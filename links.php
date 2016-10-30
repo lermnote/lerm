@@ -23,7 +23,7 @@ get_header();?>
         if ( !empty($bookmarks ) ) {
           echo '<ul class="link-content card-block clearfix">';
           foreach ( $bookmarks as $bookmark ) {
-            echo '<li class="pull-left media-left text-center media-heading"><a href="' . $bookmark->link_url . '" title="' . $bookmark->link_description . '" target="_blank"><img src="https://f.ydr.me/'.$bookmark->link_url.'" onerror="javascript:this.src=\' ', $default_ico , '\'" class="img-circle avatar"><span>'. $bookmark->link_name .'</span></a></li>';
+            echo '<li class="pull-left media-left text-center media-heading"><a href="' . $bookmark->link_url . '" title="' . $bookmark->link_description . '" target="_blank"><img src="http://api.byi.pw/favicon/?url='.$bookmark->link_url.'" onerror="javascript:this.src=\' ', $default_ico , '\'" class="img-circle avatar"><span>'. $bookmark->link_name .'</span></a></li>';
           }
           echo '</ul>';
         }?>
