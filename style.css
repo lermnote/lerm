@@ -1,0 +1,777 @@
+/*
+*Theme Name:Lerm 2.0
+*Theme URI: http://lerm.net;
+*Description: wordpress主题
+*Version: 2.0
+*Author: lerm
+*Author URI: http://lerm.net;
+*Tags: bootstrap,响应式,Html5 CSS3,蓝色,简约,白色;
+*/
+
+
+/* ----------------------------------------------------
+	1) GLOBAL STRUCTURE
+------------------------------------------------------- */
+
+html {
+    overflow-y: scroll!important;
+    margin: 0;
+}
+
+a {
+    color: #373a3c;
+}
+
+.h1, h1 {
+    font-size: 1.5rem
+}
+
+.h2, h2 {
+    font-size: 1.25rem;
+}
+
+.h3, h3 {
+    font-size: 1rem;
+    font-weight: 600
+}
+
+ul {
+    margin: 0
+}
+
+li {
+    list-style: none
+}
+
+.btn, .form-control {
+    padding: 0.25rem 0.625rem
+}
+
+.btn, a, img {
+    transition: all 0.4s ease-in-out;
+    -o-transition: all 0.4s ease-in-out;
+    -webkit-transition: all 0.4s ease-in-out;
+}
+
+.card .fa {
+    margin-right: 0.25rem;
+}
+
+.card {
+    overflow: hidden;
+}
+
+.card-header {
+    margin-bottom: 0
+}
+
+.card-header .fa {
+    color: #0085ba;
+}
+
+
+/*logo*/
+.logo {
+    float: left;
+
+}
+.site-logo {
+    position: relative;
+    overflow: hidden;
+    float: left;
+    max-height: 50px;
+}
+
+.site-title {
+    font-size: 1.75rem;
+    margin-bottom: 0;
+}
+
+.site-description {
+    margin-bottom: 0;
+    line-height: 1.5
+}
+
+
+/**logo扫光效果CSS**/
+
+.site-logo:before {
+    content: "";
+    position: absolute;
+    width: 150px;
+    height: 10px;
+
+    background-color: rgba(255, 255, 255, 0.5);
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    -webkit-animation: blink 1s ease-in 1s infinite;
+    animation: blink 1s ease-in 1s infinite;
+}
+
+@-webkit-keyframes blink {
+    from {
+        left: -100px;
+        top: 0;
+    }
+    to {
+        left: 320px;
+        top: 0px;
+    }
+}
+
+@-o-keyframes blink {
+    from {
+        left: -100px;
+        top: 0;
+    }
+    to {
+        left: 320px;
+        top: 0px;
+    }
+}
+
+@-moz-keyframes blink {
+    from {
+        left: -100px;
+        top: 0;
+    }
+    to {
+        left: 320px;
+        top: 0px;
+    }
+}
+
+@keyframes blink {
+    from {
+        left: -100px;
+        top: 0;
+    }
+    to {
+        left: 320px;
+        top: 0px;
+    }
+}
+
+
+/* ----------------------------------------------------
+   2)	blog entry-content
+------------------------------------------------------- */
+
+.entry-content h2 {
+    color: #31708f;
+    background-color: #d9edf7;
+    padding: 0.5rem;
+    border-left: 6px solid #0085ba;
+    margin: 0 -0.625rem;
+}
+
+.entry-content p {
+    text-indent: 2em
+}
+
+.entry-content a {
+    color: #0085ba;
+}
+
+.entry-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.aligncenter {
+    margin: 0 auto;
+}
+
+.alignleft {
+    float: left;
+}
+
+.alignright {
+    float: right;
+}
+
+.page-search {
+    width: 70%;
+    margin: 10px auto;
+}
+/*文章页标签*/
+
+a[rel="tag"], a[id="cancel-comment-reply-link"], .reply a {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 75%;
+    line-height: 1;
+    color: #fff;
+    background-color: #0085ba;
+    vertical-align: baseline;
+    border-radius: .25rem;
+    border: 1px solid #e1e1e1;
+}
+
+a[id="cancel-comment-reply-link"] {
+    float: right;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+a[rel="tag"]:hover, a[id="cancel-comment-reply-link"]:hover, .reply a:hover {
+    color: #0085ba!important;
+    background-color: #fff;
+}
+.screen-reader-text {
+    clip: rect(1px, 1px, 1px, 1px);
+    height: 1px;
+    overflow: hidden;
+    position: absolute !important;
+    width: 1px;
+    /* many screen reader and browser combinations announce broken words as they would appear visually */
+    word-wrap: normal !important;
+}
+/*相关文章*/
+
+.related-post {
+    width: 25%;
+    display: inline-block;
+}
+
+.related-post img {
+    max-width: 100%
+}
+
+/* ----------------------------------------------------
+   3)	share, favirate
+------------------------------------------------------- */
+
+.post-like {
+    overflow: hidden;
+}
+
+#share {
+    float: right;
+    margin-right: 0.25rem;
+    height: 2rem;
+    margin-top: 0.3725rem
+}
+
+.bdsharebuttonbox {
+    display: inline-block;
+    position: relative;
+    opacity: 0;
+    top: -0.5rem;
+}
+
+.show-share {
+    cursor: pointer;
+    float: right;
+    margin-right: 0.5rem;
+    margin-top: 0.25rem;
+    opacity: 0.6;
+    transition: opacity 0.1s ease-out 0s;
+}
+
+.specsZan {
+    float: right;
+    color: #ed1941!important;
+    margin-top: 0.625rem
+}
+
+#share:hover .bdsharebuttonbox, #share:focus .bdsharebuttonbox {
+    opacity: 1
+}
+
+.bdshare-button-style1-32 a {
+    background: url("img/social.png") no-repeat!important;
+    transition: none
+}
+
+#share .bds_qzone {
+    background-position: 0 0!important;
+}
+
+#share .bds_tsina {
+    background-position: -32px 0!important
+}
+
+#share .bds_sqq {
+    background-position: -64px 0!important
+}
+
+#share .bds_weixin {
+    background-position: -96px 0!important
+}
+
+
+/*页脚固定*/
+
+.footer {
+    /*   position: absolute;
+    bottom: 0;
+    width: 100%;    Set the fixed height of the footer here
+    height: 4rem;
+    -moz-box-sizing: border-box;
+    flex: 1
+*/
+    background-color: #f5f5f5;
+    padding: 1rem;
+}
+
+
+/*菜单*/
+
+.navbar-nav a {
+    font-weight: 600
+}
+
+.dropdown-item a {
+    font-weight: normal;
+    line-height: 1.5
+}
+
+.dropdown-item.active a {
+    color: #fff;
+}
+
+
+/*置顶文章*/
+
+.sticky-label, #archives .label {
+    font-size: 87.5%;
+    margin-bottom: 0
+}
+
+/*侧边栏*/
+.sidebar{
+  padding: 0
+}
+ .sidebar aside ul, .sidebar aside div {
+    padding: 0.5rem
+}
+
+.sidebar li {
+    padding-top: 0.25rem
+}
+
+.sidebar img {
+    max-width: 100%;
+    height: auto;
+}
+
+li.widget-post {
+    padding-top: 0;
+    border-bottom: 1px dotted #0085ba;
+    overflow: hidden;
+}
+
+.tagcloud a {
+    display: inline-block;
+    margin-bottom: 5px;
+    padding: 3px 3px;
+    border: 1px solid #e1e1e1;
+}
+
+.tagcloud a:hover {
+    color: #fff!important;
+    border: 1px solid #0085ba;
+    background: #0085ba!important;
+}
+
+.widget_categories ul li, .widget_archive ul li, .widget_pages ul li {
+    display: inline-block;
+    border: 1px solid #ccc;
+    width: 50%;
+    text-align: center;
+    margin-bottom: 0.25rem;
+    padding-top: 0
+}
+
+.widget_categories ul li:nth-child(odd), .widget_archive ul li:nth-child(odd), .widget_pages ul li:nth-child(odd) {
+    margin-right: -0.30rem
+}
+
+.widget-post .thumbnail, .widget-post .thumbnail img {
+    width: 4rem;
+    height: 2.56rem;
+}
+.recentcomment{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -o-text-overflow：ellipsis
+}
+.recentcomment a {
+    margin-right: 0.25rem;
+}
+
+/*侧边栏固定*/
+
+.affix {
+    position: fixed;
+    top: 0.75rem
+}
+
+.affix-bottom {
+    position: absolute
+}
+
+
+/*文章列表*/
+
+.summary:hover {
+    border: 1px solid #0085ba;
+    box-shadow: 0.25rem 0.25rem 0.0625rem #969696
+}
+
+.summary:hover h2 a {
+    margin-left: 0.25rem;
+}
+
+.thumbnail {
+    overflow: hidden;
+    margin: 0 0.625rem 0 0;
+    border: 1px solid #e1e1e1;
+    position: relative;
+}
+
+.thumbnail, .thumbnail img {
+    width: 12.5rem;
+    height: 8rem;
+}
+
+.thumbnail:hover img {
+    transform: scale(1.3)
+}
+
+.summary-meta {
+    position: absolute;
+    bottom: .5rem;
+    left: 13.875rem
+}
+
+.more {
+    bottom: 0.5rem;
+    right: 0.75rem;
+    position: absolute;
+    font-size: 100%;
+    font-weight: 500
+}
+
+
+/*留言*/
+
+.comment-list {
+    padding-right: 0
+}
+
+ol .children {
+    padding-left: 0.75rem
+}
+
+/*返回顶部*/
+
+.top {
+    position: fixed;
+    z-index: 3;
+    bottom: 1rem;
+    right: 1rem
+}
+
+#scrollUp {
+    display: none;
+}
+
+
+/*搜索*/
+
+#search {
+    position: relative;
+}
+
+.searchform {
+    width: 40%
+}
+
+.searchform {
+    position: absolute;
+    z-index: 3;
+    right: 0;
+}
+
+#search.collapsing {
+    position: absolute!important;
+    -webkit-transition-duration: 0.01ms!important;
+    -o-transition-duration: 0.01ms!important;
+    transition-duration: 0.01ms!important;
+}
+
+.search-title {
+    margin: 1rem
+}
+
+.page-search {
+    padding: 1rem
+}
+
+.search-page {
+    overflow: hidden;
+}
+
+
+/*友情链接*/
+
+.link-content img {
+    width: 32px;
+}
+
+.link-content span {
+    display: block
+}
+
+
+/*评论头像*/
+
+.avatar {
+    border-radius: 37.8%
+}
+
+.recentcomment:hover img, .avatar:hover {
+    transform: rotate(-360deg);
+    -webkit-transform: rotate(-360deg);
+    border-radius: 100%
+}
+
+
+/*分页导航*/
+
+.navigation {
+    width: 100%;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.navigation .screen-reader-text {
+    display: none;
+}
+
+.navigation .page-numbers {
+    padding: 0.125rem 0.625rem;
+    border: 1px solid #e1e1e1;
+    background: #fff;
+}
+
+.navigation .current, .navigation a:hover {
+    color: #fff;
+    background: #0085ba;
+}
+
+
+/*页脚*/
+
+.footer-widget {
+    margin-bottom: 0
+}
+
+.footer-widget, .footer-widget a {
+    color: #f5f5f5;
+    background-color: #333
+}
+
+.widget_nav_menu ul {
+    padding-left: 0
+}
+
+.widget_nav_menu ul li {
+    float: left;
+    width: 33%
+}
+
+
+/* ----------------------------------------------------
+   )	social media
+------------------------------------------------------- */
+
+
+/*社会化组件*/
+
+.widget_social, .footer-widget {
+    overflow: visible;
+}
+
+.social .fa {
+    color: #999;
+    margin: 0;
+    text-align: center;
+    width: 25%
+}
+
+.social:hover i {
+    color: #333
+}
+
+.footer-widget .social i {
+    width: auto;
+    margin-right: 0.5rem;
+}
+
+.footer-widget .social:hover i {
+    color: #fff;
+}
+
+
+/*微信二维码*/
+
+a.weixin {
+    position: relative;
+}
+
+.weixin img {
+    position: absolute;
+    right: -28px;
+    top: -135px;
+    z-index: 99;
+    width: 7.5rem;
+    height: 7.5rem;
+    border: 0.3125rem solid #0085ba;
+    border-radius: 0.25rem;
+    transform: scale(0);
+    opacity: 0;
+    transform-origin: top right;
+    max-width: none;
+}
+
+.weixin:hover img {
+    transform: scale(1);
+    opacity: 1;
+}
+
+
+/*文章侧边导航*/
+
+.chevronavi a {
+    position: fixed;
+    z-index: 99;
+    top: 45%;
+    color: #0085ba;
+    opacity: 0.6
+}
+
+.chevronavi a:hover {
+    color: #0085ba!important;
+    opacity: 1;
+}
+
+.chevron-left {
+    left: 1rem
+}
+
+.chevron-right {
+    right: 1rem
+}
+
+@media (max-width:74.9em) {}
+
+@media (max-width:61.9em) {}
+
+@media (max-width:47.9em) {
+    .widget_social {
+        text-align: center;
+    }
+    .searchform {
+        position: static;
+        width: 100%
+    }
+    .navigation {
+        border: 1px solid #e1e1e1;
+        background: #fff
+    }
+    .navigation .nav-links {
+        position: relative;
+    }
+    .navigation .current .screen-reader-text {
+        position: static !important;
+        display: inline;
+    }
+    .screen-reader-text {
+        position: absolute !important;
+        overflow: hidden;
+        height: 1px;
+    }
+    .page-numbers {
+        line-height: 25px;
+        display: none;
+        padding: 5px;
+    }
+    .navigation .page-numbers.current {
+        text-transform: uppercase;
+    }
+    .navigation .current {
+        display: inline-block;
+        color: #333;
+        border: none;
+        background: inherit;
+    }
+    .navigation .prev, .navigation .next {
+        position: absolute;
+        display: inline-block;
+        overflow: hidden;
+        height: 29px;
+        color: #fff;
+        border: 1px solid #e1e1e1;
+        background: #0085ba;
+    }
+    .navigation .next {
+        border-radius: 0 2px 2px 0;
+    }
+    .navigation .prev {
+        border-radius: 2px 0 0 2px;
+    }
+    .navigation .prev a, .navigation .next a {
+        line-height: 20px;
+        display: inline-block;
+        padding: 0;
+        color: #fff;
+    }
+    .navigation .prev {
+        left: 0;
+    }
+    .navigation .prev:before {
+        left: -1px;
+    }
+    .navigation .next {
+        right: 0
+    }
+    .navigation .next:before {
+        right: -1px
+    }
+    .h1, h1 {
+        font-size: 1.25rem
+    }
+    .h2, h2 {
+        font-size: 1rem!important;
+        font-weight: 600
+    }
+    .h3, h3 {
+        font-size: 0.75rem;
+        font-weight: 600
+    }
+    .m-l {
+        margin-left: 0!important
+    }
+    .custom-logo {
+        width: 6rem;
+        height: auto
+    }
+    .navbar {
+        padding: 0
+    }
+}
+
+@media(max-width:33.9em) {
+    .thumbnail, .thumbnail img {
+        width: 6.25rem;
+        height: 4rem
+    }
+    .summary-meta {
+        left: auto
+    }
+}
