@@ -238,11 +238,9 @@ document.addEventListener("DOMContentLoaded", function (e) {
 			e.preventDefault();
 			loadMorePosts.innerHTML = adminajax.loading;
 
-			let page = loadMorePosts.dataset.page
-			let newPage = parseInt(page) + 1;
 			let params = new FormData();
 			params.append("query", adminajax.posts);
-			params.append("page", page);
+			params.append("page", adminajax.current);
 			params.append("security", adminajax.nonce);
 			params.append("action", "lerm_load_more");
 			fetch(adminajax.url, {
@@ -252,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 				.then(response => response.text())
 				.then(data => {
 					if (data.length) {
-						loadMorePosts.dataset.page = newPage
+						adminajax.current++
 						let newData = parseToDOM(data);
 						newData.forEach(e => {
 							document.querySelector(".ajax-posts").appendChild(e);

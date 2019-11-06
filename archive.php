@@ -39,6 +39,7 @@ if ( $term ) {
 				endif;
 				?>
 			</div>
+
 			<div class="mt-3">
 				<?php global $wp_query;
 					if (  $wp_query->max_num_pages > 1 && (lerm_options( 'load_more', '' ) || wp_is_mobile()) ) : ?>
@@ -55,3 +56,4 @@ if ( $term ) {
 </main>
 <?php
 get_footer();
+

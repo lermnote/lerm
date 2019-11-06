@@ -145,12 +145,13 @@ add_action( 'wp_enqueue_scripts', 'lerm_enqueue_styles' );
 function lerm_enqueue_scripts() {
 	global $lerm ,$wp_query;
 	// register script
-	wp_register_script( "jquery-min", LERM_URI .'assets/js/jquery.min.js', array(), '3.1.0', true );
+	wp_register_script( 'jquery-min', LERM_URI .'assets/js/jquery.min.js', array(), '3.1.0', true );
 	wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.min.js', array(), '4.3.1', true );
 	wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
 	wp_register_script( 'lightbox', LERM_URI . 'assets/js/ekko-lightbox.min.js', array(), '2.0.0', true );
 	wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 	wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
+	wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.min.js', array(), LERM_VERSION, true );
 
 	// enqueue script
 	if ( $lerm['cdn_jquery'] ) {
@@ -170,7 +171,6 @@ function lerm_enqueue_scripts() {
 		}
 	}
 
-	wp_enqueue_script( 'lerm_js', LERM_URI . 'assets/js/lerm.min.js', array(), LERM_VERSION, true );
 	wp_localize_script(
 		'lerm_js',
 		'adminajax',
@@ -181,9 +181,12 @@ function lerm_enqueue_scripts() {
 			'loadmore' => __( 'Load more', 'lerm' ),
 			'loading'  => __( 'Loading...', 'lerm' ),
 			'posts'    => json_encode( $wp_query->query_vars ),
+			'current'  => get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1,
 			// 'maxpage'  => $wp_query->max_num_pages,
 		)
 	);
+	wp_enqueue_script( 'lerm_js' );
+
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
