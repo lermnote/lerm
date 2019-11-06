@@ -6,7 +6,7 @@ The Lerm theme for WordPress takes us back to the blog, featuring a full range o
 
 ## Infomation
 
--[contributors]: Lerm
+-Author: ![Lerm](https://www.hanost.com)
 
 -Requires at least: WordPress 5.2
 
