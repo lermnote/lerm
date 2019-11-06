@@ -1,3 +1,4 @@
+![Lerm](https://www.hanost.com/wp-content/uploads/2019/08/logo.png)
 === Lerm ===
 Contributors: Lerm
 Requires at least: WordPress 5.2
