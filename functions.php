@@ -147,7 +147,7 @@ function lerm_enqueue_scripts() {
 	// register script
 	wp_register_script( "jquery-min", LERM_URI .'assets/js/jquery.min.js', array(), '3.1.0', true );
 	wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.min.js', array(), '4.3.1', true );
-	wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.js', array(), '2.0.0', true );
+	wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
 	wp_register_script( 'lightbox', LERM_URI . 'assets/js/ekko-lightbox.min.js', array(), '2.0.0', true );
 	wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 	wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
@@ -170,7 +170,7 @@ function lerm_enqueue_scripts() {
 		}
 	}
 
-	wp_enqueue_script( 'lerm_js', LERM_URI . 'assets/js/lerm.js', array(), LERM_VERSION, true );
+	wp_enqueue_script( 'lerm_js', LERM_URI . 'assets/js/lerm.min.js', array(), LERM_VERSION, true );
 	wp_localize_script(
 		'lerm_js',
 		'adminajax',
