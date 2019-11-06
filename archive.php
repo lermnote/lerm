@@ -14,7 +14,7 @@ if ( $term ) {
 }
 	$bg_color       = isset( $meta['archive_color']['bg_color'] ) ? $meta['archive_color']['bg_color'] : '#fff';
 	$font_color     = isset( $meta['archive_color']['font_color'] ) ? $meta['archive_color']['font_color'] : '#5d6777';
-	$bg_image       = @$meta['archive_header_image'];
+	$bg_image       = isset( $meta['archive_header_image'] ) ? 'url(' . $meta['archive_header_image']['url'] . ')' : '';
 	$archive_header = sprintf( 'background: %s %s ; color: %s', $bg_image, $bg_color, $font_color );
 ?>
 <main role="main" class="container">
