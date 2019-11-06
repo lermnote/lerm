@@ -9,8 +9,3 @@ Tags: blog, one-column, two-columns, right-sidebar, custom-header, custom-menu, 
 
 == Description ==
 The Lerm theme for WordPress takes us back to the blog, featuring a full range of post formats, each displayed beautifully in their own unique way. Design details abound, starting with a vibrant color scheme and matching header images, beautiful typography and icons, and a flexible layout that looks great on any device, big or small.
-
-For more information about Twenty Thirteen please go to https://codex.wordpress.org/Twenty_Thirteen.
-
-== Installation ==
-
