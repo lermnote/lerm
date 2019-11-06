@@ -1,0 +1,1316 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Lerm\n"
+"POT-Creation-Date: 2019-09-13 20:15+0800\n"
+"PO-Revision-Date: 2019-09-17 21:11+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.3\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: archive.php:44 index.php:46
+msgid "Load More"
+msgstr "加载更多"
+
+#: comments.php:25
+msgid "Visitor"
+msgstr "游客"
+
+#: comments.php:26
+msgid "Welcome Back"
+msgstr "欢迎回来"
+
+#: comments.php:26
+msgid "Welcome "
+msgstr "欢迎您"
+
+#: comments.php:31
+msgid "Nickname"
+msgstr "昵称"
+
+#: comments.php:32
+msgid "E-mail"
+msgstr "E-mail"
+
+#: comments.php:33
+msgid "Website"
+msgstr "网站"
+
+#. translators: %s: user name
+#: comments.php:41
+#, php-format
+msgid "Logged in as %s. Edit your profile."
+msgstr ""
+
+#: comments.php:44
+msgid "Log out"
+msgstr "注销"
+
+#: comments.php:48
+msgid "Leave a Reply"
+msgstr "发表评论"
+
+#: comments.php:54
+msgid "Comments are closed."
+msgstr "评论已关闭。"
+
+#: comments.php:76
+msgid "Previous"
+msgstr "上一页"
+
+#: comments.php:77
+msgid "Next"
+msgstr "下一页"
+
+#: comments.php:78 functions.php:326
+msgid "The"
+msgstr "第"
+
+#: comments.php:79 functions.php:327
+msgid " Page"
+msgstr "页"
+
+#: footer.php:44
+msgid "Theme By Lerm"
+msgstr " %s制作"
+
+#: functions.php:68
+msgid "Primary"
+msgstr "主菜单"
+
+#: functions.php:69
+msgid "Mobile"
+msgstr "移动菜单"
+
+#: functions.php:70
+msgid "Social Links Menu"
+msgstr "社交菜单"
+
+#: functions.php:183
+msgid "No older posts found"
+msgstr "暂无更多"
+
+#: functions.php:184
+msgid "Load more"
+msgstr "加载更多"
+
+#: functions.php:185
+msgid "Loading..."
+msgstr "加载中..."
+
+#: functions.php:302
+msgid "Next Post"
+msgstr "下一篇"
+
+#: functions.php:303
+msgid "Next post:"
+msgstr "下一篇："
+
+#: functions.php:305
+msgid "Previous Post"
+msgstr "上一篇"
+
+#: functions.php:306
+msgid "Previous post:"
+msgstr "上一篇："
+
+#: functions.php:324
+msgid "Previous page"
+msgstr "上一页"
+
+#: functions.php:325
+msgid "Next page"
+msgstr "下一页"
+
+#: functions.php:361
+msgid "Tags"
+msgstr "标签"
+
+#: inc/admin/class-breadcrumb-trail.php:87
+msgid "Home"
+msgstr "首页"
+
+#: inc/admin/class-breadcrumb-trail.php:88
+#, php-format
+msgid "Page %s"
+msgstr "第 %s 页"
+
+#: inc/admin/class-breadcrumb-trail.php:89
+msgid "Article"
+msgstr "文章"
+
+#: inc/admin/class-breadcrumb-trail.php:194
+#: inc/admin/class-breadcrumb-trail.php:204
+#: inc/admin/class-breadcrumb-trail.php:220 inc/admin/function-archives.php:25
+msgctxt "yearly archives date format"
+msgid "Y"
+msgstr ""
+
+#: inc/admin/class-breadcrumb-trail.php:205
+#: inc/admin/class-breadcrumb-trail.php:221
+msgctxt "monthly archives date format"
+msgid "F"
+msgstr ""
+
+#: inc/admin/class-breadcrumb-trail.php:222
+msgctxt "daily archives date format"
+msgid "j"
+msgstr ""
+
+#: inc/admin/function-archives.php:26
+msgctxt "monthly archives date format"
+msgid "m"
+msgstr ""
+
+#: inc/admin/function-archives.php:27
+msgctxt "daily archives date format"
+msgid "d"
+msgstr ""
+
+#: inc/admin/function-login.php:70
+msgid "Incorrect username or password"
+msgstr ""
+
+#: inc/admin/functions.opengraph.php:121
+msgid "Visit the post for more."
+msgstr ""
+
+#: inc/admin/functions.opengraph.php:185
+msgid "(no title)"
+msgstr ""
+
+#: inc/admin/template-comment.php:21
+msgid " ago"
+msgstr "之前"
+
+#: inc/admin/template-comment.php:23 inc/widgets.php:114
+msgctxt "comment time format"
+msgid "l, F j, Y, g:i a"
+msgstr ""
+
+#: inc/admin/template-comment.php:27
+msgid "Edit"
+msgstr "编辑"
+
+#: inc/admin/template-comment.php:45
+msgid "Your comment is awaiting moderation."
+msgstr "您的评论正在等待审核。"
+
+#: inc/options/classes/metabox.class.php:248
+#: inc/options/classes/options.class.php:604
+msgid "No option provided by developer."
+msgstr "开发人员没有提供选项。"
+
+#: inc/options/classes/metabox.class.php:266
+msgid "Restore"
+msgstr "重置"
+
+#: inc/options/classes/metabox.class.php:267
+msgid "update post for restore "
+msgstr "更新文章以还原"
+
+#: inc/options/classes/metabox.class.php:267
+msgid "Cancel"
+msgstr "取消"
+
+#: inc/options/classes/options.class.php:240
+#: inc/options/functions/actions.php:36 inc/options/functions/actions.php:89
+#: inc/options/functions/actions.php:110
+msgid "Error while saving."
+msgstr "保存时出错。"
+
+#: inc/options/classes/options.class.php:277
+msgid "Success. Imported backup options."
+msgstr "导入备份选项成功！"
+
+#: inc/options/classes/options.class.php:289
+msgid "Default options restored."
+msgstr "默认选项已恢复."
+
+#: inc/options/classes/options.class.php:303
+msgid "Default options restored for only this section."
+msgstr "仅将此章节重置为默认值。"
+
+#: inc/options/classes/options.class.php:354
+msgid "Settings saved."
+msgstr "设置已保存。"
+
+#: inc/options/classes/options.class.php:517
+msgid "show all options"
+msgstr "显示所有选项"
+
+#: inc/options/classes/options.class.php:519
+msgid "Search option(s)"
+msgstr "搜索选项"
+
+#: inc/options/classes/options.class.php:522
+#: inc/options/classes/options.class.php:626
+msgid "Save"
+msgstr "保存"
+
+#: inc/options/classes/options.class.php:522
+#: inc/options/classes/options.class.php:626
+msgid "Saving..."
+msgstr "正在保存……"
+
+#: inc/options/classes/options.class.php:523
+#: inc/options/classes/options.class.php:627
+msgid "Reset Section"
+msgstr "重置章节"
+
+#: inc/options/classes/options.class.php:523
+#: inc/options/classes/options.class.php:627
+msgid "Are you sure to reset this section options?"
+msgstr "您确定要重置此部分选项吗？"
+
+#: inc/options/classes/options.class.php:524
+#: inc/options/classes/options.class.php:628
+#: inc/options/fields/backup/backup.php:37
+msgid "Reset All"
+msgstr "全部重置"
+
+#: inc/options/classes/options.class.php:524
+#: inc/options/classes/options.class.php:628
+msgid "Are you sure to reset all options?"
+msgstr "确定要重置所有选项吗？"
+
+#: inc/options/classes/setup.class.php:332
+msgid "Are you sure?"
+msgstr "你确定吗？"
+
+#: inc/options/classes/setup.class.php:368
+#, php-format
+msgid "Ooops! This field type (%s) can not be used here, yet."
+msgstr ""
+
+#: inc/options/classes/setup.class.php:408
+msgid "This field class is not available!"
+msgstr "此字段的类不可用！"
+
+#: inc/options/classes/setup.class.php:411
+msgid "This type is not found!"
+msgstr "未找到此类型！"
+
+#: inc/options/config/metabox.config.php:30
+msgid "Post Options"
+msgstr "文章选项"
+
+#: inc/options/config/metabox.config.php:42
+#: inc/options/config/options.config.php:90
+msgid "Layout"
+msgstr "布局"
+
+#: inc/options/config/metabox.config.php:80
+msgid "Original"
+msgstr "原创"
+
+#: inc/options/config/options.config.php:13
+msgid "Theme Options"
+msgstr "主题选项"
+
+#: inc/options/config/options.config.php:15
+msgid "Theme Options <small>by O'conner</small>"
+msgstr ""
+
+#: inc/options/config/options.config.php:16
+msgid ""
+"Thank you for creating with <a href=\"https://www.hanost.com/\" target="
+"\"_blank\">Lerm</a>"
+msgstr ""
+
+#: inc/options/config/options.config.php:21
+msgid "Basic Settings"
+msgstr "基础设置"
+
+#: inc/options/config/options.config.php:28
+#: inc/options/config/options.config.php:29
+#: inc/options/config/options.config.php:36
+msgid "Logo Blink"
+msgstr "徽标闪烁"
+
+#: inc/options/config/options.config.php:35
+msgid "Logo Desktop"
+msgstr "桌面LOGO"
+
+#: inc/options/config/options.config.php:44
+#: inc/options/config/options.config.php:45
+msgid "Logo Mobile"
+msgstr "手机端LOGO"
+
+#: inc/options/config/options.config.php:51
+msgid "Website Title"
+msgstr "网站名称"
+
+#: inc/options/config/options.config.php:59
+msgid "Website Description"
+msgstr "网站描述"
+
+#: inc/options/config/options.config.php:67
+msgid "Title Separator"
+msgstr "标题分隔符"
+
+#: inc/options/config/options.config.php:74
+msgid ""
+"Select the Title Separator of your Website. Default \"|\", eg: My Website|"
+"Just another WordPress site"
+msgstr ""
+
+#: inc/options/config/options.config.php:80
+msgid "Site Width"
+msgstr "页面宽度"
+
+#: inc/options/config/options.config.php:103
+#: inc/options/config/options.config.php:104
+msgid "Sidebar Affix"
+msgstr "侧边栏"
+
+#: inc/options/config/options.config.php:109
+msgid "Copyright"
+msgstr ""
+
+#: inc/options/config/options.config.php:110
+msgid "This copyright information will appear in the footer."
+msgstr ""
+
+#: inc/options/config/options.config.php:121
+msgid "Design"
+msgstr "设计"
+
+#: inc/options/config/options.config.php:126
+msgid "Gobal Options"
+msgstr "全局选项"
+
+#: inc/options/config/options.config.php:131
+msgid "Coler Schemes"
+msgstr "颜色结构"
+
+#: inc/options/config/options.config.php:148
+msgid "Link Color"
+msgstr "链接颜色"
+
+#: inc/options/config/options.config.php:192
+msgid "Content Background Color"
+msgstr "内容背景颜色"
+
+#: inc/options/config/options.config.php:214
+msgid "Header and Footer"
+msgstr "头部和页脚"
+
+#: inc/options/config/options.config.php:219
+msgid "Header style"
+msgstr "头部颜色"
+
+#: inc/options/config/options.config.php:227
+msgid "Menu Coler Schemes"
+msgstr "菜单颜色结构"
+
+#: inc/options/config/options.config.php:230
+msgid "Color"
+msgstr ""
+
+#: inc/options/config/options.config.php:231
+msgid "Hover Color"
+msgstr ""
+
+#: inc/options/config/options.config.php:232
+msgid "Active Color"
+msgstr ""
+
+#: inc/options/config/options.config.php:233
+msgid "Hover Background Color"
+msgstr ""
+
+#: inc/options/config/options.config.php:301
+msgid "Navbar align"
+msgstr ""
+
+#: inc/options/config/options.config.php:312
+msgid "Footer Style"
+msgstr ""
+
+#: inc/options/config/options.config.php:314
+msgid "Footer Background"
+msgstr ""
+
+#: inc/options/config/options.config.php:315
+msgid "Footer Font"
+msgstr ""
+
+#: inc/options/config/options.config.php:316
+msgid "Footer Widget Background"
+msgstr ""
+
+#: inc/options/config/options.config.php:317
+msgid "Footer Widget Font"
+msgstr ""
+
+#: inc/options/config/options.config.php:328
+msgid "Buttons"
+msgstr ""
+
+#: inc/options/config/options.config.php:334
+msgid "LIke Btton"
+msgstr ""
+
+#: inc/options/config/options.config.php:341
+msgid "Like Button background color"
+msgstr ""
+
+#: inc/options/config/options.config.php:349
+#: inc/options/config/options.config.php:357
+#: inc/options/config/options.config.php:365
+msgid "Sticky Label background color"
+msgstr ""
+
+#: inc/options/config/options.config.php:372
+msgid "Custom CSS"
+msgstr ""
+
+#: inc/options/config/options.config.php:397
+msgid "Mailing"
+msgstr ""
+
+#: inc/options/config/options.config.php:403
+msgid "Email Notification"
+msgstr ""
+
+#: inc/options/config/options.config.php:404
+msgid "Enable notification email for comments"
+msgstr ""
+
+#: inc/options/config/options.config.php:414
+msgid "From Mail"
+msgstr ""
+
+#: inc/options/config/options.config.php:419
+msgid "From Email"
+msgstr ""
+
+#: inc/options/config/options.config.php:424
+msgid "From Name"
+msgstr ""
+
+#: inc/options/config/options.config.php:436
+msgid "SMTP Options"
+msgstr ""
+
+#: inc/options/config/options.config.php:441
+msgid "SMTP Host"
+msgstr ""
+
+#: inc/options/config/options.config.php:446
+msgid "SMTP Port"
+msgstr ""
+
+#: inc/options/config/options.config.php:451
+msgid "SSL Encryption"
+msgstr ""
+
+#: inc/options/config/options.config.php:456
+msgid "SMTP Authentication"
+msgstr ""
+
+#: inc/options/config/options.config.php:457
+msgid "If Your Email open the smtp authentication"
+msgstr ""
+
+#: inc/options/config/options.config.php:459
+msgid "Use SMTP authentication"
+msgstr ""
+
+#: inc/options/config/options.config.php:460
+msgid "Do NOT use SMTP authentication"
+msgstr ""
+
+#: inc/options/config/options.config.php:466
+msgid "Username"
+msgstr "用户名"
+
+#: inc/options/config/options.config.php:471
+msgid "Password"
+msgstr "密码"
+
+#: inc/options/config/options.config.php:482
+msgid "SEO Optimize"
+msgstr ""
+
+#: inc/options/config/options.config.php:487
+#: inc/options/config/options.config.php:488
+msgid "Images Lazyload"
+msgstr ""
+
+#: inc/options/config/options.config.php:494
+msgid "Keywords"
+msgstr ""
+
+#: inc/options/config/options.config.php:497
+msgid "eg: WordPress, Theme..."
+msgstr ""
+
+#: inc/options/config/options.config.php:503
+#: inc/options/config/options.config.php:505
+#: inc/options/config/options.config.php:892
+msgid "Description"
+msgstr ""
+
+#: inc/options/config/options.config.php:512
+msgid "Baidu Submit"
+msgstr ""
+
+#: inc/options/config/options.config.php:519
+msgid "Submit Api"
+msgstr ""
+
+#: inc/options/config/options.config.php:526
+#: inc/options/config/options.config.php:532
+msgid "Submit Token"
+msgstr ""
+
+#: inc/options/config/options.config.php:534
+msgid "Week sumbit"
+msgstr ""
+
+#: inc/options/config/options.config.php:535
+msgid "day sumbit"
+msgstr ""
+
+#: inc/options/config/options.config.php:542
+msgid "Baidu Tongji"
+msgstr ""
+
+#: inc/options/config/options.config.php:543
+msgid "baidu tongji code in before <\\/head\\>"
+msgstr ""
+
+#: inc/options/config/options.config.php:557
+msgid "Blog Optimize"
+msgstr ""
+
+#: inc/options/config/options.config.php:562
+msgid "Summary Meta"
+msgstr ""
+
+#: inc/options/config/options.config.php:585
+msgid "Ajax load more post"
+msgstr ""
+
+#: inc/options/config/options.config.php:586
+msgid "Switcher on to Ajax load more post, off to show pagenation"
+msgstr ""
+
+#: inc/options/config/options.config.php:612
+#: inc/options/config/options.config.php:613
+msgid "jQuery CDN"
+msgstr ""
+
+#: inc/options/config/options.config.php:621
+msgid "Replace Avatar"
+msgstr ""
+
+#: inc/options/config/options.config.php:629
+msgid "Avatar Cache"
+msgstr ""
+
+#: inc/options/config/options.config.php:635
+msgid "Post Excerpt length on posts list page"
+msgstr ""
+
+#: inc/options/config/options.config.php:648
+msgid "Page Optimize"
+msgstr ""
+
+#: inc/options/config/options.config.php:653
+msgid "Search Filter"
+msgstr ""
+
+#: inc/options/config/options.config.php:654
+msgid "Search results exclude all pages"
+msgstr ""
+
+#: inc/options/config/options.config.php:660
+msgid "HTML Slug"
+msgstr ""
+
+#: inc/options/config/options.config.php:661
+msgid ""
+"Shows .html slug for pages (please re-save the permalink options after "
+"changed slug)"
+msgstr ""
+
+#: inc/options/config/options.config.php:667
+msgid "Categories Trailingslashit"
+msgstr ""
+
+#: inc/options/config/options.config.php:668
+msgid "fix end of category with slash"
+msgstr ""
+
+#: inc/options/config/options.config.php:674
+msgid "Remove Category Base"
+msgstr ""
+
+#: inc/options/config/options.config.php:675
+msgid "Removes \"/category\" from your category permalinks"
+msgstr ""
+
+#: inc/options/config/options.config.php:685
+msgid "Post Optimize"
+msgstr ""
+
+#: inc/options/config/options.config.php:690
+msgid "Post Meta"
+msgstr ""
+
+#: inc/options/config/options.config.php:708
+msgid "Disable Embeds"
+msgstr ""
+
+#: inc/options/config/options.config.php:714
+msgid "Posts Navigation"
+msgstr ""
+
+#: inc/options/config/options.config.php:720
+msgid "Enable Code Cighlight"
+msgstr ""
+
+#: inc/options/config/options.config.php:721
+msgid "If your posts contain some code, then enable it"
+msgstr ""
+
+#: inc/options/config/options.config.php:726
+msgid "Remove Wpautop"
+msgstr ""
+
+#: inc/options/config/options.config.php:731
+msgid "Remove Excerpt Wpautop"
+msgstr ""
+
+#: inc/options/config/options.config.php:732
+msgid "Remove tag p in excerpt"
+msgstr ""
+
+#: inc/options/config/options.config.php:737
+msgid "Remove comments Wpautop"
+msgstr ""
+
+#: inc/options/config/options.config.php:742
+msgid "Author Biography"
+msgstr ""
+
+#: inc/options/config/options.config.php:743
+msgid "Show author biography in sidebar (if have sidebar)"
+msgstr ""
+
+#: inc/options/config/options.config.php:748
+msgid "Related Posts"
+msgstr ""
+
+#: inc/options/config/options.config.php:749
+#: inc/options/config/options.config.php:836
+msgid "Show related posts  in sidebar (if have sidebar)"
+msgstr ""
+
+#: inc/options/config/options.config.php:758
+msgid "Sidebar"
+msgstr ""
+
+#: inc/options/config/options.config.php:763
+msgid "Register Sidebars"
+msgstr ""
+
+#: inc/options/config/options.config.php:768
+msgid "Sidebar Title"
+msgstr ""
+
+#: inc/options/config/options.config.php:775
+msgid "Single sidebar"
+msgstr ""
+
+#: inc/options/config/options.config.php:782
+msgid "Blog sidebar"
+msgstr ""
+
+#: inc/options/config/options.config.php:789
+msgid "Front page sidebar"
+msgstr ""
+
+#: inc/options/config/options.config.php:796
+msgid "Page sidebar"
+msgstr ""
+
+#: inc/options/config/options.config.php:803
+msgid "Footer sidebars count"
+msgstr ""
+
+#: inc/options/config/options.config.php:815
+msgid "Social"
+msgstr ""
+
+#: inc/options/config/options.config.php:820
+msgid "Weixin Qrcode"
+msgstr ""
+
+#: inc/options/config/options.config.php:828
+msgid "Show Qrcode mouse hover"
+msgstr ""
+
+#: inc/options/config/options.config.php:834
+msgid "Donate Qrcode"
+msgstr ""
+
+#: inc/options/config/options.config.php:845
+msgid "Carousel Options"
+msgstr ""
+
+#: inc/options/config/options.config.php:850
+msgid "Enable Slide"
+msgstr ""
+
+#: inc/options/config/options.config.php:851
+msgid "Show Slides On frontpage"
+msgstr ""
+
+#: inc/options/config/options.config.php:856
+msgid "Slide Position"
+msgstr ""
+
+#: inc/options/config/options.config.php:857
+msgid "Select Slides Position On frontpage"
+msgstr ""
+
+#: inc/options/config/options.config.php:859
+msgid "bottom of navbar"
+msgstr ""
+
+#: inc/options/config/options.config.php:860
+msgid "top of content"
+msgstr ""
+
+#: inc/options/config/options.config.php:861
+msgid "bottom of navbar(full_width)"
+msgstr ""
+
+#: inc/options/config/options.config.php:867
+msgid "Slides"
+msgstr ""
+
+#: inc/options/config/options.config.php:868
+msgid "Add Slide"
+msgstr ""
+
+#: inc/options/config/options.config.php:869
+msgid "New Slide"
+msgstr ""
+
+#: inc/options/config/options.config.php:876
+msgid "Slide"
+msgstr ""
+
+#: inc/options/config/options.config.php:882
+msgid "Title"
+msgstr ""
+
+#: inc/options/config/options.config.php:887
+msgid "URL"
+msgstr ""
+
+#: inc/options/config/options.config.php:904
+msgid "AD"
+msgstr ""
+
+#: inc/options/config/options.config.php:909
+#: inc/options/config/options.config.php:925
+msgid "Disable Rest API"
+msgstr ""
+
+#: inc/options/config/options.config.php:910
+#: inc/options/config/options.config.php:926
+msgid "If use GutenBerg editor, must enable rest_api"
+msgstr ""
+
+#: inc/options/config/options.config.php:920
+msgid "Other"
+msgstr ""
+
+#: inc/options/config/taxonomy.options.php:17
+msgid "Background"
+msgstr ""
+
+#: inc/options/config/taxonomy.options.php:18
+msgid "Font"
+msgstr ""
+
+#: inc/options/fields/background/background.php:38
+msgid "No background selected"
+msgstr ""
+
+#: inc/options/fields/backup/backup.php:29
+msgid "Import"
+msgstr ""
+
+#: inc/options/fields/backup/backup.php:30
+msgid "copy-paste your backup string here"
+msgstr ""
+
+#: inc/options/fields/backup/backup.php:34
+msgid "Export and Download Backup"
+msgstr ""
+
+#: inc/options/fields/backup/backup.php:38
+msgid "Please be sure for reset all of options."
+msgstr ""
+
+#: inc/options/fields/checkbox/checkbox.php:43
+#: inc/options/fields/radio/radio.php:42
+#: inc/options/fields/select/select.php:69
+msgid "No data provided for this option type."
+msgstr ""
+
+#: inc/options/fields/gallery/gallery.php:23
+msgid "Add Gallery"
+msgstr ""
+
+#: inc/options/fields/gallery/gallery.php:24
+msgid "Edit Gallery"
+msgstr ""
+
+#: inc/options/fields/gallery/gallery.php:25
+msgid "Clear"
+msgstr ""
+
+#: inc/options/fields/group/group.php:26
+msgid "Add New"
+msgstr ""
+
+#: inc/options/fields/group/group.php:37
+#: inc/options/fields/repeater/repeater.php:32
+msgid "Error: Nested field id can not be same with another nested field id."
+msgstr ""
+
+#: inc/options/fields/group/group.php:46 inc/options/fields/group/group.php:82
+#: inc/options/fields/repeater/repeater.php:49
+#: inc/options/fields/repeater/repeater.php:76
+msgid "Are you sure to delete this item?"
+msgstr ""
+
+#: inc/options/fields/group/group.php:113
+#: inc/options/fields/repeater/repeater.php:88
+msgid "You can not add more than"
+msgstr ""
+
+#: inc/options/fields/group/group.php:114
+#: inc/options/fields/repeater/repeater.php:89
+msgid "You can not remove less than"
+msgstr ""
+
+#: inc/options/fields/icon/icon.php:23 inc/options/functions/actions.php:133
+msgid "Add Icon"
+msgstr ""
+
+#: inc/options/fields/icon/icon.php:24
+msgid "Remove Icon"
+msgstr ""
+
+#: inc/options/fields/media/media.php:26
+#: inc/options/fields/upload/upload.php:24
+msgid "Upload"
+msgstr ""
+
+#: inc/options/fields/media/media.php:27
+#: inc/options/fields/upload/upload.php:25
+msgid "Remove"
+msgstr ""
+
+#: inc/options/fields/media/media.php:49
+msgid "No media selected"
+msgstr ""
+
+#: inc/options/fields/sorter/sorter.php:24
+msgid "Enabled"
+msgstr ""
+
+#: inc/options/fields/sorter/sorter.php:25
+msgid "Disabled"
+msgstr ""
+
+#: inc/options/fields/textarea/textarea.php:36
+msgid "Add Shortcode"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:85
+msgid "Font Family"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:86
+msgid "Select a font"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:94
+msgid "Backup Font Family"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:108
+#: inc/options/fields/typography/typography.php:121
+#: inc/options/fields/typography/typography.php:134
+#: inc/options/fields/typography/typography.php:148
+#: inc/options/fields/typography/typography.php:164
+#: inc/options/fields/typography/typography.php:177
+#: inc/options/fields/typography/typography.php:191
+#: inc/options/fields/typography/typography.php:209
+msgid "Default"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:119
+msgid "Font Style"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:133
+#: inc/options/fields/typography/typography.php:134
+msgid "Load Extra Styles"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:146
+msgid "Subset"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:156
+msgid "Text Align"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:172
+msgid "Font Variant"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:185
+msgid "Text Transform"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:199
+msgid "Text Decoration"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:221
+msgid "Font Size"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:233
+msgid "Line Height"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:245
+msgid "Letter Spacing"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:257
+msgid "Word Spacing"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:271
+msgid "Font Color"
+msgstr ""
+
+#: inc/options/fields/typography/typography.php:282
+msgid "Custom Style"
+msgstr ""
+
+#: inc/options/functions/actions.php:31
+msgid "No data provided by developer"
+msgstr ""
+
+#: inc/options/functions/actions.php:137
+msgid "Search a Icon..."
+msgstr ""
+
+#: inc/options/functions/validate.php:16 inc/options/functions/validate.php:84
+msgid "Please write a valid email address!"
+msgstr ""
+
+#: inc/options/functions/validate.php:33
+#: inc/options/functions/validate.php:103
+msgid "Please write a numeric data!"
+msgstr ""
+
+#: inc/options/functions/validate.php:50
+#: inc/options/functions/validate.php:122
+msgid "Error! This field is required!"
+msgstr ""
+
+#: inc/options/functions/validate.php:67
+#: inc/options/functions/validate.php:141
+msgid "Please write a valid url!"
+msgstr ""
+
+#: inc/template-tags.php:61
+msgctxt "Used before post format."
+msgid "Format"
+msgstr ""
+
+#. translators: %s: search term
+#: inc/template-tags.php:87
+#, php-format
+msgctxt "lerm"
+msgid "%s"
+msgid_plural "%s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/template-tags.php:117
+msgctxt "Used before publish date."
+msgid ""
+msgstr ""
+
+#: inc/template-tags.php:133
+msgctxt "Used between list items, there is a space after the comma."
+msgid ", "
+msgstr ""
+
+#. translators: %s: Name of current post
+#: inc/template-tags.php:148
+#, php-format
+msgid "Edit<span class=\"screen-reader-text\"> \"%s\"</span>"
+msgstr ""
+
+#: inc/widgets.php:6
+msgid "HomePage Sidebar"
+msgstr ""
+
+#: inc/widgets.php:8
+msgid "Add widgets here to appear in your sidebar."
+msgstr ""
+
+#: inc/widgets.php:25
+msgid "Cutsom register sidebar"
+msgstr ""
+
+#: inc/widgets.php:39
+#, php-format
+msgid "Sidebar %d"
+msgstr ""
+
+#: inc/widgets.php:73
+msgid "Your site&#8217;s most recent comments."
+msgstr ""
+
+#: inc/widgets.php:76 inc/widgets.php:94
+msgid "Recent Comments"
+msgstr "最近评论"
+
+#: inc/widgets.php:109
+#, php-format
+msgid "%s ago"
+msgstr ""
+
+#: inc/widgets.php:139 inc/widgets.php:250 inc/widgets.php:347
+#: inc/widgets.php:602
+msgid "Title:"
+msgstr ""
+
+#: inc/widgets.php:141
+msgid "Number of comments to show:"
+msgstr "要显示的评论数。"
+
+#: inc/widgets.php:162
+msgid "Your site&#8217;s most recent Posts."
+msgstr ""
+
+#: inc/widgets.php:165 inc/widgets.php:173
+msgid "Recent Posts"
+msgstr "最新文章"
+
+#: inc/widgets.php:253 inc/widgets.php:350 inc/widgets.php:605
+msgid "Number of posts to show:"
+msgstr ""
+
+#: inc/widgets.php:257 inc/widgets.php:353
+msgid "Display post date?"
+msgstr ""
+
+#: inc/widgets.php:276
+msgid "Display the popular posts on your website."
+msgstr ""
+
+#: inc/widgets.php:278 inc/widgets.php:283
+msgid "Popular Post"
+msgstr ""
+
+#: inc/widgets.php:379
+msgid "Lerm Ephemera"
+msgstr ""
+
+#: inc/widgets.php:382
+msgid ""
+"Use this widget to list your recent Aside, Quote, Video, Audio, Image, "
+"Gallery, and Link posts."
+msgstr ""
+
+#: inc/widgets.php:410
+msgid "Images"
+msgstr ""
+
+#: inc/widgets.php:411
+msgid "More images"
+msgstr ""
+
+#: inc/widgets.php:414
+msgid "Videos"
+msgstr ""
+
+#: inc/widgets.php:415
+msgid "More videos"
+msgstr ""
+
+#: inc/widgets.php:418
+msgid "Audio"
+msgstr ""
+
+#: inc/widgets.php:419
+msgid "More audio"
+msgstr ""
+
+#: inc/widgets.php:422
+msgid "Quotes"
+msgstr ""
+
+#: inc/widgets.php:423
+msgid "More quotes"
+msgstr ""
+
+#: inc/widgets.php:426
+msgid "Links"
+msgstr ""
+
+#: inc/widgets.php:427
+msgid "More links"
+msgstr ""
+
+#: inc/widgets.php:430
+msgid "Statuses"
+msgstr ""
+
+#: inc/widgets.php:431
+msgid "More statuses"
+msgstr ""
+
+#: inc/widgets.php:434
+msgid "Galleries"
+msgstr ""
+
+#: inc/widgets.php:435
+msgid "More galleries"
+msgstr ""
+
+#: inc/widgets.php:439
+msgid "Asides"
+msgstr ""
+
+#: inc/widgets.php:440
+msgid "More asides"
+msgstr "更多日志"
+
+#: inc/widgets.php:490 inc/widgets.php:535
+msgid "Continue reading <span class=\"meta-nav\">&rarr;</span>"
+msgstr ""
+
+#: inc/widgets.php:527
+#, php-format
+msgid "This gallery contains <a href=\"%1$s\" rel=\"bookmark\">%2$s photo</a>."
+msgid_plural ""
+"This gallery contains <a href=\"%1$s\" rel=\"bookmark\">%2$s photos</a>."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/widgets.php:558
+msgid "Leave a comment"
+msgstr "发表评论"
+
+#: inc/widgets.php:558
+msgid "1 Comment"
+msgstr "1条评论"
+
+#: inc/widgets.php:558
+msgid "% Comments"
+msgstr "%条评论"
+
+#. translators: used with More archives link
+#: inc/widgets.php:570
+#, php-format
+msgid "%s <span class=\"meta-nav\">&rarr;</span>"
+msgstr ""
+
+#: inc/widgets.php:608
+msgid "Post format to show:"
+msgstr "文章格式："
+
+#: links.php:29
+msgid "Continue reading"
+msgstr "继续阅读"
+
+#: links.php:61 template/content/content-page.php:25
+#: template/content/content-single.php:33 template/content/content.php:61
+msgid "Pages:"
+msgstr "页："
+
+#: links.php:65 template/content/content-page.php:29
+#: template/content/content-single.php:37 template/content/content.php:65
+msgid "Page"
+msgstr "页"
+
+#: search.php:16
+msgid "Search results for: "
+msgstr "搜索结果："
+
+#: search.php:18
+msgid "Nothing Found"
+msgstr "额，什么都没找到"
+
+#: searchform.php:14
+msgid "Search…"
+msgstr "搜索…"
+
+#: template/content/content-excerpt.php:15 template/content/content.php:34
+msgid "Sticky"
+msgstr "推荐"
+
+#. translators: 1: link to WP admin new post page.
+#: template/content/content-none.php:17
+#, php-format
+msgid ""
+"Ready to publish your first post? <a href=\"%1$s\">Get started here</a>."
+msgstr ""
+
+#: template/content/content-none.php:30
+msgid ""
+"Sorry, but nothing matched your search terms. Please try again with some "
+"different keywords."
+msgstr ""
+
+#: template/content/content-none.php:37
+msgid ""
+"It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps "
+"searching can help."
+msgstr ""
+
+#: template/content/content-page.php:17 template/content/content.php:53
+#, php-format
+msgid "Continue reading<span class=\"screen-reader-text\">\"%s\"</span>"
+msgstr ""
+
+#: template/content/content-single.php:25
+#, php-format
+msgid "Continue reading <span class=\"screen-reader-text\">\"%s\"</span>"
+msgstr ""
+
+#: template/post/biography.php:27
+msgid " Author"
+msgstr ""

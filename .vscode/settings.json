@@ -1,0 +1,15 @@
+{
+    "search.useIgnoreFiles": false,
+    "merge-conflict.autoNavigateNextConflict.enabled": true,
+    "auto-close-tag.fullMode": true,
+    "auto-close-tag.SublimeText3Mode": true,
+    "phpcs.showSources": true,
+    "phpcs.executablePath": "C:\\Users\\lerm\\AppData\\Roaming\\Composer\\vendor\\bin/phpcs",
+    "phpformatter.composer": true,
+    "phpcbf.onsave": true,
+    "phpcbf.executablePath": "C:\\Users\\lerm\\AppData\\Roaming\\Composer\\vendor\\bin/phpcbf.bat",
+    "phpcbf.debug": true,
+    "bracketPairColorizer.forceIterationColorCycle": true,
+    "prettier.tabWidth": 4,
+    "prettier.useTabs": true
+}
