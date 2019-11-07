@@ -19,13 +19,13 @@ function lerm_load_more() {
 	$args['paged'] = $_POST['page'] + 1;
 
 	$args['post_status'] = 'publish';
-	query_posts( $args );
 
-	if (have_posts() ) :
-		while (have_posts() ) :
+	$query = new WP_Query( $args );
 
-			the_post();
+	if ( $query->have_posts() ) :
+		while ( $query->have_posts() ) :
 
+			$query->the_post();
 			get_template_part( '/template/content/content', 'excerpt' );
 
 		endwhile;
