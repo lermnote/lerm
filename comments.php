@@ -45,7 +45,7 @@ if ( post_password_required() ) {
 			) . '</p>',
 			'id_submit'            => 'submit',
 			'class_submit'         => 'btn btn-custom',
-			'title_reply'          => '<span class="wrap fa">' . __( 'Leave a Reply', 'lerm' ) . '</span>',
+			'title_reply'          => '<span class="wrap fa p-2 d-inline-block">' . __( 'Leave a Reply', 'lerm' ) . '</span>',
 		);
 		comment_form( $args );
 		?>
