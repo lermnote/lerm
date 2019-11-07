@@ -853,9 +853,6 @@ Comments
 }
 
 /* icon */
-.comment-reply-title .wrap {
-	padding: .5rem 1rem .5rem;
-}
 
 .comment-reply-title .wrap:before {
 	content: "\f086";
