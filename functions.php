@@ -145,7 +145,7 @@ add_action( 'wp_enqueue_scripts', 'lerm_enqueue_styles' );
 function lerm_enqueue_scripts() {
 	global $lerm ,$wp_query;
 	// register script
-	wp_register_script( 'jquery-min', LERM_URI .'assets/js/jquery.min.js', array(), '3.1.0', true );
+	wp_register_script( 'jquery-min', LERM_URI . 'assets/js/jquery.min.js', array(), '3.1.0', true );
 	wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.min.js', array(), '4.3.1', true );
 	wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
 	wp_register_script( 'lightbox', LERM_URI . 'assets/js/ekko-lightbox.min.js', array(), '2.0.0', true );
@@ -180,7 +180,7 @@ function lerm_enqueue_scripts() {
 			'noposts'  => __( 'No older posts found', 'lerm' ),
 			'loadmore' => __( 'Load more', 'lerm' ),
 			'loading'  => __( 'Loading...', 'lerm' ),
-			'posts'    => json_encode( $wp_query->query_vars ),
+			'posts'    => wp_json_encode( $wp_query->query_vars ),
 			'current'  => get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1,
 			// 'maxpage'  => $wp_query->max_num_pages,
 		)
@@ -226,7 +226,7 @@ function lerm_keywords_and_description() {
 		} else {
 			$keywords[] = trim( apply_filters( 'wp_title', '', '', '' ) );
 		}
-		if ( $post->post_excerpt )  {
+		if ( $post->post_excerpt ) {
 			$text = $post->post_excerpt;
 		} else {
 			$text = $post->post_content;
@@ -235,7 +235,7 @@ function lerm_keywords_and_description() {
 		if ( ! ( $description ) ) {
 			$description = BLOGNAME . '-' . trim( apply_filters( 'wp_title', '', '', '' ) );
 		}
-	} else{
+	} else {
 		$keywords[]  = single_term_title( '', false );
 		$description = term_description() ? wp_strip_all_tags( term_description() ) : BLOGNAME . '-' . single_term_title( '', false );
 	}
