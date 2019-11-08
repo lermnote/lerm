@@ -97,8 +97,7 @@ $lerm = get_option( 'lerm_theme_options' );
  * @param  id ; $args
  * @return $options
  */
-
-function lerm_options( $id, $arg ) {
+function lerm_options( $id = null, $arg = null ) {
 	global $lerm;
 	if ( isset( $lerm[ $id ] ) ) {
 		if ( $arg ) {
