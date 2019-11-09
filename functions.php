@@ -94,11 +94,11 @@ $lerm = get_option( 'lerm_theme_options' );
 /**
  * Theme options functions.
  *
- * @param  id ; $args
+ * @param  $id ; $args
  * @return $options
  */
 function lerm_options( $id, $arg = null ) {
-	global $lerm;
+	$lerm = get_option( 'lerm_theme_options' );
 	if ( isset( $lerm[ $id ] ) ) {
 		if ( $arg ) {
 			$option = $lerm[ $id ][ $arg ];
@@ -108,22 +108,22 @@ function lerm_options( $id, $arg = null ) {
 		return $option;
 	}
 }
+
 /**
- * Load scripts/styles on the front end.
+ * Load scripts/styles on the front-end.
  *
  * @since  1.0.0
  * @access public
  * @return void
  */
 function lerm_enqueue_styles() {
-	global $lerm;
 	// bootstrap style.
 	wp_enqueue_style( 'lerm_bootstrap', LERM_URI . 'assets/css/bootstrap.min.css', array(), '4.3.1' );
 	// fontawesome-all.
 	wp_enqueue_style( 'lerm_font', LERM_URI . 'assets/css/lerm-font.min.css', array(), '1.0.0' );
 
 	// Theme stylesheet.
-	if ( is_singular( 'post' ) && $lerm['enable_code_highlight'] ) {
+	if ( is_singular( 'post' ) && lerm_options( 'enable_code_highlight' ) ) {
 		// code highlight.
 		wp_enqueue_style( 'lerm_solarized', LERM_URI . 'assets/css/solarized-dark.min.css', array(), LERM_VERSION );
 	}
@@ -140,7 +140,7 @@ add_action( 'wp_enqueue_scripts', 'lerm_enqueue_styles' );
  */
 
 function lerm_enqueue_scripts() {
-	global $lerm ,$wp_query;
+	global $wp_query;
 	// register script
 	wp_register_script( 'jquery-min', LERM_URI . 'assets/js/jquery.min.js', array(), '3.1.0', true );
 	wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.min.js', array(), '4.3.1', true );
@@ -151,8 +151,8 @@ function lerm_enqueue_scripts() {
 	wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.min.js', array(), LERM_VERSION, true );
 
 	// enqueue script
-	if ( $lerm['cdn_jquery'] ) {
-		wp_enqueue_script( 'jquery_cdn', $lerm['cdn_jquery'], array(), LERM_VERSION, true );
+	if ( lerm_options( 'cdn_jquery' ) ) {
+		wp_enqueue_script( 'jquery_cdn', lerm_options( 'cdn_jquery' ), array(), LERM_VERSION, true );
 	} else {
 		wp_enqueue_script( 'jquery-min' );
 	}
@@ -163,7 +163,7 @@ function lerm_enqueue_scripts() {
 	if ( is_singular( 'post' ) ) {
 		wp_enqueue_script( 'qrcode' );
 
-		if ( $lerm['enable_code_highlight'] ) {
+		if ( lerm_options( 'enable_code_highlight' ) ) {
 			wp_enqueue_script( 'highlight' );
 		}
 	}
@@ -197,8 +197,7 @@ add_action( 'wp_enqueue_scripts', 'lerm_enqueue_scripts' );
  * @return $lerm['title_sepa'] or "|"
  */
 function lerm_title_separator() {
-	global $lerm;
-	return $lerm['title_sepa'] ? $lerm['title_sepa'] : '|';
+	return lerm_options( 'title_sepa' ) ? lerm_options( 'title_sepa' ) : '|';
 }
 add_filter( 'document_title_separator', 'lerm_title_separator' );
 
@@ -209,12 +208,12 @@ add_filter( 'document_title_separator', 'lerm_title_separator' );
  * @return void
  */
 function lerm_keywords_and_description() {
-	global $post, $lerm;
+	global $post;
 	$keywords    = array();
 	$description = '';
 	if ( is_home() ) {
-		$keywords[]  = $lerm['keywords'];
-		$description = trim( $lerm['description'] );
+		$keywords[]  = lerm_options( 'keywords' );
+		$description = trim( lerm_options( 'description' ) );
 	} elseif ( is_singular() ) {
 		if ( has_tag() ) {
 			foreach ( ( get_the_tags() ) as $tag ) {
@@ -247,11 +246,10 @@ add_action( 'wp_head', 'lerm_keywords_and_description', 1 );
  *
  * @since  1.0.0
  */
-if ( ! function_exists( 'lerm_baidu_submit' ) && $lerm['sitemap_submit'] ) :
+if ( ! function_exists( 'lerm_baidu_submit' ) && lerm_options( 'sitemap_submit' ) ) :
 	function lerm_baidu_submit( $post_ID ) {
-		global $lerm;
 		$web_domain = LERM_URI;
-		$web_token  = $lerm['submit_token'];
+		$web_token  = lerm_options( 'submit_token' );
 		// Do not submit again
 		if ( 1 === get_post_meta( $post_ID, 'Baidusubmit', true ) ) {
 			return;
@@ -282,7 +280,7 @@ endif;
  * @since  1.0.0
  * @return void
  */
-if ( $lerm['post_navigation'] ) :
+if ( lerm_options( 'post_navigation' ) ) :
 	function lerm_post_navigation() {
 		if ( is_singular( 'post' ) ) :
 			// Previous/next post navigation.
@@ -411,7 +409,7 @@ add_filter( 'user_trailingslashit', 'lerm_category_trailingslashit', 10, 2 );
  * @access public
  * @return void
  */
-if ( $lerm['html_slug'] ) :
+if ( lerm_options( 'html_slug' ) ) :
 	// remove page slash
 	function no_page_slash( $string, $type ) {
 		global $wp_rewrite;
@@ -436,7 +434,7 @@ endif;
 /**
  * Removes '/category' from your category permalinks
  */
-if ( $lerm['no_cat_base'] ) :
+if ( lerm_options( 'no_cat_base' ) ) :
 	/* actions */
 	add_action( 'created_category', 'no_category_base_refresh_rules' );
 	add_action( 'delete_category', 'no_category_base_refresh_rules' );
@@ -547,7 +545,7 @@ function lerm_replace_avatar( $avatar ) {
 add_filter( 'get_avatar', 'lerm_replace_avatar' );
 
 // cache avatar local
-if ( $lerm['avatar_cache'] ) :
+if ( lerm_options( 'avatar_cache' ) ) :
 	function lerm_avatar_cache( $avatar ) {
 		$tmp = strpos( $avatar, 'http' );
 		$g   = substr( $avatar, $tmp, strpos( $avatar, '\'', $tmp ) - $tmp );
@@ -569,17 +567,17 @@ if ( $lerm['avatar_cache'] ) :
 endif;
 
 // Remove post auto <p>
-if ( $lerm['post_wpautop'] ) {
+if ( lerm_options( 'post_wpautop' ) ) {
 	remove_filter( 'the_content', 'wpautop' );
 }
 
 // remove excerpt auto <p>
-if ( $lerm['excerpt_wpautop'] ) {
+if ( lerm_options( 'excerpt_wpautop' ) ) {
 	remove_filter( 'the_excerpt', 'wpautop' );
 }
 
 // Remove comment auto <p>
-if ( $lerm['comment_wpautop'] ) {
+if ( lerm_options( 'comment_wpautop' ) ) {
 	remove_filter( 'comment_text', 'wpautop', 30 );
 }
 
@@ -633,7 +631,7 @@ add_filter( 'script_loader_src', 'lerm_remove_css_and_js_ver', 999 );
  *
  * @return void
  */
-if ( $lerm['disable_embeds'] ) :
+if ( lerm_options( 'disable_embeds' ) ) :
 	function lerm_disable_embeds_code_init() {
 		remove_action( 'rest_api_init', 'wp_oembed_register_route' );
 		add_filter( 'embed_oembed_discover', '__return_false' );
@@ -682,7 +680,7 @@ add_action( 'pre_ping', 'no_self_ping' );
  * @access public
  * @return void
  */
-if ( $lerm['disable_rest_api'] ) :
+if ( lerm_options( 'disable_rest_api' ) ) :
 	function lerm_disable_rest_api( $access ) {
 		return new WP_Error(
 			'Stop!',
@@ -728,11 +726,10 @@ add_filter( 'frontpage_template', 'lerm_front_page_template' );
  * @return $layout
  */
 function lerm_page_layout() {
-	global $lerm;
 	// page or post layout
 	$custom_layout = get_post_meta( get_the_ID(), '_lerm_metabox_options', true );
 	// global layout
-	$global_layout = $lerm['global_layout'];
+	$global_layout = lerm_options( 'global_layout' );
 	// if is mobile
 	if ( wp_is_mobile() ) {
 		$layout = 'mobile';
