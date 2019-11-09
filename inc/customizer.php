@@ -18,7 +18,7 @@ if ( ! function_exists( 'lerm_the_custom_logo' ) ) :
 	function lerm_the_custom_logo() {
 		if ( function_exists( 'the_custom_logo' ) ) {
 			if ( wp_is_mobile() ) {
-				$image_id   = lerm_options( 'mobile_logo', '' );
+				$image_id   = lerm_options( 'mobile_logo' );
 				$attachment = wp_get_attachment_image_src( $image_id, 'full' );
 				echo $attachment[0];
 			}
@@ -51,7 +51,7 @@ add_action( 'wp_enqueue_scripts', 'lerm_custom_site_width', 21 );
 function lerm_custom_css() {
 	wp_add_inline_style(
 		'lerm_style',
-		sprintf( '%s', lerm_options( 'custom_css', '' ) )
+		sprintf( '%s', lerm_options( 'custom_css' ) )
 	);
 }
 add_action( 'wp_enqueue_scripts', 'lerm_custom_css', 21 );

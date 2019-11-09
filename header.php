@@ -16,7 +16,7 @@ global $lerm;
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color', '' ) ); ?>">
+	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color' ) ); ?>">
 	<?php
 	wp_head();
 		echo wp_kses( $lerm['baidu_tongji'], array( 'script' => array() ) );
@@ -75,7 +75,7 @@ global $lerm;
 							'walker'          => new Lerm_Walker_Nav_Menu(),
 						)
 					);
-					if ( lerm_options( 'narbar_search', '' ) ) :
+					if ( lerm_options( 'narbar_search') ) :
 						?>
 						<div class="d-none d-lg-block">
 							<?php get_search_form(); ?>
@@ -93,7 +93,7 @@ global $lerm;
 		<?php endif; ?>
 
 		<?php
-		if ( is_home() && ! is_paged() && lerm_options( 'slide_position', '' ) === 'full_width' ) :
+		if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'full_width' ) :
 			lerm_carousel();
 		endif;
 		?>

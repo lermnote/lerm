@@ -12,8 +12,8 @@ function lerm_widgets_init() {
 			'after_title'   => '</span></h3>',
 		)
 	);
-	$widgets = lerm_options( 'register_sidebars', '' );
-	// lerm_options('register_sidebars', '')  ? lerm_options('register_sidebars', ''):'';
+	$widgets = lerm_options( 'register_sidebars' );
+	// lerm_options('register_sidebars')  ? lerm_options('register_sidebars'):'';
 	if ( isset( $widgets ) && ! empty( $widgets ) ) {
 		foreach ( $widgets as $key => $value ) {
 			$sidebar_id = 'sidebar' . preg_replace( '/ /', '', Chinese_to_PY::getPY( $value['sidebar_title'], 'all' ) );
@@ -32,7 +32,7 @@ function lerm_widgets_init() {
 			}
 		}
 	}
-	$footer_sidebars_count = (int) lerm_options( 'footer_sidebars_count', '' );
+	$footer_sidebars_count = (int) lerm_options( 'footer_sidebars_count');
 	register_sidebars(
 		$footer_sidebars_count,
 		array(

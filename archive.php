@@ -41,8 +41,10 @@ if ( $term ) {
 			</div>
 
 			<div class="mt-3">
-				<?php global $wp_query;
-					if (  $wp_query->max_num_pages > 1 && (lerm_options( 'load_more', '' ) || wp_is_mobile()) ) : ?>
+				<?php
+				global $wp_query;
+				if ( $wp_query->max_num_pages > 1 && ( lerm_options( 'load_more' ) || wp_is_mobile() ) ) :
+					?>
 					<button class='btn btn-custom btn-block more-posts' data-page="1"><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
 					<?php
 				else :

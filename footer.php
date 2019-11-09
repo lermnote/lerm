@@ -1,7 +1,7 @@
 <footer class="footer mt-3" itemscope="" itemtype="http://schema.org/WPFooter">
 	<?php if ( ! is_404() || is_home() || is_front_page() ) : ?>
 		<?php
-		$footer_sidebars_count = (int) lerm_options( 'footer_sidebars_count', '' );
+		$footer_sidebars_count = (int) lerm_options( 'footer_sidebars_count' );
 		if ( $footer_sidebars_count > 0 ) :
 			?>
 			<div class="footer-widget p-2">
@@ -33,7 +33,7 @@
 	</div>
 	<div class="copyright p-3 text-center">
 		<div class="container">
-			<?php echo esc_html( lerm_options( 'copyright', '' ) ); ?>
+			<?php echo esc_html( lerm_options( 'copyright' ) ); ?>
 			<!--制作不易，请保留作者链接，谢谢 -->
 			<a href="<?php echo esc_url( 'http://lerm.net/', 'lerm' ); ?>">
 				<?php esc_html__( 'Theme By Lerm', 'lerm' ); ?></a>

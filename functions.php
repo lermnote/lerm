@@ -97,7 +97,7 @@ $lerm = get_option( 'lerm_theme_options' );
  * @param  id ; $args
  * @return $options
  */
-function lerm_options( $id = null, $arg = null ) {
+function lerm_options( $id, $arg = null ) {
 	global $lerm;
 	if ( isset( $lerm[ $id ] ) ) {
 		if ( $arg ) {
@@ -106,8 +106,6 @@ function lerm_options( $id = null, $arg = null ) {
 			$option = $lerm[ $id ];
 		}
 		return $option;
-	} else {
-		return '';
 	}
 }
 /**
@@ -365,7 +363,7 @@ add_action( 'wp_ajax_nopriv_lerm_post_like', 'lerm_post_like' );
 add_action( 'wp_ajax_lerm_post_like', 'lerm_post_like' );
 function lerm_post_like() {
 
-	//check ajax nonce
+	// check ajax nonce
 	check_ajax_referer( 'ajax_nonce', 'security' );
 
 	$id         = $_POST['postID'];
@@ -538,8 +536,8 @@ function no_category_base_request( $query_vars ) {
 // Replace avatar url
 function lerm_replace_avatar( $avatar ) {
 	$regexp = '/https?.*?\/avatar\//i';
-	if ( lerm_options( 'replace_avatar', '' ) ) {
-		$replacement = lerm_options( 'replace_avatar', '' );
+	if ( lerm_options( 'replace_avatar' ) ) {
+		$replacement = lerm_options( 'replace_avatar');
 	} else {
 		$replacement = 'https://cn.gravatar.com/avatar/';
 	}
@@ -724,7 +722,6 @@ add_filter( 'frontpage_template', 'lerm_front_page_template' );
 
 /**
  * Wether to show sidebar in webpage.
- *
  *
  * @param string $template front-page.php.
  *
