@@ -25,10 +25,10 @@ if ( class_exists( 'CSF' ) ) {
 			'icon'   => 'fa fa-rocket',
 			'fields' => array(
 				array(
-					'id'        => 'desktop_logo',
+					'id'        => 'large_logo',
 					'type'      => 'media',
 					'add_title' => 'Add Logo',
-					'title'     => __( 'Logo Desktop', 'lerm' ),
+					'title'     => __( 'Logo large', 'lerm' ),
 					'label'     => __( 'Logo Blink', 'lerm' ),
 					'library'   => 'image',
 					'url'       => false,

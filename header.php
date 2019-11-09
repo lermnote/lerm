@@ -31,7 +31,7 @@ global $lerm;
 				<div class="brand d-flex align-items-center">
 
 					<?php
-					lerm_the_custom_logo();
+					the_custom_logo();
 					?>
 					<!-- .navbar-brand  begin -->
 					<div>
@@ -75,7 +75,7 @@ global $lerm;
 							'walker'          => new Lerm_Walker_Nav_Menu(),
 						)
 					);
-					if ( lerm_options( 'narbar_search') ) :
+					if ( lerm_options( 'narbar_search' ) ) :
 						?>
 						<div class="d-none d-lg-block">
 							<?php get_search_form(); ?>

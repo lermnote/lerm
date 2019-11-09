@@ -7,25 +7,39 @@
  * @author Lerm http://www.hanost.com
  * @since  Lerm 1.0
  */
-if ( ! function_exists( 'lerm_the_custom_logo' ) ) :
-	/**
-	 * Displays the optional custom logo.
-	 *
-	 * Does nothing if the custom logo is not available.
-	 *
-	 * @since Lerm 1.0
-	 */
-	function lerm_the_custom_logo() {
-		if ( function_exists( 'the_custom_logo' ) ) {
-			if ( wp_is_mobile() ) {
-				$image_id   = lerm_options( 'mobile_logo' );
-				$attachment = wp_get_attachment_image_src( $image_id, 'full' );
-				echo $attachment[0];
-			}
-			the_custom_logo();
-		}
+
+/**
+ * Displays the optional custom logo.
+ *
+ * Does nothing if the custom logo is not available.
+ *
+ * @since Lerm 3.1
+ */
+function lerm_custom_logo() {
+	$large_logo     = lerm_options( 'large_logo', 'id' );
+	$mobile_logo    = lerm_options( 'mobile_logo', 'id' );
+	$custom_logo_id = get_theme_mod( 'custom_logo' );
+	if ( wp_is_mobile() && ! empty( $mobile_logo ) ) {
+		$custom_logo_id = $mobile_logo;
 	}
-endif;
+	if ( ! empty( $large_logo ) ) {
+		$custom_logo_id = $large_logo;
+	}
+	$html = sprintf(
+		'<a href="%1$s" class="custom-logo-link" rel="home" itemprop="url">%2$s</a>',
+		esc_url( home_url( '/' ) ),
+		wp_get_attachment_image(
+			$custom_logo_id,
+			'full',
+			false,
+			array(
+				'class' => 'custom-logo',
+			)
+		)
+	);
+	return $html;
+}
+add_filter( 'get_custom_logo', 'lerm_custom_logo' );
 
 /**
  * custom color
