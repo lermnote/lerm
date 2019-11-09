@@ -11,5 +11,6 @@
     "phpcbf.debug": true,
     "bracketPairColorizer.forceIterationColorCycle": true,
     "prettier.tabWidth": 4,
-    "prettier.useTabs": true
+    "prettier.useTabs": true,
+    "php-cs-fixer.autoFixBySemicolon": true
 }
