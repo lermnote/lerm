@@ -537,7 +537,7 @@ function no_category_base_request( $query_vars ) {
 function lerm_replace_avatar( $avatar ) {
 	$regexp = '/https?.*?\/avatar\//i';
 	if ( lerm_options( 'replace_avatar' ) ) {
-		$replacement = lerm_options( 'replace_avatar');
+		$replacement = lerm_options( 'replace_avatar' );
 	} else {
 		$replacement = 'https://cn.gravatar.com/avatar/';
 	}
