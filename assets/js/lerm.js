@@ -327,9 +327,9 @@ document.addEventListener("DOMContentLoaded", function (e) {
 		errInfo.style.overflow = 'hidden';
 		errInfo.style.display = 'none';
 		let data = {
-			author: commentForm.querySelector('[name="author"]').value,
-			email: commentForm.querySelector('[name="email"]').value,
-			url: commentForm.querySelector('[name="url"]').value,
+			author: commentForm.querySelector('[name="author"]') ? commentForm.querySelector('[name="author"]').value : '',
+			email: commentForm.querySelector('[name="email"]') ? commentForm.querySelector('[name="email"]').value : '',
+			url: commentForm.querySelector('[name="url"]') ? commentForm.querySelector('[name="url"]').value : '',
 			comment: commentForm.querySelector('[name="comment"]').value
 		};
 		//sumbit event
