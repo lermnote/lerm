@@ -20,6 +20,7 @@ define( 'BLOGNAME', get_bloginfo( 'name' ) );
 define( 'LERM_URI', trailingslashit( get_template_directory_uri() ) );
 // Directory path to the theme folder.
 define( 'LERM_DIR', trailingslashit( get_template_directory() ) );
+
 /**
  * This function sets up support for various WordPress and framework functionality.
  *
