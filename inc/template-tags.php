@@ -202,7 +202,7 @@ add_action( 'save_post', 'lerm_category_transient_flusher' );
  * @since Lerm 2.0
  */
 function lerm_excerpt_length( $length ) {
-	$length = lerm_options( 'excerpt_length');
+	$length = lerm_options( 'excerpt_length' );
 	return $length;
 }
 add_filter( 'excerpt_length', 'lerm_excerpt_length', 999 );

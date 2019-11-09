@@ -36,9 +36,8 @@
 			<?php echo esc_html( lerm_options( 'copyright' ) ); ?>
 			<!--制作不易，请保留作者链接，谢谢 -->
 			<a href="<?php echo esc_url( 'http://lerm.net/', 'lerm' ); ?>">
-				<?php esc_html__( 'Theme By Lerm', 'lerm' ); ?></a>
-				<?php echo get_num_queries(); ?>
-				<?php timer_stop( 7 ); ?>
+				<?php esc_html__( 'Theme By Lerm', 'lerm' ); ?>
+			</a>
 		</div>
 	</div>
 </footer>
