@@ -22,7 +22,7 @@ get_header();
 			<div id="main" class="site-main ajax-posts">
 				<header>
 					<?php if ( have_posts() ) : ?>
-						<h1 class="page-title p-3 bg-white "><?php printf( esc_attr_e( 'Search results for:', 'lerm' ) . ' "%1s" ', '<span>' . get_search_query() . '</span>' ); ?></h1>
+						<h1 class="page-title p-3 bg-white "><?php printf( esc_attr_e( 'Search results for: ', 'lerm' ) . ' "%1s" ', '<span>' . get_search_query() . '</span>' ); ?></h1>
 					<?php else : ?>
 						<h1 class="page-title p-3 bg-white "><?php esc_attr_e( 'Nothing Found', 'lerm' ); ?></h1>
 					<?php endif; ?>
