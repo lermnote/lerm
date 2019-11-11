@@ -617,6 +617,11 @@ td {
 	display: none
 }
 
+.sticky .sticky-label {
+	display: inline-block;
+	margin-left: .25rem;
+}
+
 .brand a,
 .btn-custom:hover a,
 #comments a,
