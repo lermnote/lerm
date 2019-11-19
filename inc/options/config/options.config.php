@@ -771,22 +771,6 @@ if ( class_exists( 'CSF' ) ) {
 					'label' => __( 'If your posts contain some code, then enable it', 'lerm' ),
 				),
 				array(
-					'id'    => 'post_wpautop',
-					'type'  => 'switcher',
-					'title' => __( 'Remove Wpautop', 'lerm' ),
-				),
-				array(
-					'id'    => 'excerpt_wpautop',
-					'type'  => 'switcher',
-					'title' => __( 'Remove Excerpt Wpautop', 'lerm' ),
-					'label' => __( 'Remove tag p in excerpt', 'lerm' ),
-				),
-				array(
-					'id'    => 'comment_wpautop',
-					'type'  => 'switcher',
-					'title' => __( 'Remove comments Wpautop', 'lerm' ),
-				),
-				array(
 					'id'    => 'author_bio',
 					'type'  => 'switcher',
 					'title' => __( 'Author Biography', 'lerm' ),

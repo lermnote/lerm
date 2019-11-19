@@ -7,7 +7,7 @@
  */
 global $lerm;
 $like_class = isset( $_COOKIE[ 'post_like_' . $post->ID ] ) ? 'done' : '';
-$like_count =@get_post_meta( $post->ID, 'lerm_post_like', true )?get_post_meta( $post->ID, 'lerm_post_like', true ):0;
+$like_count = get_post_meta( $post->ID, 'lerm_post_like', true ) ? get_post_meta( $post->ID, 'lerm_post_like', true ) : 0;
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'entry p-3 mb-2' ); ?> >
 	<header class="entry-header d-flex flex-column justify-content-between mb-md-2 text-center pb-2">
@@ -52,7 +52,7 @@ $like_count =@get_post_meta( $post->ID, 'lerm_post_like', true )?get_post_meta( 
 				<button  id="like-button" data-id="<?php the_ID(); ?>" class="like-button btn <?php echo $like_class; ?>">
 					<span><i class="fa fa-heart"></i></span>
 					<span class="count">
-						<?php echo esc_attr( $like_count ) ;?>
+						<?php echo esc_attr( $like_count ); ?>
 					</span>
 				</button>
 				<button class="btn-custom btn entry-comment-btn "><?php echo lerm_post_comments_number(); ?> </button>
@@ -86,6 +86,7 @@ $like_count =@get_post_meta( $post->ID, 'lerm_post_like', true )?get_post_meta( 
 						<div id="share-qrcode" class="towdimcodelayer"></div>
 					</li>
 				</ul>
+				<?php lerm_the_post_meta(); ?>
 			</div>
 		</div>
 	</footer>

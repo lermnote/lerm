@@ -28,6 +28,9 @@ define( 'LERM_DIR', trailingslashit( get_template_directory() ) );
  * @return void
  */
 function lerm_theme_setup() {
+	// Automatically add feed links to <head>.
+	add_theme_support( 'automatic-feed-links' );
+
 	// site title
 	add_theme_support( 'title-tag' );
 
@@ -35,23 +38,27 @@ function lerm_theme_setup() {
 	add_theme_support(
 		'custom-logo',
 		array(
-			'height'           => 50,
-			'flex-width'       => true,
-			'flex-height'      => true,
-			'uploads'          => true,
-			'header-text'      => array( 'site-title', 'site-description' ),
-			'wp-head-callback' => 'lerm_header_style',
+			'height'      => 50,
+			'flex-width'  => true,
+			'flex-height' => true,
+			'uploads'     => true,
+			'header-text' => array( 'site-title', 'site-description' ),
 		)
 	);
 
 	// Adds core WordPress HTML5 support.
 	add_theme_support(
 		'html5',
-		array( 'caption', 'comment-form', 'comment-list', 'gallery', 'search-form' )
+		array(
+			'search-form',
+			'comment-form',
+			'comment-list',
+			'gallery',
+			'caption',
+			'script',
+			'style',
+		)
 	);
-
-	// Automatically add feed links to <head>.
-	add_theme_support( 'automatic-feed-links' );
 
 	// Feature
 	add_theme_support( 'post-thumbnails' );
@@ -71,8 +78,13 @@ function lerm_theme_setup() {
 			'social'  => __( 'Social Links Menu', 'lerm' ),
 		)
 	);
-	// Set the default content width.
-	$GLOBALS['content_width'] = 525;
+
+	// Set content-width.
+	global $content_width;
+	if ( ! isset( $content_width ) ) {
+		$content_width = 580;
+	}
+
 	// Add theme support for selective refresh for widgets.
 	add_theme_support( 'customize-selective-refresh-widgets' );
 
@@ -83,6 +95,7 @@ function lerm_theme_setup() {
 	load_theme_textdomain( DOMAIN, LERM_DIR . '/languages' );
 }
 add_action( 'after_setup_theme', 'lerm_theme_setup', 2 );
+
 /**
 * Requre admin framework
 *
@@ -95,8 +108,8 @@ $lerm = get_option( 'lerm_theme_options' );
 /**
  * Theme options functions.
  *
- * @param  $id ; $args
- * @return $options
+ * @param string $id ; $args
+ * @return string $options
  */
 function lerm_options( $id, $arg = null ) {
 	$lerm = get_option( 'lerm_theme_options' );
@@ -180,7 +193,6 @@ function lerm_enqueue_scripts() {
 			'loading'  => __( 'Loading...', 'lerm' ),
 			'posts'    => wp_json_encode( $wp_query->query_vars ),
 			'current'  => get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1,
-			// 'maxpage'  => $wp_query->max_num_pages,
 		)
 	);
 	wp_enqueue_script( 'lerm_js' );
@@ -203,44 +215,65 @@ function lerm_title_separator() {
 add_filter( 'document_title_separator', 'lerm_title_separator' );
 
 /**
- * keywords and description
+ * Keywords
  *
  * @since  1.0.0
- * @return void
+ * @return string $keywords
  */
-function lerm_keywords_and_description() {
+function lerm_keywords() {
 	global $post;
-	$keywords    = array();
-	$description = '';
+	$keywords = array();
+	if ( is_singular() ) {
+		foreach ( get_the_category( $post->ID ) as $cat ) {
+			$keywords[] = $cat->cat_name;
+		}
+		foreach ( get_the_tags() as $tag ) {
+			$keywords[] = $tag->name;
+		}
+		$keywords = array_unique( $keywords );
+	}
+	if ( is_archive() ) {
+		$keywords[] = single_cat_title( '', false );
+		$keywords[] = single_tag_title( '', false );
+		$keywords[] = get_the_author();
+	}
+
 	if ( is_home() ) {
-		$keywords[]  = lerm_options( 'keywords' );
-		$description = trim( lerm_options( 'description' ) );
-	} elseif ( is_singular() ) {
-		if ( has_tag() ) {
-			foreach ( ( get_the_tags() ) as $tag ) {
-				$keywords[] = $tag->name;
-			}
-		} else {
-			$keywords[] = trim( apply_filters( 'wp_title', '', '', '' ) );
-		}
+		$keywords[] = lerm_options( 'keywords' ) ? lerm_options( 'keywords' ) : get_bloginfo( 'name' );
+	}
+	$keywords = array_unique( $keywords );
+	if ( $keywords ) :
+		echo '<meta name="keywords" content="' . ( esc_attr( implode( ',', $keywords ) ) ) . '">';
+	endif;
+}
+add_action( 'wp_head', 'lerm_keywords', 1 );
+
+/**
+ * Description
+ *
+ * @since  1.0.0
+ * @return string $dsecription
+ */
+function lerm_description() {
+	global $post;
+	if ( is_singular() ) {
+		$description = wp_strip_all_tags( $post->post_content );
+		$description = strip_shortcodes( $description );
+		$description = str_replace( array( "\n", "\r", "\t" ), ' ', $description );
 		if ( $post->post_excerpt ) {
-			$text = $post->post_excerpt;
-		} else {
-			$text = $post->post_content;
+			$description = $post->post_excerpt;
 		}
-		$description = trim( str_replace( array( "\r\n", "\r", "\n", '　', ' ' ), ' ', str_replace( '"', "'", wp_strip_all_tags( $text ) ) ) );
-		if ( ! ( $description ) ) {
-			$description = BLOGNAME . '-' . trim( apply_filters( 'wp_title', '', '', '' ) );
-		}
-	} else {
-		$keywords[]  = single_term_title( '', false );
+	}
+	if ( is_archive() ) {
 		$description = term_description() ? wp_strip_all_tags( term_description() ) : BLOGNAME . '-' . single_term_title( '', false );
 	}
-	$description = mb_substr( $description, 0, 200, 'utf-8' );
-	echo '<meta name="keywords" content="' . ( esc_attr( implode( ',', $keywords ) ) ) . '">
-	      <meta name="description" content="' . esc_html( $description ) . '">';
+	if ( is_home() ) {
+		$description = lerm_options( 'description' ) ? lerm_options( 'description' ) : get_bloginfo( 'description' );
+	}
+	$description = mb_substr( $description, 0, 200, 'utf8' );
+	echo '<meta name="description" content="' . esc_attr( $description ) . '">';
 }
-add_action( 'wp_head', 'lerm_keywords_and_description', 1 );
+add_action( 'wp_head', 'lerm_description', 1 );
 
 /**
  * WordPress baidu submit
@@ -347,8 +380,8 @@ function lerm_entry_tag() {
 		printf(
 			'<div class="entry-tags mb-2"><span class="wrap tags-links" itemprop="keywords" ><span class="screen-reader-text">%s</span>%s</span></div>',
 			esc_html__( 'Tags', 'lerm' ),
-			$tags_list
-		);// WPCS: XSS OK.
+			$tags_list //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		);
 	}
 }
 
@@ -566,21 +599,6 @@ if ( lerm_options( 'avatar_cache' ) ) :
 	}
 	add_filter( 'get_avatar', 'lerm_avatar_cache' );
 endif;
-
-// Remove post auto <p>
-if ( lerm_options( 'post_wpautop' ) ) {
-	remove_filter( 'the_content', 'wpautop' );
-}
-
-// remove excerpt auto <p>
-if ( lerm_options( 'excerpt_wpautop' ) ) {
-	remove_filter( 'the_excerpt', 'wpautop' );
-}
-
-// Remove comment auto <p>
-if ( lerm_options( 'comment_wpautop' ) ) {
-	remove_filter( 'comment_text', 'wpautop', 30 );
-}
 
 // disable emojis
 function disable_emojis_tinymce( $plugins ) {

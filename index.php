@@ -10,8 +10,6 @@
  */
 
 get_header();
-$lerm_cat_id = '10';
-
 ?>
 <main role="main" class="container">
 
