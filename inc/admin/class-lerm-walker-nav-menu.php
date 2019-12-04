@@ -35,12 +35,12 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 		$attributes .= ! empty( $item->xfn ) ? ' rel="' . esc_attr( $item->xfn ) . '"' : '';
 		$attributes .= ! empty( $item->url ) ? ' href="' . esc_attr( $item->url ) . '"' : '';
 		$attributes .= ! empty( $item->data_toggle ) ? ' data-toggle="' . esc_attr( $item->data_toggle ) . '"' : '';
-		if ( strcasecmp( $depth, 1 ) == 0 ) {
+		if ( strcasecmp( $depth, 1 ) === 0 ) {
 			$attributes .= 'class="dropdown-item ';
 			$attributes .= ! empty( $item->a_class ) ? esc_attr( $item->a_class ) : '';
 			$attributes .= '"';
 		} else {
-			$attributes .= 'class="nav-link ';
+			$attributes .= ' class="nav-link ';
 			$attributes .= ! empty( $item->a_class ) ? esc_attr( $item->a_class ) : '';
 			$attributes .= '"';
 		}
@@ -60,8 +60,7 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 	}
 }
 
- add_filter( 'wp_nav_menu_objects', 'add_menu_parent_class' );
- //
+add_filter( 'wp_nav_menu_objects', 'add_menu_parent_class' );
 function add_menu_parent_class( $items ) {
 	$parents = array();
 	foreach ( $items as $item ) {
@@ -70,7 +69,7 @@ function add_menu_parent_class( $items ) {
 		}
 	}
 	foreach ( $items as $item ) {
-		if ( in_array( $item->ID, $parents ) ) {
+		if ( in_array( $item->ID, $parents, true ) ) {
 			$item->classes[]   = 'dropdown';
 			$item->title       = $item->title;
 			$item->a_class     = 'dropdown-toggle';
@@ -81,7 +80,7 @@ function add_menu_parent_class( $items ) {
 }
 
 function lerm_current_menu_class( $classes ) {
-	if ( in_array( 'current-menu-item', $classes ) or in_array( 'current-menu-ancestor', $classes ) ) {
+	if ( in_array( 'current-menu-item', $classes, true ) || in_array( 'current-menu-ancestor', $classes, true ) ) {
 		$classes[] = 'active';
 	}
 	return $classes;
@@ -89,7 +88,7 @@ function lerm_current_menu_class( $classes ) {
 add_filter( 'nav_menu_css_class', 'lerm_current_menu_class' );
 
 
-//清理多余css id
+// 清理多余css id
 function lerm_remove_css_attributes( $var ) {
 	return is_array( $var ) ? array_intersect( $var, array( 'active', 'dropdown', 'open', 'show' ) ) : '';
 }
