@@ -14,7 +14,7 @@ $like_count = get_post_meta( $post->ID, 'lerm_post_like', true ) ? get_post_meta
 		<?php
 		the_title( '<h1 class="entry-title test">', '</h1>' );
 		echo '<small class="entry-meta text-muted">';
-		lerm_entry_meta( 'entry' );
+		lerm_entry_meta( 'single' );
 		echo '</small>';
 		?>
 	</header>
@@ -49,7 +49,7 @@ $like_count = get_post_meta( $post->ID, 'lerm_post_like', true ) ? get_post_meta
 		</div>
 		<div class="btn-toolbar  d-flex justify-content-center mt-4 mb-3">
 			<div class="text-center">
-				<button  id="like-button" data-id="<?php the_ID(); ?>" class="like-button btn <?php echo $like_class; ?>">
+				<button  id="like-button" data-id="<?php the_ID(); ?>" class="like-button btn <?php echo esc_attr( $like_class ); ?>">
 					<span><i class="fa fa-heart"></i></span>
 					<span class="count">
 						<?php echo esc_attr( $like_count ); ?>
@@ -64,7 +64,7 @@ $like_count = get_post_meta( $post->ID, 'lerm_post_like', true ) ? get_post_meta
 					<span><i class="fa fa-dollar"></i></span>
 				</button>
 				<div class="donate-qrcode">
-					<img src="<?php echo lerm_options( 'donate-qrcode', 'url' ); ?>" alt="donate me" width="100" height="100">
+					<img src="<?php echo esc_attr( lerm_options( 'donate-qrcode', 'url' ) ); ?>" alt="donate me" width="100" height="100">
 				</div>
 			</div><!-- donate -->
 			<div id="share" class="d-flex justify-content-end">
@@ -86,7 +86,6 @@ $like_count = get_post_meta( $post->ID, 'lerm_post_like', true ) ? get_post_meta
 						<div id="share-qrcode" class="towdimcodelayer"></div>
 					</li>
 				</ul>
-				<?php lerm_the_post_meta(); ?>
 			</div>
 		</div>
 	</footer>
