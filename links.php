@@ -1,6 +1,7 @@
 <?php
 /**
  * Template Name: 链接模板
+ *
  * @author Lerm http://www.hanost.com
  * @date    2016-09-02
  * @since   lerm 2.0
@@ -71,7 +72,7 @@ get_header(); ?>
 								</div>
 							</article>
 							<?php
-							//If comments are open or we have at least one comment, load up the comment template.
+							// If comments are open or we have at least one comment, load up the comment template.
 							if ( comments_open() || get_comments_number() ) :
 								comments_template();
 							endif;
