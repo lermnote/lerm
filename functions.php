@@ -49,15 +49,7 @@ function lerm_theme_setup() {
 	// Adds core WordPress HTML5 support.
 	add_theme_support(
 		'html5',
-		array(
-			'search-form',
-			'comment-form',
-			'comment-list',
-			'gallery',
-			'caption',
-			'script',
-			'style',
-		)
+		array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'script', 'style' )
 	);
 
 	// Feature
@@ -103,12 +95,11 @@ add_action( 'after_setup_theme', 'lerm_theme_setup', 2 );
 */
 require_once LERM_DIR . 'inc/options/codestar-framework.php';
 
-$lerm = get_option( 'lerm_theme_options' );
-
 /**
  * Theme options functions.
  *
- * @param string $id ; $args
+ * @param string $id
+ * @param string $args
  * @return string $options
  */
 function lerm_options( $id, $arg = null ) {
@@ -127,18 +118,12 @@ function lerm_options( $id, $arg = null ) {
  * Load scripts/styles on the front-end.
  *
  * @since  1.0.0
- * @access public
  * @return void
  */
 function lerm_enqueue_styles() {
-	// bootstrap style.
-	wp_enqueue_style( 'lerm_bootstrap', LERM_URI . 'assets/css/bootstrap.min.css', array(), '4.3.1' );
-	// fontawesome-all.
+	wp_enqueue_style( 'bootstrap', LERM_URI . 'assets/css/bootstrap.min.css', array(), '4.3.1' );
 	wp_enqueue_style( 'lerm_font', LERM_URI . 'assets/css/lerm-font.min.css', array(), '1.0.0' );
-
-	// Theme stylesheet.
 	if ( is_singular( 'post' ) && lerm_options( 'enable_code_highlight' ) ) {
-		// code highlight.
 		wp_enqueue_style( 'lerm_solarized', LERM_URI . 'assets/css/solarized-dark.min.css', array(), LERM_VERSION );
 	}
 	wp_enqueue_style( 'lerm_style', get_stylesheet_uri(), array(), LERM_VERSION );
@@ -149,10 +134,8 @@ add_action( 'wp_enqueue_scripts', 'lerm_enqueue_styles' );
  * Load scripts/styles on the front end
  *
  * @since  3.0.0
- * @access public
  * @return void
  */
-
 function lerm_enqueue_scripts() {
 	global $wp_query;
 	// register script
@@ -162,7 +145,7 @@ function lerm_enqueue_scripts() {
 	wp_register_script( 'lightbox', LERM_URI . 'assets/js/ekko-lightbox.min.js', array(), '2.0.0', true );
 	wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 	wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
-	wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.min.js', array(), LERM_VERSION, true );
+	wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.js', array(), LERM_VERSION, true );
 
 	// enqueue script
 	if ( lerm_options( 'cdn_jquery' ) ) {
@@ -207,7 +190,7 @@ add_action( 'wp_enqueue_scripts', 'lerm_enqueue_scripts' );
  * Set title separator, default "|"
  *
  * @since  1.0.0
- * @return $lerm['title_sepa'] or "|"
+ * @return  string title_sepa
  */
 function lerm_title_separator() {
 	return lerm_options( 'title_sepa' ) ? lerm_options( 'title_sepa' ) : '|';
@@ -227,8 +210,10 @@ function lerm_keywords() {
 		foreach ( get_the_category( $post->ID ) as $cat ) {
 			$keywords[] = $cat->cat_name;
 		}
-		foreach ( get_the_tags() as $tag ) {
-			$keywords[] = $tag->name;
+		if ( has_tag() ) {
+			foreach ( get_the_tags() as $tag ) {
+				$keywords[] = $tag->name;
+			}
 		}
 		$keywords = array_unique( $keywords );
 	}
@@ -237,7 +222,6 @@ function lerm_keywords() {
 		$keywords[] = single_tag_title( '', false );
 		$keywords[] = get_the_author();
 	}
-
 	if ( is_home() ) {
 		$keywords[] = lerm_options( 'keywords' ) ? lerm_options( 'keywords' ) : get_bloginfo( 'name' );
 	}
@@ -314,23 +298,21 @@ endif;
  * @since  1.0.0
  * @return void
  */
-if ( lerm_options( 'post_navigation' ) ) :
-	function lerm_post_navigation() {
-		if ( is_singular( 'post' ) ) :
-			// Previous/next post navigation.
-			the_post_navigation(
-				array(
-					'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'lerm' ) . '</span> ' .
-						'<span class="screen-reader-text">' . __( 'Next post:', 'lerm' ) . '</span> <br/>' .
-						'<span class="post-title d-none d-md-block">%title</span>',
-					'prev_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
-						'<span class="screen-reader-text">' . __( 'Previous post:', 'lerm' ) . '</span> <br/>' .
-						'<span class="post-title d-none d-md-block">%title</span>',
-				)
-			);
-		endif;
-	}
-endif;
+function lerm_post_navigation() {
+	if ( is_singular( 'post' ) ) :
+		// Previous/next post navigation.
+		the_post_navigation(
+			array(
+				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'lerm' ) . '</span> ' .
+					'<span class="screen-reader-text">' . __( 'Next post:', 'lerm' ) . '</span> <br/>' .
+					'<span class="post-title d-none d-md-block">%title</span>',
+				'prev_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
+					'<span class="screen-reader-text">' . __( 'Previous post:', 'lerm' ) . '</span> <br/>' .
+					'<span class="post-title d-none d-md-block">%title</span>',
+			)
+		);
+	endif;
+}
 
 /**
  * Shows a pagination for posts list.
@@ -373,7 +355,12 @@ function addpageviews() {
 }
 add_action( 'wp_head', 'addpageviews' );
 
-// Entry tags list.
+/**
+ * Entry tags list.
+ *
+ * @since  1.0.0
+ * @return string tags_list
+ */
 function lerm_entry_tag() {
 	$tags_list = get_the_tag_list( ' ', esc_html( ' ', 'lerm' ) );
 	if ( $tags_list && is_singular( 'post' ) ) {
@@ -383,33 +370,6 @@ function lerm_entry_tag() {
 			$tags_list //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
 	}
-}
-
-/**
- * Post likes button ajax handler function.
- *
- * @package Lerm
- * @since Lerm 2.0
- */
-add_action( 'wp_ajax_nopriv_lerm_post_like', 'lerm_post_like' );
-add_action( 'wp_ajax_lerm_post_like', 'lerm_post_like' );
-function lerm_post_like() {
-
-	// check ajax nonce
-	check_ajax_referer( 'ajax_nonce', 'security' );
-
-	$id         = $_POST['postID'];
-	$like_count = get_post_meta( $id, 'lerm_post_like', true );
-	$expire     = time() + 604800;
-	$domain     = ( 'localhost' !== $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : false; // make cookies work with localhost
-		setcookie( 'post_like_' . $id, $id, $expire, '/', $domain, false );
-	if ( ! $like_count || ! is_numeric( $like_count ) ) {
-		update_post_meta( $id, 'lerm_post_like', 1 );
-	} else {
-		update_post_meta( $id, 'lerm_post_like', ( $like_count + 1 ) );
-	}
-	echo esc_attr( get_post_meta( $id, 'lerm_post_like', true ) );
-	wp_die();
 }
 
 /**
@@ -433,8 +393,6 @@ function lerm_category_trailingslashit( $string, $type_of_url ) {
 	return $string;
 }
 add_filter( 'user_trailingslashit', 'lerm_category_trailingslashit', 10, 2 );
-
-
 
 /**
  * Shows .html slug for pages.
@@ -466,106 +424,17 @@ if ( lerm_options( 'html_slug' ) ) :
 endif;
 
 /**
- * Removes '/category' from your category permalinks
- */
-if ( lerm_options( 'no_cat_base' ) ) :
-	/* actions */
-	add_action( 'created_category', 'no_category_base_refresh_rules' );
-	add_action( 'delete_category', 'no_category_base_refresh_rules' );
-	add_action( 'edited_category', 'no_category_base_refresh_rules' );
-	add_action( 'init', 'no_category_base_permastruct' );
-
-	/* filters */
-	add_filter( 'category_rewrite_rules', 'no_category_base_rewrite_rules' );
-	add_filter( 'query_vars', 'no_category_base_query_vars' );
-	add_filter( 'request', 'no_category_base_request' );
-endif;
-
-function no_category_base_refresh_rules() {
-	global $wp_rewrite;
-	$wp_rewrite->flush_rules();
-}
-
-/**
- * Removes category base.
+ * Maek url unclickable in comment content.
  *
  * @return void
  */
-function no_category_base_permastruct() {
-	global $wp_rewrite;
-	$wp_rewrite->extra_permastructs['category']['struct'] = '%category%';
-}
 remove_filter( 'comment_text', 'make_clickable', 9 );
 
 /**
- * Adds our custom category rewrite rules.
+ * Replace avatar url.
  *
- * @param  array $category_rewrite Category rewrite rules.
- *
- * @return array
+ * @return sring $avatar
  */
-function no_category_base_rewrite_rules( $category_rewrite ) {
-	global $wp_rewrite;
-	$category_rewrite = array();
-
-	/* WPML is present: temporary disable terms_clauses filter to get all categories for rewrite */
-	if ( class_exists( 'Sitepress' ) ) {
-		global $sitepress;
-		remove_filter( 'terms_clauses', array( $sitepress, 'terms_clauses' ) );
-		$categories = get_categories( array( 'hide_empty' => false ) );
-		// Fix provided by Albin here https://wordpress.org/support/topic/bug-with-wpml-2/#post-8362218
-		// add_filter( 'terms_clauses', array( $sitepress, 'terms_clauses' ) );
-		add_filter( 'terms_clauses', array( $sitepress, 'terms_clauses' ), 10, 4 );
-	} else {
-		$categories = get_categories( array( 'hide_empty' => false ) );
-	}
-
-	foreach ( $categories as $category ) {
-		$category_nicename = $category->slug;
-
-		if ( $category->parent === $category->cat_ID ) {
-			$category->parent = 0;
-		} elseif ( 0 !== $category->parent ) {
-			$category_nicename = get_category_parents( $category->parent, false, '/', true ) . $category_nicename;
-		}
-
-		$category_rewrite[ '(' . $category_nicename . ')/(?:feed/)?(feed|rdf|rss|rss2|atom)/?$' ]    = 'index.php?category_name=$matches[1]&feed=$matches[2]';
-		$category_rewrite[ "({$category_nicename})/{$wp_rewrite->pagination_base}/?([0-9]{1,})/?$" ] = 'index.php?category_name=$matches[1]&paged=$matches[2]';
-		$category_rewrite[ '(' . $category_nicename . ')/?$' ]                                       = 'index.php?category_name=$matches[1]';
-	}
-
-	// Redirect support from Old Category Base
-	$old_category_base                                 = get_option( 'category_base' ) ? get_option( 'category_base' ) : 'category';
-	$old_category_base                                 = trim( $old_category_base, '/' );
-	$category_rewrite[ $old_category_base . '/(.*)$' ] = 'index.php?category_redirect=$matches[1]';
-
-	return $category_rewrite;
-}
-
-function no_category_base_query_vars( $public_query_vars ) {
-	$public_query_vars[] = 'category_redirect';
-	return $public_query_vars;
-}
-
-/**
- * Handles category redirects.
- *
- * @param $query_vars Current query vars.
- *
- * @return array $query_vars, or void if category_redirect is present.
- */
-function no_category_base_request( $query_vars ) {
-	if ( isset( $query_vars['category_redirect'] ) ) {
-		$catlink = trailingslashit( home_url() ) . user_trailingslashit( $query_vars['category_redirect'], 'category' );
-		status_header( 301 );
-		header( "Location: $catlink" );
-		exit();
-	}
-
-	return $query_vars;
-}
-
-// Replace avatar url
 function lerm_replace_avatar( $avatar ) {
 	$regexp = '/https?.*?\/avatar\//i';
 	if ( lerm_options( 'replace_avatar' ) ) {
@@ -578,7 +447,11 @@ function lerm_replace_avatar( $avatar ) {
 }
 add_filter( 'get_avatar', 'lerm_replace_avatar' );
 
-// cache avatar local
+/**
+ * Cache avatar localhost.
+ *
+ * @return sring $avatar
+ */
 if ( lerm_options( 'avatar_cache' ) ) :
 	function lerm_avatar_cache( $avatar ) {
 		$tmp = strpos( $avatar, 'http' );
@@ -600,7 +473,11 @@ if ( lerm_options( 'avatar_cache' ) ) :
 	add_filter( 'get_avatar', 'lerm_avatar_cache' );
 endif;
 
-// disable emojis
+/**
+ * Disable emojis
+ *
+ * @return array
+ */
 function disable_emojis_tinymce( $plugins ) {
 	if ( is_array( $plugins ) ) {
 		return array_diff( $plugins, array( 'wpemoji' ) );
@@ -634,8 +511,11 @@ remove_action( 'wp_head', 'feed_links_extra', 3 );// comment feed
 remove_action( 'wp_head', 'wp_shortlink_wp_head', 10, 0 );// shot link
 remove_action( 'wp_head', 'rel_canonical' );
 remove_action( 'wp_head', 'wp_resource_hints', 2 );// s.w.org
-
-// Remove WordPress  JS and CSS version info
+/**
+ * Remove WordPress  JS and CSS version info
+ *
+ * @return sring $src
+ */
 function lerm_remove_css_and_js_ver( $src ) {
 	if ( strpos( $src, 'ver=' ) ) {
 		$src = remove_query_arg( 'ver', $src );
@@ -669,8 +549,7 @@ endif;
  * @return void
  */
 remove_action( 'embed_footer', 'print_embed_sharing_dialog' );
-
-// remove_action( 'embed_footer', 'print_embed_sharing_icon' );
+remove_action( 'embed_footer', 'print_embed_sharing_icon' );
 add_action( 'embed_footer', 'embed_custom_footer_style' );
 function embed_custom_footer_style() { ?>
 	<style>
@@ -682,21 +561,22 @@ function embed_custom_footer_style() { ?>
 }
 
 // Disable Pingback
-function no_self_ping( &$links ) {
-	$home = home_url();
-	foreach ( $links as $l => $link ) {
-		if ( 0 === strpos( $link, $home ) ) {
-			unset( $links[ $l ] );
+if ( ! lerm_options( 'disable_pingback' ) ) :
+	function no_self_ping( &$links ) {
+		$home = home_url();
+		foreach ( $links as $l => $link ) {
+			if ( 0 === strpos( $link, $home ) ) {
+				unset( $links[ $l ] );
+			}
 		}
 	}
-}
-add_action( 'pre_ping', 'no_self_ping' );
+	add_action( 'pre_ping', 'no_self_ping' );
+endif;
 
 /**
  * Fully disable wp-json.
  *
  * @since  3.0.0
- * @access public
  * @return void
  */
 if ( lerm_options( 'disable_rest_api' ) ) :
@@ -716,7 +596,8 @@ endif;
 /**
  * Remove the default styles that are packaged with the Recent Comments widget.
  *
- * @since Twenty Ten 1.0
+ * @since lerm 3.0
+ * @return void
  */
 function twentyten_remove_recent_comments_style() {
 	add_filter( 'show_recent_comments_widget_style', '__return_false' );
@@ -737,30 +618,6 @@ function lerm_front_page_template( $template ) {
 }
 add_filter( 'frontpage_template', 'lerm_front_page_template' );
 
-/**
- * Wether to show sidebar in webpage.
- *
- * @param string $template front-page.php.
- *
- * @return $layout
- */
-function lerm_page_layout() {
-	// page or post layout
-	$custom_layout = get_post_meta( get_the_ID(), '_lerm_metabox_options', true );
-	// global layout
-	$global_layout = lerm_options( 'global_layout' );
-	// if is mobile
-	if ( wp_is_mobile() ) {
-		$layout = 'mobile';
-	} elseif ( is_home() ) {
-		$layout = $global_layout;
-	} elseif ( ! empty( $custom_layout['page_layout'] ) ) {
-		$layout = $custom_layout['page_layout'];
-	} else {
-		$layout = $global_layout;
-	}
-	return $layout;
-}
 // code hightlight
 function code_highlight_esc_html( $content ) {
 	$regex = '/(\[code\s+[^\]]*?\])(.*?)(\[\/code\])/sim';
