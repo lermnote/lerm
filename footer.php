@@ -29,7 +29,8 @@
 		<?php endif; ?>
 	<?php endif; ?>
 	<div class="btn-group-vertical position-fixed toolbar" style="bottom: 4rem;right: 1rem">
-		<a id="scroll-up" class="tool-btn btn btn-custom" href="javascript:;" title="飞回顶部"><i class="fa fa-chevron-up"></i></a>
+		<a type="button" class="tool-btn btn btn-custom" target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=825641026&site=qq&menu=yes" data-toggle="tooltip" data-placement="left" title="QQ 在线咨询"><i class="fa fa-qq"></i></a>
+		<a type="button" class="tool-btn btn btn-custom" id="scroll-up" href="javascript:;"  data-toggle="tooltip" data-placement="left" title="飞回顶部"><i class="fa fa-chevron-up"></i></a>
 	</div>
 	<div class="copyright p-3 text-center">
 		<div class="container">
