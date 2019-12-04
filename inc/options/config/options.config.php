@@ -539,9 +539,10 @@ if ( class_exists( 'CSF' ) ) {
 					'id'         => 'keywords',
 					'type'       => 'text',
 					'title'      => __( 'Keywords', 'lerm' ),
+					'label'      =>__( 'Separate with commas', 'lerm' ),
 					'attributes' => array(
 						'style'       => 'width: 100%',
-						'placeholder' => __( 'eg: WordPress, Theme...', 'lerm' ),
+						'placeholder' => __( 'eg: WordPress,Theme...', 'lerm' ),
 					),
 				),
 				array(
@@ -651,13 +652,6 @@ if ( class_exists( 'CSF' ) ) {
 					'label'   => __( 'Switcher on to Ajax load more post, off to show pagenation', 'lerm' ),
 					'default' => false,
 				),
-				// array(
-				// 'id'      => 'load_more',
-				// 'type'    => 'switcher',
-				// 'title'   => __('Ajax load more post', 'lerm'),
-				// 'label'   => __('Switcher on to Ajax load more post, off to show pagenation', 'lerm'),
-				// 'default' => false,
-				// ),
 				array(
 					'id'         => 'cdn_jquery',
 					'type'       => 'text',
@@ -715,14 +709,7 @@ if ( class_exists( 'CSF' ) ) {
 					'title'   => __( 'HTML Slug', 'lerm' ),
 					'label'   => __( 'Shows .html slug for pages (please re-save the permalink options after changed slug)', 'lerm' ),
 					'default' => false,
-				),
-				array(
-					'id'      => 'no_cat_base',
-					'type'    => 'switcher',
-					'title'   => __( 'Remove Category Base', 'lerm' ),
-					'label'   => __( 'Removes "/category" from your category permalinks', 'lerm' ),
-					'default' => false,
-				),
+				)
 			),
 		)
 	);
@@ -756,6 +743,12 @@ if ( class_exists( 'CSF' ) ) {
 					'id'      => 'disable_embeds',
 					'type'    => 'switcher',
 					'title'   => __( 'Disable Embeds', 'lerm' ),
+					'default' => false,
+				),
+				array(
+					'id'      => 'disable_pingback',
+					'type'    => 'switcher',
+					'title'   => __( 'Disable pingback', 'lerm' ),
 					'default' => false,
 				),
 				array(
