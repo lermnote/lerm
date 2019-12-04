@@ -6,10 +6,10 @@
  * @since  1.0
  */
 
-if ( wp_is_mobile() || 'layout-1c' === lerm_page_layout() ) :
-	// Do not display sidebar on mobile or one colunm layout
-	return;
-elseif ( in_array( lerm_page_layout(), array( 'layout-2c-l', 'layout-2c-r' ), true ) ) :
+if ( wp_is_mobile() || 'layout-1c' === lerm_page_layout() ) {
+	return; // Do not display sidebar on mobile or one colunm layout
+}
+if ( in_array( lerm_page_layout(), array( 'layout-2c-l', 'layout-2c-r' ), true ) ) :
 	$class = ( lerm_page_layout() === 'layout-2c-l' ) ? 'order-md-first' : ''; ?>
 	<div class="col-lg-4 <?php echo esc_attr( $class ); ?>">
 		<aside class="sidebar sidebar-affix">
