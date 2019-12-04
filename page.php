@@ -1,6 +1,7 @@
 <?php
 /**
  * Template Name: 页面模板
+ *
  * @authors lerm http://lerm.net
  * @date    2016-10-26
  * @since lerm 2.0
@@ -34,6 +35,3 @@ get_header(); ?>
 </main>
 <?php
 get_footer();
-
-
-add_action( 'admin_print_footer_scripts', 'lerm_add_quicktags' );
