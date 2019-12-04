@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Lerm\n"
-"POT-Creation-Date: 2019-09-13 20:15+0800\n"
-"PO-Revision-Date: 2019-09-17 21:11+0800\n"
+"POT-Creation-Date: 2019-11-24 20:59+0800\n"
+"PO-Revision-Date: 2019-11-24 22:24+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -19,69 +19,77 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: archive.php:44 index.php:46
+#: archive.php:48 index.php:50 search.php:52
 msgid "Load More"
 msgstr "加载更多"
 
-#: comments.php:25
+#: comments.php:26
 msgid "Visitor"
 msgstr "游客"
 
-#: comments.php:26
+#: comments.php:27
 msgid "Welcome Back"
 msgstr "欢迎回来"
 
-#: comments.php:26
+#: comments.php:27
 msgid "Welcome "
 msgstr "欢迎您"
 
-#: comments.php:31
+#: comments.php:34
 msgid "Nickname"
 msgstr "昵称"
 
-#: comments.php:32
+#: comments.php:35
 msgid "E-mail"
 msgstr "E-mail"
 
-#: comments.php:33
+#: comments.php:36
 msgid "Website"
 msgstr "网站"
 
 #. translators: %s: user name
-#: comments.php:41
+#: comments.php:45
 #, php-format
 msgid "Logged in as %s. Edit your profile."
 msgstr ""
 
-#: comments.php:44
+#: comments.php:48
 msgid "Log out"
 msgstr "注销"
 
-#: comments.php:48
+#: comments.php:52
 msgid "Leave a Reply"
 msgstr "发表评论"
 
-#: comments.php:54
+#. translators: 1: number of comments, 2: post title
+#: comments.php:63
+#, php-format
+msgctxt "comments title"
+msgid "One comment on &ldquo;%2$s&rdquo;"
+msgid_plural "%1$s comments on &ldquo;%2$s&rdquo;"
+msgstr[0] " &ldquo;%2$s&rdquo; 有%1$s条评论"
+
+#: comments.php:83
 msgid "Comments are closed."
 msgstr "评论已关闭。"
 
-#: comments.php:76
+#: comments.php:91
 msgid "Previous"
 msgstr "上一页"
 
-#: comments.php:77
+#: comments.php:92
 msgid "Next"
 msgstr "下一页"
 
-#: comments.php:78 functions.php:326
+#: comments.php:93 functions.php:340
 msgid "The"
 msgstr "第"
 
-#: comments.php:79 functions.php:327
+#: comments.php:94 functions.php:341
 msgid " Page"
 msgstr "页"
 
-#: footer.php:44
+#: footer.php:40
 msgid "Theme By Lerm"
 msgstr " %s制作"
 
@@ -109,31 +117,31 @@ msgstr "加载更多"
 msgid "Loading..."
 msgstr "加载中..."
 
-#: functions.php:302
+#: functions.php:316
 msgid "Next Post"
 msgstr "下一篇"
 
-#: functions.php:303
+#: functions.php:317
 msgid "Next post:"
 msgstr "下一篇："
 
-#: functions.php:305
+#: functions.php:319
 msgid "Previous Post"
 msgstr "上一篇"
 
-#: functions.php:306
+#: functions.php:320
 msgid "Previous post:"
 msgstr "上一篇："
 
-#: functions.php:324
+#: functions.php:338
 msgid "Previous page"
 msgstr "上一页"
 
-#: functions.php:325
+#: functions.php:339
 msgid "Next page"
 msgstr "下一页"
 
-#: functions.php:361
+#: functions.php:375
 msgid "Tags"
 msgstr "标签"
 
@@ -178,7 +186,7 @@ msgctxt "daily archives date format"
 msgid "d"
 msgstr ""
 
-#: inc/admin/function-login.php:70
+#: inc/admin/function-login.php:72
 msgid "Incorrect username or password"
 msgstr ""
 
@@ -190,20 +198,24 @@ msgstr ""
 msgid "(no title)"
 msgstr ""
 
-#: inc/admin/template-comment.php:21
-msgid " ago"
-msgstr "之前"
+#: inc/admin/template-comment.php:32
+msgid "says:"
+msgstr "说"
 
-#: inc/admin/template-comment.php:23 inc/widgets.php:114
-msgctxt "comment time format"
-msgid "l, F j, Y, g:i a"
+#: inc/admin/template-comment.php:44
+#, php-format
+msgid "%1$s at %2$s"
 msgstr ""
 
-#: inc/admin/template-comment.php:27
+#: inc/admin/template-comment.php:48
+msgid "ago"
+msgstr "之前"
+
+#: inc/admin/template-comment.php:53
 msgid "Edit"
 msgstr "编辑"
 
-#: inc/admin/template-comment.php:45
+#: inc/admin/template-comment.php:74
 msgid "Your comment is awaiting moderation."
 msgstr "您的评论正在等待审核。"
 
@@ -307,7 +319,7 @@ msgid "Post Options"
 msgstr "文章选项"
 
 #: inc/options/config/metabox.config.php:42
-#: inc/options/config/options.config.php:90
+#: inc/options/config/options.config.php:86
 msgid "Layout"
 msgstr "布局"
 
@@ -329,517 +341,472 @@ msgid ""
 "\"_blank\">Lerm</a>"
 msgstr ""
 
-#: inc/options/config/options.config.php:21
+#: inc/options/config/options.config.php:24
 msgid "Basic Settings"
 msgstr "基础设置"
 
-#: inc/options/config/options.config.php:28
-#: inc/options/config/options.config.php:29
-#: inc/options/config/options.config.php:36
+#: inc/options/config/options.config.php:31
+msgid "Logo large"
+msgstr ""
+
+#: inc/options/config/options.config.php:32
 msgid "Logo Blink"
 msgstr "徽标闪烁"
 
-#: inc/options/config/options.config.php:35
-msgid "Logo Desktop"
-msgstr "桌面LOGO"
+#: inc/options/config/options.config.php:40
+#: inc/options/config/options.config.php:41
+msgid "Logo mobile"
+msgstr ""
 
-#: inc/options/config/options.config.php:44
-#: inc/options/config/options.config.php:45
-msgid "Logo Mobile"
-msgstr "手机端LOGO"
-
-#: inc/options/config/options.config.php:51
+#: inc/options/config/options.config.php:47
 msgid "Website Title"
 msgstr "网站名称"
 
-#: inc/options/config/options.config.php:59
-msgid "Website Description"
-msgstr "网站描述"
+#: inc/options/config/options.config.php:55
+msgid "Website description"
+msgstr ""
 
-#: inc/options/config/options.config.php:67
+#: inc/options/config/options.config.php:63
 msgid "Title Separator"
 msgstr "标题分隔符"
 
-#: inc/options/config/options.config.php:74
+#: inc/options/config/options.config.php:70
 msgid ""
 "Select the Title Separator of your Website. Default \"|\", eg: My Website|"
 "Just another WordPress site"
 msgstr ""
 
-#: inc/options/config/options.config.php:80
+#: inc/options/config/options.config.php:76
 msgid "Site Width"
 msgstr "页面宽度"
 
-#: inc/options/config/options.config.php:103
-#: inc/options/config/options.config.php:104
+#: inc/options/config/options.config.php:99
+#: inc/options/config/options.config.php:100
 msgid "Sidebar Affix"
 msgstr "侧边栏"
 
-#: inc/options/config/options.config.php:109
+#: inc/options/config/options.config.php:105
 msgid "Copyright"
 msgstr ""
 
-#: inc/options/config/options.config.php:110
+#: inc/options/config/options.config.php:106
 msgid "This copyright information will appear in the footer."
 msgstr ""
 
-#: inc/options/config/options.config.php:121
+#: inc/options/config/options.config.php:120
 msgid "Design"
 msgstr "设计"
 
-#: inc/options/config/options.config.php:126
+#: inc/options/config/options.config.php:125
 msgid "Gobal Options"
 msgstr "全局选项"
 
-#: inc/options/config/options.config.php:131
+#: inc/options/config/options.config.php:130
 msgid "Coler Schemes"
 msgstr "颜色结构"
 
-#: inc/options/config/options.config.php:148
+#: inc/options/config/options.config.php:147
 msgid "Link Color"
 msgstr "链接颜色"
 
-#: inc/options/config/options.config.php:192
+#: inc/options/config/options.config.php:191
 msgid "Content Background Color"
 msgstr "内容背景颜色"
 
-#: inc/options/config/options.config.php:214
+#: inc/options/config/options.config.php:213
+msgid "Post content h2"
+msgstr ""
+
+#: inc/options/config/options.config.php:225
+msgid "Widget title wrap"
+msgstr ""
+
+#: inc/options/config/options.config.php:236
 msgid "Header and Footer"
 msgstr "头部和页脚"
 
-#: inc/options/config/options.config.php:219
+#: inc/options/config/options.config.php:241
 msgid "Header style"
 msgstr "头部颜色"
 
-#: inc/options/config/options.config.php:227
-msgid "Menu Coler Schemes"
-msgstr "菜单颜色结构"
-
-#: inc/options/config/options.config.php:230
-msgid "Color"
+#: inc/options/config/options.config.php:250
+msgid "Link color"
 msgstr ""
 
-#: inc/options/config/options.config.php:231
-msgid "Hover Color"
+#: inc/options/config/options.config.php:265
+msgid "Menu coler schemes"
 msgstr ""
 
-#: inc/options/config/options.config.php:232
-msgid "Active Color"
-msgstr ""
-
-#: inc/options/config/options.config.php:233
-msgid "Hover Background Color"
-msgstr ""
-
-#: inc/options/config/options.config.php:301
+#: inc/options/config/options.config.php:320
 msgid "Navbar align"
 msgstr ""
 
-#: inc/options/config/options.config.php:312
-msgid "Footer Style"
+#: inc/options/config/options.config.php:331
+msgid "Navbar search form"
 msgstr ""
 
-#: inc/options/config/options.config.php:314
-msgid "Footer Background"
-msgstr ""
-
-#: inc/options/config/options.config.php:315
-msgid "Footer Font"
-msgstr ""
-
-#: inc/options/config/options.config.php:316
-msgid "Footer Widget Background"
-msgstr ""
-
-#: inc/options/config/options.config.php:317
-msgid "Footer Widget Font"
-msgstr ""
-
-#: inc/options/config/options.config.php:328
-msgid "Buttons"
+#: inc/options/config/options.config.php:333
+msgid "Show navbar search form"
 msgstr ""
 
 #: inc/options/config/options.config.php:334
-msgid "LIke Btton"
+msgid "Do NOT show navbar search form"
 msgstr ""
 
 #: inc/options/config/options.config.php:341
-msgid "Like Button background color"
+msgid "Footer style"
 msgstr ""
 
-#: inc/options/config/options.config.php:349
-#: inc/options/config/options.config.php:357
-#: inc/options/config/options.config.php:365
-msgid "Sticky Label background color"
+#: inc/options/config/options.config.php:351
+msgid "Footer widget style"
 msgstr ""
 
-#: inc/options/config/options.config.php:372
+#: inc/options/config/options.config.php:360
+msgid "Buttons"
+msgstr ""
+
+#: inc/options/config/options.config.php:369
+msgid "Like button"
+msgstr ""
+
+#: inc/options/config/options.config.php:382
+msgid "Custom button"
+msgstr ""
+
+#: inc/options/config/options.config.php:399
+msgid "Custom Button hover"
+msgstr ""
+
+#: inc/options/config/options.config.php:413
 msgid "Custom CSS"
 msgstr ""
 
-#: inc/options/config/options.config.php:397
+#: inc/options/config/options.config.php:441
 msgid "Mailing"
 msgstr ""
 
-#: inc/options/config/options.config.php:403
+#: inc/options/config/options.config.php:447
 msgid "Email Notification"
 msgstr ""
 
-#: inc/options/config/options.config.php:404
+#: inc/options/config/options.config.php:448
 msgid "Enable notification email for comments"
 msgstr ""
 
-#: inc/options/config/options.config.php:414
+#: inc/options/config/options.config.php:458
 msgid "From Mail"
 msgstr ""
 
-#: inc/options/config/options.config.php:419
+#: inc/options/config/options.config.php:463
 msgid "From Email"
 msgstr ""
 
-#: inc/options/config/options.config.php:424
+#: inc/options/config/options.config.php:468
 msgid "From Name"
 msgstr ""
 
-#: inc/options/config/options.config.php:436
+#: inc/options/config/options.config.php:480
 msgid "SMTP Options"
 msgstr ""
 
-#: inc/options/config/options.config.php:441
+#: inc/options/config/options.config.php:485
 msgid "SMTP Host"
 msgstr ""
 
-#: inc/options/config/options.config.php:446
+#: inc/options/config/options.config.php:490
 msgid "SMTP Port"
 msgstr ""
 
-#: inc/options/config/options.config.php:451
+#: inc/options/config/options.config.php:495
 msgid "SSL Encryption"
 msgstr ""
 
-#: inc/options/config/options.config.php:456
+#: inc/options/config/options.config.php:500
 msgid "SMTP Authentication"
 msgstr ""
 
-#: inc/options/config/options.config.php:457
+#: inc/options/config/options.config.php:501
 msgid "If Your Email open the smtp authentication"
 msgstr ""
 
-#: inc/options/config/options.config.php:459
+#: inc/options/config/options.config.php:503
 msgid "Use SMTP authentication"
 msgstr ""
 
-#: inc/options/config/options.config.php:460
+#: inc/options/config/options.config.php:504
 msgid "Do NOT use SMTP authentication"
 msgstr ""
 
-#: inc/options/config/options.config.php:466
+#: inc/options/config/options.config.php:510
 msgid "Username"
 msgstr "用户名"
 
-#: inc/options/config/options.config.php:471
+#: inc/options/config/options.config.php:515
 msgid "Password"
 msgstr "密码"
 
-#: inc/options/config/options.config.php:482
+#: inc/options/config/options.config.php:529
 msgid "SEO Optimize"
 msgstr ""
 
-#: inc/options/config/options.config.php:487
-#: inc/options/config/options.config.php:488
+#: inc/options/config/options.config.php:534
+#: inc/options/config/options.config.php:535
 msgid "Images Lazyload"
 msgstr ""
 
-#: inc/options/config/options.config.php:494
+#: inc/options/config/options.config.php:541
 msgid "Keywords"
 msgstr ""
 
-#: inc/options/config/options.config.php:497
+#: inc/options/config/options.config.php:544
 msgid "eg: WordPress, Theme..."
 msgstr ""
 
-#: inc/options/config/options.config.php:503
-#: inc/options/config/options.config.php:505
-#: inc/options/config/options.config.php:892
+#: inc/options/config/options.config.php:550
+#: inc/options/config/options.config.php:552
+#: inc/options/config/options.config.php:928
 msgid "Description"
 msgstr ""
 
-#: inc/options/config/options.config.php:512
+#: inc/options/config/options.config.php:559
 msgid "Baidu Submit"
 msgstr ""
 
-#: inc/options/config/options.config.php:519
-msgid "Submit Api"
-msgstr ""
-
-#: inc/options/config/options.config.php:526
-#: inc/options/config/options.config.php:532
+#: inc/options/config/options.config.php:566
 msgid "Submit Token"
 msgstr ""
 
-#: inc/options/config/options.config.php:534
-msgid "Week sumbit"
-msgstr ""
-
-#: inc/options/config/options.config.php:535
-msgid "day sumbit"
-msgstr ""
-
-#: inc/options/config/options.config.php:542
+#: inc/options/config/options.config.php:571
 msgid "Baidu Tongji"
 msgstr ""
 
-#: inc/options/config/options.config.php:543
+#: inc/options/config/options.config.php:572
 msgid "baidu tongji code in before <\\/head\\>"
 msgstr ""
 
-#: inc/options/config/options.config.php:557
+#: inc/options/config/options.config.php:589
 msgid "Blog Optimize"
 msgstr ""
 
-#: inc/options/config/options.config.php:562
+#: inc/options/config/options.config.php:594
 msgid "Summary Meta"
 msgstr ""
 
-#: inc/options/config/options.config.php:585
+#: inc/options/config/options.config.php:617
+msgid "Show thumbnail on posts list"
+msgstr ""
+
+#: inc/options/config/options.config.php:618
+msgid "Switcher on to show posts thumbnial"
+msgstr ""
+
+#: inc/options/config/options.config.php:650
 msgid "Ajax load more post"
 msgstr ""
 
-#: inc/options/config/options.config.php:586
+#: inc/options/config/options.config.php:651
 msgid "Switcher on to Ajax load more post, off to show pagenation"
 msgstr ""
 
-#: inc/options/config/options.config.php:612
-#: inc/options/config/options.config.php:613
+#: inc/options/config/options.config.php:664
+#: inc/options/config/options.config.php:665
 msgid "jQuery CDN"
 msgstr ""
 
-#: inc/options/config/options.config.php:621
+#: inc/options/config/options.config.php:673
 msgid "Replace Avatar"
 msgstr ""
 
-#: inc/options/config/options.config.php:629
+#: inc/options/config/options.config.php:681
 msgid "Avatar Cache"
 msgstr ""
 
-#: inc/options/config/options.config.php:635
+#: inc/options/config/options.config.php:687
 msgid "Post Excerpt length on posts list page"
 msgstr ""
 
-#: inc/options/config/options.config.php:648
+#: inc/options/config/options.config.php:703
 msgid "Page Optimize"
 msgstr ""
 
-#: inc/options/config/options.config.php:653
+#: inc/options/config/options.config.php:708
 msgid "Search Filter"
 msgstr ""
 
-#: inc/options/config/options.config.php:654
+#: inc/options/config/options.config.php:709
 msgid "Search results exclude all pages"
 msgstr ""
 
-#: inc/options/config/options.config.php:660
+#: inc/options/config/options.config.php:715
 msgid "HTML Slug"
 msgstr ""
 
-#: inc/options/config/options.config.php:661
+#: inc/options/config/options.config.php:716
 msgid ""
 "Shows .html slug for pages (please re-save the permalink options after "
 "changed slug)"
 msgstr ""
 
-#: inc/options/config/options.config.php:667
-msgid "Categories Trailingslashit"
-msgstr ""
-
-#: inc/options/config/options.config.php:668
-msgid "fix end of category with slash"
-msgstr ""
-
-#: inc/options/config/options.config.php:674
-msgid "Remove Category Base"
-msgstr ""
-
-#: inc/options/config/options.config.php:675
-msgid "Removes \"/category\" from your category permalinks"
-msgstr ""
-
-#: inc/options/config/options.config.php:685
+#: inc/options/config/options.config.php:729
 msgid "Post Optimize"
 msgstr ""
 
-#: inc/options/config/options.config.php:690
+#: inc/options/config/options.config.php:734
 msgid "Post Meta"
 msgstr ""
 
-#: inc/options/config/options.config.php:708
+#: inc/options/config/options.config.php:751
 msgid "Disable Embeds"
 msgstr ""
 
-#: inc/options/config/options.config.php:714
+#: inc/options/config/options.config.php:757
 msgid "Posts Navigation"
 msgstr ""
 
-#: inc/options/config/options.config.php:720
+#: inc/options/config/options.config.php:763
 msgid "Enable Code Cighlight"
 msgstr ""
 
-#: inc/options/config/options.config.php:721
+#: inc/options/config/options.config.php:764
 msgid "If your posts contain some code, then enable it"
 msgstr ""
 
-#: inc/options/config/options.config.php:726
-msgid "Remove Wpautop"
-msgstr ""
-
-#: inc/options/config/options.config.php:731
-msgid "Remove Excerpt Wpautop"
-msgstr ""
-
-#: inc/options/config/options.config.php:732
-msgid "Remove tag p in excerpt"
-msgstr ""
-
-#: inc/options/config/options.config.php:737
-msgid "Remove comments Wpautop"
-msgstr ""
-
-#: inc/options/config/options.config.php:742
+#: inc/options/config/options.config.php:769
 msgid "Author Biography"
 msgstr ""
 
-#: inc/options/config/options.config.php:743
+#: inc/options/config/options.config.php:770
 msgid "Show author biography in sidebar (if have sidebar)"
 msgstr ""
 
-#: inc/options/config/options.config.php:748
+#: inc/options/config/options.config.php:775
 msgid "Related Posts"
 msgstr ""
 
-#: inc/options/config/options.config.php:749
-#: inc/options/config/options.config.php:836
+#: inc/options/config/options.config.php:776
+#: inc/options/config/options.config.php:869
 msgid "Show related posts  in sidebar (if have sidebar)"
 msgstr ""
 
-#: inc/options/config/options.config.php:758
+#: inc/options/config/options.config.php:788
 msgid "Sidebar"
 msgstr ""
 
-#: inc/options/config/options.config.php:763
+#: inc/options/config/options.config.php:793
 msgid "Register Sidebars"
 msgstr ""
 
-#: inc/options/config/options.config.php:768
+#: inc/options/config/options.config.php:798
 msgid "Sidebar Title"
 msgstr ""
 
-#: inc/options/config/options.config.php:775
+#: inc/options/config/options.config.php:805
 msgid "Single sidebar"
 msgstr ""
 
-#: inc/options/config/options.config.php:782
+#: inc/options/config/options.config.php:812
 msgid "Blog sidebar"
 msgstr ""
 
-#: inc/options/config/options.config.php:789
+#: inc/options/config/options.config.php:819
 msgid "Front page sidebar"
 msgstr ""
 
-#: inc/options/config/options.config.php:796
+#: inc/options/config/options.config.php:826
 msgid "Page sidebar"
 msgstr ""
 
-#: inc/options/config/options.config.php:803
+#: inc/options/config/options.config.php:833
 msgid "Footer sidebars count"
 msgstr ""
 
-#: inc/options/config/options.config.php:815
+#: inc/options/config/options.config.php:848
 msgid "Social"
 msgstr ""
 
-#: inc/options/config/options.config.php:820
+#: inc/options/config/options.config.php:853
 msgid "Weixin Qrcode"
 msgstr ""
 
-#: inc/options/config/options.config.php:828
+#: inc/options/config/options.config.php:861
 msgid "Show Qrcode mouse hover"
 msgstr ""
 
-#: inc/options/config/options.config.php:834
+#: inc/options/config/options.config.php:867
 msgid "Donate Qrcode"
 msgstr ""
 
-#: inc/options/config/options.config.php:845
+#: inc/options/config/options.config.php:881
 msgid "Carousel Options"
 msgstr ""
 
-#: inc/options/config/options.config.php:850
+#: inc/options/config/options.config.php:886
 msgid "Enable Slide"
 msgstr ""
 
-#: inc/options/config/options.config.php:851
+#: inc/options/config/options.config.php:887
 msgid "Show Slides On frontpage"
 msgstr ""
 
-#: inc/options/config/options.config.php:856
+#: inc/options/config/options.config.php:892
 msgid "Slide Position"
 msgstr ""
 
-#: inc/options/config/options.config.php:857
+#: inc/options/config/options.config.php:893
 msgid "Select Slides Position On frontpage"
 msgstr ""
 
-#: inc/options/config/options.config.php:859
+#: inc/options/config/options.config.php:895
 msgid "bottom of navbar"
 msgstr ""
 
-#: inc/options/config/options.config.php:860
+#: inc/options/config/options.config.php:896
 msgid "top of content"
 msgstr ""
 
-#: inc/options/config/options.config.php:861
+#: inc/options/config/options.config.php:897
 msgid "bottom of navbar(full_width)"
 msgstr ""
 
-#: inc/options/config/options.config.php:867
+#: inc/options/config/options.config.php:903
 msgid "Slides"
 msgstr ""
 
-#: inc/options/config/options.config.php:868
+#: inc/options/config/options.config.php:904
 msgid "Add Slide"
 msgstr ""
 
-#: inc/options/config/options.config.php:869
+#: inc/options/config/options.config.php:905
 msgid "New Slide"
 msgstr ""
 
-#: inc/options/config/options.config.php:876
+#: inc/options/config/options.config.php:912
 msgid "Slide"
 msgstr ""
 
-#: inc/options/config/options.config.php:882
+#: inc/options/config/options.config.php:918
 msgid "Title"
 msgstr ""
 
-#: inc/options/config/options.config.php:887
+#: inc/options/config/options.config.php:923
 msgid "URL"
 msgstr ""
 
-#: inc/options/config/options.config.php:904
+#: inc/options/config/options.config.php:943
 msgid "AD"
 msgstr ""
 
-#: inc/options/config/options.config.php:909
-#: inc/options/config/options.config.php:925
+#: inc/options/config/options.config.php:948
+#: inc/options/config/options.config.php:967
 msgid "Disable Rest API"
 msgstr ""
 
-#: inc/options/config/options.config.php:910
-#: inc/options/config/options.config.php:926
+#: inc/options/config/options.config.php:949
+#: inc/options/config/options.config.php:968
 msgid "If use GutenBerg editor, must enable rest_api"
 msgstr ""
 
-#: inc/options/config/options.config.php:920
+#: inc/options/config/options.config.php:962
 msgid "Other"
 msgstr ""
 
@@ -1051,13 +1018,13 @@ msgstr ""
 msgid "Please write a valid url!"
 msgstr ""
 
-#: inc/template-tags.php:61
+#: inc/template-tags.php:68
 msgctxt "Used before post format."
 msgid "Format"
 msgstr ""
 
 #. translators: %s: search term
-#: inc/template-tags.php:87
+#: inc/template-tags.php:94
 #, php-format
 msgctxt "lerm"
 msgid "%s"
@@ -1065,21 +1032,39 @@ msgid_plural "%s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/template-tags.php:117
+#: inc/template-tags.php:124
 msgctxt "Used before publish date."
 msgid ""
 msgstr ""
 
-#: inc/template-tags.php:133
+#: inc/template-tags.php:140
 msgctxt "Used between list items, there is a space after the comma."
 msgid ", "
 msgstr ""
 
 #. translators: %s: Name of current post
-#: inc/template-tags.php:148
+#: inc/template-tags.php:155
 #, php-format
 msgid "Edit<span class=\"screen-reader-text\"> \"%s\"</span>"
 msgstr ""
+
+#: inc/template-tags.php:288
+msgid "Author"
+msgstr "作者"
+
+#. translators: %s: Author name
+#: inc/template-tags.php:295
+#, php-format
+msgid "%s"
+msgstr ""
+
+#: inc/template-tags.php:310
+msgid "Categories"
+msgstr "分类"
+
+#: inc/template-tags.php:325
+msgid "Post in"
+msgstr "发表于"
 
 #: inc/widgets.php:6
 msgid "HomePage Sidebar"
@@ -1109,10 +1094,15 @@ msgstr "最近评论"
 #: inc/widgets.php:109
 #, php-format
 msgid "%s ago"
+msgstr "%s 之前"
+
+#: inc/widgets.php:114
+msgctxt "comment time format"
+msgid "l, F j, Y, g:i a"
 msgstr ""
 
-#: inc/widgets.php:139 inc/widgets.php:250 inc/widgets.php:347
-#: inc/widgets.php:602
+#: inc/widgets.php:139 inc/widgets.php:258 inc/widgets.php:361
+#: inc/widgets.php:616
 msgid "Title:"
 msgstr ""
 
@@ -1128,101 +1118,101 @@ msgstr ""
 msgid "Recent Posts"
 msgstr "最新文章"
 
-#: inc/widgets.php:253 inc/widgets.php:350 inc/widgets.php:605
+#: inc/widgets.php:261 inc/widgets.php:364 inc/widgets.php:619
 msgid "Number of posts to show:"
 msgstr ""
 
-#: inc/widgets.php:257 inc/widgets.php:353
+#: inc/widgets.php:265 inc/widgets.php:367
 msgid "Display post date?"
 msgstr ""
 
-#: inc/widgets.php:276
+#: inc/widgets.php:284
 msgid "Display the popular posts on your website."
 msgstr ""
 
-#: inc/widgets.php:278 inc/widgets.php:283
+#: inc/widgets.php:286 inc/widgets.php:291
 msgid "Popular Post"
 msgstr ""
 
-#: inc/widgets.php:379
+#: inc/widgets.php:393
 msgid "Lerm Ephemera"
 msgstr ""
 
-#: inc/widgets.php:382
+#: inc/widgets.php:396
 msgid ""
 "Use this widget to list your recent Aside, Quote, Video, Audio, Image, "
 "Gallery, and Link posts."
 msgstr ""
 
-#: inc/widgets.php:410
+#: inc/widgets.php:424
 msgid "Images"
 msgstr ""
 
-#: inc/widgets.php:411
+#: inc/widgets.php:425
 msgid "More images"
 msgstr ""
 
-#: inc/widgets.php:414
+#: inc/widgets.php:428
 msgid "Videos"
 msgstr ""
 
-#: inc/widgets.php:415
+#: inc/widgets.php:429
 msgid "More videos"
 msgstr ""
 
-#: inc/widgets.php:418
+#: inc/widgets.php:432
 msgid "Audio"
 msgstr ""
 
-#: inc/widgets.php:419
+#: inc/widgets.php:433
 msgid "More audio"
 msgstr ""
 
-#: inc/widgets.php:422
+#: inc/widgets.php:436
 msgid "Quotes"
 msgstr ""
 
-#: inc/widgets.php:423
+#: inc/widgets.php:437
 msgid "More quotes"
 msgstr ""
 
-#: inc/widgets.php:426
+#: inc/widgets.php:440
 msgid "Links"
 msgstr ""
 
-#: inc/widgets.php:427
+#: inc/widgets.php:441
 msgid "More links"
 msgstr ""
 
-#: inc/widgets.php:430
+#: inc/widgets.php:444
 msgid "Statuses"
 msgstr ""
 
-#: inc/widgets.php:431
+#: inc/widgets.php:445
 msgid "More statuses"
 msgstr ""
 
-#: inc/widgets.php:434
+#: inc/widgets.php:448
 msgid "Galleries"
 msgstr ""
 
-#: inc/widgets.php:435
+#: inc/widgets.php:449
 msgid "More galleries"
 msgstr ""
 
-#: inc/widgets.php:439
+#: inc/widgets.php:453
 msgid "Asides"
 msgstr ""
 
-#: inc/widgets.php:440
+#: inc/widgets.php:454
 msgid "More asides"
 msgstr "更多日志"
 
-#: inc/widgets.php:490 inc/widgets.php:535
+#: inc/widgets.php:504 inc/widgets.php:549
 msgid "Continue reading <span class=\"meta-nav\">&rarr;</span>"
 msgstr ""
 
-#: inc/widgets.php:527
+#: inc/widgets.php:541
 #, php-format
 msgid "This gallery contains <a href=\"%1$s\" rel=\"bookmark\">%2$s photo</a>."
 msgid_plural ""
@@ -1230,25 +1220,25 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/widgets.php:558
+#: inc/widgets.php:572
 msgid "Leave a comment"
 msgstr "发表评论"
 
-#: inc/widgets.php:558
+#: inc/widgets.php:572
 msgid "1 Comment"
 msgstr "1条评论"
 
-#: inc/widgets.php:558
+#: inc/widgets.php:572
 msgid "% Comments"
 msgstr "%条评论"
 
 #. translators: used with More archives link
-#: inc/widgets.php:570
+#: inc/widgets.php:584
 #, php-format
 msgid "%s <span class=\"meta-nav\">&rarr;</span>"
 msgstr ""
 
-#: inc/widgets.php:608
+#: inc/widgets.php:622
 msgid "Post format to show:"
 msgstr "文章格式："
 
@@ -1257,28 +1247,34 @@ msgid "Continue reading"
 msgstr "继续阅读"
 
 #: links.php:61 template/content/content-page.php:25
-#: template/content/content-single.php:33 template/content/content.php:61
+#: template/content/content-single.php:35 template/content/content.php:61
 msgid "Pages:"
 msgstr "页："
 
 #: links.php:65 template/content/content-page.php:29
-#: template/content/content-single.php:37 template/content/content.php:65
+#: template/content/content-single.php:39 template/content/content.php:65
 msgid "Page"
 msgstr "页"
 
-#: search.php:16
+#: search.php:25
 msgid "Search results for: "
 msgstr "搜索结果："
 
-#: search.php:18
+#: search.php:27
 msgid "Nothing Found"
 msgstr "额，什么都没找到"
+
+#: search.php:41 template/content/content-none.php:30
+msgid ""
+"Sorry, but nothing matched your search terms. Please try again with some "
+"different keywords."
+msgstr ""
 
 #: searchform.php:14
 msgid "Search…"
 msgstr "搜索…"
 
-#: template/content/content-excerpt.php:15 template/content/content.php:34
+#: template/content/content-excerpt.php:23 template/content/content.php:34
 msgid "Sticky"
 msgstr "推荐"
 
@@ -1287,12 +1283,6 @@ msgstr "推荐"
 #, php-format
 msgid ""
 "Ready to publish your first post? <a href=\"%1$s\">Get started here</a>."
-msgstr ""
-
-#: template/content/content-none.php:30
-msgid ""
-"Sorry, but nothing matched your search terms. Please try again with some "
-"different keywords."
 msgstr ""
 
 #: template/content/content-none.php:37
@@ -1306,11 +1296,24 @@ msgstr ""
 msgid "Continue reading<span class=\"screen-reader-text\">\"%s\"</span>"
 msgstr ""
 
-#: template/content/content-single.php:25
+#. translators: %s is the title
+#: template/content/content-single.php:27
 #, php-format
 msgid "Continue reading <span class=\"screen-reader-text\">\"%s\"</span>"
 msgstr ""
 
 #: template/post/biography.php:27
 msgid " Author"
-msgstr ""
+msgstr "作者"
+
+#~ msgid "Logo Desktop"
+#~ msgstr "桌面LOGO"
+
+#~ msgid "Logo Mobile"
+#~ msgstr "手机端LOGO"
+
+#~ msgid "Website Description"
+#~ msgstr "网站描述"
+
+#~ msgid "Menu Coler Schemes"
+#~ msgstr "菜单颜色结构"
