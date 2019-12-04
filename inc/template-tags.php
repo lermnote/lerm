@@ -9,36 +9,34 @@ if ( ! function_exists( 'lerm_entry_meta' ) ) :
 	 *
 	 * @since Lerm 2.0
 	 */
-	function lerm_entry_meta( $arg ) {
-		$meta = array(
-			'modified_date' => lerm_entry_date( 'modified' ),
-			'publish_date'  => lerm_entry_date( 'publish' ),
-			'category'      => lerm_entry_taxonomies(),
-			'read'          => lerm_post_views_number(),
-			'comment'       => lerm_post_comments_number(),
-			'format'        => lerm_post_format(),
+	function lerm_entry_meta( $location ) {
+
+		$meta = apply_filters(
+			'lerm_post_meta_on_single_top',
+			array(
+				'modified_date' => lerm_entry_date( 'modified' ),
+				'publish_date'  => lerm_entry_date( 'publish' ),
+				'category'      => lerm_entry_taxonomies(),
+				'read'          => lerm_post_views_number(),
+				'comment'       => lerm_post_comments_number(),
+				'format'        => lerm_post_format(),
+			)
 		);
-		$arr  = array();
-		switch ( $arg ) {
-			case 'summary':
-				$arr = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
-				break;
-			case 'entry':
-					$arr = array_keys( (array) lerm_options( 'entry_meta', 'enabled' ) );
-				break;
+
+		if ( 'single' === $location ) {
+			$arg = array_keys( (array) lerm_options( 'entry_meta', 'enabled' ) );
 		}
 
-		foreach ( $arr as $value ) {
-			echo $meta[ $value ];
+		if ( 'summary' === $location ) {
+			$arg = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
 		}
-		if ( in_array( get_post_type(), array( 'post', 'attachment' ), true ) ) {
-			lerm_entry_date( 'publish' );
-			lerm_entry_date( 'modified' );
+
+		foreach ( $arg as $value ) {
+			echo $meta[ $value ];
 		}
 
 		if ( 'post' === get_post_type() ) {
 			if ( is_single() ) {
-				lerm_entry_taxonomies();
 				lerm_edit_link();
 			}
 		}
@@ -206,6 +204,24 @@ function lerm_excerpt_length( $length ) {
 	return $length;
 }
 add_filter( 'excerpt_length', 'lerm_excerpt_length', 999 );
+/**
+ * Wether to show sidebar in webpage.
+ *
+ * @return string $layout
+ */
+function lerm_page_layout() {
+	// page and post layout
+	$metabox = get_post_meta( get_the_ID(), '_lerm_metabox_options', true );
+	// global layout
+	$layout = lerm_options( 'global_layout' );
+	if ( wp_is_mobile() ) {
+		$layout = 'mobile';
+	}
+	if ( is_singular() && isset( $metabox['page_layout'] ) ) {
+		$layout = $metabox['page_layout'];
+	}
+	return $layout;
+}
 
 /**
  * Adds custom classes to the array of body classes.
@@ -215,27 +231,27 @@ add_filter( 'excerpt_length', 'lerm_excerpt_length', 999 );
  */
 function lerm_body_classes( $classes ) {
 	$classes[] = 'body-bg';
+	// Check singular
+	if ( is_singular() ) {
+		$classes[] = 'singular';
+	}
+	// Check for post thumbnail.
+	if ( is_singular() && has_post_thumbnail() ) {
+		$classes[] = 'has-post-thumbnail';
+	}
 	// Add class on front page.
 	if ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) {
 		$classes[] = 'lerm-front-page';
 	}
-
-	// layout body classes
+	// Output layout
 	$classes[] = lerm_page_layout();
-
 	return $classes;
 }
 add_filter( 'body_class', 'lerm_body_classes' );
 
 function lerm_post_class( $classes ) {
-	$classes[] = '';
 	if ( ! is_singular() ) {
-		// $classes[] = 'summary d-flex pt-3 pb-3 ml-3 mr-3';
 		$classes[] = 'summary d-flex p-3 mb-2';
-	}
-
-	if ( is_singular( array( 'post', 'page' ) ) ) {
-		$classes[] = ' ';
 	}
 	return $classes;
 }
