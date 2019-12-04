@@ -68,7 +68,7 @@ global $lerm;
 						array(
 							'theme_location'  => 'primary',
 							'container'       => 'div',
-							'container_class' => $lerm['narbar_align'] . ' primary-nav navbar-collapse',
+							'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav navbar-collapse',
 							'container_id'    => 'navbar',
 							'menu_class'      => 'nav navbar-nav',
 							'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
