@@ -45,7 +45,7 @@ if ( $lerm_term ) {
 				global $wp_query;
 				if ( $wp_query->max_num_pages > 1 && ( lerm_options( 'load_more' ) || wp_is_mobile() ) ) :
 					?>
-					<button class='btn btn-custom btn-block more-posts' data-page="1"><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
+					<button class='btn btn-custom btn-block more-posts' data-archive="<?php echo esc_attr( $_SERVER['REQUEST_URI'] ); ?>" data-page="1"><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
 					<?php
 				else :
 					lerm_pagination();
