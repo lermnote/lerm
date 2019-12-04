@@ -341,13 +341,16 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
 			if (!data.author) {
 				errInfo.style.display = 'block';
+				// return;
 			}
 			if (!validateEmail(data.email)) {
 				errInfo.style.display = 'block';
+				// return;
 			}
 
 			if (!data.comment) {
 				errInfo.style.display = 'block';
+				// return;
 			}
 			let params = new URLSearchParams(new FormData(commentForm));
 			params.append("action", "ajax_comment");
@@ -360,8 +363,8 @@ document.addEventListener("DOMContentLoaded", function (e) {
 				.then(response => response.text())
 				.then(e => {
 					let data = parseToDOM(e);
-					// console.log(data)
-					if ('STRONG' === data[0].nodeName || data[0].length > 1) {
+					console.log(data)
+					if ('STRONG' === data[0].nodeName) {
 						throw data;
 					}
 					let respond = document.getElementById("respond");
@@ -393,7 +396,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 				})
 				.then(() => (commentForm.querySelector("#comment").value = ""))
 				.catch(err => {
-					console.log(err);
+					// console.log(err);
 					errInfo.style.display = 'block';
 					//show orror info
 					err.forEach(e => errInfo.appendChild(e))
