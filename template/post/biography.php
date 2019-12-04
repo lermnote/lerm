@@ -24,7 +24,7 @@
 			<?php echo get_avatar( get_the_author_meta( 'email' ), $author_bio_avatar_size ); ?>
 
 		<h2 class="author-title">
-		<span class="author-heading"><?php echo get_the_author(); ?></span> <label class="badge badge-info"><?php _e( ' Author', 'lerm' ); ?></label>
+		<span class="author-heading"><?php echo get_the_author(); ?></span> <label class="badge badge-info"><?php esc_html_e( 'Author', 'lerm' ); ?></label>
 	</h2>
 		<?php
 		if ( '' !== get_the_author_meta( 'description' ) ) {
