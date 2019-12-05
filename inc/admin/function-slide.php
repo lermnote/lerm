@@ -7,13 +7,12 @@
 * Display lerm_slides on Home page
 */
 function lerm_carousel() {
-	global $lerm;
 	$item_posit = 0;
 	$indicator  = '';
 	$carousel   = '';
-	if ( $lerm['slide_switcher'] && isset( $lerm['lerm_slides'] ) && ! empty( $lerm['lerm_slides'] ) ) {
+	if ( lerm_options( 'slide_switcher' ) && null !== lerm_options( 'lerm_slides' ) ) {
 		$output = '<div id="lermCarouselIndicators" class="carousel slide" data-ride="carousel">';
-		foreach ( $lerm['lerm_slides'] as $key => $item ) {
+		foreach ( lerm_options( 'lerm_slides' ) as $key => $item ) {
 			$title = $item['title'];
 			$desc  = $item['description'];
 			$url   = $item['url'];

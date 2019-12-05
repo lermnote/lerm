@@ -217,7 +217,7 @@ function lerm_page_layout() {
 	if ( wp_is_mobile() ) {
 		$layout = 'mobile';
 	}
-	if ( is_singular() && isset( $metabox['page_layout'] ) ) {
+	if ( is_singular() && ! empty( $metabox['page_layout'] ) ) {
 		$layout = $metabox['page_layout'];
 	}
 	return $layout;

@@ -38,7 +38,7 @@ get_header();
 					?>
 				<?php else : ?>
 					<section class="bg-white p-3">
-						<p><?php esc_attr_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'twentyseventeen' ); ?></p>
+						<p><?php esc_attr_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'lerm' ); ?></p>
 						<?php get_search_form(); ?>
 					</section>
 				<?php endif; ?>

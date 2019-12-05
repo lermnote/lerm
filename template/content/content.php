@@ -67,34 +67,6 @@ global $lerm;
 					)
 				);
 			?>
-<!-- <div class="accordion" id="accordionExample">
-  <div class="card">
-	<div class="card-header" id="headingOne">
-	  <h3 class="mb-0">
-		<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-		 下载地址
-		</button>
-	  </h3>
-	</div>
-
-	<div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
-	  <div class="card-body">
-			<div class="d-flex ">
-			<img src="http://localhost/wordpress/wp-content/themes/lerm/assets/img/random/10.jpg" alt="">
-			<div class="d-flex flex-column">
-					<div class="p-2 flex-fill"><strong>下载地址： </strong> <a href="https://www.hanost.com/">https://www.hanost.com/</a></div>
-					<div class="p-2 flex-fill"><strong>备用下载： </strong> <a href="https://www.hanost.com/">https://www.hanost.com/</a></div>
-					<div class="p-2 flex-fill"><strong>资源大小： </strong> <a href="https://www.hanost.com/">381.6MB</a></div>
-					<div class="p-2 flex-fill"><strong>更新日期： </strong> <a href="https://www.hanost.com/">2019年7月1日</a></div>
-				</div>
-			</div>
-
-	  </div>
-	</div>
-  </div>
-
-  </div>
-</div> -->
 			<?php else : ?>
 				<div class="summary-content d-none d-md-block">
 					<?php
