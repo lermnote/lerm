@@ -21,11 +21,11 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 		$indent = ( $depth > 0 ? str_repeat( "\t", $depth ) : '' ); // code indent
 		// passed classes
 		$classes     = empty( $item->classes ) ? array() : (array) $item->classes;
-		$class_names = esc_attr( implode( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item ) ) );
+		$class_names = implode( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item ) );
 
 		// build html
 		if ( strcasecmp( $depth, 1 ) == 0 ) {
-			// $output .= $indent;
+			$output .= $indent;
 		} else {
 			$output .= $indent . '<li class="nav-item ' . $class_names . '">';
 		}
@@ -35,7 +35,7 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 		$attributes .= ! empty( $item->xfn ) ? ' rel="' . esc_attr( $item->xfn ) . '"' : '';
 		$attributes .= ! empty( $item->url ) ? ' href="' . esc_attr( $item->url ) . '"' : '';
 		$attributes .= ! empty( $item->data_toggle ) ? ' data-toggle="' . esc_attr( $item->data_toggle ) . '"' : '';
-		if ( strcasecmp( $depth, 1 ) === 0 ) {
+		if ( strcasecmp( $depth, 1 ) == 0 ) {
 			$attributes .= 'class="dropdown-item ';
 			$attributes .= ! empty( $item->a_class ) ? esc_attr( $item->a_class ) : '';
 			$attributes .= '"';
@@ -69,7 +69,8 @@ function add_menu_parent_class( $items ) {
 		}
 	}
 	foreach ( $items as $item ) {
-		if ( in_array( $item->ID, $parents, true ) ) {
+
+		if ( in_array( $item->ID, $parents ) ) {
 			$item->classes[]   = 'dropdown';
 			$item->title       = $item->title;
 			$item->a_class     = 'dropdown-toggle';
@@ -94,4 +95,4 @@ function lerm_remove_css_attributes( $var ) {
 }
 // add_filter('nav_menu_css_class', 'lerm_remove_css_attributes', 100, 1);
 // add_filter('nav_menu_item_id', 'lerm_remove_css_attributes', 100, 1);
-add_filter( 'page_css_class', 'lerm_remove_css_attributes', 100, 1 );
+// add_filter( 'page_css_class', 'lerm_remove_css_attributes', 100, 1 );
