@@ -539,7 +539,7 @@ if ( class_exists( 'CSF' ) ) {
 					'id'         => 'keywords',
 					'type'       => 'text',
 					'title'      => __( 'Keywords', 'lerm' ),
-					'label'      =>__( 'Separate with commas', 'lerm' ),
+					'label'      => __( 'Separate with commas', 'lerm' ),
 					'attributes' => array(
 						'style'       => 'width: 100%',
 						'placeholder' => __( 'eg: WordPress,Theme...', 'lerm' ),
@@ -709,7 +709,7 @@ if ( class_exists( 'CSF' ) ) {
 					'title'   => __( 'HTML Slug', 'lerm' ),
 					'label'   => __( 'Shows .html slug for pages (please re-save the permalink options after changed slug)', 'lerm' ),
 					'default' => false,
-				)
+				),
 			),
 		)
 	);
@@ -722,6 +722,10 @@ if ( class_exists( 'CSF' ) ) {
 			'icon'   => 'fa fa-newspaper-o',
 			'title'  => __( 'Post Optimize', 'lerm' ),
 			'fields' => array(
+				array(
+					'type'    => 'heading',
+					'content' => __( 'Single page optimize', 'lerm' ),
+				),
 				array(
 					'id'      => 'entry_meta',
 					'type'    => 'sorter',
@@ -770,10 +774,21 @@ if ( class_exists( 'CSF' ) ) {
 					'label' => __( 'Show author biography in sidebar (if have sidebar)', 'lerm' ),
 				),
 				array(
+					'type'    => 'subheading',
+					'content' => __( 'Related posts', 'lerm' ),
+				),
+				array(
 					'id'    => 'related_posts',
 					'type'  => 'switcher',
 					'title' => __( 'Related Posts', 'lerm' ),
-					'label' => __( 'Show related posts  in sidebar (if have sidebar)', 'lerm' ),
+					'label' => __( 'Show related posts under single bottom', 'lerm' ),
+				),
+				array(
+					'id'         => 'raleted_number',
+					'type'       => 'spinner',
+					'dependency' => array( 'related_posts', '==', 'true' ),
+					'title'      => __( 'Related posts number', 'lerm' ),
+					'default'    => 5,
 				),
 			),
 		)
