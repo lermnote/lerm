@@ -30,7 +30,6 @@ get_header();
 
 			<div id="main" class="site-main ajax-posts">
 				<?php
-				// $n = new Lerm_Carousel();
 				if ( have_posts() ) :
 					?>
 					<?php
