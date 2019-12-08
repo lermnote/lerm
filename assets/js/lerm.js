@@ -335,10 +335,10 @@ document.addEventListener("DOMContentLoaded", function (e) {
 		//sumbit event
 		commentForm.addEventListener("submit", e => {
 			e.preventDefault();
+			commentForm.querySelector('[type="submit"]').setAttribute('disabled', 'disabled')
 			errInfo.style.display = 'none';
 			errInfo.style.height = 'auto';
 			errInfo.innerHTML = ' ';
-
 			if (!data.author) {
 				errInfo.style.display = 'block';
 				// return;
@@ -363,7 +363,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 				.then(response => response.text())
 				.then(e => {
 					let data = parseToDOM(e);
-					console.log(data)
+					// console.log(data)
 					if ('STRONG' === data[0].nodeName) {
 						throw data;
 					}
