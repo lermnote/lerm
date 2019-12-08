@@ -18,7 +18,7 @@ require LERM_DIR . 'inc/admin/function-lazyload.php';
 require LERM_DIR . 'inc/admin/function-load-more.php';
 require LERM_DIR . 'inc/admin/icon-functions.php';
 require LERM_DIR . 'inc/admin/functions.opengraph.php';
-require LERM_DIR . 'inc/admin/functions-related.php';
+require LERM_DIR . 'inc/admin/function-related.php';
 
 // Load the template files
 require LERM_DIR . 'inc/admin/zh_to_py.php';
