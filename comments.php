@@ -14,10 +14,13 @@ if ( post_password_required() ) {
 }?>
 <div id="comments" class="comments">
 	<?php if ( comments_open() || pings_open() ) : ?>
+
 		<?php
-		$comment_author       = isset( $_COOKIE [ 'comment_author_' . COOKIEHASH ] ) ? $_COOKIE [ 'comment_author_' . COOKIEHASH ] : '';
-		$comment_author_email = isset( $_COOKIE [ 'comment_author_email_' . COOKIEHASH ] ) ? $_COOKIE [ 'comment_author_email_' . COOKIEHASH ] : '';
-		$comment_author_url   = isset( $_COOKIE [ 'comment_author_url_' . COOKIEHASH ] ) ? $_COOKIE [ 'comment_author_url_' . COOKIEHASH ] : '';
+		$commenter = wp_get_current_commenter();
+		sanitize_comment_cookies();
+		$comment_author       = $commenter ['comment_author'];
+		$comment_author_email = $commenter ['comment_author_email'];
+		$comment_author_url   = $commenter ['comment_author_url'];
 
 		$args = array(
 			'comment_notes_before' => '<label class="logged-in-as pl-2">' . sprintf(
@@ -28,12 +31,12 @@ if ( post_password_required() ) {
 			) . '</label>',
 
 			'comment_field'        => '<fieldset class="form-group mb-2">
-			<textarea id="comment" class="rq form-control"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea></fieldset>',
+			<textarea id="comment" class="rq form-control mb-2"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea>',
 
 			'fields'               => array(
 				'author' => '<div class="form-group input-form"><label class="sr-only" for="author">Username</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-user"></i></div></div><input type="text" name="author" class="rq form-control" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
 				'email'  => '<label class="sr-only" for="email">Email</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-envelope"></i></div></div><input type="email" name="email" class="rq form-control" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . __( 'E-mail', 'lerm' ) . '" required></div>',
-				'url'    => '<label class="sr-only" for="url">Yrl</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-link"></i></div></div><input type="url" name="url" class="form-control" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></div>',
+				'url'    => '<label class="sr-only" for="url">Url</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-link"></i></div></div><input type="url" name="url" class="form-control" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></fieldset>',
 			),
 
 			'logged_in_as'         => '<p class="logged-in-as">' . sprintf(
@@ -56,6 +59,11 @@ if ( post_password_required() ) {
 	<?php endif; ?>
 
 	<?php if ( $comments ) : ?>
+		<?php
+		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) {
+			lerm_paginate_comments();
+		}
+		?>
 		<h2 class="comment-title card-header border-bottom-0 bg-white mt-2">
 			<?php
 			printf(
@@ -83,21 +91,10 @@ if ( post_password_required() ) {
 			<p class="card-footer bg-white p-3"><?php esc_html_e( 'Comments are closed.', 'lerm' ); ?></p>
 		<?php endif; ?>
 
-		<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : ?>
-		<nav class="comment-nav mt-3">
-			<div class="comment-pager d-flex justify-content-center">
-				<?php
-				paginate_comments_links(
-					array(
-						'prev_text'          => '<span class="screen-reader-text">' . __( 'Previous', 'lerm' ) . '</span>',
-						'next_text'          => '<span class="screen-reader-text">' . __( 'Next', 'lerm' ) . '</span>',
-						'before_page_number' => '<span class="meta-nav screen-reader-text">' . __( 'The', 'lerm' ) . ' </span>',
-						'after_page_number'  => '<span class="meta-nav screen-reader-text">' . __( ' Page', 'lerm' ) . ' </span>',
-					)
-				);
-				?>
-			</div>
-		</nav>
-	<?php endif; // Check for comment navigation. ?>
+		<?php
+		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) {
+			lerm_paginate_comments();
+		}
+		?>
 <?php endif; // have comments. ?>
 </div>

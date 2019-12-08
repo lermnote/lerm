@@ -303,10 +303,10 @@ function lerm_post_navigation() {
 		// Previous/next post navigation.
 		the_post_navigation(
 			array(
-				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'lerm' ) . '</span> ' .
+				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'lerm' ) . '</span><i class="fa fa-chevron-right"></i>' .
 					'<span class="screen-reader-text">' . __( 'Next post:', 'lerm' ) . '</span> <br/>' .
 					'<span class="post-title d-none d-md-block">%title</span>',
-				'prev_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
+				'prev_text' => '<i class="fa fa-chevron-left"></i><span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
 					'<span class="screen-reader-text">' . __( 'Previous post:', 'lerm' ) . '</span> <br/>' .
 					'<span class="post-title d-none d-md-block">%title</span>',
 			)
@@ -330,6 +330,28 @@ function lerm_pagination() {
 			'after_page_number'  => '<span class="meta-nav screen-reader-text">' . __( ' Page', 'lerm' ) . ' </span>',
 		)
 	);
+}
+
+/**
+ * Shows a pagination for comments list.
+ *
+ * @since  3.0.0
+ * @return void
+ */
+function lerm_paginate_comments() {?>
+	<nav class="comment-nav mt-2">
+		<div class="comment-pager d-flex justify-content-between">
+			<div class="comment-prev prev page-numbers">
+				<i class="fa fa-chevron-left"></i>
+				<?php previous_comments_link( esc_html__( 'Older Comments', 'lerm' ) ); ?>
+			</div>
+			<div class="comment-next next page-numbers">
+				<?php next_comments_link( esc_html__( 'Newer Comments', 'lerm' ) ); ?>
+				<i class=" fa fa-chevron-right"></i>
+			</div>
+		</div>
+	</nav>
+	<?php
 }
 
 // Get post views count.
@@ -551,7 +573,8 @@ endif;
 remove_action( 'embed_footer', 'print_embed_sharing_dialog' );
 remove_action( 'embed_footer', 'print_embed_sharing_icon' );
 add_action( 'embed_footer', 'embed_custom_footer_style' );
-function embed_custom_footer_style() { ?>
+function embed_custom_footer_style() {
+	?>
 	<style>
 		/* .wp-embed-share {
 			display: none;
