@@ -82,7 +82,7 @@ if ( ! function_exists( 'lerm_post_comments_number' ) ) :
 
 	function lerm_post_comments_number() {
 		/* translators: %s: search term */
-		return sprintf( '<a class="comments-link meta-item" href="%1$s"><i class="fa fa-comment pr-1 pl-2"></i>%2$s</a>', get_comments_link(), sprintf( _nx( '%s', '%s', 'comments title', 'lerm' ), number_format_i18n( get_comments_number() ) ) );
+		return sprintf( '<a class="comments-link meta-item" href="%1$s"><i class="fa fa-comment pr-1 pl-2"></i>%2$s</a>', get_comments_link(), sprintf( _nx( '%s comment', '%s comments', get_comments_number(), 'comments title', 'lerm' ), number_format_i18n( get_comments_number() ) ) );
 	}
 
 endif;
@@ -97,7 +97,7 @@ if ( ! function_exists( 'lerm_entry_date' ) ) :
 		 */
 	function lerm_entry_date( $arg ) {
 		if ( 'publish' === $arg ) {
-			$time_string = '<time class="entry-published meta-item" datetime="%1$s" title="%2$s"><i class="fa fa-calendar pr-1"></i>%2$s</time>';}
+			$time_string = '<time class="published meta-item" datetime="%1$s" title="%2$s"><i class="fa fa-calendar pr-1"></i>%2$s</time>';}
 		if ( 'modified' === $arg ) {
 			$time_string = '<time class="updated meta-item" datetime="%3$s"><i class="fa fa-calendar pr-1"></i>%4$s</time>';
 		}
@@ -109,13 +109,7 @@ if ( ! function_exists( 'lerm_entry_date' ) ) :
 			get_the_modified_date( DATE_W3C ),
 			get_the_modified_date()
 		);
-
-		return sprintf(
-			'%1$s%2$s',
-			_x( '', 'Used before publish date.', 'lerm' ),
-			// esc_url( get_permalink() ),//time-link
-					$time_string
-		);
+		return $time_string;
 	}
 endif;
 
