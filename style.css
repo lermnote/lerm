@@ -665,7 +665,6 @@ td {
 	display: -ms-flexbox;
 	display: flex;
 	-ms-flex-pack: distribute;
-	justify-content: space-around;
 	text-align: center;
 	border-top: 1px solid #e2e2e2;
 	border-bottom: 1px solid #e2e2e2;
@@ -1116,12 +1115,16 @@ Media
 .post-thumbnail {
 	width: 100px;
 	height: 60px;
+	-webkit-transform: scale(1.0);
 	transform: scale(1.0);
+	-webkit-transition: all .5s ease 0s;
 	transition: all .5s ease 0s
 }
 
 .thumbnail-wrap:hover .post-thumbnail {
+	-webkit-transform: scale(1.1);
 	transform: scale(1.1);
+	-webkit-transition: all .5s ease 0s;
 	transition: all .5s ease 0s
 }
 
