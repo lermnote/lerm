@@ -46,11 +46,10 @@ class Lerm_Carousel {
 		$this->get_carousel();
 	}
 	public function get_carousel() {
-		global $lerm;
 		$index     = 0;
 		$indicator = '';
 		$carousel  = '';
-		foreach ( $lerm['lerm_slides'] as $item ) {
+		foreach ( lerm_options( 'lerm_slides' ) as $item ) {
 			$title = $item['title'];
 			$desc  = $item['description'];
 			$url   = $item['url'];

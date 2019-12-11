@@ -341,16 +341,16 @@ document.addEventListener("DOMContentLoaded", function (e) {
 			errInfo.innerHTML = ' ';
 			if (!data.author) {
 				errInfo.style.display = 'block';
-				// return;
+				// return; //for no login users
 			}
 			if (!validateEmail(data.email)) {
 				errInfo.style.display = 'block';
-				// return;
+				// return; //for no login users
 			}
 
 			if (!data.comment) {
 				errInfo.style.display = 'block';
-				// return;
+				return;
 			}
 			let params = new URLSearchParams(new FormData(commentForm));
 			params.append("action", "ajax_comment");

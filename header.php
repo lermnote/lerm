@@ -7,7 +7,6 @@
  * @package lerm
  * @since  1.0
  */
-global $lerm;
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -19,7 +18,7 @@ global $lerm;
 	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color' ) ); ?>">
 	<?php
 	wp_head();
-		echo wp_kses( $lerm['baidu_tongji'], array( 'script' => array() ) );
+		echo wp_kses( lerm_options( 'baidu_tongji' ), array( 'script' => array() ) );
 	?>
 </head>
 <body <?php body_class(); ?>>
@@ -36,7 +35,7 @@ global $lerm;
 					<!-- .navbar-brand  begin -->
 					<div>
 						<?php
-						$lerm_blogname = $lerm['blogname'] ? $lerm['blogname'] : get_bloginfo( 'name' );
+						$lerm_blogname = lerm_options( 'blogname' ) ? lerm_options( 'blogname' ) : get_bloginfo( 'name' );
 						if ( is_front_page() || is_home() ) :
 							?>
 							<h1 class="site-title"><a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home"><?php echo esc_html( $lerm_blogname ); ?></a></h1>
@@ -45,7 +44,7 @@ global $lerm;
 							<?php
 						endif;
 
-						$description = $lerm['blogdesc'] ? $lerm['blogdesc'] : get_bloginfo( 'description' );
+						$description = lerm_options( 'blogdesc' ) ? lerm_options( 'blogdesc' ) : get_bloginfo( 'description' );
 						if ( ! wp_is_mobile() && $description || is_customize_preview() ) :
 							?>
 							<span class="site-description small d-none d-md-block text-muted"><?php echo esc_html( $description ); ?></span>

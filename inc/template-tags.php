@@ -123,7 +123,7 @@ if ( ! function_exists( 'lerm_entry_taxonomies' ) ) :
 		 */
 	function lerm_entry_taxonomies() {
 		$cat_list = get_the_category_list( _x( ', ', 'Used between list items, there is a space after the comma.', 'lerm' ) );
-		if ( $cat_list && lerm_categorized_blog() ) {
+		if ( $cat_list && has_category() ) {
 			return sprintf(
 				'<span class="category-link meta-item"><i class="fa fa-th pr-1"></i>%s</span>',
 				$cat_list
@@ -152,41 +152,41 @@ endif;
  *
  * @since Lerm 2.0
  */
-function lerm_categorized_blog() {
-	if ( false === ( $all_the_cool_cats = get_transient( 'lerm_categories' ) ) ) {
-		// Create an array of all the categories that are attached to posts.
-		$all_the_cool_cats = get_categories(
-			array(
-				'fields' => 'ids',
-				// We only need to know if there is more than one category.
-				'number' => 2,
-			)
-		);
+// function lerm_categorized_blog() {
+// 	if ( false === ( $all_the_cool_cats = get_transient( 'lerm_categories' ) ) ) {
+// 		// Create an array of all the categories that are attached to posts.
+// 		$all_the_cool_cats = get_categories(
+// 			array(
+// 				'fields' => 'ids',
+// 				// We only need to know if there is more than one category.
+// 				'number' => 2,
+// 			)
+// 		);
 
-		// Count the number of categories that are attached to the posts.
-		$all_the_cool_cats = count( $all_the_cool_cats );
+// 		// Count the number of categories that are attached to the posts.
+// 		$all_the_cool_cats = count( $all_the_cool_cats );
 
-		set_transient( 'lerm_categories', $all_the_cool_cats );
-	}
+// 		set_transient( 'lerm_categories', $all_the_cool_cats );
+// 	}
 
-	if ( $all_the_cool_cats > 1 ) {
-		// This blog has more than 1 category so lerm_categorized_blog should return true.
-		return true;
-	} else {
-		// This blog has only 1 category so lerm_categorized_blog should return false.
-		return false;
-	}
-}
+// 	if ( $all_the_cool_cats > 1 ) {
+// 		// This blog has more than 1 category so lerm_categorized_blog should return true.
+// 		return true;
+// 	} else {
+// 		// This blog has only 1 category so lerm_categorized_blog should return false.
+// 		return false;
+// 	}
+// }
 
-function lerm_category_transient_flusher() {
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
-	}
-	// Like, beat it. Dig?
-	delete_transient( 'lerm_categories' );
-}
-add_action( 'edit_category', 'lerm_category_transient_flusher' );
-add_action( 'save_post', 'lerm_category_transient_flusher' );
+// function lerm_category_transient_flusher() {
+// 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+// 		return;
+// 	}
+// 	// Like, beat it. Dig?
+// 	delete_transient( 'lerm_categories' );
+// }
+// add_action( 'edit_category', 'lerm_category_transient_flusher' );
+// add_action( 'save_post', 'lerm_category_transient_flusher' );
 
 /**
  * Displays the optional excerpt.

@@ -5,7 +5,6 @@
  * @package Lerm
  * @since Lerm 2.0
  */
-global $lerm;
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?> >
 	<?php
@@ -32,7 +31,6 @@ global $lerm;
 							lerm_entry_meta( 'summary' );
 							echo '</small>';
 						?>
-						<?php //excerpt_more(); ?>
 				</footer>
 		</div>
 </article>

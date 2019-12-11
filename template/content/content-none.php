@@ -5,7 +5,6 @@
  * @package Lerm
  * @since Lerm 2.0
  */
-global $lerm;
 ?>
 <section>
 <?php

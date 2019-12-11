@@ -5,7 +5,6 @@
  * @package Lerm
  * @since Lerm 2.0
  */
-global $lerm;
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?> >
 	<?php

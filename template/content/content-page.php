@@ -14,6 +14,7 @@
 		<?php
 			the_content(
 				sprintf(
+					/* translators: %s = post title */
 					__( 'Continue reading<span class="screen-reader-text">"%s"</span>', 'lerm' ),
 					get_the_title()
 				)

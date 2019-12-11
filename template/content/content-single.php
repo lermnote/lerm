@@ -5,7 +5,6 @@
  * @package Lerm
  * @since Lerm 2.0
  */
-global $lerm;
 $like_class = isset( $_COOKIE[ 'post_like_' . $post->ID ] ) ? 'done' : '';
 $like_count = get_post_meta( $post->ID, 'lerm_post_like', true ) ? get_post_meta( $post->ID, 'lerm_post_like', true ) : 0;
 ?>

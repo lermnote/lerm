@@ -1,5 +1,5 @@
 <?php
-if ( is_admin() || in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) ) || ! $lerm['lazyload'] ) {
+if ( is_admin() || in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) ) || ! lerm_options( 'lazyload' ) ) {
 	return;
 }
 

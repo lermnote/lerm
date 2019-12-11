@@ -3,21 +3,20 @@
  * WordPress STMP mail functions.
  *
  * @package    http://www.hanost.com/
- * @author     Lerm  
+ * @author     Lerm
  */
-if ( $lerm['email_notice'] ) :
+if ( lerm_options( 'email_notice' ) ) :
 	function lerm_mail_smtp( $phpmailer ) {
-		global $lerm;
-		$phpmailer->From     = $lerm['mail_options']['from_email'];
-		$phpmailer->FromName = $lerm['mail_options']['from_name'];
+		$phpmailer->From     = lerm_options( 'mail_options', 'from_email' );
+		$phpmailer->FromName = lerm_options( 'mail_options', 'from_name' );
 
-		$phpmailer->Host       = $lerm['smtp_options']['smtp_host'];
-		$phpmailer->Port       = $lerm['smtp_options']['smtp_port'];
-		$phpmailer->SMTPSecure = $lerm['smtp_options']['ssl_switcher'] ? 'ssl' : '';
+		$phpmailer->Host       = lerm_options( 'smtp_options', 'smtp_host' );
+		$phpmailer->Port       = lerm_options( 'smtp_options', 'smtp_port' );
+		$phpmailer->SMTPSecure = lerm_options( 'smtp_options', 'ssl_switcher' ) ? 'ssl' : '';
 
-		$phpmailer->SMTPAuth = $lerm['smtp_options']['smtp_auth'];
-		$phpmailer->Username = $lerm['smtp_options']['username'];
-		$phpmailer->Password = $lerm['smtp_options']['pswd'];
+		$phpmailer->SMTPAuth = lerm_options( 'smtp_options', 'smtp_auth' );
+		$phpmailer->Username = lerm_options( 'smtp_options', 'username' );
+		$phpmailer->Password = lerm_options( 'smtp_options', 'pswd' );
 		$phpmailer->IsSMTP();
 	}
 	add_action( 'phpmailer_init', 'lerm_mail_smtp' );
