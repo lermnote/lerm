@@ -753,6 +753,145 @@ a[rel="weixin"]:hover::after {
 }
 
 /*share*/
+
+.social-share a {
+	position: relative;
+	text-decoration: none;
+	margin: 4px;
+	display: inline-block;
+	outline: none
+}
+
+.social-share .social-share-icon {
+	position: relative;
+	display: inline-block;
+	color: #666;
+	text-align: center;
+	vertical-align: middle;
+	transition: background 0.6s ease-out 0s
+}
+
+.social-share .social-share-icon:hover {
+	background: #666;
+	color: #fff
+}
+
+.social-share .icon-weibo:hover {
+	background: #ff763b
+}
+
+.social-share .icon-qq:hover {
+	background: #56b6e7
+}
+
+.social-share .icon-qzone:hover {
+	background: #FDBE3D
+}
+
+.social-share .icon-douban:hover {
+	background: #33b045
+}
+
+.social-share .icon-linkedin:hover {
+	background: #0077B5
+}
+
+.social-share .icon-facebook:hover {
+	background: #44619D
+}
+
+.social-share .icon-google:hover {
+	background: #db4437
+}
+
+.social-share .icon-twitter:hover {
+	background: #55acee
+}
+
+.social-share .icon-diandian:hover {
+	background: #307DCA
+}
+
+.social-share .icon-wechat {
+	position: relative;
+}
+
+.social-share .icon-wechat:hover {
+	background: #7bc549
+}
+
+.social-share .icon-wechat .wechat-qrcode {
+	display: none;
+	border: 1px solid #eee;
+	position: absolute;
+	z-index: 9;
+	top: -205px;
+	left: -84px;
+	width: 200px;
+	height: 192px;
+	color: #666;
+	font-size: 12px;
+	text-align: center;
+	background-color: #fff;
+	box-shadow: 0 2px 10px #aaa;
+	transition: all 200ms;
+	-webkit-tansition: all 350ms;
+	-moz-transition: all 350ms
+}
+
+.social-share .icon-wechat .wechat-qrcode.bottom {
+	top: 40px;
+	left: -84px
+}
+
+.social-share .icon-wechat .wechat-qrcode.bottom:after {
+	display: none
+}
+
+.social-share .icon-wechat .wechat-qrcode h4 {
+	font-weight: normal;
+	height: 26px;
+	line-height: 26px;
+	font-size: 12px;
+	background-color: #f3f3f3;
+	margin: 0;
+	padding: 0;
+	color: #777
+}
+
+.social-share .icon-wechat .wechat-qrcode .qrcode {
+	width: 105px;
+	margin: 10px auto
+}
+
+.social-share .icon-wechat .wechat-qrcode .qrcode table {
+	margin: 0 !important
+}
+
+.social-share .icon-wechat .wechat-qrcode .help p {
+	font-weight: normal;
+	line-height: 16px;
+	padding: 0;
+	margin: 0
+}
+
+.social-share .icon-wechat .wechat-qrcode:after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	margin-left: -6px;
+	bottom: -13px;
+	width: 0;
+	height: 0;
+	border-width: 8px 6px 6px 6px;
+	border-style: solid;
+	border-color: #fff transparent transparent transparent
+}
+
+.social-share .icon-wechat:hover .wechat-qrcode {
+	display: block
+}
+
 .line {
 	content: '';
 	display: block;
@@ -765,66 +904,6 @@ a[rel="weixin"]:hover::after {
 	padding: .5rem;
 	top: -11px;
 	background: #fff;
-}
-
-.share,
-.donate {
-	position: relative;
-}
-
-.donate-qrcode {
-	position: absolute;
-	bottom: 3rem;
-	left: -2rem;
-	opacity: 0;
-	-webkit-transform: scale(0);
-	transform: scale(0);
-}
-
-.banner {
-	position: absolute;
-	top: -2rem;
-	left: -2rem;
-	opacity: 0;
-	-webkit-transform: scale(0);
-	transform: scale(0);
-}
-
-.donate:hover .donate-qrcode,
-.share:hover .banner {
-	opacity: 1;
-	-webkit-transform: scale(1);
-	transform: scale(1);
-	-webkit-transition: all .4s ease-in-out;
-	transition: all .4s ease-in-out;
-}
-
-/* 微信分享弹层样式 */
-.towdimcodelayer {
-	position: absolute;
-	z-index: 99;
-	bottom: 2rem;
-	left: -4rem;
-	padding: 0 1rem;
-	opacity: 0;
-	background: #fff;
-	-webkit-transform: scale(0);
-	transform: scale(0);
-	-webkit-transform-origin: center;
-	transform-origin: center;
-	-webkit-transition: all .4s ease-in-out;
-	transition: all .4s ease-in-out;
-}
-
-.towdimcodelayer .codettl {
-	font-size: .75rem;
-}
-
-.js-show-up {
-	opacity: 1;
-	-webkit-transform: scale(1);
-	transform: scale(1);
-	border: 1px solid #818a91;
 }
 
 /*--------------------------------------------------------------
