@@ -104,7 +104,7 @@ require_once LERM_DIR . 'inc/options/codestar-framework.php';
  */
 function lerm_options( $id, $arg = null ) {
 	$lerm = get_option( 'lerm_theme_options' );
-	if ( isset( $lerm[ $id ] ) ) {
+	if ( ! empty( $lerm[ $id ] ) ) {
 		if ( $arg ) {
 			$option = $lerm[ $id ][ $arg ];
 		} else {
@@ -143,6 +143,7 @@ function lerm_enqueue_scripts() {
 	wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.min.js', array(), '4.3.1', true );
 	wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
 	wp_register_script( 'lightbox', LERM_URI . 'assets/js/ekko-lightbox.min.js', array(), '2.0.0', true );
+	wp_register_script( 'share', LERM_URI . 'assets/js/social-share.min.js', array(), LERM_VERSION, true );
 	wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 	wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
 	wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.min.js', array(), LERM_VERSION, true );
@@ -159,6 +160,7 @@ function lerm_enqueue_scripts() {
 
 	if ( is_singular( 'post' ) ) {
 		wp_enqueue_script( 'qrcode' );
+		wp_enqueue_script( 'share' );
 
 		if ( lerm_options( 'enable_code_highlight' ) ) {
 			wp_enqueue_script( 'highlight' );

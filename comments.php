@@ -36,7 +36,7 @@ if ( post_password_required() ) {
 			'fields'               => array(
 				'author' => '<div class="form-group input-form"><label class="sr-only" for="author">Username</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-user"></i></div></div><input type="text" name="author" class="rq form-control" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
 				'email'  => '<label class="sr-only" for="email">Email</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-envelope"></i></div></div><input type="email" name="email" class="rq form-control" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . __( 'E-mail', 'lerm' ) . '" required></div>',
-				'url'    => '<label class="sr-only" for="url">Url</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-link"></i></div></div><input type="url" name="url" class="form-control" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></fieldset>',
+				'url'    => '<label class="sr-only" for="url">Url</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-link"></i></div></div><input type="url" name="url" class="form-control" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></div></fieldset>',
 			),
 
 			'logged_in_as'         => '<p class="logged-in-as">' . sprintf(
@@ -98,3 +98,33 @@ if ( post_password_required() ) {
 		?>
 <?php endif; // have comments. ?>
 </div>
+
+<textarea id="comment" class="rq form-control mb-2"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea>
+<div class="form-group input-form">
+	<label class="sr-only" for="author">Username</label>
+	<div class="input-group mb-2">
+		<div class="input-group-prepend">
+			<div class="input-group-text">
+				<i class="fa fa-user"></i>
+			</div>
+		</div>
+		<input type="text" name="author" class="rq form-control" id="author" value="" placeholder="昵称" required>
+	</div>
+	<label class="sr-only" for="email">Email</label>
+	<div class="input-group mb-2">
+		<div class="input-group-prepend">
+			<div class="input-group-text">
+				<i class="fa fa-envelope"></i>
+			</div>
+		</div>
+		<input type="email" name="email" class="rq form-control" id="email" value="" placeholder="E-mail" required>
+	</div>
+	<label class="sr-only" for="url">Url</label>
+	<div class="input-group mb-2">
+		<div class="input-group-prepend">
+			<div class="input-group-text">
+				<i class="fa fa-link"></i>
+			</div>
+		</div>
+		<input type="url" name="url" class="form-control" id="url" value="" placeholder="网站">
+	</div>
