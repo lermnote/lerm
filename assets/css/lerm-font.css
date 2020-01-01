@@ -24,6 +24,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.fa-douban:before {
+  content: "\e901";
+}
+
+.fa-qzone:before {
+  content: "\e900";
+}
+
 .fa-search:before {
   content: "\f002";
 }
@@ -208,10 +216,6 @@
   content: "\f110";
 }
 
-.fa-code:before {
-  content: "\f121";
-}
-
 .fa-shield:before {
   content: "\f132";
 }
@@ -330,4 +334,16 @@
 
 .fa-vcard:before {
   content: "\f2c2";
+}
+
+.fa-code:before {
+  content: "\ea80";
+}
+
+.fa-linkedin:before {
+  content: "\eaca";
+}
+
+.fa-google-plus:before {
+  content: "\ea8b";
 }
