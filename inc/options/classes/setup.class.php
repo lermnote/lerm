@@ -309,7 +309,7 @@ if ( ! class_exists( 'CSF' ) ) {
 			wp_enqueue_script( 'wp-color-picker' );
 
 			// cdn styles
-			wp_enqueue_style( 'csf-fa', LERM_URI . '/assets/css/font-awesome.min.css', array(), '4.7.0', 'all' );
+			wp_enqueue_style( 'csf-fa', LERM_URI . 'assets/css/lerm-font.min.css', array(), '1.0.0', 'all' );
 
 			// framework core styles
 			wp_enqueue_style( 'csf', self::include_plugin_url( 'assets/css/csf' . $min . '.css' ), array(), '1.0.0', 'all' );

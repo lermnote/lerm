@@ -595,14 +595,15 @@ if ( class_exists( 'CSF' ) ) {
 					'title'   => __( 'Summary Meta', 'lerm' ),
 					'default' => array(
 						'enabled'  => array(
-							'category' => 'Category',
-							'read'     => 'Read',
+							'categories' => 'Category',
+							'read'       => 'Read',
 						),
 						'disabled' => array(
+							'author'        => 'Author',
 							'comment'       => 'Comment',
 							'publish_date'  => 'Publish Date',
 							'format'        => 'Format',
-							'modified_date' => 'Modified Date',
+							// 'modified_date' => 'Modified Date',
 						),
 					),
 				),
@@ -727,19 +728,20 @@ if ( class_exists( 'CSF' ) ) {
 					'content' => __( 'Single page optimize', 'lerm' ),
 				),
 				array(
-					'id'      => 'entry_meta',
+					'id'      => 'single_top',
 					'type'    => 'sorter',
 					'title'   => __( 'Post Meta', 'lerm' ),
 					'default' => array(
 						'enabled'  => array(
 							'publish_date' => 'Publish Date',
-							'category'     => 'Category',
+							'categories'   => 'Category',
 							'read'         => 'Read',
 							'comment'      => 'Comment',
 						),
 						'disabled' => array(
 							'format'        => 'Format',
-							'modified_date' => 'Modified Date',
+							'author'        => 'Author',
+							// 'modified_date' => 'Modified Date',
 						),
 					),
 				),
@@ -883,6 +885,23 @@ if ( class_exists( 'CSF' ) ) {
 					'url'   => false,
 					'label' => __( 'Show related posts  in sidebar (if have sidebar)', 'lerm' ),
 				),
+				array(
+					'id'      => 'social_share',
+					'type'    => 'checkbox',
+					'title'   => 'Social share icons',
+					'inline'  => true,
+					'options' => array(
+						'weibo'       => '<i class="fa fa-weibo"></i>',
+						'wechat'      => '<i class="fa fa-wechat"></i>',
+						'qq'          => '<i class="fa fa-qq"></i>',
+						'qzone'       => '<i class="fa fa-qzone"></i>',
+						'douban'      => '<i class="fa fa-douban"></i>',
+						'linkedin'    => '<i class="fa fa-linkedin"></i>',
+						'facebook'    => '<i class="fa fa-facebook"></i>',
+						'twitter'     => '<i class="fa fa-twitter"></i>',
+						'google_plus' => '<i class="fa fa-google-plus"></i>',
+					),
+				),
 			),
 		)
 	);
@@ -954,7 +973,7 @@ if ( class_exists( 'CSF' ) ) {
 	CSF::createSection(
 		$prefix,
 		array(
-			'icon'   => 'fa fa-star',
+			'icon'   => 'fa fa-ad',
 			'title'  => __( 'AD', 'lerm' ),
 			'fields' => array(
 				array(

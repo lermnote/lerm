@@ -6,6 +6,7 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 
 	// add classes to ul sub-menus
 	public function start_lvl( &$output, $depth = 0, $args = array() ) {
+		
 		// depth dependent classes
 		$indent = ( $depth > 0 ? str_repeat( "\t", $depth ) : '' );
 		// code indent
@@ -14,6 +15,7 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 		$output .= "\n" . $indent . '<div class="dropdown-menu m-0 border-0">' . "\n";
 	}
 	public function end_lvl( &$output, $depth = 0, $args = array() ) {
+		$output .='</div>';
 	}
 	// add main/sub classes to li's and links
 	public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
@@ -24,7 +26,7 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 		$class_names = implode( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item ) );
 
 		// build html
-		if ( strcasecmp( $depth, 1 ) == 0 ) {
+		if ( strcasecmp( $depth, 1 ) === 0 ) {
 			$output .= $indent;
 		} else {
 			$output .= $indent . '<li class="nav-item ' . $class_names . '">';
@@ -36,7 +38,7 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 		$attributes .= ! empty( $item->url ) ? ' href="' . esc_attr( $item->url ) . '"' : '';
 		$attributes .= ! empty( $item->data_toggle ) ? ' data-toggle="' . esc_attr( $item->data_toggle ) . '"' : '';
 		if ( strcasecmp( $depth, 1 ) == 0 ) {
-			$attributes .= 'class="dropdown-item ';
+			$attributes .= ' class="dropdown-item ';
 			$attributes .= ! empty( $item->a_class ) ? esc_attr( $item->a_class ) : '';
 			$attributes .= '"';
 		} else {
@@ -56,7 +58,10 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 		// build html
 		$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
 	}
-	public function end_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+	public function end_el( &$output, $item, $depth = 0, $args = array() ) {
+		if ( 0 === $depth ) {
+            $output .= "</li>\n";
+        }
 	}
 }
 

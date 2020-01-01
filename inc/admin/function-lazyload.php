@@ -48,7 +48,7 @@ function lerm_lazyload_match( $matches ) {
 		}
 	} else {
 		$regexp  = "/<img([^<>]*)src=['\"]([^<>'\"]*)\.(bmp|gif|jpeg|jpg|png)([^<>'\"]*)['\"]([^<>]*)>/i";
-		$replace = '<img$1src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="data-src="$2.$3$4"$5>';
+		$replace = '<img$1src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-src="$2.$3$4"$5>';
 		$lazyimg = preg_replace( $regexp, $replace, $lazyimg );
 	}
 	return $lazyimg;
