@@ -10,38 +10,33 @@
  */
 
 get_header();
+$row_class    = ( 'layout-1c-narrow' === lerm_page_layout() ) ? 'justify-content-md-center' : '';
+$colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_page_layout() ) ? 'col-md-12' : 'col-lg-8';
 ?>
-<main role="main" class="container">
+<main role="main" class="container mt-md-3"><!--.container-->
 
-	<?php $class = ( 'layout-1c-narrow' === lerm_page_layout() ) ? 'justify-content-md-center' : ''; ?>
-	<div class="row <?php echo esc_attr( $class ); ?> ">
+	<div class="row <?php echo esc_attr( $row_class ); ?> "><!--.row-->
 
-		<?php if ( ( is_home() && ! is_paged() ) && ( lerm_options( 'slide_position' ) === 'bot_of_nav' || wp_is_mobile() ) ) : ?>
-			<?php lerm_carousel(); ?>
-		<?php endif; ?>
-
-		<?php $class = ( wp_is_mobile() || 'layout-1c' === lerm_page_layout() ) ? 'col-md-12' : 'col-lg-8'; ?>
-		<div class="<?php echo esc_attr( $class ); ?>  px-0" >
-			<?php if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'top_of_con' && ! wp_is_mobile() ) : ?>
+		<div class="<?php echo esc_attr( $colunm_class ); ?>  px-0" ><!--.col-md-12 .col-lg-8-->
+			<?php if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'above_entry_list' ) : ?>
 				<div class="mb-2">
-					<?php lerm_carousel(); ?>
+					<?php lerm_carousel( array() ); ?>
 				</div>
 			<?php endif; ?>
 
 			<div id="main" class="site-main ajax-posts">
+
 				<?php
 				if ( have_posts() ) :
-					?>
-					<?php
 					while ( have_posts() ) :
 						the_post();
 						get_template_part( 'template/content/content', 'excerpt' );
 					endwhile;
-					?>
-				<?php endif; ?>
+				endif;
+				?>
 
-			</div>
-			<div class="mt-3">
+			</div><!--.col-md-12 .col-lg-8-->
+			<div class="px-3 px-md-0">
 				<?php
 				global $wp_query;
 				if ( $wp_query->max_num_pages > 1 && ( lerm_options( 'load_more' ) || wp_is_mobile() ) ) :
@@ -55,7 +50,7 @@ get_header();
 			</div>
 		</div>
 		<?php get_sidebar(); ?>
-	</div>
-</main>
+	</div><!--.row-->
+</main><!--.container-->
 <?php
 get_footer();

@@ -37,10 +37,11 @@
  *     02. 20. Field: color_group
  *     02. 21. Field: palette
  * 03. Taxonomy
- * 04. Modal
- * 05. Customizer
- * 06. Responsive
- * 07. Others
+ * 04. Profile
+ * 05. Modal
+ * 06. Customizer
+ * 07. Responsive
+ * 08. Others
  *
  * ---------------------------------------------------------
  *
@@ -316,6 +317,9 @@
   margin-left: 0;
   margin-right: 7px;
 }
+.csf-field-media .hidden + .button {
+  margin-right: 0;
+}
 
 /**
  * 02. 13. Field: notice
@@ -433,7 +437,32 @@
 }
 
 /**
- * 04. Modal
+ * 04. Profile
+ */
+.csf-profile > h2 > .fa {
+  padding-right: 0;
+  padding-left: 7px;
+}
+.csf-profile > .csf-field > .csf-fieldset {
+  margin-left: 0;
+  margin-right: 220px;
+}
+.csf-profile > .csf-field > .csf-help {
+  left: 0;
+  right: auto;
+}
+
+.csf-taxonomy-edit-fields .csf-fieldset {
+  margin-left: 0;
+  margin-right: 225px;
+}
+.csf-taxonomy-edit-fields .csf-field > .csf-fieldset > .csf-help {
+  right: auto;
+  left: -5px;
+}
+
+/**
+ * 05. Modal
  */
 .csf-modal-content .csf-field {
   padding: 15px 15px 15px 30px;
@@ -449,14 +478,14 @@
 }
 
 /**
- * 05. Customizer
+ * 06. Customizer
  */
 .control-section .csf-field .csf-fieldset {
   margin-right: 0;
 }
 
 /**
- * 06. Responsive
+ * 07. Responsive
  */
 @media only screen and (max-width: 1200px) {
   .csf-metabox .csf-field .csf-fieldset {
@@ -470,7 +499,7 @@
   }
 }
 /**
- * 07. Others
+ * 08. Others
  */
 .csf-field .csf--transparent-slider {
   margin-left: 0;

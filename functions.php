@@ -2,22 +2,25 @@
 /**
  * Functions and definitions
  *
- * @author https://www.hanost.com
- * @date   2016-08-28
- * @since  lerm 2.0
+ * @author Lerm https://www.hanost.com
+ * @date   2016-08-28 21:57:52
+ * @since  lerm 1.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
 define( 'DOMAIN', 'lerm' );
+
 // Theme vision
 define( 'LERM_VERSION', wp_get_theme()->get( 'Version' ) );
+
 // Define blog name
 define( 'BLOGNAME', get_bloginfo( 'name' ) );
+
 // Directory URI to the theme folder.
 define( 'LERM_URI', trailingslashit( get_template_directory_uri() ) );
+
 // Directory path to the theme folder.
 define( 'LERM_DIR', trailingslashit( get_template_directory() ) );
 
@@ -28,6 +31,7 @@ define( 'LERM_DIR', trailingslashit( get_template_directory() ) );
  * @return void
  */
 function lerm_theme_setup() {
+
 	// Automatically add feed links to <head>.
 	add_theme_support( 'automatic-feed-links' );
 
@@ -51,6 +55,9 @@ function lerm_theme_setup() {
 		'html5',
 		array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'script', 'style' )
 	);
+
+	// Add support for full and wide align images.
+	add_theme_support( 'align-wide' );
 
 	// Feature
 	add_theme_support( 'post-thumbnails' );
@@ -89,10 +96,10 @@ function lerm_theme_setup() {
 add_action( 'after_setup_theme', 'lerm_theme_setup', 2 );
 
 /**
-* Requre admin framework
-*
-* @since 2.0
-*/
+ * Requre admin framework
+ *
+ * @since 2.0
+ */
 require_once LERM_DIR . 'inc/options/codestar-framework.php';
 
 /**
@@ -123,10 +130,12 @@ function lerm_options( $id, $arg = null ) {
 function lerm_enqueue_styles() {
 	wp_enqueue_style( 'bootstrap', LERM_URI . 'assets/css/bootstrap.min.css', array(), '4.3.1' );
 	wp_enqueue_style( 'lerm_font', LERM_URI . 'assets/css/lerm-font.min.css', array(), '1.0.0' );
+	wp_enqueue_style( 'animate', LERM_URI . 'assets/css/animate.min.css', array(), '1.0.0' );
 	if ( is_singular( 'post' ) && lerm_options( 'enable_code_highlight' ) ) {
 		wp_enqueue_style( 'lerm_solarized', LERM_URI . 'assets/css/solarized-dark.min.css', array(), LERM_VERSION );
 	}
 	wp_enqueue_style( 'lerm_style', get_stylesheet_uri(), array(), LERM_VERSION );
+
 }
 add_action( 'wp_enqueue_scripts', 'lerm_enqueue_styles' );
 
@@ -146,8 +155,8 @@ function lerm_enqueue_scripts() {
 	wp_register_script( 'share', LERM_URI . 'assets/js/social-share.min.js', array(), LERM_VERSION, true );
 	wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 	wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
-	wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.min.js', array(), LERM_VERSION, true );
-
+	wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.js', array(), LERM_VERSION, true );
+	wp_register_script( 'wow_js', LERM_URI . 'assets/js/wow.min.js', array(), LERM_VERSION, true );
 	// enqueue script
 	if ( lerm_options( 'cdn_jquery' ) ) {
 		wp_enqueue_script( 'jquery_cdn', lerm_options( 'cdn_jquery' ), array(), LERM_VERSION, true );
@@ -166,7 +175,7 @@ function lerm_enqueue_scripts() {
 			wp_enqueue_script( 'highlight' );
 		}
 	}
-
+	wp_enqueue_script( 'wow_js' );
 	wp_localize_script(
 		'lerm_js',
 		'adminajax',
@@ -178,6 +187,7 @@ function lerm_enqueue_scripts() {
 			'loading'  => __( 'Loading...', 'lerm' ),
 			'posts'    => wp_json_encode( $wp_query->query_vars ),
 			'current'  => get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1,
+			'loggedin' => is_user_logged_in(),
 		)
 	);
 	wp_enqueue_script( 'lerm_js' );
@@ -306,11 +316,11 @@ function lerm_post_navigation() {
 		the_post_navigation(
 			array(
 				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'lerm' ) . '</span><i class="fa fa-chevron-right"></i>' .
-					'<span class="screen-reader-text">' . __( 'Next post:', 'lerm' ) . '</span> <br/>' .
-					'<span class="post-title d-none d-md-block">%title</span>',
+				'<span class="screen-reader-text">' . __( 'Next post:', 'lerm' ) . '</span> <br/>' .
+				'<span class="post-title d-none d-md-block">%title</span>',
 				'prev_text' => '<i class="fa fa-chevron-left"></i><span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
-					'<span class="screen-reader-text">' . __( 'Previous post:', 'lerm' ) . '</span> <br/>' .
-					'<span class="post-title d-none d-md-block">%title</span>',
+				'<span class="screen-reader-text">' . __( 'Previous post:', 'lerm' ) . '</span> <br/>' .
+				'<span class="post-title d-none d-md-block">%title</span>',
 			)
 		);
 	endif;
@@ -448,13 +458,6 @@ if ( lerm_options( 'html_slug' ) ) :
 endif;
 
 /**
- * Maek url unclickable in comment content.
- *
- * @return void
- */
-remove_filter( 'comment_text', 'make_clickable', 9 );
-
-/**
  * Replace avatar url.
  *
  * @return sring $avatar
@@ -578,14 +581,14 @@ add_action( 'embed_footer', 'embed_custom_footer_style' );
 function embed_custom_footer_style() {
 	?>
 	<style>
-		/* .wp-embed-share {
+		.wp-embed-share {
 			display: none;
-		} */
+		}
 	</style>
 	<?php
 }
 
-// Disable Pingback
+	// Disable Pingback
 if ( ! lerm_options( 'disable_pingback' ) ) :
 	function no_self_ping( &$links ) {
 		$home = home_url();
@@ -596,14 +599,14 @@ if ( ! lerm_options( 'disable_pingback' ) ) :
 		}
 	}
 	add_action( 'pre_ping', 'no_self_ping' );
-endif;
+	endif;
 
-/**
- * Fully disable wp-json.
- *
- * @since  3.0.0
- * @return void
- */
+	/**
+	 * Fully disable wp-json.
+	 *
+	 * @since  3.0.0
+	 * @return void
+	 */
 if ( lerm_options( 'disable_rest_api' ) ) :
 	function lerm_disable_rest_api( $access ) {
 		return new WP_Error(
@@ -618,32 +621,32 @@ if ( lerm_options( 'disable_rest_api' ) ) :
 	remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
 endif;
 
-/**
- * Remove the default styles that are packaged with the Recent Comments widget.
- *
- * @since lerm 3.0
- * @return void
- */
+	/**
+	 * Remove the default styles that are packaged with the Recent Comments widget.
+	 *
+	 * @since lerm 3.0
+	 * @return void
+	 */
 function twentyten_remove_recent_comments_style() {
 	add_filter( 'show_recent_comments_widget_style', '__return_false' );
 }
 add_action( 'widgets_init', 'twentyten_remove_recent_comments_style' );
 
-/**
- * Use front-page.php when Front page displays is set to a static page.
- *
- * @since Lerm 3.0
- *
- * @param string $template front-page.php.
- *
- * @return string The template to be used: blank if is_home() is true (defaults to index.php), else $template.
- */
+	/**
+	 * Use front-page.php when Front page displays is set to a static page.
+	 *
+	 * @since Lerm 3.0
+	 *
+	 * @param string $template front-page.php.
+	 *
+	 * @return string The template to be used: blank if is_home() is true (defaults to index.php), else $template.
+	 */
 function lerm_front_page_template( $template ) {
 	return is_home() ? '' : $template;
 }
-add_filter( 'frontpage_template', 'lerm_front_page_template' );
+	add_filter( 'frontpage_template', 'lerm_front_page_template' );
 
-// code hightlight
+	// code hightlight
 function code_highlight_esc_html( $content ) {
 	$regex = '/(\[code\s+[^\]]*?\])(.*?)(\[\/code\])/sim';
 
@@ -682,18 +685,18 @@ function dangopress_esc_callback( $matches ) {
 
 	return $tag_open . $content . $tag_close;
 }
-add_filter( 'the_content', 'code_highlight_esc_html', 2 );
-add_filter( 'comment_text', 'code_highlight_esc_html', 2 );
-add_filter( 'the_content', 'pre_esc_html', 2 );
-add_filter( 'comment_text', 'pre_esc_html', 2 );
-add_filter( 'the_content', 'dangopress_esc_html', 2 );
-add_filter( 'comment_text', 'dangopress_esc_html', 2 );
+	add_filter( 'the_content', 'code_highlight_esc_html', 2 );
+	add_filter( 'comment_text', 'code_highlight_esc_html', 2 );
+	add_filter( 'the_content', 'pre_esc_html', 2 );
+	add_filter( 'comment_text', 'pre_esc_html', 2 );
+	add_filter( 'the_content', 'dangopress_esc_html', 2 );
+	add_filter( 'comment_text', 'dangopress_esc_html', 2 );
 
-/**
- * Custom template tags for this theme.
- */
-require LERM_DIR . 'inc/template-tags.php';
-require LERM_DIR . 'inc/customizer.php';
-require LERM_DIR . 'inc/lerm.php';
-require LERM_DIR . 'inc/widgets.php';
+	/**
+	 * Custom template tags for this theme.
+	 */
+	require LERM_DIR . 'inc/template-tags.php';
+	require LERM_DIR . 'inc/customizer.php';
+	require LERM_DIR . 'inc/lerm.php';
+	require LERM_DIR . 'inc/widgets.php';
 

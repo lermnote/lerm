@@ -1,15 +1,15 @@
 <?php
 
 // load class files
-require LERM_DIR . 'inc/admin/class-breadcrumb-trail.php';
 require LERM_DIR . 'inc/admin/class-media-grabber.php';
-require LERM_DIR . 'inc/admin/class-lerm-walker-nav-menu.php';
+require LERM_DIR . 'inc/admin/class-lerm-carousel.php';
 require LERM_DIR . 'inc/admin/class-lerm-svg-icons.php';
+require LERM_DIR . 'inc/admin/class-breadcrumb-trail.php';
 require LERM_DIR . 'inc/admin/class-lerm-walker-comment.php';
+require LERM_DIR . 'inc/admin/class-lerm-walker-nav-menu.php';
 
 // load function files
 require LERM_DIR . 'inc/admin/function-like.php';
-require LERM_DIR . 'inc/admin/function-slide.php';
 require LERM_DIR . 'inc/admin/function-mail.php';
 require LERM_DIR . 'inc/admin/function-login.php';
 require LERM_DIR . 'inc/admin/function-archives.php';

@@ -1,4 +1,13 @@
 <?php
+/*
+ * @Author: your name
+ * @Date: 2020-03-18 20:39:42
+ * @LastEditTime: 2020-03-21 11:48:00
+ * @LastEditors: your name
+ * @Description: In User Settings Edit
+ * @FilePath: \lerm\inc\options\config\options.config.php
+ */
+
 if ( class_exists( 'CSF' ) ) {
 	// Set a unique slug-like ID
 	$prefix = 'lerm_theme_options';
@@ -17,7 +26,9 @@ if ( class_exists( 'CSF' ) ) {
 		)
 	);
 
-	// Create a section
+	// ----------------------------------------
+	// Basic section
+	// ----------------------------------------
 	CSF::createSection(
 		$prefix,
 		array(
@@ -113,7 +124,9 @@ if ( class_exists( 'CSF' ) ) {
 			),
 		)
 	);
-
+	// ----------------------------------------
+	// Disign
+	// ----------------------------------------
 	CSF::createSection(
 		$prefix,
 		array(
@@ -206,18 +219,6 @@ if ( class_exists( 'CSF' ) ) {
 						'.post-navigation',
 						'.comment-list .comment',
 					),
-				),
-				array(
-					'id'           => 'content_title',
-					'type'         => 'color_pair',
-					'title'        => __( 'Post content h2', 'lerm' ),
-					'border_color' => true,
-					'default'      => array(
-						'color'            => '#5d6777',
-						'background_color' => '#0084ba44',
-						'border_color'     => '#0084ba',
-					),
-					'output'       => array( '.entry-content>h2' ),
 				),
 				array(
 					'id'           => 'title_wrap',
@@ -430,8 +431,6 @@ if ( class_exists( 'CSF' ) ) {
 			),
 		)
 	);
-
-
 	// ----------------------------------------
 	// an  option section for Email -- done
 	// ----------------------------------------
@@ -599,10 +598,10 @@ if ( class_exists( 'CSF' ) ) {
 							'read'       => 'Read',
 						),
 						'disabled' => array(
-							'author'        => 'Author',
-							'comment'       => 'Comment',
-							'publish_date'  => 'Publish Date',
-							'format'        => 'Format',
+							'author'       => 'Author',
+							'comment'      => 'Comment',
+							'publish_date' => 'Publish Date',
+							'format'       => 'Format',
 							// 'modified_date' => 'Modified Date',
 						),
 					),
@@ -629,23 +628,12 @@ if ( class_exists( 'CSF' ) ) {
 					'meidas'  => array( 'breakpoint-sm', 'breakpoint-md', 'breakpoint-lg' ),
 					'default' => array(
 						'width'  => '180',
-						'height' => '110',
+						'height' => '120',
 						'meida'  => 'breakpoint-sm',
 					),
 					'output'  => array( '.post-thumbnail' ),
 				),
-				array(
-					'id'      => 'thumbnail_border',
-					'type'    => 'border',
-					'title'   => 'Thumbnail Border Style',
-					'all'     => true,
-					'default' => array(
-						'all'   => '1',
-						'style' => 'solid',
-						'color' => '#82828244',
-					),
-					'output'  => '.thumbnail',
-				),
+
 				array(
 					'id'      => 'load_more',
 					'type'    => 'switcher',
@@ -739,8 +727,8 @@ if ( class_exists( 'CSF' ) ) {
 							'comment'      => 'Comment',
 						),
 						'disabled' => array(
-							'format'        => 'Format',
-							'author'        => 'Author',
+							'format' => 'Format',
+							'author' => 'Author',
 							// 'modified_date' => 'Modified Date',
 						),
 					),
@@ -796,7 +784,7 @@ if ( class_exists( 'CSF' ) ) {
 		)
 	);
 	// ----------------------------------------
-	// a opttion panel for Social -- done
+	// a opttion panel for sidebar -- done
 	// ----------------------------------------
 	CSF::createSection(
 		$prefix,
@@ -917,23 +905,39 @@ if ( class_exists( 'CSF' ) ) {
 				array(
 					'id'    => 'slide_switcher',
 					'type'  => 'switcher',
-					'title' => __( 'Enable Slide', 'lerm' ),
-					'label' => __( 'Show Slides On frontpage', 'lerm' ),
+					'title' => __( 'Enable Slides', 'lerm' ),
+					'label' => __( 'Enable to show slides on frontpage', 'lerm' ),
 				),
 				array(
-					'id'      => 'slide_position',
-					'type'    => 'radio',
-					'title'   => __( 'Slide Position', 'lerm' ),
-					'label'   => __( 'Select Slides Position On frontpage', 'lerm' ),
-					'options' => array(
-						'bot_of_nav' => __( 'bottom of navbar', 'lerm' ),
-						'top_of_con' => __( 'top of content', 'lerm' ),
-						'full_width' => __( 'bottom of navbar(full_width)', 'lerm' ),
+					'id'         => 'slide_position',
+					'type'       => 'radio',
+					'title'      => __( 'Slides Position', 'lerm' ),
+					'label'      => __( 'Select Slides Position On frontpage', 'lerm' ),
+					'dependency' => array( 'slide_switcher', '==', 'true' ),
+					'options'    => array(
+						'under_navbar'     => __( 'Under navbar', 'lerm' ),
+						'above_entry_list' => __( 'Above entry list', 'lerm' ),
+						'full_width'       => __( 'Under navbar(Full width)', 'lerm' ),
 					),
+				),
+				array(
+					'id'         => 'slide_indicators',
+					'type'       => 'switcher',
+					'title'      => __( 'Slides indicators', 'lerm' ),
+					'label'      => __( 'Enable to show slides indicators', 'lerm' ),
+					'dependency' => array( 'slide_switcher', '==', 'true' ),
+				),
+				array(
+					'id'         => 'slide_control',
+					'type'       => 'switcher',
+					'title'      => __( 'Slides control arrows', 'lerm' ),
+					'label'      => __( 'Enable to show slides control arrows', 'lerm' ),
+					'dependency' => array( 'slide_switcher', '==', 'true' ),
 				),
 				array(
 					'id'                     => 'lerm_slides',
 					'type'                   => 'group',
+					'dependency'             => array( 'slide_switcher', '==', 'true' ),
 					'title'                  => __( 'Slides', 'lerm' ),
 					'button_title'           => __( 'Add Slide', 'lerm' ),
 					'accordion_title'        => __( 'New Slide', 'lerm' ),

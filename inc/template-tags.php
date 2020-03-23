@@ -1,5 +1,5 @@
 <?php if ( ! defined( 'ABSPATH' ) ) {
-	die; }
+	die;}
 function lerm_post_meta( $location ) {
 	if ( 'single_top' === $location ) {
 		$arg = array_keys( (array) lerm_options( 'single_top', 'enabled' ) );
@@ -11,7 +11,7 @@ function lerm_post_meta( $location ) {
 	$post_meta = apply_filters( 'post_meta_show_on_post', $arg );
 
 	if ( $post_meta ) {?>
-		<ul class="list-unstyled mb-0 d-flex justify-content-center">
+		<ul class="list-unstyled mb-0 d-flex justify-content-center justify-content-md-start entry-meta small text-muted">
 			<?php
 			foreach ( $post_meta as $item ) {
 				switch ( $item ) {
@@ -141,7 +141,7 @@ function lerm_post_comments_number() {
 				?>
 			</a>
 		</li>
-		<?php
+		  <?php
 	}
 }
 
@@ -214,7 +214,7 @@ add_filter( 'body_class', 'lerm_body_classes' );
 
 function lerm_post_class( $classes ) {
 	if ( ! is_singular() ) {
-		$classes[] = 'summary d-flex p-3 mb-2';
+		$classes[] = 'summary card mx-3 mx-md-0 mb-3 p-0 p-md-3';
 	}
 	return $classes;
 }

@@ -1,14 +1,16 @@
 /**
-* global js file
-* @authors Lerm http://lerm.net
-* @date    2016-04-17 22:02:49
-* @version 2.0
-*/
+ * Global Javascript Functions
+ *
+ * @Authors Lerm https://www.hanost.com
+ * @Date 2016-04-17 22:02:49
+ * @LastEditTime 2020-03-21 19:03:53
+ * @version 2.0
+ */
 
 (function () {
 	"use strict";
 	//archives page expand
-	let archive = $('#archives');
+	let archive = $("#archives");
 	let monthList = $(".month-list", archive);
 	let monthPostList = $(".month-post-list", archive);
 	let postList = $(".post-list", archive);
@@ -52,11 +54,8 @@
 		// console.log($(this))
 		return $(this).ekkoLightbox();
 	});
-
-
 })($);
 document.addEventListener("DOMContentLoaded", function (e) {
-
 	/**
 	 * global variable
 	 *
@@ -68,14 +67,15 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 * dropdown menu hover show
 	 *
 	 */
-	let dropdown = document.querySelectorAll('.dropdown');
+	let dropdown = document.querySelectorAll(".dropdown");
 	if (dropdown) {
 		dropdown.forEach(e => {
-			e.onmouseover = (() => e.querySelector('.dropdown-menu').classList.add('show'))
-			e.onmouseout = (() => e.querySelector('.dropdown-menu').classList.remove('show'))
-		})
+			e.onmouseover = () =>
+				e.querySelector(".dropdown-menu").classList.add("show");
+			e.onmouseout = () =>
+				e.querySelector(".dropdown-menu").classList.remove("show");
+		});
 	}
-
 
 	/**
 	 * mobile menu
@@ -83,29 +83,37 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 */
 	//dropback
 	let backdrop = body.querySelector(".menu-backdrop");
-	if (!backdrop) { return }
+	if (!backdrop) {
+		return;
+	}
 
 	//adminbar height
 	let windowWidth = document.body.clientWidth;
 	let siteHeader = body.querySelector("#site-header");
 	let navbar = document.querySelector("#navbar");
+	if (!navbar) {
+		return;
+	}
 
 	// mobile menu collope
 	let navigation = document.querySelector("#site-navigation");
-	if (!navigation) { return }
+	if (!navigation) {
+		return;
+	}
 
 	let toggleButton = navigation.querySelector(".menu-toggle");
-	if ("undefined" === typeof toggleButton) { return }
+	if ("undefined" === typeof toggleButton) {
+		return;
+	}
 
 	let menuList = navigation.querySelector("ul");
 	//Hide menu toggle toggleButton if menu is empty and return early.
 	if (!menuList) {
 		toggleButton.style.display = "none";
 	} else {
-
 		menuList.setAttribute("aria-expanded", "false");
 		// Get all the link elements within the menu.
-		let links = menuList.querySelectorAll('a');
+		let links = menuList.querySelectorAll("a");
 		let subMenus = menuList.getElementsByClassName("dropdown-menu");
 
 		// Set menu items with submenus to aria-haspopup="true".
@@ -114,13 +122,13 @@ document.addEventListener("DOMContentLoaded", function (e) {
 		}
 		//click link to hidden menu
 		links.forEach(e => {
-			if (!e.classList.contains('dropdown-toggle')) (
+			if (!e.classList.contains("dropdown-toggle"))
 				e.onclick = function () {
 					body.classList.remove("nav-opened");
 					navigation.classList.remove("toggled");
 					backdrop.classList.remove("show");
 					html.classList.remove("noscroll");
-				})
+				};
 		});
 	}
 	if (windowWidth < 992) {
@@ -175,8 +183,8 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 * calendar add class
 	 *
 	 */
-	document.querySelectorAll('#wp-calendar tbody td a').forEach(e => {
-		e.classList.add('has-posts')
+	document.querySelectorAll("#wp-calendar tbody td a").forEach(e => {
+		e.classList.add("has-posts");
 	});
 
 	/**
@@ -195,33 +203,37 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 * code highlight
 	 *
 	 */
-	if ('undefined' !== typeof hljs) {
-		document.querySelectorAll('pre code').forEach(block => {
-			hljs.highlightBlock(block)
-		})
+	if ("undefined" !== typeof hljs) {
+		document.querySelectorAll("pre code").forEach(block => {
+			hljs.highlightBlock(block);
+		});
 	}
 
 	/**
 	 * smooth scroll to top
 	 *
 	 */
-	let scrollUp = document.getElementById('scroll-up');
-	scrollUp.addEventListener('click', e => {
+	let scrollUp = document.getElementById("scroll-up");
+	scrollUp.addEventListener("click", e => {
 		e.preventDefault();
 		animate({
 			duration: 700,
 			timing: scrollUpEaseOut,
 			draw: progress =>
-				html.scrollTop = (html.scrollTop * (1 - progress / 7))
+				(html.scrollTop = html.scrollTop * (1 - progress / 7))
 		});
-	})
-	window.addEventListener('scroll', check);
+	});
+	window.addEventListener("scroll", check);
 
-	function check () {
-		pageYOffset >= 500 && scrollUp.classList.add('show');
-		pageYOffset < 500 && scrollUp.classList.remove('show');
+	function check() {
+		pageYOffset >= 500 && scrollUp.classList.add("show");
+		pageYOffset < 500 && scrollUp.classList.remove("show");
 	}
-	let circ = timeFraction => 1 - Math.sin(Math.acos(timeFraction > 1 ? timeFraction = 1 : timeFraction));
+	let circ = timeFraction =>
+		1 -
+		Math.sin(
+			Math.acos(timeFraction > 1 ? (timeFraction = 1) : timeFraction)
+		);
 
 	let makeEaseOut = timing => timeFraction => 1 - timing(1 - timeFraction);
 	let scrollUpEaseOut = makeEaseOut(circ);
@@ -233,7 +245,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 */
 	let loadMorePosts = document.querySelector(".more-posts");
 	if (loadMorePosts) {
-
 		loadMorePosts.addEventListener("click", e => {
 			e.preventDefault();
 			loadMorePosts.innerHTML = adminajax.loading;
@@ -244,16 +255,18 @@ document.addEventListener("DOMContentLoaded", function (e) {
 			params.append("security", adminajax.nonce);
 			params.append("action", "lerm_load_more");
 			fetch(adminajax.url, {
-				method: "POST",
-				body: params
-			})
+					method: "POST",
+					body: params
+				})
 				.then(response => response.text())
 				.then(data => {
 					if (data.length) {
-						adminajax.current++
+						adminajax.current++;
 						let newData = parseToDOM(data);
 						newData.forEach(e => {
-							document.querySelector(".ajax-posts").appendChild(e);
+							document
+								.querySelector(".ajax-posts")
+								.appendChild(e);
 							if (e.childNodes.length) {
 								e.classList.add("ajax-loading");
 							}
@@ -261,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 						return document.querySelectorAll(".ajax-loading");
 					}
 
-					loadMorePosts.innerHTML = adminajax.noposts
+					loadMorePosts.innerHTML = adminajax.noposts;
 					throw data;
 				})
 				.then(e => {
@@ -273,21 +286,20 @@ document.addEventListener("DOMContentLoaded", function (e) {
 				})
 				.catch(err => {
 					// console.log(err)
-					loadMorePosts.setAttribute('disabled', 'true')
-					loadMorePosts.setAttribute('aria-disabled', "true")
+					loadMorePosts.setAttribute("disabled", "true");
+					loadMorePosts.setAttribute("aria-disabled", "true");
 				});
 		});
 	}
 
 	/**
- * Ajax like post;
- *
- * @since 3.2
- */
+	 * Ajax like post;
+	 *
+	 * @since 3.2
+	 */
 	let likeButton = document.querySelector("#like-button");
 	// console.log(likeButton);
 	if (likeButton) {
-
 		let id = likeButton.dataset.id;
 		let params = new FormData();
 		params.append("action", "lerm_post_like");
@@ -299,15 +311,17 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
 			if (!likeButton.classList.contains("done")) {
 				fetch(adminajax.url, {
-					method: "POST",
-					body: params
-				})
+						method: "POST",
+						body: params
+					})
 					.then(response => response.json())
 					.then(data => {
 						// console.log(data);
 						likeButton.classList.add("done");
 						likeButton.disabled = true;
-						document.querySelector(".count").innerHTML = parseInt(data);
+						document.querySelector(".count").innerHTML = parseInt(
+							data
+						);
 					})
 					.catch(err => console.log(err.message));
 			}
@@ -320,108 +334,136 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 */
 	let commentForm = document.getElementById("commentform");
 	if (commentForm) {
-
 		//error info display
-		commentForm.insertAdjacentHTML('beforeend', '<div id="error" class="text-danger hide"> </div>');
-		let errInfo = commentForm.querySelector('#error')
-		errInfo.style.overflow = 'hidden';
-		errInfo.style.display = 'none';
-		let data = {
-			author: commentForm.querySelector('[name="author"]') ? commentForm.querySelector('[name="author"]').value : '',
-			email: commentForm.querySelector('[name="email"]') ? commentForm.querySelector('[name="email"]').value : '',
-			url: commentForm.querySelector('[name="url"]') ? commentForm.querySelector('[name="url"]').value : '',
-			comment: commentForm.querySelector('[name="comment"]').value
-		};
-		//sumbit event
+		commentForm.insertAdjacentHTML( 'beforeend', '<div id="error" class="text-danger wow"></div>' );
+		let errInfo = commentForm.querySelector("#error");
+		let author = commentForm.querySelector('[name="author"]');
+		let email = commentForm.querySelector('[name="email"]');
+		let url = commentForm.querySelector('[name="url"]');
+		let comment = commentForm.querySelector('[name="comment"]');
+
+		errInfo.style.visibility = "hidden";
+		errInfo.innerHTML = "#";
+
+		//submit event
 		commentForm.addEventListener("submit", e => {
 			e.preventDefault();
-			commentForm.querySelector('[type="submit"]').setAttribute('disabled', 'disabled')
-			errInfo.style.display = 'none';
-			errInfo.style.height = 'auto';
-			errInfo.innerHTML = ' ';
-			if (!data.author) {
-				errInfo.style.display = 'block';
-				// return; //for no login users
-			}
-			if (!validateEmail(data.email)) {
-				errInfo.style.display = 'block';
-				// return; //for no login users
+			errInfo.removeAttribute('style');
+			errInfo.classList.remove('shake');
+			errInfo.classList.remove('fadeOut');
+			errInfo.innerHTML =  '<strong><i class="fa fa-spinner fa-pulse mr-1"></i>正在提交...</strong>';
+			new WOW().init();
+
+			// check user logged in.
+			if (!adminajax.loggedin) {
+				let data = {
+					author: author.value,
+					email: email.value,
+					url: url.value,
+				};
+				if (!data.author) {
+					errInfo.innerHTML = '<strong>错误：</strong>请填写姓名';
+					errInfo.classList.add('shake');
+					// let shake = setTimeout(function(){
+					// 	errInfo.classList.remove('shake');
+					// 	// errInfo.removeAttribute('style');
+					// 	clearTimeout(shake);
+					// }, 3000);
+					return;
+				}
+
+				if (!validateEmail(data.email)) {
+					errInfo.innerHTML = '<strong>错误：</strong>请填写正确的电子邮箱';
+					errInfo.classList.add('shake');
+					// let shake = setTimeout(function(){
+					// 	errInfo.classList.remove('shake');
+					// 	// errInfo.removeAttribute('style');
+					// 	clearTimeout(shake);
+					// }, 3000);
+					return;
+				}
 			}
 
-			if (!data.comment) {
-				errInfo.style.display = 'block';
+			if (!comment.value) {
+				errInfo.innerHTML = '<strong>错误：</strong>请输入评论内容';
+				errInfo.classList.add('shake');
+				// let shake = setTimeout(function(){
+				// 	errInfo.classList.remove('shake');
+				// 	// errInfo.removeAttribute('style');
+				// 	clearTimeout(shake);
+				// }, 3000);
 				return;
 			}
+
 			let params = new URLSearchParams(new FormData(commentForm));
 			params.append("action", "ajax_comment");
 			params.append("security", adminajax.nonce);
 			// console.log(params);
 			fetch(adminajax.url, {
-				method: "POST",
-				body: params
-			})
+					method: "POST",
+					body: params
+				})
 				.then(response => response.text())
 				.then(e => {
 					let data = parseToDOM(e);
-					// console.log(data)
-					if ('STRONG' === data[0].nodeName) {
+					// console.log(data, data.length)
+					if ("STRONG" === data[0].nodeName||data.length===1) {
 						throw data;
 					}
 					let respond = document.getElementById("respond");
-					errInfo.style.display = 'none';
+					// errInfo.style.display = "none";
 					if (respond.parentNode.classList.contains("comment")) {
 						if (null !== respond.nextElementSibling) {
 							data.forEach(e => {
 								respond.nextElementSibling.appendChild(e);
+								commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
 							});
 							//console.log('1')
 						} else {
 							data.forEach(e => {
 								// console.log(e)
 								respond.parentNode.appendChild(e);
+								commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
 							});
 						}
 					}
 					if (document.querySelector(".comment-list")) {
 						data.forEach(e => {
-							document.querySelector(".comment-list").insertBefore(e, document.querySelector(".comment-list").firstChild);
+							document.querySelector(".comment-list").insertBefore( e, document.querySelector(".comment-list") .firstChild );
+							commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
 							//console.log('2')
 						});
 					} else {
 						data.forEach(e => {
 							// console.log(e)
 							respond.parentNode.appendChild(e);
+							commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
 						});
 					}
 				})
-				.then(() => (commentForm.querySelector("#comment").value = ""))
-				.catch(err => {
-					// console.log(err);
-					errInfo.style.display = 'block';
-					//show orror info
-					err.forEach(e => errInfo.appendChild(e))
-					let elementHeight = errInfo.offsetHeight;
-					animate({
-						duration: 400,
-						timing: scrollUpEaseOut,
-						draw: progress => {
-							errInfo.style.height = (elementHeight * progress) + 'px';
-							commentForm.querySelector('[type="submit"]').setAttribute('disabled', 'disabled')
-						}
-					});
-					// console.log(elementHeight)
-					let hide = setTimeout(function () {
-						animate({
-							duration: 400,
-							timing: scrollUpEaseOut,
-							draw: progress => {
-								errInfo.style.height = elementHeight - (elementHeight * progress) + 'px';
-								commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
-							}
-						});
-						clearTimeout(hide)
-					}, 5000);
+				.then(() => {
+					commentForm.querySelector("#comment").value = "";
+					errInfo.innerHTML =  '<strong><i class="fa fa-ok mr-1"></i>提交成功</strong>';
+					let fadeOut = setTimeout(function(){
+						errInfo.classList.add('fadeOut');
+						errInfo.style.opacity = 0;
+						clearTimeout(fadeOut)
+					}, 3000);
 				})
+				.catch(err => {
+					 console.log(err);
+					errInfo.innerHTML = " ";
+					//show orror info
+					err.forEach(e => {
+						errInfo.appendChild(e);
+						let fadeOut = setTimeout(function(){
+							errInfo.classList.add('fadeOut');
+							errInfo.style.opacity = 0;
+							clearTimeout(fadeOut)
+						}, 3000);
+					});
+					// console.log(e);
+				});
 		});
 	}
 });
@@ -432,7 +474,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
  * @param {*} s
  * @returns
  */
-function parseToDOM (s) {
+function parseToDOM(s) {
 	let div = document.createElement("div");
 	if (typeof s == "string") div.innerHTML = s;
 	return Array.prototype.slice.call(div.childNodes);
@@ -458,7 +500,7 @@ const matches = function (el, selector) {
  *
  * @param {*} e
  */
-function fadeIn (e) {
+function fadeIn(e) {
 	e.style.opacity = 0;
 
 	var last = +new Date();
@@ -468,7 +510,7 @@ function fadeIn (e) {
 
 		if (+e.style.opacity < 1) {
 			(window.requestAnimationFrame && requestAnimationFrame(tick)) ||
-				setTimeout(tick, 16);
+			setTimeout(tick, 16);
 		}
 	};
 	tick();
@@ -479,7 +521,7 @@ function fadeIn (e) {
  *
  * @param {*} email
  */
-function validateEmail (email) {
+function validateEmail(email) {
 	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 	return re.test(String(email).toLowerCase());
 }
@@ -488,14 +530,14 @@ function validateEmail (email) {
  *
  * @param {*} options
  */
-function animate (options) {
+function animate(options) {
 	let start = performance.now();
 
-	requestAnimationFrame(function animate (time) {
+	requestAnimationFrame(function animate(time) {
 		let timeFraction = (time - start) / options.duration;
 		timeFraction > 1 && (timeFraction = 1);
 
-		let progress = options.timing(timeFraction)
+		let progress = options.timing(timeFraction);
 
 		options.draw(progress);
 		timeFraction < 1 && requestAnimationFrame(animate);

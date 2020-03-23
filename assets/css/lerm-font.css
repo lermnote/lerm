@@ -12,12 +12,12 @@
 .fa {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lerm' !important;
-  speak: none;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
   text-transform: none;
   line-height: 1;
+  display: inline-block;
 
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
@@ -347,3 +347,34 @@
 .fa-google-plus:before {
   content: "\ea8b";
 }
+.fa-check-circle::before {
+  content: "\f058";
+}
+.fa-spin {
+  -webkit-animation:fa-spin 2s infinite linear;
+  animation:fa-spin 2s infinite linear
+ }
+.fa-pulse{
+  -webkit-animation: fa-spin 1s infinite steps(8);
+  animation: fa-spin 1s infinite steps(8);
+}
+@-webkit-keyframes fa-spin {
+  0% {
+   -webkit-transform:rotate(0deg);
+   transform:rotate(0deg)
+  }
+  100% {
+   -webkit-transform:rotate(359deg);
+   transform:rotate(359deg)
+  }
+ }
+ @keyframes fa-spin {
+  0% {
+   -webkit-transform:rotate(0deg);
+   transform:rotate(0deg)
+  }
+  100% {
+   -webkit-transform:rotate(359deg);
+   transform:rotate(359deg)
+  }
+ }

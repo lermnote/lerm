@@ -6,10 +6,10 @@ function lerm_widgets_init() {
 			'name'          => __( 'HomePage Sidebar', 'lerm' ),
 			'id'            => 'home-sidebar',
 			'description'   => __( 'Add widgets here to appear in your sidebar.', 'lerm' ),
-			'before_widget' => '<section id="%1$s" class="widget mb-3 pl-3 pr-3 pb-3 pt-3 %2$s">',
+			'before_widget' => '<section id="%1$s" class="card border-0 widget mb-3 p-3 %2$s">',
 			'after_widget'  => '</section>',
-			'before_title'  => '<h3 class="widget-title"><span class="wrap fa pt-2 pb-2 pl-2 pr-2 m-0 d-inline-block">',
-			'after_title'   => '</span></h3>',
+			'before_title'  => '<h5 class="widget-title"><span class="wrap fa pt-2 pb-2 pl-2 pr-2 m-0 d-inline-block">',
+			'after_title'   => '</span></h5>',
 		)
 	);
 	$widgets = lerm_options( 'register_sidebars' );
@@ -71,6 +71,7 @@ add_filter( 'widget_tag_cloud_args', 'lerm_widget_tag_cloud_args' );
  * @since 1.0.0
  */
 class Lerm_Recent_Comments extends WP_Widget {
+
 	public function __construct() {
 		$widget_ops = array(
 			'classname'                   => 'widget_recent_comments',
@@ -81,7 +82,7 @@ class Lerm_Recent_Comments extends WP_Widget {
 		$this->alt_option_name = 'widget_recent_comments';
 	}
 	public function widget( $args, $instance ) {
-		global  $comment;
+		global $comment;
 		if ( ! isset( $args['widget_id'] ) ) {
 			$args['widget_id'] = $this->id;
 		}
@@ -126,7 +127,7 @@ class Lerm_Recent_Comments extends WP_Widget {
 				);
 				$content = apply_filters( 'get_comment_text', $comment->comment_content );
 				$content = convert_smilies( $content );
-				$output .= '<li class="recentcomment pt-2 pb-2 border-bottom">' . $avatar . '<span class="comment-content small">' . $content . '</span></li>';
+				$output .= '<li class="recentcomment py-2 border-bottom">' . $avatar . '<span class="comment-content small">' . $content . '</span></li>';
 			}
 		}
 		$output .= '</ul>';
@@ -142,10 +143,19 @@ class Lerm_Recent_Comments extends WP_Widget {
 	public function form( $instance ) {
 		$title  = isset( $instance['title'] ) ? $instance['title'] : '';
 		$number = isset( $instance['number'] ) ? absint( $instance['number'] ) : 5; ?>
-		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_attr_e( 'Title:', 'lerm' ); ?></label>
-		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
-		<p><label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php esc_attr_e( 'Number of comments to show:', 'lerm' ); ?></label>
-		<input class="tiny-text" id="<?php echo $this->get_field_id( 'number' ); ?>" name="<?php echo $this->get_field_name( 'number' ); ?>" type="number" step="1" min="1" value="<?php echo $number; ?>" size="3" /></p>
+<p><label
+		for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_attr_e( 'Title:', 'lerm' ); ?></label>
+	<input class="widefat"
+		id="<?php echo $this->get_field_id( 'title' ); ?>"
+		name="<?php echo $this->get_field_name( 'title' ); ?>"
+		type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
+<p><label
+		for="<?php echo $this->get_field_id( 'number' ); ?>"><?php esc_attr_e( 'Number of comments to show:', 'lerm' ); ?></label>
+	<input class="tiny-text"
+		id="<?php echo $this->get_field_id( 'number' ); ?>"
+		name="<?php echo $this->get_field_name( 'number' ); ?>"
+		type="number" step="1" min="1" value="<?php echo $number; ?>"
+		size="3" /></p>
 		<?php
 	}
 }
@@ -162,6 +172,7 @@ add_action(
  * @since 1.0.0
  */
 class Lerm_Recent_Posts extends WP_Widget {
+
 	public function __construct() {
 		$widget_ops = array(
 			'classname'                   => 'widget_posts',
@@ -213,30 +224,32 @@ class Lerm_Recent_Posts extends WP_Widget {
 				echo $args['before_title'] . $title . $args['after_title'];
 			}
 			?>
-			<ul>
-				<?php
-				while ( $r->have_posts() ) :
-					$r->the_post();
+<ul>
+			<?php
+			while ( $r->have_posts() ) :
+				$r->the_post();
+				?>
+	<li class="widget-post d-flex row mx-0 pb-3">
+		<div class="col-md-4 p-0">
+					<?php
+					lerm_thumb_nail(
+						array(
+							'classes' => 'widget-thumbnail',
+							'height'  => '60',
+							'width'   => '100',
+						)
+					);
 					?>
-					<li class="widget-post d-flex">
-						<?php
-						lerm_thumb_nail(
-							array(
-								'classes' => 'widget-thumbnail',
-								'height'  => '60',
-								'width'   => '100',
-							)
-						);
-						?>
-						<div class="d-flex flex-column justify-content-between">
-							<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
-								<?php if ( $show_date ) : ?>
-								<span class="post-date text-muted"><?php echo get_the_date(); ?></span>
-								<?php endif; ?>
-						</div>
-					</li>
-				<?php endwhile; ?>
-			</ul>
+		</div>
+		<div class="col-md-8 d-flex flex-column justify-content-between pr-0">
+			<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
+					<?php if ( $show_date ) : ?>
+			<span class="post-date text-muted"><?php echo get_the_date(); ?></span>
+			<?php endif; ?>
+		</div>
+	</li>
+			<?php endwhile; ?>
+</ul>
 			<?php echo $args['after_widget']; ?>
 			<?php
 			wp_reset_postdata();
@@ -256,14 +269,27 @@ class Lerm_Recent_Posts extends WP_Widget {
 		$number    = isset( $instance['number'] ) ? absint( $instance['number'] ) : 5;
 		$show_date = isset( $instance['show_date'] ) ? (bool) $instance['show_date'] : false;
 		?>
-		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_attr_e( 'Title:', 'lerm' ); ?></label>
-		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" /></p>
+<p><label
+		for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_attr_e( 'Title:', 'lerm' ); ?></label>
+	<input class="widefat"
+		id="<?php echo $this->get_field_id( 'title' ); ?>"
+		name="<?php echo $this->get_field_name( 'title' ); ?>"
+		type="text" value="<?php echo $title; ?>" /></p>
 
-		<p><label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php esc_attr_e( 'Number of posts to show:', 'lerm' ); ?></label>
-		<input class="tiny-text" id="<?php echo $this->get_field_id( 'number' ); ?>" name="<?php echo $this->get_field_name( 'number' ); ?>" type="number" step="1" min="1" value="<?php echo $number; ?>" size="3" /></p>
+<p><label
+		for="<?php echo $this->get_field_id( 'number' ); ?>"><?php esc_attr_e( 'Number of posts to show:', 'lerm' ); ?></label>
+	<input class="tiny-text"
+		id="<?php echo $this->get_field_id( 'number' ); ?>"
+		name="<?php echo $this->get_field_name( 'number' ); ?>"
+		type="number" step="1" min="1" value="<?php echo $number; ?>"
+		size="3" /></p>
 
-		<p><input class="checkbox" type="checkbox"<?php checked( $show_date ); ?> id="<?php echo $this->get_field_id( 'show_date' ); ?>" name="<?php echo $this->get_field_name( 'show_date' ); ?>" />
-		<label for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php esc_attr_e( 'Display post date?', 'lerm' ); ?></label></p>
+<p><input class="checkbox" type="checkbox" <?php checked( $show_date ); ?> id="<?php echo $this->get_field_id( 'show_date' ); ?>"
+	name="<?php echo $this->get_field_name( 'show_date' ); ?>"
+	/>
+	<label
+		for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php esc_attr_e( 'Display post date?', 'lerm' ); ?></label>
+</p>
 		<?php
 	}
 }
@@ -319,31 +345,33 @@ class Lerm_Popular_Post extends WP_Widget {
 			}
 			?>
 
-			<ul>
-				<?php
-				while ( $query->have_posts() ) :
-					$query->the_post();
-					?>
+<ul>
+			<?php
+			while ( $query->have_posts() ) :
+				$query->the_post();
+				?>
 
-					<li class="widget-post d-flex">
-						<?php
-						lerm_thumb_nail(
-							array(
-								'classes' => 'widget-thumbnail',
-								'height'  => '60',
-								'width'   => '100',
-							)
-						);
-						?>
-						<div class="d-flex flex-column justify-content-between">
-							<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
-								<?php if ( $show_date ) : ?>
-								<span class="post-date text-muted"><?php echo get_the_date(); ?></span>
-								<?php endif; ?>
-						</div>
-					</li>
-				<?php endwhile; ?>
-			</ul>
+	<li class="row widget-post d-flex mx-0">
+		<div class="col-md-4 p-0">
+					<?php
+					lerm_thumb_nail(
+						array(
+							'classes' => 'widget-thumbnail',
+							'height'  => '60',
+							'width'   => '100',
+						)
+					);
+					?>
+		</div>
+		<div class="col-md-8 pr-0 d-flex flex-column justify-content-between">
+			<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
+					<?php if ( $show_date ) : ?>
+			<span class="post-date text-muted"><?php echo get_the_date(); ?></span>
+			<?php endif; ?>
+		</div>
+	</li>
+			<?php endwhile; ?>
+</ul>
 
 			<?php echo $args['after_widget']; ?>
 
@@ -365,13 +393,26 @@ class Lerm_Popular_Post extends WP_Widget {
 		$number    = isset( $instance['number'] ) ? absint( $instance['number'] ) : 5;
 		$show_date = isset( $instance['show_date'] ) ? (bool) $instance['show_date'] : false;
 		?>
-		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_attr_e( 'Title:', 'lerm' ); ?></label>
-		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
+<p><label
+		for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_attr_e( 'Title:', 'lerm' ); ?></label>
+	<input class="widefat"
+		id="<?php echo $this->get_field_id( 'title' ); ?>"
+		name="<?php echo $this->get_field_name( 'title' ); ?>"
+		type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
 
-		<p><label for="<?php echo $this->get_field_id( 'show_num' ); ?>"><?php esc_attr_e( 'Number of posts to show:', 'lerm' ); ?></label>
-		<input class="tiny-text" id="<?php echo $this->get_field_id( 'number' ); ?>" name="<?php echo $this->get_field_name( 'number' ); ?>" type="number" step="1" min="1" value="<?php echo $number; ?>" size="3" /></p>
-		<p><input class="checkbox" type="checkbox"<?php checked( $show_date ); ?> id="<?php echo $this->get_field_id( 'show_date' ); ?>" name="<?php echo $this->get_field_name( 'show_date' ); ?>" />
-		<label for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php esc_attr_e( 'Display post date?', 'lerm' ); ?></label></p>
+<p><label
+		for="<?php echo $this->get_field_id( 'show_num' ); ?>"><?php esc_attr_e( 'Number of posts to show:', 'lerm' ); ?></label>
+	<input class="tiny-text"
+		id="<?php echo $this->get_field_id( 'number' ); ?>"
+		name="<?php echo $this->get_field_name( 'number' ); ?>"
+		type="number" step="1" min="1" value="<?php echo $number; ?>"
+		size="3" /></p>
+<p><input class="checkbox" type="checkbox" <?php checked( $show_date ); ?> id="<?php echo $this->get_field_id( 'show_date' ); ?>"
+	name="<?php echo $this->get_field_name( 'show_date' ); ?>"
+	/>
+	<label
+		for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php esc_attr_e( 'Display post date?', 'lerm' ); ?></label>
+</p>
 		<?php
 	}
 }

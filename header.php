@@ -10,7 +10,6 @@
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
-
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -90,10 +89,19 @@
 				<?php get_search_form(); ?>
 			</div>
 		<?php endif; ?>
-
-		<?php
-		if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'full_width' ) :
-			lerm_carousel();
-		endif;
-		?>
 	</header>
+	<?php
+	if ( is_home() && ! is_paged() ) {
+		switch ( lerm_options( 'slide_position' ) ) {
+			case 'full_width':
+				lerm_carousel( array() );
+				break;
+			case 'under_navbar':
+				?>
+				<div class="container">
+					<?php lerm_carousel( array() ); ?>
+				</div>
+				<?php
+				break;
+		}
+	}

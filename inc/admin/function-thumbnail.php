@@ -12,6 +12,7 @@ function lerm_thumb_nail( $args = array() ) {
 }
 class Lerm_Thumbnail {
 
+
 	public function __construct( $args = array() ) {
 		$defaults = array(
 			'show'    => true,
@@ -49,8 +50,8 @@ class Lerm_Thumbnail {
 		$width      = $this->args['width'];
 		$classes    = $this->args['classes'];
 		$src        = $this->get_image();
-		$thumbnail  = '<figure class="thumbnail-wrap mr-2 mb-0">';
-		$thumbnail .= sprintf( '<a href="%1$s" title="%2$s" rel="bookmark"><img class="thumbnail img-fluid %3$s" src="%4$s" height="%5$s" width="%6$s"></a>', get_permalink(), get_the_title(), $classes, $src, $height, $width );
+		$thumbnail  = '<figure class="thumbnail-wrap m-0">';
+		$thumbnail .= sprintf( '<a href="%1$s" title="%2$s" rel="bookmark"><img class="thumbnail img-fluid %3$s" src="%4$s" height="%5$s" width="%6$s" alt="%2$s"></a>', get_permalink(), get_the_title(), $classes, $src, $height, $width );
 		$thumbnail .= '</figure>';
 		echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}

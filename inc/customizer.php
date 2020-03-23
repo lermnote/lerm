@@ -16,13 +16,13 @@
  * @since Lerm 3.1
  */
 function lerm_custom_logo() {
-	$large_logo = lerm_options( 'large_logo', 'id' );
+	$large_logo     = lerm_options( 'large_logo', 'id' );
 	$mobile_logo    = lerm_options( 'mobile_logo', 'id' );
 	$custom_logo_id = get_theme_mod( 'custom_logo' );
-	if ( wp_is_mobile() && isset( $mobile_logo ) ) {
+	if ( wp_is_mobile() && ! empty( $mobile_logo ) ) {
 		$custom_logo_id = $mobile_logo;
 	}
-	if ( isset( $large_logo ) ) {
+	if ( ! empty( $large_logo ) ) {
 		$custom_logo_id = $large_logo;
 	}
 	$html = sprintf(

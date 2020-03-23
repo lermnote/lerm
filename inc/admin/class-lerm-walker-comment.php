@@ -2,7 +2,7 @@
 /**
  * Comments walker
  *
- * @package https://www.hanost.com
+ * @package Lerm https://www.hanost.com
  *
  * @since lerm 3.0
  */
@@ -13,7 +13,7 @@ class Lerm_Walker_Comment extends Walker_Comment {
 	public function register() {
 		add_action( 'wp_ajax_nopriv_ajax_comment', array( $this, 'ajax_comment' ) );
 		add_action( 'wp_ajax_ajax_comment', array( $this, 'ajax_comment' ) );
-		add_filter( 'preprocess_comment', array( $this, 'lerm_comment_post' ), '', 1 );
+		//add_filter( 'preprocess_comment', array( $this, 'lerm_comment_post' ), '', 1 );
 	}
 	public function ajax_comment( $comment ) {
 		// Check ajax nonce first
@@ -51,7 +51,7 @@ class Lerm_Walker_Comment extends Walker_Comment {
 		?>
 		<li <?php comment_class( 'card p-3 mb-2' ); ?> id="comment-<?php comment_ID(); ?>">
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
-				<header class="comment-meta mb-1">
+				<footer class="comment-meta mb-1">
 					<span class="comment-author vcard">
 						<?php
 						$comment_author_url = get_comment_author_url( $comment );
@@ -107,11 +107,13 @@ class Lerm_Walker_Comment extends Walker_Comment {
 						);
 						?>
 					</span>
-				</header>
-					<?php if ( '0' === $comment->comment_approved ) { ?>
-						<p class="comment-awaiting-moderation"><?php esc_html_e( 'Your comment is awaiting moderation.', 'lerm' ); ?></p>
-					<?php } ?>
+				</footer>
+				<?php if ( '0' === $comment->comment_approved ) { ?>
+					<p class="comment-awaiting-moderation"><?php esc_html_e( 'Your comment is awaiting moderation.', 'lerm' ); ?></p>
+				<?php } ?>
+				<section class="comment-content">
 					<?php comment_text(); ?>
+				</section>
 			</article>
 			<?php
 	}
@@ -123,9 +125,20 @@ class Lerm_Walker_Comment extends Walker_Comment {
 		// the one exception is single quotes, which cannot be #03d; because WordPress marks it as spam
 		return( $incoming_comment );
 	}
-
+	//disable html in comment content
+	// add_filter( 'pre_comment_content', 'wp_specialchars' );
 }
 function lerm_comment() {
 	return new Lerm_Walker_Comment();
 }
 lerm_comment();
+
+/**
+ * Make url unclickable in comment content.
+ *
+ *  @author 智慧宫
+ * @link   https://www.hanost.com
+ */
+remove_filter( 'comment_text', 'make_clickable', 9 );
+// add_filter( 'pre_comment_content', 'wp_specialchars' );
+

@@ -43,10 +43,6 @@ class Lerm_Breadcrumb_Trail {
 		$breadcrumb .= '<ol class="breadcrumb mb-0" itemscope itemtype="http://schema.org/BreadcrumbList">';
 		$item_class  = '';
 
-		// Add the number of items and item list order schema.
-		$breadcrumb .= sprintf( '<meta name="numberOfItems" content="%d" />', absint( $item_count ) );
-		$breadcrumb .= '<meta name="itemListOrder" content="Ascending" />';
-
 		foreach ( $this->items as $item ) {
 			++$item_position;
 			// Check if the item is linked.
@@ -95,23 +91,17 @@ class Lerm_Breadcrumb_Trail {
 	public function add_item() {
 		$this->add_site_home_link();
 
-		//if view on homepage
 		if ( is_home() ) {
+			// if view on homepage
 			$this->add_home_item();
-		}
-
-		//post item
-		elseif ( is_single() ) {
+		} elseif ( is_single() ) {
+			// post item
 			$this->add_post_item();
-		}
-
-		//page item
-		elseif ( is_page() ) {
+		} elseif ( is_page() ) {
+			// page item
 			$this->add_page_item();
-		}
-
-		//archive item
-		elseif ( is_archive() ) {
+		} elseif ( is_archive() ) {
+			//archive item
 			if ( is_post_type_archive() ) {
 				$this->add_post_type_archive_item();
 			} elseif ( is_category() || is_tag() || is_tax() ) {

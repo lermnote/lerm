@@ -28,7 +28,7 @@ if ( $lerm_term ) {
 						<header class="archive-header mb-2 p-3" style="<?php echo esc_attr( $archive_header ); ?>">
 						<?php
 						the_archive_title( '<h1 class="page-title">', '</h1>' );
-						the_archive_description( '<small class="taxonomy-description">', '</small>' );
+						the_archive_description( '<div class="taxonomy-description small">', '</div>' );
 						?>
 					</header>
 					<?php
@@ -58,4 +58,3 @@ if ( $lerm_term ) {
 </main>
 <?php
 get_footer();
-
