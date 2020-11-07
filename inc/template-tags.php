@@ -1,17 +1,20 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
-	die;}
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	die; }
 function lerm_post_meta( $location ) {
 	if ( 'single_top' === $location ) {
-		$arg = array_keys( (array) lerm_options( 'single_top', 'enabled' ) );
+		$arg           = array_keys( (array) lerm_options( 'single_top', 'enabled' ) );
+		$align_classes = 'justify-content-center';
 	}
 
 	if ( 'summary_bottom' === $location ) {
-		$arg = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
+		$arg           = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
+		$align_classes = ' justify-content-center justify-content-sm-start ';
 	}
 	$post_meta = apply_filters( 'post_meta_show_on_post', $arg );
 
 	if ( $post_meta ) {?>
-		<ul class="list-unstyled mb-0 d-flex justify-content-center justify-content-md-start entry-meta small text-muted">
+		<ul class="list-unstyled mb-0 d-flex <?php echo esc_html( $align_classes ); ?> entry-meta small text-muted" style="z-index:1">
 			<?php
 			foreach ( $post_meta as $item ) {
 				switch ( $item ) {
@@ -73,14 +76,14 @@ function lerm_post_author() {
 	?>
 		<li class="post-author meta-item">
 			<span class="meta-icon">
-				<span class="screen-reader-text"><?php esc_attr_e( 'Post author', 'lerm' ); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Post author', 'lerm' ); ?></span>
 				<i class="fa fa-user pr-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php
 				printf(
 					/* translators: %s: Author name */
-					__( 'By %s', 'lerm' ),
+					esc_html__( 'By %s', 'lerm' ),
 					'<a href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author_meta( 'display_name' ) ) . '</a>'
 				);
 				?>
@@ -107,7 +110,7 @@ function lerm_post_categories() {
 		?>
 		<li class="post-categories meta-item">
 			<span class="meta-icon">
-				<span class="screen-reader-text"><?php esc_attr_e( 'Categories', 'lerm' ); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Categories', 'lerm' ); ?></span>
 				<i class="fa fa-hdd pr-1"></i>
 			</span>
 			<span class="meta-text">
@@ -141,7 +144,7 @@ function lerm_post_comments_number() {
 				?>
 			</a>
 		</li>
-		  <?php
+		<?php
 	}
 }
 
@@ -167,24 +170,6 @@ function lerm_excerpt_length( $length ) {
 	return $length;
 }
 add_filter( 'excerpt_length', 'lerm_excerpt_length', 999 );
-/**
- * Wether to show sidebar in webpage.
- *
- * @return string $layout
- */
-function lerm_page_layout() {
-	// page and post layout
-	$metabox = get_post_meta( get_the_ID(), '_lerm_metabox_options', true );
-	// global layout
-	$layout = lerm_options( 'global_layout' );
-	if ( wp_is_mobile() ) {
-		$layout = 'mobile';
-	}
-	if ( is_singular() && ! empty( $metabox['page_layout'] ) ) {
-		$layout = $metabox['page_layout'];
-	}
-	return $layout;
-}
 
 /**
  * Adds custom classes to the array of body classes.
@@ -194,6 +179,7 @@ function lerm_page_layout() {
  */
 function lerm_body_classes( $classes ) {
 	$classes[] = 'body-bg';
+
 	// Check singular
 	if ( is_singular() ) {
 		$classes[] = 'singular';
@@ -207,14 +193,24 @@ function lerm_body_classes( $classes ) {
 		$classes[] = 'lerm-front-page';
 	}
 	// Output layout
-	$classes[] = lerm_page_layout();
+	$classes[] = lerm_site_layout();
 	return $classes;
 }
 add_filter( 'body_class', 'lerm_body_classes' );
 
 function lerm_post_class( $classes ) {
+	// $classes[] = 'card';
+
 	if ( ! is_singular() ) {
-		$classes[] = 'summary card mx-3 mx-md-0 mb-3 p-0 p-md-3';
+		$classes[] = 'summary';
+		$classes[] = 'mb-3 p-0 p-sm-2 p-md-3';
+		if ( lerm_options( 'loading-animate' ) ) {
+			$classes[] = 'loading-animate';
+			$classes[] = 'fadeInUp';
+		}
+	} else {
+		$classes[] = 'entry';
+		$classes[] = ' p-3 mb-2';
 	}
 	return $classes;
 }

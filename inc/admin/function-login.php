@@ -20,7 +20,7 @@ function lerm_login_style() {
 	} ?>
 	<style type="text/css">
 		.login {
-			background:rgba(255,255,255,.6) url(<?php echo $image_url; ?>) no-repeat center;
+			background:rgba(255,255,255,.6) url(<?php echo esc_url( $image_url ); ?>) no-repeat center;
 			height:auto;
 			/* filter: blur(0.1px); */
 		}
@@ -34,12 +34,13 @@ function lerm_login_style() {
 		}
 		.login form {
 			padding:0;
+			border: 0 none;
 			box-shadow:none;
 			background-color: initial;
 		}
 		.login h1 a {
 			font-size:inherit;
-			background:url(<?php echo LERM_URI . 'favicon.ico'; ?>) no-repeat center;
+			background:url(<?php echo esc_url( LERM_URI . 'favicon.ico' ); ?>) no-repeat center;
 			background-size:100px;
 		}
 		.login label{

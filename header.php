@@ -7,6 +7,12 @@
  * @package lerm
  * @since  1.0
  */
+if ( wp_is_mobile() ) {
+	$theme_location = 'mobile';
+} else {
+	$theme_location = 'primary';
+}
+$carousel = new \Lerm\Inc\Carousel();
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -15,31 +21,28 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color' ) ); ?>">
-	<?php
-	wp_head();
-		echo wp_kses( lerm_options( 'baidu_tongji' ), array( 'script' => array() ) );
-	?>
+	<?php wp_head(); ?>
+	<script>
+		<?php echo wp_kses( lerm_options( 'baidu_tongji' ), array( 'script' => array() ) ); ?>
+	</script>
 </head>
 <body <?php body_class(); ?>>
-<?php wp_body_open(); ?>
-	<header id="site-header" class="site-header mb-md-3" itemscope="" itemtype="http://schema.org/WPHeader">
-		<nav id="site-navigation" class="navbar navbar-expand-lg py-0">
-			<div class="container">
-				<!-- Container -->
-				<div class="brand d-flex align-items-center">
+	<?php wp_body_open(); ?>
+	<header id="site-header" class="site-header" itemscope="" itemtype="http://schema.org/WPHeader">
+		<div class="container"><!-- Container -->
+			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
+				<div class="brand d-flex align-items-center"><!-- .navbar-brand  begin -->
 
-					<?php
-					the_custom_logo();
-					?>
-					<!-- .navbar-brand  begin -->
-					<div>
+					<?php the_custom_logo(); ?>
+
+					<div class="masthead">
 						<?php
 						$lerm_blogname = lerm_options( 'blogname' ) ? lerm_options( 'blogname' ) : get_bloginfo( 'name' );
 						if ( is_front_page() || is_home() ) :
 							?>
 							<h1 class="site-title"><a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home"><?php echo esc_html( $lerm_blogname ); ?></a></h1>
 						<?php else : ?>
-							<p class="site-title"><a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home"><?php echo esc_html( $lerm_blogname ); ?></a></p>
+							<p class="site-title h1"><a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home"><?php echo esc_html( $lerm_blogname ); ?></a></p>
 							<?php
 						endif;
 
@@ -52,25 +55,26 @@
 					</div>
 				</div><!-- logo end -->
 				<div class="d-lg-none d-flex justify-content-end">
-						<button class="btn bg-inherit navbar-btn collapseds search-btn" type="button" data-toggle="collapse" data-target="#mobile-search" aria-expanded="false"  >
-							<i class="fa fa-search"></i>
-						</button>
-						<button id="trigger" class="menu-toggle mr-2 btn bg-inherit navbar-btn" type="button"  aria-expanded="false" style="z-index:18">
-							<span></span>
-						</button>
-					</div>
+					<button id="trigger" class="btn bg-inherit navbar-btn d-lg-none" type="button" data-toggle="collapse"  aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="menu-icon">
+							<span class="menu-icon-top"></span>
+							<span class="menu-icon-middle"></span>
+							<span class="menu-icon-bottom"></span>
+						</span>
+					</button>
+				</div>
 				<?php
 				// primary menu begin
-				if ( has_nav_menu( 'primary' ) ) :
+				if ( has_nav_menu( $theme_location ) ) :
 					wp_nav_menu(
 						array(
-							'theme_location'  => 'primary',
+							'theme_location'  => $theme_location,
 							'container'       => 'div',
-							'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav navbar-collapse',
+							'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav navbar-collapse mx-1',
 							'container_id'    => 'navbar',
 							'menu_class'      => 'nav navbar-nav',
 							'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
-							'walker'          => new Lerm_Walker_Nav_Menu(),
+							'walker'          => new \Lerm\Inc\Nav_Walker(),
 						)
 					);
 					if ( lerm_options( 'narbar_search' ) ) :
@@ -79,27 +83,22 @@
 							<?php get_search_form(); ?>
 						</div>
 						<?php
+					endif;
 				endif;
-			endif;
 				?>
-			</div>
-		</nav>
-		<?php if ( wp_is_mobile() ) : ?>
-			<div class="collapse" id="mobile-search">
-				<?php get_search_form(); ?>
-			</div>
-		<?php endif; ?>
+			</nav>
+		</div>
 	</header>
 	<?php
 	if ( is_home() && ! is_paged() ) {
 		switch ( lerm_options( 'slide_position' ) ) {
 			case 'full_width':
-				lerm_carousel( array() );
+				$carousel->render();
 				break;
 			case 'under_navbar':
 				?>
 				<div class="container">
-					<?php lerm_carousel( array() ); ?>
+					<?php $carousel->render(); ?>
 				</div>
 				<?php
 				break;

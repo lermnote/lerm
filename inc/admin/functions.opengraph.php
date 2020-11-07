@@ -30,7 +30,7 @@ function jetpack_og_tags() {
 	$disable_widont = remove_filter( 'the_title', 'widont' );
 
 	$og_output = "\n<!-- Jetpack Open Graph Tags -->\n";
-	$tags = array();
+	$tags      = array();
 
 	/**
 	 * Filter the minimum width of the images used in Jetpack Open Graph Meta Tags.
@@ -41,7 +41,7 @@ function jetpack_og_tags() {
 	 *
 	 * @param int 200 Minimum image width used in Jetpack Open Graph Meta Tags.
 	 */
-	$image_width        = absint( apply_filters( 'jetpack_open_graph_image_width', 200 ) );
+	$image_width = absint( apply_filters( 'jetpack_open_graph_image_width', 200 ) );
 	/**
 	 * Filter the minimum height of the images used in Jetpack Open Graph Meta Tags.
 	 *
@@ -55,38 +55,38 @@ function jetpack_og_tags() {
 	$description_length = 197;
 
 	if ( is_home() || is_front_page() ) {
-		// $site_type              = Jetpack_Options::get_option_and_ensure_autoload( 'open_graph_protocol_site_type', '' );
 		$tags['og:type']        = ! empty( $site_type ) ? $site_type : 'website';
 		$tags['og:title']       = get_bloginfo( 'name' );
 		$tags['og:description'] = get_bloginfo( 'description' );
 
 		$front_page_id = get_option( 'page_for_posts' );
-		if ( 'page' == get_option( 'show_on_front' ) && $front_page_id && is_home() )
+		if ( 'page' == get_option( 'show_on_front' ) && $front_page_id && is_home() ) {
 			$tags['og:url'] = get_permalink( $front_page_id );
-		else
+		} else {
 			$tags['og:url'] = home_url( '/' );
+		}
 
 		// Associate a blog's root path with one or more Facebook accounts
 		// $facebook_admins = Jetpack_Options::get_option_and_ensure_autoload( 'facebook_admins', array() );
-		if ( ! empty( $facebook_admins ) )
+		if ( ! empty( $facebook_admins ) ) {
 			$tags['fb:admins'] = $facebook_admins;
-
-	} else if ( is_author() ) {
+		}
+	} elseif ( is_author() ) {
 		$tags['og:type'] = 'profile';
 
 		$author = get_queried_object();
 
-		$tags['og:title']           = $author->display_name;
+		$tags['og:title'] = $author->display_name;
 		if ( ! empty( $author->user_url ) ) {
-			$tags['og:url']     = $author->user_url;
+			$tags['og:url'] = $author->user_url;
 		} else {
-			$tags['og:url']     = get_author_posts_url( $author->ID );
+			$tags['og:url'] = get_author_posts_url( $author->ID );
 		}
 		$tags['og:description']     = $author->description;
 		$tags['profile:first_name'] = get_the_author_meta( 'first_name', $author->ID );
 		$tags['profile:last_name']  = get_the_author_meta( 'last_name', $author->ID );
 
-	} else if ( is_singular() ) {
+	} elseif ( is_singular() ) {
 		global $post;
 		$data = $post; // so that we don't accidentally explode the global
 
@@ -98,13 +98,13 @@ function jetpack_og_tags() {
 			$tags['og:title'] = wp_kses( apply_filters( 'the_title', $data->post_title, $data->ID ), array() );
 		}
 
-		$tags['og:url']         = get_permalink( $data->ID );
+		$tags['og:url'] = get_permalink( $data->ID );
 		if ( ! post_password_required() ) {
 			if ( ! empty( $data->post_excerpt ) ) {
 				$tags['og:description'] = preg_replace( '@https?://[\S]+@', '', strip_shortcodes( wp_kses( $data->post_excerpt, array() ) ) );
 			} else {
 				$exploded_content_on_more_tag = explode( '<!--more-->', $data->post_content );
-				$tags['og:description'] = wp_trim_words( preg_replace( '@https?://[\S]+@', '', strip_shortcodes( wp_kses( $exploded_content_on_more_tag[0], array() ) ) ) );
+				$tags['og:description']       = wp_trim_words( preg_replace( '@https?://[\S]+@', '', strip_shortcodes( wp_kses( $exploded_content_on_more_tag[0], array() ) ) ) );
 			}
 		}
 		if ( empty( $tags['og:description'] ) ) {
@@ -125,14 +125,13 @@ function jetpack_og_tags() {
 		}
 
 		$tags['article:published_time'] = date( 'c', strtotime( $data->post_date_gmt ) );
-		$tags['article:modified_time'] = date( 'c', strtotime( $data->post_modified_gmt ) );
+		$tags['article:modified_time']  = date( 'c', strtotime( $data->post_modified_gmt ) );
 		if ( post_type_supports( get_post_type( $data ), 'author' ) && isset( $data->post_author ) ) {
 			$publicize_facebook_user = get_post_meta( $data->ID, '_publicize_facebook_user', true );
 			// if ( ! empty( $publicize_facebook_user ) ) {
 				$tags['article:author'] = esc_url( $publicize_facebook_user );
-			}
 		}
-	
+	}
 
 	/**
 	 * Allow plugins to inject additional template-specific Open Graph tags.
@@ -147,8 +146,9 @@ function jetpack_og_tags() {
 	$tags = apply_filters( 'jetpack_open_graph_base_tags', $tags, compact( 'image_width', 'image_height' ) );
 
 	// Re-enable widont if we had disabled it
-	if ( $disable_widont )
+	if ( $disable_widont ) {
 		add_filter( 'the_title', 'widont' );
+	}
 
 	/**
 	 * Do not return any Open Graph Meta tags if we don't have any info about a post.
@@ -159,8 +159,9 @@ function jetpack_og_tags() {
 	 *
 	 * @param bool true Do not return any Open Graph Meta tags if we don't have any info about a post.
 	 */
-	if ( empty( $tags ) && apply_filters( 'jetpack_open_graph_return_if_empty', true ) )
+	if ( empty( $tags ) && apply_filters( 'jetpack_open_graph_return_if_empty', true ) ) {
 		return;
+	}
 
 	$tags['og:site_name'] = get_bloginfo( 'name' );
 
@@ -181,8 +182,9 @@ function jetpack_og_tags() {
 	}
 
 	// Facebook whines if you give it an empty title
-	if ( empty( $tags['og:title'] ) )
+	if ( empty( $tags['og:title'] ) ) {
 		$tags['og:title'] = __( '(no title)', 'lerm' );
+	}
 
 	// Shorten the description if it's too long
 	if ( isset( $tags['og:description'] ) ) {
@@ -229,8 +231,9 @@ function jetpack_og_tags() {
 		$tag_content = array_unique( $tag_content );
 
 		foreach ( $tag_content as $tag_content_single ) {
-			if ( empty( $tag_content_single ) )
+			if ( empty( $tag_content_single ) ) {
 				continue; // Don't ever output empty tags
+			}
 			$og_tag = sprintf( '<meta property="%s" content="%s" />', esc_attr( $tag_property ), esc_attr( $tag_content_single ) );
 			/**
 			 * Filter the HTML Output of each Open Graph Meta tag.
@@ -245,12 +248,12 @@ function jetpack_og_tags() {
 			$og_output .= "\n";
 
 			if ( 'og:image' == $tag_property ) {
-				if ( is_array( $secure ) && !empty( $secure[$secure_image_num] ) ) {
+				if ( is_array( $secure ) && ! empty( $secure[ $secure_image_num ] ) ) {
 					$og_tag = sprintf( '<meta property="og:image:secure_url" content="%s" />', esc_url( $secure[ $secure_image_num ] ) );
 					/** This filter is documented in functions.opengraph.php */
 					$og_output .= apply_filters( 'jetpack_open_graph_output', $og_tag );
 					$og_output .= "\n";
-				} else if ( !is_array( $secure ) && !empty( $secure ) ) {
+				} elseif ( ! is_array( $secure ) && ! empty( $secure ) ) {
 					$og_tag = sprintf( '<meta property="og:image:secure_url" content="%s" />', esc_url( $secure ) );
 					/** This filter is documented in functions.opengraph.php */
 					$og_output .= apply_filters( 'jetpack_open_graph_output', $og_tag );
@@ -289,7 +292,13 @@ function jetpack_og_get_image( $width = 200, $height = 200, $deprecated = null )
 
 		// Attempt to find something good for this post using our generalized PostImages code
 		if ( empty( $image ) && class_exists( 'Jetpack_PostImages' ) ) {
-			$post_images = Jetpack_PostImages::get_images( get_the_ID(), array( 'width' => $width, 'height' => $height ) );
+			$post_images = Jetpack_PostImages::get_images(
+				get_the_ID(),
+				array(
+					'width'  => $width,
+					'height' => $height,
+				)
+			);
 			if ( $post_images && ! is_wp_error( $post_images ) ) {
 				foreach ( (array) $post_images as $post_image ) {
 					$image['src'] = $post_image['src'];
@@ -305,14 +314,17 @@ function jetpack_og_get_image( $width = 200, $height = 200, $deprecated = null )
 		}
 	} elseif ( is_author() ) {
 		$author       = get_queried_object();
-		$image['src'] = get_avatar_url( $author->user_email, array(
-			'size' => $width,
-		) );
+		$image['src'] = get_avatar_url(
+			$author->user_email,
+			array(
+				'size' => $width,
+			)
+		);
 	}
 
 	// First fall back, blavatar.
 	if ( empty( $image ) && function_exists( 'blavatar_domain' ) ) {
-		$blavatar_domain = blavatar_domain( site_url() );
+		$blavatar_domain = blavatar_domain( home_url() );
 		if ( blavatar_exists( $blavatar_domain ) ) {
 			$image['src']    = blavatar_url( $blavatar_domain, 'img', $width, false, true );
 			$image['width']  = $width;
@@ -379,8 +391,8 @@ function _jetpack_og_get_image_validate_size( $width, $height, $req_width, $req_
 		return false;
 	}
 
-	$valid_width = ( $width >= $req_width );
-	$valid_height = ( $height >= $req_height );
+	$valid_width         = ( $width >= $req_width );
+	$valid_height        = ( $height >= $req_height );
 	$is_image_acceptable = $valid_width && $valid_height;
 
 	return $is_image_acceptable;
@@ -394,7 +406,10 @@ function _jetpack_og_get_image_validate_size( $width, $height, $req_width, $req_
  * @return array|bool|mixed|string
  */
 function jetpack_og_get_image_gravatar( $email, $width ) {
-	return get_avatar_url( $email, array(
-		'size' => $width,
-	) );
+	return get_avatar_url(
+		$email,
+		array(
+			'size' => $width,
+		)
+	);
 }

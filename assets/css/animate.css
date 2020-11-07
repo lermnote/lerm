@@ -719,7 +719,7 @@
     transform: scale(1);
   }
 }
-
+.like-button:hover i,
 .heartBeat {
   -webkit-animation-name: heartBeat;
   animation-name: heartBeat;

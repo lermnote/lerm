@@ -417,8 +417,9 @@ class Chinese_to_PY {
 			$sGBK = $chinese;
 		}
 		$aBuf = array();
-		for ( $i = 0, $iLoop = strlen( $sGBK ); $i < $iLoop; $i++ ) {
-			$iChr = ord( $sGBK{$i} );
+		$iLoop = strlen( $sGBK );
+		for ( $i = 0; $i < $iLoop; $i++ ) {
+			$iChr = ord( $sGBK[$i] );
 			if ( $iChr > 160 ) {
 				$iChr = ( $iChr << 8 ) + ord( $sGBK{++$i} ) - 65536;
 			}

@@ -25,19 +25,21 @@ function lerm_custom_logo() {
 	if ( ! empty( $large_logo ) ) {
 		$custom_logo_id = $large_logo;
 	}
-	$html = sprintf(
-		'<a href="%1$s" class="custom-logo-link" rel="home" itemprop="url">%2$s</a>',
-		esc_url( home_url( '/' ) ),
-		wp_get_attachment_image(
-			$custom_logo_id,
-			'full',
-			false,
-			array(
-				'class' => 'custom-logo',
+	if ( $custom_logo_id ) {
+		$html = sprintf(
+			'<a href="%1$s" class="custom-logo-link" rel="home" itemprop="url">%2$s</a>',
+			esc_url( home_url( '/' ) ),
+			wp_get_attachment_image(
+				$custom_logo_id,
+				'full',
+				false,
+				array(
+					'class' => 'custom-logo',
+				)
 			)
-		)
-	);
-	return $html;
+		);
+		return $html;
+	}
 }
 add_filter( 'get_custom_logo', 'lerm_custom_logo' );
 

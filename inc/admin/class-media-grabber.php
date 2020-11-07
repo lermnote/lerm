@@ -111,7 +111,7 @@ class Hybrid_Media_Grabber {
 			'type'        => 'video',        // audio|video
 			'before'      => '',             // HTML before the output
 			'after'       => '',             // HTML after the output
-			'split_media' => false,          // Splits the media from the post content
+			'split_media' => true,          // Splits the media from the post content
 			'width'       => $content_width, // Custom width. Defaults to the theme's content width.
 			'shortcodes'  => true,           // True | False | Array of specific shortcode handles to look for.
 			'autoembeds'  => true,           // Whether to check for autoembeds.

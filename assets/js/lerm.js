@@ -2,13 +2,13 @@
  * Global Javascript Functions
  *
  * @Authors Lerm https://www.hanost.com
- * @Date 2016-04-17 22:02:49
- * @LastEditTime 2020-03-21 19:03:53
- * @version 2.0
+ * @Date    2016-04-17 22:02:49
+ * @Version 2.0
  */
 
 (function () {
 	"use strict";
+	
 	//archives page expand
 	let archive = $("#archives");
 	let monthList = $(".month-list", archive);
@@ -19,9 +19,7 @@
 	postListFirst.show();
 	monthList.first().show();
 	monthPostList.css("cursor", "s-resize").on("click", function () {
-		$(this)
-			.next()
-			.slideToggle(400);
+		$(this).next().slideToggle(400);
 	});
 	var animate = function (index, status, s) {
 		if (index > postList.length) {
@@ -55,7 +53,15 @@
 		return $(this).ekkoLightbox();
 	});
 })($);
+
 document.addEventListener("DOMContentLoaded", function (e) {
+	let wow = new WOW({
+		boxClass: "loading-animate",
+		animateClass: "animated",
+		offset: 0,
+		mobile: true,
+	});
+	wow.init();
 	/**
 	 * global variable
 	 *
@@ -63,13 +69,47 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	let html = document.documentElement;
 	let body = document.body;
 
+	// image resize to fill full container
+	imageResize = (parentNode) => {
+		let item = document.querySelector(parentNode);
+		if (item) {
+			let items = document.querySelectorAll(parentNode);
+			let naturalWidth = item.querySelector("img").naturalWidth;
+			let naturalHeight = item.querySelector("img").naturalHeight;
+			let offsetWidth = item.querySelector("img").offsetWidth;
+			let offsetHeight = item.querySelector("img").offsetHeight;
+			console.log(naturalWidth, naturalHeight, offsetWidth, offsetHeight);
+			items.forEach((e) => {
+				e.querySelector("img").style.width = offsetWidth + "px";
+				e.querySelector("img").style.height = offsetHeight + "px";
+			});
+		}
+	};
 	/**
-	 * dropdown menu hover show
+	 * carousel image height
+	 *
+	 */
+	imageResize(".carousel-item");
+	// imageResize(".thumbnail-wrap");
+	// let carouselItem  = document.querySelector('.thumbnail-wrap');
+	// if( carouselItem ) {
+	// 	let carouselItems = document.querySelectorAll('.thumbnail-wrap');
+	// 	let naturalWidth = carouselItem.querySelector('img').naturalWidth;
+	// 	let naturalHeight = carouselItem.querySelector('img').naturalHeight;
+	// 	let offsetWidth = carouselItem.querySelector('img').offsetWidth;
+	// 	carouselItems.forEach(e=>{
+	// 		e.querySelector('img').style.width  = offsetWidth + 'px'
+	// 		e.querySelector('img').style.height = naturalHeight / naturalWidth * offsetWidth + 'px';
+	// 	})
+	// }
+
+	/**
+	 * Dropdown menu hover show
 	 *
 	 */
 	let dropdown = document.querySelectorAll(".dropdown");
 	if (dropdown) {
-		dropdown.forEach(e => {
+		dropdown.forEach((e) => {
 			e.onmouseover = () =>
 				e.querySelector(".dropdown-menu").classList.add("show");
 			e.onmouseout = () =>
@@ -78,10 +118,9 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	}
 
 	/**
-	 * mobile menu
+	 * Mobile menu
 	 *
 	 */
-	//dropback
 	let backdrop = body.querySelector(".menu-backdrop");
 	if (!backdrop) {
 		return;
@@ -91,9 +130,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	let windowWidth = document.body.clientWidth;
 	let siteHeader = body.querySelector("#site-header");
 	let navbar = document.querySelector("#navbar");
-	if (!navbar) {
-		return;
-	}
 
 	// mobile menu collope
 	let navigation = document.querySelector("#site-navigation");
@@ -101,7 +137,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 		return;
 	}
 
-	let toggleButton = navigation.querySelector(".menu-toggle");
+	let toggleButton = document.getElementById("trigger");
 	if ("undefined" === typeof toggleButton) {
 		return;
 	}
@@ -111,17 +147,15 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	if (!menuList) {
 		toggleButton.style.display = "none";
 	} else {
-		menuList.setAttribute("aria-expanded", "false");
 		// Get all the link elements within the menu.
 		let links = menuList.querySelectorAll("a");
 		let subMenus = menuList.getElementsByClassName("dropdown-menu");
-
 		// Set menu items with submenus to aria-haspopup="true".
 		for (let i = 0, len = subMenus.length; i < len; i++) {
 			subMenus[i].parentNode.setAttribute("aria-haspopup", "true");
 		}
 		//click link to hidden menu
-		links.forEach(e => {
+		links.forEach((e) => {
 			if (!e.classList.contains("dropdown-toggle"))
 				e.onclick = function () {
 					body.classList.remove("nav-opened");
@@ -132,45 +166,50 @@ document.addEventListener("DOMContentLoaded", function (e) {
 		});
 	}
 	if (windowWidth < 992) {
-		// navbar.style.top = parseFloat(document.defaultView.getComputedStyle(html, null).marginTop) + navigation.offsetHeight + 'px';
-		navbar.style.top = document.defaultView.getComputedStyle(
-			html,
-			null
-		).marginTop;
+		backdrop.style.top = navbar.style.top =
+			parseFloat(
+				document.defaultView.getComputedStyle(html, null).marginTop
+			) +
+			navigation.offsetHeight +
+			"px"; //position:absolute
+		// backdrop.style.top = navbar.style.top = navigation.offsetHeight + 'px';//position:absolute
 	}
-
-	toggleButton.onclick = function () {
+	toggleButton.addEventListener("click", (e) => {
+		e.preventDefault();
 		if (-1 != navigation.className.indexOf("toggled")) {
+			toggleButton.setAttribute("aria-expanded", "false");
+			backdrop.classList.remove("show");
+			navbar.classList.remove("show");
 			navigation.classList.remove("toggled");
 			body.classList.remove("nav-opened");
-			toggleButton.setAttribute("aria-expanded", "false");
-			menuList.setAttribute("aria-expanded", "false");
-			backdrop.classList.remove("show");
 			html.classList.remove("noscroll");
 		} else {
+			html.classList.add("noscroll");
 			body.classList.add("nav-opened");
 			navigation.classList.add("toggled");
-			toggleButton.setAttribute("aria-expanded", "true");
-			menuList.setAttribute("aria-expanded", "true");
+			navbar.classList.add("show");
 			backdrop.classList.add("show");
-			html.classList.add("noscroll");
+			toggleButton.setAttribute("aria-expanded", "true");
 		}
-	};
+	});
 
 	let dragging = false;
 	backdrop.addEventListener("touchmove", () => {
 		dragging = true;
 		// console.log("触摸滑动事件", dragging);
 	});
-	backdrop.addEventListener("touchend", e => {
+	backdrop.addEventListener("touchend", (e) => {
 		e.preventDefault();
 		if (false === dragging) {
 			// console.log("触摸结束事件", dragging);
-			if (-1 !== backdrop.className.indexOf("show")) {
-				body.classList.remove("nav-opened");
+			if (-1 != backdrop.className.indexOf("show")) {
+				//body.classList.remove("nav-opened");
 				navigation.classList.remove("toggled");
+				toggleButton.setAttribute("aria-expanded", "false");
 				backdrop.classList.remove("show");
 				html.classList.remove("noscroll");
+				body.classList.remove("nav-opened");
+				navbar.classList.remove("show");
 			}
 		}
 	});
@@ -183,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 * calendar add class
 	 *
 	 */
-	document.querySelectorAll("#wp-calendar tbody td a").forEach(e => {
+	document.querySelectorAll("#wp-calendar tbody td a").forEach((e) => {
 		e.classList.add("has-posts");
 	});
 
@@ -193,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 */
 	let lazyLoadInstance = new LazyLoad({
 		elements_selector: ".lazy",
-		threshold: 0
+		threshold: 0,
 	});
 	if (lazyLoadInstance) {
 		lazyLoadInstance.update();
@@ -204,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 *
 	 */
 	if ("undefined" !== typeof hljs) {
-		document.querySelectorAll("pre code").forEach(block => {
+		document.querySelectorAll("pre code").forEach((block) => {
 			hljs.highlightBlock(block);
 		});
 	}
@@ -214,28 +253,29 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 *
 	 */
 	let scrollUp = document.getElementById("scroll-up");
-	scrollUp.addEventListener("click", e => {
+	scrollUp.addEventListener("click", (e) => {
 		e.preventDefault();
 		animate({
 			duration: 700,
 			timing: scrollUpEaseOut,
-			draw: progress =>
-				(html.scrollTop = html.scrollTop * (1 - progress / 7))
+			draw: (progress) =>
+				(html.scrollTop = html.scrollTop * (1 - progress / 7)),
 		});
 	});
 	window.addEventListener("scroll", check);
 
-	function check() {
+	function check () {
 		pageYOffset >= 500 && scrollUp.classList.add("show");
 		pageYOffset < 500 && scrollUp.classList.remove("show");
 	}
-	let circ = timeFraction =>
+	let circ = (timeFraction) =>
 		1 -
 		Math.sin(
 			Math.acos(timeFraction > 1 ? (timeFraction = 1) : timeFraction)
 		);
 
-	let makeEaseOut = timing => timeFraction => 1 - timing(1 - timeFraction);
+	let makeEaseOut = (timing) => (timeFraction) =>
+		1 - timing(1 - timeFraction);
 	let scrollUpEaseOut = makeEaseOut(circ);
 
 	/**
@@ -243,90 +283,83 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 *
 	 * @since 3.2
 	 */
-	let loadMorePosts = document.querySelector(".more-posts");
-	if (loadMorePosts) {
-		loadMorePosts.addEventListener("click", e => {
-			e.preventDefault();
-			loadMorePosts.innerHTML = adminajax.loading;
 
-			let params = new FormData();
-			params.append("query", adminajax.posts);
-			params.append("page", adminajax.current);
-			params.append("security", adminajax.nonce);
+	const loadMoreBtn = document.querySelector(".more-posts");
+	if (typeof loadMoreBtn != "undefined" && loadMoreBtn != null) {
+		loadMoreBtn.addEventListener("click", (e) => {
+			e.preventDefault();
+			loadMoreBtn.innerHTML = adminajax.loading;
+			let postsList = document.querySelector(".ajax-posts");
+			let currentPage = postsList.dataset.page;
+			let maxPages = postsList.dataset.max;
+
+			let params = new URLSearchParams();
 			params.append("action", "lerm_load_more");
+			params.append("security", adminajax.nonce);
+			params.append("current_page", currentPage);
+			params.append("max_pages", maxPages);
+
 			fetch(adminajax.url, {
-					method: "POST",
-					body: params
-				})
-				.then(response => response.text())
-				.then(data => {
-					if (data.length) {
-						adminajax.current++;
-						let newData = parseToDOM(data);
-						newData.forEach(e => {
+				method: "POST",
+				body: params,
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.success == true) {
+						let newData = parseToDOM(data.data);
+						postsList.dataset.page++;
+						newData.forEach((e) => {
+							//loadMorePosts.dataset.page = '/page/' + adminajax.current;
 							document
 								.querySelector(".ajax-posts")
 								.appendChild(e);
-							if (e.childNodes.length) {
-								e.classList.add("ajax-loading");
-							}
 						});
-						return document.querySelectorAll(".ajax-loading");
+						//history.replaceState(null, null, '?paged=' + adminajax.current)
 					}
-
-					loadMorePosts.innerHTML = adminajax.noposts;
-					throw data;
+					loadMoreBtn.innerHTML = adminajax.loadmore;
+					loadMoreBtn.blur();
+					if (currentPage == maxPages) {
+						throw data;
+					}
 				})
-				.then(e => {
-					Array.prototype.slice.call(e).forEach(f => {
-						fadeIn(f);
-						f.classList.remove("ajax-loading");
-					});
-					loadMorePosts.innerHTML = adminajax.loadmore;
-				})
-				.catch(err => {
-					// console.log(err)
-					loadMorePosts.setAttribute("disabled", "true");
-					loadMorePosts.setAttribute("aria-disabled", "true");
+				.catch((err) => {
+					loadMoreBtn.innerHTML = adminajax.noposts;
+					loadMoreBtn.blur();
+					loadMoreBtn.setAttribute("disabled", "true");
+					loadMoreBtn.setAttribute("aria-disabled", "true");
 				});
 		});
 	}
 
 	/**
 	 * Ajax like post;
-	 *
-	 * @since 3.2
 	 */
-	let likeButton = document.querySelector("#like-button");
-	// console.log(likeButton);
-	if (likeButton) {
-		let id = likeButton.dataset.id;
-		let params = new FormData();
+	let likeBtn = document.querySelector(".like-button");
+	if (typeof likeBtn != "undefined" && likeBtn != null && likeBtn.classList.contains("done") == false) {
+		let postID = likeBtn.dataset.id;
+
+		let params = new URLSearchParams();
 		params.append("action", "lerm_post_like");
-		params.append("postID", id);
 		params.append("security", adminajax.nonce);
+		params.append("post_ID", postID);
 
-		likeButton.addEventListener("click", e => {
+		likeBtn.addEventListener("click", (e) => {
 			e.preventDefault();
-
-			if (!likeButton.classList.contains("done")) {
-				fetch(adminajax.url, {
-						method: "POST",
-						body: params
-					})
-					.then(response => response.json())
-					.then(data => {
-						// console.log(data);
-						likeButton.classList.add("done");
-						likeButton.disabled = true;
-						document.querySelector(".count").innerHTML = parseInt(
-							data
-						);
-					})
-					.catch(err => console.log(err.message));
-			}
+			fetch(adminajax.url, {
+				method: "POST",
+				body: params,
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					// console.log(data);
+					likeBtn.classList.add("done");
+					likeBtn.disabled = true;
+					document.querySelector(".count").innerHTML = parseInt(data);
+				})
+				.catch((err) => console.log(err.message));
 		});
 	}
+
 	/**
 	 * Ajax comment submission
 	 *
@@ -335,7 +368,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	let commentForm = document.getElementById("commentform");
 	if (commentForm) {
 		//error info display
-		commentForm.insertAdjacentHTML( 'beforeend', '<div id="error" class="text-danger wow"></div>' );
+		commentForm.insertAdjacentHTML( "beforeend", '<div id="error" class="text-danger wow"></div>');
 		let errInfo = commentForm.querySelector("#error");
 		let author = commentForm.querySelector('[name="author"]');
 		let email = commentForm.querySelector('[name="email"]');
@@ -346,52 +379,37 @@ document.addEventListener("DOMContentLoaded", function (e) {
 		errInfo.innerHTML = "#";
 
 		//submit event
-		commentForm.addEventListener("submit", e => {
+		commentForm.addEventListener("submit", (e) => {
 			e.preventDefault();
-			errInfo.removeAttribute('style');
-			errInfo.classList.remove('shake');
-			errInfo.classList.remove('fadeOut');
-			errInfo.innerHTML =  '<strong><i class="fa fa-spinner fa-pulse mr-1"></i>正在提交...</strong>';
+			errInfo.removeAttribute("style");
+			errInfo.classList.remove("shake");
+			errInfo.classList.remove("fadeOut");
+			errInfo.innerHTML = '<strong><i class="fa fa-spinner fa-pulse mr-1"></i>正在提交...</strong>';
 			new WOW().init();
 
 			// check user logged in.
 			if (!adminajax.loggedin) {
-				let data = {
+				let formData = {
 					author: author.value,
 					email: email.value,
 					url: url.value,
 				};
-				if (!data.author) {
-					errInfo.innerHTML = '<strong>错误：</strong>请填写姓名';
-					errInfo.classList.add('shake');
-					// let shake = setTimeout(function(){
-					// 	errInfo.classList.remove('shake');
-					// 	// errInfo.removeAttribute('style');
-					// 	clearTimeout(shake);
-					// }, 3000);
+				if (!formData.author) {
+					errInfo.innerHTML = "<strong>错误：</strong>请填写姓名";
+					errInfo.classList.add("shake");
 					return;
 				}
 
-				if (!validateEmail(data.email)) {
-					errInfo.innerHTML = '<strong>错误：</strong>请填写正确的电子邮箱';
-					errInfo.classList.add('shake');
-					// let shake = setTimeout(function(){
-					// 	errInfo.classList.remove('shake');
-					// 	// errInfo.removeAttribute('style');
-					// 	clearTimeout(shake);
-					// }, 3000);
+				if (!validateEmail(formData.email)) {
+					errInfo.innerHTML = "<strong>错误：</strong>请填写正确的电子邮箱";
+					errInfo.classList.add("shake");
 					return;
 				}
 			}
 
 			if (!comment.value) {
-				errInfo.innerHTML = '<strong>错误：</strong>请输入评论内容';
-				errInfo.classList.add('shake');
-				// let shake = setTimeout(function(){
-				// 	errInfo.classList.remove('shake');
-				// 	// errInfo.removeAttribute('style');
-				// 	clearTimeout(shake);
-				// }, 3000);
+				errInfo.innerHTML = "<strong>错误：</strong>请输入评论内容";
+				errInfo.classList.add("shake");
 				return;
 			}
 
@@ -400,85 +418,120 @@ document.addEventListener("DOMContentLoaded", function (e) {
 			params.append("security", adminajax.nonce);
 			// console.log(params);
 			fetch(adminajax.url, {
-					method: "POST",
-					body: params
-				})
-				.then(response => response.text())
-				.then(e => {
-					let data = parseToDOM(e);
-					// console.log(data, data.length)
-					if ("STRONG" === data[0].nodeName||data.length===1) {
-						throw data;
-					}
-					let respond = document.getElementById("respond");
-					// errInfo.style.display = "none";
-					if (respond.parentNode.classList.contains("comment")) {
-						if (null !== respond.nextElementSibling) {
-							data.forEach(e => {
-								respond.nextElementSibling.appendChild(e);
-								commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
+				method: "POST",
+				body: params,
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					// console.log(data);
+					let nodeArray = parseToDOM(data.data);
+					if (data.success == true && data.data.length != 0) {
+						commentForm.querySelector('[type="submit"]').setAttribute("disabled", "disabled");
+						let respond = document.getElementById("respond");
+						if (respond.parentNode.classList.contains("comment")) {
+							// console.log('1')
+							if (null !== respond.previousElementSibling) {
+								// console.log('2')
+								//这个if是为了回复评论是在原评论下面追加子评论
+								nodeArray.forEach((e) => {
+									respond.previousElementSibling.appendChild(e);
+								});
+								//console.log('1')
+							} else {
+								nodeArray.forEach((e) => {
+									// console.log('3')
+									respond.parentNode.appendChild(e);
+								});
+							}
+						} else if (document.querySelector(".comment-list")) {
+							//增加新评论是使用此方法
+							nodeArray.forEach((e) => {
+								document
+									.querySelector(".comment-list")
+									.insertBefore(
+										e,
+										document.querySelector(".comment-list")
+											.firstChild
+									);
 							});
-							//console.log('1')
 						} else {
-							data.forEach(e => {
+							nodeArray.forEach((e) => {
+								//无评论是使用此方法
 								// console.log(e)
 								respond.parentNode.appendChild(e);
-								commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
 							});
 						}
-					}
-					if (document.querySelector(".comment-list")) {
-						data.forEach(e => {
-							document.querySelector(".comment-list").insertBefore( e, document.querySelector(".comment-list") .firstChild );
-							commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
-							//console.log('2')
-						});
 					} else {
-						data.forEach(e => {
-							// console.log(e)
-							respond.parentNode.appendChild(e);
-							commentForm.querySelector('[type="submit"]').removeAttribute('disabled', 'disabled')
-						});
+						// 若success:false,则抛出错误；
+						throw nodeArray;
 					}
 				})
 				.then(() => {
 					commentForm.querySelector("#comment").value = "";
-					errInfo.innerHTML =  '<strong><i class="fa fa-ok mr-1"></i>提交成功</strong>';
-					let fadeOut = setTimeout(function(){
-						errInfo.classList.add('fadeOut');
+					errInfo.innerHTML = '<strong><i class="fa fa-ok mr-1"></i>提交成功</strong>';
+					let fadeOut = setTimeout(function () {
+						commentForm.querySelector('[type="submit"]').removeAttribute("disabled", "disabled");
+						errInfo.classList.add("fadeOut");
 						errInfo.style.opacity = 0;
-						clearTimeout(fadeOut)
+						clearTimeout(fadeOut);
 					}, 3000);
 				})
-				.catch(err => {
-					 console.log(err);
-					errInfo.innerHTML = " ";
+				.catch((err) => {
+					// console.log(err);
+					errInfo.innerHTML ="<strong>错误：</strong>";
 					//show orror info
-					err.forEach(e => {
+					err.forEach((e) => {
 						errInfo.appendChild(e);
-						let fadeOut = setTimeout(function(){
-							errInfo.classList.add('fadeOut');
+						errInfo.classList.add("shake");
+						let fadeOut = setTimeout(function () {
+							commentForm.querySelector('[type="submit"]').removeAttribute("disabled", "disabled");
+							errInfo.classList.add("fadeOut");
 							errInfo.style.opacity = 0;
-							clearTimeout(fadeOut)
+							clearTimeout(fadeOut);
 						}, 3000);
 					});
-					// console.log(e);
 				});
 		});
 	}
 });
 
+
+/**
+ * Is the DOM ready
+ *
+ * this implementation is coming from https://gomakethings.com/a-native-javascript-equivalent-of-jquerys-ready-method/
+ *
+ * @param {Function} fn Callback function to run.
+ */
+function isDomReady( fn ) {
+	if ( typeof fn !== 'function' ) {
+		return;
+	}
+
+	if ( document.readyState === 'interactive' || document.readyState === 'complete' ) {
+		return fn();
+	}
+
+	document.addEventListener( 'DOMContentLoaded', fn, false );
+}
+
+isDomReady(function(){
+
+})
+
+
 /**
  *Parse to DOM Array
  *
- * @param {*} s
- * @returns
+ * @param {*} string
+ * @returns {array}
  */
-function parseToDOM(s) {
+const parseToDOM = function (string) {
 	let div = document.createElement("div");
-	if (typeof s == "string") div.innerHTML = s;
+	if (typeof string == "string") div.innerHTML = string;
 	return Array.prototype.slice.call(div.childNodes);
 }
+
 /**
  *
  * @param {*} el
@@ -500,7 +553,7 @@ const matches = function (el, selector) {
  *
  * @param {*} e
  */
-function fadeIn(e) {
+function fadeIn (e) {
 	e.style.opacity = 0;
 
 	var last = +new Date();
@@ -510,7 +563,7 @@ function fadeIn(e) {
 
 		if (+e.style.opacity < 1) {
 			(window.requestAnimationFrame && requestAnimationFrame(tick)) ||
-			setTimeout(tick, 16);
+				setTimeout(tick, 16);
 		}
 	};
 	tick();
@@ -521,7 +574,7 @@ function fadeIn(e) {
  *
  * @param {*} email
  */
-function validateEmail(email) {
+const validateEmail = function (email) {
 	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 	return re.test(String(email).toLowerCase());
 }
@@ -530,10 +583,10 @@ function validateEmail(email) {
  *
  * @param {*} options
  */
-function animate(options) {
+const animate = function (options) {
 	let start = performance.now();
 
-	requestAnimationFrame(function animate(time) {
+	requestAnimationFrame(function animate (time) {
 		let timeFraction = (time - start) / options.duration;
 		timeFraction > 1 && (timeFraction = 1);
 

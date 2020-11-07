@@ -6,7 +6,7 @@
 $social_share = apply_filters( 'social_share_icons', lerm_options( 'social_share' ) );?>
 
 <?php if ( $social_share ) { ?>
-	<div class="social-share" data-initialized="true">
+	<div class="social-share d-flex justify-content-center" data-initialized="true">
 		<?php if ( in_array( 'weibo', $social_share, true ) ) { ?>
 			<a href="#" class="social-share-icon icon-weibo btn-light btn-sm "><i class="fa fa-weibo"></i></a>
 		<?php } ?>

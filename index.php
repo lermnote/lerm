@@ -5,43 +5,37 @@
  * It is used to display a page when nothing more specific matches a query,
  * e.g., it puts together the home page when no home.php file exists.
  *
- * @author lerm http://lerm.net
- * @since  1.0
+ * @author lerm https://www.hanost.com
+ * @package Lerm
  */
 
 get_header();
-$row_class    = ( 'layout-1c-narrow' === lerm_page_layout() ) ? 'justify-content-md-center' : '';
-$colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_page_layout() ) ? 'col-md-12' : 'col-lg-8';
+$breadcrumb = new \Lerm\Inc\Breadcrumb();
+$carousel   = new \Lerm\Inc\Carousel();
 ?>
-<main role="main" class="container mt-md-3"><!--.container-->
 
-	<div class="row <?php echo esc_attr( $row_class ); ?> "><!--.row-->
-
-		<div class="<?php echo esc_attr( $colunm_class ); ?>  px-0" ><!--.col-md-12 .col-lg-8-->
-			<?php if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'above_entry_list' ) : ?>
-				<div class="mb-2">
-					<?php lerm_carousel( array() ); ?>
-				</div>
-			<?php endif; ?>
-
-			<div id="main" class="site-main ajax-posts">
-
+<main role="main" class="container" ><!--.container-->
+	<?php $breadcrumb->trail(); ?>
+	<div <?php lerm_row_class(); ?>><!--.row-->
+		<div <?php lerm_column_class( ); ?>><!--.col-md-12 .col-lg-8-->
+			<?php
+			if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'above_entry_list' ) :
+				$carousel->render();
+			endif;
+			?>
+			<div id="main" class="site-main ajax-posts row row-cols-1 row-cols-md-4" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
 				<?php
 				if ( have_posts() ) :
 					while ( have_posts() ) :
 						the_post();
-						get_template_part( 'template/content/content', 'excerpt' );
+						get_template_part( 'template-parts/content/content', 'card' );
 					endwhile;
 				endif;
 				?>
-
-			</div><!--.col-md-12 .col-lg-8-->
-			<div class="px-3 px-md-0">
-				<?php
-				global $wp_query;
-				if ( $wp_query->max_num_pages > 1 && ( lerm_options( 'load_more' ) || wp_is_mobile() ) ) :
-					?>
-					<button class='btn btn-custom btn-block more-posts' data-page="1"><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
+			</div><!--.site-main-->
+			<div class="navigation">
+				<?php if ( ( lerm_options( 'load_more' ) || wp_is_mobile() ) ) : ?>
+					<button class='btn btn-sm btn-custom btn-block more-posts loading-animate fadeInUp' data-page="/"><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
 					<?php
 				else :
 					lerm_pagination();

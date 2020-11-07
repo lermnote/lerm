@@ -1,24 +1,26 @@
 <?php
 
 // load class files
-require LERM_DIR . 'inc/admin/class-media-grabber.php';
-require LERM_DIR . 'inc/admin/class-lerm-carousel.php';
-require LERM_DIR . 'inc/admin/class-lerm-svg-icons.php';
-require LERM_DIR . 'inc/admin/class-breadcrumb-trail.php';
-require LERM_DIR . 'inc/admin/class-lerm-walker-comment.php';
-require LERM_DIR . 'inc/admin/class-lerm-walker-nav-menu.php';
+// require_once LERM_DIR . 'inc/admin/class-media-grabber.php';
+//// require_once LERM_DIR . 'inc/admin/class-lerm-carousel.php';
+// require_once LERM_DIR . 'inc/admin/class-lerm-svg-icons.php';
+// // require_once LERM_DIR . 'inc/admin/class-breadcrumb-trail.php';
+// // require_once LERM_DIR . 'inc/admin/class-lerm-walker-comment.php';
+//// require_once LERM_DIR . 'inc/admin/class-lerm-walker-nav-menu.php';
 
-// load function files
-require LERM_DIR . 'inc/admin/function-like.php';
-require LERM_DIR . 'inc/admin/function-mail.php';
-require LERM_DIR . 'inc/admin/function-login.php';
-require LERM_DIR . 'inc/admin/function-archives.php';
-require LERM_DIR . 'inc/admin/function-thumbnail.php';
-require LERM_DIR . 'inc/admin/function-lazyload.php';
-require LERM_DIR . 'inc/admin/function-load-more.php';
-require LERM_DIR . 'inc/admin/icon-functions.php';
-require LERM_DIR . 'inc/admin/functions.opengraph.php';
-require LERM_DIR . 'inc/admin/function-related.php';
-
+// loader function files
+require_once LERM_DIR . 'inc/admin/function-like.php';
+// require_once LERM_DIR . 'inc/admin/function-mail.php';
+require_once LERM_DIR . 'inc/admin/function-login.php';
+require_once LERM_DIR . 'inc/admin/function-archives.php';
+require_once LERM_DIR . 'inc/admin/function-thumbnail.php';
+require_once LERM_DIR . 'inc/admin/function-lazyload.php';
+require_once LERM_DIR . 'inc/admin/function-load-more.php';
+require_once LERM_DIR . 'inc/admin/icon-functions.php';
+require_once LERM_DIR . 'inc/admin/functions.opengraph.php';
+require_once LERM_DIR . 'inc/admin/function-related.php';
+require_once LERM_DIR . 'inc/admin/function-grabber-favico.php';
+require_once LERM_DIR . 'inc/admin/auth.php';
+require_once LERM_DIR . 'inc/functions/functions-layout.php';
 // Load the template files
-require LERM_DIR . 'inc/admin/zh_to_py.php';
+require_once LERM_DIR . 'inc/admin/zh_to_py.php';

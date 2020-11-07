@@ -5,15 +5,16 @@
  * the visitor has not yet entered the password we will
  * return early without loading the comments.
  *
- * @since   2.0
- * @package https://www.hanost.com
+ * @author Lerm https://www.hanost.com
+ * @date   2019-12-11 21:57:52
+ * @since  2.0
  */
+global $post_id;
 if ( post_password_required() ) {
 	return;
 }?>
 <div id="comments" class="comments">
 	<?php if ( comments_open() || pings_open() ) : ?>
-
 		<?php
 		$commenter = wp_get_current_commenter();
 		sanitize_comment_cookies();
@@ -33,9 +34,9 @@ if ( post_password_required() ) {
 			<textarea id="comment" class="rq form-control mb-2"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea>',
 
 			'fields'               => array(
-				'author' => '<div class="form-group input-form"><label class="sr-only" for="author">Username</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-user"></i></div></div><input type="text" name="author" class="rq form-control" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
-				'email'  => '<label class="sr-only" for="email">Email</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-envelope"></i></div></div><input type="email" name="email" class="rq form-control" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . __( 'E-mail', 'lerm' ) . '" required></div>',
-				'url'    => '<label class="sr-only" for="url">Url</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-link"></i></div></div><input type="url" name="url" class="form-control" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></div></fieldset>',
+				'author' => '<div class="form-group input-form"><label class="sr-only" for="author">Username</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-user"></i></div></div><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
+				'email'  => '<label class="sr-only" for="email">Email</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-envelope"></i></div></div><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . __( 'E-mail', 'lerm' ) . '" required></div>',
+				'url'    => '<label class="sr-only" for="url">Url</label><div class="input-group mb-2"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-link"></i></div></div><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></div></fieldset>',
 			),
 
 			'logged_in_as'         => '<p class="logged-in-as">' . sprintf(
@@ -49,9 +50,21 @@ if ( post_password_required() ) {
 				wp_logout_url( apply_filters( 'the_permalink', get_permalink() ) ),
 				__( 'Log out', 'lerm' )
 			) . '</p>',
+			'must_log_in'          => sprintf(
+				'<div class="must-log-in card-body">%s</div>',
+				sprintf(
+					/* translators: %s: Login URL. */
+					__( 'You must be <a class="badge badge-pill badge-primary text-light" href="%s">logged in</a> to post a comment.' ),
+					/** This filter is documented in wp-includes/link-template.php */
+					wp_login_url( apply_filters( 'the_permalink', get_permalink( $post_id ), $post_id ) )
+				)
+			),
+			'class_container'      => 'card comment-respond',
+			'class_form'           => 'card-body comment-form',
 			'id_submit'            => 'submit',
-			'class_submit'         => 'btn btn-custom',
-			'title_reply'          => '<span class="wrap fa p-2 d-inline-block">' . __( 'Leave a Reply', 'lerm' ) . '</span>',
+			'class_submit'         => 'btn btn-sm btn-custom',
+			'title_reply'          => '<i class="fa fa-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
+			'title_reply_before'   => '<h3 id="reply-title" class="comment-reply-title card-header">',
 		);
 		comment_form( $args );
 		?>
@@ -63,7 +76,8 @@ if ( post_password_required() ) {
 			lerm_paginate_comments();
 		}
 		?>
-		<h2 class="comment-title card-header border-bottom-0 bg-white mt-2">
+		<div class="card comments-list mt-2">
+		<h3 class="comment-title card-header border-bottom-0">
 			<?php
 			printf(
 				/* translators: 1: number of comments, 2: post title */
@@ -72,12 +86,12 @@ if ( post_password_required() ) {
 				esc_html( get_the_title() )
 			);
 			?>
-		</h2>
-		<ol class="comment-list p-0 m-0 card-body">
+		</h3>
+		<ol class="comment-list p-0 m-0 list-group list-group-flush">
 			<?php
 			wp_list_comments(
 				array(
-					'walker'      => new Lerm_Walker_Comment(),
+					'walker'      => \Lerm\Inc\Comment_Walker::get_instance(),
 					'type'        => 'comment',
 					'style'       => 'ol',
 					'short_ping'  => true,
@@ -86,8 +100,9 @@ if ( post_password_required() ) {
 			);
 			?>
 		</ol><!-- .comment-list -->
+		</div>
 		<?php if ( ! comments_open() && get_comments_number() ) : ?>
-			<p class="card-footer bg-white p-3"><?php esc_html_e( 'Comments are closed.', 'lerm' ); ?></p>
+			<p class=" alert alert-info mt-3"><?php esc_html_e( 'Comments are closed.', 'lerm' ); ?></p>
 		<?php endif; ?>
 
 		<?php
@@ -95,5 +110,5 @@ if ( post_password_required() ) {
 			lerm_paginate_comments();
 		}
 		?>
-<?php endif; // have comments. ?>
+	<?php endif; // have comments. ?>
 </div>

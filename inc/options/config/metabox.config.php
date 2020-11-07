@@ -9,7 +9,7 @@
 // If using image radio buttons, define a directory path
 global $lerm;
 // global layout
-$global_layout = $lerm['global_layout'];
+$global_layout = lerm_options( 'global_layout' );
 $imagepath     = LERM_URI . 'assets/img/';
 $layout        = array(
 	'layout-1c'        => $imagepath . '1c.png',
@@ -43,6 +43,7 @@ if ( class_exists( 'CSF' ) ) {
 					'id'      => 'page_layout',
 					'type'    => 'image_select',
 					'options' => $layout,
+					'default' => $global_layout,
 				),
 				array(
 					'id'          => 'sidebar_select',
@@ -54,6 +55,5 @@ if ( class_exists( 'CSF' ) ) {
 			),
 		)
 	);
-
 	$prefix_post_opts = '_lerm_post_options';
 }

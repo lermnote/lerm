@@ -13,18 +13,18 @@ get_header();
 ?>
 <main role="main" class="container">
 
-	<?php $class = ( 'layout-1c-narrow' === lerm_page_layout() ) ? 'justify-content-md-center' : ''; ?>
+	<?php $class = ( 'layout-1c-narrow' === lerm_site_layout() ) ? 'justify-content-md-center' : ''; ?>
 	<div class="row <?php echo esc_attr( $class ); ?> ">
 
-		<?php $class = ( wp_is_mobile() || 'layout-1c' === lerm_page_layout() ) ? 'col-md-12' : 'col-lg-8'; ?>
+		<?php $class = ( wp_is_mobile() || 'layout-1c' === lerm_site_layout() ) ? 'col-md-12' : 'col-lg-8'; ?>
 		<div class="<?php echo esc_attr( $class ); ?>  px-0" >
 
 			<div id="main" class="site-main ajax-posts">
 				<header>
 					<?php if ( have_posts() ) : ?>
-						<h1 class="page-title p-3 bg-white "><?php printf( esc_attr_e( 'Search results for: ', 'lerm' ) . ' "%1$s" ', '<span>' . get_search_query() . '</span>' ); ?></h1>
+						<h1 class="page-title p-3 bg-white "><?php printf( esc_html_e( 'Search results for: ', 'lerm' ) . ' "%1$s" ', '<span>' . get_search_query() . '</span>' ); ?></h1>
 					<?php else : ?>
-						<h1 class="page-title p-3 bg-white "><?php esc_attr_e( 'Nothing Found', 'lerm' ); ?></h1>
+						<h1 class="page-title p-3 bg-white "><?php esc_html_e( 'Nothing Found', 'lerm' ); ?></h1>
 					<?php endif; ?>
 				</header>
 				<?php
@@ -38,7 +38,7 @@ get_header();
 					?>
 				<?php else : ?>
 					<section class="bg-white p-3">
-						<p><?php esc_attr_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'lerm' ); ?></p>
+						<p><?php esc_html_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'lerm' ); ?></p>
 						<?php get_search_form(); ?>
 					</section>
 				<?php endif; ?>

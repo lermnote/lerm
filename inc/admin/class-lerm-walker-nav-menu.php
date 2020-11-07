@@ -20,7 +20,7 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 	public function start_lvl( &$output, $depth = 0, $args = array() ) {
 		$indent        = str_repeat( "\t", $depth );
 		$display_depth = ( $depth + 1 );
-		$output       .= "\n" . $indent . '<ul class="dropdown-menu m-0 border-0">' . "\n";
+		$output       .= "\n" . $indent . '<ul class="dropdown-menu border-0 m-0">' . "\n";
 	}
 
 	/**
@@ -79,16 +79,16 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 
 		$output .= $indent . '<li' . $id . $class_names . '>';
 
-		$atts                  = array();
-		$atts['title']         = ! empty( $item->attr_title ) ? $item->attr_title : '';
-		$atts['target']        = ! empty( $item->target ) ? $item->target : '';
+		$atts                = array();
+		$atts['title']       = ! empty( $item->attr_title ) ? $item->attr_title : '';
+		$atts['target']      = ! empty( $item->target ) ? $item->target : '';
 		$atts['data-toggle'] = ! empty( $item->data_toggle ) ? esc_attr( $item->data_toggle ) : '';
 		if ( '_blank' === $item->target && empty( $item->xfn ) ) {
 			$atts['rel'] = 'noopener noreferrer';
 		} else {
 			$atts['rel'] = $item->xfn;
 		}
-		$atts['href']           = ! empty( $item->url ) ? $item->url : '';
+		$atts['href']         = ! empty( $item->url ) ? $item->url : '';
 		$atts['aria-current'] = $item->current ? 'page' : '';
 
 		if ( 0 === $depth ) {
@@ -96,8 +96,8 @@ class Lerm_Walker_Nav_Menu extends Walker_Nav_Menu {
 			$atts['class'] .= ! empty( $item->a_class ) ? esc_attr( $item->a_class ) : '';
 		}
 		if ( 0 === $depth && in_array( 'menu-item-has-children', $classes, true ) ) {
-			$atts['data - toggle'] = 'dropdown';
-			$atts['class']        .= ' dropdown-toggle ';
+			$atts['data-toggle'] = 'dropdown';
+			$atts['class']      .= ' dropdown-toggle ';
 		}
 		if ( $depth > 0 ) {
 			$manual        = array_values( $classes )[0] . ' dropdown-item';
@@ -138,3 +138,19 @@ function lerm_remove_css_attributes( $var ) {
 add_filter( 'nav_menu_css_class', 'lerm_remove_css_attributes', 100, 1 );
 add_filter( 'nav_menu_item_id', 'lerm_remove_css_attributes', 100, 1 );
 add_filter( 'page_css_class', 'lerm_remove_css_attributes', 100, 1 );
+
+function add_search_form( $items, $args ) {
+	$searchform = '';
+	if ( in_array( $args->theme_location, array( 'primary', 'mobile' ), true )  ) {
+		$searchform = '<li class="nav-item d-lg-none">'
+		. '<form role="search" method="get" class="search-form my-1" action="' . esc_url( home_url( '/' ) ) . '">'
+		. '<label>'
+		. '<span class="screen-reader-text">' . _x( 'Search for:', 'label', 'lerm' ) . '</span>'
+		. '</label>'
+		. '<input type="search" class="form-control" placeholder="' . esc_attr_x( 'Search …', 'placeholder', 'lerm' ) . '" value="' . get_search_query() . '" name="s" title="' . esc_attr_x( 'Search for:', 'label', 'lerm' ) . '" />'
+		. '</form>'
+		. '</li>';
+	}
+	return $searchform . $items;
+}
+add_filter( 'wp_nav_menu_items', 'add_search_form', 10, 2 );

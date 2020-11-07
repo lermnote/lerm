@@ -1,4 +1,6 @@
 <?php function add_auth(){ ?>
+
+
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -29,4 +31,63 @@
 </div>
 	<?php
 }
-add_action( 'wp_head', 'add_auth' );
+add_action( 'wp_footer', 'add_auth' );
+
+
+class Lerm_Frontend_Login {
+	public function login( $args = array() ) {
+		$default    = array(
+			'login'         => true,
+			'register'      => true,
+			'login_page'    => '/login.html',
+			'register_page' => '/register.html',
+		);
+		$this->args = apply_filter( 'lerm_frontend_login_args', wp_parse_args( $args, $default ) );
+		$this->add_action( 'init', 'redirect' );
+	}
+	public function redirect() {
+		global $pagenow;
+		$login_page  = home_url( $this->login_page );
+		$page_viewed = basename( $_SERVER['REQUEST_URI'] );
+		if ( 'wp-login.php' === $pagenow && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
+			wp_safe_redirect( $login_page );
+			exit;
+		}
+	}
+}
+
+
+function redirect() {
+	global $pagenow;
+	$login_page  = home_url( '/login.html' );
+	$page_viewed = basename( $_SERVER['REQUEST_URI'] );
+	if ( 'wp-login.php' === $pagenow && 'GET' === $_SERVER['REQUEST_METHOD'] ) {
+		wp_safe_redirect( $login_page );
+		exit;
+	}
+}
+// add_action( 'init', 'redirect' );
+
+
+function login_failed() {
+	$login_page = home_url( '/login.html' );
+	wp_redirect( $login_page . '?login=failed' );
+	exit;
+}
+//add_action( 'wp_login_failed', 'login_failed' );
+
+function verify_username_password( $user, $username, $password ) {
+	$login_page = home_url( '/login.html' );
+	if ( $username == '' || $password == '' ) {
+		wp_redirect( $login_page . '?login=empty' );
+		exit;
+	}
+}
+  ////add_filter( 'authenticate', 'verify_username_password', 1, 3 );
+
+function logout_page() {
+	$login_page = home_url( '' );
+	wp_redirect( $login_page . '?login=false' );
+	exit;
+}
+add_action( 'wp_logout', 'logout_page' );

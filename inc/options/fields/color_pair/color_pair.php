@@ -1,6 +1,4 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
-	die;
-} // Cannot access pages directly.
+<?php if ( ! defined( 'ABSPATH' ) ) { die;} // Cannot access pages directly.
 /**
  *
  * Field: color
@@ -30,16 +28,22 @@ if ( ! class_exists( 'CSF_Field_color_pair' ) ) {
 						'background_color' => '',
 						'border_color'     => '',
 					);
+					$color_props = array(
+						'color'    => esc_html__( 'Color', 'lerm' ),
+						'background_color'    => esc_html__( 'Background', 'lerm' ),
+						'border_color'   => esc_html__( 'Border', 'lerm' ),
+					  );
 					$value          = wp_parse_args( $this->value, $default_values );
 					echo $this->field_before();
-					foreach ( array( 'color', 'background_color', 'border_color' ) as $props ) {
-						if ( ! empty( $args[ $props ] ) ) {
-							$default_attr = ( ! empty( $this->field['default'][ $props ] ) ) ? ' data-default-color="' . $this->field['default'][ $props ] . '"' : '';
+					foreach ( $color_props as $color_prop_key => $color_prop_value ) {
+						if ( ! empty( $args[$color_prop_key] ) ) {
+
+							$default_attr = ( ! empty( $this->field['default'][$color_prop_key] ) ) ? ' data-default-color="'. esc_attr( $this->field['default'][$color_prop_key] ) .'"' : '';
 							echo '<div class="csf--left csf-field-color">';
-							echo '<div class="csf--title">' . ucfirst( $props ) . '</div>';
-							echo '<input type="text" name="' . $this->field_name( '[' . $props . ']' ) . '" value="' . $value[ $props ] . '" class="csf-color"' . $default_attr . $this->field_attributes() . '/>';
+							echo '<div class="csf--title">'. esc_attr( $color_prop_value ) .'</div>';
+							echo '<input type="text" name="'. esc_attr( $this->field_name( '['. $color_prop_key .']' ) ) .'" value="'. esc_attr( $value[$color_prop_key] ) .'" class="csf-color"'. $default_attr . $this->field_attributes() .'/>';
 							echo '</div>';
-						}
+						  }
 					}
 					echo $this->field_after();
 		}

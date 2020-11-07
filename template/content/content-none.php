@@ -6,7 +6,7 @@
  * @since Lerm 2.0
  */
 ?>
-<section>
+<section class="card-body">
 <?php
 if ( is_home() && current_user_can( 'publish_posts' ) ) :
 
@@ -26,14 +26,14 @@ if ( is_home() && current_user_can( 'publish_posts' ) ) :
 		elseif ( is_search() ) :
 			?>
 
-			<p><?php esc_attr_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'lerm' ); ?></p>
+			<p><?php esc_html_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'lerm' ); ?></p>
 			<?php
 			get_search_form();
 
 		else :
 			?>
 
-			<p><?php esc_attr_e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'lerm' ); ?></p>
+			<p><?php esc_html_e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'lerm' ); ?></p>
 			<?php
 			get_search_form();
 
