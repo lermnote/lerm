@@ -41,6 +41,7 @@ trait Hooker {
 			array_fill( 0, $count, $accepted_args )
 		);
 	}
+
 	/**
 	 * Add filter to functions
 	 *

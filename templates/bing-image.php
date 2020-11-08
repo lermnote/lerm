@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: 每日一图
+ * Template Name: Bing Image
  *
  * @authors lerm http://lerm.net
  * @date    2016-10-26
