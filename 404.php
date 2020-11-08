@@ -2,8 +2,6 @@
 /**
  * The template for displaying the 404 template in the Twenty Twenty theme.
  *
- * @date    2016-10-26
- * @since   2.0
  * @package https://www.hanost.com
  */
 
