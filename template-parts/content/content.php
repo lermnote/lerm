@@ -5,7 +5,7 @@
  * @package Lerm
  * @since Lerm 2.0
  */
-global $post
+global $post;
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'col' ); ?> >
 	<div class="content-area">
