@@ -10,9 +10,10 @@ namespace Lerm\Inc;
 use WP_Error;
 
 use Lerm\Inc\Traits\Singleton;
+use Lerm\Inc\Traits\Hooker;
 
 class Init extends Theme_Abstract {
-	use Singleton;
+	use Singleton, hooker;
 
 	protected $init = [];
 
@@ -27,8 +28,8 @@ class Init extends Theme_Abstract {
 	}
 
 	protected function hooks() {
-		add_action( 'init', [ $this, 'unscure' ] );
-		add_action( 'init', [ $this, 'disable_emojis' ] );
+		$this->action( 'init', 'unscure' );
+		$this->action( 'init', 'disable_emojis' );
 		$this->filter( 'document_title_separator', 'title_separator', 15, 1 );
 		$this->filter( 'frontpage_template', 'front_page_template', 15, 1 );
 		$this->filter( 'comment_reply_link', 'replace_reply_link_class' );
