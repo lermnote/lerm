@@ -1,8 +1,8 @@
 <?php
 /**
- * The template for displaying the 404 template in the Twenty Twenty theme.
+ * The template for displaying the 404 template in the theme.
  *
- * @package https://www.hanost.com
+ * @package Lerm
  */
 
 get_header();
