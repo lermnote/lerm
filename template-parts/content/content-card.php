@@ -9,7 +9,7 @@ $post_title  = $post->post_title;
 $summary_col = $post_title ? 'col-sm-9' : 'col-sm-12';
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'col' ); ?> >
-		<div class="card  h-100">
+		<div class="card h-100">
 		<?php if ( $post_title ) : ?>
 			<!-- <div class="col-sm-12"> -->
 				<?php
