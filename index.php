@@ -23,7 +23,7 @@ $carousel   = new \Lerm\Inc\Carousel();
 				$carousel->render();
 			endif;
 			?>
-			<div id="main" class="site-main ajax-posts row row-cols-1 row-cols-md-4" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
+			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
 				<?php
 				if ( have_posts() ) :
 					while ( have_posts() ) :
