@@ -123,6 +123,7 @@ if ( class_exists( 'CSF' ) ) {
 					'title' => __( 'Sidebar Affix', 'lerm' ),
 					'label' => __( 'Sidebar Affix', 'lerm' ),
 				),
+
 				array(
 					'id'         => 'icp_num',
 					'type'       => 'text',
@@ -583,6 +584,11 @@ if ( class_exists( 'CSF' ) ) {
 					'title'   => __( 'Show thumbnail on posts list', 'lerm' ),
 					'label'   => __( 'Switcher on to show posts thumbnial', 'lerm' ),
 					'default' => true,
+				),
+				array(
+					'id'    => 'thumbnail_gallery',
+					'type'  => 'gallery',
+					'title' => __( 'Post Thumbnail Gallery', 'lerm' ),
 				),
 				array(
 					'id'      => 'load_more',

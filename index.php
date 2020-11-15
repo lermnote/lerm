@@ -17,7 +17,7 @@ $carousel   = new \Lerm\Inc\Carousel();
 <main role="main" class="container" ><!--.container-->
 	<?php $breadcrumb->trail(); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
-		<div <?php lerm_column_class( ); ?>><!--.col-md-12 .col-lg-8-->
+		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<?php
 			if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'above_entry_list' ) :
 				$carousel->render();

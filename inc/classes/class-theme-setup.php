@@ -19,6 +19,7 @@ class THEME_SETUP {
 		Comment_Walker::get_instance();
 		Carousel::get_instance();
 		Mail::get_instance();
+        Thumbnail::get_instance();
 		$this->hooks();
 	}
 

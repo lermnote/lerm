@@ -17,7 +17,7 @@ $breadcrumb = new \Lerm\Inc\Breadcrumb();
 				if ( have_posts() ) :
 					while ( have_posts() ) :
 						the_post();
-						get_template_part( 'template/content/content', 'single' );
+						get_template_part( 'template-parts/content/content', get_post_type() );
 						?>
 						<?php lerm_post_tag(); ?>
 						<ul class="card entry-copyright p-3 mb-2 list-unstyled">
