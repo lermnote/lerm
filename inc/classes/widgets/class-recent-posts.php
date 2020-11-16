@@ -70,15 +70,7 @@ class Recent_Posts extends WP_Widget {
 				?>
 	<li class="widget-post d-flex">
 		<div class="col-md-4 p-0">
-					<?php
-					lerm_thumb_nail(
-						array(
-							'classes' => 'widget-thumbnail',
-							'height'  => '60',
-							'width'   => '100',
-						)
-					);
-					?>
+			<?php get_template_part('template-parts/content/features-image'); ?>
 		</div>
 		<div class="col-md-8 d-flex flex-column justify-content-between pr-0">
 			<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>

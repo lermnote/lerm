@@ -14,7 +14,6 @@ global $post;
 
 			<div class="entry-content clearfix pt-2">
 				<?php
-				echo wp_get_attachment_image( '1691' );
 					the_content(
 						sprintf(
 							/* translators: %s = post title */

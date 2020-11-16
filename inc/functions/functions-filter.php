@@ -1,24 +1,5 @@
 <?php
 /**
- * Set title separator, default "|"
- *
- * @since  1.0.0
- * @return  string title_sepa
- */
-function lerm_title_separator() {
-	return lerm_options( 'title_sepa' ) ? lerm_options( 'title_sepa' ) : '|';
-}
-add_filter( 'document_title_separator', 'lerm_title_separator' );
-
-/**
- * Activate links manger section.
- *
- * @since  1.0.0
- * @return boolen
- */
-add_filter( 'pre_option_link_manager_enabled', '__return_true' );
-
-/**
  * Fix end of archive url with slash.
  *
  * @param  array $args Arguments to pass to Breadcrumb_Trail.
@@ -49,34 +30,6 @@ function lerm_replace_avatar( $avatar ) {
 }
 add_filter( 'get_avatar', 'lerm_replace_avatar' );
 
-/**
- * Remove WordPress  JS and CSS version info
- *
- * @return sring $src
- */
-function lerm_remove_css_and_js_ver( $src ) {
-	if ( strpos( $src, 'ver=' ) ) {
-		$src = remove_query_arg( 'ver', $src );
-	}
-	return $src;
-}
-add_filter( 'style_loader_src', 'lerm_remove_css_and_js_ver', 999 );
-add_filter( 'script_loader_src', 'lerm_remove_css_and_js_ver', 999 );
-
-/**
- * Use front-page.php when Front page displays is set to a static page.
- *
- * @since Lerm 3.0
- *
- * @param string $template front-page.php.
- *
- * @return string The template to be used: blank if is_home() is true (defaults to index.php), else $template.
- */
-function lerm_front_page_template( $template ) {
-	return is_home() ? '' : $template;
-}
-add_filter( 'frontpage_template', 'lerm_front_page_template' );
-
 
 /**
  * Displays the optional excerpt.
@@ -90,21 +43,6 @@ function lerm_excerpt_length( $length ) {
 add_filter( 'excerpt_length', 'lerm_excerpt_length', 999 );
 
 
-/**
- * Use btn btn-sm btn-custom class replace comment-reply-link class.
- *
- * @since Lerm 3.0
- *
- * @param string
- *
- * @return string $class;
- */
-
-function replace_reply_link_class( $class ) {
-	$class = str_replace( "class='comment-reply-link", "class='btn btn-sm btn-custom", $class );
-	return $class;
-}
-add_filter( 'comment_reply_link', 'replace_reply_link_class' );
 
 // code hightlight
 function code_highlight_esc_html( $content ) {
