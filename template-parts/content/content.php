@@ -27,15 +27,7 @@ global $post;
 		<?php else : ?>
 			<div class="row no-gutters">
 				<div class="col-md-3">
-				<?php
-				lerm_thumb_nail(
-					array(
-						'classes' => 'card-img post-thumbnail',
-						'height'  => '110',
-						'width'   => '180',
-					)
-				);
-				?>
+					<?php get_template_part( 'template-parts/content/featured-image' ); ?>
 				</div>
 				<div class="col-md-9">
 					<div class="card-body py-md-0">
