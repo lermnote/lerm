@@ -215,3 +215,22 @@ function lerm_post_class( $classes ) {
 	return $classes;
 }
 add_filter( 'post_class', 'lerm_post_class' );
+
+/**
+ * Share icon template
+ * 
+ * @since lerm 3.0.0
+ */
+function social_icons( $icons = array() ) {
+	if ( $icons ) { ?>
+		<div class="social-share d-flex justify-content-center" data-initialized="true">
+
+			<?php foreach ( $icons as $icon ) { ?>
+				<a href="#" class="social-share-icon icon-<?php echo $icon; ?> btn-light btn-sm "><i class="fa fa-<?php echo  $icon; ?>"></i></a>
+				<?php
+			} ?>
+		
+		</div>
+		<?php
+	}
+}

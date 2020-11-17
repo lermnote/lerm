@@ -21,6 +21,7 @@ global $post;
 							get_the_title()
 						)
 					);
+					social_icons( lerm_options( 'social_share' ) );
 				?>
 			</div>
 		<?php else : ?>
