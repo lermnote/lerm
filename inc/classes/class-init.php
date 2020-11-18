@@ -42,7 +42,7 @@ class Init extends Theme_Abstract {
 	}
 
 	/**
-	 * Clean up wp_head() from unused or unsecure stuff
+	 * Clean up wp_head() from unused or unsecure stuff.
 	 *
 	 * @return void
 	 */
@@ -78,7 +78,7 @@ class Init extends Theme_Abstract {
 		$this->filter( 'tiny_mce_plugins', 'disable_emojis_tinymce' );
 	}
 	/**
-	 * Disable emojis
+	 * Disable emojis.
 	 *
 	 * @return array
 	 */
@@ -103,9 +103,8 @@ class Init extends Theme_Abstract {
 	 * @return $ver
 	 */
 	public function remove_css_attributes( $var ) {
-		return is_array( $var ) ? array_intersect( $var, array( 'show', 'active', '' ) ) : '';
+		return is_array( $var ) ? array_intersect( $var, array( 'active', 'dropdown', 'open', 'show' ) ) : '';
 	}
-
 
 	/**
 	 * Enable link manager on wp-admin page.
