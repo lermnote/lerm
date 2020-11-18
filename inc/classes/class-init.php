@@ -34,6 +34,7 @@ class Init extends Theme_Abstract {
 		$this->filter( 'frontpage_template', 'front_page_template', 15, 1 );
 		$this->filter( 'comment_reply_link', 'replace_reply_link_class' );
 		$this->filter( 'widget_tag_cloud_args', 'tag_cloud_args' );
+		$this->filters( [ 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ], 'remove_css_attributes', 100, 1 );
 		$this->filters( [ 'script_loader_src', 'style_loader_src' ], 'remove_ver', 15, 1 );
 		$this->link_manager();
 		$this->remove_recent_comments_css();
@@ -94,6 +95,17 @@ class Init extends Theme_Abstract {
 	public function remove_ver( $url ) {
 		return $url ? remove_query_arg( 'ver', $url ) : false;
 	}
+
+	/**
+	 * Clean up menu attributes.
+	 *
+	 * @param array $ver
+	 * @return $ver
+	 */
+	public function remove_css_attributes( $var ) {
+		return is_array( $var ) ? array_intersect( $var, array() ) : '';
+	}
+
 
 	/**
 	 * Enable link manager on wp-admin page.
@@ -170,7 +182,7 @@ class Init extends Theme_Abstract {
 	}
 
 	/**
-	 * Custmm tags cloud args.
+	 * Custom tags cloud args.
 	 *
 	 * @param array $args
 	 * @return array Tag cloud args.
