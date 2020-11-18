@@ -103,7 +103,7 @@ class Init extends Theme_Abstract {
 	 * @return $ver
 	 */
 	public function remove_css_attributes( $var ) {
-		return is_array( $var ) ? array_intersect( $var, array() ) : '';
+		return is_array( $var ) ? array_intersect( $var, array( 'show', 'active', '' ) ) : '';
 	}
 
 
