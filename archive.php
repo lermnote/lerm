@@ -34,24 +34,13 @@ $breadcrumb = new \Lerm\Inc\Breadcrumb();
 					<?php
 					while ( have_posts() ) :
 						the_post();
-						get_template_part( 'template/content/content', get_post_format() );
+						get_template_part( 'template-parts/content/content', get_post_format() );
 					endwhile;
 				endif;
 				?>
 			</div>
 
-			<div class="mt-3">
-				<?php
-				global $wp_query;
-				if ( $wp_query->max_num_pages > 1 && ( lerm_options( 'load_more' ) || wp_is_mobile() ) ) :
-					?>
-					<button class='btn btn-sm btn-custom btn-block more-posts' data-archive="<?php echo esc_attr( $_SERVER['REQUEST_URI'] ); ?>" data-page="/"><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
-					<?php
-				else :
-					lerm_pagination();
-				endif;
-				?>
-			</div>
+			<?php get_template_part( 'template-parts/pagination' ); ?>
 		</div>
 		<?php get_sidebar(); ?>
 		</div><!--.row-->

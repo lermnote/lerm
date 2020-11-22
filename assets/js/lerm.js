@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 			let maxPages = postsList.dataset.max;
 
 			let params = new URLSearchParams();
-			params.append("action", "lerm_load_more");
+			params.append("action", "load_more");
 			params.append("security", adminajax.nonce);
 			params.append("current_page", currentPage);
 			params.append("max_pages", maxPages);
@@ -318,7 +318,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 					}
 					loadMoreBtn.innerHTML = adminajax.loadmore;
 					loadMoreBtn.blur();
-					if (currentPage == maxPages) {
+					if (currentPage >= maxPages) {
 						throw data;
 					}
 				})

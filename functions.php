@@ -202,6 +202,7 @@ function lerm_post_navigation() {
  * @return void
  */
 function lerm_pagination() {
+
 	the_posts_pagination(
 		array(
 			'mid_size'           => 10,
@@ -212,7 +213,6 @@ function lerm_pagination() {
 		)
 	);
 }
-
 function lerm_link_pagination() {
 	wp_link_pages(
 		array(

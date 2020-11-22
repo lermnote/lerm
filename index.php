@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This is the most generic template file in a WordPress theme and one
  * of the two required files for a theme (the other being style.css).
@@ -20,29 +19,21 @@ $carousel   = new \Lerm\Inc\Carousel();
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<?php
-            if (is_home() && !is_paged() && lerm_options('slide_position') === 'above_entry_list') :
-                $carousel->render();
-            endif;
-            ?>
-			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var('paged') ? esc_attr(get_query_var('paged')) : 1; ?>" data-max="<?php echo esc_attr($wp_query->max_num_pages); ?>">
+			if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'above_entry_list' ) :
+				$carousel->render();
+			endif;
+			?>
+			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
 				<?php
-                if (have_posts()) :
-                    while (have_posts()) :
-                        the_post();
-                        get_template_part('template-parts/content/content', get_post_type());
-                    endwhile;
-                endif;
-                ?>
+				if ( have_posts() ) :
+					while ( have_posts() ) :
+						the_post();
+						get_template_part( 'template-parts/content/content', get_post_type() );
+					endwhile;
+				endif;
+				?>
 			</div><!--.site-main-->
-			<div class="navigation">
-				<?php if ((lerm_options('load_more') || wp_is_mobile())) : ?>
-					<button class='btn btn-sm btn-custom btn-block more-posts loading-animate fadeInUp' data-page="/"><?php esc_html_e('Load More', 'lerm'); ?></button>
-				<?php
-                else :
-                    lerm_pagination();
-                endif;
-                ?>
-			</div>
+			<?php get_template_part( 'template-parts/pagination' ); ?>
 		</div>
 		<?php get_sidebar(); ?>
 	</div><!--.row-->

@@ -27,7 +27,7 @@ function lerm_load_more() {
 
 		while ( $query->have_posts() ) :
 			$query->the_post();
-			get_template_part( 'template/content/content', get_post_format() );
+			get_template_part( 'template-parts/content/content', get_post_format() );
 		endwhile;
 
 		wp_send_json_success( ob_get_clean() );

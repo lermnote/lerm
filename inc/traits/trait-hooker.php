@@ -19,7 +19,7 @@ trait Hooker {
 	 * @return void
 	 */
 	protected function action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-		add_action( $tag, [ $this, $function_to_add ], $priority, $accepted_args );
+		add_action( $tag, array( $this, $function_to_add ), $priority, $accepted_args );
 	}
 
 	/**
@@ -34,7 +34,7 @@ trait Hooker {
 	protected function actions( $tags, $function_to_add, $priority = 10, $accepted_args = 1 ) {
 		$count = count( $tags );
 		array_map(
-			[ $this, 'action' ],
+			array( $this, 'action' ),
 			(array) $tags,
 			array_fill( 0, $count, $function_to_add ),
 			array_fill( 0, $count, $priority ),
@@ -52,7 +52,7 @@ trait Hooker {
 	 * @return void
 	 */
 	protected function filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-		add_filter( $tag, [ $this, $function_to_add ], $priority, $accepted_args );
+		add_filter( $tag, array( $this, $function_to_add ), $priority, $accepted_args );
 	}
 
 	/**
@@ -67,7 +67,7 @@ trait Hooker {
 	protected function filters( $tags, $function_to_add, $priority = 10, $accepted_args = 1 ) {
 		$count = count( $tags );
 		array_map(
-			[ $this, 'filter' ],
+			array( $this, 'filter' ),
 			(array) $tags,
 			array_fill( 0, $count, $function_to_add ),
 			array_fill( 0, $count, $priority ),

@@ -66,7 +66,7 @@ class Thumbnail extends Theme_Abstract {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	protected function feature_image() {
 		return has_post_thumbnail() ? get_post_thumbnail_id() : '';
@@ -74,18 +74,18 @@ class Thumbnail extends Theme_Abstract {
 
 	/**
 	 * Hanlde post images
-	 * 
+	 *
 	 * @return string attachment_url_to_postid( $matches[1][0] ) first post image id
 	 */
 	protected function post_images() {
 		global $post;
 		preg_match_all( '/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post->post_content, $matches, PREG_PATTERN_ORDER );
-		return attachment_url_to_postid( $matches[1][0] );
+		return $matches[1] ? attachment_url_to_postid( $matches[1][0] ) : '';
 	}
 
 	/**
 	 * Default thumbnial if show thumbnail on post list page,but nethever feature image,nor post images
-	 * 
+	 *
 	 * @return string $thumbnail_gallery[ $rand_key ] image id
 	 */
 	protected function thumbnail_gallery() {

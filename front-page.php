@@ -47,7 +47,7 @@ $recent_posts = new WP_Query(
 						?>
 				<div class="col mb-4">
 					<div class="card h-100">
-						<?php lerm_thumb_nail( array( 'class' => 'card-img-top' ) ); ?>
+						<?php the_post_thumbnail(); ?>
 						<div class="card-body">
 							<h5 class="card-title">
 								<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>

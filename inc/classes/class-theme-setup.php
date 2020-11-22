@@ -19,15 +19,16 @@ class THEME_SETUP {
 		Comment_Walker::get_instance();
 		Carousel::get_instance();
 		Mail::get_instance();
-        Thumbnail::get_instance();
+		Thumbnail::get_instance();
+		Load_More::get_instance();
 		$this->hooks();
 	}
 
 	public function hooks() {
-		add_action( 'after_setup_theme', [ $this, 'setup' ], 2 );
-		add_action( 'after_setup_theme', [ $this, 'content_width' ] );
-		add_action( 'widgets_init', [ $this, 'register_sidebar' ] );
-		add_action( 'widgets_init', [ $this, 'widgets' ] );
+		add_action( 'after_setup_theme', array( $this, 'setup' ), 2 );
+		add_action( 'after_setup_theme', array( $this, 'content_width' ) );
+		add_action( 'widgets_init', array( $this, 'register_sidebar' ) );
+		add_action( 'widgets_init', array( $this, 'widgets' ) );
 	}
 
 	/**
