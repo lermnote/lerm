@@ -18,7 +18,7 @@ class Thumbnail extends Theme_Abstract {
 	 *
 	 * @var array
 	 */
-	public $arg = array();
+	public $args = array();
 
 	/**
 	 * Collection of posts thumbnails.
@@ -27,31 +27,20 @@ class Thumbnail extends Theme_Abstract {
 	 */
 	public $thumbnails = array();
 
-	public function __construct() {
+	public function __construct( $args = array() ) {
 		$this->hooks();
+		$defauls = array(
+			'post_id' => get_the_ID(),
+
+		);
+		$this->args = apply_filters( 'get_the_image_args', wp_parse_args( $args, $defauls ) );
 	}
 
 	protected function handle() {}
 
 	protected function hooks() {
 		$this->filter( 'post_thumbnail_html', 'get_default_thumbnail', 1, 5 );
-		// $this->thumbnail_gallery();
 	}
-
-	public function render() { ?>
-		<!-- <figure class="post-thumbnail"> -->
-
-			<!-- <?php //the_post_thumbnail(); ?> -->
-
-		<!-- </figure> -->
-		<?php
-	}
-
-	// protected function set_thumbnail( $image_id ) {
-	// 	return wp_get_attachment_image( $image_id );
-	// }
-
-
 
 	public function get_default_thumbnail( $html, $post_id, $post_thumbnail_id, $size, $attr ) {
 
@@ -86,7 +75,8 @@ class Thumbnail extends Theme_Abstract {
 	 */
 	protected function post_images() {
 		global $post;
-		preg_match_all( '/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post->post_content, $matches, PREG_PATTERN_ORDER );
+		$post_content = get_post_field( 'post_content', $this->args['post_id'] );
+		preg_match_all( '/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post_content, $matches, PREG_PATTERN_ORDER );
 		return $matches[1] ? attachment_url_to_postid( $matches[1][0] ) : '';
 	}
 
