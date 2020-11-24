@@ -14,6 +14,13 @@ class Thumbnail extends Theme_Abstract {
 	use Hooker, Singleton;
 
 	/**
+	 * $default parse to arg;
+	 *
+	 * @var array
+	 */
+	public $arg = array();
+
+	/**
 	 * Collection of posts thumbnails.
 	 *
 	 * @var array
