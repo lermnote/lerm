@@ -15,17 +15,13 @@ use Lerm\Inc\Traits\Hooker;
 class Init extends Theme_Abstract {
 	use Singleton, hooker;
 
-	protected $init = [];
+	public $init = [];
 
 
 	protected function __construct() {
 		$this->hooks();
 	}
-	protected function handle() {
-
-		$filters = [];
-
-	}
+	protected function handle(){ }
 
 	protected function hooks() {
 		$this->action( 'init', 'unscure' );
