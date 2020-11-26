@@ -21,13 +21,19 @@ class Thumbnail extends Theme_Abstract
      */
     public $args = array();
     
+    /**
+     * Image html;
+     *
+     * @var string
+     */
+    public $image = '';
     
     /**
-     * Image arguments array filled by the class
+     * Image attributes arguments array filled by the class
      *
      * @var array
      */
-    public $attr = array();
+    public $image_attr = array();
 
     /**
      * Collection of posts thumbnails.
@@ -42,7 +48,9 @@ class Thumbnail extends Theme_Abstract
         $defauls = array(
             'post_id' => get_the_ID(),
             'size'    => 'thumbnail',
-            'lazy'    => false,
+			'lazy'    => false,
+			'order'   => array( 'featured', 'attachment', 'scan', 'default' ),
+            'default' => array(),// URL in medias 'http://example.com/wp-content/uploads/2016/05/01.jpg'
 
         );
         $this->args = apply_filters('get_the_image_args', wp_parse_args($args, $defauls));
@@ -54,32 +62,23 @@ class Thumbnail extends Theme_Abstract
 
     protected function hooks()
     {
-        $this->filter('post_thumbnail_html', 'get_default_thumbnail', 1, 5);
+        //$this->filter('post_thumbnail_html', 'get_default_thumbnail', 1, 5);
     }
-
-    public function get_default_thumbnail($html, $post_id, $post_thumbnail_id, $size, $attr)
+    
+    public function the_post_image()
     {
-        if ($this->feature_image()) {
-            $thumbnail_id = $this->feature_image();
-        } elseif ($this->post_images()) {
-            $thumbnail_id = $this->post_images();
-        } else {
-            $thumbnail_id = $this->thumbnail_gallery();
-        }
-
-        if ('' === $html) {
-            if (intval($thumbnail_id) > 0) {
-                $html = wp_get_attachment_image(intval($thumbnail_id), $size, false, $attr);
-            }
-        }
-
-        return $html;
-    }
+        if (empty($this->image)) {
+            return;
+		}
+		if () {
+			$this->get_feature_image();
+		}
+	}
 
     /**
      * Gets the featured image
-	 * 
-	 * @return void
+     *
+     * @return void
      */
     protected function get_feature_image()
     {
@@ -103,8 +102,8 @@ class Thumbnail extends Theme_Abstract
         preg_match_all('/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post_content, $matches, PREG_PATTERN_ORDER);
         if (isset($matches) && !empty($matches[1][0])) {
             $attachment_id = attachment_url_to_postid($matches[1][0]);
+            $this->get_attachment_image($attachment_id);
         }
-        return $this->get_attachment_image($attachment_id);
     }
 
     /**
@@ -112,15 +111,27 @@ class Thumbnail extends Theme_Abstract
      *
      * @return string $thumbnail_gallery[ $rand_key ] image id
      */
-    protected function thumbnail_gallery()
+    protected function get_default_image()
     {
-        if (lerm_options('thumbnail_gallery')) {
-            $thumbnail_gallery = explode(',', lerm_options('thumbnail_gallery'));
-            $rand_key          = array_rand($thumbnail_gallery);
-            return $thumbnail_gallery[ $rand_key ];
+        $images = $this->args['default'];
+        if (empty($images)) {
+            return;
         }
+        if (! is_array($images)) {
+            $images = explode(',', $images);
+        }
+        $image_ids = array_map('attachment_url_to_postid', $images);
+        $image_id  = $image_ids[ array_rand($image_ids)];
+        
+        $this->get_attachment_image($image_id);
     }
 
+    /**
+     * Retireve attachment image html.
+     *
+     * @param int $attachment_id
+     * @return string $html
+     */
     private function get_attachment_image($attachment_id)
     {
         $html = '';
@@ -136,12 +147,15 @@ class Thumbnail extends Theme_Abstract
             if (empty($default_attr['alt'])) {
                 $default_attr['alt'] = trim(strip_tags($attachment->post_excerpt));
             } // If not, Use the Caption
+
             if (empty($default_attr['alt'])) {
                 $default_attr['alt'] = trim(strip_tags($attachment->post_title));
             } // Finally, use the title
+
             $attr = wp_parse_args($attr, $default_attr);
-            
             $html = wp_get_attachment_image(intval($attachment_id), $this->args['size'], false, $attr);
+            
+            $this->image = $html;
         }
         return $html;
     }
