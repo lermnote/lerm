@@ -71,3 +71,9 @@ function lerm_custom_css() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'lerm_custom_css', 21 );
+
+
+function lerm_post_image( $args = array() ) {
+	$post_thumbnail = new \Lerm\Inc\Image( $args );
+	return $post_thumbnail->get_image();
+}
