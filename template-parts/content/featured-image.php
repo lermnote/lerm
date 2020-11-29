@@ -7,7 +7,7 @@
 ?>
 <figure class="figure">
 		<?php
-		if ( ! is_singluar() ) {
+		if ( ! is_singular() ) {
 			lerm_post_image(
 				array(
 					'size'    => 'home-thumb',
