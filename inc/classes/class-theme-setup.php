@@ -19,7 +19,6 @@ class THEME_SETUP {
 		Comment_Walker::get_instance();
 		Carousel::get_instance();
 		Mail::get_instance();
-		Thumbnail::get_instance();
 		Load_More::get_instance();
 		$this->hooks();
 	}
@@ -67,6 +66,7 @@ class THEME_SETUP {
 		// Feature
 		add_theme_support( 'post-thumbnails' );
 		set_post_thumbnail_size( 200, 128 );
+		add_image_size( 'home-thumb', 180, 110, true ); //300 像素宽，无限的高
 
 		// Post formats.
 		add_theme_support(
