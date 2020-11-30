@@ -12,7 +12,7 @@ use WP_Error;
 use Lerm\Inc\Traits\Singleton;
 use Lerm\Inc\Traits\Hooker;
 
-class Init extends Theme_Abstract {
+class Init {
 	use Singleton, hooker;
 
 	public $init = [];

@@ -54,6 +54,7 @@ class Image {
 			//
 			'before'     => '',
 			'after'      => '',
+			'class'      => '',
 		);
 		$this->args = apply_filters( 'get_the_image_args', wp_parse_args( $args, $defauls ) );
 		if ( empty( $this->args['post_id'] ) ) {
@@ -156,14 +157,16 @@ class Image {
 		$image = wp_get_attachment_image_src( $attachment_id, $this->args['size'] );
 		if ( $image ) {
 			$size_class = $this->args['size'];
+			
 
 			if ( is_array( $size_class ) ) {
 				$size_class = join( 'x', $size_class );
 			}
+			$image_class = $this->args['class'];
 
 			$attachment   = get_post( $attachment_id );
 			$default_attr = array(
-				'class'   => "attachment-$size_class",
+				'class'   => "attachment-$size_class $image_class",
 				'alt'     => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ), // Use Alt field first
 				'loading' => $this->args['lazy'],
 			);

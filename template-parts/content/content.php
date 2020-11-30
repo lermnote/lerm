@@ -33,17 +33,17 @@ global $post;
 					<div class="card-body py-md-0">
 					<?php the_title( '<h2 class="entry-title card-title"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a><label class="sticky-label badge badge-danger">' . __( 'Sticky', 'lerm' ) . '</label></h2>' ); ?>
 						<!-- <h2 class="card-title">Card title</h2> -->
-						<p class="card-text">
+						<!-- <p class="card-text"> -->
 						<?php the_excerpt(); ?>
 							<!-- This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer. -->
-						</p>
-						<p class="card-text">
+						<!-- </p> -->
+						<!-- <p class="card-text"> -->
 								<?php
 								//if ( $post_title ) :
 									lerm_post_meta( 'summary_bottom' );
 								//endif;
 								?>
-						</p>
+						<!-- </p> -->
 					</div>
 				</div>
 			</div>

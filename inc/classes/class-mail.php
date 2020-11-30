@@ -9,7 +9,7 @@ namespace Lerm\Inc;
 
 use Lerm\Inc\Traits\Singleton;
 const CONTENT_TYPE_MULTIPART_ALTERNATIVE = 'multipart/alternative';
-class Mail extends Theme_Abstract {
+class Mail { 
 
 	use Singleton;
 
