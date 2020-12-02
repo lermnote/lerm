@@ -55,6 +55,8 @@ class Image {
 			'before'     => '',
 			'after'      => '',
 			'class'      => '',
+
+			'echo'       => false,
 		);
 		$this->args = apply_filters( 'get_the_image_args', wp_parse_args( $args, $defauls ) );
 		if ( empty( $this->args['post_id'] ) ) {
@@ -72,6 +74,9 @@ class Image {
 			return;
 		}
 		$image_html = apply_filters( 'get_the_image', $this->image );
+		if (false === $this->args['echo']) {
+			return ( ! empty( $image_html ) ) ? $this->args['before'] . $image_html . $this->args['after'] : $image_html;
+		}
 		echo ( ! empty( $image_html ) ) ? $this->args['before'] . $image_html . $this->args['after'] : $image_html; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
@@ -114,10 +119,10 @@ class Image {
 	 * @return string attachment_url_to_postid( $matches[1][0] ) first post image id
 	 */
 	protected function get_post_image() {
+		
 		$post_content = get_post_field( 'post_content', $this->args['post_id'] );
 
-		preg_match_all( '/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post_content, $matches, PREG_PATTERN_ORDER );
-
+		preg_match_all( '|<img.?src=[\'"](.*?)[\'"].*?>|i', $post_content, $matches, PREG_PATTERN_ORDER );
 		if ( isset( $matches ) && ! empty( $matches[1][0] ) ) {
 			$attachment_id = attachment_url_to_postid( $matches[1][0] );
 			$this->get_attachment_image( $attachment_id );
