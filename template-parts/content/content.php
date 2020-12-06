@@ -26,7 +26,7 @@ global $post;
 			</div>
 		<?php else : ?>
 			<div class="row no-gutters">
-			<?php if(null !== get_the_image()): ?>
+			<?php if(null !== lerm_post_image()): ?>
 				<div class="col-md-3">
 					<?php get_template_part( 'template-parts/content/featured-image' ); ?>
 				</div>

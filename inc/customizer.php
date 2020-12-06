@@ -79,9 +79,9 @@ function lerm_post_image( $args = array() ) {
 	$post_thumbnail = new \Lerm\Inc\Image( $args );
 	return $post_thumbnail->get_image();
 }
-function get_the_image($args = array())
-{
-    $image = new \Lerm\Inc\Get_The_Image($args);
+// function get_the_image($args = array())
+// {
+//     $image = new \Lerm\Inc\Get_The_Image($args);
 
-    return $image->get_image();
-}
+//     return $image->get_image();
+// }

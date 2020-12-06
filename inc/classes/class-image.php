@@ -74,7 +74,7 @@ class Image {
 			return;
 		}
 		$image_html = apply_filters( 'get_the_image', $this->image );
-		if (false === $this->args['echo']) {
+		if ( false === $this->args['echo'] ) {
 			return ( ! empty( $image_html ) ) ? $this->args['before'] . $image_html . $this->args['after'] : $image_html;
 		}
 		echo ( ! empty( $image_html ) ) ? $this->args['before'] . $image_html . $this->args['after'] : $image_html; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -94,6 +94,9 @@ class Image {
 			} elseif ( 'default' === $method && ! empty( $this->args['default'] ) ) {
 				$this->get_default_image();
 			}
+		}
+		if ( empty( $this->image ) && ! empty( $this->image_attr ) ) {
+			$this->format_html();
 		}
 	}
 
@@ -119,13 +122,26 @@ class Image {
 	 * @return string attachment_url_to_postid( $matches[1][0] ) first post image id
 	 */
 	protected function get_post_image() {
-		
+
 		$post_content = get_post_field( 'post_content', $this->args['post_id'] );
 
-		preg_match_all( '|<img.?src=[\'"](.*?)[\'"].*?>|i', $post_content, $matches, PREG_PATTERN_ORDER );
+		// Check the content for `id="wp-image-%d"`.
+		preg_match( '/class=[\'"]wp-image-([\d]*)[\'"]/i', $post_content, $image_ids );
+
+		// Loop through any found image IDs.
+		if ( is_array( $image_ids ) ) {
+			foreach ( $image_ids as $image_id ) {
+				$this->get_attachment_image( $image_id );
+
+				if ( ! empty( $this->image_args ) ) {
+					return;
+				}
+			}
+		}
+
+		preg_match_all( '/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post_content, $matches, PREG_PATTERN_ORDER );
 		if ( isset( $matches ) && ! empty( $matches[1][0] ) ) {
-			$attachment_id = attachment_url_to_postid( $matches[1][0] );
-			$this->get_attachment_image( $attachment_id );
+			$this->image_attr['src'] = $matches[1][0];
 		}
 	}
 
@@ -157,37 +173,70 @@ class Image {
 	 * @return string $html
 	 */
 	private function get_attachment_image( $attachment_id ) {
-		$html  = '';
-		$attr  = '';
+		$html = '';
+		$attr = $this->image_attr;
+
 		$image = wp_get_attachment_image_src( $attachment_id, $this->args['size'] );
+
 		if ( $image ) {
-			$size_class = $this->args['size'];
-			
+			$this->get_image_attr( $attachment_id, $image[0] );
 
-			if ( is_array( $size_class ) ) {
-				$size_class = join( 'x', $size_class );
-			}
-			$image_class = $this->args['class'];
-
-			$attachment   = get_post( $attachment_id );
-			$default_attr = array(
-				'class'   => "attachment-$size_class $image_class",
-				'alt'     => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ), // Use Alt field first
-				'loading' => $this->args['lazy'],
-			);
-			if ( empty( $default_attr['alt'] ) ) {
-				$default_attr['alt'] = trim( wp_strip_all_tags( $attachment->post_excerpt ) );
-			} // If not, Use the Caption
-
-			if ( empty( $default_attr['alt'] ) ) {
-				$default_attr['alt'] = trim( wp_strip_all_tags( $attachment->post_title ) );
-			} // Finally, use the title
-
-			$attr = wp_parse_args( $attr, $default_attr );
 			$html = wp_get_attachment_image( intval( $attachment_id ), $this->args['size'], false, $attr );
 
 			$this->image = $html;
 		}
 		return $html;
+	}
+
+	public function format_html() {
+		// If there is no image URL, return false.
+		if ( empty( $this->image_attr['src'] ) ) {
+			return;
+		}
+
+		$attachment_id = '';
+		$img_attr      = $this->get_image_attr( $attachment_id, $this->image_attr['src'] );
+
+		// Set up a variable for the image attributes.
+		$attr = $img_attr;
+		$html = rtrim( '<img ' );
+
+		foreach ( $attr as $name => $value ) {
+			$html .= " $name=" . '"' . $value . '"';
+		}
+
+		$html .= ' />';
+
+		$this->image = $html;
+	}
+	public function get_image_attr( $attachment_id = null, $image ) {
+		$attr = '';
+
+		$src        = $image;
+		$size_class = $this->args['size'];
+
+		if ( is_array( $size_class ) ) {
+			$size_class = join( 'x', $size_class );
+		}
+		$image_class = $this->args['class'];
+
+		$attachment   = get_post( $attachment_id );
+		$default_attr = array(
+			'src'     => $src,
+			'class'   => "attachment-$size_class $image_class",
+			'alt'     => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ), // Use Alt field first
+			'loading' => $this->args['lazy'],
+		);
+		if ( empty( $default_attr['alt'] ) ) {
+			$default_attr['alt'] = trim( wp_strip_all_tags( $attachment->post_excerpt ) );
+		} // If not, Use the Caption
+
+		if ( empty( $default_attr['alt'] ) ) {
+			$default_attr['alt'] = trim( wp_strip_all_tags( $attachment->post_title ) );
+		} // Finally, use the title
+
+		$attr = wp_parse_args( $attr, $default_attr );
+
+		return $attr;
 	}
 }
