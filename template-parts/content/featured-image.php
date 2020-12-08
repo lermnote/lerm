@@ -11,7 +11,7 @@
 			lerm_post_image(
 				array(
 					'size'  => 'home-thumb',
-					'class' => 'w-100',
+					'class' => 'w-100 h-100',
 					'echo'  => true,
 				)
 			);

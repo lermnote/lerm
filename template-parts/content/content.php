@@ -8,8 +8,9 @@
 global $post;
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'card' ); ?>>
-	<div class="content-area">
-		<?php if ( is_singular() ) : ?>
+
+	<?php if ( is_singular() ) : ?>
+		<div class="content-area">
 			<?php get_template_part( 'template-parts/header/entry-header' ); ?>
 
 			<div class="entry-content clearfix pt-2">
@@ -24,8 +25,9 @@ global $post;
 					social_icons( lerm_options( 'social_share' ) );
 				?>
 			</div>
-		<?php else : ?>
-			<div class="row no-gutters">
+		</div>
+	<?php else : ?>
+		<div class="row no-gutters">
 			<?php if(null !== lerm_post_image()): ?>
 				<div class="col-md-3">
 					<?php get_template_part( 'template-parts/content/featured-image' ); ?>
@@ -51,9 +53,9 @@ global $post;
 					</div>
 					<?php if( lerm_post_image()): ?>
 				</div>
-				<?php endif;?>
-			</div>
+			<?php endif;?>
+		</div>
 
-		<?php endif; ?>
-	</div>
+	<?php endif; ?>
+
 </article>

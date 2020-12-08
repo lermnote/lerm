@@ -37,9 +37,11 @@ class Image {
 	 */
 	public $thumbnails = array();
 
+	/**
+	 * Construst function initials.
+	 */
 	public function __construct( $args = array() ) {
-		$this->hooks();
-		$defauls = array(
+		$defaults = array(
 			'post_id'    => get_the_ID(),
 			'size'       => 'home-thumb',
 			'lazy'       => 'lazy',
@@ -58,25 +60,27 @@ class Image {
 
 			'echo'       => false,
 		);
-		$this->args = apply_filters( 'get_the_image_args', wp_parse_args( $args, $defauls ) );
+
+		$this->args = apply_filters( 'get_the_image_args', wp_parse_args( $args, $defaults ) );
+		
 		if ( empty( $this->args['post_id'] ) ) {
 			return;
 		}
+
 		$this->find_image();
 	}
 
-	protected function handle() {}
-
-	protected function hooks() {}
-
 	public function get_image() {
-		if ( empty( $this->image ) ) {
+		if ( empty( $this->image ) && empty( $this->image_attr ) ) {
 			return;
 		}
+
 		$image_html = apply_filters( 'get_the_image', $this->image );
+
 		if ( false === $this->args['echo'] ) {
 			return ( ! empty( $image_html ) ) ? $this->args['before'] . $image_html . $this->args['after'] : $image_html;
 		}
+
 		echo ( ! empty( $image_html ) ) ? $this->args['before'] . $image_html . $this->args['after'] : $image_html; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
@@ -95,6 +99,7 @@ class Image {
 				$this->get_default_image();
 			}
 		}
+
 		if ( empty( $this->image ) && ! empty( $this->image_attr ) ) {
 			$this->format_html();
 		}
@@ -133,15 +138,17 @@ class Image {
 			foreach ( $image_ids as $image_id ) {
 				$this->get_attachment_image( $image_id );
 
-				if ( ! empty( $this->image_args ) ) {
+				if ( ! empty( $this->image ) ) {
 					return;
 				}
 			}
 		}
 
 		preg_match_all( '/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post_content, $matches, PREG_PATTERN_ORDER );
+
 		if ( isset( $matches ) && ! empty( $matches[1][0] ) ) {
 			$this->image_attr['src'] = $matches[1][0];
+			$this->image_attr['alt'] = $matches[2][0];
 		}
 	}
 
@@ -174,17 +181,17 @@ class Image {
 	 */
 	private function get_attachment_image( $attachment_id ) {
 		$html = '';
-		$attr = $this->image_attr;
 
 		$image = wp_get_attachment_image_src( $attachment_id, $this->args['size'] );
 
 		if ( $image ) {
-			$this->get_image_attr( $attachment_id, $image[0] );
+			$attr = $this->get_image_attr( $attachment_id, $image[0] );
 
 			$html = wp_get_attachment_image( intval( $attachment_id ), $this->args['size'], false, $attr );
 
 			$this->image = $html;
 		}
+
 		return $html;
 	}
 
@@ -221,6 +228,7 @@ class Image {
 		$image_class = $this->args['class'];
 
 		$attachment   = get_post( $attachment_id );
+
 		$default_attr = array(
 			'src'     => $src,
 			'class'   => "attachment-$size_class $image_class",

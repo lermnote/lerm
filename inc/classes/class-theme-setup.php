@@ -20,7 +20,7 @@ class THEME_SETUP {
 		Carousel::get_instance();
 		Mail::get_instance();
 		Load_More::get_instance();
-		Get_The_Image::get_instance();
+
 		$this->hooks();
 	}
 
