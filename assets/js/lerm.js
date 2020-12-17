@@ -305,6 +305,9 @@ document.addEventListener("DOMContentLoaded", function (e) {
 			})
 				.then((response) => response.json())
 				.then((data) => {
+					if (currentPage == maxPages) {
+						throw data;
+					}
 					if (data.success == true) {
 						let newData = parseToDOM(data.data);
 						postsList.dataset.page++;
@@ -318,11 +321,10 @@ document.addEventListener("DOMContentLoaded", function (e) {
 					}
 					loadMoreBtn.innerHTML = adminajax.loadmore;
 					loadMoreBtn.blur();
-					if (currentPage >= maxPages) {
-						throw data;
-					}
+
 				})
 				.catch((err) => {
+					//console.log(err);
 					loadMoreBtn.innerHTML = adminajax.noposts;
 					loadMoreBtn.blur();
 					loadMoreBtn.setAttribute("disabled", "true");

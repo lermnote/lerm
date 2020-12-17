@@ -446,11 +446,6 @@ form select, form input, form textarea{
 .loading-animate{
 	visibility: hidden;
 }
-.sticky-label.badge {
-	font-size: 0.875rem;
-	font-weight: 600;
-}
-
 
 .brand a,
 .btn-custom:hover a,

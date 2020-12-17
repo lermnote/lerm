@@ -9,22 +9,23 @@ namespace Lerm\Inc;
 
 use Lerm\Inc\Traits\Ajax;
 use Lerm\Inc\Traits\Singleton;
+use WP_Query;
 
 class Load_More {
 
 	use Ajax, Singleton;
 
-	public function __construct($args = array()) {
+	public function __construct( $args = array() ) {
 		$this->register( 'load_more' );
 		$default = array(
 			'post_per_page' => 10,
 		);
-		$args = wp_parse_args( $args, $default );
+		$args    = wp_parse_args( $args, $default );
 	}
 
 	/**
 	 * Load more posts on blog page.
-	 * 
+	 *
 	 * @return void
 	 */
 	public function load_more() {
@@ -37,21 +38,22 @@ class Load_More {
 
 	/**
 	 * Render the html
-	 * 
+	 *
 	 * @return string|false|void
-	 */ 
+	 */
 	public function render() {
 		check_ajax_referer( 'ajax_nonce', 'security' );
 
 		$next_page = $_POST['current_page'] + 1;
 		$max_pages = $_POST['max_pages'];
 
-		$args  = array(
+		$args = array(
 			'post_per_page' => 10,
 			'paged'         => $next_page,
+			'post_status'   => 'publish',
 		);
 
-		$query = new \WP_Query( $args );
+		$query = new WP_Query( $args );
 
 		if ( $query->have_posts() && $next_page <= $max_pages ) {
 			ob_start();

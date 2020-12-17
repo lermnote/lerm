@@ -28,32 +28,24 @@ global $post;
 		</div>
 	<?php else : ?>
 		<div class="row no-gutters">
-			<?php if(null !== lerm_post_image()): ?>
+			<?php if ( null !== lerm_post_image() ) : ?>
 				<div class="col-md-3">
 					<?php get_template_part( 'template-parts/content/featured-image' ); ?>
 				</div>
-				<div class="col-md-9">
-			<?php endif;?>
+			<?php endif; ?>
+			<div class="<?php echo lerm_post_image() ? 'col-md-9' : 'col-md-12'; ?>">
+				<div class="card-body py-md-0">
+					<h2 class="entry-title card-title">
+						<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>
+						<?php if ( is_sticky() ) : ?>
+							<label class="sticky-label badge badge-danger m-0"><?php echo esc_html__( 'Sticky', 'lerm' ); ?></label>
+						<?php endif; ?>
+					</h2>
 
-				
-					<div class="card-body py-md-0">
-					<?php the_title( '<h2 class="entry-title card-title"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a><label class="sticky-label badge badge-danger">' . __( 'Sticky', 'lerm' ) . '</label></h2>' ); ?>
-						<!-- <h2 class="card-title">Card title</h2> -->
-						<!-- <p class="card-text"> -->
 						<?php the_excerpt(); ?>
-							<!-- This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer. -->
-						<!-- </p> -->
-						<!-- <p class="card-text"> -->
-								<?php
-								//if ( $post_title ) :
-									lerm_post_meta( 'summary_bottom' );
-								//endif;
-								?>
-						<!-- </p> -->
-					</div>
-					<?php if( lerm_post_image()): ?>
+
 				</div>
-			<?php endif;?>
+			</div>
 		</div>
 
 	<?php endif; ?>
