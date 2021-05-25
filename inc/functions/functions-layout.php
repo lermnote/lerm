@@ -93,12 +93,12 @@ function lerm_get_column_class( $class = '' ) {
 
 	if ( 'layout-2c-l' === lerm_site_layout() ) {
 		$classes[] = 'col-lg-8';
-		$classes[] = 'pl-lg-0';
+		$classes[] = 'ps-lg-0';
 		$classes[] = 'order-lg-last';
 	}
 	if ( 'layout-2c-r' === lerm_site_layout() ) {
 		$classes[] = 'col-lg-8';
-		$classes[] = 'pr-lg-0';
+		$classes[] = 'pe-lg-0';
 	}
 	if ( in_array( lerm_site_layout(), [ 'layout-1c', 'layout-1c-narrow' ] ) ) {
 		$classes[] = 'col-12';

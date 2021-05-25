@@ -188,6 +188,7 @@ blockquote p:last-child {
 a {
 	-webkit-transition: color 110ms ease-in-out;
 	transition: color 110ms ease-in-out;
+	text-decoration: none;
 }
 
 a:hover,
@@ -363,7 +364,7 @@ form select, form input, form textarea{
 }
 
 @media (max-width: 991.9px) {
-	.primary-nav {
+	/* .primary-nav {
 		position: fixed;
 		right: 0;
 		z-index: 99;
@@ -387,6 +388,9 @@ form select, form input, form textarea{
 		width: 100%;
 		display: block;
 		background-color: #000;
+	} */
+	.offcanvas-end{
+		width: 60%;
 	}
 }
 

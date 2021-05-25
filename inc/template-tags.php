@@ -77,7 +77,7 @@ function lerm_post_author() {
 		<li class="post-author meta-item">
 			<span class="meta-icon">
 				<span class="screen-reader-text"><?php esc_html_e( 'Post author', 'lerm' ); ?></span>
-				<i class="fa fa-user pr-1"></i>
+				<i class="fa fa-user pe-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php
@@ -96,7 +96,7 @@ function lerm_post_date() {
 	?>
 		<li class="post-date meta-item">
 			<span>
-				<i class="fa fa-calendar pr-1"></i>
+				<i class="fa fa-calendar pe-1"></i>
 				<a href="<?php the_permalink(); ?>">
 					<?php the_time( get_option( 'date_format' ) ); ?>
 				</a>
@@ -111,7 +111,7 @@ function lerm_post_categories() {
 		<li class="post-categories meta-item">
 			<span class="meta-icon">
 				<span class="screen-reader-text"><?php esc_html_e( 'Categories', 'lerm' ); ?></span>
-				<i class="fa fa-hdd pr-1"></i>
+				<i class="fa fa-hdd pe-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php the_category( ', ' ); ?>
@@ -124,7 +124,7 @@ function lerm_post_categories() {
 function lerm_post_views_number() {
 	?>
 	<li  class="post-views meta-item">
-		<i class="fa fa-eye pr-1"></i>
+		<i class="fa fa-eye pe-1"></i>
 		<span>
 			<?php echo esc_html( post_views( '' ) ); ?>
 		</span>
@@ -137,7 +137,7 @@ function lerm_post_comments_number() {
 		?>
 		<li  class="comments-link meta-item">
 			<a href="<?php comments_link(); ?>">
-				<i class="fa fa-comment pr-1"></i>
+				<i class="fa fa-comment pe-1"></i>
 				<?php
 				/* translators: %s: number of comments  */
 				printf( _nx( '%s comment', '%s comments', get_comments_number(), 'comments title', 'lerm' ), esc_attr( number_format_i18n( get_comments_number() ) ) );
@@ -155,7 +155,7 @@ function lerm_edit_link() {
 			__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'lerm' ),
 			get_the_title()
 		),
-		'<span class="edit-link meta-item"><i class="fa fa-edit pr-1 pl-2"></i>',
+		'<span class="edit-link meta-item"><i class="fa fa-edit pe-1 ps-2"></i>',
 		'</span>'
 	);
 }

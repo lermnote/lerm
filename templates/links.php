@@ -72,7 +72,7 @@ $link_categories = get_terms(
 											);
 											$link_name        = sprintf( '<h5 class="card-title m-0">%s</h5>', esc_html( $link_term->link_name ) );
 											$link_description = sprintf( '<div class="card-body"><p class="card-text">%s</p></div>', esc_html( $link_term->link_description ) );
-											$link_image       = sprintf( '<div class="card-header text-center d-flex justify-content-center align-items-center"><img src="%s" class="mr-1" alt="%s" style="height:1.5rem;width:1.5rem;overflow: hidden;">%s</div>', $grap_favicon, esc_html( $link_term->link_name ), $link_name );
+											$link_image       = sprintf( '<div class="card-header text-center d-flex justify-content-center align-items-center"><img src="%s" class="me-1" alt="%s" style="height:1.5rem;width:1.5rem;overflow: hidden;">%s</div>', $grap_favicon, esc_html( $link_term->link_name ), $link_name );
 											$link_card       .= sprintf( '<div class="col mb-3"><div class="card h-100 link-card"><a class="text-dark h-100" href="%s" target="%s">%s%s</a></div></div>', esc_html( $link_term->link_url ), esc_html( $link_term->link_target ), $link_image, $link_description );
 										}
 										echo sprintf( '<div class="row row-cols-1 row-cols-md-4">%s</div>', $link_card ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

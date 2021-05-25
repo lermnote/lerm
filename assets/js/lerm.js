@@ -136,88 +136,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	if (!navigation) {
 		return;
 	}
-
-	let toggleButton = document.getElementById("trigger");
-	if ("undefined" === typeof toggleButton) {
-		return;
-	}
-
-	let menuList = navigation.querySelector("ul");
-	//Hide menu toggle toggleButton if menu is empty and return early.
-	if (!menuList) {
-		toggleButton.style.display = "none";
-	} else {
-		// Get all the link elements within the menu.
-		let links = menuList.querySelectorAll("a");
-		let subMenus = menuList.getElementsByClassName("dropdown-menu");
-		// Set menu items with submenus to aria-haspopup="true".
-		for (let i = 0, len = subMenus.length; i < len; i++) {
-			subMenus[i].parentNode.setAttribute("aria-haspopup", "true");
-		}
-		//click link to hidden menu
-		links.forEach((e) => {
-			if (!e.classList.contains("dropdown-toggle"))
-				e.onclick = function () {
-					body.classList.remove("nav-opened");
-					navigation.classList.remove("toggled");
-					backdrop.classList.remove("show");
-					html.classList.remove("noscroll");
-				};
-		});
-	}
-	if (windowWidth < 992) {
-		backdrop.style.top = navbar.style.top =
-			parseFloat(
-				document.defaultView.getComputedStyle(html, null).marginTop
-			) +
-			navigation.offsetHeight +
-			"px"; //position:absolute
-		// backdrop.style.top = navbar.style.top = navigation.offsetHeight + 'px';//position:absolute
-	}
-	toggleButton.addEventListener("click", (e) => {
-		e.preventDefault();
-		if (-1 != navigation.className.indexOf("toggled")) {
-			toggleButton.setAttribute("aria-expanded", "false");
-			backdrop.classList.remove("show");
-			navbar.classList.remove("show");
-			navigation.classList.remove("toggled");
-			body.classList.remove("nav-opened");
-			html.classList.remove("noscroll");
-		} else {
-			html.classList.add("noscroll");
-			body.classList.add("nav-opened");
-			navigation.classList.add("toggled");
-			navbar.classList.add("show");
-			backdrop.classList.add("show");
-			toggleButton.setAttribute("aria-expanded", "true");
-		}
-	});
-
-	let dragging = false;
-	backdrop.addEventListener("touchmove", () => {
-		dragging = true;
-		// console.log("触摸滑动事件", dragging);
-	});
-	backdrop.addEventListener("touchend", (e) => {
-		e.preventDefault();
-		if (false === dragging) {
-			// console.log("触摸结束事件", dragging);
-			if (-1 != backdrop.className.indexOf("show")) {
-				//body.classList.remove("nav-opened");
-				navigation.classList.remove("toggled");
-				toggleButton.setAttribute("aria-expanded", "false");
-				backdrop.classList.remove("show");
-				html.classList.remove("noscroll");
-				body.classList.remove("nav-opened");
-				navbar.classList.remove("show");
-			}
-		}
-	});
-	backdrop.addEventListener("touchstart", function () {
-		dragging = false;
-		// console.log("触摸开始事件", dragging);
-	});
-
 	/**
 	 * calendar add class
 	 *
@@ -386,7 +304,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 			errInfo.removeAttribute("style");
 			errInfo.classList.remove("shake");
 			errInfo.classList.remove("fadeOut");
-			errInfo.innerHTML = '<strong><i class="fa fa-spinner fa-pulse mr-1"></i>正在提交...</strong>';
+			errInfo.innerHTML = '<strong><i class="fa fa-spinner fa-pulse me-1"></i>正在提交...</strong>';
 			new WOW().init();
 
 			// check user logged in.
@@ -470,7 +388,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 				})
 				.then(() => {
 					commentForm.querySelector("#comment").value = "";
-					errInfo.innerHTML = '<strong><i class="fa fa-ok mr-1"></i>提交成功</strong>';
+					errInfo.innerHTML = '<strong><i class="fa fa-ok me-1"></i>提交成功</strong>';
 					let fadeOut = setTimeout(function () {
 						commentForm.querySelector('[type="submit"]').removeAttribute("disabled", "disabled");
 						errInfo.classList.add("fadeOut");

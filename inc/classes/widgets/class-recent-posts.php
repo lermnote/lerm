@@ -72,7 +72,7 @@ class Recent_Posts extends WP_Widget {
 		<div class="col-md-4 p-0">
 			<?php get_template_part('template-parts/content/features-image'); ?>
 		</div>
-		<div class="col-md-8 d-flex flex-column justify-content-between pr-0">
+		<div class="col-md-8 d-flex flex-column justify-content-between pe-0">
 			<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
 					<?php if ( $show_date ) : ?>
 			<span class="post-date text-muted"><?php echo get_the_date(); ?></span>
@@ -194,7 +194,7 @@ class Lerm_Popular_Post extends WP_Widget {
 					);
 					?>
 		</div>
-		<div class="col-md-8 pr-0 d-flex flex-column justify-content-between">
+		<div class="col-md-8 pe-0 d-flex flex-column justify-content-between">
 			<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
 					<?php if ( $show_date ) : ?>
 			<span class="post-date text-muted small"><?php echo get_the_date(); ?></span>

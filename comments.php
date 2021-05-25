@@ -23,8 +23,8 @@ if ( post_password_required() ) {
 		$comment_author_url   = $commenter ['comment_author_url'];
 
 		$args = array(
-			'comment_notes_before' => '<label class="logged-in-as pl-2">' . sprintf(
-				'<cite class="fn">%1$s<strong class="pl-2">%2$s</strong></cite><span class="ml-2">%3$s</span>',
+			'comment_notes_before' => '<label class="logged-in-as ps-2">' . sprintf(
+				'<cite class="fn">%1$s<strong class="ps-2">%2$s</strong></cite><span class="ms-2">%3$s</span>',
 				get_avatar( $comment_author_email, 32 ),
 				$comment_author ? $comment_author : __( 'Visitor', 'lerm' ),
 				$comment_author_email ? __( 'Welcome Back', 'lerm' ) : __( 'Welcome ', 'lerm' )

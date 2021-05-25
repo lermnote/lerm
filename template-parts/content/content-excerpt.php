@@ -17,7 +17,7 @@ global $post;
 			<div class="col-md-9">
 			<?php //endif; ?>
 
-				<div class="card-body py-md-0">
+				<div class="card-body p-0">
 					<h2 class="entry-title card-title">
 						<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>
 						<?php if ( is_sticky() ) : ?>

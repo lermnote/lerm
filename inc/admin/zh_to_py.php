@@ -416,12 +416,12 @@ class Chinese_to_PY {
 		if ( $sUTF8 != $chinese ) {
 			$sGBK = $chinese;
 		}
-		$aBuf = array();
+		$aBuf  = array();
 		$iLoop = strlen( $sGBK );
 		for ( $i = 0; $i < $iLoop; $i++ ) {
-			$iChr = ord( $sGBK[$i] );
+			$iChr = ord( $sGBK[ $i ] );
 			if ( $iChr > 160 ) {
-				$iChr = ( $iChr << 8 ) + ord( $sGBK{++$i} ) - 65536;
+				// $iChr = ( $iChr << 8 ) + ord( $sGBK )++$i - 65536;
 			}
 			if ( 'first' == $sRetFormat || 'one' == $sRetFormat ) {
 				$aBuf[] = substr( self::zh2py( $iChr ), 0, 1 );

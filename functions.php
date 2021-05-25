@@ -53,11 +53,11 @@ function lerm_options( string $id, string $tag = '', $default = '' ) {
 
 	$args = apply_filters(
 		'theme_option',
-		[
+		array(
 			'id'      => $id,
 			'tag'     => $tag,
 			'default' => $default,
-		]
+		)
 	);
 	// Get theme options.
 	$options = get_option( 'lerm_theme_options' );
@@ -283,7 +283,7 @@ function lerm_post_tag( $output = '' ) {
 		$output .= esc_html__( 'Tags', 'lerm' );
 		$output .= '</span>';
 		foreach ( $tags as $tag ) {
-			$output .= sprintf( '<a class="btn btn-custom btn-sm mr-2" href="%s" rel="tag">%s</a>', esc_url( get_tag_link( $tag ) ), esc_html( $tag->name ) );
+			$output .= sprintf( '<a class="btn btn-custom btn-sm me-2" href="%s" rel="tag">%s</a>', esc_url( get_tag_link( $tag ) ), esc_html( $tag->name ) );
 		}
 		$output .= '</span></div>';
 	}
@@ -502,10 +502,10 @@ function lerm_create_copyright( string $type = '' ) {
 		$rights    = esc_html__( ' All rights reserved ', 'lerm' );
 	}
 
-	if ( substr( $first_date, 0, 4 ) === date( 'Y' ) || 'short' === $type ) {
-		$date = esc_html( date( 'Y ' ) );
+	if ( substr( $first_date, 0, 4 ) === gmdate( 'Y' ) || 'short' === $type ) {
+		$date = esc_html( gmdate( 'Y ' ) );
 	} else {
-		$date = esc_html( substr( $first_date, 0, 4 ) . '-' . date( 'Y ' ) );
+		$date = esc_html( substr( $first_date, 0, 4 ) . '-' . gmdate( 'Y ' ) );
 	}
 
 	$output = $copyright . $date . $blogname . $rights;

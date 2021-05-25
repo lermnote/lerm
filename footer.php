@@ -52,7 +52,7 @@
 		<div class="container">
 			<span><?php lerm_create_copyright(); ?></span>
 			<?php if ( lerm_options( 'icp_num' ) ) : ?>
-				<span><?php echo esc_html( lerm_options( 'icp_num' ) ); ?></span>
+				<span><a href="https://beian.miit.gov.cn"><?php echo esc_html( lerm_options( 'icp_num' ) ); ?></a></span>
 			<?php endif; ?>
 			<!--尊重原创，请保留作者链接，谢谢 -->
 			<span><?php echo esc_html__( 'Theme By', 'lerm' ); ?><a href="<?php echo esc_url( 'https://www.hanost.com/', 'lerm' ); ?>"> Lerm </a></span>

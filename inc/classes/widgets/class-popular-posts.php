@@ -67,7 +67,7 @@ class Popular_Posts extends WP_Widget {
 					);
 					?>
 		</div>
-		<div class="col-md-8 pr-0 d-flex flex-column justify-content-between">
+		<div class="col-md-8 pe-0 d-flex flex-column justify-content-between">
 			<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
 					<?php if ( $show_date ) : ?>
 			<span class="post-date text-muted small"><?php echo get_the_date(); ?></span>

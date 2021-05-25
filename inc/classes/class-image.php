@@ -216,7 +216,7 @@ class Image {
 
 		$this->image = $html;
 	}
-	public function get_image_attr( $attachment_id = null, $image ) {
+	public function get_image_attr( $attachment_id, $image ) {
 		$attr = '';
 
 		$src        = $image;

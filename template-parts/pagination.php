@@ -1,6 +1,6 @@
 <div class="navigation">
 	<?php if ( ( lerm_options( 'load_more' ) || wp_is_mobile() ) ) : ?>
-		<button class='btn btn-sm btn-custom btn-block more-posts loading-animate fadeInUp' data-page="/"><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
+		<button class='btn btn-sm btn-custom container more-posts loading-animate fadeInUp' data-page="/"><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
 		<?php
 	else :
 		the_posts_pagination(
