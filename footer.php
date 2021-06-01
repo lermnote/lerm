@@ -77,12 +77,5 @@
 	</div>
 </footer>
 <?php wp_footer(); ?>
-<div class="menu-backdrop fade"></div>
-<!-- <div class="alert alert-warning alert-dismissible fade show" role="alert" style="position: fixed;right: 0;bottom: 0;z-index: 1030;">
-	<small>This website uses cookies.</small>
-	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-		<span aria-hidden="true">&times;</span>
-	</button>
-</div> -->
 </body>
 </html>

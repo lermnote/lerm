@@ -83,9 +83,8 @@ $carousel = new \Lerm\Inc\Carousel();
 					)
 				);
 				?>
-				<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+				<div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
 					<div class="offcanvas-header py-0">
-						<h5 id="offcanvasRightLabel">Offcanvas right</h5>
 						<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 					</div>
 					<div class="offcanvas-body">

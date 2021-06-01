@@ -8,7 +8,7 @@
 
 (function () {
 	"use strict";
-	
+
 	//archives page expand
 	let archive = $("#archives");
 	let monthList = $(".month-list", archive);
@@ -115,15 +115,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
 			e.onmouseout = () =>
 				e.querySelector(".dropdown-menu").classList.remove("show");
 		});
-	}
-
-	/**
-	 * Mobile menu
-	 *
-	 */
-	let backdrop = body.querySelector(".menu-backdrop");
-	if (!backdrop) {
-		return;
 	}
 
 	//adminbar height

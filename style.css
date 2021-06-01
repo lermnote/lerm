@@ -401,7 +401,8 @@ form select, form input, form textarea{
 }
 
 @media(max-width:991.9px) {
-	.custom-logo {
+	.custom-logo,
+	.offcanvas-header {
 		width: auto;
 		height: 2rem;
 	}

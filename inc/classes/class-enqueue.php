@@ -18,12 +18,12 @@ class Enqueue {
 	}
 
 	public function hooks() {
-		add_action( 'wp_enqueue_scripts', [ $this, 'styles' ] );
-		add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ] );
+		add_action( 'wp_enqueue_scripts', array( $this, 'styles' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'scripts' ) );
 	}
 
 	public function styles() {
-		wp_enqueue_style( 'bootstrap', LERM_URI . 'assets/bootstrap-5.0.1-dist/css/bootstrap.min.css', array(), '4.4.1' );
+		wp_enqueue_style( 'bootstrap', LERM_URI . 'assets/css/bootstrap.min.css', array(), '4.4.1' );
 		wp_enqueue_style( 'lerm_font', LERM_URI . 'assets/css/lerm-font.min.css', array(), '1.0.0' );
 		wp_enqueue_style( 'animate', LERM_URI . 'assets/css/animate.min.css', array(), '1.0.0' );
 		if ( is_singular( 'post' ) && lerm_options( 'enable_code_highlight' ) ) {
@@ -34,7 +34,7 @@ class Enqueue {
 	}
 	public function scripts() {
 		wp_register_script( 'jquery-min', LERM_URI . 'assets/js/jquery.min.js', array(), '3.1.0', true );
-		wp_register_script( 'bootstrap', LERM_URI . 'assets/bootstrap-5.0.1-dist/js/bootstrap.min.js', array(), '4.3.1', true );
+		wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.min.js', array(), '4.3.1', true );
 		wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
 		wp_register_script( 'lightbox', LERM_URI . 'assets/js/ekko-lightbox.min.js', array(), '2.0.0', true );
 		wp_register_script( 'share', LERM_URI . 'assets/js/social-share.min.js', array(), LERM_VERSION, true );
