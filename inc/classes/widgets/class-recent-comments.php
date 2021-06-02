@@ -55,7 +55,7 @@ class Recent_Comments extends WP_Widget {
 			_prime_post_caches( $post_ids, strpos( get_option( 'permalink_structure' ), '%category%' ), false );
 			foreach ( (array) $comments as $comment ) {
 				$avatar = sprintf(
-					'<a href="%s" class="vcard d-block" rel="external nofollow">%s<strong class="hidden-md-down comment_author">%s</strong><time class="float-right" datetime="%s" title="%s">' . esc_html__( '%s ago', 'lerm' ) . '</time></a>',
+					'<a href="%s" class="vcard d-block" rel="external nofollow">%s<strong class="hidden-md-down comment_author">%s</strong><time class="float-end" datetime="%s" title="%s">' . esc_html__( '%s ago', 'lerm' ) . '</time></a>',
 					esc_url( get_comment_link( $comment ) ),
 					get_avatar( $comment, 32 ),
 					get_comment_author( $comment ),

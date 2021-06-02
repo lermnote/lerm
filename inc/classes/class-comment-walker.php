@@ -105,7 +105,7 @@ class Comment_Walker extends Walker_Comment {
 						}
 						?>
 					</span>
-					<span class="reply float-right">
+					<span class="reply float-end">
 						<?php
 
 						comment_reply_link(
