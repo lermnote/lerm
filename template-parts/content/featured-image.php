@@ -5,7 +5,7 @@
  * @package Lerm
  */
 ?>
-<figure class="figure w-100 m-0" style="max-height:140px; overflow:hidden">
+<figure class="figure w-100 m-0" style="max-height:115px; overflow:hidden">
 	<?php
 
 		lerm_post_image(

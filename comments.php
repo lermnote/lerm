@@ -23,12 +23,12 @@ if ( post_password_required() ) {
 		$comment_author_url   = $commenter ['comment_author_url'];
 
 		$args = array(
-			'comment_notes_before' => '<label class="logged-in-as ps-2">' . sprintf(
+			'comment_notes_before' => '<p class="logged-in-as">' . sprintf(
 				'<cite class="fn">%1$s<strong class="ps-2">%2$s</strong></cite><span class="ms-2">%3$s</span>',
 				get_avatar( $comment_author_email, 32 ),
 				$comment_author ? $comment_author : __( 'Visitor', 'lerm' ),
 				$comment_author_email ? __( 'Welcome Back', 'lerm' ) : __( 'Welcome ', 'lerm' )
-			) . '</label>',
+			) . '</p>',
 
 			'comment_field'        => '<fieldset class="form-group mb-2">
 			<textarea id="comment" class="rq form-control mb-2"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea>',
@@ -54,7 +54,7 @@ if ( post_password_required() ) {
 				'<div class="must-log-in card-body">%s</div>',
 				sprintf(
 					/* translators: %s: Login URL. */
-					__( 'You must be <a class="badge badge-pill badge-primary text-light" href="%s">logged in</a> to post a comment.' ),
+					__( 'You must be <a class="badge rounded-pill bg-primary text-light" href="%s">logged in</a> to post a comment.' ),
 					/** This filter is documented in wp-includes/link-template.php */
 					wp_login_url( apply_filters( 'the_permalink', get_permalink( $post_id ), $post_id ) )
 				)
@@ -95,7 +95,7 @@ if ( post_password_required() ) {
 					'type'        => 'comment',
 					'style'       => 'ol',
 					'short_ping'  => true,
-					'avatar_size' => 48,
+					'avatar_size' => wp_is_mobile() ? 32 : 48,
 				)
 			);
 			?>

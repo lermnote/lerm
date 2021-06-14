@@ -30,7 +30,7 @@ $summary_col = $post_title ? 'col-sm-9' : 'col-sm-12';
 					the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' );
 					?>
 					<?php if ( is_sticky() ) { ?>
-					<label class="sticky-label badge badge-danger"><?php echo esc_html__( 'Sticky', 'lerm' ); ?></label>
+					<label class="sticky-label badge bg-danger"><?php echo esc_html__( 'Sticky', 'lerm' ); ?></label>
 					<?php } ?>
 				</h2>
 				<div class="d-sm-none d-md-block text-muted">

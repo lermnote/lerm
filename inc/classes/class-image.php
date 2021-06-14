@@ -45,7 +45,7 @@ class Image {
 			'post_id'    => get_the_ID(),
 			'size'       => 'home-thumb',
 			'lazy'       => 'lazy',
-			'order'      => array( 'featured', 'attachment', 'scan', 'default' ),
+			'order'      => array( 'featured', 'attachment', 'block', 'scan', 'default' ),
 
 			//define the method of get image
 			'featured'   => '',
@@ -62,7 +62,7 @@ class Image {
 		);
 
 		$this->args = apply_filters( 'get_the_image_args', wp_parse_args( $args, $defaults ) );
-		
+
 		if ( empty( $this->args['post_id'] ) ) {
 			return;
 		}
@@ -93,6 +93,8 @@ class Image {
 
 			if ( 'featured' === $method ) {
 				$this->get_feature_image();
+			} elseif ( 'block' === $method ) {
+				$this->first_image_in_blocks();
 			} elseif ( 'scan' === $method ) {
 				$this->get_post_image();
 			} elseif ( 'default' === $method && ! empty( $this->args['default'] ) ) {
@@ -149,6 +151,29 @@ class Image {
 		if ( isset( $matches ) && ! empty( $matches[1][0] ) ) {
 			$this->image_attr['src'] = $matches[1][0];
 			$this->image_attr['alt'] = $matches[2][0];
+		}
+	}
+
+	/**
+	 * function that will return the ID of the first image in a post from a Gutenberg-based post
+	 *
+	 * @return int $first_image_blocks['attrs']['id'] first post image id
+	 */
+	protected function first_image_in_blocks() {
+		$post   = get_post( $this->args['post_id'] );
+		$blocks = parse_blocks( $post->post_content );
+
+		// Get all blocks that have a core/image blockName
+		$images = array_filter(
+			$blocks,
+			function( $block ) {
+				return 'core/image' === $block['blockName'];
+			}
+		);
+		// If there are any images, get the id from the first image, otherwise
+		$first_image_blocks = array_shift( $images );
+		if ( null !== $first_image_blocks ) {
+			return $first_image_blocks['attrs']['id'];
 		}
 	}
 
@@ -227,7 +252,7 @@ class Image {
 		}
 		$image_class = $this->args['class'];
 
-		$attachment   = get_post( $attachment_id );
+		$attachment = get_post( $attachment_id );
 
 		$default_attr = array(
 			'src'     => $src,

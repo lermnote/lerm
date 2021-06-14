@@ -172,7 +172,7 @@ class Init {
 		return new WP_Error(
 			'rest_forbidden',
 			__( 'REST API frobidden.sss', 'lerm' ),
-			[ 'status' => rest_authorization_required_code() ]
+			array( 'status' => rest_authorization_required_code() )
 		);
 	}
 

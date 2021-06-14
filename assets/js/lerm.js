@@ -6,53 +6,53 @@
  * @Version 2.0
  */
 
-(function () {
-	"use strict";
+// (function () {
+// 	"use strict";
 
-	//archives page expand
-	let archive = $("#archives");
-	let monthList = $(".month-list", archive);
-	let monthPostList = $(".month-post-list", archive);
-	let postList = $(".post-list", archive);
-	let postListFirst = $(".post-list:first", archive);
-	postList.hide();
-	postListFirst.show();
-	monthList.first().show();
-	monthPostList.css("cursor", "s-resize").on("click", function () {
-		$(this).next().slideToggle(400);
-	});
-	var animate = function (index, status, s) {
-		if (index > postList.length) {
-			return;
-		}
-		if (status == "up") {
-			postList.eq(index).slideUp(s, function () {
-				animate(index + 1, status, s - 10 < 1 ? 0 : s - 10);
-			});
-		} else {
-			postList.eq(index).slideDown(s, function () {
-				animate(index + 1, status, s - 10 < 1 ? 0 : s - 10);
-			});
-		}
-	};
-	$("#al_expand_collapse").on("click", function (e) {
-		e.preventDefault();
-		if ($(this).data("s")) {
-			$(this).data("s", "");
-			animate(0, "up", 100);
-		} else {
-			$(this).data("s", 1);
-			animate(0, "down", 100);
-		}
-	});
+// 	//archives page expand
+// 	let archive = $("#archives");
+// 	let monthList = $(".month-list", archive);
+// 	let monthPostList = $(".month-post-list", archive);
+// 	let postList = $(".post-list", archive);
+// 	let postListFirst = $(".post-list:first", archive);
+// 	postList.hide();
+// 	postListFirst.show();
+// 	monthList.first().show();
+// 	monthPostList.css("cursor", "s-resize").on("click", function () {
+// 		$(this).next().slideToggle(400);
+// 	});
+// 	var animate = function (index, status, s) {
+// 		if (index > postList.length) {
+// 			return;
+// 		}
+// 		if (status == "up") {
+// 			postList.eq(index).slideUp(s, function () {
+// 				animate(index + 1, status, s - 10 < 1 ? 0 : s - 10);
+// 			});
+// 		} else {
+// 			postList.eq(index).slideDown(s, function () {
+// 				animate(index + 1, status, s - 10 < 1 ? 0 : s - 10);
+// 			});
+// 		}
+// 	};
+// 	$("#al_expand_collapse").on("click", function (e) {
+// 		e.preventDefault();
+// 		if ($(this).data("s")) {
+// 			$(this).data("s", "");
+// 			animate(0, "up", 100);
+// 		} else {
+// 			$(this).data("s", 1);
+// 			animate(0, "down", 100);
+// 		}
+// 	});
 
-	$(document).on("click", '[data-toggle="lightbox"]', function (e) {
-		// console.log(e)
-		e.preventDefault();
-		// console.log($(this))
-		return $(this).ekkoLightbox();
-	});
-})($);
+// 	$(document).on("click", '[data-toggle="lightbox"]', function (e) {
+// 		// console.log(e)
+// 		e.preventDefault();
+// 		// console.log($(this))
+// 		return $(this).ekkoLightbox();
+// 	});
+// })($);
 
 document.addEventListener("DOMContentLoaded", function (e) {
 	let wow = new WOW({
@@ -74,11 +74,11 @@ document.addEventListener("DOMContentLoaded", function (e) {
 		let item = document.querySelector(parentNode);
 		if (item) {
 			let items = document.querySelectorAll(parentNode);
-			let naturalWidth = item.querySelector("img").naturalWidth;
-			let naturalHeight = item.querySelector("img").naturalHeight;
+			// let naturalWidth = item.querySelector("img").naturalWidth;
+			// let naturalHeight = item.querySelector("img").naturalHeight;
 			let offsetWidth = item.querySelector("img").offsetWidth;
 			let offsetHeight = item.querySelector("img").offsetHeight;
-			console.log(naturalWidth, naturalHeight, offsetWidth, offsetHeight);
+			// console.log(naturalWidth, naturalHeight, offsetWidth, offsetHeight);
 			items.forEach((e) => {
 				e.querySelector("img").style.width = offsetWidth + "px";
 				e.querySelector("img").style.height = offsetHeight + "px";
@@ -120,13 +120,12 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	//adminbar height
 	let windowWidth = document.body.clientWidth;
 	let siteHeader = body.querySelector("#site-header");
-	let navbar = document.querySelector("#navbar");
+	let offcanvasMenu = document.querySelector("#offcanvasMenu");
 
-	// mobile menu collope
-	let navigation = document.querySelector("#site-navigation");
-	if (!navigation) {
-		return;
+	if (windowWidth < 992) {
+		offcanvasMenu.style.top =parseFloat( document.defaultView.getComputedStyle(html, null).marginTop ) +'px';
 	}
+
 	/**
 	 * calendar add class
 	 *
@@ -165,27 +164,12 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	scrollUp.addEventListener("click", (e) => {
 		e.preventDefault();
 		animate({
+			timing: (progress) => (html.scrollTop = html.scrollTop  * (1 - progress)),
+			draw: circ,
 			duration: 700,
-			timing: scrollUpEaseOut,
-			draw: (progress) =>
-				(html.scrollTop = html.scrollTop * (1 - progress / 7)),
 		});
 	});
-	window.addEventListener("scroll", check);
-
-	function check () {
-		pageYOffset >= 500 && scrollUp.classList.add("show");
-		pageYOffset < 500 && scrollUp.classList.remove("show");
-	}
-	let circ = (timeFraction) =>
-		1 -
-		Math.sin(
-			Math.acos(timeFraction > 1 ? (timeFraction = 1) : timeFraction)
-		);
-
-	let makeEaseOut = (timing) => (timeFraction) =>
-		1 - timing(1 - timeFraction);
-	let scrollUpEaseOut = makeEaseOut(circ);
+	let circ = (timeFraction) =>( 1 - Math.sin(Math.acos(timeFraction)));
 
 	/**
 	 * ajax load more posts
@@ -245,7 +229,9 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	/**
 	 * Ajax like post;
 	 */
+
 	let likeBtn = document.querySelector(".like-button");
+
 	if (typeof likeBtn != "undefined" && likeBtn != null && likeBtn.classList.contains("done") == false) {
 		let postID = likeBtn.dataset.id;
 
@@ -406,7 +392,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	}
 });
 
-
 /**
  * Is the DOM ready
  *
@@ -429,7 +414,6 @@ function isDomReady( fn ) {
 isDomReady(function(){
 
 })
-
 
 /**
  *Parse to DOM Array
@@ -489,21 +473,24 @@ const validateEmail = function (email) {
 	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 	return re.test(String(email).toLowerCase());
 }
+
 /**
- *
+ * animate function
  *
  * @param {*} options
  */
-const animate = function (options) {
+function animate({timing, draw, duration}) {
+
 	let start = performance.now();
-
-	requestAnimationFrame(function animate (time) {
-		let timeFraction = (time - start) / options.duration;
-		timeFraction > 1 && (timeFraction = 1);
-
-		let progress = options.timing(timeFraction);
-
-		options.draw(progress);
-		timeFraction < 1 && requestAnimationFrame(animate);
+	requestAnimationFrame(function animate(time) {
+	  // timeFraction 从 0 增加到 1
+	  let timeFraction = (time - start) / duration;
+	  if (timeFraction > 1) timeFraction = 1;
+	  // 计算当前动画状态
+	  let progress = timing(timeFraction);
+	  draw(progress); // 绘制
+	  if (timeFraction < 1) {
+		requestAnimationFrame(animate);
+	  }
 	});
-}
+  }

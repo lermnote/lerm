@@ -31,13 +31,15 @@ $recent_posts = new WP_Query(
 		),
 	)
 );
+
+$carousel = new \Lerm\Inc\Carousel();
 ?>
 
 <div class="container">
 	<div class="row">
 		<div class="col-md-8">
 			<div class="mb-4">
-				<?php //lerm_carousel( array() ); ?>
+				<?php $carousel->render(); ?>
 			</div>
 			<div class="row row-cols-1 row-cols-md-3">
 				<?php if ( $recent_posts->have_posts() ) : ?>
@@ -47,7 +49,7 @@ $recent_posts = new WP_Query(
 						?>
 				<div class="col mb-4">
 					<div class="card h-100">
-						<?php the_post_thumbnail(); ?>
+						<?php get_template_part( 'template-parts/content/featured-image' ); ?>
 						<div class="card-body">
 							<h5 class="card-title">
 								<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>

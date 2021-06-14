@@ -11,18 +11,19 @@ function lerm_post_like() {
 	// check ajax nonce
 	if ( check_ajax_referer( 'ajax_nonce', 'security', false ) ) {
 		$id = $_POST['post_ID'];
-
 	}
 
 	$like_count = (int) get_post_meta( $id, 'lerm_post_like', true );
 	$expire     = time() + 604800;//a week
 	$domain     = ( 'localhost' !== $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : false; // make cookies work with localhost
-		setcookie( 'post_like_' . $id, $id, $expire, '/', $domain, false );
+	setcookie( 'post_like_' . $id, $id, $expire, '/', $domain, '/; samesite=strict', true );
+
 	if ( ! $like_count || ! is_numeric( $like_count ) ) {
 		update_post_meta( $id, 'lerm_post_like', 1 );
 	} else {
 		update_post_meta( $id, 'lerm_post_like', ( $like_count + 1 ) );
 	}
+
 	echo esc_attr( get_post_meta( $id, 'lerm_post_like', true ) );
 	wp_die();
 }

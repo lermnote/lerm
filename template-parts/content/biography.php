@@ -24,7 +24,7 @@
 			<?php echo get_avatar( get_the_author_meta( 'email' ), $author_bio_avatar_size ); ?>
 
 		<h2 class="author-title">
-		<span class="author-heading"><?php echo get_the_author(); ?></span> <label class="badge badge-info"><?php esc_html_e( 'Author', 'lerm' ); ?></label>
+		<span class="author-heading"><?php echo get_the_author(); ?></span> <label class="badge bg-info"><?php esc_html_e( 'Author', 'lerm' ); ?></label>
 	</h2>
 		<?php
 		if ( '' !== get_the_author_meta( 'description' ) ) {
@@ -43,14 +43,16 @@
 </div><!-- .author-avatar -->
 <div class="author-contact pb-3">
 	<?php
-	wp_nav_menu(
-		array(
-			'theme_location' => 'social',
-			'menu_class'     => 'social-links-menu d-flex justify-content-around list-unstyled',
-			'link_before'    => '<span class="screen-reader-text">',
-			'link_after'     => '</span>' . lerm_get_icon_svg( 'link' ),
-			'depth'          => 1,
-		)
-	);
+	if ( has_nav_menu( 'social' ) ) :
+		wp_nav_menu(
+			array(
+				'theme_location' => 'social',
+				'menu_class'     => 'social-links-menu d-flex justify-content-around list-unstyled',
+				'link_before'    => '<span class="screen-reader-text">',
+				'link_after'     => '</span>' . lerm_get_icon_svg( 'link' ),
+				'depth'          => 1,
+			)
+		);
+	endif;
 	?>
 </div><!-- .author-description -->

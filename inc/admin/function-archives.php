@@ -7,7 +7,7 @@
  */
  //文章归档
 function lerm_archives_list() {
-	 $output = '<div id="archives" class="archives-page"><button type="button" class="btn btn-success" id="al_expand_collapse" style="margin-bottom:1rem">全部展开/收缩</button>';
+	$output = '<div id="archives" class="archives-page"><button type="button" class="btn btn-success" id="al_expand_collapse" style="margin-bottom:1rem">全部展开/收缩</button>';
 
 	$args = array(
 		'post_type'           => 'post',
@@ -27,7 +27,7 @@ function lerm_archives_list() {
 		$day   = get_the_date( _x( 'd', 'daily archives date format', 'lerm' ) );
 
 		$posts_rebuild[ $year ][ $month ][ $day ] = sprintf(
-			'<span class="entry-published">%s</span><a href="%s" >%s <span class="badge badge-primary">%s</span></a>',
+			'<span class="entry-published">%s</span><a href="%s" >%s <span class="badge bg-primary">%s</span></a>',
 			$day,
 			get_permalink(),
 			get_the_title(),
@@ -46,7 +46,7 @@ function lerm_archives_list() {
 				++$i;
 				$posts .= '<li class="list-group-item d-flex justify-content-between align-items-center archives-post">' . $p . '</li>';
 			}
-			$output .= sprintf( '<li class="list-item"><span class="month-post-list">%s<label class="badge badge-danger">%s篇文章</label></span><ul class="list-group post-list">%s</ul></li>', $key_m, $i, $posts );
+			$output .= sprintf( '<li class="list-item"><span class="month-post-list">%s<label class="badge bg-danger">%s篇文章</label></span><ul class="list-group post-list">%s</ul></li>', $key_m, $i, $posts );
 		}
 		$output .= '</ul>';
 	}

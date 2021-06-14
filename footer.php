@@ -8,7 +8,7 @@
  */
 ?>
 
-<footer class="footer mt-3" itemscope="" itemtype="http://schema.org/WPFooter">
+<footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
 	<?php if ( ! is_404() || is_home() || is_front_page() ) : ?>
 		<?php
 		$footer_sidebars_count = (int) lerm_options( 'footer_sidebars_count' );

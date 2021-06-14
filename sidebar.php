@@ -9,13 +9,13 @@
 if ( wp_is_mobile() || in_array( lerm_site_layout(), array( 'layout-1c', 'layout-1c-narrow' ), true ) ) {
 	return; // Do not display sidebar on mobile or one colunm layout
 }?>
-<div class="col-lg-4 d-none d-lg-block">
+<div class="col-lg-4 d-none d-lg-block mb-3">
 	<aside class="sidebar sidebar-affix">
 		<?php if ( is_singular( 'post' ) ) : ?>
 
 			<?php if ( lerm_options( 'author_bio' ) ) : ?>
 				<section class="author-info text-center mb-3">
-					<?php get_template_part( 'template/post/biography' ); ?>
+					<?php get_template_part( 'template-parts/content/biography' ); ?>
 				</section>
 			<?php endif; ?>
 

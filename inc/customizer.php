@@ -34,7 +34,7 @@ function lerm_custom_logo() {
 				'full',
 				false,
 				array(
-					'class' => 'custom-logo',
+					'class' => 'custom-logo me-1',
 				)
 			)
 		);

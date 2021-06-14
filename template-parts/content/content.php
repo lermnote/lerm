@@ -22,28 +22,28 @@ global $post;
 							get_the_title()
 						)
 					);
-					social_icons( lerm_options( 'social_share' ) );
+					get_template_part( 'template-parts/footer/entry-footer' );
 				?>
 			</div>
 		</div>
 	<?php else : ?>
-		<div class="row no-gutters">
+		<div class="row no-gutters align-items-md-center">
 			<?php if ( null !== lerm_post_image() ) : ?>
-				<div class="col-md-3">
+				<div class="col-md-3 ">
 					<?php get_template_part( 'template-parts/content/featured-image' ); ?>
 				</div>
 			<?php endif; ?>
 			<div class="<?php echo lerm_post_image() ? 'col-md-9' : 'col-md-12'; ?>">
-				<div class="card-body py-md-0">
+				<div class="card-body p-md-0">
 					<h2 class="entry-title card-title">
 						<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>
 						<?php if ( is_sticky() ) : ?>
-							<label class="sticky-label badge badge-danger m-0"><?php echo esc_html__( 'Sticky', 'lerm' ); ?></label>
+							<label class="sticky-label badge bg-danger m-0"><?php echo esc_html__( 'Sticky', 'lerm' ); ?></label>
 						<?php endif; ?>
 					</h2>
 
-						<?php the_excerpt(); ?>
-
+					<?php the_excerpt(); ?>
+					<?php get_template_part( 'template-parts/footer/summary-footer' ); ?>
 				</div>
 			</div>
 		</div>

@@ -19,7 +19,7 @@ global $post;
 				<h2 class="entry-title card-title">
 					<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>
 					<?php if ( is_sticky() ) : ?>
-						<label class="sticky-label badge badge-danger m-0"><?php echo esc_html__( 'Sticky', 'lerm' ); ?></label>
+						<label class="sticky-label badge bg-danger m-0"><?php echo esc_html__( 'Sticky', 'lerm' ); ?></label>
 					<?php endif; ?>
 				</h2>
 

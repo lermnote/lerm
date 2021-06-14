@@ -18,7 +18,7 @@ class Load_More {
 	public function __construct( $args = array() ) {
 		$this->register( 'load_more' );
 		$default = array(
-			'post_per_page' => 10,
+			'post_per_page' => get_option( 'posts_per_page' ),
 		);
 		$args    = wp_parse_args( $args, $default );
 	}
@@ -48,7 +48,7 @@ class Load_More {
 		$max_pages = $_POST['max_pages'];
 
 		$args = array(
-			'post_per_page' => 10,
+			'post_per_page' => get_option( 'posts_per_page' ),
 			'paged'         => $next_page,
 			'post_status'   => 'publish',
 		);

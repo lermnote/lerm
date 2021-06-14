@@ -6,20 +6,13 @@
  */
 
 get_header();
+$breadcrumb = new \Lerm\Inc\Breadcrumb();
 ?>
 <main role="main" class="container"><!--.container-->
-	<?php
-	if ( ( 'layout-1c-narrow' !== lerm_site_layout() ) ) {
-		breadcrumb_trail();
-	}
-	?>
+	<?php $breadcrumb->trail(); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
-		<?php
-		if ( ( 'layout-1c-narrow' === lerm_site_layout() ) ) {
-			breadcrumb_trail();
-		}
-		?>
+
 			<div class="site-main card">
 				<h1 class="entry-header text-center pb-2"><?php esc_html_e( 'Page Not Found', 'lerm' ); ?></h1>
 

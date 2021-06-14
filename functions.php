@@ -19,8 +19,6 @@ define( 'LERM_VERSION', wp_get_theme()->get( 'Version' ) );
 define( 'BLOGNAME', get_bloginfo( 'name' ) );
 
 // Directory URI to the theme folder.
-
-// Directory URI to the theme folder.
 if ( ! defined( 'LERM_URI' ) ) {
 	define( 'LERM_URI', trailingslashit( get_template_directory_uri() ) );
 }
@@ -35,7 +33,6 @@ function lerm_get_theme_instance() {
 	\Lerm\Inc\THEME_SETUP::get_instance();
 }
 lerm_get_theme_instance();
-
 
 /**
  * Requre admin framework
@@ -290,7 +287,6 @@ function lerm_post_tag( $output = '' ) {
 	echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
-
 /**
  * Fix end of archive url with slash.
  *
@@ -344,7 +340,7 @@ function lerm_replace_avatar( $avatar ) {
 	if ( lerm_options( 'replace_avatar' ) ) {
 		$replacement = lerm_options( 'replace_avatar' );
 	} else {
-		$replacement = 'https://cn.gravatar.com/avatar/';
+		$replacement = 'https://gravatar.loli.net/avatar/';
 	}
 	$avatar = preg_replace( $regexp, $replacement, $avatar );
 	return $avatar;
@@ -376,7 +372,6 @@ if ( lerm_options( 'avatar_cache' ) ) :
 	}
 	add_filter( 'get_avatar', 'lerm_avatar_cache' );
 endif;
-
 
 /**
  * Disable Embeds.
@@ -472,13 +467,13 @@ add_filter( 'comment_text', 'pre_esc_html', 2 );
 add_filter( 'the_content', 'dangopress_esc_html', 2 );
 add_filter( 'comment_text', 'dangopress_esc_html', 2 );
 
-	/**
-	 * Custom template tags for this theme.
-	 */
-	require LERM_DIR . 'inc/template-tags.php';
-	require LERM_DIR . 'inc/customizer.php';
-	require LERM_DIR . 'inc/lerm.php';
-
+/**
+ * Custom template tags for this theme.
+ *
+ */
+require LERM_DIR . 'inc/template-tags.php';
+require LERM_DIR . 'inc/customizer.php';
+require LERM_DIR . 'inc/lerm.php';
 
 /**
  *  Get copyright of website

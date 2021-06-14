@@ -40,7 +40,7 @@ class Enqueue {
 		wp_register_script( 'share', LERM_URI . 'assets/js/social-share.min.js', array(), LERM_VERSION, true );
 		wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 		wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
-		wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.js', array(), LERM_VERSION, true );
+		wp_register_script( 'lerm_js', LERM_URI . 'assets/js/lerm.min.js', array(), LERM_VERSION, true );
 		wp_register_script( 'wow_js', LERM_URI . 'assets/js/wow.min.js', array(), LERM_VERSION, true );
 		// enqueue script
 		if ( lerm_options( 'cdn_jquery' ) ) {

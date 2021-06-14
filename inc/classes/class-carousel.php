@@ -47,31 +47,31 @@ class Carousel {
 		if ( $this->slides ) {
 			foreach ( $this->slides as $key => $slide ) {
 				$active     = ( 0 === $key ) ? ' active' : '';
-				$indicator .= sprintf( '<li data-target="#lermSlides" data-slide-to="%s" class="%s"></li>', $key, $active );
+				$indicator .= sprintf( '<button type="button" data-bs-target="#lermSlides" data-bs-slide-to="%s" class="%s" aria-current="true"></button>', $key, $active );
 				$image      = sprintf( '<img class="d-block img-fluid w-100 rounded slider " src="%1$s" alt="%2$s" width="%3$s" height="%4$s">', $slide['image']['url'], $slide['title'], $slide['image']['width'], $slide['image']['height'] );
 				$link       = sprintf( '<a href="%1$s" title="%2$s">%3$s</a>', $slide['url'], $slide['title'], $image );
-				$title      = sprintf( '<div class="carousel-caption">%1$s%2$s</div>', $slide['title'] ? '<h5>' . $slide['title'] . '</h5>' : '', $slide['description'] ? '<p>' . $slide['description'] . '</p>' : '' );
-				$carousel  .= sprintf( '<div class="carousel-item%1$s">%2$s%3$s</div>', $active, $slide['url'] ? $link : $image, $title );
+				$title      = sprintf( '<div class="carousel-caption d-none d-md-block">%1$s%2$s</div>', $slide['title'] ? '<h5>' . $slide['title'] . '</h5>' : '', $slide['description'] ? '<p>' . $slide['description'] . '</p>' : '' );
+				$carousel  .= sprintf( '<div class="carousel-item%1$s" data-bs-interval="10000">%2$s%3$s</div>', $active, $slide['url'] ? $link : $image, $title );
 			}
 			?>
-			<div id="lermSlides" class="carousel slide carousel-fade mb-3" data-ride="carousel">
+			<div id="lermSlides" class="carousel slide carousel-fade mb-3" data-bs-ride="carousel">
 				<?php if ( $this->args['indicators'] ) { ?>
-					<ol class="carousel-indicators mb-0">
+					<div class="carousel-indicators mb-0">
 						<?php echo $indicator; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</ol>
+					</div>
 				<?php } ?>
 				<div class="carousel-inner">
 					<?php echo $carousel; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</div>
 				<?php if ( $this->args['control_arrows'] ) { ?>
-					<a class="carousel-control-prev d-none d-md-flex" href="#lermSlides" role="button" data-slide="prev">
+					<button class="carousel-control-prev d-none d-md-flex" type="button" data-bs-target="#lermSlides" data-bs-slide="prev">
 						<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-						<span class="screen-reader-text">Previous</span>
-					</a>
-					<a class="carousel-control-next d-none d-md-flex" href="#lermSlides" role="button" data-slide="next">
+						<span class="visually-hidden">Previous</span>
+					</button>
+					<button class="carousel-control-next d-none d-md-flex" type="button" data-bs-target="#lermSlides" data-bs-slide="next">
 						<span class="carousel-control-next-icon" aria-hidden="true"></span>
-						<span class="screen-reader-text">Next</span>
-					</a>
+						<span class="visually-hidden">Next</span>
+					</button>
 				<?php } ?>
 			</div>
 			<?php

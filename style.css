@@ -275,27 +275,11 @@ form select, form input, form textarea{
 }
 
 /*site-title site-description*/
-
+.navbar-brand{
+	line-height: normal;
+}
 .site-title {
 	margin: 0;
-}
-
-.navbar-brand {
-	display: inline-block;
-	padding-top: 0.3125rem;
-	padding-bottom: 0.3125rem;
-	margin-right: 1rem;
-	font-size: 1.25rem;
-	line-height: inherit;
-	white-space: nowrap;
-}
-
-.brand a:hover,
-.brand a:active,
-.brand a:focus {
-	text-decoration: none;
-	color: inherit;
-	outline: none
 }
 
 .dropdown-item {
@@ -364,33 +348,8 @@ form select, form input, form textarea{
 }
 
 @media (max-width: 991.9px) {
-	/* .primary-nav {
-		position: fixed;
-		right: 0;
-		z-index: 99;
-		width: 80%;
-		overflow-y:scroll;
-		height: 0;
-		transition: all 0.5s ease;
-	}
-	.toggled .primary-nav{
-		padding: 1rem;
-		height: 100%;
-		transition: all 0.5s ease;
-	}
-
-	.menu-backdrop.show {
-		opacity: 0.6;
-		z-index: 89;
-		position: absolute;
-		left: 0;
-		height: 100%;
-		width: 100%;
-		display: block;
-		background-color: #000;
-	} */
 	.offcanvas-end{
-		width: 60%;
+		width: 70%;
 	}
 }
 
@@ -452,7 +411,6 @@ form select, form input, form textarea{
 	visibility: hidden;
 }
 
-.brand a,
 .btn-custom:hover a,
 #comments a,
 .colophon a,
@@ -1552,10 +1510,12 @@ border-radius: .25rem;
 	box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, .25);
 }
 
-.comment .children {
+.children .children {
 	padding: 0;
 }
-
+.children .comment{
+	border-width: 0;
+}
 /* input 文件上传css */
 .img-upload {
 	position: relative;

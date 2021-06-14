@@ -122,7 +122,7 @@ class Comment_Walker extends Walker_Comment {
 					</span>
 				</footer>
 				<?php if ( '0' === $comment->comment_approved ) : ?>
-					<span class="comment-awaiting-moderation badge badge-pill badge-info"><?php esc_html_e( 'Your comment is awaiting moderation.', 'lerm' ); ?></span>
+					<span class="comment-awaiting-moderation badge rounded-pill bg-info"><?php esc_html_e( 'Your comment is awaiting moderation.', 'lerm' ); ?></span>
 				<?php endif; ?>
 				<section class="comment-content">
 					<?php comment_text(); ?>
