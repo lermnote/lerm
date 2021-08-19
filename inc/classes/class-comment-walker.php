@@ -45,7 +45,7 @@ class Comment_Walker extends Walker_Comment {
 			// Set the globals, so our comment functions below will work correctly
 			$GLOBALS['comment'] = $comment;
 
-			$this->html5_comment( $comment, '1', array( 'avatar_size' => '48' ) );
+			$this->html5_comment( $comment, '1', array( 'avatar_size' => wp_is_mobile() ? 32 : 48 ) );
 
 			wp_send_json_success( ob_get_clean() );
 
@@ -60,7 +60,7 @@ class Comment_Walker extends Walker_Comment {
 	}
 	protected function html5_comment( $comment, $depth, $args ) {
 		?>
-		<li <?php comment_class( ( $depth > 1 ) ? 'list-group-item px-0' : 'list-group-item' ); ?> id="comment-<?php comment_ID(); ?>">
+		<li <?php comment_class( ( $depth > 1 ) ? 'list-group-item p-0' : 'list-group-item' ); ?> id="comment-<?php comment_ID(); ?>">
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
 				<footer class="comment-meta mb-1">
 					<span class="comment-author vcard">
@@ -95,7 +95,7 @@ class Comment_Walker extends Walker_Comment {
 							$comment_timestamp = sprintf( __( '%1$s at %2$s', 'lerm' ), get_comment_date( '', $comment ), get_comment_time() );
 							?>
 							<time datetime="<?php comment_time( 'c' ); ?>" title="<?php echo esc_attr( $comment_timestamp ); ?>">
-								<?php echo esc_html( human_time_diff( get_comment_time( 'U' ), current_time( 'timestamp' ) ) ); ?>
+								<?php echo esc_html( human_time_diff( get_comment_time( 'U' ), current_datetime()->getTimestamp() ) ); ?>
 								<span> <?php echo esc_html__( 'ago', 'lerm' ); ?></span>
 							</time>
 						</a>
@@ -114,7 +114,6 @@ class Comment_Walker extends Walker_Comment {
 								array(
 									'add_below' => 'div-comment',
 									'depth'     => $depth,
-									'max_depth' => $args['max_depth'],
 								)
 							)
 						);
@@ -124,7 +123,7 @@ class Comment_Walker extends Walker_Comment {
 				<?php if ( '0' === $comment->comment_approved ) : ?>
 					<span class="comment-awaiting-moderation badge rounded-pill bg-info"><?php esc_html_e( 'Your comment is awaiting moderation.', 'lerm' ); ?></span>
 				<?php endif; ?>
-				<section class="comment-content">
+				<section class="comment-content" style="margin-left: <?php echo ( ( ( wp_is_mobile() ? 32 : 48 ) + 8 ) . 'px' ); ?>" >
 					<?php comment_text(); ?>
 				</section>
 			</article>
@@ -132,4 +131,4 @@ class Comment_Walker extends Walker_Comment {
 	}
 }
 remove_filter( 'comment_text', 'make_clickable', 9 );
-add_filter( 'pre_comment_content', 'wp_specialchars' );
+add_filter( 'pre_comment_content', 'esc_html' );

@@ -20,7 +20,6 @@ function autoloader( $resource = '' ) {
 	// Remove our root namespace.
 	$resource = str_replace( $namespace_root, '', $resource );
 
-
 	$path = explode(
 		'\\',
 		str_replace( '_', '-', strtolower( $resource ) )

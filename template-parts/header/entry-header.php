@@ -6,7 +6,7 @@
  */
 ?>
 
-<header class="entry-header d-flex flex-column text-center mb-md-2">
+<header class="entry-header d-flex flex-column text-center mb-2">
 	<?php
 	the_title( '<h1 class="entry-title">', '</h1>' );
 	if ( is_singular( 'post' ) ) {

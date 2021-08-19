@@ -25,7 +25,7 @@ function lerm_related_posts() {
 		echo '<ul class="list-unstyled p-3 m-0">';
 		while ( $query->have_posts() ) :
 			$query->the_post();
-			the_title( '<li class="mb-1"><i class="fa fa-chevron-right"></i><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a></li>' );
+			the_title( '<li class="mb-1"><i class="fa fa-chevron-right me-1"></i><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a></li>' );
 			endwhile;
 		echo '</ul>';
 		echo '</section>';

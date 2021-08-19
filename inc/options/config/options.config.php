@@ -351,6 +351,7 @@ if ( class_exists( 'CSF' ) ) {
 					'title'            => __( 'Primary Buttons Color', 'lerm' ),
 					'output'           => array(
 						'.btn-custom',
+						'.comment-reply-link',
 						'a[id="cancel-comment-reply-link"]',
 						'.tag-cloud-link',
 					),

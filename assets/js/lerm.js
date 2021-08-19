@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	let offcanvasMenu = document.querySelector("#offcanvasMenu");
 
 	if (windowWidth < 992) {
-		offcanvasMenu.style.top =parseFloat( document.defaultView.getComputedStyle(html, null).marginTop ) +'px';
+		offcanvasMenu.style.top = parseFloat(document.defaultView.getComputedStyle(html, null).marginTop) + 'px';
 	}
 
 	/**
@@ -164,12 +164,12 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	scrollUp.addEventListener("click", (e) => {
 		e.preventDefault();
 		animate({
-			timing: (progress) => (html.scrollTop = html.scrollTop  * (1 - progress)),
+			timing: (progress) => (html.scrollTop = html.scrollTop * (1 - progress)),
 			draw: circ,
 			duration: 700,
 		});
 	});
-	let circ = (timeFraction) =>( 1 - Math.sin(Math.acos(timeFraction)));
+	let circ = (timeFraction) => (1 - Math.sin(Math.acos(timeFraction)));
 
 	/**
 	 * ajax load more posts
@@ -265,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	let commentForm = document.getElementById("commentform");
 	if (commentForm) {
 		//error info display
-		commentForm.insertAdjacentHTML( "beforeend", '<div id="error" class="text-danger wow"></div>');
+		commentForm.insertAdjacentHTML("beforeend", '<div id="error" class="text-danger wow"></div>');
 		let errInfo = commentForm.querySelector("#error");
 		let author = commentForm.querySelector('[name="author"]');
 		let email = commentForm.querySelector('[name="email"]');
@@ -322,41 +322,46 @@ document.addEventListener("DOMContentLoaded", function (e) {
 				.then((data) => {
 					// console.log(data);
 					let nodeArray = parseToDOM(data.data);
+
 					if (data.success == true && data.data.length != 0) {
+						nodeLi = nodeArray[1];
 						commentForm.querySelector('[type="submit"]').setAttribute("disabled", "disabled");
 						let respond = document.getElementById("respond");
 						if (respond.parentNode.classList.contains("comment")) {
-							// console.log('1')
+							//回复原评论
 							if (null !== respond.previousElementSibling) {
-								// console.log('2')
-								//这个if是为了回复评论是在原评论下面追加子评论
-								nodeArray.forEach((e) => {
-									respond.previousElementSibling.appendChild(e);
-								});
-								//console.log('1')
+								//这个if是为了回复评论时在原评论下面追加子评论
+								//previousElementSibling指的是上一个兄弟元素节点
+								// nodeArray.forEach((e) => {
+									respond.previousElementSibling.appendChild(nodeLi);
+								// });
+
 							} else {
-								nodeArray.forEach((e) => {
-									// console.log('3')
-									respond.parentNode.appendChild(e);
-								});
+								//无子评论时使用此方法
+								// nodeArray.forEach((e) => {
+									respond.parentNode.appendChild(nodeLi);
+								// });
 							}
 						} else if (document.querySelector(".comment-list")) {
-							//增加新评论是使用此方法
-							nodeArray.forEach((e) => {
-								document
-									.querySelector(".comment-list")
-									.insertBefore(
-										e,
-										document.querySelector(".comment-list")
-											.firstChild
-									);
-							});
+							//增加新评论时使用此方法
+							// nodeArray.forEach((e) => {
+								document.querySelector(".comment-list").insertBefore(nodeLi,document.querySelector(".comment-list").firstChild);
+							// });
 						} else {
-							nodeArray.forEach((e) => {
-								//无评论是使用此方法
-								// console.log(e)
-								respond.parentNode.appendChild(e);
-							});
+							//无评论是使用此方法
+							// nodeArray.forEach((e) => {
+
+								let div = document.createElement('div');
+								let ol = document.createElement('ol');
+
+								div.classList = 'card mb-3';
+								ol.classList = 'comment-list p-0 m-0 list-group list-group-flush';
+
+								ol.appendChild(nodeLi);
+								div.appendChild(ol);
+
+								respond.parentNode.appendChild(div);
+							// });
 						}
 					} else {
 						// 若success:false,则抛出错误；
@@ -375,7 +380,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 				})
 				.catch((err) => {
 					// console.log(err);
-					errInfo.innerHTML ="<strong>错误：</strong>";
+					errInfo.innerHTML = "<strong>错误：</strong>";
 					//show orror info
 					err.forEach((e) => {
 						errInfo.appendChild(e);
@@ -399,19 +404,19 @@ document.addEventListener("DOMContentLoaded", function (e) {
  *
  * @param {Function} fn Callback function to run.
  */
-function isDomReady( fn ) {
-	if ( typeof fn !== 'function' ) {
+function isDomReady (fn) {
+	if (typeof fn !== 'function') {
 		return;
 	}
 
-	if ( document.readyState === 'interactive' || document.readyState === 'complete' ) {
+	if (document.readyState === 'interactive' || document.readyState === 'complete') {
 		return fn();
 	}
 
-	document.addEventListener( 'DOMContentLoaded', fn, false );
+	document.addEventListener('DOMContentLoaded', fn, false);
 }
 
-isDomReady(function(){
+isDomReady(function () {
 
 })
 
@@ -479,18 +484,18 @@ const validateEmail = function (email) {
  *
  * @param {*} options
  */
-function animate({timing, draw, duration}) {
+function animate ({ timing, draw, duration }) {
 
 	let start = performance.now();
-	requestAnimationFrame(function animate(time) {
-	  // timeFraction 从 0 增加到 1
-	  let timeFraction = (time - start) / duration;
-	  if (timeFraction > 1) timeFraction = 1;
-	  // 计算当前动画状态
-	  let progress = timing(timeFraction);
-	  draw(progress); // 绘制
-	  if (timeFraction < 1) {
-		requestAnimationFrame(animate);
-	  }
+	requestAnimationFrame(function animate (time) {
+		// timeFraction 从 0 增加到 1
+		let timeFraction = (time - start) / duration;
+		if (timeFraction > 1) timeFraction = 1;
+		// 计算当前动画状态
+		let progress = timing(timeFraction);
+		draw(progress); // 绘制
+		if (timeFraction < 1) {
+			requestAnimationFrame(animate);
+		}
 	});
-  }
+}

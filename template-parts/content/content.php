@@ -22,6 +22,7 @@ global $post;
 							get_the_title()
 						)
 					);
+					lerm_link_pagination();
 					get_template_part( 'template-parts/footer/entry-footer' );
 				?>
 			</div>

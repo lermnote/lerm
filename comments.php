@@ -31,12 +31,12 @@ if ( post_password_required() ) {
 			) . '</p>',
 
 			'comment_field'        => '<fieldset class="form-group mb-2">
-			<textarea id="comment" class="rq form-control mb-2"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea>',
+			<textarea id="comment" class="rq form-control mb-1"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea>',
 
 			'fields'               => array(
-				'author' => '<div class="form-group input-form"><label class="visually-hidden-focusable" for="author">Username</label><div class="input-group mb-2"><span class="input-group-text"><i class="fa fa-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
-				'email'  => '<label class="visually-hidden-focusable" for="email">Email</label><div class="input-group mb-2"><span class="input-group-text"><i class="fa fa-envelope"></i></span><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . __( 'E-mail', 'lerm' ) . '" required></div>',
-				'url'    => '<label class="visually-hidden-focusable" for="url">Url</label><div class="input-group mb-2"><span class="input-group-text"><i class="fa fa-link"></i></span><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></div></fieldset>',
+				'author' => '<div class="form-group input-form"><label class="visually-hidden-focusable" for="author">Username</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
+				'email'  => '<label class="visually-hidden-focusable" for="email">Email</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-envelope"></i></span><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . __( 'E-mail', 'lerm' ) . '" required></div>',
+				'url'    => '<label class="visually-hidden-focusable" for="url">Url</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-link"></i></span><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></div></fieldset>',
 			),
 
 			'logged_in_as'         => '<p class="logged-in-as">' . sprintf(
@@ -59,7 +59,7 @@ if ( post_password_required() ) {
 					wp_login_url( apply_filters( 'the_permalink', get_permalink( $post_id ), $post_id ) )
 				)
 			),
-			'class_container'      => 'card comment-respond',
+			'class_container'      => 'card comment-respond mb-3',
 			'class_form'           => 'card-body comment-form',
 			'id_submit'            => 'submit',
 			'class_submit'         => 'btn btn-sm btn-custom',
@@ -76,7 +76,7 @@ if ( post_password_required() ) {
 			lerm_paginate_comments();
 		}
 		?>
-		<div class="card comments-list mt-2">
+		<div class="card mb-3">
 		<h3 class="comment-title card-header border-bottom-0">
 			<?php
 			printf(

@@ -12,7 +12,8 @@ if ( wp_is_mobile() ) {
 } else {
 	$theme_location = 'primary';
 }
-$carousel = new \Lerm\Inc\Carousel();
+$carousel   = new \Lerm\Inc\Carousel();
+$breadcrumb = new \Lerm\Inc\Breadcrumb();
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -28,7 +29,7 @@ $carousel = new \Lerm\Inc\Carousel();
 </head>
 <body <?php body_class(); ?>>
 	<?php wp_body_open(); ?>
-	<header id="site-header" class="site-header" itemscope="" itemtype="http://schema.org/WPHeader">
+	<header id="site-header" class="site-header <?php echo ( false === $breadcrumb->args['show_on_front'] && is_home() ) ? 'mb-3' : ' '; ?>" itemscope="" itemtype="http://schema.org/WPHeader">
 		<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
 			<div class="container">
 				<div class="navbar-brand d-flex"><!-- .navbar-brand  begin -->
@@ -74,7 +75,7 @@ $carousel = new \Lerm\Inc\Carousel();
 					)
 				);
 				?>
-				<div class=" d-none d-md-block">
+				<div class="d-none d-lg-block">
 					<?php
 					if ( lerm_options( 'narbar_search' ) ) :
 						get_search_form();

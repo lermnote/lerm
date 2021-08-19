@@ -33,10 +33,9 @@ class Enqueue {
 		wp_enqueue_style( 'main', LERM_URI . 'assets/css/main.css', array(), '1.0.0' );
 	}
 	public function scripts() {
-		wp_register_script( 'jquery-min', LERM_URI . 'assets/js/jquery.min.js', array(), '3.1.0', true );
 		wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.min.js', array(), '4.3.1', true );
 		wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
-		wp_register_script( 'lightbox', LERM_URI . 'assets/js/ekko-lightbox.min.js', array(), '2.0.0', true );
+		// wp_register_script( 'lightbox', LERM_URI . 'assets/js/ekko-lightbox.min.js', array(), '2.0.0', true );
 		wp_register_script( 'share', LERM_URI . 'assets/js/social-share.min.js', array(), LERM_VERSION, true );
 		wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 		wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
@@ -45,8 +44,6 @@ class Enqueue {
 		// enqueue script
 		if ( lerm_options( 'cdn_jquery' ) ) {
 			wp_enqueue_script( 'jquery_cdn', lerm_options( 'cdn_jquery' ), array(), LERM_VERSION, true );
-		} else {
-			wp_enqueue_script( 'jquery-min' );
 		}
 		wp_enqueue_script( 'bootstrap' );
 		wp_enqueue_script( 'lazyload' );

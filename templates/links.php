@@ -12,13 +12,11 @@ $link_categories = get_terms(
 		'taxonmomy' => 'link_category',
 	)
 );
+
+$breadcrumb = new \Lerm\Inc\Breadcrumb();
 ?>
 <main role="main" class="container"><!--.container-->
-	<?php
-	if ( ( 'layout-1c-narrow' !== lerm_site_layout() ) ) {
-		breadcrumb_trail();
-	}
-	?>
+	<?php $breadcrumb->trail(); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 		<?php
@@ -50,34 +48,40 @@ $link_categories = get_terms(
 									foreach ( $link_categories as $link_category ) {
 										$link_card = '';
 										?>
-										<h2 class="link-title text-center">
-											<?php echo esc_html( $link_category->name ); ?>
-										</h2>
-										<?php
-										$link_terms = get_bookmarks(
-											array(
-												'orderby'  => 'name',
-												'category' => $link_category->term_id,
-											)
-										);
-										foreach ( $link_terms as $link_term ) {
-											$grap_favicon     = grap_favicon(
+										<div class="card mb-4">
+
+											<h2 class="card-header">
+												<?php echo esc_html( $link_category->name ); ?>
+											</h2>
+											<?php
+											$link_terms = get_bookmarks(
 												array(
-													'URL'  => $link_term->link_url,
-													'SAVE' => true,
-													'DIR'  => './',
-													'TRY'  => true,
-													'DEV'  => null,
+													'orderby'  => 'name',
+													'category' => $link_category->term_id,
 												)
 											);
-											$link_name        = sprintf( '<h5 class="card-title m-0">%s</h5>', esc_html( $link_term->link_name ) );
-											$link_description = sprintf( '<div class="card-body"><p class="card-text">%s</p></div>', esc_html( $link_term->link_description ) );
-											$link_image       = sprintf( '<div class="card-header text-center d-flex justify-content-center align-items-center"><img src="%s" class="me-1" alt="%s" style="height:1.5rem;width:1.5rem;overflow: hidden;">%s</div>', $grap_favicon, esc_html( $link_term->link_name ), $link_name );
-											$link_card       .= sprintf( '<div class="col mb-3"><div class="card h-100 link-card"><a class="text-dark h-100" href="%s" target="%s">%s%s</a></div></div>', esc_html( $link_term->link_url ), esc_html( $link_term->link_target ), $link_image, $link_description );
-										}
-										echo sprintf( '<div class="row row-cols-1 row-cols-md-4">%s</div>', $link_card ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+											foreach ( $link_terms as $link_term ) {
+												// $grap_favicon = grap_favicon(
+												// 	array(
+												// 		'URL'  => $link_term->link_url,
+												// 		'SAVE' => false,
+												// 		'DIR'  => './',
+												// 		'TRY'  => true,
+												// 	)
+												// );
+
+												$link_name        = sprintf( '<h5 class="card-title m-0">%s</h5>', esc_html( $link_term->link_name ) );
+												$link_description = sprintf( '<div class="card-body"><p class="card-text">%s</p></div>', esc_html( $link_term->link_description ) );
+                                                $link_image       = sprintf( '<img src="%s" class="me-auto p-2 border rounded-3 " alt="%s" style="height:3rem;width:3rem;overflow: hidden;">%s', '$grap_favicon', esc_html( $link_term->link_name ), $link_name );
+												$link_card       .= sprintf( '<li class="col-3 col-sm-3 col-md-3 col-lg-auto text-center my-2 py-2"><a class="text-dark h-100" href="%s" target="%s">%s</a></li>', esc_html( $link_term->link_url ), esc_html( $link_term->link_target ), $link_image, $link_description );
+											}
+											echo sprintf( '<ul class="row list-unstyled card-body">%s</ul>', $link_card ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+											?>
+											</div>
+										<?php
 									}
 									?>
+
 									<div class="py-3 clearfix">
 										<?php lerm_link_pagination(); ?>
 									</div>

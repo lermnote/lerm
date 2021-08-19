@@ -184,7 +184,8 @@ function lerm_post_navigation() {
 				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'lerm' ) . '</span><i class="fa fa-chevron-right"></i>' .
 				'<span class="screen-reader-text">' . __( 'Next post:', 'lerm' ) . '</span> <br/>' .
 				'<span class="post-title d-none d-md-block">%title</span>',
-				'prev_text' => '<i class="fa fa-chevron-left"></i><span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
+				'prev_text' => '<i class="fa 
+				fa-chevron-left"></i><span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
 				'<span class="screen-reader-text">' . __( 'Previous post:', 'lerm' ) . '</span> <br/>' .
 				'<span class="post-title d-none d-md-block">%title</span>',
 			)
@@ -213,11 +214,9 @@ function lerm_pagination() {
 function lerm_link_pagination() {
 	wp_link_pages(
 		array(
-			'mid_size'           => 3,
-			'prev_text'          => '<span class="screen-reader-text">' . __( 'Previous page', 'lerm' ) . '</span>',
-			'next_text'          => '<span class="screen-reader-text">' . __( 'Next page', 'lerm' ),
-			'before_page_number' => '<span class="meta-nav screen-reader-text">' . __( 'The', 'lerm' ) . ' </span>',
-			'after_page_number'  => '<span class="meta-nav screen-reader-text">' . __( ' Page', 'lerm' ) . ' </span>',
+			'previouspagelink' => '<span class="screen-reader-text">' . __( 'Previous page', 'lerm' ) . '</span>',
+			'nextpagelink'     => '<span class="screen-reader-text">' . __( 'Next page', 'lerm' ),
+			'pagelink'         => esc_html__( 'Page %', 'lerm' ),
 		)
 	);
 }

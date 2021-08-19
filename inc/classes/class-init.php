@@ -15,7 +15,7 @@ use Lerm\Inc\Traits\Hooker;
 class Init {
 	use Singleton, hooker;
 
-	public $init = [];
+	public $init = array();
 
 
 	protected function __construct() {
@@ -28,10 +28,10 @@ class Init {
 		$this->action( 'init', 'disable_emojis' );
 		$this->filter( 'document_title_separator', 'title_separator', 15, 1 );
 		$this->filter( 'frontpage_template', 'front_page_template', 15, 1 );
-		$this->filter( 'comment_reply_link', 'replace_reply_link_class' );
+		// $this->filter( 'comment_reply_link', 'replace_reply_link_class' );
 		$this->filter( 'widget_tag_cloud_args', 'tag_cloud_args' );
-		$this->filters( [ 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ], 'remove_css_attributes', 100, 1 );
-		$this->filters( [ 'script_loader_src', 'style_loader_src' ], 'remove_ver', 15, 1 );
+		$this->filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
+		$this->filters( array( 'script_loader_src', 'style_loader_src' ), 'remove_ver', 15, 1 );
 		$this->link_manager();
 		$this->remove_recent_comments_css();
 		$this->disable_rest_api();
@@ -160,7 +160,7 @@ class Init {
 		remove_action( 'xml_rsd_apis', 'rest_output_rsd' );
 		remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
 		remove_action( 'template_redirect', 'rest_output_linkheader', 11 );
-		//$this->filter( 'rest_authentication_errors', 'rest_authorization_error' );
+		// $this->filter( 'rest_authentication_errors', 'rest_authorization_error' );
 	}
 
 	/**
@@ -185,14 +185,14 @@ class Init {
 	public function tag_cloud_args( $args ) {
 		return array_merge(
 			$args,
-			[
+			array(
 				'largest'  => 1.382,
 				'smallest' => 0.618,
 				'unit'     => 'em',
 				'number'   => 22,
 				'orderby'  => 'count',
 				'order'    => 'DESC',
-			]
+			)
 		);
 	}
 }
