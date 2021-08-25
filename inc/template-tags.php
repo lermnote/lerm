@@ -204,13 +204,14 @@ function lerm_post_class( $classes ) {
 	if ( ! is_singular() ) {
 		$classes[] = 'summary';
 		$classes[] = 'mb-3 p-0 p-md-3';
-		if ( lerm_options( 'loading-animate' ) ) {
-			$classes[] = 'loading-animate';
-			$classes[] = 'fadeInUp';
-		}
+
 	} else {
 		$classes[] = 'entry';
 		$classes[] = ' p-3 mb-2';
+	}
+	if ( lerm_options( 'loading-animate' ) ) {
+		$classes[] = 'loading-animate';
+		$classes[] = 'fadeIn';
 	}
 	return $classes;
 }

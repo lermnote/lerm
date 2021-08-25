@@ -221,7 +221,7 @@ if ( class_exists( 'CSF' ) ) {
 					),
 					'output'       => array(
 						// '#related',
-						'.widget',
+						// '.widget',
 						// '.summary',
 						// '.entry',
 						'img.avatar',
@@ -255,7 +255,7 @@ if ( class_exists( 'CSF' ) ) {
 					'title'       => __( 'Header Background Color', 'lerm' ),
 					'default'     => '#fff',
 					'output_mode' => 'background-color',
-					'output'      => array( '.site-header', '.dropdown-menu' ),
+					'output'      => array( '.site-header', '.dropdown-menu', '.offcanvas' ),
 				),
 
 				array(

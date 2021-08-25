@@ -114,44 +114,22 @@ class THEME_SETUP {
 				'name'          => __( 'HomePage Sidebar', 'lerm' ),
 				'id'            => 'home-sidebar',
 				'description'   => __( 'Add widgets here to appear in your sidebar.', 'lerm' ),
-				'before_widget' => '<section id="%1$s" class="card border-0 widget mb-3 %2$s loading-animate fadeInUp">',
+				'before_widget' => '<section id="%1$s" class="card border-0 widget mb-3 %2$s loading-animate fadeIn">',
 				'after_widget'  => '</section>',
 				'before_title'  => '<h4 class="widget-title card-header"><span class="wrap d-inline-block fa">',
 				'after_title'   => '</span></h4>',
 			)
 		);
-		$widgets = lerm_options( 'register_sidebars' );
-		if ( isset( $widgets ) && ! empty( $widgets ) ) {
-			foreach ( $widgets as $key => $value ) {
-				$sidebar_id = 'sidebar' . preg_replace( '/ /', '', Chinese_to_PY::getPY( $value['sidebar_title'], 'all' ) );
-				if ( ! empty( $value['sidebar_title'] ) ) {
-					register_sidebar(
-						array(
-							'name'          => $value['sidebar_title'],
-							'id'            => $sidebar_id,
-							'description'   => __( 'Cutsom register sidebar', 'lerm' ),
-							'before_widget' => '<section id="%1$s" class="card widget mb-3 %2$s">',
-							'after_widget'  => '</section>',
-							'before_title'  => '<h4 class="widget-title card-header"><span class="wrap d-inline-block fa">',
-							'after_title'   => '</span></h4>',
-						)
-					);
-				}
-			}
-		}
-		$footer_sidebars_count = (int) lerm_options( 'footer_sidebars_count' );
-		register_sidebars(
-			$footer_sidebars_count,
+
+		register_sidebar(
 			array(
-				/* translators: %d: number of sidebar*/
-				'name'          => __( 'Sidebar %d', 'lerm' ),
-				'id'            => 'footer-sidebar',
-				'description'   => 'Sidebar show  ',
-				'class'         => '',
-				'before_widget' => '<section id="%1$s" class="footer-widget %2$s">',
+				'name'          => __( 'Footer Sidebar', 'lerm' ),
+				'id'            => 'footer-sidebar-right',
+				'description'   => __( 'Add widgets here to appear in your sidebar.', 'lerm' ),
+				'before_widget' => '<section id="%1$s" class="footer-widget %2$s loading-animate fadeIn">',
 				'after_widget'  => '</section>',
-				'before_title'  => '<h4 class="footer-widget-title">',
-				'after_title'   => '</h4>',
+				'before_title'  => '<h4 class="footer-widget-title"><span class="wrap d-inline-block fa">',
+				'after_title'   => '</span></h4>',
 			)
 		);
 	}
