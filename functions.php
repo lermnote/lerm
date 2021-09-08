@@ -184,8 +184,7 @@ function lerm_post_navigation() {
 				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'lerm' ) . '</span><i class="fa fa-chevron-right"></i>' .
 				'<span class="screen-reader-text">' . __( 'Next post:', 'lerm' ) . '</span> <br/>' .
 				'<span class="post-title d-none d-md-block">%title</span>',
-				'prev_text' => '<i class="fa 
-				fa-chevron-left"></i><span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
+				'prev_text' => '<i class="fa fa-chevron-left"></i><span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
 				'<span class="screen-reader-text">' . __( 'Previous post:', 'lerm' ) . '</span> <br/>' .
 				'<span class="post-title d-none d-md-block">%title</span>',
 			)
@@ -228,7 +227,7 @@ function lerm_link_pagination() {
  * @return void
  */
 function lerm_paginate_comments() {?>
-	<nav class="comment-nav mt-2">
+	<nav class="comment-nav mb-3">
 		<div class="comment-pager d-flex justify-content-between">
 			<div class="comment-prev prev btn btn-sm btn-custom">
 				<i class="fa fa-chevron-left"></i>
@@ -265,26 +264,6 @@ function addpageviews() {
 	}
 }
 add_action( 'wp_head', 'addpageviews' );
-
-/**
- * Entry tags list.
- *
- * @since  1.0.0
- * @return string tags_list
- */
-function lerm_post_tag( $output = '' ) {
-	$tags = get_the_tags();
-	if ( $tags && is_singular( 'post' ) ) {
-		$output  = '<div class="post-tag-list mb-2"><span class="wrap tags-links" itemprop="keywords" ><span class="screen-reader-text">';
-		$output .= esc_html__( 'Tags', 'lerm' );
-		$output .= '</span>';
-		foreach ( $tags as $tag ) {
-			$output .= sprintf( '<a class="btn btn-custom btn-sm me-2" href="%s" rel="tag">%s</a>', esc_url( get_tag_link( $tag ) ), esc_html( $tag->name ) );
-		}
-		$output .= '</span></div>';
-	}
-	echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-}
 
 /**
  * Fix end of archive url with slash.
@@ -468,7 +447,6 @@ add_filter( 'comment_text', 'dangopress_esc_html', 2 );
 
 /**
  * Custom template tags for this theme.
- *
  */
 require LERM_DIR . 'inc/template-tags.php';
 require LERM_DIR . 'inc/customizer.php';

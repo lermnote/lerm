@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	 * carousel image height
 	 *
 	 */
-	imageResize(".carousel-item");
+	// imageResize(".carousel-item");
 	// imageResize(".thumbnail-wrap");
 	// let carouselItem  = document.querySelector('.thumbnail-wrap');
 	// if( carouselItem ) {
@@ -145,7 +145,8 @@ document.addEventListener("DOMContentLoaded", function (e) {
 	if (lazyLoadInstance) {
 		lazyLoadInstance.update();
 	}
-
+	// let favicon = getFaviconURLs('https://cdn.jsdelivr.net/npm/@meltwater/fetch-favicon@1.0.4/dist/index.min.js')
+	// console.log(favicon);
 	/**
 	 * code highlight
 	 *

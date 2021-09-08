@@ -116,7 +116,7 @@ class THEME_SETUP {
 				'description'   => __( 'Add widgets here to appear in your sidebar.', 'lerm' ),
 				'before_widget' => '<section id="%1$s" class="card border-0 widget mb-3 %2$s loading-animate fadeIn">',
 				'after_widget'  => '</section>',
-				'before_title'  => '<h4 class="widget-title card-header"><span class="wrap d-inline-block fa">',
+				'before_title'  => '<h4 class="widget-title card-header border-bottom-0"><span class="wrap d-inline-block fa">',
 				'after_title'   => '</span></h4>',
 			)
 		);

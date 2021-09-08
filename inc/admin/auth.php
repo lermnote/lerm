@@ -31,7 +31,7 @@
 </div>
 	<?php
 }
-add_action( 'wp_footer', 'add_auth' );
+// add_action( 'wp_footer', 'add_auth' );
 
 
 class Lerm_Frontend_Login {

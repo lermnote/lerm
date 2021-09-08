@@ -55,7 +55,7 @@ $breadcrumb = new \Lerm\Inc\Breadcrumb();
 					</div><!-- .navbar-brand end -->
 				</div><!-- logo end -->
 
-				<button class="btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+				<button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
 					<span class="menu-icon">
 						<span class="menu-icon-top"></span>
 						<span class="menu-icon-middle"></span>
@@ -63,17 +63,20 @@ $breadcrumb = new \Lerm\Inc\Breadcrumb();
 					</span>
 				</button>
 				<?php
-				wp_nav_menu(
-					array(
-						'theme_location'  => 'primary',
-						'container'       => 'div',
-						'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav flex-grow-1 d-none d-lg-flex mx-2',
-						'container_id'    => 'navbar',
-						'menu_class'      => 'nav navbar-nav',
-						'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
-						'walker'          => new \Lerm\Inc\Nav_Walker(),
-					)
-				);
+				if ( has_nav_menu( $theme_location ) ) :
+					wp_nav_menu(
+						array(
+							'theme_location'  => $theme_location,
+							'container'       => 'div',
+							'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav flex-grow-1 d-none d-lg-flex mx-2',
+							'container_id'    => 'navbar',
+							'fallback_cb'     => 'return _false_',
+							'menu_class'      => 'nav navbar-nav',
+							'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
+							'walker'          => new \Lerm\Inc\Nav_Walker(),
+						)
+					);
+					endif;
 				?>
 				<div class="d-none d-lg-block">
 					<?php
@@ -100,6 +103,7 @@ $breadcrumb = new \Lerm\Inc\Breadcrumb();
 									'container'       => 'div',
 									'container_class' => 'primary-nav mx-1',
 									'container_id'    => 'navbar',
+									'fallback_cb'     => 'return _false_',
 									'menu_class'      => 'nav navbar-nav',
 									'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
 									'walker'          => new \Lerm\Inc\Nav_Walker(),

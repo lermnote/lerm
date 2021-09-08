@@ -13,7 +13,7 @@ global $post;
 		<div class="content-area">
 			<?php get_template_part( 'template-parts/header/entry-header' ); ?>
 
-			<div class="entry-content clearfix pt-2">
+			<div class="entry-content clearfix mb-3">
 				<?php
 					the_content(
 						sprintf(
@@ -23,9 +23,10 @@ global $post;
 						)
 					);
 					lerm_link_pagination();
-					get_template_part( 'template-parts/footer/entry-footer' );
 				?>
 			</div>
+			<?php the_tags( '<ul class="list-unstyled m-0 small text-muted"><li class="d-inline ms-2">#', '</li><li class="d-inline ms-2">#', '</li></ul>' ); ?>
+			<?php get_template_part( 'template-parts/footer/entry-footer' ); ?>
 		</div>
 	<?php else : ?>
 		<div class="row no-gutters align-items-md-center">

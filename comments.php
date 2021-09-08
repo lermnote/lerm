@@ -64,7 +64,7 @@ if ( post_password_required() ) {
 			'id_submit'            => 'submit',
 			'class_submit'         => 'btn btn-sm btn-custom',
 			'title_reply'          => '<i class="fa fa-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
-			'title_reply_before'   => '<h3 id="reply-title" class="comment-reply-title card-header">',
+			'title_reply_before'   => '<h3 id="reply-title" class="comment-reply-title card-header border-bottom-0">',
 		);
 		comment_form( $args );
 		?>
@@ -102,7 +102,7 @@ if ( post_password_required() ) {
 		</ol><!-- .comment-list -->
 		</div>
 		<?php if ( ! comments_open() && get_comments_number() ) : ?>
-			<p class=" alert alert-info mt-3"><?php esc_html_e( 'Comments are closed.', 'lerm' ); ?></p>
+			<p class=" alert alert-info mb-3"><?php esc_html_e( 'Comments are closed.', 'lerm' ); ?></p>
 		<?php endif; ?>
 
 		<?php

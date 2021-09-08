@@ -53,6 +53,15 @@ function lerm_login_style() {
 		.login #nav,.login #backtoblog {
 			display:inline-block
 		}
+		@media (max-width: 575.98px) {
+			.login{
+				overflow: hidden;
+			}
+			#login{
+				margin-top: 0;
+				height:100vh;
+			}
+		}
 	</style>
 	<?php
 }

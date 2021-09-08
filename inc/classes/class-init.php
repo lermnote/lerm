@@ -29,7 +29,7 @@ class Init {
 		$this->filter( 'document_title_separator', 'title_separator', 15, 1 );
 		$this->filter( 'frontpage_template', 'front_page_template', 15, 1 );
 		// $this->filter( 'comment_reply_link', 'replace_reply_link_class' );
-		$this->filter( 'widget_tag_cloud_args', 'tag_cloud_args' );
+		$this->filter( 'wp_tag_cloud', 'tag_cloud', 10, 1 );
 		$this->filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
 		$this->filters( array( 'script_loader_src', 'style_loader_src' ), 'remove_ver', 15, 1 );
 		$this->link_manager();
@@ -180,19 +180,20 @@ class Init {
 	 * Custom tags cloud args.
 	 *
 	 * @param array $args
-	 * @return array Tag cloud args.
+	 * @return string|string[] Tag cloud as a string or an array, depending on 'format' argument.
 	 */
-	public function tag_cloud_args( $args ) {
-		return array_merge(
-			$args,
-			array(
-				'largest'  => 1.382,
-				'smallest' => 0.618,
-				'unit'     => 'em',
-				'number'   => 22,
-				'orderby'  => 'count',
-				'order'    => 'DESC',
-			)
+	public function tag_cloud( $args ) {
+		$args = array(
+			'largest'  => 22,
+			'smallest' => 8,
+			'unit'     => 'pt',
+			'number'   => 22,
+			'orderby'  => 'count',
+			'order'    => 'DESC',
 		);
+		$tags = get_tags();
+
+		$return = wp_generate_tag_cloud( $tags, $args );
+		// return $return;
 	}
 }

@@ -19,7 +19,6 @@ $breadcrumb = new \Lerm\Inc\Breadcrumb();
 						the_post();
 						get_template_part( 'template-parts/content/content', get_post_type() );
 						?>
-						<?php lerm_post_tag(); ?>
 						<ul class="card entry-copyright p-3 mb-2 list-unstyled">
 							<li><strong>版权声明：</strong> <span>本文由<a href="<?php the_permalink(); ?>" rel="bookmark" title="本文固定链接 <?php the_permalink(); ?>"> <?php bloginfo( 'name' ); ?> </a> 整理发表，转载请注明出处</span> </li>
 							<li><strong>转载信息：</strong> <span><a href="<?php the_permalink(); ?>" rel="bookmark" title="本文固定链接 <?php the_permalink(); ?>"> <?php the_title(); ?> | <?php bloginfo( 'name' ); ?></a></span> </li>

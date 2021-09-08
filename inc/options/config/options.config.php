@@ -163,7 +163,7 @@ if ( class_exists( 'CSF' ) ) {
 			'fields' => array(
 				array(
 					'type'    => 'heading',
-					'content' => __( 'Global Color Schemes', 'lerm' ),
+					'content' => __( 'Global color schemes', 'lerm' ),
 				),
 				array(
 					'id'      => 'link_color',
@@ -193,7 +193,6 @@ if ( class_exists( 'CSF' ) ) {
 					),
 					'output'               => 'body',
 				),
-
 				array(
 					'id'             => 'body_typography',
 					'type'           => 'typography',
@@ -212,7 +211,7 @@ if ( class_exists( 'CSF' ) ) {
 				array(
 					'id'           => 'content_background',
 					'type'         => 'color_pair',
-					'title'        => __( 'Content Color', 'lerm' ),
+					'title'        => __( 'Content color', 'lerm' ),
 					'border_color' => true,
 					'default'      => array(
 						'color'            => '',
@@ -220,10 +219,6 @@ if ( class_exists( 'CSF' ) ) {
 						'border_color'     => '',
 					),
 					'output'       => array(
-						// '#related',
-						// '.widget',
-						// '.summary',
-						// '.entry',
 						'img.avatar',
 						'.author-info',
 						'.page-numbers',
@@ -236,7 +231,7 @@ if ( class_exists( 'CSF' ) ) {
 				array(
 					'id'           => 'title_wrap',
 					'type'         => 'color_pair',
-					'title'        => __( 'Widget Header Color', 'lerm' ),
+					'title'        => __( 'Widget header color', 'lerm' ),
 					'border_color' => true,
 					'default'      => array(
 						'color'            => '',
@@ -247,21 +242,36 @@ if ( class_exists( 'CSF' ) ) {
 				),
 				array(
 					'type'    => 'heading',
-					'content' => __( 'Footer Color Schemes', 'lerm' ),
+					'content' => __( 'Header color schemes', 'lerm' ),
 				),
 				array(
 					'id'          => 'header_bg_color',
 					'type'        => 'color',
-					'title'       => __( 'Header Background Color', 'lerm' ),
+					'title'       => __( 'Header background color', 'lerm' ),
 					'default'     => '#fff',
 					'output_mode' => 'background-color',
 					'output'      => array( '.site-header', '.dropdown-menu', '.offcanvas' ),
 				),
-
+				array(
+					'id'             => 'menu_typography',
+					'type'           => 'typography',
+					'title'          => 'Menu typography',
+					'font_family'    => '',
+					'text_transform' => false,
+					'unit'           => 'rem',
+					'default'        => array(
+						'font-weight' => '400',
+						'color'       => '#5d6777',
+						'font-size'   => '.875',
+						'unit'        => 'rem',
+						'line-height' => '1.5',
+					),
+					'output'         => '.navbar',
+				),
 				array(
 					'id'               => 'navbar_link_color',
 					'type'             => 'link_color',
-					'title'            => __( 'Menu Links Color', 'lerm' ),
+					'title'            => __( 'Menu links color', 'lerm' ),
 					'output_important' => true,
 					'default'          => array(
 						'color' => '#828282',
@@ -272,18 +282,18 @@ if ( class_exists( 'CSF' ) ) {
 				array(
 					'id'               => 'header_color',
 					'type'             => 'color_pair',
-					'title'            => __( 'Menu Items Active Color', 'lerm' ),
+					'title'            => __( 'Menu items active color', 'lerm' ),
 					'output_important' => true,
 					'default'          => array(
 						'color'            => '#0084ba',
 						'background_color' => '#fff',
 					),
-					'output'           => array( '.navbar-nav .active > .nav-link', '.navbar-nav .show > .nav-link' ),
+					'output'           => array( '.navbar-nav .nav-link.active', '.navbar-nav .show > .nav-link', '.dropdown-item.active', '.dropdown-item:active' ),
 				),
 				array(
 					'id'          => 'navbar_item_spacing',
 					'type'        => 'spacing',
-					'title'       => 'Menu Items Padding',
+					'title'       => 'Menu items padding',
 					'units'       => array( 'rem', 'em' ),
 					'output_mode' => 'padding',
 					'default'     => array(
@@ -298,7 +308,7 @@ if ( class_exists( 'CSF' ) ) {
 				array(
 					'id'      => 'site_header_border',
 					'type'    => 'border',
-					'title'   => 'Site Header Border',
+					'title'   => 'Site header border',
 					'default' => array(
 						'top'    => '0',
 						'bottom' => '1',
@@ -311,12 +321,12 @@ if ( class_exists( 'CSF' ) ) {
 				),
 				array(
 					'type'    => 'heading',
-					'content' => __( 'Footer Color Schemes', 'lerm' ),
+					'content' => __( 'Footer color schemes', 'lerm' ),
 				),
 				array(
 					'id'      => 'colophon_style',
 					'type'    => 'color_pair',
-					'title'   => __( 'Footer Copyright Color', 'lerm' ),
+					'title'   => __( 'Footer copyright color', 'lerm' ),
 					'default' => array(
 						'color'            => '#ddd',
 						'background_color' => '#555',
@@ -326,12 +336,12 @@ if ( class_exists( 'CSF' ) ) {
 				array(
 					'id'      => 'footer_widget_color',
 					'type'    => 'color_pair',
-					'title'   => __( 'Footer Widgets Color', 'lerm' ),
+					'title'   => __( 'Footer widgets color', 'lerm' ),
 					'default' => array(
 						'color'            => '#ddd',
 						'background_color' => '#333',
 					),
-					'output'  => array( '.footer-widget' ),
+					'output'  => array( '.footer' ),
 				),
 				array(
 					'type'    => 'heading',
@@ -351,9 +361,9 @@ if ( class_exists( 'CSF' ) ) {
 					'title'            => __( 'Primary Buttons Color', 'lerm' ),
 					'output'           => array(
 						'.btn-custom',
-						'.comment-reply-link',
+						// '.comment-reply-link',
 						'a[id="cancel-comment-reply-link"]',
-						'.tag-cloud-link',
+						// '.tag-cloud-link',
 					),
 				),
 				array(
@@ -369,7 +379,7 @@ if ( class_exists( 'CSF' ) ) {
 					'output'           => array(
 						'.btn-custom:hover',
 						'a[id="cancel-comment-reply-link"]:hover',
-						'.tag-cloud-link:hover',
+						// '.tag-cloud-link:hover',
 					),
 				),
 				array(
@@ -766,6 +776,10 @@ if ( class_exists( 'CSF' ) ) {
 			'title'  => __( 'Sidebar', 'lerm' ),
 			'fields' => array(
 				array(
+					'type'    => 'heading',
+					'content' => __( 'Basic Setting', 'lerm' ),
+				),
+				array(
 					'id'     => 'register_sidebars',
 					'type'   => 'group',
 					'title'  => __( 'Register Sidebars', 'lerm' ),
@@ -806,12 +820,17 @@ if ( class_exists( 'CSF' ) ) {
 					'options'     => 'sidebars',
 				),
 				array(
-					'id'      => 'footer_sidebars_count',
-					'type'    => 'spinner',
-					'title'   => __( 'Footer sidebars count', 'lerm' ),
-					'default' => 0,
+					'type'    => 'heading',
+					'content' => __( 'Widget Setting', 'lerm' ),
+				),
+				array(
+					'id'      => 'comment_excerpt_length',
+					'type'    => 'slider',
+					'title'   => __( 'Latest comment widget excerpt length', 'lerm' ),
 					'min'     => 0,
-					'max'     => 4,
+					'max'     => 300,
+					'step'    => 5,
+					'default' => 95,
 				),
 			),
 		)

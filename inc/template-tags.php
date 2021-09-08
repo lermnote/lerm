@@ -166,10 +166,21 @@ function lerm_edit_link() {
  * @since Lerm 2.0
  */
 function lerm_excerpt_length( $length ) {
-	$length = lerm_options( 'excerpt_length' );
+	$length = lerm_options( 'excerpt_length' ) ? lerm_options( 'excerpt_length' ) : 100;
 	return $length;
 }
 add_filter( 'excerpt_length', 'lerm_excerpt_length', 999 );
+
+/**
+ * Displays the optional excerpt.
+ *
+ * @since Lerm 2.0
+ */
+function lerm_comment_excerpt_length( $length ) {
+	$length = lerm_options( 'comment_excerpt_length' ) ? lerm_options( 'comment_excerpt_length' ) : 120;
+	return $length;
+}
+add_filter( 'comment_excerpt_length', 'lerm_comment_excerpt_length', 999 );
 
 /**
  * Adds custom classes to the array of body classes.
@@ -240,3 +251,4 @@ function social_icons( $icons = array() ) {
 		<?php
 	}
 }
+
