@@ -22,7 +22,6 @@ class Init {
 		$this->hooks();
 	}
 	protected function hooks() {
-		$this->filter( 'document_title_separator', 'title_separator', 15, 1 );
 		$this->filter( 'frontpage_template', 'front_page_template', 15, 1 );
 		$this->filter( 'wp_tag_cloud', 'tag_cloud', 10, 1 );
 		$this->filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );

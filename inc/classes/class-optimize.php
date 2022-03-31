@@ -50,6 +50,7 @@ class Optimize {
 	 * @return void
 	 */
 	public static function optimize( $args = array() ) {
+		// Remove head links.
 		$actions = array( 'rsd_link', 'wlwmanifest_link', 'wp_generator', 'start_post_rel_link', 'index_rel_link', 'adjacent_posts_rel_link_wp_head', 'rel_canonical' );
 		if ( is_array( $args ) && ! empty( $args ) ) {
 			foreach ( $actions as $value ) {
@@ -57,6 +58,7 @@ class Optimize {
 					remove_action( 'wp_head', $value );
 				}
 			}
+			// remove feed links in head
 			if ( in_array( 'feed_links', $args, true ) ) {
 				remove_action( 'wp_head', 'feed_links', 2 );
 				remove_action( 'wp_head', 'feed_links_extra', 3 );
