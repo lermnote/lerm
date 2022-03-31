@@ -36,9 +36,12 @@ class Recent_Comments extends WP_Widget {
 			apply_filters(
 				'widget_comments_args',
 				array(
-					'number'      => $number,
-					'status'      => 'approve',
-					'post_status' => 'publish',
+					'number'                 => $number,
+					'status'                 => 'approve',
+					'post_status'            => 'publish',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
 				),
 				$instance
 			)

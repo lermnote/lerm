@@ -7,13 +7,12 @@
  * It is used to display a page when nothing more specific matches a query,
  * e.g., it puts together the home page when no home.php file exists.
  *
- *
  * @authors lerm http://lerm.net
  * @date    2018-01-30
  * @since   Lerm 3.0
  */
 get_header();
-//posts show on top
+// posts show on top
 $recent_posts = new WP_Query(
 	array(
 		'posts_per_page'      => 6,
@@ -31,16 +30,14 @@ $recent_posts = new WP_Query(
 		),
 	)
 );
-
-$carousel = new \Lerm\Inc\Carousel();
 ?>
 
 <div class="container">
 	<div class="row">
+	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 		<div class="col-md-8">
 			<div class="mb-4">
-				<?php $carousel->render(); ?>
-			</div>
+							</div>
 			<div class="row row-cols-1 row-cols-md-3">
 				<?php if ( $recent_posts->have_posts() ) : ?>
 					<?php
@@ -55,7 +52,7 @@ $carousel = new \Lerm\Inc\Carousel();
 								<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>
 							</h5>
 						</div>
-						<?php //get_template_part( 'template/content/content', 'excerpt' ); ?>
+						<?php // get_template_part( 'template/content/content', 'excerpt' ); ?>
 					</div>
 				</div>
 				<?php endwhile; ?>

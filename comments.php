@@ -54,7 +54,7 @@ if ( post_password_required() ) {
 				'<div class="must-log-in card-body">%s</div>',
 				sprintf(
 					/* translators: %s: Login URL. */
-					__( 'You must be <a class="badge rounded-pill bg-primary text-light" href="%s">logged in</a> to post a comment.' ),
+					__( 'You must be <a class="badge rounded-pill bg-primary text-light" href="%s">logged in</a> to post a comment.', 'lerm' ),
 					/** This filter is documented in wp-includes/link-template.php */
 					wp_login_url( apply_filters( 'the_permalink', get_permalink( $post_id ), $post_id ) )
 				)
@@ -91,9 +91,8 @@ if ( post_password_required() ) {
 			<?php
 			wp_list_comments(
 				array(
-					'walker'      => \Lerm\Inc\Comment_Walker::get_instance(),
-					'type'        => 'comment',
-					'style'       => 'ol',
+					'walker'      => \Lerm\Inc\Comment_Walker::instance(),
+					'style'       => 'li',
 					'short_ping'  => true,
 					'avatar_size' => wp_is_mobile() ? 32 : 48,
 				)

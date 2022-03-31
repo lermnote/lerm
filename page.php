@@ -6,21 +6,11 @@
  * @package Lerm
  */
 get_header();
-$breadcrumb = new \Lerm\Inc\Breadcrumb();
 ?>
 <main role="main" class="container"><!--.container-->
-	<?php
-	if ( ( 'layout-1c-narrow' !== lerm_site_layout() ) ) {
-		$breadcrumb->trail();
-	}
-	?>
+	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
-		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
-		<?php
-		if ( ( 'layout-1c-narrow' === lerm_site_layout() ) ) {
-			$breadcrumb->trail();
-		}
-		?>
+		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">
 				<?php
 				if ( have_posts() ) :

@@ -13,11 +13,14 @@ function lerm_related_posts() {
 			$tag_id .= $tag->term_id . ',';
 		}
 	}
-	$arg   = array(
-		'post_status'    => 'publish',
-		'tag__in'        => explode( ',', $tag_id ),
-		'orderby'        => 'comment_date',
-		'posts_per_page' => $post_number,
+	$arg = array(
+		'post_status'            => 'publish',
+		'tag__in'                => explode( ',', $tag_id ),
+		'orderby'                => 'comment_date',
+		'posts_per_page'         => $post_number,
+		'no_found_rows'          => true,
+		'update_post_meta_cache' => false,
+		'update_post_term_cache' => false,
 	);
 	$query = new WP_Query( $arg );
 	if ( $query->have_posts() ) :

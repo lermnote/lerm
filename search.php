@@ -7,11 +7,8 @@
  */
 
 get_header();
-
-$breadcrumb = new \Lerm\Inc\Breadcrumb();
 ?>
 <main role="main" class="container"><!--.container-->
-	<?php $breadcrumb->trail(); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">

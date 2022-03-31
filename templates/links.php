@@ -13,17 +13,11 @@ $link_categories = get_terms(
 	)
 );
 
-$breadcrumb = new \Lerm\Inc\Breadcrumb();
 ?>
 <main role="main" class="container"><!--.container-->
-	<?php $breadcrumb->trail(); ?>
+	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
-		<?php
-		if ( ( 'layout-1c-narrow' === lerm_site_layout() ) ) {
-			breadcrumb_trail();
-		}
-		?>
 			<div class="site-main">
 				<?php
 				if ( have_posts() ) :
@@ -62,17 +56,17 @@ $breadcrumb = new \Lerm\Inc\Breadcrumb();
 											);
 											foreach ( $link_terms as $link_term ) {
 												// $grap_favicon = grap_favicon(
-												// 	array(
-												// 		'URL'  => $link_term->link_url,
-												// 		'SAVE' => false,
-												// 		'DIR'  => './',
-												// 		'TRY'  => true,
-												// 	)
+												// array(
+												// 'URL'  => $link_term->link_url,
+												// 'SAVE' => false,
+												// 'DIR'  => './',
+												// 'TRY'  => true,
+												// )
 												// );
 
 												$link_name        = sprintf( '<h5 class="card-title m-0">%s</h5>', esc_html( $link_term->link_name ) );
 												$link_description = sprintf( '<div class="card-body"><p class="card-text">%s</p></div>', esc_html( $link_term->link_description ) );
-                                                $link_image       = sprintf( '<img src="%s" class="me-auto p-2 border rounded-3 " alt="%s" style="height:3rem;width:3rem;overflow: hidden;">%s', '$grap_favicon', esc_html( $link_term->link_name ), $link_name );
+												$link_image       = sprintf( '<img src="%s" class="me-auto p-2 border rounded-3 " alt="%s" style="height:3rem;width:3rem;overflow: hidden;">%s', '$grap_favicon', esc_html( $link_term->link_name ), $link_name );
 												$link_card       .= sprintf( '<li class="col-3 col-sm-3 col-md-3 col-lg-auto text-center my-2 py-2"><a class="text-dark h-100" href="%s" target="%s">%s</a></li>', esc_html( $link_term->link_url ), esc_html( $link_term->link_target ), $link_image, $link_description );
 											}
 											echo sprintf( '<ul class="row list-unstyled card-body">%s</ul>', $link_card ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

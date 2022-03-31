@@ -27,17 +27,13 @@ if ( ! defined( 'LERM_URI' ) ) {
 if ( ! defined( 'LERM_DIR' ) ) {
 	define( 'LERM_DIR', trailingslashit( get_template_directory() ) );
 }
-
-require_once LERM_DIR . 'inc/autoloader.php';
-function lerm_get_theme_instance() {
-	\Lerm\Inc\THEME_SETUP::get_instance();
-}
-lerm_get_theme_instance();
-
 /**
  * Requre admin framework
  */
 require_once LERM_DIR . 'inc/options/codestar-framework.php';
+require_once LERM_DIR . 'inc/autoloader.php';
+\Lerm\Inc\Setup::instance();
+\Lerm\Inc\Setup::get_options( get_option( 'lerm_theme_options' ) );
 
 /**
  * Theme options functions.
@@ -74,101 +70,6 @@ function lerm_options( string $id, string $tag = '', $default = '' ) {
 	}
 }
 
-/**
- * Keywords
- *
- * @since  1.0.0
- * @return string $keywords
- */
-function lerm_keywords() {
-	global $post;
-	$keywords = array();
-	if ( is_singular() ) {
-		foreach ( get_the_category( $post->ID ) as $cat ) {
-			$keywords[] = $cat->cat_name;
-		}
-		if ( has_tag() ) {
-			foreach ( get_the_tags() as $tag ) {
-				$keywords[] = $tag->name;
-			}
-		}
-		$keywords = array_unique( $keywords );
-	}
-	if ( is_archive() ) {
-		$keywords[] = single_cat_title( '', false );
-		$keywords[] = single_tag_title( '', false );
-		$keywords[] = get_the_author();
-	}
-	if ( is_home() ) {
-		$keywords[] = lerm_options( 'keywords' ) ? lerm_options( 'keywords' ) : get_bloginfo( 'name' );
-	}
-	$keywords = array_unique( $keywords );
-	if ( $keywords ) :
-		echo '<meta name="keywords" content="' . ( esc_attr( implode( ',', $keywords ) ) ) . '">';
-	endif;
-}
-add_action( 'wp_head', 'lerm_keywords', 1 );
-
-/**
- * Description
- *
- * @since  1.0.0
- * @return string $dsecription
- */
-function lerm_description() {
-	global $post;
-	$description = ' ';
-	if ( is_singular() ) {
-		$description = wp_strip_all_tags( $post->post_content );
-		$description = strip_shortcodes( $description );
-		$description = str_replace( array( "\n", "\r", "\t" ), ' ', $description );
-		if ( $post->post_excerpt ) {
-			$description = $post->post_excerpt;
-		}
-	}
-	if ( is_archive() ) {
-		$description = term_description() ? wp_strip_all_tags( term_description() ) : BLOGNAME . '-' . single_term_title( '', false );
-	}
-	if ( is_home() ) {
-		$description = lerm_options( 'description' ) ? lerm_options( 'description' ) : get_bloginfo( 'description' );
-	}
-	$description = mb_substr( $description, 0, 200, 'utf8' );
-	echo '<meta name="description" content="' . esc_attr( $description ) . '">';
-}
-add_action( 'wp_head', 'lerm_description', 1 );
-
-/**
- * WordPress baidu submit
- *
- * @since  1.0.0
- */
-if ( ! function_exists( 'lerm_baidu_submit' ) && lerm_options( 'sitemap_submit' ) ) :
-	function lerm_baidu_submit( $post_ID ) {
-		$web_domain = LERM_URI;
-		$web_token  = lerm_options( 'submit_token' );
-		// Do not submit again
-		if ( 1 === get_post_meta( $post_ID, 'Baidusubmit', true ) ) {
-			return;
-		}
-		$url     = get_permalink( $post_ID );
-		$api     = 'http://data.zz.baidu.com/urls?site=' . $web_domain . '&token=' . $web_token;
-		$request = new WP_Http();
-		$result  = $request->request(
-			$api,
-			array(
-				'method'  => 'POST',
-				'body'    => $url,
-				'headers' => 'Content-Type: text/plain',
-			)
-		);
-		$result  = json_decode( $result['body'], true );
-		// if submit success, add post meta 'Baidusubmit'，value is 1
-		if ( array_key_exists( 'success', $result ) ) {
-			add_post_meta( $post_ID, 'Baidusubmit', 1, true );
-		}
-	}
-	add_action( 'publish_post', 'lerm_baidu_submit', 0 );
-endif;
 
 /**
  * Navigation post.
@@ -202,11 +103,9 @@ function lerm_pagination() {
 
 	the_posts_pagination(
 		array(
-			'mid_size'           => 10,
-			'prev_text'          => '<span class="screen-reader-text">' . __( 'Previous page', 'lerm' ) . '</span>',
-			'next_text'          => '<span class="screen-reader-text">' . __( 'Next page', 'lerm' ),
-			'before_page_number' => '<span class="meta-nav screen-reader-text">' . __( 'The', 'lerm' ) . ' </span>',
-			'after_page_number'  => '<span class="meta-nav screen-reader-text">' . __( ' Page', 'lerm' ) . ' </span>',
+			'mid_size'  => 10,
+			'prev_text' => '<span class="screen-reader-text">' . __( 'Previous page', 'lerm' ) . '</span>',
+			'next_text' => '<span class="screen-reader-text">' . __( 'Next page', 'lerm' ),
 		)
 	);
 }
@@ -306,49 +205,6 @@ if ( lerm_options( 'html_slug' ) ) :
 		}
 	}
 	add_action( 'init', 'html_page_permalink', -1 );
-endif;
-
-/**
- * Replace avatar url.
- *
- * @return sring $avatar
- */
-function lerm_replace_avatar( $avatar ) {
-	$regexp = '/https?.*?\/avatar\//i';
-	if ( lerm_options( 'replace_avatar' ) ) {
-		$replacement = lerm_options( 'replace_avatar' );
-	} else {
-		$replacement = 'https://gravatar.loli.net/avatar/';
-	}
-	$avatar = preg_replace( $regexp, $replacement, $avatar );
-	return $avatar;
-}
-add_filter( 'get_avatar', 'lerm_replace_avatar' );
-
-/**
- * Cache avatar localhost.
- *
- * @return sring $avatar
- */
-if ( lerm_options( 'avatar_cache' ) ) :
-	function lerm_avatar_cache( $avatar ) {
-		$tmp = strpos( $avatar, 'http' );
-		$g   = substr( $avatar, $tmp, strpos( $avatar, '\'', $tmp ) - $tmp );
-		$tmp = strpos( $g, 'avatar/' ) + 7;
-		$f   = substr( $g, $tmp, strpos( $g, '?', $tmp ) - $tmp );
-		$e   = LERM_DIR . 'assets/avatar/' . $f . '.png';
-		$t   = 604800; // max age setting a week
-		if ( ! is_file( $e ) || ( time() - filemtime( $e ) ) > $t ) {
-			copy( htmlspecialchars_decode( $g ), $e );
-		} else {
-			$avatar = strtr( $avatar, array( $g => LERM_URI . 'assets/avatar/' . $f . '.png' ) );
-		}
-		if ( filesize( $e ) < 500 ) {
-			copy( LERM_URI . 'assets/avatar/default.png', $e );
-		}
-		return $avatar;
-	}
-	add_filter( 'get_avatar', 'lerm_avatar_cache' );
 endif;
 
 /**

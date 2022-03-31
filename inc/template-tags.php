@@ -2,19 +2,22 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	die; }
 function lerm_post_meta( $location ) {
-	if ( 'single_top' === $location ) {
+	if ( 'single_top' === $location && is_singular() ) {
 		$arg           = array_keys( (array) lerm_options( 'single_top', 'enabled' ) );
-		$align_classes = 'justify-content-center';
+		$align_classes = 'justify-content-center  mb-0 ';
 	}
-
+	if ( 'single_bottom' === $location && is_singular() ) {
+		$arg           = array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) );
+		$align_classes = 'justify-content-between mb-1';
+	}
 	if ( 'summary_bottom' === $location ) {
 		$arg           = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
-		$align_classes = ' justify-content-center justify-content-sm-start ';
+		$align_classes = ' justify-content-center justify-content-sm-start mb-0 ';
 	}
 	$post_meta = apply_filters( 'post_meta_show_on_post', $arg );
 
-	if ( $post_meta ) {?>
-		<ul class="list-unstyled mb-0 d-flex <?php echo esc_html( $align_classes ); ?> entry-meta small text-muted" style="z-index:1">
+	if ( 'disabled' !== $post_meta[0] ) {?>
+		<ul class="list-unstyled d-flex <?php echo esc_html( $align_classes ); ?> entry-meta small text-muted">
 			<?php
 			foreach ( $post_meta as $item ) {
 				switch ( $item ) {
@@ -205,12 +208,14 @@ function lerm_body_classes( $classes ) {
 	}
 	// Output layout
 	$classes[] = lerm_site_layout();
+	if ( lerm_options( 'layout_style' ) ) {
+		$classes[] = lerm_options( 'layout_style' );
+	}
 	return $classes;
 }
 add_filter( 'body_class', 'lerm_body_classes' );
 
 function lerm_post_class( $classes ) {
-	// $classes[] = 'card';
 
 	if ( ! is_singular() ) {
 		$classes[] = 'summary';
@@ -251,4 +256,3 @@ function social_icons( $icons = array() ) {
 		<?php
 	}
 }
-

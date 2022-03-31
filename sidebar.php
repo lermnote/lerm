@@ -9,7 +9,7 @@
 if ( wp_is_mobile() || in_array( lerm_site_layout(), array( 'layout-1c', 'layout-1c-narrow' ), true ) ) {
 	return; // Do not display sidebar on mobile or one colunm layout
 }?>
-<div class="col-lg-4 d-none d-lg-block mb-3">
+<div id="secondary" class="col-lg-4 d-none d-lg-block mb-3">
 	<aside class="sidebar sidebar-affix">
 		<?php if ( is_singular( 'post' ) ) : ?>
 

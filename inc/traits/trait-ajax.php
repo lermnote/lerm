@@ -21,7 +21,8 @@ trait Ajax {
 	 */
 	public function register( $action ) {
 		// wp_ajax_{action} for registered users, wp_ajax_nopriv_{action} for not registered users
-		$this->actions( array( 'wp_ajax_' . $action, 'wp_ajax_nopriv_' . $action ), $action, 10, 1 );
+		add_action( 'wp_ajax_nopriv_' . $action, array( $this, $action ), 10, 1 );
+		add_action( 'wp_ajax_' . $action, array( $this, $action ), 10, 1 );
 	}
 
 	/**
@@ -57,7 +58,7 @@ trait Ajax {
 	/**
 	 * Send AJAX response data.
 	 *
-	 * @param array $data
+	 * @param array   $data
 	 * @param boolean $success
 	 */
 	private function send( $data, $success = true ) {

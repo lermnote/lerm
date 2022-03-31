@@ -6,28 +6,12 @@
  * @package Lerm
  */
 get_header();
-$breadcrumb = new \Lerm\Inc\Breadcrumb();
-$args       = array(
-	'post_type'           => 'post',
-	'posts_per_page'      => -1,
-	'ignore_sticky_posts' => 1,
-);
-
 $the_query = new WP_Query( $args );
 ?>
 <main role="main" class="container"><!--.container-->
-	<?php
-	if ( ( 'layout-1c-narrow' !== lerm_site_layout() ) ) {
-		$breadcrumb->trail();
-	}
-	?>
+	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
-		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
-			<?php
-			if ( ( 'layout-1c-narrow' === lerm_site_layout() ) ) {
-				$breadcrumb->trail();
-			}
-			?>
+		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">
 				<?php
 				if ( have_posts() ) :
@@ -66,7 +50,7 @@ $the_query = new WP_Query( $args );
 										get_the_title(),
 										get_comments_number( '0', '1', '%' )
 									);
-                                    var_dump(get_the_title());
+									var_dump( get_the_title() );
 								endwhile;
 								wp_reset_postdata();
 								foreach ( $posts_rebuild as $key_y => $y ) {
@@ -103,7 +87,7 @@ $the_query = new WP_Query( $args );
 								}
 								?>
 							</div>
-							<?php //lerm_archives_list(); ?>
+							<?php // lerm_archives_list(); ?>
 
 						</article><!-- #post-## -->
 						<?php

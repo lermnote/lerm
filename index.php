@@ -10,17 +10,15 @@
  */
 
 get_header();
-$breadcrumb = new \Lerm\Inc\Breadcrumb();
-$carousel   = new \Lerm\Inc\Carousel();
 ?>
 
 <main role="main" class="container"><!--.container-->
-	<?php $breadcrumb->trail(); ?>
+	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
-		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
+		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<?php
 			if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'above_entry_list' ) :
-				$carousel->render();
+				get_template_part( 'template-parts/carousel' );
 			endif;
 			?>
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">

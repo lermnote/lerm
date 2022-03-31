@@ -7,28 +7,33 @@
 
 namespace Lerm\Inc;
 
-use Lerm\Inc\Traits\Singleton;
+class Setup {
 
-class THEME_SETUP {
+	// Default constants
+	public static $args = array(
+		'optimize_options' => array(),
+		'mail_options'     => array(),
+		'carousel_options' => array(),
+		'super_optimize'   => array(),
+		'seo_options'      => array(),
+		'sitemap_options'  => array(),
+	);
 
-	use Singleton;
-
-	public function __construct() {
-		Init::get_instance();
-		Enqueue::get_instance();
-		Comment_Walker::get_instance();
-		Carousel::get_instance();
-		Mail_SMTP::get_instance();
-		Load_More::get_instance();
-
-		$this->hooks();
+	public function __construct( $params = array() ) {
+		self::$args = apply_filters( 'lerm_setup_', wp_parse_args( $params, self::$args ) );
+		self::hooks();
 	}
 
-	public function hooks() {
-		add_action( 'after_setup_theme', array( $this, 'setup' ), 2 );
-		add_action( 'after_setup_theme', array( $this, 'content_width' ) );
-		add_action( 'widgets_init', array( $this, 'register_sidebar' ) );
-		add_action( 'widgets_init', array( $this, 'widgets' ) );
+	// instance
+	public static function instance( $params = array() ) {
+		return new self( $params );
+	}
+
+	public static function hooks() {
+		add_action( 'after_setup_theme', array( '\Lerm\Inc\Setup', 'setup' ), 2 );
+		add_action( 'after_setup_theme', array( '\Lerm\Inc\Setup', 'content_width' ) );
+		add_action( 'widgets_init', array( '\Lerm\Inc\Setup', 'register_sidebar' ) );
+		add_action( 'widgets_init', array( '\Lerm\Inc\Setup', 'widgets' ) );
 	}
 
 	/**
@@ -36,7 +41,12 @@ class THEME_SETUP {
 	 *
 	 * @return void
 	 */
-	public function setup() {
+	public static function setup() {
+
+		Enqueue::instance();
+		Comment_Walker::instance();
+		Load_More::instance();
+
 		// Automatically add feed links to <head>.
 		add_theme_support( 'automatic-feed-links' );
 
@@ -92,6 +102,76 @@ class THEME_SETUP {
 		 * Translations can be filed in the /languages/ directory
 		 */
 		load_theme_textdomain( DOMAIN, LERM_DIR . '/languages' );
+
+		// Optimize options
+		$params = array();
+		if ( ! empty( self::$args['optimize_options'] ) ) {
+			$params = self::$args['optimize_options'];
+			Optimize::instance( $params );
+		}
+
+		// Mail SMTP options
+		$params = array();
+		if ( ! empty( self::$args['mail_options'] ) ) {
+			$params = self::$args['mail_options'];
+			SMTP::instance( $params );
+		}
+
+		// SEO options
+		$params = array();
+		if ( ! empty( self::$args['seo_options'] ) ) {
+			$params = self::$args['seo_options'];
+			SEO::instance( $params );
+		}
+
+		// Sitemap options
+		$params = array();
+		if ( ! empty( self::$args['sitemap_options'] ) ) {
+			$params = self::$args['sitemap_options'];
+			Sitemap::instance( $params );
+		}
+	}
+
+	/**
+	 * Get theme options
+	 *
+	 * @return void
+	 */
+	public static function get_options( $options = array() ) {
+		$options = get_option( 'lerm_theme_options' );
+
+		// optimize
+		self::$args['optimize_options'] = array(
+			'gravatar_accel' => $options['super_gravatar'],
+			'admin_accel'    => $options['super_admin'],
+			'google_replace' => $options['super_googleapis'],
+			'super_optimize' => $options['super_optimize'],
+		);
+
+		// smtp
+		self::$args['mail_options'] = array(
+			'email_notice' => $options['email_notice'],
+			'smtp_options' => $options['smtp_options'],
+		);
+
+		// seo
+		self::$args['seo_options'] = array(
+			'baidu_submit' => $options['baidu_submit'],
+			'submit_url'   => $options['submit_url'],
+			'submit_token' => $options['submit_token'],
+			'post_urls'    => array(),
+			'separator'    => $options['title_sep'],
+			'keywords'     => array(),
+			'description'  => array(),
+		);
+
+		// sitemap
+		self::$args['sitemap_options'] = array(
+			'sitemap_enable' => $options['sitemap_enable'],
+			'post_type'      => $options['exclude_post_types'],
+			'post_exclude'   => $options['exclude_post'],
+			'page_exclude'   => $options['exclude_page'],
+		);
 	}
 
 	/**
@@ -99,7 +179,7 @@ class THEME_SETUP {
 	 *
 	 * @return void
 	 */
-	public function content_width() {
+	public static function content_width() {
 		$GLOBALS['content_width'] = apply_filters( 'content_width', 1440 );
 	}
 
@@ -108,7 +188,7 @@ class THEME_SETUP {
 	 *
 	 * @return void
 	 */
-	public function register_sidebar() {
+	public static function register_sidebar() {
 		register_sidebar(
 			array(
 				'name'          => __( 'HomePage Sidebar', 'lerm' ),
@@ -139,7 +219,7 @@ class THEME_SETUP {
 	 *
 	 * @return void
 	 */
-	public function widgets() {
+	public static function widgets() {
 		register_widget( '\Lerm\Inc\Widgets\Popular_Posts' );
 		register_widget( '\Lerm\Inc\Widgets\Recent_Posts' );
 		register_widget( '\Lerm\Inc\Widgets\Recent_Comments' );

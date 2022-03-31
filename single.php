@@ -6,12 +6,11 @@
  * @since  1.0
  */
 get_header();
-$breadcrumb = new \Lerm\Inc\Breadcrumb();
 ?>
 <main role="main" class="container"><!--.container-->
-	<?php $breadcrumb->trail(); ?>
+	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?> ><!--.row-->
-		<div <?php lerm_column_class(); ?> ><!--.col-md-12 .col-lg-8-->
+		<div id="primary" <?php lerm_column_class(); ?> ><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">
 				<?php
 				if ( have_posts() ) :

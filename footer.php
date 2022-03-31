@@ -9,7 +9,7 @@
 ?>
 
 <footer class="footer card" itemscope="" itemtype="http://schema.org/WPFooter">
-	<?php if ( ! is_404() || is_home() || is_front_page() ) : ?>
+	<?php if ( ! is_404() && ( is_home() || is_front_page() ) ) : ?>
 		<div class="container card-body">
 			<?php dynamic_sidebar( 'footer-sidebar' ); ?>
 		</div>
@@ -21,6 +21,7 @@
 				<span><a href="https://beian.miit.gov.cn"><?php echo esc_html( lerm_options( 'icp_num' ) ); ?></a></span>
 			<?php endif; ?>
 			<!--尊重原创，请保留作者链接，谢谢 -->
+			<br>
 			<span><?php echo esc_html__( 'Theme By', 'lerm' ); ?><a href="<?php echo esc_url( 'https://www.hanost.com/', 'lerm' ); ?>"> Lerm </a></span>
 			<?php
 			wp_nav_menu(
@@ -38,10 +39,11 @@
 		</div>
 	</div>
 </footer>
-<div class="btn-group-vertical position-fixed btn-group-sm toolbar" style="bottom: 4rem;right: 1rem">
+<div class="position-fixed d-grid gap-1 btn-group-sm" style="bottom: 4rem;right: 1rem">
 	<a class="btn btn-custom" target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=825641026&site=qq&menu=yes" data-toggle="tooltip" data-placement="left" title="QQ 在线咨询"  role="button"><i class="fa fa-qq"></i></a>
 	<a class="btn btn-custom" id="scroll-up" href="javascript:void(0);"  data-toggle="tooltip" data-placement="left" title="飞回顶部"  role="button"><i class="fa fa-chevron-up" ></i></a>
 </div>
+</div><!-- #page -->
 <?php wp_footer(); ?>
 </body>
 </html>

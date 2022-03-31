@@ -15,6 +15,8 @@ class Load_More {
 
 	use Ajax, Singleton;
 
+	public static $args = array();
+
 	public function __construct( $args = array() ) {
 		$this->register( 'load_more' );
 		$default = array(
@@ -48,9 +50,12 @@ class Load_More {
 		$max_pages = $_POST['max_pages'];
 
 		$args = array(
-			'post_per_page' => get_option( 'posts_per_page' ),
-			'paged'         => $next_page,
-			'post_status'   => 'publish',
+			'post_per_page'          => get_option( 'posts_per_page' ),
+			'paged'                  => $next_page,
+			'post_status'            => 'publish',
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
 		);
 
 		$query = new WP_Query( $args );

@@ -4,7 +4,6 @@
  *
  * @package LERM
  */
-
 namespace Lerm\Inc;
 
 function autoloader( $resource = '' ) {
@@ -74,6 +73,5 @@ function autoloader( $resource = '' ) {
 		// We already making sure that file is exists and valid.
 		require_once( $resource_path ); // phpcs:ignore
 	}
-
 }
 spl_autoload_register( '\Lerm\Inc\autoloader' );

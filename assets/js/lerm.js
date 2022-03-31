@@ -333,36 +333,27 @@ document.addEventListener("DOMContentLoaded", function (e) {
 							if (null !== respond.previousElementSibling) {
 								//这个if是为了回复评论时在原评论下面追加子评论
 								//previousElementSibling指的是上一个兄弟元素节点
-								// nodeArray.forEach((e) => {
-									respond.previousElementSibling.appendChild(nodeLi);
-								// });
-
+								respond.previousElementSibling.appendChild(nodeLi);
 							} else {
 								//无子评论时使用此方法
-								// nodeArray.forEach((e) => {
-									respond.parentNode.appendChild(nodeLi);
-								// });
+								respond.parentNode.appendChild(nodeLi);
 							}
 						} else if (document.querySelector(".comment-list")) {
 							//增加新评论时使用此方法
-							// nodeArray.forEach((e) => {
-								document.querySelector(".comment-list").insertBefore(nodeLi,document.querySelector(".comment-list").firstChild);
-							// });
+							document.querySelector(".comment-list").insertBefore(nodeLi,document.querySelector(".comment-list").firstChild);
 						} else {
 							//无评论是使用此方法
-							// nodeArray.forEach((e) => {
 
-								let div = document.createElement('div');
-								let ol = document.createElement('ol');
+							let div = document.createElement('div');
+							let ol = document.createElement('ol');
 
-								div.classList = 'card mb-3';
-								ol.classList = 'comment-list p-0 m-0 list-group list-group-flush';
+							div.classList = 'card mb-3';
+							ol.classList = 'comment-list p-0 m-0 list-group list-group-flush';
 
-								ol.appendChild(nodeLi);
-								div.appendChild(ol);
+							ol.appendChild(nodeLi);
+							div.appendChild(ol);
 
-								respond.parentNode.appendChild(div);
-							// });
+							respond.parentNode.appendChild(div);
 						}
 					} else {
 						// 若success:false,则抛出错误；

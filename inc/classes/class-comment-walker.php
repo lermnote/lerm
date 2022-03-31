@@ -7,23 +7,34 @@
  * @since lerm 3.0
  */
 
-namespace LERM\Inc;
+namespace Lerm\Inc;
 
 use Walker_Comment;
-
 use Lerm\Inc\Traits\Singleton;
 
 class Comment_Walker extends Walker_Comment {
 
 	use Singleton;
 
-	public function __construct() {
+	public static $args = array(
+		'make_clickable' => true,
+		'escape_html'    => true,
+	);
+
+	public function __construct( $params ) {
+		self::$args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$args ) );
 		$this->register();
 	}
 	public function register() {
 		add_action( 'wp_ajax_nopriv_ajax_comment', array( $this, 'ajax_comment' ) );
 		add_action( 'wp_ajax_ajax_comment', array( $this, 'ajax_comment' ) );
+		if ( self::$args['make_clickable'] ) {
+			remove_filter( 'comment_text', 'make_clickable', 9 );}
+		if ( self::$args['escape_html'] ) {
+			add_filter( 'pre_comment_content', 'esc_html' );
+		}
 	}
+
 	public function ajax_comment( $comment ) {
 		// Check ajax nonce first
 		$comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
@@ -32,6 +43,7 @@ class Comment_Walker extends Walker_Comment {
 
 		if ( check_ajax_referer( 'ajax_nonce', 'security', false ) && ! is_wp_error( $comment ) && 0 !== $comment_post_id ) {
 			ob_start();
+
 			/**
 			 * Set Cookies checkbox
 			 *
@@ -41,7 +53,6 @@ class Comment_Walker extends Walker_Comment {
 			if ( isset( $_POST['wp-comment-cookies-consent'] ) && 'yes' === $_POST['wp-comment-cookies-consent'] ) {
 				do_action( 'set_comment_cookies', $comment, $user );
 			}
-
 			// Set the globals, so our comment functions below will work correctly
 			$GLOBALS['comment'] = $comment;
 
@@ -55,10 +66,17 @@ class Comment_Walker extends Walker_Comment {
 				wp_send_json_error( $comment->get_error_message() );
 			}
 		}
-
 		wp_die();
 	}
+
 	protected function html5_comment( $comment, $depth, $args ) {
+		if ( 'div' === $args['style'] ) {
+			$tag       = 'div';
+			$add_below = 'comment';
+		} else {
+			$tag       = 'li';
+			$add_below = 'div-comment';
+		}
 		?>
 		<li <?php comment_class( ( $depth > 1 ) ? 'list-group-item p-0' : 'list-group-item' ); ?> id="comment-<?php comment_ID(); ?>">
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
@@ -105,20 +123,20 @@ class Comment_Walker extends Walker_Comment {
 						}
 						?>
 					</span>
-					<span class="reply float-end">
+					<div class="reply float-end">
 						<?php
-
 						comment_reply_link(
 							array_merge(
 								$args,
 								array(
 									'add_below' => 'div-comment',
 									'depth'     => $depth,
+									'max_depth' => $args['max_depth'],
 								)
 							)
 						);
 						?>
-					</span>
+					</div>
 				</footer>
 				<?php if ( '0' === $comment->comment_approved ) : ?>
 					<span class="comment-awaiting-moderation badge rounded-pill bg-info"><?php esc_html_e( 'Your comment is awaiting moderation.', 'lerm' ); ?></span>
@@ -130,5 +148,3 @@ class Comment_Walker extends Walker_Comment {
 		<?php
 	}
 }
-remove_filter( 'comment_text', 'make_clickable', 9 );
-add_filter( 'pre_comment_content', 'esc_html' );

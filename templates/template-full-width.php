@@ -9,13 +9,9 @@
  */
 get_header();?>
 <main role="main" class="container-fluid"><!--.container-->
-
-	<?php breadcrumb_trail(); ?>
-
+	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 	<div class="row justify-content-md-center"><!--.row-->
-
 		<div class="col-md-12 px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
-
 			<div class="site-main">
 				<?php
 				if ( have_posts() ) :

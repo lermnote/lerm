@@ -52,7 +52,7 @@ if ( ! class_exists( 'CSF' ) ) {
 			self::textdomain();
 
 			add_action( 'after_setup_theme', array( 'CSF', 'setup' ) );
-			add_action( 'init', array( 'CSF', 'setup' ) );
+			// add_action( 'init', array( 'CSF', 'setup' ) );
 			add_action( 'switch_theme', array( 'CSF', 'setup' ) );
 			add_action( 'admin_enqueue_scripts', array( 'CSF', 'add_admin_enqueue_scripts' ) );
 			add_action( 'wp_enqueue_scripts', array( 'CSF', 'add_typography_enqueue_styles' ), 80 );
@@ -495,10 +495,10 @@ if ( ! class_exists( 'CSF' ) ) {
 
 			// Font awesome 4 and 5 loader
 			if ( apply_filters( 'csf_fa4', false ) ) {
-				wp_enqueue_style( 'csf-fa', 'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome' . $min . '.css', array(), '4.7.0', 'all' );
+				wp_enqueue_style( 'csf-fa', 'https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome' . $min . '.css', array(), '4.7.0', 'all' );
 			} else {
-				wp_enqueue_style( 'csf-fa5', 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all' . $min . '.css', array(), '5.13.0', 'all' );
-				wp_enqueue_style( 'csf-fa5-v4-shims', 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/v4-shims' . $min . '.css', array(), '5.13.0', 'all' );
+				wp_enqueue_style( 'csf-fa5', 'https://cdn.staticfile.org/font-awesome/5.13.0/css/all' . $min . '.css', array(), '5.13.0', 'all' );
+				wp_enqueue_style( 'csf-fa5-v4-shims', 'https://cdn.staticfile.org/font-awesome/5.13.0/css/v4-shims' . $min . '.css', array(), '5.13.0', 'all' );
 			}
 
 			// Main style

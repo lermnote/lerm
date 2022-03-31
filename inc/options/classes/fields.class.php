@@ -122,6 +122,7 @@ if ( ! class_exists( 'CSF_Fields' ) ) {
             $query          = new WP_Query( wp_parse_args( $query_args, array(
               'post_type'   => $option,
               'post_status' => 'publish',
+              'posts_per_page' => -1,
             ) ) );
 
           }

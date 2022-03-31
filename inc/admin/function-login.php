@@ -8,9 +8,12 @@
 function lerm_login_style() {
 	$url        = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=';
 	$resolution = '1920x1080';
-	$request    = wp_remote_get( $url );
-	$data       = wp_remote_retrieve_body( $request );
-	$json       = json_decode( trim( $data ), true );
+	if ( false === wp_cache_get( 'lerm_login_background' ) ) {
+		$request = wp_remote_get( $url );
+		$data    = wp_remote_retrieve_body( $request );
+		wp_cache_set( 'lerm_login_background', $data, '', HOUR_IN_SECONDS );
+	}
+	$json = json_decode( trim( $data ), true );
 	if ( $json ) {
 		$images = $json['images'];
 		foreach ( $images as $image ) {
@@ -32,8 +35,13 @@ function lerm_login_style() {
 			-moz-box-shadow:0 0 5px 1px rgba(0,0,0,0.5);
 			-webkit-box-shadow:0 0 5px 1px rgba(0,0,0,0.5)
 		}
+		.login #login_error,
+		.login .message,
+		.login .success {
+			margin:1rem;
+		}
 		.login form {
-			padding:0;
+			padding:1rem;
 			border: 0 none;
 			box-shadow:none;
 			background-color: initial;
@@ -67,7 +75,7 @@ function lerm_login_style() {
 }
 add_action( 'login_head', 'lerm_login_style' );
 
-//logo link
+// logo link
 add_filter(
 	'login_headerurl',
 	function () {
@@ -75,10 +83,14 @@ add_filter(
 	}
 );
 
-//登陆用户名和密码错误提示
+// 登陆用户名和密码错误提示
 add_filter(
 	'login_errors',
 	function () {
 		return __( 'Incorrect username or password', 'lerm' );
 	}
 );
+function lerm_login_header() {
+	echo '<div class="login-h">';
+}
+add_action( 'login_header', 'lerm_login_header' );
