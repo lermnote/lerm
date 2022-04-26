@@ -11,15 +11,20 @@
 
 get_header();
 ?>
-
 <main role="main" class="container"><!--.container-->
-	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<?php
+	get_template_part( 'template-parts/breadcrumb' );
+
+	if ( lerm_options( 'slide_position' ) === 'under_navbar' ) {
+		get_template_part( 'template-parts/carousel' );
+	}
+	?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<?php
-			if ( is_home() && ! is_paged() && lerm_options( 'slide_position' ) === 'above_entry_list' ) :
+			if ( lerm_options( 'slide_position' ) === 'under_primary' ) {
 				get_template_part( 'template-parts/carousel' );
-			endif;
+			}
 			?>
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
 				<?php

@@ -17,6 +17,7 @@ class Optimize {
 
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$args ) );
+		self::optimize( self::$args['super_optimize'] );
 		self::hooks();
 	}
 
@@ -30,18 +31,21 @@ class Optimize {
 			$this->filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), 'gravatar_replace', 100, 1 );
 		}
 		if ( 'https://cravatar.cn/avatar/' === self::$args['gravatar_accel'] ) {
-			$this->filter( 'user_profile_picture_description', 'set_user_profile_picture_for_cravatar', 100, 1 );
-			$this->filter( 'avatar_defaults', 'set_defaults_for_cravatar', 100, 1 );
+			add_filter( 'user_profile_picture_description', 'set_user_profile_picture_for_cravatar', 100, 1 );
+			add_filter( 'avatar_defaults', 'set_defaults_for_cravatar', 100, 1 );
 		}
 		if ( self::$args['admin_accel'] ) {
-			$this->action( 'init', 'super_admin', 100, 1 );
-			$this->action( 'shutdown', 'ob_buffer_end', 100, 1 );
+			add_action( 'init', array( __NAMESPACE__ . '\Optimize', 'super_admin' ), 100, 1 );
+			add_action( 'shutdown', array( __NAMESPACE__ . '\Optimize', 'ob_buffer_end' ), 100, 1 );
 		}
 		if ( ! in_array( self::$args['google_replace'], array( 'disable', '' ), true ) ) {
-			$this->action( 'init', 'googleapis_replace', 100, 1 );
-			$this->action( 'shutdown', 'ob_buffer_end', 100, 1 );
+			add_action( 'init', array( __NAMESPACE__ . '\Optimize', 'googleapis_replace' ), 100, 1 );
+			add_action( 'shutdown', array( __NAMESPACE__ . '\Optimize', 'ob_buffer_end' ), 100, 1 );
 		}
-		$this->optimize( self::$args['super_optimize'] );
+		add_filter( 'frontpage_template', array( __NAMESPACE__ . '\Optimize', 'front_page_template' ), 15, 1 );
+		add_filter( 'wp_tag_cloud', array( __NAMESPACE__ . '\Optimize', 'tag_cloud' ), 10, 1 );
+		add_filter( 'pre_option_link_manager_enabled', '__return_true' );
+		$this->filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
 	}
 
 	/**
@@ -101,6 +105,17 @@ class Optimize {
 				add_filter( 'embed_oembed_discover', '__return_false' );
 				add_filter( 'rewrite_rules_array', array( __NAMESPACE__ . '\Optimize', 'disable_embeds_rewrites' ) );
 				add_filter( 'tiny_mce_plugins', array( __NAMESPACE__ . '\Optimize', 'remove_wpembed_tinymce_plugins' ) );
+			}
+			if ( in_array( 'remove_global_styles_render_svg', $args, true ) ) {
+				remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
+				remove_filter( 'render_block', 'wp_render_layout_support_flag' );
+				// 移除 SVG 和全局样式
+				// remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
+				// 删除添加全局内联样式的 wp_footer 操作
+				// remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
+				// 删除render_block 过滤器
+				// remove_filter('render_block', 'wp_render_duotone_support');
+				// remove_filter('render_block', 'wp_restore_group_inner_container');
 			}
 		}
 	}
@@ -170,11 +185,61 @@ class Optimize {
 		return $url ? remove_query_arg( 'ver', $url ) : false;
 	}
 
+	/**
+	 * Use front-page.php when Front page displays is set to a static page.
+	 *
+	 * @param string $template front-page.php.
+	 *
+	 * @return string The template to be used: blank if is_home() is true (defaults to index.php), else $template.
+	 */
+	public static function front_page_template( $template ) {
+		return is_home() ? '' : $template;
+	}
 
 	/**
-	 * 替换 WordPress 头像地址
+	 * Add custom class item to replay links.
+	 *
+	 * @param string $class
+	 * @return void
 	 */
-	public function gravatar_replace( $subject ) {
+	public static function replace_reply_link_class( $class ) {
+		return str_replace( 'class=\'', 'class=\'btn btn-sm btn-custom ', $class );
+	}
+
+	/**
+	 * Custom tags cloud args.
+	 *
+	 * @param array $args
+	 * @return string|string[] Tag cloud as a string or an array, depending on 'format' argument.
+	 */
+	public static function tag_cloud( $args ) {
+		$args = array(
+			'largest'  => 22,
+			'smallest' => 8,
+			'unit'     => 'pt',
+			'number'   => 22,
+			'orderby'  => 'count',
+			'order'    => 'DESC',
+		);
+		$tags = get_tags();
+
+		return wp_generate_tag_cloud( $tags, $args );
+	}
+
+	/**
+	 * Clean up menu attributes.
+	 *
+	 * @param array $ver
+	 * @return $ver
+	 */
+	public static function remove_css_attributes( $var ) {
+		return is_array( $var ) ? array_intersect( $var, array( 'active', 'dropdown', 'open', 'show' ) ) : '';
+	}
+
+	/**
+	 * Replace WordPress gravatar url
+	 */
+	public static function gravatar_replace( $subject ) {
 		$pattern = '/https?.*?\/avatar\//i';
 		$replace = self::$args['gravatar_accel'];
 		return preg_replace( $pattern, $replace, $subject );
@@ -183,7 +248,7 @@ class Optimize {
 	/**
 	 * 替换 WordPress 讨论设置中的默认头像
 	 */
-	public function set_defaults_for_cravatar( $avatar_defaults ) {
+	public static function set_defaults_for_cravatar( $avatar_defaults ) {
 		$avatar_defaults['gravatar_default'] = 'Cravatar avatar';
 		return $avatar_defaults;
 	}
@@ -191,7 +256,7 @@ class Optimize {
 	/**
 	 * 替换个人资料卡中的头像上传地址
 	 */
-	public function set_user_profile_picture_for_cravatar() {
+	public static function set_user_profile_picture_for_cravatar() {
 		return '<a href="https://cravatar.cn" target="_blank">您可以在 Cravatar 修改您的资料图片</a>';
 	}
 
@@ -199,7 +264,7 @@ class Optimize {
 	 * 将WordPress核心所依赖的静态文件访问链接替换为公共资源节点
 	 * 参考 wp-china-yes 插件
 	 */
-	public function super_admin() {
+	public static function super_admin() {
 		$pattern = '~' . home_url( '/' ) . '(wp-admin|wp-includes)/(css|js)/~';
 		$replace = sprintf( 'https://a2.wp-china-yes.net/WordPress@%s/$1/$2/', $GLOBALS['wp_version'] );
 		return self::replace( 'preg_replace', $pattern, $replace );
@@ -208,7 +273,7 @@ class Optimize {
 	/**
 	 * Replace Google services
 	 */
-	public function googleapis_replace( $replace ) {
+	public static function googleapis_replace( $replace ) {
 		$services = array(
 			'geekzu' => array( '//fonts.geekzu.org', '//gapis.geekzu.org/ajax', '//gapis.geekzu.org/g-fonts', '//gapis.geekzu.org/g-themes' ),
 			'loli'   => array( '//fonts.loli.net', '//ajax.loli.net', '//gstatic.loli.net', '//themes.loli.net' ),
@@ -223,15 +288,14 @@ class Optimize {
 	 * Replace public function
 	 * 参考 wp-china-yes 插件
 	 */
-	public function replace( $function, $regexp, $replace ) {
+	public static function replace( $function, $regexp, $replace ) {
 		ob_start(
 			function( $buffer ) use ( $function, $regexp, $replace ) {
-				$buffer = call_user_func( $function, $regexp, $replace, $buffer );
-				return $buffer;
+				return call_user_func( $function, $regexp, $replace, $buffer );
 			}
 		);
 	}
-	public function ob_buffer_end() {
+	public static function ob_buffer_end() {
 		if ( ob_get_level() > 0 ) {
 			ob_end_flush();
 		}

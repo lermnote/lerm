@@ -36,26 +36,24 @@ $recent_posts = new WP_Query(
 	<div class="row">
 	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 		<div class="col-md-8">
-			<div class="mb-4">
-							</div>
 			<div class="row row-cols-1 row-cols-md-3">
-				<?php if ( $recent_posts->have_posts() ) : ?>
-					<?php
+				<?php
+				if ( $recent_posts->have_posts() ) :
 					while ( $recent_posts->have_posts() ) :
 						$recent_posts->the_post();
 						?>
-				<div class="col mb-4">
-					<div class="card h-100">
-						<?php get_template_part( 'template-parts/content/featured-image' ); ?>
-						<div class="card-body">
-							<h5 class="card-title">
-								<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>
-							</h5>
+						<div class="col mb-4">
+							<div class="card h-100">
+								<?php get_template_part( 'template-parts/content/featured-image' ); ?>
+								<div class="card-body">
+									<h5 class="card-title">
+										<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>
+									</h5>
+								</div>
+								<?php //get_template_part( 'template-parts/content/content', get_post_type() ); ?>
+							</div>
 						</div>
-						<?php // get_template_part( 'template/content/content', 'excerpt' ); ?>
-					</div>
-				</div>
-				<?php endwhile; ?>
+					<?php endwhile; ?>
 				<?php endif; ?>
 			</div><!-- row row-cols-1 row-cols-md-3 -->
 			<div class="card mb-3">

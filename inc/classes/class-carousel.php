@@ -15,6 +15,7 @@ class Carousel {
 		'slides'       => array(),
 		'indicators'   => false,
 		'control'      => false,
+		'animation'    => 'carousel-fade',
 	);
 
 	public function __construct( $params = array() ) {
@@ -47,7 +48,7 @@ class Carousel {
 				$carousel  .= sprintf( '<div class="carousel-item%1$s" data-bs-interval="10000">%2$s%3$s</div>', $active, $slide['url'] ? $link : $image, $title );
 			}
 			?>
-			<div id="lermSlides" class="carousel slide carousel-fade mb-3" data-bs-ride="carousel">
+			<div id="lermSlides" class="carousel slide <?php echo esc_attr( self::$args['animation'] ); ?> mb-3" data-bs-ride="carousel">
 			<?php if ( self::$args['indicators'] ) { ?>
 					<div class="carousel-indicators mb-0">
 						<?php echo $indicator; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

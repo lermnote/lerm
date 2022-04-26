@@ -189,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
 			let params = new URLSearchParams();
 			params.append("action", "load_more");
+			params.append("query", adminajax.posts);
 			params.append("security", adminajax.nonce);
 			params.append("current_page", currentPage);
 			params.append("max_pages", maxPages);

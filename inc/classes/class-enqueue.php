@@ -33,6 +33,7 @@ class Enqueue {
 		wp_enqueue_style( 'main', LERM_URI . 'assets/css/main.css', array(), '1.0.0' );
 	}
 	public function scripts() {
+		global $wp_query;
 		wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.min.js', array(), '4.3.1', true );
 		wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
 		// wp_register_script( 'lightbox', 'https://ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js', array(), '1.7.1' );
@@ -65,6 +66,7 @@ class Enqueue {
 				'url'      => admin_url( 'admin-ajax.php' ),
 				'nonce'    => wp_create_nonce( 'ajax_nonce' ),
 				'noposts'  => __( 'No older posts found', 'lerm' ),
+				'posts'    => wp_json_encode( $wp_query->query_vars ), // everything about your loop is here
 				'loadmore' => __( 'Load more', 'lerm' ),
 				'loading'  => '<i class="fa fa-spinner fa-spin me-1"></i>' . __( 'Loading...', 'lerm' ),
 				'loggedin' => is_user_logged_in(),

@@ -39,6 +39,37 @@ class SEO {
 		if ( self::$args['baidu_submit'] ) {
 			add_action( 'publish_post', array( __NAMESPACE__ . '\SEO', 'baidu_submit' ) );
 		}
+		if ( self::$args['html_slug'] ) {
+			add_filter( 'user_trailingslashit', array( __NAMESPACE__ . '\SEO', 'trailingslashit' ), 10, 2 );
+			add_action( 'init', array( __NAMESPACE__ . '\SEO', 'html_page_permalink' ), -1 );
+		}
+	}
+
+	/**
+	 * Fix end of archive url with slash.
+	 *
+	 * @param  array  $args Arguments to pass to Breadcrumb_Trail.
+	 * @param string $string      URL with or without a trailing slash.
+	 * @param string $type_of_url The type of URL being considered. Accepts 'single', 'single_trackback',
+	 *                            'single_feed', 'single_paged', 'commentpaged', 'paged', 'home', 'feed',
+	 *                            'category', 'page', 'year', 'month', 'day', 'post_type_archive'.
+	 */
+	public static function trailingslashit( $string, $type_of_url ) {
+		if ( 'category' !== $type_of_url ) {
+			$string = untrailingslashit( $string );
+		}
+		if ( 'page' !== $type_of_url && 'home' !== $type_of_url && 'single' !== $type_of_url ) {
+			$string = trailingslashit( $string );
+		}
+		return $string;
+	}
+
+	// add html slug
+	public static function html_page_permalink() {
+		global $wp_rewrite;
+		if ( ! strpos( $wp_rewrite->get_page_permastruct(), '.html' ) ) {
+			$wp_rewrite->page_structure = $wp_rewrite->page_structure . '.html';
+		}
 	}
 
 	/**
@@ -97,7 +128,7 @@ class SEO {
 				$description = str_replace( array( "\n", "\r", "\t" ), ' ', $description );
 			}
 		} elseif ( is_archive() ) {
-			$description = the_archive_description() ? wp_strip_all_tags( the_archive_description() ) : BLOGNAME . '-' . single_term_title( '', false );
+			$description = get_the_archive_description() ? wp_strip_all_tags( get_the_archive_description() ) : BLOGNAME . '-' . single_term_title( '', false );
 		} else {
 			$description = get_bloginfo( 'description' );
 		}

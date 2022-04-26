@@ -1,8 +1,13 @@
 <?php
-class Chinese_to_PY {
+/**
+ * Transfer Chinese character to pinyin
+ *
+ */
+class Chinese_To_PY {
 
 	/**
 	 * 拼音字符转换图
+	 *
 	 * @var array
 	 */
 	private static $_aMaps = array(
@@ -406,6 +411,7 @@ class Chinese_to_PY {
 
 	/**
 	 * 将中文编码成拼音
+	 *
 	 * @param string $chinese 要转换为拼音的字符串
 	 * @param string $sRetFormat 返回格式 [first:每个字的首字母|all:全拼音|one:字符串字母]
 	 * @return string
@@ -440,17 +446,18 @@ class Chinese_to_PY {
 
 	/**
 	 * 中文转换到拼音(每次处理一个字符)
-	 * @param number $iWORD 待处理字符双字节
+	 *
+	 * @param number $dword 待处理字符双字节
 	 * @return string 拼音
 	 */
-	private static function zh2py( $iWORD ) {
-		if ( $iWORD > 0 && $iWORD < 160 ) {
-			return chr( $iWORD );
-		} elseif ( $iWORD < -20319 || $iWORD > -10247 ) {
+	private static function zh2py( $dword ) {
+		if ( $dword > 0 && $dword < 160 ) {
+			return chr( $dword );
+		} elseif ( $dword < -20319 || $dword > -10247 ) {
 			return '';
 		} else {
 			foreach ( self::$_aMaps as $py => $code ) {
-				if ( $code > $iWORD ) {
+				if ( $code > $dword ) {
 					break;
 				}
 				$result = $py;

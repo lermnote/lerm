@@ -190,12 +190,6 @@ if ( class_exists( 'CSF' ) ) {
 						'background-size'       => '',
 					),
 					'output'               => array(
-						// 'img.avatar',
-						// '.author-info',
-						// '.page-numbers',
-						// '.comment-respond',
-						// '.post-navigation',
-						// '.comments-list',
 						'.card',
 					),
 				),
@@ -480,7 +474,6 @@ if ( class_exists( 'CSF' ) ) {
 						'.separate-layout .container',
 					),
 					'output_mode' => 'width',
-					// 'default'     => 1140,
 				),
 
 				array(
@@ -514,8 +507,6 @@ if ( class_exists( 'CSF' ) ) {
 					'output_mode' => 'background-color',
 					'output'      => array(
 						'.boxed-layout',
-						// '.dropdown-menu',
-						// '.offcanvas',
 					),
 				),
 				array(
@@ -527,8 +518,6 @@ if ( class_exists( 'CSF' ) ) {
 					'output_mode' => 'background-color',
 					'output'      => array(
 						'.boxed-layout #page',
-						// '.dropdown-menu',
-						// '.offcanvas',
 					),
 				),
 			),
@@ -611,7 +600,6 @@ if ( class_exists( 'CSF' ) ) {
 					'id'       => 'super_optimize',
 					'type'     => 'checkbox',
 					'title'    => __( 'WordPress optimization', 'lerm' ),
-					'inline'   => true,
 					'subtitle' => __( 'Cleanup wp_head unneccessary and unsecure codes.', 'lerm' ),
 					'options'  => array(
 						'rsd_link'                        => __( 'Remove RSD link', 'lerm' ),
@@ -630,6 +618,7 @@ if ( class_exists( 'CSF' ) ) {
 						'disable_rest_api'                => __( 'Disable rest api', 'lerm' ),
 						'remove_recent_comments_css'      => __( 'Remove recent comments widget styles', 'lerm' ),
 						'rel_canonical'                   => __( 'Remove rel canonical', 'lerm' ),
+						'remove_global_styles_render_svg' => __( 'Remove wp global styles render svg filters', 'lerm' ),
 					),
 				),
 			),
@@ -772,7 +761,7 @@ if ( class_exists( 'CSF' ) ) {
 						'&raquo;'  => '&raquo;',
 						'&gt;'     => '&gt;',
 					),
-					'default' => '&#45;',
+					'default' => '-',
 				),
 				array(
 					'id'      => 'html_slug',
@@ -786,7 +775,7 @@ if ( class_exists( 'CSF' ) ) {
 					'type'    => 'switcher',
 					'title'   => __( 'Images Lazyload', 'lerm' ),
 					'desc'    => __( 'Images Lazyload', 'lerm' ),
-					'default' => true,
+					'default' => false,
 				),
 				array(
 					'id'      => 'baidu_submit',
@@ -975,33 +964,33 @@ if ( class_exists( 'CSF' ) ) {
 					'id'      => 'breadcrumb_container',
 					'type'    => 'button_set',
 					'title'   => __( 'Container', 'lerm' ),
-					'desc'   => __( 'Container HTML element. nav|div', 'lerm' ),
+					'desc'    => __( 'Container HTML element. nav|div', 'lerm' ),
 					'options' => array(
-						'nav'    => __( 'nav', 'lerm' ),
+						'nav' => __( 'nav', 'lerm' ),
 						'div' => __( 'div', 'lerm' ),
 					),
 					'default' => 'nav',
 				),
 				array(
-					'id'      => 'breadcrumb_before',
-					'type'    => 'text',
-					'title'   => __( 'Before', 'lerm' ),
-					'desc'   => __( 'String to output before breadcrumb menu.', 'lerm' ),
+					'id'    => 'breadcrumb_before',
+					'type'  => 'text',
+					'title' => __( 'Before', 'lerm' ),
+					'desc'  => __( 'String to output before breadcrumb menu.', 'lerm' ),
 				),
 				array(
-					'id'      => 'breadcrumb_after',
-					'type'    => 'text',
-					'title'   => __( 'After', 'lerm' ),
-					'desc'   => __( 'String to output after breadcrumb menu.', 'lerm' ),
+					'id'    => 'breadcrumb_after',
+					'type'  => 'text',
+					'title' => __( 'After', 'lerm' ),
+					'desc'  => __( 'String to output after breadcrumb menu.', 'lerm' ),
 				),
 				array(
 					'id'      => 'breadcrumb_list_tag',
 					'type'    => 'button_set',
 					'title'   => __( 'List tag', 'lerm' ),
-					'desc'   => __( 'The HTML tag to use for the list wrapper.', 'lerm' ),
+					'desc'    => __( 'The HTML tag to use for the list wrapper.', 'lerm' ),
 					'options' => array(
-						'ol'    => __( 'ol', 'lerm' ),
-						'ul' => __( 'ul', 'lerm' ),
+						'ol'  => __( 'ol', 'lerm' ),
+						'ul'  => __( 'ul', 'lerm' ),
 						'div' => __( 'div', 'lerm' ),
 					),
 					'default' => 'ol',
@@ -1010,9 +999,9 @@ if ( class_exists( 'CSF' ) ) {
 					'id'      => 'breadcrumb_item_tag',
 					'type'    => 'button_set',
 					'title'   => __( 'Item tag', 'lerm' ),
-					'desc'   => __( 'The HTML tag to use for the list wrapper.', 'lerm' ),
+					'desc'    => __( 'The HTML tag to use for the list wrapper.', 'lerm' ),
 					'options' => array(
-						'li'    => __( 'li', 'lerm' ),
+						'li'   => __( 'li', 'lerm' ),
 						'span' => __( 'span', 'lerm' ),
 					),
 					'default' => 'li',
@@ -1021,26 +1010,25 @@ if ( class_exists( 'CSF' ) ) {
 					'id'      => 'breadcrumb_separator',
 					'type'    => 'text',
 					'title'   => __( 'After', 'lerm' ),
-					'desc'   => __( 'Breadcrumb link separator, ex: \'»\',, Alt Code', 'lerm' ),
+					'desc'    => __( 'Breadcrumb link separator, ex: \'»\',, Alt Code', 'lerm' ),
 					'default' => '/',
 				),
 				array(
 					'id'      => 'breadcrumb_front_show',
 					'type'    => 'switcher',
 					'title'   => __( 'Show on front', 'lerm' ),
-					'desc'   => __( 'Whether to show when `is_front_page()`.', 'lerm' ),
+					'desc'    => __( 'Whether to show when `is_front_page()`.', 'lerm' ),
 					'default' => false,
 				),
 				array(
 					'id'      => 'breadcrumb_show_title',
 					'type'    => 'switcher',
 					'title'   => __( 'Show title', 'lerm' ),
-					'desc'   => __( 'Whether to show the title (last item) in the trail.', 'lerm' ),
+					'desc'    => __( 'Whether to show the title (last item) in the trail.', 'lerm' ),
 					'default' => true,
 				),
 			),
 		)
-
 	);
 	// ----------------------------------------
 	// a opttion panel for Blog -- done
@@ -1373,14 +1361,14 @@ if ( class_exists( 'CSF' ) ) {
 				),
 				array(
 					'id'         => 'slide_position',
-					'type'       => 'radio',
+					'type'       => 'image_select',
 					'title'      => __( 'Slides Position', 'lerm' ),
 					'label'      => __( 'Select Slides Position On frontpage', 'lerm' ),
 					'dependency' => array( 'slide_enable', '==', 'true' ),
 					'options'    => array(
-						'under_navbar'     => __( 'Under navbar', 'lerm' ),
-						'above_entry_list' => __( 'Above entry list', 'lerm' ),
-						'full_width'       => __( 'Under navbar(Full width)', 'lerm' ),
+						'under_navbar'  => $imagepath . 'main_width.png',
+						'under_primary' => $imagepath . 'primary_width.png',
+						'full_width'    => $imagepath . 'full_width.png',
 					),
 				),
 				array(
@@ -1398,7 +1386,7 @@ if ( class_exists( 'CSF' ) ) {
 					'desc'       => __( 'Enable to show slides control arrows', 'lerm' ),
 				),
 				array(
-					'id'                     => 'lerm_slides',
+					'id'                     => 'slide_images',
 					'type'                   => 'group',
 					'dependency'             => array( 'slide_enable', '==', 'true' ),
 					'title'                  => __( 'Slides', 'lerm' ),
@@ -1484,7 +1472,7 @@ if ( class_exists( 'CSF' ) ) {
 					'type'       => 'text',
 					'dependency' => array( 'enable_cdn', '==', 'true' ),
 					'title'      => __( 'Site URL', 'lerm' ),
-					'desc'       => __( 'The new URL to be used in place of' . get_bloginfo( 'url', 'display' ) . 'for rewriting. No trailing <code>/</code> please. E.g. <code>http://cdn.lerm.local/wp-includes/js/jquery/jquery-migrate.js</code>', 'lerm' ),
+					'desc'       => __( 'The new URL to be used in place of site url for rewriting. No trailing <code>/</code> please. E.g. <code>http://cdn.lerm.local/wp-includes/js/jquery/jquery-migrate.js</code>', 'lerm' ),
 					'attributes' => array(
 						'placeholder' => get_bloginfo( 'url', 'display' ),
 					),

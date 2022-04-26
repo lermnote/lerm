@@ -34,6 +34,8 @@ class Setup {
 		add_action( 'after_setup_theme', array( '\Lerm\Inc\Setup', 'content_width' ) );
 		add_action( 'widgets_init', array( '\Lerm\Inc\Setup', 'register_sidebar' ) );
 		add_action( 'widgets_init', array( '\Lerm\Inc\Setup', 'widgets' ) );
+		add_filter( 'excerpt_length', array( __NAMESPACE__ . '\Setup', 'excerpt_length' ), 999 );
+		add_filter( 'comment_excerpt_length', array( __NAMESPACE__ . '\Setup', 'comment_excerpt_length' ), 999 );
 	}
 
 	/**
@@ -161,6 +163,7 @@ class Setup {
 			'submit_token' => $options['submit_token'],
 			'post_urls'    => array(),
 			'separator'    => $options['title_sep'],
+			'html_slug'    => $options['html_slug'],
 			'keywords'     => array(),
 			'description'  => array(),
 		);
@@ -181,6 +184,26 @@ class Setup {
 	 */
 	public static function content_width() {
 		$GLOBALS['content_width'] = apply_filters( 'content_width', 1440 );
+	}
+
+	/**
+	 * Displays the optional excerpt.
+	 *
+	 * @since Lerm 2.0
+	 */
+	public static function excerpt_length( $length ) {
+		$length = lerm_options( 'excerpt_length' );
+		return $length;
+	}
+
+	/**
+	 * Displays the optional excerpt.
+	 *
+	 * @since Lerm 2.0
+	 */
+	public static function comment_excerpt_length( $length ) {
+		$length = lerm_options( 'comment_excerpt_length' ) ? lerm_options( 'comment_excerpt_length' ) : 120;
+		return $length;
 	}
 
 	/**

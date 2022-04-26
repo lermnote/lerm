@@ -92,23 +92,6 @@ function lerm_post_navigation() {
 		);
 	endif;
 }
-
-/**
- * Shows a pagination for posts list.
- *
- * @since  1.0.0
- * @return void
- */
-function lerm_pagination() {
-
-	the_posts_pagination(
-		array(
-			'mid_size'  => 10,
-			'prev_text' => '<span class="screen-reader-text">' . __( 'Previous page', 'lerm' ) . '</span>',
-			'next_text' => '<span class="screen-reader-text">' . __( 'Next page', 'lerm' ),
-		)
-	);
-}
 function lerm_link_pagination() {
 	wp_link_pages(
 		array(
@@ -165,67 +148,6 @@ function addpageviews() {
 add_action( 'wp_head', 'addpageviews' );
 
 /**
- * Fix end of archive url with slash.
- *
- * @param  array $args Arguments to pass to Breadcrumb_Trail.
- * @return $string
- */
-function lerm_category_trailingslashit( $string, $type_of_url ) {
-	if ( 'single' !== $type_of_url && 'page' !== $type_of_url && 'paged' !== $type_of_url && 'single_paged' !== $type_of_url ) {
-		$string = trailingslashit( $string );
-	}
-	return $string;
-}
-add_filter( 'user_trailingslashit', 'lerm_category_trailingslashit', 10, 2 );
-
-/**
- * Shows .html slug for pages.
- *
- * @since  1.0.0
- * @access public
- * @return void
- */
-if ( lerm_options( 'html_slug' ) ) :
-	// remove page slash
-	function no_page_slash( $string, $type ) {
-		global $wp_rewrite;
-		if ( true === $wp_rewrite->using_permalinks() && $wp_rewrite->use_trailing_slashes && 'page' === $type ) {
-			return untrailingslashit( $string );
-		} else {
-			return $string;
-		}
-	}
-	add_filter( 'user_trailingslashit', 'no_page_slash', 66, 2 );
-
-	// add html slug
-	function html_page_permalink() {
-		global $wp_rewrite;
-		if ( ! strpos( $wp_rewrite->get_page_permastruct(), '.html' ) ) {
-			$wp_rewrite->page_structure = $wp_rewrite->page_structure . '.html';
-		}
-	}
-	add_action( 'init', 'html_page_permalink', -1 );
-endif;
-
-/**
- * Disable Embeds.
- *
- * @return void
- */
-if ( lerm_options( 'disable_embeds' ) ) :
-	function lerm_disable_embeds_code_init() {
-		remove_action( 'rest_api_init', 'wp_oembed_register_route' );
-		add_filter( 'embed_oembed_discover', '__return_false' );
-		remove_filter( 'oembed_dataparse', 'wp_filter_oembed_result', 10 );
-		remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
-		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
-		add_filter( 'rewrite_rules_array', 'disable_embeds_rewrites' );
-		remove_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result', 10 );
-	}
-	add_action( 'init', 'lerm_disable_embeds_code_init', 9999 );
-endif;
-
-/**
  * Style embed front-end.
  *
  * @return void
@@ -255,6 +177,7 @@ if ( ! lerm_options( 'disable_pingback' ) ) :
 	}
 	add_action( 'pre_ping', 'no_self_ping' );
 endif;
+
 // code hightlight
 function code_highlight_esc_html( $content ) {
 	$regex = '/(\[code\s+[^\]]*?\])(.*?)(\[\/code\])/sim';
