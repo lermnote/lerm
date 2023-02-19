@@ -19,7 +19,7 @@ class SMTP {
 			'ssl_enable' => true,
 			'smtp_auth'  => '',
 			'username'   => '',
-			'pswd'       => '',
+			'pwd'       => '',
 		),
 	);
 
@@ -35,7 +35,7 @@ class SMTP {
 
 	public static function hooks() {
 		if ( self::$args['email_notice'] ) {
-			add_action( 'phpmailer_init', 'mail_smtp', 100, 1 );
+			add_action( 'phpmailer_init', array( __NAMESPACE__ . '\SMTP', 'mail_smtp' ), 100, 1 );
 		}
 	}
 
@@ -46,12 +46,12 @@ class SMTP {
 		$phpmailer->FromName = $smtp['from_name'];
 
 		$phpmailer->Host       = $smtp['smtp_host'];
-		$phpmailer->Port       = self::$smtp['smtp_options']['smtp_port'];
+		$phpmailer->Port       = $smtp['smtp_port'];
 		$phpmailer->SMTPSecure = $smtp['ssl_enable'] ? 'ssl' : '';
 
 		$phpmailer->SMTPAuth = $smtp['smtp_auth'];
 		$phpmailer->Username = $smtp['username'];
-		$phpmailer->Password = $smtp['pswd'];
+		$phpmailer->Password = $smtp['pwd'];
 		$phpmailer->IsSMTP();
 	}
 }

@@ -16,6 +16,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color' ) ); ?>">
 	<?php wp_head(); ?>
+	<?php echo wp_kses( lerm_options( 'baidu_tongji' ), array( 'script' => array() ) ); ?>
 </head>
 <body <?php body_class(); ?>>
 	<?php wp_body_open(); ?>

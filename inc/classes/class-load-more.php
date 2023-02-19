@@ -11,64 +11,54 @@ use Lerm\Inc\Traits\Ajax;
 use WP_Query;
 
 class Load_More {
-
 	use Ajax;
 
-	public static $args = array();
+	private $query_args;
 
-	public function __construct( $args = array() ) {
+	public function __construct( $query_args = array() ) {
 		$this->register( 'load_more' );
-		$default = array(
-			'post_per_page' => get_option( 'posts_per_page' ),
-		);
-		$args    = wp_parse_args( $args, $default );
+
+		$default_args =
+			array(
+				'post_per_page' => get_option( 'posts_per_page' ),
+			);
+
+		$this->query_args = wp_parse_args( $query_args, $default_args );
 	}
 
-	// instance
-	public static function instance( $params = array() ) {
-		return new self( $params );
+	public static function instance( $query_args = array() ) {
+		return new self( $query_args );
 	}
 
-	/**
-	 * Load more posts on blog page.
+	/** Load more posts on blog page.
 	 *
 	 * @return void
 	 */
 	public function load_more() {
-		$this->verify_nonce( 'ajax_nonce' );
-
-		$this->success( $this->render() );
-
-		$this->error( 'No more posts!' );
-	}
-
-	/**
-	 * Render the html
-	 *
-	 * @return string|false|void
-	 */
-	public function render() {
-		check_ajax_referer( 'ajax_nonce', 'security' );
-
-		// prepare our arguments for the query
-		$args                = json_decode( stripslashes( $_POST['query'] ), true );
-		$args['paged']       = $_POST['current_page'] + 1; // we need next page to be loaded
-		$args['post_status'] = 'publish';
-
-		// it is always better to use WP_Query but not here
-		query_posts( $args );
-
-		if ( have_posts() && $next_page <= $max_pages ) {
-			ob_start();
-
-			while ( have_posts() ) :
-
-				the_post();
-				get_template_part( 'template-parts/content/content', get_post_format() );
-
-			endwhile;
-
-			return ob_get_clean();
+		$nonce = sanitize_text_field( $_POST['security'] );
+		if ( ! wp_verify_nonce( $nonce, 'ajax_nonce' ) ) {
+			$this->error( __( 'Invalid nonce', 'lerm' ) );
 		}
+
+		$requested_query_args = json_decode( stripslashes( $_POST['query'] ), true );
+
+		$query_args = array_merge( $this->query_args, $requested_query_args );
+
+		$query_args['paged']       = (int) $_POST['current_page'] + 1;
+		$query_args['post_status'] = 'publish';
+
+		$posts = new WP_Query( $query_args );
+
+		if ( ! $posts->have_posts() || $query_args['paged'] > $posts->max_num_pages ) {
+			$this->error( __( 'No more posts!', 'lerm' ) );
+		}
+
+		ob_start();
+		while ( $posts->have_posts() ) :
+			$posts->the_post();
+			get_template_part( 'template-parts/content/content', get_post_format() );
+		endwhile;
+		$content = ob_get_clean();
+		$this->success( $content );
 	}
 }

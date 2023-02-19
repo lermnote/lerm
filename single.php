@@ -37,7 +37,6 @@ get_header();
 							comments_template();
 						endif;
 					endwhile;
-					lerm_pagination();
 				endif;
 				?>
 			</div>

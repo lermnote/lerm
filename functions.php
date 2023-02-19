@@ -43,34 +43,21 @@ require_once LERM_DIR . 'inc/autoloader.php';
  * @return string $options
  */
 function lerm_options( string $id, string $tag = '', $default = '' ) {
-
-	$args = apply_filters(
-		'theme_option',
-		array(
-			'id'      => $id,
-			'tag'     => $tag,
-			'default' => $default,
-		)
-	);
-	// Get theme options.
-	$options = get_option( 'lerm_theme_options' );
-	if ( ! array_key_exists( $id, $options ) ) {
-		return;
-	}
-
-	if ( is_array( $options[ $id ] ) ) {
-		if ( ! empty( $tag ) && array_key_exists( $tag, $options[ $id ] ) ) {
-			return $options[ $id ][ $tag ] ? $options[ $id ][ $tag ] : $default;
+	$options = get_option( 'lerm_theme_options', array() );
+	$value   = $default;
+	if ( array_key_exists( $id, $options ) ) {
+		if ( is_array( $options[ $id ] ) ) {
+			if ( ! empty( $tag ) && array_key_exists( $tag, $options[ $id ] ) ) {
+				$value = $options[ $id ][ $tag ];
+			} else {
+				$value = $options[ $id ];
+			}
 		} else {
-			return $options[ $id ] ? $options[ $id ] : $default;
+			$value = $options[ $id ];
 		}
-	} else {
-		$default = $tag;
-		return $options[ $id ] ? $options[ $id ] : $default;
 	}
+	return $value;
 }
-
-
 /**
  * Navigation post.
  *
@@ -236,29 +223,26 @@ require LERM_DIR . 'inc/lerm.php';
  *
  * @since lerm 3.0
  */
-function lerm_create_copyright( string $type = '' ) {
-	$type = 'short';
-
+function lerm_create_copyright( string $type = 'short' ) {
 	$output   = '';
 	$blogname = '<strong>' . get_bloginfo( 'name' ) . '</strong>';
 
 	$all_posts  = get_posts( 'post_status=publish&order=ASC' );
 	$first_post = $all_posts[0];
 	$first_date = $first_post->post_date_gmt;
+	$date       = esc_html( substr( $first_date, 0, 4 ) . ( ( substr( $first_date, 0, 4 ) === date( 'Y' ) ) || ( 'short' === $type ) ? '' : '-' . date( 'Y ' ) ) );
 	if ( 'short' === $type ) {
-		$copyright = esc_html__( '&copy; ', 'lerm' );
-		$rights    = '';
+		$output = sprintf(
+			'&copy; %1$s %2$s',
+			$date,
+			$blogname
+		);
 	} else {
-		$copyright = esc_html__( 'Copyright &copy; ', 'lerm' );
-		$rights    = esc_html__( ' All rights reserved ', 'lerm' );
+		$output = sprintf(
+			'Copyright &copy; %1$s %2$s All rights reserved',
+			$date,
+			$blogname
+		);
 	}
-
-	if ( substr( $first_date, 0, 4 ) === gmdate( 'Y' ) || 'short' === $type ) {
-		$date = esc_html( gmdate( 'Y ' ) );
-	} else {
-		$date = esc_html( substr( $first_date, 0, 4 ) . '-' . gmdate( 'Y ' ) );
-	}
-
-	$output = $copyright . $date . $blogname . $rights;
-	echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }

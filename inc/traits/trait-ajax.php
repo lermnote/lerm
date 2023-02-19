@@ -33,7 +33,7 @@ trait Ajax {
 	protected function verify_nonce( $action ) {
 
 		if ( ! isset( $_REQUEST['security'] ) || ! \wp_verify_nonce( $_REQUEST['security'], $action ) ) {
-			$this->error( __( 'Error: Nonce verification failed', 'lerm' ) );
+			$this->error( __( 'Error: Invalid request', 'lerm' ) );
 		}
 	}
 
@@ -43,7 +43,7 @@ trait Ajax {
 	 * @param mixed $data Data to send to response.
 	 */
 	public function success( $data = null ) {
-		$this->send( $data );
+		$this->send_response( $data, true );
 	}
 
 	/**
@@ -52,7 +52,7 @@ trait Ajax {
 	 * @param mixed $data Data to send to response.
 	 */
 	protected function error( $data = null ) {
-		$this->send( $data, false );
+		$this->send_response( $data, false );
 	}
 
 	/**
@@ -61,12 +61,15 @@ trait Ajax {
 	 * @param array   $data
 	 * @param boolean $success
 	 */
-	private function send( $data, $success = true ) {
+	private function send_response( $data, $success ) {
+		$response = array( 'success' => $success );
 
 		if ( is_string( $data ) ) {
-			$data = $success ? array( 'data' => $data ) : array( 'error' => $data );
+			$response['data'] = $data;
+		} else {
+			$response = array_merge( $response, $data );
 		}
-		$data['success'] = isset( $data['success'] ) ? $data['success'] : $success;
-		\wp_send_json( $data );
+
+		\wp_send_json( $response );
 	}
 }

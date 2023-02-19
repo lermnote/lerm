@@ -796,14 +796,11 @@ if ( class_exists( 'CSF' ) ) {
 					'title'      => __( 'Submit Token', 'lerm' ),
 				),
 				array(
-					'id'            => 'baidu_tongji',
-					'type'          => 'wp_editor',
-					'title'         => __( 'Baidu Tongji', 'lerm' ),
-					'after'         => __( 'baidu tongji code in before head tag', 'lerm' ),
-					'height'        => '80px',
-					'media_buttons' => false,
-					'quicktags'     => false,
-					'tinymce'       => true,
+					'id'       => 'baidu_tongji',
+					'type'     => 'code_editor',
+					'title'    => __( 'Baidu Tongji', 'lerm' ),
+					'after'    => __( 'Baidu tongji code in before head tag', 'lerm' ),
+					'sanitize' => false,
 				),
 
 				array(
