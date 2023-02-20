@@ -21,6 +21,6 @@ $like_count = get_post_meta( $post->ID, 'lerm_post_like', true ) ? get_post_meta
 			</a>
 		</div><!-- like -->
 	</div><!-- toolbar -->
-	<?php social_icons( lerm_options( 'social_share' ) ); ?>
+	<?php lerm_social_icons( lerm_options( 'social_share' ) ); ?>
 </footer>
 

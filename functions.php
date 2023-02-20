@@ -112,27 +112,27 @@ function lerm_paginate_comments() {?>
 }
 
 // Get post views count.
-function post_views( $after = '' ) {
+function lerm_post_views( $after = '' ) {
 	global $post;
 	$post_ID = $post->ID;
-	$views   = (int) get_post_meta( $post_ID, 'pageviews', true );
+	$views   = get_transient( 'pageviews_' . $post_ID );
+
+	if ( false === $views ) {
+		$views = (int) get_post_meta( $post_ID, 'pageviews', true );
+		set_transient( 'pageviews_' . $post_ID, $views, 12 * HOUR_IN_SECONDS ); // Cache for 12 hours
+	}
+
 	return number_format( $views ) . $after;
 }
-
 // Update post views count.
-function addpageviews() {
+function add_page_views() {
 	if ( is_singular( 'post' ) ) {
-		global $post;
-		$post_ID = $post->ID;
-		if ( $post_ID ) {
-			$post_views = (int) get_post_meta( $post_ID, 'pageviews', true );
-			if ( ! update_post_meta( $post_ID, 'pageviews', ( $post_views + 1 ) ) ) {
-				add_post_meta( $post_ID, 'pageviews', 1, true );
-			}
-		}
+		$post_ID    = get_queried_object_id();
+		$post_views = (int) get_post_meta( $post_ID, 'pageviews', true );
+		update_metadata( 'post', $post_ID, 'pageviews', $post_views + 1 );
 	}
 }
-add_action( 'wp_head', 'addpageviews' );
+add_action( 'wp_footer', 'add_page_views' );
 
 /**
  * Style embed front-end.

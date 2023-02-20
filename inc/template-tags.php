@@ -2,61 +2,41 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	die; }
 function lerm_post_meta( $location ) {
-	if ( 'single_top' === $location && is_singular() ) {
-		$arg           = array_keys( (array) lerm_options( 'single_top', 'enabled' ) );
-		$align_classes = 'justify-content-center  mb-0 ';
+	$meta_settings = array(
+		'single_top'     => array( 'option' => 'single_top', 'class' => 'justify-content-center  mb-0 ' ),
+		'single_bottom'  => array( 'option' => 'single_bottom', 'class' => 'justify-content-between mb-1' ),
+		'summary_bottom' => array( 'option' => 'summary_meta', 'class' => ' justify-content-center justify-content-sm-start mb-0 ' ),
+	);
+
+	if ( isset( $meta_settings[ $location ] ) && is_singular() ) {
+		$arg           = array_keys( (array) lerm_options( $meta_settings[ $location ]['option'], 'enabled' ) );
+		$align_classes = $meta_settings[ $location ]['class'];
 	}
-	if ( 'single_bottom' === $location && is_singular() ) {
-		$arg           = array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) );
-		$align_classes = 'justify-content-between mb-1';
-	}
-	if ( 'summary_bottom' === $location ) {
-		$arg           = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
-		$align_classes = ' justify-content-center justify-content-sm-start mb-0 ';
-	}
+
 	$post_meta = apply_filters( 'post_meta_show_on_post', $arg );
 
-	if ( 'disabled' !== $post_meta[0] ) {?>
+	if ( isset( $post_meta[0] ) && 'disabled' !== $post_meta[0] ) {
+		$post_meta_items = array(
+			'format'       => 'lerm_post_format',
+			'publish_date' => 'lerm_post_date',
+			'categories'   => 'lerm_post_categories',
+			'read'         => 'lerm_post_views_number',
+			'comment'      => 'lerm_post_comments_number',
+			'author'       => 'lerm_post_author',
+		);
+
+		?>
 		<ul class="list-unstyled d-flex <?php echo esc_html( $align_classes ); ?> entry-meta small text-muted">
 			<?php
 			foreach ( $post_meta as $item ) {
-				switch ( $item ) {
-					case 'format':
-						lerm_post_format();
-						break;
-					case 'publish_date':
-						lerm_post_date();
-						break;
-					case 'categories':
-						lerm_post_categories();
-						break;
-					case 'read':
-						lerm_post_views_number();
-						break;
-					case 'comment':
-						lerm_post_comments_number();
-						break;
-					case 'author':
-						lerm_post_author();
-						break;
+				if ( isset( $post_meta_items[ $item ] ) ) {
+					$post_meta_items[ $item ]();
 				}
 			}
 			?>
 		</ul>
 		<?php
 	}
-}
-
-function lerm_post_meta_list( $location = null ) {
-	if ( 'single_top' === $location ) {
-		$arg = array_keys( (array) lerm_options( 'single_top', 'enabled' ) );
-	}
-
-	if ( 'summary_bottom' === $location ) {
-		$arg = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
-	}
-	$post_meta = apply_filters( 'post_meta_show_on_post', $arg );
-	return $post_meta;
 }
 
 function lerm_post_format() {
@@ -129,7 +109,7 @@ function lerm_post_views_number() {
 	<li  class="post-views meta-item">
 		<i class="fa fa-eye pe-1"></i>
 		<span>
-			<?php echo esc_html( post_views( '' ) ); ?>
+			<?php echo esc_html( lerm_post_views( '' ) ); ?>
 		</span>
 	</li>
 	<?php
@@ -173,16 +153,21 @@ function lerm_body_classes( $classes ) {
 	$classes[] = 'body-bg';
 
 	// Check singular
-	if ( is_singular() ) {
+	if ( is_single() || is_page() ) {
 		$classes[] = 'singular';
-	}
-	// Check for post thumbnail.
-	if ( is_singular() && has_post_thumbnail() ) {
-		$classes[] = 'has-post-thumbnail';
+		if ( has_post_thumbnail() ) {
+			$classes[] = 'has-post-thumbnail';
+		}
 	}
 	// Add class on front page.
 	if ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) {
-		$classes[] = 'lerm-front-page';
+		static $lerm_front_page = null;
+		if ( null === $lerm_front_page ) {
+			$lerm_front_page = get_option( 'page_on_front' );
+		}
+		if ( $lerm_front_page && is_page( $lerm_front_page ) ) {
+			$classes[] = 'lerm-front-page';
+		}
 	}
 	// Output layout
 	$classes[] = lerm_site_layout();
@@ -193,20 +178,20 @@ function lerm_body_classes( $classes ) {
 }
 add_filter( 'body_class', 'lerm_body_classes' );
 
+//add CSS class in WordPress post list and single page
 function lerm_post_class( $classes ) {
+	$loading_animate = lerm_options('loading-animate');
 
-	if ( ! is_singular() ) {
-		$classes[] = 'summary';
-		$classes[] = 'mb-3 p-0 p-md-3';
-
+	if ( ! is_single() ) {
+		$classes[] = implode( ' ', array( 'summary', 'mb-3', 'p-0', 'p-md-3' ) );
 	} else {
-		$classes[] = 'entry';
-		$classes[] = ' p-3 mb-2';
+		$classes[] = implode( ' ', array( 'entry', 'p-3', 'mb-2' ) );
 	}
-	if ( lerm_options( 'loading-animate' ) ) {
-		$classes[] = 'loading-animate';
-		$classes[] = 'fadeIn';
+
+	if ( $loading_animate ) {
+		$classes[] = implode( ' ', array( 'loading-animate', 'fadeIn' ) );
 	}
+
 	return $classes;
 }
 add_filter( 'post_class', 'lerm_post_class' );
@@ -216,20 +201,17 @@ add_filter( 'post_class', 'lerm_post_class' );
  *
  * @since lerm 3.0.0
  */
-function social_icons( $icons = array() ) {
-	if ( $icons ) {
+function lerm_social_icons( $icons = array() ) {
+	if ( is_array( $icons ) && count( $icons ) > 0 ) {
 		?>
 		<div class="social-share d-flex justify-content-center" data-initialized="true">
+			<?php foreach ( $icons as $icon ) : ?>
 
-			<?php
-			$icons = array_map( 'esc_attr', $icons );
-			foreach ( $icons as $icon ) {
-				?>
-				<a href="#" class="social-share-icon icon-<?php echo $icon; ?> btn-light btn-sm "><i class="fa fa-<?php echo $icon; ?>"></i></a>
-				<?php
-			}
-			?>
+					<a href="#" class="social-share-icon icon-<?php echo esc_attr( $icon ); ?> btn-light btn-sm">
+						<i class="fa fa-<?php echo esc_attr( $icon ); ?>"></i>
+					</a>
 
+			<?php endforeach; ?>
 		</div>
 		<?php
 	}
