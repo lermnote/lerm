@@ -3,14 +3,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die; }
 function lerm_post_meta( $location ) {
 	$meta_settings = array(
-		'single_top'     => array( 'option' => 'single_top', 'class' => 'justify-content-center  mb-0 ' ),
-		'single_bottom'  => array( 'option' => 'single_bottom', 'class' => 'justify-content-between mb-1' ),
-		'summary_bottom' => array( 'option' => 'summary_meta', 'class' => ' justify-content-center justify-content-sm-start mb-0 ' ),
+		'single_top'     => array(
+			'option' => 'single_top',
+			'class'  => 'justify-content-center  mb-0 ',
+		),
+		'single_bottom'  => array(
+			'option' => 'single_bottom',
+			'class'  => 'justify-content-between mb-1',
+		),
+		'summary_bottom' => array(
+			'option' => 'summary_meta',
+			'class'  => ' justify-content-center justify-content-sm-start mb-0 ',
+		),
 	);
 
+	$arg     = array();
+	$classes = '';
 	if ( isset( $meta_settings[ $location ] ) && is_singular() ) {
-		$arg           = array_keys( (array) lerm_options( $meta_settings[ $location ]['option'], 'enabled' ) );
-		$align_classes = $meta_settings[ $location ]['class'];
+		$arg     = array_keys( (array) lerm_options( $meta_settings[ $location ]['option'], 'enabled' ) );
+		$classes = $meta_settings[ $location ]['class'];
 	}
 
 	$post_meta = apply_filters( 'post_meta_show_on_post', $arg );
@@ -26,7 +37,7 @@ function lerm_post_meta( $location ) {
 		);
 
 		?>
-		<ul class="list-unstyled d-flex <?php echo esc_html( $align_classes ); ?> entry-meta small text-muted">
+		<ul class="list-unstyled d-flex <?php echo esc_html( $classes ); ?> entry-meta small text-muted">
 			<?php
 			foreach ( $post_meta as $item ) {
 				if ( isset( $post_meta_items[ $item ] ) ) {
@@ -161,26 +172,24 @@ function lerm_body_classes( $classes ) {
 	}
 	// Add class on front page.
 	if ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) {
-		static $lerm_front_page = null;
-		if ( null === $lerm_front_page ) {
-			$lerm_front_page = get_option( 'page_on_front' );
-		}
+		$lerm_front_page = get_option( 'page_on_front' );
 		if ( $lerm_front_page && is_page( $lerm_front_page ) ) {
 			$classes[] = 'lerm-front-page';
 		}
 	}
 	// Output layout
-	$classes[] = lerm_site_layout();
-	if ( lerm_options( 'layout_style' ) ) {
-		$classes[] = lerm_options( 'layout_style' );
+	$classes[]    = lerm_site_layout();
+	$layout_style = lerm_options( 'layout_style' );
+	if ( $layout_style ) {
+		$classes[] = $layout_style;
 	}
 	return $classes;
 }
 add_filter( 'body_class', 'lerm_body_classes' );
 
-//add CSS class in WordPress post list and single page
+// add CSS class in WordPress post list and single page
 function lerm_post_class( $classes ) {
-	$loading_animate = lerm_options('loading-animate');
+	$loading_animate = lerm_options( 'loading-animate' );
 
 	if ( ! is_single() ) {
 		$classes[] = implode( ' ', array( 'summary', 'mb-3', 'p-0', 'p-md-3' ) );
@@ -201,16 +210,14 @@ add_filter( 'post_class', 'lerm_post_class' );
  *
  * @since lerm 3.0.0
  */
-function lerm_social_icons( $icons = array() ) {
-	if ( is_array( $icons ) && count( $icons ) > 0 ) {
+function lerm_social_icons( $icons = array( 'weibo', 'wechat', 'qq' ) ) {
+	if ( ! empty( $icons ) && is_array( $icons ) ) {
 		?>
 		<div class="social-share d-flex justify-content-center" data-initialized="true">
-			<?php foreach ( $icons as $icon ) : ?>
-
-					<a href="#" class="social-share-icon icon-<?php echo esc_attr( $icon ); ?> btn-light btn-sm">
-						<i class="fa fa-<?php echo esc_attr( $icon ); ?>"></i>
-					</a>
-
+			<?php foreach ( $icons as &$icon ) : ?>
+				<a href="#" class="social-share-icon icon-<?php echo esc_attr( $icon ); ?> btn-light btn-sm">
+					<i class="fa fa-<?php echo esc_attr( $icon ); ?>"></i>
+				</a>
 			<?php endforeach; ?>
 		</div>
 		<?php

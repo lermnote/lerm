@@ -48,6 +48,7 @@ class Setup {
 		Enqueue::instance();
 		Comment_Walker::instance();
 		Load_More::instance();
+		Post_Like::instance();
 
 		// Automatically add feed links to <head>.
 		add_theme_support( 'automatic-feed-links' );
