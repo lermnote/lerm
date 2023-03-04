@@ -35,13 +35,14 @@ class Comment_Walker extends Walker_Comment {
 		}
 	}
 
-	public function ajax_comment( $comment ) {
+	public function ajax_comment( $comment_data ) {
 		// Check ajax nonce first
 		$comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
 
 		$comment_post_id = isset( $_POST['comment_post_ID'] ) ? (int) $_POST['comment_post_ID'] : 0;
 
 		if ( check_ajax_referer( 'ajax_nonce', 'security', false ) && ! is_wp_error( $comment ) && 0 !== $comment_post_id ) {
+
 			ob_start();
 
 			/**
@@ -69,13 +70,15 @@ class Comment_Walker extends Walker_Comment {
 		wp_die();
 	}
 
-	protected function html5_comment( $comment, $depth, $args ) {
-		if ( 'div' === $args['style'] ) {
-			$tag       = 'div';
-			$add_below = 'comment';
+	public function html5_comment( $comment, $depth, $args ) {
+		$tag                = ( 'div' === $args['style'] ) ? 'div' : 'li';
+		$commenter          = wp_get_current_commenter();
+		$show_pending_links = ! empty( $commenter['comment_author'] );
+
+		if ( $commenter['comment_author_email'] ) {
+			$moderation_note = __( 'Your comment is awaiting moderation.' );
 		} else {
-			$tag       = 'li';
-			$add_below = 'div-comment';
+			$moderation_note = __( 'Your comment is awaiting moderation. This is a preview; your comment will be visible after it has been approved.' );
 		}
 		?>
 		<li <?php comment_class( ( $depth > 1 ) ? 'list-group-item p-0' : 'list-group-item' ); ?> id="comment-<?php comment_ID(); ?>">
@@ -83,44 +86,42 @@ class Comment_Walker extends Walker_Comment {
 				<footer class="comment-meta mb-1">
 					<span class="comment-author vcard">
 						<?php
-						$comment_author_url = get_comment_author_url( $comment );
-						$comment_author     = get_comment_author( $comment );
-						$avatar             = get_avatar( $comment, $args['avatar_size'] );
 						if ( 0 !== $args['avatar_size'] ) {
-							if ( empty( $comment_author_url ) ) {
-								echo wp_kses_post( $avatar );
-							} else {
-								printf( '<a href="%s" rel="external nofollow" class="url">', $comment_author_url ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped --Escaped in https://developer.wordpress.org/reference/functions/get_comment_author_url/
-								echo wp_kses_post( $avatar );
-							}
+							echo get_avatar( $comment, $args['avatar_size'] );
 						}
-						printf(
-							'<span class="fn">%1$s</span><span class="screen-reader-text says">%2$s</span>',
-							esc_html( $comment_author ),
-							esc_html__( 'says:', 'lerm' )
-						);
 
-						if ( ! empty( $comment_author_url ) ) {
-							echo '</a>';
+						$comment_author = get_comment_author_link( $comment );
+
+						if ( '0' === $comment->comment_approved && ! $show_pending_links ) {
+							$comment_author = get_comment_author( $comment );
 						}
+
+						printf(
+							/* translators: %s: Comment author link. */
+							'<b class="fn">%s</b>',
+							$comment_author
+						);
 						?>
 					</span>
 					<!--.comment-author -->
-					<span>
-						<a href="<?php echo esc_url( get_comment_link( $comment, $args ) ); ?>">
-							<?php
-							/* Translators: 1 = comment date, 2 = comment time */
-							$comment_timestamp = sprintf( __( '%1$s at %2$s', 'lerm' ), get_comment_date( '', $comment ), get_comment_time() );
-							?>
-							<time datetime="<?php comment_time( 'c' ); ?>" title="<?php echo esc_attr( $comment_timestamp ); ?>">
-								<?php echo esc_html( human_time_diff( get_comment_time( 'U' ), current_datetime()->getTimestamp() ) ); ?>
-								<span> <?php echo esc_html__( 'ago', 'lerm' ); ?></span>
-							</time>
-						</a>
+					<span class="comment-metadata">
 						<?php
-						if ( get_edit_comment_link() ) {
-							echo ' <span aria-hidden="true">&bull;</span> <a class="comment-edit-link" href="' . esc_url( get_edit_comment_link() ) . '">' . esc_html__( 'Edit', 'lerm' ) . '</a>';
-						}
+						$comment_timestamp = get_comment_time( 'U' );
+						$current_timestamp = current_datetime()->getTimestamp();
+						$time_diff         = human_time_diff( $comment_timestamp, $current_timestamp ) ?? 'unknown time';
+
+						printf(
+							'<span aria-hidden="true">&bull;</span><a href="%s"><time datetime="%s">%s</time></a>',
+							esc_url( get_comment_link( $comment, $args ) ),
+							esc_attr( get_comment_time( 'c' ) ),
+							sprintf(
+								/* translators: 1: Comment date, 2: Comment time. */
+								esc_html( '%1$s %2$s' ),
+								esc_html( $time_diff ),
+								esc_html__( 'ago', 'lerm' )
+							)
+						);
+						edit_comment_link( __( 'Edit' ), '<span aria-hidden="true">&bull;</span><span class="edit-link">', '</span>' );
 						?>
 					</span>
 					<div class="reply float-end">
@@ -129,7 +130,6 @@ class Comment_Walker extends Walker_Comment {
 							array_merge(
 								$args,
 								array(
-									'add_below' => 'div-comment',
 									'depth'     => $depth,
 									'max_depth' => $args['max_depth'],
 								)

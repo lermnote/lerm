@@ -47,13 +47,12 @@ class Image {
 			'lazy'       => 'lazy',
 			'order'      => array( 'featured', 'attachment', 'block', 'scan', 'default' ),
 
-			//define the method of get image
+			// define the method of get image
 			'featured'   => '',
 			'attachment' => '',
 			'scan'       => '',
 			'default'    => array(), // URL in medias 'http://example.com/wp-content/uploads/2016/05/01.jpg'
 
-			//
 			'before'     => '',
 			'after'      => '',
 			'class'      => '',
@@ -171,9 +170,10 @@ class Image {
 			}
 		);
 		// If there are any images, get the id from the first image, otherwise
-		$first_image_blocks = array_shift( $images );
-		if ( null !== $first_image_blocks ) {
-			return $first_image_blocks['attrs']['id'];
+		$first_image_blocks = reset( $images );
+		if ( false !== $first_image_blocks ) {
+			$id = isset( $first_image_blocks['attrs']['id'] ) ? $first_image_blocks['attrs']['id'] : null;
+			return $id;
 		}
 	}
 

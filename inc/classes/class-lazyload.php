@@ -10,16 +10,13 @@ namespace Lerm\Inc;
 
 class Lazyload {
 
-	public static $args = array(
-		// 'gravatar_accel' => 'disable',
-		// 'admin_accel'    => false,
-		// 'google_replace' => 'disable',
-		// 'super_optimize' => array(),
+	protected static $args = array(
+		'skip_list' => array(),
 	);
 
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$args ) );
-		// self::hooks();
+		self::hooks();
 	}
 
 	// instance
@@ -28,73 +25,69 @@ class Lazyload {
 	}
 
 	public static function hooks() {
-		add_action( 'template_redirect', array( __NAMESPACE__ . '\Lazyload', 'lazyload' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'lazyload' ) );
 	}
 
-	public static function lazyoad( $subject ) {
-		$pattern = '/<img([^<>]*)\.(bmp|gif|jpeg|jpg|png)([^<>]*)>/i';
-		$subject = preg_replace( $pattern, $replacement, $subject );
-		return $subject;
+	public static function lazyload() {
+		ob_start( array( __CLASS__, 'lazyload_content' ) );
 	}
 
-
-
-
-
-
-	// public function lazyload() {
-	// ob_start( 'lazyload_content' );
-	// }
-
-	public function lazyload_content( $subject ) {
+	public static function lazyload_content( $content ) {
 		$regexp = '/<img([^<>]*)\.(bmp|gif|jpeg|jpg|png)([^<>]*)>/i';
-
-		return preg_replace_callback( $regexp, 'match', $subject );
+		return preg_replace_callback( $regexp, array( __CLASS__, 'lazyload_match' ), $content );
 	}
 
-	public function match( $matches ) {
-		$lazyimg = $matches[0];
-		// if (stripos($lazyimg, 'src') === false ) {
-		// return $lazyimg;
-		// }
+	public static function lazyload_match( $matches ) {
+		$image = $matches[0];
 
-		if ( ( stripos( $lazyimg, 'skip_lazyload' ) !== false ) || ( stripos( $lazyimg, 'custom-logo' ) !== false ) || ( stripos( $lazyimg, 'slider' ) !== false ) || ( stripos( $lazyimg, 'avatar' ) !== false ) || ( stripos( $lazyimg, 'qrcode' ) !== false ) ) {
-			return $lazyimg;
+		if ( self::skip_lazyload( $image ) ) {
+			return $image;
 		}
 
-		if ( stripos( $lazyimg, 'slider' ) !== false ) {
-			return $lazyimg;
-		}
+		$image = self::add_lazy_class( $image );
+		$image = self::add_lazy_data_attributes( $image );
 
-		if ( stripos( $lazyimg, 'class=' ) === false ) {
-			$lazyimg = preg_replace(
-				'/<img(.*)>/i',
-				'<img class="lazy"$1>',
-				$lazyimg
-			);
+		return $image;
+	}
+
+	private static function skip_lazyload( $image ) {
+		if (
+		stripos( $image, 'skip_lazyload' ) !== false ||
+		stripos( $image, 'custom-logo' ) !== false ||
+		stripos( $image, 'slider' ) !== false ||
+		stripos( $image, 'avatar' ) !== false ||
+		stripos( $image, 'qrcode' ) !== false
+		) {
+			return true;
+		}
+		return false;
+	}
+
+	private static function add_lazy_class( $image ) {
+		if ( stripos( $image, 'class=' ) === false ) {
+			$image = preg_replace( '/<img(.*)>/i', '<img class="lazy"$1>', $image );
 		} else {
-			$lazyimg = preg_replace(
-				"/<img(.*)class=['\"]([\w\-\s]*)['\"](.*)>/i",
-				'<img$1class="$2 lazy"$3>',
-				$lazyimg
-			);
+			$image = preg_replace( "/<img(.*)class=['\"]([\w\-\s]*)['\"](.*)>/i", '<img$1class="$2 lazy"$3>', $image );
 		}
 
-		if ( stripos( $lazyimg, 'srcset=' ) ) {
-			if ( ! stripos( $lazyimg, 'data-srcset=' ) ) {
+		return $image;
+	}
+
+	private static function add_lazy_data_attributes( $image ) {
+		if ( stripos( $image, 'srcset=' ) ) {
+			if ( ! stripos( $image, 'data-srcset=' ) ) {
 				$regexp  = "/<img([^<>]*)srcset=['\"]([^<>'\"]*)['\"]([^<>]*)>/i";
-				$replace = '<img$1srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" data-srcset="$2"$3>';
-				$lazyimg = preg_replace( $regexp, $replace, $lazyimg );
+				$replace = '<img$1srcset="data:image/gif;base64,R0lGODlhAQABAIAAAPyH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" data-srcset="$2"$3>';
 			}
 		} else {
 			$regexp  = "/<img([^<>]*)src=['\"]([^<>'\"]*)\.(bmp|gif|jpeg|jpg|png)([^<>'\"]*)['\"]([^<>]*)>/i";
-			$replace = '<img$1src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-src="$2.$3$4"$5>';
-			$lazyimg = preg_replace( $regexp, $replace, $lazyimg );
+			$replace = '<img$1src="data:image/gif;base64,data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-src="$2.$3$4"$5>';
 		}
-		return $lazyimg;
+		$image = preg_replace( $regexp, $replace, $image );
+		return $image;
 	}
 
-	public function replace( $regexp, $replace ) {
+	private function replace( $regexp, $replace ) {
 		ob_start(
 			function( $buffer ) use ( $regexp, $replace ) {
 				return preg_replace( $regexp, $replace, $buffer );

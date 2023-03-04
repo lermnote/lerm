@@ -25,7 +25,7 @@ if ( post_password_required() ) {
 		$args = array(
 			'comment_notes_before' => '<p class="logged-in-as">' . sprintf(
 				'<cite class="fn">%1$s<strong class="ps-2">%2$s</strong></cite><span class="ms-2">123</span>',
-				//get_avatar( $comment_author_email, 32 ),
+				// get_avatar( $comment_author_email, 32 ),
 				$comment_author ? $comment_author : __( 'Visitor', 'lerm' ),
 				$comment_author_email ? __( 'Welcome Back', 'lerm' ) : __( 'Welcome ', 'lerm' )
 			) . '</p>',
@@ -92,7 +92,6 @@ if ( post_password_required() ) {
 			wp_list_comments(
 				array(
 					'walker'      => \Lerm\Inc\Comment_Walker::instance(),
-					'style'       => 'li',
 					'short_ping'  => true,
 					'avatar_size' => wp_is_mobile() ? 32 : 48,
 				)

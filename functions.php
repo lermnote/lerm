@@ -43,7 +43,7 @@ require_once LERM_DIR . 'inc/autoloader.php';
  * @return string $options
  */
 function lerm_options( string $id, string $tag = '', $default = '' ) {
-	$options = get_option( 'lerm_theme_options', array() );
+	$options = (array) get_option( 'lerm_theme_options', array() );
 	$value   = $default;
 	if ( array_key_exists( $id, $options ) ) {
 		if ( is_array( $options[ $id ] ) ) {

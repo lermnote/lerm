@@ -49,7 +49,7 @@ class Setup {
 		Comment_Walker::instance();
 		Load_More::instance();
 		Post_Like::instance();
-
+		Lazyload::instance();
 		// Automatically add feed links to <head>.
 		add_theme_support( 'automatic-feed-links' );
 
@@ -218,7 +218,7 @@ class Setup {
 				'name'          => __( 'HomePage Sidebar', 'lerm' ),
 				'id'            => 'home-sidebar',
 				'description'   => __( 'Add widgets here to appear in your sidebar.', 'lerm' ),
-				'before_widget' => '<section id="%1$s" class="card border-0 widget mb-3 %2$s loading-animate fadeIn">',
+				'before_widget' => '<section id="%1$s" class="card widget mb-3 %2$s loading-animate fadeIn">',
 				'after_widget'  => '</section>',
 				'before_title'  => '<h4 class="widget-title card-header border-bottom-0"><span class="wrap d-inline-block fa">',
 				'after_title'   => '</span></h4>',

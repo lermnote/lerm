@@ -11,18 +11,18 @@ use Lerm\Inc\Traits\Ajax;
 class Post_Like {
 	use Ajax;
 
-	private $args;
+	private static $args;
 
-	public function __construct( $args = array() ) {
+	public function __construct( $params = array() ) {
 		$this->register( 'post_like' );
 		add_filter( 'manage_post_posts_columns', array( __NAMESPACE__ . '\Post_Like', 'set_post_columns' ) );
 		add_action( 'manage_post_posts_custom_column', array( __NAMESPACE__ . '\Post_Like', 'post_custom_column' ), 10, 2 );
 		add_action( 'add_meta_boxes', array( __NAMESPACE__ . '\Post_Like', 'post_like_meta_box' ) );
-		$this->args = wp_parse_args( $args, $default_args );
+		self::$args = wp_parse_args( $params, self::$args );
 	}
 
-	public static function instance( $args = array() ) {
-		return new self( $args );
+	public static function instance( $params = array() ) {
+		return new self( $params );
 	}
 
 	public function post_like() {

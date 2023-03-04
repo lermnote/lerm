@@ -243,9 +243,9 @@ class Breadcrumb {
 	protected static function set_post_taxonomy() {
 		$defaults = array();
 		// If post permalink is set to `%postname%`, use the `category` taxonomy.
-		if ( '%postname%' === trim( get_option( 'permalink_structure' ), '/' ) ) {
+		// if ( '%postname%' === trim( get_option( 'permalink_structure' ), '/' )||'%post_id%' === trim( get_option( 'permalink_structure' ), '/' ) ) {
 			$defaults['post'] = 'category';
-		}
+		// }
 		self::$post_taxonomy = apply_filters( 'lerm_breadcrumb_post_taxonomy', wp_parse_args( self::$args['post_taxonomy'], $defaults ) );
 	}
 
@@ -425,7 +425,6 @@ class Breadcrumb {
 		// Get the queried post.
 		$post    = get_queried_object();
 		$post_id = $post->ID;
-
 		$page_id = get_option( 'page_for_posts' );
 
 		if ( 'posts' !== get_option( 'show_on_front' ) && 0 < $page_id ) {
@@ -434,24 +433,30 @@ class Breadcrumb {
 			}
 			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $page_id ) ), get_the_title( $page_id ) );
 		}
-		// Get the post category.
-		$cats = get_the_category( $post->ID );
-		// Get the post title.
-		$post_title = single_post_title( '', false );
+
 		// If the post has a parent, follow the parent trail.
 		if ( 0 < $post->post_parent ) {
 			self::add_post_parents( $post->post_parent );
+
 		} else {
 			// If the post doesn't have a parent, get its hierarchy based off the post type.
 			self::add_post_hierarchy( $post_id );
+
 		}
 		// Display terms for specific post type taxonomy if requested.
 		if ( ! empty( self::$post_taxonomy[ $post->post_type ] ) ) {
 			self::add_post_terms( $post_id, self::$post_taxonomy[ $post->post_type ] );
+
 		}
+
+		// Get the post title.
+		$post_title = single_post_title( '', false );
+		$show_title = true === self::$args['show_title'];
+		$is_paged   = ( 1 < get_query_var( 'page' ) || is_paged() ) || ( get_option( 'page_comments' ) && 1 < absint( get_query_var( 'cpage' ) ) );
+
 		// End with the post title.
 		if ( $post_title ) {
-			if ( ( 1 < get_query_var( 'page' ) || is_paged() ) || ( get_option( 'page_comments' ) && 1 < absint( get_query_var( 'cpage' ) ) ) ) {
+			if ( $is_paged ) {
 				self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $post_id ) ), $post_title );
 			} elseif ( true === self::$args['show_title'] ) {
 				self::$items[] = $post_title;
@@ -805,34 +810,38 @@ class Breadcrumb {
 		// Get the post type.
 		$post_type        = get_post_type( $post_id );
 		$post_type_object = get_post_type_object( $post_type );
-		// If this is the 'post' post type, get the rewrite front items and map the rewrite tags.
+
 		if ( 'post' === $post_type ) {
 			// Add $wp_rewrite->front to the trail.
 			self::add_rewrite_front_items();
 			// Map the rewrite tags.
 			self::map_rewrite_tags( $post_id, get_option( 'permalink_structure' ) );
-		} elseif ( false !== $post_type_object->rewrite ) {
-			// If the post type has rewrite rules.
-			// If 'with_front' is true, add $wp_rewrite->front to the trail.
-			if ( $post_type_object->rewrite['with_front'] ) {
-				self::add_rewrite_front_items();
-			}
-			// If there's a path, check for parents.
-			if ( ! empty( $post_type_object->rewrite['slug'] ) ) {
-				self::add_path_parents( $post_type_object->rewrite['slug'] );
-			}
+			return;
 		}
+
+		if ( false === $post_type_object->rewrite ) {
+			return;
+		}
+
+		// If 'with_front' is true, add $wp_rewrite->front to the trail.
+		if ( $post_type_object->rewrite['with_front'] ) {
+			self::add_rewrite_front_items();
+		}
+
+		// If there's a path, check for parents.
+		if ( ! empty( $post_type_object->rewrite['slug'] ) ) {
+			self::add_path_parents( $post_type_object->rewrite['slug'] );
+		}
+
 		// If there's an archive page, add it to the trail.
 		if ( $post_type_object->has_archive ) {
-			// Add support for a non-standard label of 'archive_title' (special use case).
-			$label = ! empty( $post_type_object->labels->archive_title ) ? $post_type_object->labels->archive_title : $post_type_object->labels->name;
-			// Core filter hook.
-			$label = apply_filters( 'post_type_archive_title', $label, $post_type_object->name );
-
+			$label         = ! empty( $post_type_object->labels->archive_title ) ? $post_type_object->labels->archive_title : $post_type_object->labels->name;
+			$label         = apply_filters( 'post_type_archive_title', $label, $post_type_object->name );
 			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_post_type_archive_link( $post_type ) ), $label );
 		}
+
 		// Map the rewrite tags if there's a `%` in the slug.
-		if ( 'post' !== $post_type && ! empty( $post_type_object->rewrite['slug'] ) && false !== strpos( $post_type_object->rewrite['slug'], '%' ) ) {
+		if ( ! empty( $post_type_object->rewrite['slug'] ) && false !== strpos( $post_type_object->rewrite['slug'], '%' ) ) {
 			self::map_rewrite_tags( $post_id, $post_type_object->rewrite['slug'] );
 		}
 	}
@@ -870,34 +879,31 @@ class Breadcrumb {
 	 * @return void
 	 */
 	protected static function add_post_terms( $post_id, $taxonomy ) {
-		// Get the post type.
-		$post_type = get_post_type( $post_id );
 		// Get the post categories.
 		$terms = get_the_terms( $post_id, $taxonomy );
 		// Check that categories were returned.
-		if ( $terms && ! is_wp_error( $terms ) ) {
-			foreach ( $terms as $term ) {
-				if ( 0 < $term->parent ) {
-					self::add_post_terms( $term, $taxonomy );
-				}
-			}
-			// Sort the terms by ID and get the first category.
-			if ( function_exists( 'wp_list_sort' ) ) {
-				$terms = wp_list_sort( $terms, 'term_id' );
-			} else {
-				usort( $terms, '_usort_terms_by_ID' );
-			}
-			$term = get_term( end( $terms ), $taxonomy );
-
-			// If the category has a parent, add the hierarchy to the trail.
-			if ( 0 < $term->parent ) {
-				self::add_term_parents( $term->parent, $taxonomy );
-			}
-			// Add the category archive link to the trail.
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_term_link( $term, $taxonomy ) ), $term->name );
+		if ( ! $terms || is_wp_error( $terms ) ) {
+			return;
 		}
-	}
 
+		// Sort the terms by ID.
+		if ( function_exists( 'wp_list_sort' ) ) {
+			$terms = wp_list_sort( $terms, 'term_id' );
+		} else {
+			usort( $terms, '_usort_terms_by_ID' );
+		}
+
+		// Get the last term (i.e., the one with the highest ID).
+		$term = array_pop( $terms );
+
+		// If the category has a parent, add the hierarchy to the trail.
+		if ( $term->parent ) {
+			self::add_term_parents( $term->parent, $taxonomy );
+		}
+
+		// Add the category archive link to the trail.
+		self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_term_link( $term, $taxonomy ) ), $term->name );
+	}
 	/**
 	 * Get parent posts by path.  Currently, this method only supports getting parents of the 'page'
 	 * post type.  The goal of this function is to create a clear path back to home given what would
