@@ -233,7 +233,7 @@ class Optimize {
 	 * @return $ver
 	 */
 	public static function remove_css_attributes( $var ) {
-		return is_array( $var ) ? array_intersect( $var, array( 'active', 'dropdown', 'open', 'show' ) ) : '';
+		return is_array( $var ) ? array_intersect( $var, array('nav-item', 'active', 'dropdown', 'open', 'show' ) ) : array();
 	}
 
 	/**

@@ -27,10 +27,11 @@ if ( false === wp_cache_get( 'lerm_nav_menu' ) && has_nav_menu( $theme_location 
 			'container'       => 'div',
 			'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav flex-grow-1 d-none d-lg-flex mx-2',
 			'container_id'    => 'navbar',
-			'fallback_cb'     => 'return _false_',
+			'fallback_cb'     => '\Lerm\Inc\Nav_Walker::fallback',
 			'menu_class'      => 'nav navbar-nav',
 			'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
 			'walker'          => new \Lerm\Inc\Nav_Walker(),
+			'depth'           => 2,
 		)
 	);
 	wp_cache_set( 'lerm_nav_menu', $nav_menu, '', HOUR_IN_SECONDS );
@@ -48,7 +49,7 @@ if ( false === wp_cache_get( 'lerm_nav_menu' ) && has_nav_menu( $theme_location 
 		<div class="offcanvas-header py-0">
 			<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 		</div>
-		<div class="offcanvas-body">
+		<div class="offcanvas-body px-0">
 			<?php
 			if ( lerm_options( 'narbar_search' ) ) :
 				get_search_form();
@@ -59,9 +60,9 @@ if ( false === wp_cache_get( 'lerm_nav_menu' ) && has_nav_menu( $theme_location 
 					array(
 						'theme_location'  => $theme_location,
 						'container'       => 'div',
-						'container_class' => 'primary-nav mx-1',
+						'container_class' => 'primary-nav',
 						'container_id'    => 'navbar',
-						'fallback_cb'     => 'return _false_',
+						'fallback_cb'     => '\Lerm\Inc\Nav_Walker::fallback',
 						'menu_class'      => 'nav navbar-nav',
 						'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
 						'walker'          => new \Lerm\Inc\Nav_Walker(),
