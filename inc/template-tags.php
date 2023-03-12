@@ -134,7 +134,7 @@ function lerm_post_comments_number() {
 				<i class="fa fa-comment pe-1"></i>
 				<?php
 				/* translators: %s: number of comments  */
-				printf( _nx( '%s comment', '%s comments', get_comments_number(), 'comments title', 'lerm' ), esc_attr( number_format_i18n( get_comments_number() ) ) );
+				printf( _nx( '%s comment', '%s comments', esc_attr( get_comments_number() ), 'comments title', 'lerm' ), esc_attr( number_format_i18n( get_comments_number() ) ) );
 				?>
 			</a>
 		</li>
@@ -191,10 +191,10 @@ add_filter( 'body_class', 'lerm_body_classes' );
 function lerm_post_class( $classes ) {
 	$loading_animate = lerm_options( 'loading-animate' );
 
-	if ( ! is_single() ) {
-		$classes[] = implode( ' ', array( 'summary', 'mb-3', 'p-0', 'p-md-3' ) );
-	} else {
+	if ( ! is_singular() ) {
 		$classes[] = implode( ' ', array( 'entry', 'p-3', 'mb-2' ) );
+	} else {
+		$classes[] = implode( ' ', array( 'summary', 'mb-3', 'p-0', 'p-md-3' ) );
 	}
 
 	if ( $loading_animate ) {

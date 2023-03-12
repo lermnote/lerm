@@ -12,6 +12,7 @@ class Post_Like {
 	use Ajax;
 
 	private static $args;
+	private static $post_id;
 
 	public function __construct( $params = array() ) {
 		$this->register( 'post_like' );
@@ -31,7 +32,7 @@ class Post_Like {
 			$this->error( __( 'Invalid nonce', 'lerm' ) );
 		}
 
-		$id = absint( $_POST['post_ID'] );
+		self::$post_id = absint( $_POST['post_ID'] );
 
 		if ( isset( $_COOKIE[ 'post_like_' . $id ] ) ) {
 			$this->error( __( 'Already liked', 'lerm' ) );
@@ -65,12 +66,12 @@ class Post_Like {
 	}
 
 	public static function post_like_meta_box() {
-		add_meta_box( 'post_like', esc_html__( 'Like', 'lerm' ), self::post_like_callback, 'post', 'side' );
+		add_meta_box( 'post_like', esc_html__( 'Like', 'lerm' ), self::post_like_callback( self::$post_id ), 'post', 'side' );
 	}
 
-	private static function post_like_callback( $post ) {
+	private static function post_like_callback( $post_id ) {
 		wp_nonce_field( 'lerm_save_like_data', 'lerm_post_like_meta_box_nonce' );
-		$value = get_post_meta( $post->ID, 'lerm_post_like', true );
+		$value = get_post_meta( $post_id, 'lerm_post_like', true );
 		echo '<label for="lerm_like_field">' . esc_html__( 'Post Like Count', 'lerm' ) . '</label>';
 		echo '<input type="text" id="lerm_like_field" name="lerm_like_field" value="' . esc_attr( $value ) . '" size="25" />';
 	}
