@@ -191,7 +191,7 @@ add_filter( 'body_class', 'lerm_body_classes' );
 function lerm_post_class( $classes ) {
 	$loading_animate = lerm_options( 'loading-animate' );
 
-	if ( ! is_singular() ) {
+	if ( 'post' === get_post_type() || 'page' === get_post_type() ) {
 		$classes[] = implode( ' ', array( 'entry', 'p-3', 'mb-2' ) );
 	} else {
 		$classes[] = implode( ' ', array( 'summary', 'mb-3', 'p-0', 'p-md-3' ) );

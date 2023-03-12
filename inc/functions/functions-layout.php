@@ -6,7 +6,7 @@
  * structures. This file merely contains the API function calls at theme developers' disposal.
  */
 
-add_filter( 'lerm_site_layout', 'lerm_layout_filter', 5 );
+//add_filter( 'lerm_site_layout', 'lerm_post_layout', 5 );
 
 
 function lerm_site_layout() {
@@ -69,7 +69,7 @@ function lerm_get_row_class( $class = '' ) {
  * @param string|array $class Additional column classes
  */
 function lerm_column_class( $class = '' ) {
-	$column_classes = lerm_get_row_class( $class );
+	$column_classes = lerm_get_column_class( $class );
 	echo 'class="' . esc_attr( join( ' ', $column_classes ) ) . '"';
 }
 /**
