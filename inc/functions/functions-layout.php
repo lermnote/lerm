@@ -6,7 +6,7 @@
  * structures. This file merely contains the API function calls at theme developers' disposal.
  */
 
-//add_filter( 'lerm_site_layout', 'lerm_post_layout', 5 );
+add_filter( 'lerm_site_layout', 'lerm_post_layout', 5 );
 
 
 function lerm_site_layout() {

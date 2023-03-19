@@ -524,26 +524,6 @@ body {
 }
 
 /* post navigation */
-.post-navigation {
-	margin-bottom: 1rem;
-}
-
-.post-navigation .nav-links {
-	display: flex;
-	-ms-flex-pack: distribute;
-	text-align: center;
-	position: relative;
-	min-width: 0;
-	word-wrap: break-word;
-	background-clip: border-box;
-	border-radius: .25rem;
-	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-}
-
-.nav-previous {
-	border-right: 1px solid #e2e2e2;
-}
-
 .nav-previous,
 .nav-next {
 	padding: .5rem;

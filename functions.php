@@ -58,27 +58,7 @@ function lerm_options( string $id, string $tag = '', $default = '' ) {
 	}
 	return $value;
 }
-/**
- * Navigation post.
- *
- * @since  1.0.0
- * @return void
- */
-function lerm_post_navigation() {
-	if ( is_singular( 'post' ) ) :
-		// Previous/next post navigation.
-		the_post_navigation(
-			array(
-				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'lerm' ) . '</span><i class="fa fa-chevron-right"></i>' .
-				'<span class="screen-reader-text">' . __( 'Next post:', 'lerm' ) . '</span> <br/>' .
-				'<span class="post-title d-none d-md-block">%title</span>',
-				'prev_text' => '<i class="fa fa-chevron-left"></i><span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'lerm' ) . '</span> ' .
-				'<span class="screen-reader-text">' . __( 'Previous post:', 'lerm' ) . '</span> <br/>' .
-				'<span class="post-title d-none d-md-block">%title</span>',
-			)
-		);
-	endif;
-}
+
 function lerm_link_pagination() {
 	wp_link_pages(
 		array(
@@ -165,52 +145,6 @@ if ( ! lerm_options( 'disable_pingback' ) ) :
 	add_action( 'pre_ping', 'no_self_ping' );
 endif;
 
-// code hightlight
-function code_highlight_esc_html( $content ) {
-	$regex = '/(\[code\s+[^\]]*?\])(.*?)(\[\/code\])/sim';
-
-	return preg_replace_callback( $regex, 'dangopress_esc_callback', $content );
-}
-
-function pre_esc_html( $content ) {
-	$regex = '/(<pre\s+[^>]*?class\s*?=\s*?[",\'].*?prettyprint.*?[",\'].*?>)(.*?)(<\/pre>)/sim';
-
-	return preg_replace_callback( $regex, 'dangopress_esc_callback', $content );
-}
-
-function dangopress_esc_html( $content ) {
-	$regex = '/(<code.*?>)(.*?)(<\/code>)/sim';
-
-	return preg_replace_callback( $regex, 'dangopress_esc_callback', $content );
-}
-
-function dangopress_esc_callback( $matches ) {
-	if ( stripos( $matches[1], 'code' ) !== false ) {
-		$tag_open  = $matches[1];
-		$content   = $matches[2];
-		$tag_close = $matches[3];
-	}
-	if ( stripos( $matches[1], 'pre' ) !== false ) {
-		$tag_open  = $matches[1];
-		$content   = $matches[2];
-		$tag_close = $matches[3];
-	}
-	if ( stripos( $matches[1], 'code' ) !== false ) {
-		$tag_open  = $matches[1];
-		$content   = $matches[2];
-		$tag_close = $matches[3];
-	}
-	$content = esc_html( $content );
-
-	return $tag_open . $content . $tag_close;
-}
-add_filter( 'the_content', 'code_highlight_esc_html', 2 );
-add_filter( 'comment_text', 'code_highlight_esc_html', 2 );
-add_filter( 'the_content', 'pre_esc_html', 2 );
-add_filter( 'comment_text', 'pre_esc_html', 2 );
-add_filter( 'the_content', 'dangopress_esc_html', 2 );
-add_filter( 'comment_text', 'dangopress_esc_html', 2 );
-
 /**
  * Custom template tags for this theme.
  */
@@ -230,7 +164,7 @@ function lerm_create_copyright( string $type = 'short' ) {
 	$all_posts  = get_posts( 'post_status=publish&order=ASC' );
 	$first_post = $all_posts[0];
 	$first_date = $first_post->post_date_gmt;
-	$date       = esc_html( substr( $first_date, 0, 4 ) . ( ( substr( $first_date, 0, 4 ) === date( 'Y' ) ) || ( 'short' === $type ) ? '' : '-' . date( 'Y ' ) ) );
+	$date       = esc_html( substr( $first_date, 0, 4 ) . ( ( substr( $first_date, 0, 4 ) === gmdate( 'Y' ) ) || ( 'short' === $type ) ? '' : '-' . gmdate( 'Y ' ) ) );
 	if ( 'short' === $type ) {
 		$output = sprintf(
 			'&copy; %1$s %2$s',

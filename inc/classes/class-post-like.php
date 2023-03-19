@@ -10,52 +10,90 @@ namespace Lerm\Inc;
 use Lerm\Inc\Traits\Ajax;
 class Post_Like {
 	use Ajax;
-
+	/**
+	 * The arguments for the class.
+	 *
+	 * @var array $args
+	 */
 	private static $args;
+
+	/**
+	 * The ID of the post being processed.
+	 *
+	 * @var int $post_id
+	 */
 	private static $post_id;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param array $params Optional. Arguments for the class.
+	 */
 	public function __construct( $params = array() ) {
 		$this->register( 'post_like' );
-		add_filter( 'manage_post_posts_columns', array( __NAMESPACE__ . '\Post_Like', 'set_post_columns' ) );
-		add_action( 'manage_post_posts_custom_column', array( __NAMESPACE__ . '\Post_Like', 'post_custom_column' ), 10, 2 );
-		add_action( 'add_meta_boxes', array( __NAMESPACE__ . '\Post_Like', 'post_like_meta_box' ) );
+		add_filter( 'manage_post_posts_columns', array( __CLASS__, 'set_post_columns' ) );
+		add_action( 'manage_post_posts_custom_column', array( __CLASS__, 'post_custom_column' ), 10, 2 );
+		add_action( 'add_meta_boxes', array( __CLASS__, 'post_like_meta_box' ) );
 		self::$args = wp_parse_args( $params, self::$args );
 	}
 
+	/**
+	 * Get an instance of the Post_Like class.
+	 *
+	 * @param array $params Optional. Arguments for the class.
+	 * @return Post_Like
+	 */
 	public static function instance( $params = array() ) {
 		return new self( $params );
 	}
 
+	/**
+	 * Callback function for processing the post like button AJAX request.
+	 */
 	public function post_like() {
 		$nonce = sanitize_text_field( $_POST['security'] );
+
 		if ( ! wp_verify_nonce( $nonce, 'ajax_nonce' ) ) {
-			$this->error( __( 'Invalid nonce', 'lerm' ) );
+			wp_send_json_error( esc_html__( 'Invalid nonce', 'lerm' ), 403 );
 		}
 
-		self::$post_id = absint( $_POST['post_ID'] );
+		$post_id = $_POST['post_ID'] ? absint( $_POST['post_ID'] ) : 0;
 
-		if ( isset( $_COOKIE[ 'post_like_' . $id ] ) ) {
-			$this->error( __( 'Already liked', 'lerm' ) );
+		if ( 0 === $post_id ) {
+			wp_send_json_error( esc_html__( 'Invalid post ID', 'lerm' ), 400 );
 		}
 
-		$like_count = (int) get_post_meta( $id, 'lerm_post_like', true );
+		if ( isset( $_COOKIE[ 'post_like_' . $post_id ] ) ) {
+			wp_send_json_error( esc_html__( 'Already liked', 'lerm' ), 400 );
+		}
+
+		$like_count = (int) get_post_meta( $post_id, 'lerm_post_like', true );
 		$like_count++;
-		update_post_meta( $id, 'lerm_post_like', $like_count );
+		update_post_meta( $post_id, 'lerm_post_like', $like_count );
 
-		setcookie( 'post_like_' . $id, $id, time() + 604800, '/', ( 'localhost' !== $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : false ), true, true );
+		setcookie( 'post_like_' . $post_id, $post_id, time() + 604800, '/', esc_url( $_SERVER['HTTP_HOST'] ), true, true );
+		self::$post_id = $post_id;
 
-		$response = array(
-			'success' => true,
-			'data'    => $like_count,
-		);
-		$this->success( $response );
+		wp_send_json_success( $like_count );
 	}
 
+	/**
+	 * Set the custom column for post like count in post list table.
+	 *
+	 * @param array $columns Array of columns for the post list table.
+	 * @return array
+	 */
 	public static function set_post_columns( $columns ) {
 		$columns['like'] = esc_html__( 'Like', 'lerm' );
 		return $columns;
 	}
 
+	/**
+	 * Output the post like count for the custom column in post list table.
+	 *
+	 * @param string $column Name of the current column being processed.
+	 * @param int    $post_id ID of the current post being processed.
+	 */
 	public static function post_custom_column( $column, $post_id ) {
 		switch ( $column ) {
 			case 'like':

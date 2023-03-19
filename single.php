@@ -24,15 +24,12 @@ get_header();
 						</ul>
 						<?php if ( lerm_options( 'related_posts' ) ) : ?>
 							<!-- <section id="related" class="card mb-2"> -->
-								<?php lerm_related_posts(); ?>
+								<?php get_template_part( 'template-parts/related-posts' ); ?>
 							<!-- </section> -->
 							<?php
 						endif;
-						if ( lerm_options( 'post_navigation' ) ) {
-							lerm_post_navigation();
-						}
-
-							// If comments are open or we have at least one comment, load up the comment template.
+						get_template_part( 'template-parts/navigation' );
+						// If comments are open or we have at least one comment, load up the comment template.
 						if ( comments_open() || get_comments_number() ) :
 							comments_template();
 						endif;

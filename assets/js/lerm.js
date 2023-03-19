@@ -111,6 +111,8 @@
 
 			if (count) {
 				countEl.textContent = count;
+				likeBtn.classList.add("done");
+				likeBtn.disabled = true;
 			}
 
 			likeBtn.addEventListener("click", debounce(async (e) => {
