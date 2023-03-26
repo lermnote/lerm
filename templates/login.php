@@ -70,80 +70,62 @@ get_header();
 	}
 
 </style>
-<main role="main" class="container login-page align-items-center p-5"><!--.container-->
-	<div class="row">
-		<div class="col-lg-6  bg-info">
-			<div class="info d-flex align-items-center p-5">
-				<div class="brand d-flex align-items-center">
+<main role="main" class="container login-page p-3 d-flex flex-column justify-content-center"><!--.container-->
+	<div class="row justify-content-end">
+		<div class="col-lg-4 bg-white card">
+			<?php
+			if ( ! is_user_logged_in() ) {
+				if ( isset( $_POST['btn_submit'] ) ) {
+					$username                     = sanitize_text_field( $_POST['username'] );
+					$password                     = sanitize_text_field( $_POST['password'] );
+					$login_array                  = array();
+					$login_array['user_login']    = $username;
+					$login_array['user_password'] = $password;
 
-					<?php the_custom_logo(); ?>
-						<!-- .navbar-brand  begin -->
-					<div class="masthead">
-						<?php
-						$lerm_blogname = lerm_options( 'blogname' ) ? lerm_options( 'blogname' ) : get_bloginfo( 'name' );
-						if ( is_front_page() || is_home() ) :
-							?>
-							<h1 class="site-title"><a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home"><?php echo esc_html( $lerm_blogname ); ?></a></h1>
-						<?php else : ?>
-							<p class="site-title h1"><a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home"><?php echo esc_html( $lerm_blogname ); ?></a></p>
-							<?php
-						endif;
-
-						$description = lerm_options( 'blogdesc' ) ? lerm_options( 'blogdesc' ) : get_bloginfo( 'description' );
-						if ( ! wp_is_mobile() && $description || is_customize_preview() ) :
-							?>
-							<span class="site-description small d-none d-md-block text-muted"><?php echo esc_html( $description ); ?></span>
-						<?php endif; ?>
-						<!-- .navbar-brand end -->
-					</div>
-				</div><!-- logo end -->
-			</div>
-		</div>
-		<div class="col-lg-6 bg-white">
-			<div class="form d-flex align-items-center p-5">
-		<?php
-		if ( ! $user_ID ) {
-			if ( $_POST ) {
-				$username = esc_sql( $_POST['username'] );
-				$password = esc_sql( $_POST['password'] );
-
-				$login_array                  = array();
-				$login_array['user_login']    = $username;
-				$login_array['user_password'] = $password;
-
-				$verify_user = wp_signon( $login_array, true );
-				if ( ! is_wp_error( $verify_user ) ) {
-					echo "<script>window.location ='" . esc_url( site_url() ) . "'</script>";
+					$verify_user = wp_signon( $login_array, true );
+					if ( ! is_wp_error( $verify_user ) ) {
+						wp_safe_redirect( home_url() );
+						exit;
+					} else {
+						echo '<p>' . esc_html__( 'Invalid Credentials', 'lerm' ) . '</p>';
+					}
 				} else {
-					echo '<p>Invalid Credentials</p>';
+					?>
+					<div class="card-body">
+						<h2 class="h2 text-center py-3"><?php echo esc_html__( 'Login', 'lerm' ); ?></h2>
+
+						<form method="post" action="" class="form-validate" id="loginFrom" novalidate>
+						<div class="input-group mb-3">
+							<span class="input-group-text" id="basic-addon1"><i class="fa fa-star"></i></span>
+							<input id="username" type="text" name="username" required class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+						</div>
+						<div class="input-group mb-3">
+							<span class="input-group-text" id="basic-addon1"><i class="fa fa-star"></i></span>
+							<input id="password" type="password"  name="password"  required  class="form-control" placeholder="Password" aria-label="Username" aria-describedby="basic-addon1">
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+							<label class="form-check-label" for="flexCheckDefault">
+							<?php echo esc_html__( 'Remember Me', 'lerm' ); ?>
+							</label>
+						</div>
+						<div class="d-grid gap-2">
+							<button id="login" type="submit" name='btn_submit' class="btn btn-primary"><?php echo esc_html__( 'Login', 'lerm' ); ?></button>
+						</div>
+						<div class="row justify-content-between py-3">
+							<div class="col-4">
+								<a href="#" class="link-underline-primary"><?php echo esc_html__( 'Forget', 'lerm' ); ?></a>
+							</div>
+							<div class="col-4">
+								<a href="#" class="link-underline-secondary"><?php echo esc_html__( 'Regist', 'lerm' ); ?></a>
+							</div>
+						</div>
+					</form>
+				<?php
 				}
 			} else {
-				?>
-				<form method="post" action="" class="form-validate" id="loginFrom" novalidate="novalidate">
-					<div class="form-group">
-						<input id="username" type="text" name="username" required="" data-msg="请输入用户名" placeholder="用户名" value="admin" class="input-material">
-					</div>
-					<div class="form-group">
-						<input id="password" type="password" name="password" required="" data-msg="请输入密码" placeholder="密码" class="input-material">
-					</div>
-					<button id="login" type="submit" name='btn_submit' class="btn btn-primary"><?php echo esc_html__( 'Login', 'lerm' ); ?></button>
-					<div class="d-inline">
-						<div class="custom-control custom-checkbox " style="float: right;">
-							<input type="checkbox" class="custom-control-input" id="check2">
-							<label class="custom-control-label" for="check2"><?php echo esc_html__( 'Auto Login', 'lerm' ); ?></label>
-						</div>
-						<div class="custom-control custom-checkbox " style="float: right;">
-							<input type="checkbox" class="custom-control-input" id="check1">
-							<label class="custom-control-label" for="check1"><?php echo esc_html__( 'Remember Me', 'lerm' ); ?>&nbsp;&nbsp;</label>
-						</div>
-					</div>
-				</form>
-				<?php
 			}
-		} else {
-
-		}
-		?>
+			?>
 			</div>
 		</div>
 	</div>

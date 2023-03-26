@@ -87,6 +87,7 @@ class Comment_Walker extends Walker_Comment {
 					<span class="comment-author vcard">
 						<?php
 						if ( 0 !== $args['avatar_size'] ) {
+							$args['avatar_size'] = ( $comment->comment_parent ) ? $args['avatar_size'] * 2 / 3 : $args['avatar_size'];
 							echo get_avatar( $comment, $args['avatar_size'] );
 						}
 
