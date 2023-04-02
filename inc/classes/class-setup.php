@@ -50,6 +50,7 @@ class Setup {
 		Load_More::instance();
 		Post_Like::instance();
 		Lazyload::instance();
+		User::instance();
 		// Automatically add feed links to <head>.
 		add_theme_support( 'automatic-feed-links' );
 

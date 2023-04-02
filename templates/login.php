@@ -10,69 +10,14 @@ global $user_ID;
 get_header();
 ?>
 <style>
-	.site-header{
-		position: absolute;
-		clip: rect(1px, 1px, 1px, 1px);
-	}
-	.login-page{
-		min-height: 100vh;
-	}
-	.login-page .info, .login-page .form {
-		min-height: 70vh;
-	}
-	@media (max-width: 991px) {
-		.login-page .info, .login-page .form {
-			min-height: auto !important;
-		}
-	}
-	.login-page .form form{
-		width: 100%
-	}
-	input.input-material {
-	width: 100%;
-	border: none;
-	border-bottom: 1px solid #eee;
-	padding: 10px 0;
-	}
-
-	input.input-material.is-invalid {
-	border-color: #dc3545 !important;
-	}
-
-	input.input-material:focus {
-		border-color: #796AEE;
-	}
-
-	input.input-material ~ label {
-	color: #aaa;
-	position: absolute;
-	top: 14px;
-	left: 0;
-	cursor: text;
-	-webkit-transition: all 0.2s;
-	transition: all 0.2s;
-	font-weight: 300;
-	}
-
-	input.input-material ~ label.active {
-	font-size: 0.8rem;
-	top: -10px;
-	color: #796AEE;
-	}
-
-	input.input-material.is-invalid ~ label {
-	color: #dc3545;
-	}
-
-	.form-group-material {
-	position: relative;
-	margin-bottom: 30px;
-	}
-
 </style>
 <main role="main" class="container login-page p-3 d-flex flex-column justify-content-center"><!--.container-->
-	<div class="row justify-content-end">
-		<div class="col-lg-4 bg-white card">
+	<div class="row align-items-center g-lg-5 py-5">
+	<div class="col-lg-7 text-center text-lg-start">
+		<h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Vertically centered hero sign-up form</h1>
+		<p class="col-lg-10 fs-4">Below is an example form built entirely with Bootstrap’s form controls. Each required form group has a validation state that can be triggered by attempting to submit the form without completing it.</p>
+	</div>
+	<div class="col-md-10 mx-auto col-lg-5">
 			<?php
 			if ( ! is_user_logged_in() ) {
 				if ( isset( $_POST['btn_submit'] ) ) {
@@ -91,27 +36,24 @@ get_header();
 					}
 				} else {
 					?>
-					<div class="card-body">
-						<h2 class="h2 text-center py-3"><?php echo esc_html__( 'Login', 'lerm' ); ?></h2>
-
-						<form method="post" action="" class="form-validate" id="loginFrom" novalidate>
-						<div class="input-group mb-3">
-							<span class="input-group-text" id="basic-addon1"><i class="fa fa-star"></i></span>
-							<input id="username" type="text" name="username" required class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+					<form method="post" action="" class="p-4 p-md-5 border rounded-3 bg-body-tertiary" id="login-form" novalidate>
+						<div class="form-floating mb-3">
+							<input id="username" type="text" name="username" required class="form-control"  placeholder="name@example.com" aria-label="Username" aria-describedby="username">
+							<label for="floatingInput"><?php echo esc_html__( 'Username', 'lerm' ); ?></label>
 						</div>
-						<div class="input-group mb-3">
-							<span class="input-group-text" id="basic-addon1"><i class="fa fa-star"></i></span>
-							<input id="password" type="password"  name="password"  required  class="form-control" placeholder="Password" aria-label="Username" aria-describedby="basic-addon1">
+						<div class="form-floating mb-3">
+							<input id="password" type="password"  name="password"  required  class="form-control" class="form-control"  placeholder="Password" aria-label="Password" aria-describedby="password">
+							<label for="floatingPassword"><?php echo esc_html__( 'Password', 'lerm' ); ?></label>
 						</div>
-						<div class="form-check">
-							<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-							<label class="form-check-label" for="flexCheckDefault">
-							<?php echo esc_html__( 'Remember Me', 'lerm' ); ?>
+						<div class="checkbox mb-3">
+							<label>
+								<input type="checkbox" value="remember-me">
+								<?php echo esc_html__( 'Remember Me', 'lerm' ); ?>
 							</label>
 						</div>
-						<div class="d-grid gap-2">
-							<button id="login" type="submit" name='btn_submit' class="btn btn-primary"><?php echo esc_html__( 'Login', 'lerm' ); ?></button>
-						</div>
+						<button id="login" type="submit" name='btn_submit' class="w-100 btn btn-lg btn-primary" type="submit"><?php echo esc_html__( 'Sign in', 'lerm' ); ?></button>
+						<hr class="my-4">
+						<small id="login-message" class="login-message"></small>
 						<div class="row justify-content-between py-3">
 							<div class="col-4">
 								<a href="#" class="link-underline-primary"><?php echo esc_html__( 'Forget', 'lerm' ); ?></a>
@@ -121,12 +63,12 @@ get_header();
 							</div>
 						</div>
 					</form>
-				<?php
+					<?php
 				}
 			} else {
+				echo '<p class="alert alert-warning" role="alert">您已登录！(<a href="' . wp_logout_url() . '" title="登出">登出？</a>)</p>';
 			}
 			?>
-			</div>
 		</div>
 	</div>
 </main>
