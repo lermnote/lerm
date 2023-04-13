@@ -31,19 +31,19 @@ class Optimize {
 			$this->filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), 'gravatar_replace', 100, 1 );
 		}
 		if ( 'https://cravatar.cn/avatar/' === self::$args['gravatar_accel'] ) {
-			add_filter( 'user_profile_picture_description', 'set_user_profile_picture_for_cravatar', 100, 1 );
-			add_filter( 'avatar_defaults', 'set_defaults_for_cravatar', 100, 1 );
+			add_filter( 'user_profile_picture_description',  array( __CLASS__, 'set_user_profile_picture_for_cravatar' ), 100, 1 );
+			add_filter( 'avatar_defaults', array( __CLASS__, 'set_defaults_for_cravatar' ), 100, 1 );
 		}
 		if ( self::$args['admin_accel'] ) {
-			add_action( 'init', array( __NAMESPACE__ . '\Optimize', 'super_admin' ), 100, 1 );
-			add_action( 'shutdown', array( __NAMESPACE__ . '\Optimize', 'ob_buffer_end' ), 100, 1 );
+			add_action( 'init', array( __CLASS__, 'super_admin' ), 100, 1 );
+			add_action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
 		}
 		if ( ! in_array( self::$args['google_replace'], array( 'disable', '' ), true ) ) {
-			add_action( 'init', array( __NAMESPACE__ . '\Optimize', 'googleapis_replace' ), 100, 1 );
-			add_action( 'shutdown', array( __NAMESPACE__ . '\Optimize', 'ob_buffer_end' ), 100, 1 );
+			add_action( 'init', array( __CLASS__, 'googleapis_replace' ), 100, 1 );
+			add_action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
 		}
-		add_filter( 'frontpage_template', array( __NAMESPACE__ . '\Optimize', 'front_page_template' ), 15, 1 );
-		add_filter( 'wp_tag_cloud', array( __NAMESPACE__ . '\Optimize', 'tag_cloud' ), 10, 1 );
+		add_filter( 'frontpage_template', array( __CLASS__, 'front_page_template' ), 15, 1 );
+		add_filter( 'wp_tag_cloud', array( __CLASS__, 'tag_cloud' ), 10, 1 );
 		add_filter( 'pre_option_link_manager_enabled', '__return_true' );
 		$this->filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
 	}
@@ -71,11 +71,11 @@ class Optimize {
 				self::remove_rest_api();
 			}
 			if ( in_array( 'disable_rest_api', $args, true ) ) {
-				add_filter( 'rest_authentication_errors', array( __NAMESPACE__ . '\Optimize', 'rest_authorization_error' ) );
+				add_filter( 'rest_authentication_errors', array( __CLASS__, 'rest_authorization_error' ) );
 			}
 			if ( in_array( 'remove_ver', $args, true ) ) {
-				add_filter( 'script_loader_src', array( __NAMESPACE__ . '\Optimize', 'remove_ver' ) );
-				add_filter( 'style_loader_src', array( __NAMESPACE__ . '\Optimize', 'remove_ver' ) );
+				add_filter( 'script_loader_src', array( __CLASS__, 'remove_ver' ) );
+				add_filter( 'style_loader_src', array( __CLASS__, 'remove_ver' ) );
 			}
 			if ( in_array( 'wp_shortlink_wp_head', $args, true ) ) {
 				remove_action( 'wp_head', 'wp_shortlink_wp_head', 10, 0 );
@@ -90,7 +90,7 @@ class Optimize {
 				remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
 				remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
 				add_filter( 'emoji_svg_url', '__return_false' );
-				add_filter( 'tiny_mce_plugins', array( __NAMESPACE__ . '\Optimize', 'remove_emojis_tinymce_plugins' ) );
+				add_filter( 'tiny_mce_plugins', array( __CLASS__, 'remove_emojis_tinymce_plugins' ) );
 			}
 			if ( in_array( 'remove_recent_comments_css', $args, true ) ) {
 				add_filter( 'show_recent_comments_widget_style', '__return_false' );
@@ -103,8 +103,8 @@ class Optimize {
 				remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
 				remove_action( 'wp_head', 'wp_oembed_add_host_js' );
 				add_filter( 'embed_oembed_discover', '__return_false' );
-				add_filter( 'rewrite_rules_array', array( __NAMESPACE__ . '\Optimize', 'disable_embeds_rewrites' ) );
-				add_filter( 'tiny_mce_plugins', array( __NAMESPACE__ . '\Optimize', 'remove_wpembed_tinymce_plugins' ) );
+				add_filter( 'rewrite_rules_array', array( __CLASS__, 'disable_embeds_rewrites' ) );
+				add_filter( 'tiny_mce_plugins', array( __CLASS__, 'remove_wpembed_tinymce_plugins' ) );
 			}
 			if ( in_array( 'remove_global_styles_render_svg', $args, true ) ) {
 				remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
