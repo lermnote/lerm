@@ -61,15 +61,14 @@ class Image {
 		);
 
 		$this->args = apply_filters( 'get_the_image_args', wp_parse_args( $args, $defaults ) );
+		$this->find_image($this->args['post_id']);
+	}
 
+	public function get_image() {
 		if ( empty( $this->args['post_id'] ) ) {
 			return;
 		}
 
-		$this->find_image();
-	}
-
-	public function get_image() {
 		if ( empty( $this->image ) && empty( $this->image_attr ) ) {
 			return;
 		}
@@ -83,7 +82,7 @@ class Image {
 		echo ( ! empty( $image_html ) ) ? $this->args['before'] . $image_html . $this->args['after'] : $image_html; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
-	protected function find_image() {
+	protected function find_image($post_id) {
 
 		foreach ( $this->args['order'] as  $method ) {
 			if ( ! empty( $this->image ) ) {
@@ -91,11 +90,11 @@ class Image {
 			}
 
 			if ( 'featured' === $method ) {
-				$this->get_feature_image();
+				$this->get_featured_image($post_id);
 			} elseif ( 'block' === $method ) {
-				$this->first_image_in_blocks();
+				$this->first_image_in_blocks($post_id);
 			} elseif ( 'scan' === $method ) {
-				$this->get_post_image();
+				$this->get_post_image($post_id);
 			} elseif ( 'default' === $method && ! empty( $this->args['default'] ) ) {
 				$this->get_default_image();
 			}
@@ -109,12 +108,17 @@ class Image {
 	/**
 	 * Gets the featured image
 	 *
+	 * @param int $post_id The ID of the post
 	 * @return void
 	 */
-	protected function get_feature_image() {
-		$post_thumbnail_id = get_post_thumbnail_id( $this->args['post_id'] );
+	protected function get_featured_image( $post_id ) {
+		if ( ! $post_id || ! has_post_thumbnail( $post_id ) ) {
+			return;
+		}
 
-		if ( empty( $post_thumbnail_id ) ) {
+		$post_thumbnail_id = get_post_thumbnail_id( $post_id );
+
+		if ( ! $post_thumbnail_id ) {
 			return;
 		}
 
@@ -125,31 +129,30 @@ class Image {
 	/**
 	 * Find post images, and return first post image.
 	 *
-	 * @return string attachment_url_to_postid( $matches[1][0] ) first post image id
+	 * @param int $post_id ID of the post to get the image from
+	 * @return void
 	 */
-	protected function get_post_image() {
-
-		$post_content = get_post_field( 'post_content', $this->args['post_id'] );
-
-		// Check the content for `id="wp-image-%d"`.
-		preg_match( '/class=[\'"]wp-image-([\d]*)[\'"]/i', $post_content, $image_ids );
-
-		// Loop through any found image IDs.
-		if ( is_array( $image_ids ) ) {
-			foreach ( $image_ids as $image_id ) {
-				$this->get_attachment_image( $image_id );
-
+	protected function get_post_image( $post_id ) {
+		$post_content = get_post_field( 'post_content', $post_id );
+		if ( strpos( $post_content, 'class="wp-image-' ) !== false ) {
+			preg_match_all( '/class=[\'"]wp-image-([\d]*)[\'"]/i', $post_content, $image_ids );
+			foreach ( $image_ids[1] as $image_id ) { // Get all image IDs from the post content
+				$this->get_attachment_image( $image_id ); // Attempt to get the attachment image for each ID
 				if ( ! empty( $this->image ) ) {
-					return;
+					return; // Return if the image is found
 				}
 			}
-		}
-
-		preg_match_all( '/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post_content, $matches, PREG_PATTERN_ORDER );
-
-		if ( isset( $matches ) && ! empty( $matches[1][0] ) ) {
-			$this->image_attr['src'] = $matches[1][0];
-			$this->image_attr['alt'] = $matches[2][0];
+		} else {
+			preg_match_all( '/<img[^>]*src=[\"|\']([^>\"\'\s]+).*alt\=[\"|\']([^>\"\']+).*?[\/]?>/i', $post_content, $matches, PREG_SET_ORDER );
+			foreach ( $matches as $match ) { // Loop through each image match
+				$image_id = attachment_url_to_postid( $match[1] ); // Get the attachment ID for the image URL
+				if ( $image_id ) {
+					$this->get_attachment_image( $image_id ); // Attempt to get the attachment image for the ID
+					if ( ! empty( $this->image ) ) {
+						return; // Return if the image is found
+					}
+				}
+			}
 		}
 	}
 
@@ -158,8 +161,8 @@ class Image {
 	 *
 	 * @return int $first_image_blocks['attrs']['id'] first post image id
 	 */
-	protected function first_image_in_blocks() {
-		$post   = get_post( $this->args['post_id'] );
+	protected function first_image_in_blocks($post_id) {
+		$post   = get_post( $post_id );
 		$blocks = parse_blocks( $post->post_content );
 
 		// Get all blocks that have a core/image blockName

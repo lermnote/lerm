@@ -261,35 +261,7 @@
 				}
 			});
 		}
-		const loginForm = document.getElementById('login-form');
-		const loginMessage = document.getElementById('login-message');
-	
-		loginForm.addEventListener('submit', function (event) {
-			event.preventDefault();
-	
-			const formData = new FormData(loginForm);
-			formData.append('action', 'ajax_login'); // WordPress action，用于验证
-	
-			fetch(adminajax.url, {
-				method: 'POST',
-				body: formData
-			})
-				.then(response => response.json())
-				.then(response => {
-					if (response.success) {
-						// 登录成功，刷新页面
-						location.reload();
-					} else {
-						// 显示错误信息
-						loginMessage.textContent = response.data.message;
-					}
-				})
-				.catch((error) => {
-					// 显示错误信息
-					console.log(error);
-					loginMessage.textContent = 'Login error';
-				});
-		});
+		login();
 		loadMore();
 		calendarAddClass();
 	});
@@ -352,11 +324,11 @@
 						let newData = parseToDOM(data);
 
 						postsList.dataset.page++;
-						newData.forEach((e) => {
-							//loadMorePosts.dataset.page = '/page/' + adminajax.current;
-							postsList.appendChild(e)
-						});
-						//history.replaceState(null, null, '?paged=' + adminajax.current)
+
+						const fragment = document.createDocumentFragment();
+						newData.forEach((e) => fragment.appendChild(e));
+						postsList.appendChild(fragment);
+
 						loadMoreBtn.textContent = adminajax.loadmore;
 						loadMoreBtn.blur();
 					} else {
@@ -469,6 +441,73 @@
 		};
 		requestAnimationFrame(animate);
 	};
+
+	let login= ()=>{
+		const loginForm = document.getElementById('login-form');
+		const loginMessage = document.getElementById('login-message');
+		if (loginForm === null) {
+			console.error("Can't find element with id 'login-form'");
+			return;
+		}
+		loginForm.addEventListener('submit', function (event) {
+			event.preventDefault();
+
+			const formData = new FormData(loginForm);
+			formData.append('action', 'ajax_login'); // WordPress action，用于验证
+
+			fetch(adminajax.url, {
+				method: 'POST',
+				body: formData
+			})
+				.then(response => response.json())
+				.then(response => {
+					if (response.success) {
+						// 登录成功，刷新页面
+						location.reload();
+					} else {
+						// 显示错误信息
+						loginMessage.textContent = response.data.message;
+					}
+				})
+				.catch((error) => {
+					// 显示错误信息
+					console.log(error);
+					loginMessage.textContent = 'Login error';
+				});
+		});
+	}
+
+	let formFetchapi = (form, msg, action) => {
+		form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+
+			const formData = new FormData(form);
+			formData.append('action', action); // WordPress action，用于验证
+
+			try {
+				const response = await fetch(adminajax.url, {
+					method: "POST",
+					body: formData,
+				});
+
+				const { success, data } = await response.json();
+
+				if (success && data.length !== 0) {
+					// 登录成功，刷新页面
+					
+				} else {
+					// 显示错误信息
+					msg.textContent = response.data.message;
+				}
+			} catch (error) {
+				// 显示错误信息
+				console.log(error);
+				msg.textContent = 'Login error';
+			} finally {
+				console.log(meg);
+			};
+		});
+	}
 
 	/**
 	 * Limit the frequency of calls to the click event handler function.
