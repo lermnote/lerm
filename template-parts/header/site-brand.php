@@ -1,12 +1,12 @@
 <?php
 /**
- * Displays the site navigation.
+ * Displays the site brand.
  *
  * @package lerm
  * @since  3.5.0
  */
 ?>
-<div class="navbar-brand d-flex">
+<div class="navbar-brand d-flex align-items-center">
 	<?php the_custom_logo(); ?>
 
 	<div class="masthead">

@@ -266,7 +266,7 @@ class Optimize {
 	 */
 	public static function super_admin() {
 		$pattern = '~' . home_url( '/' ) . '(wp-admin|wp-includes)/(css|js)/~';
-		$replace = sprintf( 'https://a2.wp-china-yes.net/WordPress@%s/$1/$2/', $GLOBALS['wp_version'] );
+		$replace = sprintf( 'https://wpstatic.cdn.haozi.net/%s/$1/$2/', $GLOBALS['wp_version'] );
 		return self::replace( 'preg_replace', $pattern, $replace );
 	}
 

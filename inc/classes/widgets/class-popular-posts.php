@@ -22,6 +22,7 @@ class Popular_Posts extends WP_Widget {
 	public function widget( $args, $instance ) {
 
 		$title = ( ! empty( $instance['title'] ) ) ? $instance['title'] : __( 'Popular Post', 'lerm' );
+
 		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
 		$number    = ( ! empty( $instance['number'] ) ) ? absint( $instance['number'] ) : 5;
@@ -35,6 +36,7 @@ class Popular_Posts extends WP_Widget {
 				array(
 					'posts_per_page'      => $number,
 					'orderby'             => 'comment_count',
+					'no_found_rows'       => true,
 					'post_status'         => 'publish',
 					'ignore_sticky_posts' => true,
 				)
@@ -68,7 +70,7 @@ class Popular_Posts extends WP_Widget {
 				</li>
 				<?php endwhile; ?>
 			</ul>
-			<?php echo $args['after_widget']; ?>
+			<?php //echo $args['after_widget']; ?>
 			<?php
 			wp_reset_postdata();
 		endif;

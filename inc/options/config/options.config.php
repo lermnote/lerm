@@ -564,6 +564,7 @@ if ( class_exists( 'CSF' ) ) {
 						'https://cravatar.cn/avatar/'    => __( 'Cravatar 加速服务', 'lerm' ),
 						'https://sdn.geekzu.org/avatar/' => __( 'Geekzu 加速服务', 'lerm' ),
 						'https://gravatar.loli.net/avatar/' => __( 'Loli 加速服务', 'lerm' ),
+						'https://weavatar.com/avatar/'      => __( 'WeAvatar 加速服务', 'lerm' ),
 					),
 					'default'     => 'disable',
 				),
