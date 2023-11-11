@@ -35,12 +35,14 @@ global $post;
 		</div>
 	<?php else : ?>
 		<div class="row no-gutters align-items-md-center">
-			<?php if ( null !== lerm_post_image() ) : ?>
+			<?php if ( has_post_thumbnail() ) : ?>
 				<div class="col-md-3 ">
+					
 					<?php get_template_part( 'template-parts/content/featured-image' ); ?>
+					
 				</div>
 			<?php endif; ?>
-			<div class="<?php echo lerm_post_image() ? 'col-md-9' : 'col-md-12'; ?>">
+			<div class="<?php echo has_post_thumbnail() ? 'col-md-9' : 'col-md-12'; ?>">
 				<div class="card-body p-md-0">
 					<h2 class="entry-title card-title">
 						<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>

@@ -104,7 +104,7 @@ class Post_Like {
 	}
 
 	public static function post_like_meta_box() {
-		add_meta_box( 'post_like', esc_html__( 'Like', 'lerm' ), self::post_like_callback( self::$post_id ), 'post', 'side' );
+		//add_meta_box( 'post_like', esc_html__( 'Like', 'lerm' ), self::post_like_callback( self::$post_id ), 'post', 'side' );
 	}
 
 	private static function post_like_callback( $post_id ) {

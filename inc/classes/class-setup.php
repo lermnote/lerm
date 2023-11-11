@@ -9,6 +9,9 @@ namespace Lerm\Inc;
 
 class Setup {
 
+	//global options
+	public static $options = array();
+
 	// Default constants
 	public static $args = array(
 		'optimize_options' => array(),
@@ -30,12 +33,12 @@ class Setup {
 	}
 
 	public static function hooks() {
-		add_action( 'after_setup_theme', array( '\Lerm\Inc\Setup', 'setup' ), 2 );
-		add_action( 'after_setup_theme', array( '\Lerm\Inc\Setup', 'content_width' ) );
-		add_action( 'widgets_init', array( '\Lerm\Inc\Setup', 'register_sidebar' ) );
-		add_action( 'widgets_init', array( '\Lerm\Inc\Setup', 'widgets' ) );
-		add_filter( 'excerpt_length', array( __NAMESPACE__ . '\Setup', 'excerpt_length' ), 999 );
-		add_filter( 'comment_excerpt_length', array( __NAMESPACE__ . '\Setup', 'comment_excerpt_length' ), 999 );
+		add_action( 'after_setup_theme', array( __CLASS__ , 'setup' ), 2 );
+		add_action( 'after_setup_theme', array( __CLASS__ , 'content_width' ) );
+		add_action( 'widgets_init', array( __CLASS__ , 'register_sidebar' ) );
+		add_action( 'widgets_init', array( __CLASS__ , 'widgets' ) );
+		add_filter( 'excerpt_length', array( __CLASS__ , 'excerpt_length' ), 999 );
+		add_filter( 'comment_excerpt_length', array( __CLASS__ , 'comment_excerpt_length' ), 999 );
 	}
 
 	/**
@@ -51,6 +54,7 @@ class Setup {
 		Post_Like::instance();
 		Lazyload::instance();
 		User::instance();
+
 		// Automatically add feed links to <head>.
 		add_theme_support( 'automatic-feed-links' );
 
@@ -142,7 +146,10 @@ class Setup {
 	 * @return void
 	 */
 	public static function get_options( $options = array() ) {
-		$options = get_option( 'lerm_theme_options' );
+
+		if(!isset($options)||empty($options)) {
+			return;
+		}
 
 		// optimize
 		self::$args['optimize_options'] = array(
