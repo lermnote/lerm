@@ -6,6 +6,7 @@
  * @since Lerm 2.0
  */
 global $post;
+\Lerm\Inc\Image::instance();
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'card' ); ?>>
 
