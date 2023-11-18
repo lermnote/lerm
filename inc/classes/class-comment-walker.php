@@ -76,9 +76,9 @@ class Comment_Walker extends Walker_Comment {
 		$show_pending_links = ! empty( $commenter['comment_author'] );
 
 		if ( $commenter['comment_author_email'] ) {
-			$moderation_note = __( 'Your comment is awaiting moderation.' );
+			$moderation_note = __( 'Your comment is awaiting moderation.', 'lerm' );
 		} else {
-			$moderation_note = __( 'Your comment is awaiting moderation. This is a preview; your comment will be visible after it has been approved.' );
+			$moderation_note = __( 'Your comment is awaiting moderation. This is a preview; your comment will be visible after it has been approved.', 'lerm' );
 		}
 		?>
 		<li <?php comment_class( ( $depth > 1 ) ? 'list-group-item p-0' : 'list-group-item' ); ?> id="comment-<?php comment_ID(); ?>">
@@ -122,7 +122,7 @@ class Comment_Walker extends Walker_Comment {
 								esc_html__( 'ago', 'lerm' )
 							)
 						);
-						edit_comment_link( __( 'Edit' ), '<span aria-hidden="true">&bull;</span><span class="edit-link">', '</span>' );
+						edit_comment_link( __( 'Edit', 'lerm' ), '<span aria-hidden="true">&bull;</span><span class="edit-link">', '</span>' );
 						?>
 					</span>
 					<div class="reply float-end">

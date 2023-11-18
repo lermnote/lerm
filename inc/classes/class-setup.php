@@ -55,6 +55,15 @@ class Setup {
 		Lazyload::instance();
 		User::instance();
 		Image::instance();
+		new Updater(
+			[
+				'name' => 'Lerm',                     // Theme Name.
+				'repo' => 'lermnote/lerm',             // Theme repository.
+				'slug' => 'lerm',                     // Theme Slug.
+				'url'  => 'https://wplemon.com/gridd', // Theme URL.
+				'ver'  => wp_get_theme()->get('Version')                          // Theme Version.
+			]
+		);
 
 		// Automatically add feed links to <head>.
 		add_theme_support( 'automatic-feed-links' );
