@@ -1,13 +1,18 @@
 <?php
+/**
+ * Theme options.
+ *
+ *  @package Lerm
+ */
 
 if ( class_exists( 'CSF' ) ) {
-	// Set a unique slug-like ID
+	// Set a unique slug-like ID.
 	$prefix = 'lerm_theme_options';
 
-	// If using image radio buttons, define a directory path
+	// If using image radio buttons, define a directory path.
 	$imagepath = LERM_URI . 'assets/img/';
 
-	// Create options
+	// Create options.
 	CSF::createOptions(
 		$prefix,
 		array(
@@ -564,7 +569,7 @@ if ( class_exists( 'CSF' ) ) {
 						'https://cravatar.cn/avatar/'    => __( 'Cravatar 加速服务', 'lerm' ),
 						'https://sdn.geekzu.org/avatar/' => __( 'Geekzu 加速服务', 'lerm' ),
 						'https://gravatar.loli.net/avatar/' => __( 'Loli 加速服务', 'lerm' ),
-						'https://weavatar.com/avatar/'      => __( 'WeAvatar 加速服务', 'lerm' ),
+						'https://weavatar.com/avatar/'   => __( 'WeAvatar 加速服务', 'lerm' ),
 					),
 					'default'     => 'disable',
 				),
@@ -670,22 +675,29 @@ if ( class_exists( 'CSF' ) ) {
 						),
 						array(
 							'id'    => 'smtp_port',
-							'type'  => 'text',
+							'type'  => 'number',
 							'title' => __( 'SMTP Port', 'lerm' ),
 						),
 						array(
-							'id'    => 'ssl_enable',
-							'type'  => 'switcher',
-							'title' => __( 'SSL Encryption', 'lerm' ),
+							'id'      => 'ssl_enable',
+							'type'    => 'button_set',
+							'title'   => __( 'SSL Encryption', 'lerm' ),
+							'options' => array(
+								''    => 'None',
+								'tls' => 'TLS',
+								'ssl' => 'SSL',
+							),
+							'default' => 'tls',
 						),
+
 						array(
 							'id'      => 'smtp_auth',
 							'type'    => 'radio',
 							'title'   => __( 'SMTP Authentication', 'lerm' ),
 							'label'   => __( 'If Your Email open the smtp authentication', 'lerm' ),
 							'options' => array(
-								'true'  => __( 'Use SMTP authentication', 'lerm' ),
-								'false' => __( 'Do NOT use SMTP authentication', 'lerm' ),
+								true  => __( 'Use SMTP authentication', 'lerm' ),
+								false => __( 'Do NOT use SMTP authentication', 'lerm' ),
 							),
 						),
 						array(

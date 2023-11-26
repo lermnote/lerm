@@ -50,6 +50,15 @@ class Updater {
 	 * @since 1.0
 	 * @var string
 	 */
+	private $ver;
+	
+	/**
+	 * Theme URL.
+	 *
+	 * @access private
+	 * @since 1.0
+	 * @var string
+	 */
 	private $url;
 
 	/**

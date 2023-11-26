@@ -1,18 +1,18 @@
 ﻿@charset "UTF-8";
 /*
-  Theme Name: Lerm
-  Text Domain: lerm
-  Version: 3.2.8
-  Requires at least: 4.7
-  Tested up to: 6.4.1
-  Requires PHP: 7.4
-  Theme URI: http://github.com/lermnote
-  Author: Lerm
-  Author URI: https://www.hanost.com
-  Description: Lerm WordPress theme is based on BootStrap 4.0.0, it contain seclectable sidebars, many type of content layouts
-  License: GNU General Public License v2 or later
-  License URI: http://www.gnu.org/licenses/gpl-2.0.html
-  Tags: blog, two-columns, right-sidebar, custom-menu, featured-images, footer-widgets, post-formats, sticky-post
+Theme Name: Lerm
+Theme URI: http://github.com/lermnote
+Author: Lerm
+Author URI: https://www.hanost.com
+Description: Lerm WordPress theme is based on BootStrap 4.0.0, it contain seclectable sidebars, many type of content layouts
+Requires at least: 4.7
+Tested up to: 6.4
+Requires PHP: 7.4
+Version: 3.2.8
+Text Domain: lerm
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tags: blog, two-columns, right-sidebar, custom-menu, featured-images, footer-widgets, post-formats, sticky-post
 */
 
 /*--------------------------------------------------------------

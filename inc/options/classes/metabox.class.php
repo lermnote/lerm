@@ -10,13 +10,15 @@
  */
 if ( ! class_exists( 'CSF_Metabox' ) ) {
 	class CSF_Metabox extends CSF_Abstract {
-
+	
 		// constans
 		public $unique     = '';
 		public $abstract   = 'metabox';
 		public $pre_fields = array();
 		public $sections   = array();
 		public $post_type  = array();
+		public $post_formats;
+		public $page_templates;
 		public $args       = array(
 			'title'              => '',
 			'post_type'          => 'post',

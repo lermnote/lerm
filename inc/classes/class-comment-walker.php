@@ -57,7 +57,15 @@ class Comment_Walker extends Walker_Comment {
 			// Set the globals, so our comment functions below will work correctly
 			$GLOBALS['comment'] = $comment;
 
-			$this->html5_comment( $comment, '1', array( 'avatar_size' => wp_is_mobile() ? 32 : 48 ) );
+			$this->html5_comment(
+				$comment,
+				'1',
+				array(
+					'avatar_size' => wp_is_mobile() ? 32 : 48,
+					'li',
+					5,
+				)
+			);
 
 			wp_send_json_success( ob_get_clean() );
 
@@ -100,7 +108,16 @@ class Comment_Walker extends Walker_Comment {
 						printf(
 							/* translators: %s: Comment author link. */
 							'<b class="fn">%s</b>',
-							$comment_author
+							wp_kses(
+								$comment_author,
+								array(
+									'a' => array(
+										'href'  => array(),
+										'class' => array(),
+										'rel'   => array(),
+									),
+								)
+							)
 						);
 						?>
 					</span>

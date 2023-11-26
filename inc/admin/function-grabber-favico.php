@@ -113,7 +113,8 @@ function grap_favicon( $options = array() ) {
 		// } // END If nothink works: Get the Favicon from API
 
 		// Write Favicon local
-
+		global $wp_filesystem;
+		WP_Filesystem();
 		// If Favicon should be saved
 		if ( isset( $save ) && true === $save ) {
 			// Load Favicon
@@ -129,6 +130,7 @@ function grap_favicon( $options = array() ) {
 			$fh = fopen( $file_path, 'wb' );
 			fwrite( $fh, $content );
 			fclose( $fh );
+
 		}
 	} else {
 		// END If Favicon not already exists local

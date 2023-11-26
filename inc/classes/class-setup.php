@@ -7,12 +7,23 @@
 
 namespace Lerm\Inc;
 
+/**
+ * Theme setup
+ */
 class Setup {
 
-	//global options
+	/**
+	 * Global options.
+	 *
+	 * @var array $options
+	 */
 	public static $options = array();
 
-	// Default constants
+	/**
+	 * Default constants.
+	 *
+	 * @var array $args
+	 */
 	public static $args = array(
 		'optimize_options' => array(),
 		'mail_options'     => array(),
@@ -22,23 +33,41 @@ class Setup {
 		'sitemap_options'  => array(),
 	);
 
+	/**
+	 * Constructor
+	 *
+	 * @param array $params Optional parameters.
+	 *
+	 * @return void
+	 */
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_setup_', wp_parse_args( $params, self::$args ) );
 		self::hooks();
 	}
 
-	// instance
+	/**
+	 * Instance
+	 *
+	 * @param array $params Optional parameters.
+	 *
+	 * @return Setup
+	 */
 	public static function instance( $params = array() ) {
 		return new self( $params );
 	}
 
+	/**
+	 * Hooks
+	 *
+	 * @return void
+	 */
 	public static function hooks() {
-		add_action( 'after_setup_theme', array( __CLASS__ , 'setup' ), 2 );
-		add_action( 'after_setup_theme', array( __CLASS__ , 'content_width' ) );
-		add_action( 'widgets_init', array( __CLASS__ , 'register_sidebar' ) );
-		add_action( 'widgets_init', array( __CLASS__ , 'widgets' ) );
-		add_filter( 'excerpt_length', array( __CLASS__ , 'excerpt_length' ), 999 );
-		add_filter( 'comment_excerpt_length', array( __CLASS__ , 'comment_excerpt_length' ), 999 );
+		add_action( 'after_setup_theme', array( __CLASS__, 'setup' ), 2 );
+		add_action( 'after_setup_theme', array( __CLASS__, 'content_width' ) );
+		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
+		add_action( 'widgets_init', array( __CLASS__, 'widgets' ) );
+		add_filter( 'excerpt_length', array( __CLASS__, 'excerpt_length' ), 999 );
+		add_filter( 'comment_excerpt_length', array( __CLASS__, 'comment_excerpt_length' ), 999 );
 	}
 
 	/**
@@ -48,30 +77,10 @@ class Setup {
 	 */
 	public static function setup() {
 
-		Enqueue::instance();
-		Comment_Walker::instance();
-		Load_More::instance();
-		Post_Like::instance();
-		Lazyload::instance();
-		User::instance();
-		Image::instance();
-		new Updater(
-			[
-				'name' => 'Lerm',                     // Theme Name.
-				'repo' => 'lermnote/lerm',             // Theme repository.
-				'slug' => 'lerm',                     // Theme Slug.
-				'url'  => 'https://wplemon.com/gridd', // Theme URL.
-				'ver'  => wp_get_theme()->get('Version')                          // Theme Version.
-			]
-		);
-
-		// Automatically add feed links to <head>.
-		add_theme_support( 'automatic-feed-links' );
-
-		// site title
+		// site title.
 		add_theme_support( 'title-tag' );
 
-		// site logo
+		// site logo.
 		add_theme_support(
 			'custom-logo',
 			array(
@@ -92,10 +101,13 @@ class Setup {
 		// Add support for full and wide align images.
 		add_theme_support( 'align-wide' );
 
-		// Feature
+		// Feature.
 		add_theme_support( 'post-thumbnails' );
 		set_post_thumbnail_size( 200, 128 );
 		add_image_size( 'home-thumb', 180, 110, true ); // 300 像素宽，无限的高
+		add_image_size( 'home-thumb', 120, 110, true ); // 300 像素宽，无限的高
+		add_theme_support( 'wp-block-styles' );
+		add_theme_support( 'responsive-embeds' );
 
 		// Post formats.
 		add_theme_support(
@@ -112,6 +124,10 @@ class Setup {
 				'footer'  => __( 'Footer Menu', 'lerm' ),
 			)
 		);
+
+		// Automatically add feed links to <head>.
+		add_theme_support( 'automatic-feed-links' );
+
 		// Add theme support for selective refresh for widgets.
 		add_theme_support( 'customize-selective-refresh-widgets' );
 
@@ -120,48 +136,21 @@ class Setup {
 		 * Translations can be filed in the /languages/ directory
 		 */
 		load_theme_textdomain( DOMAIN, LERM_DIR . '/languages' );
-
-		// Optimize options
-		$params = array();
-		if ( ! empty( self::$args['optimize_options'] ) ) {
-			$params = self::$args['optimize_options'];
-			Optimize::instance( $params );
-		}
-
-		// Mail SMTP options
-		$params = array();
-		if ( ! empty( self::$args['mail_options'] ) ) {
-			$params = self::$args['mail_options'];
-			SMTP::instance( $params );
-		}
-
-		// SEO options
-		$params = array();
-		if ( ! empty( self::$args['seo_options'] ) ) {
-			$params = self::$args['seo_options'];
-			SEO::instance( $params );
-		}
-
-		// Sitemap options
-		$params = array();
-		if ( ! empty( self::$args['sitemap_options'] ) ) {
-			$params = self::$args['sitemap_options'];
-			Sitemap::instance( $params );
-		}
 	}
-
 	/**
-	 * Get theme options
+	 * Get theme options.
+	 *
+	 * @param array $options Optional parameters.
 	 *
 	 * @return void
 	 */
 	public static function get_options( $options = array() ) {
 
-		if(!isset($options)||empty($options)) {
+		if ( ! isset( $options ) || empty( $options ) ) {
 			return;
 		}
 
-		// optimize
+		// optimize.
 		self::$args['optimize_options'] = array(
 			'gravatar_accel' => $options['super_gravatar'],
 			'admin_accel'    => $options['super_admin'],
@@ -169,13 +158,13 @@ class Setup {
 			'super_optimize' => $options['super_optimize'],
 		);
 
-		// smtp
+		// smtp.
 		self::$args['mail_options'] = array(
 			'email_notice' => $options['email_notice'],
 			'smtp_options' => $options['smtp_options'],
 		);
 
-		// seo
+		// seo.
 		self::$args['seo_options'] = array(
 			'baidu_submit' => $options['baidu_submit'],
 			'submit_url'   => $options['submit_url'],
@@ -187,12 +176,59 @@ class Setup {
 			'description'  => array(),
 		);
 
-		// sitemap
+		// sitemap.
 		self::$args['sitemap_options'] = array(
 			'sitemap_enable' => $options['sitemap_enable'],
 			'post_type'      => $options['exclude_post_types'],
 			'post_exclude'   => $options['exclude_post'],
 			'page_exclude'   => $options['exclude_page'],
+		);
+
+		Enqueue::instance();
+		Comment_Walker::instance();
+		Load_More::instance();
+		Post_Like::instance();
+		Lazyload::instance();
+		User::instance();
+		Image::instance();
+
+		// Optimize options.
+		$params = array();
+		if ( ! empty( self::$args['optimize_options'] ) ) {
+			$params = self::$args['optimize_options'];
+			Optimize::instance( $params );
+		}
+
+		// Mail SMTP options.
+		$params = array();
+		if ( ! empty( self::$args['mail_options'] ) ) {
+			$params = self::$args['mail_options'];
+			SMTP::instance( $params );
+		}
+
+		// SEO options.
+		$params = array();
+		if ( ! empty( self::$args['seo_options'] ) ) {
+			$params = self::$args['seo_options'];
+			SEO::instance( $params );
+		}
+
+		// Sitemap options.
+		$params = array();
+		if ( ! empty( self::$args['sitemap_options'] ) ) {
+			$params = self::$args['sitemap_options'];
+			Sitemap::instance( $params );
+		}
+
+		// Theme update.
+		new Updater(
+			array(
+				'name' => 'Lerm',                     // Theme Name.
+				'repo' => 'lermnote/lerm',             // Theme repository.
+				'slug' => 'lerm',                     // Theme Slug.
+				'url'  => 'https://wplemon.com/gridd', // Theme URL.
+				'ver'  => wp_get_theme()->get( 'Version' ), // Theme Version.
+			)
 		);
 	}
 
@@ -208,6 +244,8 @@ class Setup {
 	/**
 	 * Displays the optional excerpt.
 	 *
+	 * @param array $length Optional parameters.
+	 *
 	 * @since Lerm 2.0
 	 */
 	public static function excerpt_length( $length ) {
@@ -217,6 +255,8 @@ class Setup {
 
 	/**
 	 * Displays the optional excerpt.
+	 *
+	 * @param array $length Optional parameters.
 	 *
 	 * @since Lerm 2.0
 	 */

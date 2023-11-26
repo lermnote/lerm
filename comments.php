@@ -24,8 +24,8 @@ if ( post_password_required() ) {
 
 		$args = array(
 			'comment_notes_before' => '<p class="logged-in-as">' . sprintf(
-				'<cite class="fn">%1$s<strong class="ps-2">%2$s</strong></cite><span class="ms-2">123</span>',
-				// get_avatar( $comment_author_email, 32 ),
+				'<cite class="fn">%1$s<strong class="ps-2">%2$s</strong></cite><span class="ms-2">%3$s</span>',
+				get_avatar( $comment_author_email, 32 ),
 				$comment_author ? $comment_author : __( 'Visitor', 'lerm' ),
 				$comment_author_email ? __( 'Welcome Back', 'lerm' ) : __( 'Welcome ', 'lerm' )
 			) . '</p>',
