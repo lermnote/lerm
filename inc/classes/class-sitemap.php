@@ -8,6 +8,7 @@ class Sitemap {
 
 	public static $args = array(
 		'sitemap_enable' => true,
+		'max_urls'       => 6666,
 		'post_type'      => array(),
 		'post_exclude'   => array(),
 		'page_exclude'   => array(),
@@ -72,6 +73,9 @@ class Sitemap {
 
 
 	public static function exclude_post( $args, $post_type ) {
+		if ( 'post' !== $post_type ) {
+			return $args;
+		}
 		$args['post__not_in'] = isset( $args['post__not_in'] ) ? $args['post__not_in'] : array();
 		foreach ( self::$args['post_exclude'] as $key => $value ) {
 			$args['post__not_in'][] = $value;
@@ -80,7 +84,7 @@ class Sitemap {
 	}
 
 	public static function max_urls() {
-		return 6666;
+		return self::$args['max_urls'];
 	}
 
 	public static function add_tag( $entry, $post ) {

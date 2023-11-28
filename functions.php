@@ -4,18 +4,20 @@
  *
  * @author Lerm https://www.hanost.com
  * @date   2016-08-28 21:57:52
+ * @package Lerm\Inc
  * @since  lerm 1.0
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
 define( 'DOMAIN', 'lerm' );
 
-// Theme vision
+// Theme vision.
 define( 'LERM_VERSION', wp_get_theme()->get( 'Version' ) );
 
-// Define blog name
+// Define blog name.
 define( 'BLOGNAME', get_bloginfo( 'name' ) );
 
 // Directory URI to the theme folder.
@@ -27,6 +29,7 @@ if ( ! defined( 'LERM_URI' ) ) {
 if ( ! defined( 'LERM_DIR' ) ) {
 	define( 'LERM_DIR', trailingslashit( get_template_directory() ) );
 }
+
 /**
  * Requre admin framework
  */
@@ -40,6 +43,7 @@ require_once LERM_DIR . 'inc/autoloader.php';
  *
  * @param string $id
  * @param string $tag
+ * @param string $default
  * @return string $options
  */
 function lerm_options( string $id, string $tag = '', $default = '' ) {
@@ -75,7 +79,8 @@ function lerm_link_pagination() {
  * @since  3.0.0
  * @return void
  */
-function lerm_paginate_comments() {?>
+function lerm_paginate_comments() {
+	?>
 	<nav class="comment-nav mb-3">
 		<div class="comment-pager d-flex justify-content-between">
 			<div class="comment-prev prev btn btn-sm btn-custom">
@@ -179,4 +184,17 @@ function lerm_create_copyright( string $type = 'short' ) {
 		);
 	}
 	echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+
+// functions used for debug mail errors, log is stored at SERVER_ROOT_DIR/mail.log
+add_action( 'wp_mail_failed', 'smtplog_mailer_errors', 10, 1 );
+function smtplog_mailer_errors( $wp_error ) {
+	global $wp_filesystem;
+	WP_Filesystem();
+
+	$file = ABSPATH . '/mail.log';
+
+	$timestamp   = time();
+	$currenttime = gmdate( 'Y-m-d H:i:s', $timestamp );
+	$wp_filesystem->put_contents( $file, $currenttime . ' Mailer Error: ' . $wp_error->get_error_message() . "\n", FS_CHMOD_FILE );
 }

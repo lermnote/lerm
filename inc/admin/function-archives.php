@@ -5,7 +5,7 @@
  * @author Lerm http://www.hanost.com
  * @since lerm 2.0
  */
- //文章归档
+// 文章归档
 function lerm_archives_list() {
 	$output = '<div id="archives" class="archives-page"><button type="button" class="btn btn-success" id="al_expand_collapse" style="margin-bottom:1rem">全部展开/收缩</button>';
 

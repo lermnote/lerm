@@ -25,7 +25,7 @@ class User {
 
 	public static function hooks() {
 		// 处理前端登录请求
-		add_action( 'wp_ajax_nopriv_ajax_login', array( __Class__, 'ajax_login' ) );
+		add_action( 'wp_ajax_nopriv_ajax_login', array( __CLASS__, 'ajax_login' ) );
 	}
 
 	public static function ajax_login() {
@@ -42,7 +42,6 @@ class User {
 			wp_send_json_success();
 		}
 	}
-	public static function user_profile(){
-
+	public static function user_profile() {
 	}
 }

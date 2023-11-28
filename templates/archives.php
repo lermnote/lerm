@@ -50,7 +50,6 @@ $the_query = new WP_Query( $args );
 										get_the_title(),
 										get_comments_number( '0', '1', '%' )
 									);
-									var_dump( get_the_title() );
 								endwhile;
 								wp_reset_postdata();
 								foreach ( $posts_rebuild as $key_y => $y ) {

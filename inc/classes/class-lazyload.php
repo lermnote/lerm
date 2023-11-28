@@ -89,7 +89,7 @@ class Lazyload {
 
 	private function replace( $regexp, $replace ) {
 		ob_start(
-			function( $buffer ) use ( $regexp, $replace ) {
+			function ( $buffer ) use ( $regexp, $replace ) {
 				return preg_replace( $regexp, $replace, $buffer );
 			}
 		);

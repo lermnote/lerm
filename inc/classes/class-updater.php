@@ -51,7 +51,7 @@ class Updater {
 	 * @var string
 	 */
 	private $ver;
-	
+
 	/**
 	 * Theme URL.
 	 *
@@ -80,16 +80,16 @@ class Updater {
 	public function __construct( $args ) {
 		$this->name = $args['name'];
 		$this->slug = $args['slug'];
-        $this->repo = $args['repo'];
-        $this->ver  = $args['ver'];
+		$this->repo = $args['repo'];
+		$this->ver  = $args['ver'];
 		$this->url  = $args['url'];
 
 		$this->response = $this->get_response();
 		// Check for theme updates.
 		// add_filter( 'http_request_args', [ $this, 'update_check' ], 5, 2 );
 		// Inject theme updates into the response array.
-		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'update_themes' ] );
-		add_filter( 'pre_set_transient_update_themes', [ $this, 'update_themes' ] );
+		add_filter( 'pre_set_site_transient_update_themes', array( $this, 'update_themes' ) );
+		add_filter( 'pre_set_transient_update_themes', array( $this, 'update_themes' ) );
 	}
 
 	/**
@@ -190,12 +190,12 @@ class Updater {
 			$current_version = $this->ver;
 
 			if ( version_compare( $current_version, $this->get_latest_version(), '<' ) ) {
-				$transient->response[ $this->name ] = [
+				$transient->response[ $this->name ] = array(
 					'theme'       => $this->name,
 					'new_version' => $this->get_latest_version(),
 					'url'         => 'https://github.com/' . $this->repo . '/releases',
 					'package'     => $this->get_latest_package(),
-				];
+				);
 			}
 		}
 		return $transient;

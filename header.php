@@ -19,7 +19,7 @@
 	<?php echo wp_kses( lerm_options( 'baidu_tongji' ), array( 'script' => array() ) ); ?>
 </head>
 <body <?php body_class(); ?>>
-	<?php wp_body_open();?>
+	<?php wp_body_open(); ?>
 	<div id="page" class="site">
 		<header id="site-header" class="site-header" itemscope="" itemtype="http://schema.org/WPHeader">
 			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">

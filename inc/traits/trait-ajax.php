@@ -7,7 +7,7 @@
 
 namespace Lerm\Inc\Traits;
 
-use  Lerm\Inc\Traits\Hooker;
+use Lerm\Inc\Traits\Hooker;
 
 trait Ajax {
 

@@ -56,12 +56,12 @@ class Popular_Posts extends WP_Widget {
 								$r->the_post();
 						?>
 						<li class="widget-post d-flex">
-							<?php if ( null !== lerm_post_image() ) : ?>
+							<?php if ( has_post_thumbnail() ) : ?>
 								<div class="col-md-4 pe-2">
 									<?php get_template_part( 'template-parts/content/featured-image' ); ?>
 								</div>
 							<?php endif; ?>
-						<div class="<?php echo lerm_post_image() ? 'col-md-8' : 'col-md-12'; ?> d-flex flex-column justify-content-between pe-0">
+						<div class="<?php echo has_post_thumbnail() ? 'col-md-8' : 'col-md-12'; ?> d-flex flex-column justify-content-between pe-0">
 							<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : the_ID(); ?></a>
 									<?php if ( $show_date ) : ?>
 							<span class="post-date text-muted"><?php echo get_the_date(); ?></span>

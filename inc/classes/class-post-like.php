@@ -10,6 +10,7 @@ namespace Lerm\Inc;
 use Lerm\Inc\Traits\Ajax;
 class Post_Like {
 	use Ajax;
+
 	/**
 	 * The arguments for the class.
 	 *

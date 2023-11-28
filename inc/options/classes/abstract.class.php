@@ -1,137 +1,128 @@
-<?php if ( ! defined( 'ABSPATH' ) ) { die; } // Cannot access directly.
+<?php if ( ! defined( 'ABSPATH' ) ) {
+	die; } // Cannot access directly.
 /**
  *
  * Abstract Class
  *
  * @since 1.0.0
  * @version 1.0.0
- *
  */
 if ( ! class_exists( 'CSF_Abstract' ) ) {
-  abstract class CSF_Abstract {
+	abstract class CSF_Abstract {
+		public $args       = array();
+		public $abstract   = '';
+		public $output_css = '';
+		public $webfonts   = array();
+		public $subsets    = array();
 
-    public $abstract   = '';
-    public $output_css = '';
-    public $webfonts   = array();
-    public $subsets    = array();
+		public function __construct() {
 
-    public function __construct() {
+			// Collect output css and typography
+			if ( ! empty( $this->args['output_css'] ) || ! empty( $this->args['enqueue_webfont'] ) ) {
+				add_action( 'wp_enqueue_scripts', array( &$this, 'collect_output_css_and_typography' ), 10 );
+			}
+		}
 
-      // Collect output css and typography
-      if ( ! empty( $this->args['output_css'] ) || ! empty( $this->args['enqueue_webfont'] ) ) {
-        add_action( 'wp_enqueue_scripts', array( &$this, 'collect_output_css_and_typography' ), 10 );
-      }
+		public function collect_output_css_and_typography() {
+			$this->recursive_output_css( $this->pre_fields );
+		}
 
-    }
+		public function recursive_output_css( $fields = array(), $combine_field = array() ) {
 
-    public function collect_output_css_and_typography() {
-      $this->recursive_output_css( $this->pre_fields );
-    }
+			if ( ! empty( $fields ) ) {
 
-    public function recursive_output_css( $fields = array(), $combine_field = array() ) {
+				foreach ( $fields as $field ) {
 
-      if ( ! empty( $fields ) ) {
+					$field_id     = ( ! empty( $field['id'] ) ) ? $field['id'] : '';
+					$field_type   = ( ! empty( $field['type'] ) ) ? $field['type'] : '';
+					$field_output = ( ! empty( $field['output'] ) ) ? $field['output'] : '';
+					$field_check  = ( $field_type === 'typography' || $field_output ) ? true : false;
 
-        foreach ( $fields as $field ) {
+					if ( $field_type && $field_id ) {
 
-          $field_id     = ( ! empty( $field['id'] ) ) ? $field['id'] : '';
-          $field_type   = ( ! empty( $field['type'] ) ) ? $field['type'] : '';
-          $field_output = ( ! empty( $field['output'] ) ) ? $field['output'] : '';
-          $field_check  = ( $field_type === 'typography' || $field_output ) ? true : false;
+						CSF::maybe_include_field( $field_type );
 
-          if ( $field_type && $field_id ) {
+						$class_name = 'CSF_Field_' . $field_type;
 
-            CSF::maybe_include_field( $field_type );
+						if ( $field_type === 'fieldset' ) {
+							if ( ! empty( $field['fields'] ) ) {
+								$this->recursive_output_css( $field['fields'], $field );
+							}
+						}
 
-            $class_name = 'CSF_Field_' . $field_type;
+						if ( $field_type === 'accordion' ) {
+							if ( ! empty( $field['accordions'] ) ) {
+								foreach ( $field['accordions'] as $accordion ) {
+									$this->recursive_output_css( $accordion['fields'], $field );
+								}
+							}
+						}
 
-            if( $field_type === 'fieldset' ) {
-              if ( ! empty( $field['fields'] ) ) {
-                $this->recursive_output_css( $field['fields'], $field );
-              }
-            }
+						if ( $field_type === 'tabbed' ) {
+							if ( ! empty( $field['tabs'] ) ) {
+								foreach ( $field['tabs'] as $accordion ) {
+									$this->recursive_output_css( $accordion['fields'], $field );
+								}
+							}
+						}
 
-            if( $field_type === 'accordion' ) {
-              if ( ! empty( $field['accordions'] ) ) {
-                foreach ( $field['accordions'] as $accordion ) {
-                  $this->recursive_output_css( $accordion['fields'], $field );
-                }
-              }
-            }
+						if ( class_exists( $class_name ) ) {
 
-            if( $field_type === 'tabbed' ) {
-              if ( ! empty( $field['tabs'] ) ) {
-                foreach ( $field['tabs'] as $accordion ) {
-                  $this->recursive_output_css( $accordion['fields'], $field );
-                }
-              }
-            }
+							if ( method_exists( $class_name, 'output' ) || method_exists( $class_name, 'enqueue_google_fonts' ) ) {
 
-            if ( class_exists( $class_name ) ) {
+								$field_value = '';
 
-              if ( method_exists( $class_name, 'output' ) || method_exists( $class_name, 'enqueue_google_fonts' ) ) {
+								if ( $field_check && ( $this->abstract === 'options' || $this->abstract === 'customize' ) ) {
 
-                $field_value = '';
+									if ( ! empty( $combine_field ) ) {
 
-                if ( $field_check && ( $this->abstract === 'options' || $this->abstract === 'customize' ) ) {
+										$field_value = ( isset( $this->options[ $combine_field['id'] ][ $field_id ] ) ) ? $this->options[ $combine_field['id'] ][ $field_id ] : '';
 
-                  if( ! empty( $combine_field ) ) {
+									} else {
 
-                    $field_value = ( isset( $this->options[$combine_field['id']][$field_id] ) ) ? $this->options[$combine_field['id']][$field_id] : '';
+										$field_value = ( isset( $this->options[ $field_id ] ) ) ? $this->options[ $field_id ] : '';
 
-                  } else {
+									}
+								} elseif ( $field_check && $this->abstract === 'metabox' && is_singular() ) {
 
-                    $field_value = ( isset( $this->options[$field_id] ) ) ? $this->options[$field_id] : '';
+									if ( ! empty( $combine_field ) ) {
 
-                  }
+										$meta_value  = $this->get_meta_value( $combine_field );
+										$field_value = ( isset( $meta_value[ $field_id ] ) ) ? $meta_value[ $field_id ] : '';
 
-                } else if ( $field_check && $this->abstract === 'metabox' && is_singular() ) {
+									} else {
 
-                  if( ! empty( $combine_field ) ) {
+										$meta_value  = $this->get_meta_value( $field );
+										$field_value = ( isset( $meta_value ) ) ? $meta_value : '';
 
-                    $meta_value  = $this->get_meta_value( $combine_field );
-                    $field_value = ( isset( $meta_value[$field_id] ) ) ? $meta_value[$field_id] : '';
+									}
+								}
 
-                  } else {
+								$instance = new $class_name( $field, $field_value, $this->unique, 'wp/enqueue', $this );
 
-                    $meta_value  = $this->get_meta_value( $field );
-                    $field_value = ( isset( $meta_value ) ) ? $meta_value : '';
+								// typography enqueue and embed google web fonts
+								if ( $field_type === 'typography' && $this->args['enqueue_webfont'] && ! empty( $field_value['font-family'] ) ) {
 
-                  }
+									$method = ( ! empty( $this->args['async_webfont'] ) ) ? 'async' : 'enqueue';
+									$family = $instance->enqueue_google_fonts();
 
-                }
+									CSF::$webfonts[ $method ][ $family ] = ( ! empty( $this->webfonts[ $family ] ) ) ? $family . ':' . implode( ',', $this->webfonts[ $family ] ) : $family;
+									CSF::$subsets                        = $this->subsets;
 
-                $instance = new $class_name( $field, $field_value, $this->unique, 'wp/enqueue', $this );
+								}
 
-                // typography enqueue and embed google web fonts
-                if ( $field_type === 'typography' && $this->args['enqueue_webfont'] && ! empty( $field_value['font-family'] ) ) {
+								// output css
+								if ( $field_output && $this->args['output_css'] ) {
+									CSF::$css .= $instance->output();
+								}
 
-                  $method = ( ! empty( $this->args['async_webfont'] ) ) ? 'async' : 'enqueue';
-                  $family = $instance->enqueue_google_fonts();
+								unset( $instance );
 
-                  CSF::$webfonts[$method][$family] = ( ! empty( $this->webfonts[$family] ) ) ? $family . ':' . implode( ',', $this->webfonts[$family] ) : $family;
-                  CSF::$subsets = $this->subsets;
-
-                }
-
-                // output css
-                if ( $field_output && $this->args['output_css'] ) {
-                  CSF::$css .= $instance->output();
-                }
-
-                unset( $instance );
-
-              }
-
-            }
-
-          }
-
-        }
-
-      }
-
-    }
-
-  }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

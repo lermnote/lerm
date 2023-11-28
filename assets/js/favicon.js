@@ -20,8 +20,7 @@ async function getFaviconIcoUrl(url) {
  * | Websites             | Favicon href values                                            |
  * |----------------------+----------------------------------------------------------------|
  * | https://github.com   | https://github.githubassets.com/favicons/favicon.png           |
- * | https://jquery.com   | //jquery.com/jquery-wp-content/themes/jquery.com/i/favicon.ico |
- * | https://pixabay.com  | /favicon-32x32.png                                             |
+ * | https://jquery.com   | //jquery.com/jquery-wp-content/themes/jquery.com/i/favicon.ico |                                         |
  * | https://willbc.cn    | assets/images/favicon.png                                      |
  */
 
@@ -142,7 +141,6 @@ function test(urls) {
 const urls = [
     "https://github.com",
     "https://jquery.com",
-    "https://pixabay.com",
     "https://willbc.cn",
     "not a url",
     "https://unavaliable.com", // This URL takes time to get result.

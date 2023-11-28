@@ -83,7 +83,7 @@ class Carousel {
 	protected static function is_array_empty( $array ) {
 		$non_empty = array_filter(
 			$array,
-			function( $item ) {
+			function ( $item ) {
 				return ! empty( $item );
 			}
 		);

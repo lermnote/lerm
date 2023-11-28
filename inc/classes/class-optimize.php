@@ -31,7 +31,7 @@ class Optimize {
 			$this->filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), 'gravatar_replace', 100, 1 );
 		}
 		if ( 'https://cravatar.cn/avatar/' === self::$args['gravatar_accel'] ) {
-			add_filter( 'user_profile_picture_description',  array( __CLASS__, 'set_user_profile_picture_for_cravatar' ), 100, 1 );
+			add_filter( 'user_profile_picture_description', array( __CLASS__, 'set_user_profile_picture_for_cravatar' ), 100, 1 );
 			add_filter( 'avatar_defaults', array( __CLASS__, 'set_defaults_for_cravatar' ), 100, 1 );
 		}
 		if ( self::$args['admin_accel'] ) {
@@ -168,7 +168,7 @@ class Optimize {
 	 * @return void
 	 */
 	public static function disable_rest_api() {
-		return new WP_Error(
+		return new \WP_Error(
 			'rest_forbidden',
 			__( 'REST API frobidden', 'lerm' ),
 			array( 'status' => rest_authorization_required_code() )
@@ -232,8 +232,8 @@ class Optimize {
 	 * @param array $ver
 	 * @return $ver
 	 */
-	public static function remove_css_attributes( $var ) {
-		return is_array( $var ) ? array_intersect( $var, array('nav-item', 'active', 'dropdown', 'open', 'show' ) ) : array();
+	public static function remove_css_attributes( $attr ) {
+		return is_array( $attr ) ? array_intersect( $attr, array( 'nav-item', 'active', 'dropdown', 'open', 'show' ) ) : array();
 	}
 
 	/**
@@ -290,7 +290,7 @@ class Optimize {
 	 */
 	public static function replace( $function, $regexp, $replace ) {
 		ob_start(
-			function( $buffer ) use ( $function, $regexp, $replace ) {
+			function ( $buffer ) use ( $function, $regexp, $replace ) {
 				return call_user_func( $function, $regexp, $replace, $buffer );
 			}
 		);

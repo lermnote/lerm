@@ -34,10 +34,10 @@
 namespace Lerm\Inc;
 
 use Lerm\Inc\Traits\Singleton;
-# Adds theme support for WordPress 'featured images'.
+// Adds theme support for WordPress 'featured images'.
 add_theme_support( 'post-thumbnails' );
 
-# Delete the cache when a post or post metadata is updated.
+// Delete the cache when a post or post metadata is updated.
 add_action( 'save_post', 'get_the_image_delete_cache_by_post' );
 add_action( 'deleted_post_meta', 'get_the_image_delete_cache_by_meta', 10, 2 );
 add_action( 'updated_post_meta', 'get_the_image_delete_cache_by_meta', 10, 2 );
@@ -54,9 +54,9 @@ add_action( 'added_post_meta', 'get_the_image_delete_cache_by_meta', 10, 2 );
  */
 // function get_the_image($args = array())
 // {
-//     $image = new Get_The_Image($args);
+// $image = new Get_The_Image($args);
 
-//     return $image->get_image();
+// return $image->get_image();
 // }
 
 
@@ -74,6 +74,7 @@ add_action( 'added_post_meta', 'get_the_image_delete_cache_by_meta', 10, 2 );
 final class Get_The_Image {
 
 	use Singleton;
+
 	/**
 	 * Array of arguments passed in by the user and merged with the defaults.
 	 *
@@ -127,7 +128,7 @@ final class Get_The_Image {
 	 *
 	 * @since  1.0.0
 	 * @access public
-	 * @param  array  $args
+	 * @param  array $args
 	 * @return void
 	 */
 	public function __construct( $args = array() ) {
@@ -647,7 +648,7 @@ final class Get_The_Image {
 	 *
 	 * @since  1.0.0
 	 * @access public
-	 * @param  int    $attachment_id
+	 * @param  int $attachment_id
 	 * @return void
 	 */
 	public function _get_image_attachment( $attachment_id ) {
@@ -690,7 +691,7 @@ final class Get_The_Image {
 	 *
 	 * @since  1.1.0
 	 * @access public
-	 * @param  int     $attachment_id
+	 * @param  int $attachment_id
 	 * @return void
 	 */
 	public function get_srcset( $attachment_id ) {
@@ -841,7 +842,7 @@ final class Get_The_Image {
 	 * @return array
 	 */
 	public function get_image_class() {
-		 global $content_width;
+		global $content_width;
 
 		$classes = array();
 
@@ -940,7 +941,7 @@ final class Get_The_Image {
 	 *
 	 * @since  1.0.0
 	 * @access public
-	 * @param  array   $classes
+	 * @param  array $classes
 	 * @return array
 	 */
 	public function sanitize_class( $classes ) {
@@ -955,11 +956,11 @@ final class Get_The_Image {
 	 *
 	 * @since  1.0.0
 	 * @access public
-	 * @param  string  $content
+	 * @param  string $content
 	 * @return string
 	 */
 	public function split_content( $content ) {
-		 remove_filter( 'the_content', array( $this, 'split_content' ), 9 );
+		remove_filter( 'the_content', array( $this, 'split_content' ), 9 );
 
 		return str_replace( $this->original_image, '', $content );
 	}
@@ -969,8 +970,8 @@ final class Get_The_Image {
 	 *
 	 * @since  1.1.0
 	 * @access public
-	 * @param  int|bool  $width
-	 * @param  int|bool  $height
+	 * @param  int|bool $width
+	 * @param  int|bool $height
 	 * @return bool
 	 */
 	public function have_required_dimensions( $width = false, $height = false ) {
@@ -993,7 +994,7 @@ final class Get_The_Image {
  *
  * @since  0.7.0
  * @access private
- * @param  int      $post_id  The ID of the post to delete the cache for.
+ * @param  int $post_id  The ID of the post to delete the cache for.
  * @return void
  */
 function get_the_image_delete_cache_by_post( $post_id ) {
@@ -1006,12 +1007,12 @@ function get_the_image_delete_cache_by_post( $post_id ) {
  *
  * @since  0.7.0
  * @access private
- * @param  int      $meta_id  The ID of the metadata being updated.
- * @param  int      $post_id  The ID of the post to delete the cache for.
+ * @param  int $meta_id  The ID of the metadata being updated.
+ * @param  int $post_id  The ID of the post to delete the cache for.
  * @return void
  */
 function get_the_image_delete_cache_by_meta( $meta_id, $post_id ) {
-	 wp_cache_delete( $post_id, 'get_the_image' );
+	wp_cache_delete( $post_id, 'get_the_image' );
 }
 
 
@@ -1024,7 +1025,7 @@ function get_the_image_delete_cache_by_meta( $meta_id, $post_id ) {
  * @access     public
  */
 function get_the_image_link() {
-	 _deprecated_function( __FUNCTION__, '0.3.0', 'get_the_image' );
+	_deprecated_function( __FUNCTION__, '0.3.0', 'get_the_image' );
 	get_the_image( array( 'link_to_post' => true ) );
 }
 

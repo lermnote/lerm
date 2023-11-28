@@ -1,4 +1,5 @@
-<?php function add_auth(){ ?>
+<?php function add_auth() {
+	?>
 
 
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -74,7 +75,7 @@ function login_failed() {
 	wp_redirect( $login_page . '?login=failed' );
 	exit;
 }
-//add_action( 'wp_login_failed', 'login_failed' );
+// add_action( 'wp_login_failed', 'login_failed' );
 
 function verify_username_password( $user, $username, $password ) {
 	$login_page = home_url( '/login.html' );
@@ -83,7 +84,7 @@ function verify_username_password( $user, $username, $password ) {
 		exit;
 	}
 }
-  ////add_filter( 'authenticate', 'verify_username_password', 1, 3 );
+	// add_filter( 'authenticate', 'verify_username_password', 1, 3 );
 
 function logout_page() {
 	$login_page = home_url( '' );

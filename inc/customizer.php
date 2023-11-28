@@ -74,4 +74,3 @@ function lerm_custom_css() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'lerm_custom_css', 21 );
-
