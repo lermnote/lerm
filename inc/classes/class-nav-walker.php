@@ -12,7 +12,6 @@
 namespace Lerm\Inc;
 
 use Walker_Nav_Menu;
-use Lerm\Inc\Traits\Singleton;
 
 // Check if Class Exists.
 if ( ! class_exists( 'Nav_Walker' ) ) :
@@ -32,30 +31,34 @@ if ( ! class_exists( 'Nav_Walker' ) ) :
 			$class_names   = '';
 
 			$classes = empty( $item->classes ) ? array() : (array) $item->classes;
-			// 为菜单项添加 dropdown class
-			$classes[] = ( $args->has_children ) ? 'dropdown' : '';
+
+			// 为菜单项添加 menu-item-[ID] class
+			$classes[] = 'nav-item';
+			$classes[] = 'menu-item-' . $item->ID;
+
 			// 为当前菜单项添加 active class
 			$classes[] = ( $item->current || $item->current_item_ancestor ) ? 'active' : '';
-			// 为菜单项添加 menu-item-[ID] class
-			$classes[]   = 'menu-item-' . $item->ID;
-			$classes[]   = 'nav-item';
+
+			// 为菜单项添加 dropdown class
+			$classes[] = ( $args->has_children ) ? 'dropdown' : '';
+
 			$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args ) );
 			$class_names = ' class="' . esc_attr( $class_names ) . '"';
 
 			$id = apply_filters( 'nav_menu_item_id', 'menu-item-' . $item->ID, $item, $args );
-			$id = count( $id ) ? ' id="' . esc_attr( $id ) . '"' : '';
+			$id = ! empty( $id ) ? ' id="' . esc_attr( $id ) . '"' : '';
 
 			$output .= $indent . '<li' . $id . $class_names . $li_attributes . '>';
 
 			$attributes  = ! empty( $item->attr_title ) ? ' title="' . esc_attr( $item->attr_title ) . '"' : '';
 			$attributes .= ! empty( $item->target ) ? ' target="' . esc_attr( $item->target ) . '"' : '';
 			$attributes .= ! empty( $item->xfn ) ? ' rel="' . esc_attr( $item->xfn ) . '"' : '';
-			$attributes .= ! empty( $item->url ) ? ' href="' . esc_attr( $item->url ) . '"' : '';
+			$attributes .= ! empty( $item->url ) ? ' href="' . esc_attr( $item->url ) . '"' : 'href="#"';
 			$attributes .= $depth > 0 ? ' class="dropdown-item"' : '';
-			$attributes .= ( $args->has_children ) ? 'role="button" class=" nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"' : ' class="nav-link"';
+			$attributes .= ( $args->has_children ) ? 'role="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"' : ' class="nav-link"';
 
 			$item_output  = $args->before;
-			$item_output .= '<a' . $attributes . '>';
+			$item_output .= '<a ' . $attributes . '>';
 			$item_output .= $args->link_before . apply_filters( 'the_title', $item->title, $item->ID ) . $args->link_after;
 			$item_output .= '</a>';
 			$item_output .= $args->after;

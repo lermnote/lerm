@@ -104,8 +104,8 @@ class Setup {
 		// Feature.
 		add_theme_support( 'post-thumbnails' );
 		set_post_thumbnail_size( 200, 128 );
-		add_image_size( 'home-thumb', 180, 110, true ); // 300 像素宽，无限的高
-		add_image_size( 'home-thumb', 120, 110, true ); // 300 像素宽，无限的高
+		add_image_size( 'home-thumb', 180, 110, false ); // 300 像素宽，无限的高
+		add_image_size( 'widget-thumb', 120, 110, true ); // 300 像素宽，无限的高
 		add_theme_support( 'wp-block-styles' );
 		add_theme_support( 'responsive-embeds' );
 

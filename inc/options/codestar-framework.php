@@ -22,3 +22,28 @@ require_once plugin_dir_path( __FILE__ ) . 'classes/setup.class.php';
 require_once plugin_dir_path( __FILE__ ) . 'config/options.config.php';
 require_once plugin_dir_path( __FILE__ ) . 'config/metabox.config.php';
 require_once plugin_dir_path( __FILE__ ) . 'config/taxonomy.options.php';
+
+/**
+ * Theme options functions.
+ *
+ * @param string $id option id.
+ * @param string $tag tag id.
+ * @param string $value default option.
+ * @return string $options options of theme.
+ */
+function lerm_options( string $id, string $tag = '', $value = '' ) {
+	$options = (array) get_option( 'lerm_theme_options', array() );
+
+	if ( array_key_exists( $id, $options ) ) {
+		if ( is_array( $options[ $id ] ) ) {
+			if ( ! empty( $tag ) && array_key_exists( $tag, $options[ $id ] ) ) {
+				$value = $options[ $id ][ $tag ];
+			} else {
+				$value = $options[ $id ];
+			}
+		} else {
+			$value = $options[ $id ];
+		}
+	}
+	return $value;
+}

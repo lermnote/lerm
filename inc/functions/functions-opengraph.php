@@ -60,7 +60,7 @@ function jetpack_og_tags() {
 		$tags['og:description'] = get_bloginfo( 'description' );
 
 		$front_page_id = get_option( 'page_for_posts' );
-		if ( 'page' == get_option( 'show_on_front' ) && $front_page_id && is_home() ) {
+		if ( 'page' === get_option( 'show_on_front' ) && $front_page_id && is_home() ) {
 			$tags['og:url'] = get_permalink( $front_page_id );
 		} else {
 			$tags['og:url'] = home_url( '/' );
@@ -124,12 +124,12 @@ function jetpack_og_tags() {
 			$tags['og:description'] = wp_kses( trim( convert_chars( wptexturize( $tags['og:description'] ) ) ), array() );
 		}
 
-		$tags['article:published_time'] = date( 'c', strtotime( $data->post_date_gmt ) );
-		$tags['article:modified_time']  = date( 'c', strtotime( $data->post_modified_gmt ) );
+		$tags['article:published_time'] = gmdate( 'c', strtotime( $data->post_date_gmt ) );
+		$tags['article:modified_time']  = gmdate( 'c', strtotime( $data->post_modified_gmt ) );
 		if ( post_type_supports( get_post_type( $data ), 'author' ) && isset( $data->post_author ) ) {
 			$publicize_facebook_user = get_post_meta( $data->ID, '_publicize_facebook_user', true );
-			// if ( ! empty( $publicize_facebook_user ) ) {
-				$tags['article:author'] = esc_url( $publicize_facebook_user );
+
+			$tags['article:author'] = esc_url( $publicize_facebook_user );
 		}
 	}
 
@@ -191,23 +191,6 @@ function jetpack_og_tags() {
 		$tags['og:description'] = strlen( $tags['og:description'] ) > $description_length ? mb_substr( $tags['og:description'], 0, $description_length ) . '…' : $tags['og:description'];
 	}
 
-	// Try to add OG locale tag if the WP->FB data mapping exists
-	if ( defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) && file_exists( JETPACK__GLOTPRESS_LOCALES_PATH ) ) {
-		require_once JETPACK__GLOTPRESS_LOCALES_PATH;
-		$_locale = get_locale();
-
-		// We have to account for w.org vs WP.com locale divergence
-		if ( defined( 'IS_WPCOM' ) && IS_WPCOM ) {
-			$gp_locale = GP_Locales::by_field( 'slug', $_locale );
-		} else {
-			$gp_locale = GP_Locales::by_field( 'wp_locale', $_locale );
-		}
-	}
-
-	if ( isset( $gp_locale->facebook_locale ) && ! empty( $gp_locale->facebook_locale ) ) {
-		$tags['og:locale'] = $gp_locale->facebook_locale;
-	}
-
 	/**
 	 * Allow the addition of additional Open Graph Meta tags, or modify the existing tags.
 	 *
@@ -222,6 +205,7 @@ function jetpack_og_tags() {
 
 	// secure_urls need to go right after each og:image to work properly so we will abstract them here
 	$secure = $tags['og:image:secure_url'] = ( empty( $tags['og:image:secure_url'] ) ) ? '' : $tags['og:image:secure_url'];
+
 	unset( $tags['og:image:secure_url'] );
 	$secure_image_num = 0;
 
@@ -247,7 +231,7 @@ function jetpack_og_tags() {
 			$og_output .= apply_filters( 'jetpack_open_graph_output', $og_tag );
 			$og_output .= "\n";
 
-			if ( 'og:image' == $tag_property ) {
+			if ( 'og:image' === $tag_property ) {
 				if ( is_array( $secure ) && ! empty( $secure[ $secure_image_num ] ) ) {
 					$og_tag = sprintf( '<meta property="og:image:secure_url" content="%s" />', esc_url( $secure[ $secure_image_num ] ) );
 					/** This filter is documented in functions.opengraph.php */
@@ -264,7 +248,7 @@ function jetpack_og_tags() {
 		}
 	}
 	$og_output .= "\n<!-- End Jetpack Open Graph Tags -->\n";
-	echo $og_output;
+	echo $og_output; // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: $breadcrumb is safe.
 }
 
 /**

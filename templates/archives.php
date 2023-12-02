@@ -6,7 +6,12 @@
  * @package Lerm
  */
 get_header();
-$the_query = new WP_Query( $args );
+$args  = array(
+	'post_type'           => 'post',
+	'posts_per_page'      => -1,
+	'ignore_sticky_posts' => 1,
+);
+$query = new WP_Query( $args );
 ?>
 <main role="main" class="container"><!--.container-->
 	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
@@ -36,8 +41,8 @@ $the_query = new WP_Query( $args );
 								$year          = 0;
 								$mon           = 0;
 
-								while ( $the_query->have_posts() ) :
-									$the_query->the_post();
+								while ( $query->have_posts() ) :
+									$query->the_post();
 
 									$year  = get_the_date( _x( 'Y', 'yearly archives date format', 'lerm' ) );
 									$month = get_the_date( _x( 'm', 'monthly archives date format', 'lerm' ) );
@@ -60,11 +65,11 @@ $the_query = new WP_Query( $args );
 									<ul class="list-unstyled month-list">
 										<?php
 										foreach ( $y as $key_m => $m ) {
-											$posts = '';
+											$items = '';
 											$i     = 0;
 											foreach ( $m as $p ) {
 												++$i;
-												$posts .= '<li class="list-group-item d-flex justify-content-between align-items-center archives-post">' . $p . '</li>';
+												$items .= '<li class="list-group-item d-flex justify-content-between align-items-center archives-post">' . $p . '</li>';
 											}
 											?>
 											<li class="list-item">
@@ -75,7 +80,7 @@ $the_query = new WP_Query( $args );
 													</label>
 												</span>
 												<ul class="list-group post-list">
-												<?php echo $posts; ?>
+												<?php echo $items; ?>
 												</ul>
 											</li>
 											<?php
@@ -86,7 +91,6 @@ $the_query = new WP_Query( $args );
 								}
 								?>
 							</div>
-							<?php // lerm_archives_list(); ?>
 
 						</article><!-- #post-## -->
 						<?php

@@ -1478,7 +1478,7 @@ if ( class_exists( 'CSF' ) ) {
 					'default' => false,
 				),
 				array(
-					'id'         => 'site_url',
+					'id'         => 'new_url',
 					'type'       => 'text',
 					'dependency' => array( 'enable_cdn', '==', 'true' ),
 					'title'      => __( 'Site URL', 'lerm' ),
@@ -1489,7 +1489,7 @@ if ( class_exists( 'CSF' ) ) {
 					'default'    => get_bloginfo( 'url', 'display' ),
 				),
 				array(
-					'id'         => 'off_site_url',
+					'id'         => 'off_new_url',
 					'type'       => 'text',
 					'dependency' => array( 'enable_cdn', '==', 'true' ),
 					'title'      => __( 'Off-site URL', 'lerm' ),

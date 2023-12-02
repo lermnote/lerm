@@ -33,36 +33,16 @@ if ( ! defined( 'LERM_DIR' ) ) {
 /**
  * Requre admin framework
  */
-require_once LERM_DIR . 'inc/options/codestar-framework.php';
-require_once LERM_DIR . 'inc/autoloader.php';
+require LERM_DIR . 'inc/themeloader.php';
 \Lerm\Inc\Setup::instance();
 \Lerm\Inc\Setup::get_options( get_option( 'lerm_theme_options' ) );
 
 /**
- * Theme options functions.
+ * Shows a pagination for post page.
  *
- * @param string $id
- * @param string $tag
- * @param string $default
- * @return string $options
+ * @since  3.0.0
+ * @return void
  */
-function lerm_options( string $id, string $tag = '', $default = '' ) {
-	$options = (array) get_option( 'lerm_theme_options', array() );
-	$value   = $default;
-	if ( array_key_exists( $id, $options ) ) {
-		if ( is_array( $options[ $id ] ) ) {
-			if ( ! empty( $tag ) && array_key_exists( $tag, $options[ $id ] ) ) {
-				$value = $options[ $id ][ $tag ];
-			} else {
-				$value = $options[ $id ];
-			}
-		} else {
-			$value = $options[ $id ];
-		}
-	}
-	return $value;
-}
-
 function lerm_link_pagination() {
 	wp_link_pages(
 		array(
@@ -96,7 +76,12 @@ function lerm_paginate_comments() {
 	<?php
 }
 
-// Get post views count.
+/**
+ * Get post views count.
+ *
+ * @since  3.0.0
+ * @return void
+ */
 function lerm_post_views( $after = '' ) {
 	global $post;
 	$post_ID = $post->ID;
@@ -151,14 +136,9 @@ if ( ! lerm_options( 'disable_pingback' ) ) :
 endif;
 
 /**
- * Custom template tags for this theme.
- */
-require LERM_DIR . 'inc/template-tags.php';
-require LERM_DIR . 'inc/customizer.php';
-require LERM_DIR . 'inc/lerm.php';
-
-/**
  *  Get copyright of website
+ *
+ * @param string $type type of copyright,'short', 'long'.
  *
  * @since lerm 3.0
  */

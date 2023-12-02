@@ -36,9 +36,9 @@ class SEO {
 		add_filter( 'document_title_separator', array( __NAMESPACE__ . '\SEO', 'title_separator' ), 15, 1 );
 
 		add_action( 'wp_head', array( __NAMESPACE__ . '\SEO', 'html' ), 1 );
-		if ( self::$args['baidu_submit'] ) {
-			add_action( 'publish_post', array( __NAMESPACE__ . '\SEO', 'baidu_submit' ) );
-		}
+		// if ( self::$args['baidu_submit'] ) {
+		// 	add_action( 'publish_post', array( __NAMESPACE__ . '\SEO', 'baidu_submit' ) );
+		// }
 		if ( self::$args['html_slug'] ) {
 			add_filter( 'user_trailingslashit', array( __NAMESPACE__ . '\SEO', 'trailingslashit' ), 10, 2 );
 			add_action( 'init', array( __NAMESPACE__ . '\SEO', 'html_page_permalink' ), -1 );
@@ -167,19 +167,29 @@ class SEO {
 	 * @since  3.1.0
 	 */
 	public static function baidu_submit( $url, $site = '', $token = '' ) {
-		$api = 'http://data.zz.baidu.com/urls?site=' . $site . '&token=' . $token;
-
-		$response = wp_remote_get(
+		$api      = 'http://data.zz.baidu.com/urls?site=' . $site . '&token=' . $token;
+		$response = wp_remote_post(
 			$api,
 			array(
-				'method'  => 'POST',
+				'headers' => array( 'Content-Type' => 'text/plain' ),
 				'body'    => $url,
-				'headers' => 'Content-Type: text/plain',
-			)
+			),
 		);
 		$response = wp_remote_retrieve_body( $response );
 		$response = json_decode( trim( $response ), true );
 		return $response;
+	}
+	/**
+	 * First submit post links to baidu zz
+	 *
+	 * @since  3.1.0
+	 */
+	public static function post_submit( $post_ID ) {
+
+		if ( ! empty( $post_ID ) ) {
+
+			self::baidu_submit( $post_ID, self::$args['submit_url'], self::$args['submit_token'] );
+		}
 	}
 
 	/**
@@ -187,7 +197,7 @@ class SEO {
 	 *
 	 * @since  3.1.0
 	 */
-	public static function query_post( $offset ) {
+	public static function first_submit( $offset ) {
 		$offset = 0;
 
 		$query = new \WP_Query(
@@ -200,7 +210,7 @@ class SEO {
 		);
 		if ( $query->have_posts() ) {
 			$count  = count( $query->posts );
-			$number = $offset + $count;
+			$offset = $offset + $count;
 
 			$urls = '';
 
@@ -211,7 +221,7 @@ class SEO {
 					wp_cache_set( 'lerm_post_query', $urls, 'lerm_cache', HOUR_IN_SECONDS );
 				}
 			}
-			return $urls;
+			self::baidu_submit( $urls, self::$args['submit_url'], self::$args['submit_token'] );
 		}
 	}
 }

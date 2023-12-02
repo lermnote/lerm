@@ -37,17 +37,6 @@
 			});
 		};
 
-		// Show dropdown menu on hover
-		const dropdown = document.querySelectorAll(".dropdown");
-		dropdown.forEach((e) => {
-			e.addEventListener("mouseover", () => {
-				e.querySelector(".dropdown-menu").classList.add("show");
-			});
-			e.addEventListener("mouseout", () => {
-				e.querySelector(".dropdown-menu").classList.remove("show");
-			});
-		});
-
 		//adminbar height
 		// Get window width once
 		const windowWidth = document.body.clientWidth;
