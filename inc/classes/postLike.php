@@ -8,7 +8,8 @@
 namespace Lerm\Inc;
 
 use Lerm\Inc\Traits\Ajax;
-class Post_Like {
+
+class PostLike {
 	use Ajax;
 
 	/**

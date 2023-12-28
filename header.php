@@ -24,9 +24,9 @@
 		<header id="site-header" class="site-header" itemscope="" itemtype="http://schema.org/WPHeader">
 			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
 				<div class="container">
-				<!-- .navbar-brand  begin -->
-				<?php get_template_part( 'template-parts/header/site-brand' ); ?>
-				<!-- .navbar-brand end -->
+					<!-- .navbar-brand  begin -->
+					<?php get_template_part( 'template-parts/header/site-brand' ); ?>
+					<!-- .navbar-brand end -->
 					<?php get_template_part( 'template-parts/header/site-nav' ); ?>
 				</div><!-- .container -->
 			</nav>

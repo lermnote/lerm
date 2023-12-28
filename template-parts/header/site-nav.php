@@ -30,7 +30,7 @@ if ( false === wp_cache_get( 'lerm_nav_menu' ) && has_nav_menu( $theme_location 
 			'fallback_cb'     => '\Lerm\Inc\Nav_Walker::fallback',
 			'menu_class'      => 'navbar-nav',
 			'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
-			'walker'          => new \Lerm\Inc\Nav_Walker(),
+			'walker'          => new \Lerm\Inc\NavWalker(),
 			'depth'           => 2,
 		)
 	);
@@ -45,7 +45,7 @@ if ( false === wp_cache_get( 'lerm_nav_menu' ) && has_nav_menu( $theme_location 
 	?>
 </div>
 <?php if ( wp_is_mobile() ) : ?>
-	<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenu">
+	<div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenu">
 		<div class="offcanvas-header py-0">
 			<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 		</div>

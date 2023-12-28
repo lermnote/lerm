@@ -388,7 +388,10 @@ if ( class_exists( 'CSF' ) ) {
 						'color'            => '#fff',
 						'background_color' => '#c82333',
 					),
-					'output'       => '.like-button,.like-button:hover',
+					'output'       => array(
+						'.like-button,.like-button:hover',
+						'.like-button.done',
+					),
 				),
 				array(
 					'type'    => 'heading',
@@ -658,11 +661,13 @@ if ( class_exists( 'CSF' ) ) {
 							'id'    => 'from_email',
 							'type'  => 'text',
 							'title' => __( 'From Email', 'lerm' ),
+							'desc'  => __( 'The email address that emails are sent from.', 'lerm' ),
 						),
 						array(
 							'id'    => 'from_name',
 							'type'  => 'text',
 							'title' => __( 'From Name', 'lerm' ),
+							'desc'  => __( 'The name that emails are sent from.', 'lerm' ),
 						),
 						array(
 							'type'    => 'heading',
@@ -688,6 +693,7 @@ if ( class_exists( 'CSF' ) ) {
 								'ssl' => 'SSL',
 							),
 							'default' => 'tls',
+							'desc'    => __( 'For most servers TLS is the recommended option. If your SMTP provider offers both SSL and TLS options, we recommend using TLS.', 'lerm' ),
 						),
 
 						array(
@@ -703,12 +709,12 @@ if ( class_exists( 'CSF' ) ) {
 						array(
 							'id'    => 'username',
 							'type'  => 'text',
-							'title' => __( 'Username', 'lerm' ),
+							'title' => __( 'STMP Username', 'lerm' ),
 						),
 						array(
 							'id'         => 'pswd',
 							'type'       => 'text',
-							'title'      => __( 'Password', 'lerm' ),
+							'title'      => __( 'STMP Password', 'lerm' ),
 							'attributes' => array(
 								'type' => 'password',
 							),

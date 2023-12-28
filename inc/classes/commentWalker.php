@@ -10,11 +10,11 @@
 namespace Lerm\Inc;
 
 use Walker_Comment;
-use Lerm\Inc\Traits\Singleton;
+// use Lerm\Inc\Traits\Singleton;
 
-class Comment_Walker extends Walker_Comment {
+class CommentWalker extends Walker_Comment {
 
-	use Singleton;
+	// use Singleton;
 
 	public static $args = array(
 		'make_clickable' => true,
@@ -24,6 +24,16 @@ class Comment_Walker extends Walker_Comment {
 	public function __construct( $params ) {
 		self::$args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$args ) );
 		$this->register();
+	}
+		/**
+	 * Instance
+	 *
+	 * @param array $params Optional parameters.
+	 *
+	 * @return Setup
+	 */
+	public static function instance( $params = array() ) {
+		return new self( $params );
 	}
 	public function register() {
 		add_action( 'wp_ajax_nopriv_ajax_comment', array( $this, 'ajax_comment' ) );

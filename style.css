@@ -295,19 +295,22 @@ form textarea {
 
 
 /* layout */
-.boxed-layout #page{
+.boxed-layout #page {
 	width: 1140px;
 	max-width: 100%;
 	margin: 0 auto;
 }
+
 body {
-	background:#fff
+	background: #fff
 }
-.boxed-layout{
+
+.boxed-layout {
 	background-color: #ebebeb;
 }
-.seperate-layout{
-	background-color:#f1f1f1;
+
+.seperate-layout {
+	background-color: #f1f1f1;
 }
 
 
@@ -563,88 +566,53 @@ body {
 	background-color: currentColor;
 }
 
-a[rel="weixin"] {
-	position: relative;
-}
 
-a[rel="weixin"]::after {
-	content: "";
-	position: absolute;
-	right: -2.5rem;
-	top: -9rem;
-	z-index: 99;
-	width: 128px;
-	height: 128px;
-	background-size: 120px 120px;
-	border: 4px solid #0095ba;
-	transform-origin: top right;
-	transform: scale(0);
-	opacity: 0;
-	transition: all .4s ease-in-out;
-}
-
-a[rel="weixin"]:hover::after {
-	transform: scale(1);
-	opacity: 1;
-}
 
 /*share*/
-.social-share a {
-	position: relative;
+.social-share .social-share-icon {
 	text-decoration: none;
 	margin: 4px;
-	display: inline-block;
-	outline: none
-}
-
-.social-share .social-share-icon {
-	position: relative;
-	display: inline-block;
+	outline: none;
 	color: #666;
 	text-align: center;
 	vertical-align: middle;
-	transition: background 0.6s ease-out 0s
-}
-
-.social-share .social-share-icon:hover {
-	background: #666;
-	color: #fff
+	transition: color 0.6s ease-out 0s
 }
 
 .social-share .icon-weibo:hover {
-	background: #ff763b
+	color: #ff763b
 }
 
 .social-share .icon-qq:hover {
-	background: #56b6e7
+	color: #56b6e7
 }
 
 .social-share .icon-qzone:hover {
-	background: #FDBE3D
+	color: #FDBE3D
 }
 
 .social-share .icon-douban:hover {
-	background: #33b045
+	color: #33b045
 }
 
 .social-share .icon-linkedin:hover {
-	background: #0077B5
+	color: #0077B5
 }
 
 .social-share .icon-facebook:hover {
-	background: #44619D
+	color: #44619D
 }
 
 .social-share .icon-google:hover {
-	background: #db4437
+	color: #db4437
 }
 
 .social-share .icon-twitter:hover {
-	background: #55acee
+	color: #55acee
 }
 
 .social-share .icon-diandian:hover {
-	background: #307DCA
+	color: #307DCA
 }
 
 .social-share .icon-wechat {
@@ -652,7 +620,7 @@ a[rel="weixin"]:hover::after {
 }
 
 .social-share .icon-wechat:hover {
-	background: #7bc549
+	color: #7bc549
 }
 
 .social-share .icon-wechat .wechat-qrcode {
@@ -725,6 +693,32 @@ a[rel="weixin"]:hover::after {
 
 .social-share .icon-wechat:hover .wechat-qrcode {
 	display: block
+}
+
+/**社交菜单微信 */
+a[rel="weixin"] {
+	position: relative;
+}
+
+a[rel="weixin"]::after {
+	content: "";
+	position: absolute;
+	right: -2.5rem;
+	top: -9rem;
+	z-index: 99;
+	width: 128px;
+	height: 128px;
+	background-size: 120px 120px;
+	border: 4px solid #0095ba;
+	transform-origin: top right;
+	transform: scale(0);
+	opacity: 0;
+	transition: all .4s ease-in-out;
+}
+
+a[rel="weixin"]:hover::after {
+	transform: scale(1);
+	opacity: 1;
 }
 
 .line-text::before,
@@ -1009,20 +1003,21 @@ a[rel="weixin"]:hover::after {
 }
 
 /* Block: HTML Sitemap Widget Styles --------------- */
-.html-sitemap-list{
+.html-sitemap-list {
 	padding: 0;
 }
+
 .html-sitemap-list-item {
 	list-style: none;
 }
 
 .sitemap-posttypes.sitemap-posttype-post .html-sitemap-list-item {
-	padding:.4rem 0;
+	padding: .4rem 0;
 }
 
 .sitemap-posttypes.sitemap-posttype-page li,
 .sitemap-taxonomies.sitemap-taxonomy-category li,
-.sitemap-taxonomies.sitemap-taxonomy-post_tag li{
+.sitemap-taxonomies.sitemap-taxonomy-post_tag li {
 	float: left;
 	padding: .4rem .3rem;
 	margin-right: .3rem;

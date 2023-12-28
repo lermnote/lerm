@@ -213,7 +213,7 @@ add_filter( 'post_class', 'lerm_post_class' );
 function lerm_social_icons( $icons = array( 'weibo', 'wechat', 'qq' ) ) {
 	if ( ! empty( $icons ) && is_array( $icons ) ) {
 		?>
-		<div class="social-share d-flex justify-content-center" data-initialized="true">
+		<div class="social-share d-flex justify-content-center gap-1" data-initialized="true">
 			<?php foreach ( $icons as &$icon ) : ?>
 				<a href="#" class="social-share-icon icon-<?php echo esc_attr( $icon ); ?> btn-light btn-sm">
 					<i class="fa fa-<?php echo esc_attr( $icon ); ?>"></i>

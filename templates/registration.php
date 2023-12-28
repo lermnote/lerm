@@ -100,7 +100,7 @@ get_header(); ?>
 		</div>
 		<div class="col-lg-6 bg-white">
 			<div class="form d-flex align-items-center p-5">
-				<!-- <form method="post" action="login.html" class="form-validate" id="loginFrom" novalidate="novalidate">
+				<form method="post" action="login.html" class="form-validate" id="loginFrom" novalidate="novalidate">
 					<div class="form-group">
 						<input id="login-username" type="text" name="userName" required="" data-msg="请输入用户名" placeholder="用户名" value="admin" class="input-material">
 					</div>
@@ -109,9 +109,9 @@ get_header(); ?>
 					</div>
 					<button id="login" type="submit" class="btn btn-primary">登录</button>
 					<div class="d-inline">
-								<!-- <input type="checkbox"  id="check1"/>&nbsp;<span>记住密码</span>
-								<input type="checkbox" id="check2"/>&nbsp;<span>自动登录</span> -->
-						<!-- <div class="custom-control custom-checkbox " style="float: right;">
+								<input type="checkbox"  id="check1"/>&nbsp;<span>记住密码</span>
+								<input type="checkbox" id="check2"/>&nbsp;<span>自动登录</span>
+						<div class="custom-control custom-checkbox " style="float: right;">
 							<input type="checkbox" class="custom-control-input" id="check2">
 							<label class="custom-control-label" for="check2">自动登录</label>
 						</div>
@@ -120,7 +120,7 @@ get_header(); ?>
 							<label class="custom-control-label" for="check1">记住密码&nbsp;&nbsp;</label>
 						</div>
 					</div>
-				</form> -->
+				</form>
 				<?php
 				wp_login_form(
 					array(

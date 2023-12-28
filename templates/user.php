@@ -22,7 +22,7 @@ get_header();
 
 <main role="main" class="container login-page align-items-center"><!--.container-->
 	<div class="card mb-3">
-	<img src="https://lerm.net/lerm/wp-content/uploads/2019/05/2-e1569245524644.jpg" class="card-img-top" alt="...">
+	<img src="http://lerm.net/wp-content/uploads/2019/05/bing-e1569245501792.jpg" class="card-img-top" alt="...">
 	<div class="card-body">
 	<div href="#" class="d-flex gap-3 align-items-end" aria-current="true">
 		<img src="<?php echo $user_meta['avatar']; ?>" alt="<?php echo $user_meta['username']; ?>" class=" flex-shrink-0 bg-light" width="128" height="128" style="margin-top:-5rem">

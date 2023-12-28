@@ -10,7 +10,7 @@ namespace Lerm\Inc;
 use Lerm\Inc\Traits\Ajax;
 use WP_Query;
 
-class Load_More {
+class LoadMore {
 	use Ajax;
 
 	private $query_args;

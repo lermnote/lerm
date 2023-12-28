@@ -15,7 +15,7 @@ use Walker_Nav_Menu;
 
 // Check if Class Exists.
 if ( ! class_exists( 'Nav_Walker' ) ) :
-	class Nav_Walker extends Walker_Nav_menu {
+	class NavWalker extends Walker_Nav_menu {
 		// 开始子菜单
 		public function start_lvl( &$output, $depth = 0, $args = array() ) {
 			$indent = str_repeat( "\t", $depth );

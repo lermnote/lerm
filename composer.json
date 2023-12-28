@@ -9,14 +9,15 @@
 	"authors": [
 		{
 			"name": "Oconner",
-            "email": "admin@lerm.net",
-            "homepage": "https://lerm.net",
-            "role": "Developer"
+			"email": "admin@lerm.net",
+			"homepage": "https://lerm.net",
+			"role": "Developer"
 		}
 	],
 	"autoload": {
-        "psr-4": {
-            "Lerm\\Inc\\": "inc/"
-        }
-    }
+		"psr-4": {
+			"Lerm\\Inc\\": "inc/classes",
+			"Lerm\\Inc\\Traits\\": "inc/traits"
+		}
+	}
 }

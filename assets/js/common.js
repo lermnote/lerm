@@ -5,7 +5,24 @@
  * @Date    2016-04-17 22:02:49
  * @Version 2.0
  */
+// (function (global, factory) {
+//     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+//     typeof define === 'function' && define.amd ? define(factory) :
+//     (global.libName = factory());
+// }(this, (function () { 'use strict';})));
 (function () {
+
+
+	/**
+ * --------------------------------------------------------------------------
+ * Bootstrap dom/data.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * --------------------------------------------------------------------------
+ */
+
+	/**
+	 * Constants
+	 */
 	document.addEventListener("DOMContentLoaded", function (e) {
 		// Initialize the WOW animation library
 		const wow = new WOW({
@@ -147,8 +164,12 @@
 
 		const showError = (msg) => {
 			message.innerHTML = `<strong><i class="fa fa-ok me-1"></i>${msg}</strong>`;
-			message.classList.add("shake", "show");
-			setTimeout(() => message.classList.remove("shake", "show"), 3000);
+			message.classList.remove("visually-hidden");
+			message.classList.add("shake");
+			setTimeout(() => {
+				message.classList.remove("shake")
+				message.classList.add("visually-hidden");
+			}, 3000);
 		}
 
 		const showSuccess = (msg) => {
@@ -159,14 +180,10 @@
 
 		if (commentForm) {
 			//error info display
-			commentForm.insertAdjacentHTML("beforeend", '<div id="message" class="text-danger wow"></div>');
+			commentForm.insertAdjacentHTML("beforeend", '<div id="message" class="text-danger wow visually-hidden"></div>');
 
 			const message = commentForm.querySelector("#message");
-			const author = commentForm.querySelector('[name="author"]');
-			const email = commentForm.querySelector('[name="email"]');
-			const url = commentForm.querySelector('[name="url"]');
-			const comment = commentForm.querySelector('[name="comment"]');
-
+		
 			//submit event
 			commentForm.addEventListener("click", async (e) => {
 				// ensure event target is submit button and within comment form
@@ -177,28 +194,25 @@
 					message.innerHTML = '<strong><i class="fa fa-spinner fa-pulse me-1"></i>正在提交...</strong>';
 					new WOW().init();
 					// check user logged in.
+					const commentData = new FormData(commentForm)
 					if (!adminajax.loggedin) {
-						const formData = {
-							author: author.value,
-							email: email.value,
-							url: url.value,
-						};
-						if (!formData.author) {
+
+						if (!commentData.get('author')) {
 							showError("请填写姓名");
 							return;
 						}
-						if (!validateEmail(formData.email)) {
+						if (!validateEmail(commentData.get('email'))) {
 							showError("请填写正确的电子邮箱");
 							return;
 						}
 					}
-					if (!comment.value) {
+					if (!commentData.get('comment')) {
 						showError("请输入评论内容");
 						return;
 					}
 
 					// create URLSearchParams object and append necessary parameters
-					const params = new URLSearchParams(new FormData(commentForm));
+					const params = new URLSearchParams(commentData);
 					params.append("action", "ajax_comment");
 					params.append("security", adminajax.nonce);
 
@@ -250,7 +264,7 @@
 				}
 			});
 		}
-		login();
+
 		loadMore();
 		calendarAddClass();
 	});
@@ -261,7 +275,7 @@
 	 *
 	 * @param {Function} fn Callback function to run.
 	 */
-	function isDomReady (fn) {
+	function DomReady(fn) {
 		if (typeof fn !== 'function') {
 			return;
 		}
@@ -273,7 +287,7 @@
 		document.addEventListener('DOMContentLoaded', fn, false);
 	}
 
-	isDomReady(function () {
+	DomReady(function () {
 
 
 	})
@@ -283,7 +297,7 @@
 		const postsList = document.querySelector(".ajax-posts");
 
 		if (loadMoreBtn === null) {
-			console.error("Can't find element with class '.more-posts'");
+			//console.error("Can't find element with class '.more-posts'");
 			return;
 		}
 		if (typeof loadMoreBtn != "undefined" && loadMoreBtn != null) {
@@ -327,7 +341,7 @@
 						loadMoreBtn.setAttribute("aria-disabled", "true");
 					}
 				} catch (error) {
-					console.error(error);
+					//console.error(error);
 					loadMoreBtn.textContent = "出错啦，请刷新";
 					loadMoreBtn.disabled = true;
 					loadMoreBtn.setAttribute("aria-disabled", "true");
@@ -340,7 +354,7 @@
 	const calendarAddClass = () => {
 		const calendar = document.querySelector("#wp-calendar");
 		if (calendar === null) {
-			console.error("Can't find element with id '#wp-calendar'");
+			//console.error("Can't find element with id '#wp-calendar'");
 			return;
 		}
 		const calendarLinks = calendar.querySelectorAll("tbody td a");
@@ -388,7 +402,7 @@
 		let opacity = 0;
 		const duration = 400;
 		const start = performance.now();
-		function tick (now) {
+		function tick(now) {
 			const elapsed = now - start;
 			opacity = Math.min(1, opacity + elapsed / duration);
 			element.style.opacity = opacity;
@@ -431,72 +445,9 @@
 		requestAnimationFrame(animate);
 	};
 
-	let login= ()=>{
-		const loginForm = document.getElementById('login-form');
-		const loginMessage = document.getElementById('login-message');
-		if (loginForm === null) {
-			console.error("Can't find element with id 'login-form'");
-			return;
-		}
-		loginForm.addEventListener('submit', function (event) {
-			event.preventDefault();
 
-			const formData = new FormData(loginForm);
-			formData.append('action', 'ajax_login'); // WordPress action，用于验证
 
-			fetch(adminajax.url, {
-				method: 'POST',
-				body: formData
-			})
-				.then(response => response.json())
-				.then(response => {
-					if (response.success) {
-						// 登录成功，刷新页面
-						location.reload();
-					} else {
-						// 显示错误信息
-						loginMessage.textContent = response.data.message;
-					}
-				})
-				.catch((error) => {
-					// 显示错误信息
-					console.log(error);
-					loginMessage.textContent = 'Login error';
-				});
-		});
-	}
 
-	let formFetchapi = (form, msg, action) => {
-		form.addEventListener('submit', async (event) => {
-			event.preventDefault();
-
-			const formData = new FormData(form);
-			formData.append('action', action); // WordPress action，用于验证
-
-			try {
-				const response = await fetch(adminajax.url, {
-					method: "POST",
-					body: formData,
-				});
-
-				const { success, data } = await response.json();
-
-				if (success && data.length !== 0) {
-					// 登录成功，刷新页面
-					
-				} else {
-					// 显示错误信息
-					msg.textContent = response.data.message;
-				}
-			} catch (error) {
-				// 显示错误信息
-				console.log(error);
-				msg.textContent = 'Login error';
-			} finally {
-				console.log(meg);
-			};
-		});
-	}
 
 	/**
 	 * Limit the frequency of calls to the click event handler function.
@@ -504,7 +455,7 @@
 	 * @param {*} wait
 	 * @returns
 	 */
-	function debounce (func, wait) {
+	function debounce(func, wait) {
 		let timeout;
 		return function (...args) {
 			clearTimeout(timeout);

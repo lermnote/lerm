@@ -108,7 +108,10 @@ class Setup {
 		add_image_size( 'widget-thumb', 120, 110, true ); // 300 像素宽，无限的高
 		add_theme_support( 'wp-block-styles' );
 		add_theme_support( 'responsive-embeds' );
-
+		add_theme_support( 'custom-background' );
+		add_theme_support( 'custom-header' );
+				// Add support for link color control.
+				add_theme_support( 'link-color' );
 		// Post formats.
 		add_theme_support(
 			'post-formats',
@@ -185,11 +188,11 @@ class Setup {
 		);
 
 		Enqueue::instance();
-		Comment_Walker::instance();
-		Load_More::instance();
-		Post_Like::instance();
+		CommentWalker::instance();
+		// LoadMore::instance();
+		PostLike::instance();
 		Lazyload::instance();
-		User::instance();
+		
 		Image::instance();
 
 		// Optimize options.
@@ -302,8 +305,8 @@ class Setup {
 	 * @return void
 	 */
 	public static function widgets() {
-		register_widget( '\Lerm\Inc\Widgets\Popular_Posts' );
-		register_widget( '\Lerm\Inc\Widgets\Recent_Posts' );
-		register_widget( '\Lerm\Inc\Widgets\Recent_Comments' );
+		// register_widget( '\Lerm\Inc\Widgets\Popular_Posts' );
+		// register_widget( '\Lerm\Inc\Widgets\Recent_Posts' );
+		// register_widget( '\Lerm\Inc\Widgets\Recent_Comments' );
 	}
 }
