@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
          * get loginForm.
          */
         const loginForm = document.getElementById('login-form');
+        if(loginForm===null) return;
         const loginMessage = document.getElementById('login-message');
 
         /**

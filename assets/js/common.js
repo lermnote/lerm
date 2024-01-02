@@ -162,8 +162,41 @@
 		 */
 		const commentForm = document.getElementById("commentform");
 
+		const commentLiStr = (data) => {
+			if (data.comment_parent == '0') {
+				str = `<li class="${data.comment_type} list-group-item" id="comment-${data.comment_ID}">`;
+			} else {
+				str = `<li class="${data.comment_type} list-group-item p-0" id="comment-${data.comment_ID}">`;
+			}
+
+			str += `<article id="div-comment-${data.comment_ID}" class="comment-body">
+				<footer class="comment-meta mb-1">
+					<span class="comment-author vcard">
+						<img src="${data.avatar_url}" srcset="${data.avatar_url} 2x" alt="${data.comment_author}" class="avatar avatar-${data.avatar_size} photo" height="${data.avatar_size}" width="${data.avatar_size}" loading="lazy" decoding="async">
+						<b class="fn">${data.comment_author}</b>
+					</span>
+					<!--.comment-author -->
+					<span class="comment-metadata">
+						<span aria-hidden="true">•</span>
+						<a href="http://localhost/wordpress/${data.comment_post_ID}/#comment-${data.comment_ID}">
+							<time time datetime = "${data.comment_date_gmt}" > ${data.comment_date}</time >
+						</a>
+					</span>
+				</footer>`;
+
+			if (data.comment_approved == '0') {
+				str += `<span class="comment-awaiting-moderation badge rounded-pill bg-info">您的评论正在等待审核。</span>`;
+			}
+			str += `<section class="comment-content" style="margin-left: 56px">
+					<p>${data.comment_content}</p>
+				</section>
+			</article>
+			</li>`;
+			return str;
+		}
+
 		const showError = (msg) => {
-			message.innerHTML = `<strong><i class="fa fa-ok me-1"></i>${msg}</strong>`;
+			message.innerHTML = `< strong strong > <i class="fa fa-ok me-1"></i>${msg}</strong > `;
 			message.classList.remove("visually-hidden");
 			message.classList.add("shake");
 			setTimeout(() => {
@@ -173,7 +206,7 @@
 		}
 
 		const showSuccess = (msg) => {
-			message.innerHTML = `<strong><i class="fa fa-xmark me-1"></i>${msg}</strong>`;
+			message.innerHTML = `< strong strong > <i class="fa fa-xmark me-1"></i>${msg}</strong > `;
 			message.classList.add("show");
 			setTimeout(() => message.classList.remove("show"), 3000);
 		}
@@ -183,7 +216,7 @@
 			commentForm.insertAdjacentHTML("beforeend", '<div id="message" class="text-danger wow visually-hidden"></div>');
 
 			const message = commentForm.querySelector("#message");
-		
+
 			//submit event
 			commentForm.addEventListener("click", async (e) => {
 				// ensure event target is submit button and within comment form
@@ -222,30 +255,44 @@
 							body: params,
 						});
 						const { success, data } = await response.json();
+
 						if (success && data.length !== 0) {
-							const commentNode = parseToDOM(data);
-							const nodeLi = commentNode[1];
+
+							const nodeLi = commentLiStr(data);
+
+							//respond form
 							const respond = document.getElementById("respond");
 
 							e.target.setAttribute("disabled", "disabled");
 
-							if (respond.parentNode.classList.contains("comment")) {
-								// if there are existing child comments, append the new comment under the last child comment
-								// otherwise, append the new comment directly under the original comment
-								respond.previousElementSibling?.appendChild(nodeLi) ?? respond.parentNode.appendChild(nodeLi);
+							if (document.querySelector(".comment-list")) {
+								if (respond.previousElementSibling) {
 
-							} else if (document.querySelector(".comment-list")) {
-								// add new comment using this method when there are already comments
-								document.querySelector(".comment-list").insertBefore(nodeLi, document.querySelector(".comment-list").firstChild);
+									if (respond.previousElementSibling.lastElementChild.classList.contains("children")) {
+										//评论有子元素的父元素，需要添加li到ul里面
+										respond.previousElementSibling.lastElementChild.insertAdjacentHTML('beforeend', nodeLi)
+									} else {
+										//评论无子元素的评论，需添加子元素到li，新增ul元素
+										respond.previousElementSibling.insertAdjacentHTML('beforeend',
+											`<ul class="children">
+											${nodeLi}
+										</ul>`
+										)
+									}
+								} else {
+									//评论有子元素的父元素，需要添加li到ul里面
+									document.querySelector(".comment-list").insertAdjacentHTML('afterbegin', nodeLi)
+									// respond.previousElementSibling.lastElementChild.insertAdjacentHTML('beforeend', nodeLi)
+								}
+
 							} else {
-								// use this method when there are no comments
-								respond.parentNode.insertAdjacentHTML('beforeend', `
-						<div class="card mb-3">
-							<ol class="comment-list p-0 m-0 list-group list-group-flush">
-								${nodeLi.outerHTML}
-							</ol>
-						</div>
-					`);
+								respond.parentNode.insertAdjacentHTML('beforeend',
+									`<div class= "card mb-3">
+										<ol class="comment-list p-0 m-0 list-group list-group-flush">
+											${nodeLi}
+										</ol>
+									</div>`
+								);
 							}
 							showSuccess("评论已成功提交");
 							commentForm.querySelector("#comment").value = "";

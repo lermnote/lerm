@@ -7,6 +7,9 @@
 
 namespace Lerm\Inc;
 
+use Lerm\Inc\User\User;
+
+
 /**
  * Theme setup
  */
@@ -189,10 +192,10 @@ class Setup {
 
 		Enqueue::instance();
 		CommentWalker::instance();
-		// LoadMore::instance();
+		LoadMore::instance();
 		PostLike::instance();
 		Lazyload::instance();
-		
+		User::instance();
 		Image::instance();
 
 		// Optimize options.

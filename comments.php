@@ -91,7 +91,7 @@ if ( post_password_required() ) {
 			<?php
 			wp_list_comments(
 				array(
-					'walker'      => \Lerm\Inc\Comment_Walker::instance(),
+					'walker'      => \Lerm\Inc\CommentWalker::instance(),
 					'short_ping'  => true,
 					'avatar_size' => wp_is_mobile() ? 32 : 48,
 				)

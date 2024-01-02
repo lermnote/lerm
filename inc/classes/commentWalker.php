@@ -10,11 +10,10 @@
 namespace Lerm\Inc;
 
 use Walker_Comment;
-// use Lerm\Inc\Traits\Singleton;
 
 class CommentWalker extends Walker_Comment {
 
-	// use Singleton;
+	public const AJAX_ACTION = 'ajax_login';
 
 	public static $args = array(
 		'make_clickable' => true,
@@ -23,29 +22,30 @@ class CommentWalker extends Walker_Comment {
 
 	public function __construct( $params ) {
 		self::$args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$args ) );
-		$this->register();
-	}
-		/**
-	 * Instance
-	 *
-	 * @param array $params Optional parameters.
-	 *
-	 * @return Setup
-	 */
-	public static function instance( $params = array() ) {
-		return new self( $params );
-	}
-	public function register() {
-		add_action( 'wp_ajax_nopriv_ajax_comment', array( $this, 'ajax_comment' ) );
-		add_action( 'wp_ajax_ajax_comment', array( $this, 'ajax_comment' ) );
 		if ( self::$args['make_clickable'] ) {
 			remove_filter( 'comment_text', 'make_clickable', 9 );}
 		if ( self::$args['escape_html'] ) {
 			add_filter( 'pre_comment_content', 'esc_html' );
 		}
+		$this->register();
+	}
+		/**
+		 * Instance
+		 *
+		 * @param array $params Optional parameters.
+		 *
+		 * @return Setup
+		 */
+	public static function instance( $params = array() ) {
+		return new self( $params );
 	}
 
-	public function ajax_comment( $comment_data ) {
+	public static function register() {
+		add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_comment' ) );
+		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_comment' ) );
+	}
+
+	public function ajax_comment() {
 		// Check ajax nonce first
 		$comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
 
@@ -53,8 +53,8 @@ class CommentWalker extends Walker_Comment {
 
 		if ( check_ajax_referer( 'ajax_nonce', 'security', false ) && ! is_wp_error( $comment ) && 0 !== $comment_post_id ) {
 
-			ob_start();
-
+			$comment->avatar_url  = get_avatar_url( $comment );
+			$comment->avatar_size = ( 0 !== $_POST['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
 			/**
 			 * Set Cookies checkbox
 			 *
@@ -64,20 +64,8 @@ class CommentWalker extends Walker_Comment {
 			if ( isset( $_POST['wp-comment-cookies-consent'] ) && 'yes' === $_POST['wp-comment-cookies-consent'] ) {
 				do_action( 'set_comment_cookies', $comment, $user );
 			}
-			// Set the globals, so our comment functions below will work correctly
-			$GLOBALS['comment'] = $comment;
 
-			$this->html5_comment(
-				$comment,
-				'1',
-				array(
-					'avatar_size' => wp_is_mobile() ? 32 : 48,
-					'li',
-					5,
-				)
-			);
-
-			wp_send_json_success( ob_get_clean() );
+			wp_send_json_success( $comment );
 
 		} else {
 			$error = intval( $comment->get_error_data() );
@@ -134,7 +122,7 @@ class CommentWalker extends Walker_Comment {
 					<!--.comment-author -->
 					<span class="comment-metadata">
 						<?php
-						$comment_timestamp = get_comment_time( 'U' );
+						$comment_timestamp = get_comment_time( 'U', true );
 						$current_timestamp = current_datetime()->getTimestamp();
 						$time_diff         = human_time_diff( $comment_timestamp, $current_timestamp ) ?? 'unknown time';
 

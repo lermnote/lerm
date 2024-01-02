@@ -8,9 +8,10 @@ namespace Lerm\Inc\User;
 class User {
 
 	// secs
+	public const LERM_MENU_LOCATION        = 'primary';
 	public const LERM_LOGIN_RETRY_PAUSE    = 5;
 	public const LERM_LOGIN_ACTION         = 'lerm_ajax_login';
-	public const LERM_LOGIN_FORM_FILE_NAME = 'login.php';
+	public const LERM_LOGIN_FORM_FILE_NAME = 'login';
 
 	public static $args = array(
 		'login_enable'         => true,
@@ -36,8 +37,9 @@ class User {
 		/**
 		* Listen for incoming login requests from the Ajax form.
 		*/
-		add_action( 'wp_ajax_nopriv_' . LERM_LOGIN_ACTION, array( __CLASS__, 'ajax_login' ) );
+		add_action( 'wp_ajax_nopriv_' . self::LERM_LOGIN_ACTION, array( __CLASS__, 'ajax_login' ) );
 		add_filter( 'login_redirect', array( __CLASS__, 'my_login_redirect' ), 10, 3 );
+		add_filter( 'wp_nav_menu_items', array( __CLASS__, 'lerm_wp_nav_menu_items' ), 10, 2 );
 	}
 
 	/**
@@ -74,7 +76,7 @@ class User {
 			} elseif ( empty( $credentials['user_password'] ) ) {
 				$response['message'] = __( 'The password field is empty.', 'lerm' );
 			} elseif ( get_transient( $client_key ) !== false ) {
-				$response['message'] = __( 'Slow down a bit.', 'lerm' );
+				$response['message'] = __( '1Slow down a bit.', 'lerm' );
 			}
 
 			if ( is_a( $user, 'WP_User' ) ) {
@@ -85,7 +87,7 @@ class User {
 				wp_send_json_success( $response, $status_code );
 			} else {
 				// 验证失败
-				set_transient( $client_key, '1', LERM_LOGIN_RETRY_PAUSE );
+				set_transient( $client_key, '1', self::LERM_LOGIN_RETRY_PAUSE );
 				wp_send_json_error( $response, $status_code );
 			}
 		}
@@ -93,11 +95,63 @@ class User {
 
 	public static function user_profile() {
 	}
+	/**
+	 * Render the login menu item and form. $items is a string that we're going
+	 * to append our HTML to.
+	 */
+	public static function lerm_wp_nav_menu_items( $items, $args ) {
+		// The file name of the login form (PHP) we're going to "include".
+		$file_name = __DIR__ . '/../../../templates/' . self::LERM_LOGIN_FORM_FILE_NAME;
+
+		if ( ! self::lerm_is_login_menu_required() ) {
+			// We're already logged in so we don't need a login form.
+		} elseif ( $args->theme_location !== self::LERM_MENU_LOCATION ) {
+			// These aren't the menu item's you're looking for.
+		} elseif ( ! is_file( $file_name ) ) {
+			$items .= sprintf(
+				'<li class="menu-item"><a class="menu-link"><strong>%s</strong></a></li>',
+				self::LERM_LOGIN_FORM_FILE_NAME
+			);
+		} else {
+			// Start rendering the HTML for the menu item.
+			$outer_classes = array(
+				'menu-item',
+				'menu-item-has-children',
+				'menu-item-login',
+			);
+			$items        .= sprintf( '<li class="%s">', esc_attr( implode( ' ', $outer_classes ) ) );
+
+			// The login menu item. You can change the "Login" label here.
+			$items .= sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( self::lerm_front_door_url() ),
+				esc_html__( 'Login', 'wp-tutorials' )
+			);
+
+			// Start rendering a sub menu to hold the login form.
+			$sub_menu_classes = array(
+				'sub-menu',
+				'lerm-container',
+			);
+			$items           .= sprintf( '<ul class="%s">', esc_attr( implode( ' ', $sub_menu_classes ) ) );
+
+			// Include the login form PHP/HTML file.
+			ob_start();
+			include $file_name;
+			$items .= ob_get_clean();
+
+			$items .= '</ul>'; // .sub-menu
+
+			$items .= '</li>'; // .menu-item
+		}
+
+		return $items;
+	}
 
 	/**
 	 * WordPress function for redirecting users on login based on user role
 	 */
-	private static function my_login_redirect( $url, $request, $user ) {
+	public static function my_login_redirect( $url, $request, $user ) {
 		if ( $user && is_object( $user ) && is_a( $user, 'WP_User' ) ) {
 			if ( $user->has_cap( 'administrator' ) ) {
 				$url = admin_url();
@@ -112,8 +166,8 @@ class User {
 	 * We add our assets to every page of the site, because the primay
 	 * nav menu is probably on every page.
 	 */
-	private static function lerm_enqueue_scripts() {
-		if ( lerm_is_login_menu_required() ) {
+	public static function lerm_enqueue_scripts() {
+		// if ( lerm_is_login_menu_required() ) {
 			$base_uri = get_stylesheet_directory_uri();
 			$version  = wp_get_theme()->get( 'Version' );
 
@@ -128,12 +182,12 @@ class User {
 				array(
 					'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 					'user_nonce' => wp_create_nonce( 'user_nonce' ),
-					'action'     => LERM_LOGIN_ACTION,
+					'action'     => self::LERM_LOGIN_ACTION,
 					'frontDoor'  => self::lerm_front_door_url(),
 
 				)
 			);
-		}
+		// }
 	}
 
 	/**
@@ -170,5 +224,19 @@ class User {
 		}
 
 		return $login_page_url;
+	}
+	/**
+	 * A convenience function that lets us disable the login menu item under
+	 * certain conditions.
+	 */
+	private static function lerm_is_login_menu_required() {
+		$is_required = ! is_user_logged_in();
+
+		// You can put extra conditions in here.
+		// if ($some_test == true) {
+		// $is_required = false;
+		// }
+
+		return $is_required;
 	}
 }
