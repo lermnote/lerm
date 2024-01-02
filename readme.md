@@ -1,6 +1,6 @@
-![Lerm](https://www.hanost.com/wp-content/uploads/2019/08/cropped-logo-2.png)
-
 # Lerm
+
+![Lerm](https://www.hanost.com/wp-content/uploads/2019/08/cropped-logo-2.png)
 
 The Lerm theme for WordPress takes us back to the blog, featuring a full range of post formats, each displayed beautifully in their own unique way. Design based on bootstrap beautiful typography and icons, and a flexible layout that looks great on any device, big or small.
 
@@ -14,8 +14,7 @@ The Lerm theme for WordPress takes us back to the blog, featuring a full range o
 
 -Version: 3.2.1
 
--License: GNU General Public License v2 or later
+-License: GPLv2 or later
+-License URI: <http://www.gnu.org/licenses/gpl-2.0.html>
 
--License URI: http://www.gnu.org/licenses/gpl-2.0.html
-
--Tags: blog, one-column, two-columns, right-sidebar, custom-menu, editor-style, featured-images, footer-widgets, microformats, post-formats, sticky-post, translation-ready, accessibility-ready
+-Tags: blog, one-column, two-columns, right-sidebar, left-sidebar, custom-menu, editor-style, featured-images, footer-widgets, microformats, post-formats, sticky-post, translation-ready, accessibility-ready

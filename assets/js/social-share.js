@@ -46,7 +46,7 @@
         wechatQrcodeHelper: '<p>微信里点“发现”，扫一下</p><p>二维码便可将本文分享至朋友圈。</p>',
         wechatQrcodeSize: 100,
 
-        sites: ['weibo', 'qq', 'wechat', 'douban', 'qzone', 'linkedin', 'facebook', 'twitter', 'google'],
+        sites: ['weibo', 'qq', 'wechat', 'douban', 'qzone', 'linkedin', 'facebook', 'twitter', 'google_plus'],
         mobileSites: [],
         disabled: [],
         initialized: false
@@ -61,7 +61,7 @@
         linkedin: 'http://www.linkedin.com/shareArticle?mini=true&ro=true&title={{TITLE}}&url={{URL}}&summary={{SUMMARY}}&source={{SOURCE}}&armin=armin',
         facebook: 'https://www.facebook.com/sharer/sharer.php?u={{URL}}',
         twitter: 'https://twitter.com/intent/tweet?text={{TITLE}}&url={{URL}}&via={{ORIGIN}}',
-        google: 'https://plus.google.com/share?url={{URL}}'
+        google_plus: 'https://plus.google.com/share?url={{URL}}'
     };
 
 

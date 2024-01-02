@@ -12,96 +12,26 @@
 <html <?php language_attributes(); ?>>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color' ) ); ?>">
-	<?php
-	wp_head();
-		echo wp_kses( lerm_options( 'baidu_tongji' ), array( 'script' => array() ) );
-	?>
+	<?php wp_head(); ?>
+	<?php echo wp_kses( lerm_options( 'baidu_tongji' ), array( 'script' => array() ) ); ?>
 </head>
 <body <?php body_class(); ?>>
-<?php wp_body_open(); ?>
-	<header id="site-header" class="site-header mb-md-3" itemscope="" itemtype="http://schema.org/WPHeader">
-		<nav id="site-navigation" class="navbar navbar-expand-lg py-0">
-			<div class="container">
-				<!-- Container -->
-				<div class="brand d-flex align-items-center">
-
-					<?php
-					the_custom_logo();
-					?>
-					<!-- .navbar-brand  begin -->
-					<div>
-						<?php
-						$lerm_blogname = lerm_options( 'blogname' ) ? lerm_options( 'blogname' ) : get_bloginfo( 'name' );
-						if ( is_front_page() || is_home() ) :
-							?>
-							<h1 class="site-title"><a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home"><?php echo esc_html( $lerm_blogname ); ?></a></h1>
-						<?php else : ?>
-							<p class="site-title"><a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home"><?php echo esc_html( $lerm_blogname ); ?></a></p>
-							<?php
-						endif;
-
-						$description = lerm_options( 'blogdesc' ) ? lerm_options( 'blogdesc' ) : get_bloginfo( 'description' );
-						if ( ! wp_is_mobile() && $description || is_customize_preview() ) :
-							?>
-							<span class="site-description small d-none d-md-block text-muted"><?php echo esc_html( $description ); ?></span>
-						<?php endif; ?>
-						<!-- .navbar-brand end -->
-					</div>
-				</div><!-- logo end -->
-				<div class="d-lg-none d-flex justify-content-end">
-						<button class="btn bg-inherit navbar-btn collapseds search-btn" type="button" data-toggle="collapse" data-target="#mobile-search" aria-expanded="false"  >
-							<i class="fa fa-search"></i>
-						</button>
-						<button id="trigger" class="menu-toggle mr-2 btn bg-inherit navbar-btn" type="button"  aria-expanded="false" style="z-index:18">
-							<span></span>
-						</button>
-					</div>
-				<?php
-				// primary menu begin
-				if ( has_nav_menu( 'primary' ) ) :
-					wp_nav_menu(
-						array(
-							'theme_location'  => 'primary',
-							'container'       => 'div',
-							'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav navbar-collapse',
-							'container_id'    => 'navbar',
-							'menu_class'      => 'nav navbar-nav',
-							'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
-							'walker'          => new Lerm_Walker_Nav_Menu(),
-						)
-					);
-					if ( lerm_options( 'narbar_search' ) ) :
-						?>
-						<div class="d-none d-lg-block">
-							<?php get_search_form(); ?>
-						</div>
-						<?php
-				endif;
-			endif;
-				?>
-			</div>
-		</nav>
-		<?php if ( wp_is_mobile() ) : ?>
-			<div class="collapse" id="mobile-search">
-				<?php get_search_form(); ?>
-			</div>
-		<?php endif; ?>
-	</header>
-	<?php
-	if ( is_home() && ! is_paged() ) {
-		switch ( lerm_options( 'slide_position' ) ) {
-			case 'full_width':
-				lerm_carousel( array() );
-				break;
-			case 'under_navbar':
-				?>
+	<?php wp_body_open(); ?>
+	<div id="page" class="site">
+		<header id="site-header" class="site-header" itemscope="" itemtype="http://schema.org/WPHeader">
+			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
 				<div class="container">
-					<?php lerm_carousel( array() ); ?>
-				</div>
-				<?php
-				break;
+					<!-- .navbar-brand  begin -->
+					<?php get_template_part( 'template-parts/header/site-brand' ); ?>
+					<!-- .navbar-brand end -->
+					<?php get_template_part( 'template-parts/header/site-nav' ); ?>
+				</div><!-- .container -->
+			</nav>
+		</header>
+		<?php
+		if ( lerm_options( 'slide_position' ) === 'full_width' ) {
+			get_template_part( 'template-parts/carousel' );
 		}
-	}

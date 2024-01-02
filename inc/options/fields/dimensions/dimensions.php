@@ -1,6 +1,5 @@
-<?php if (! defined('ABSPATH')) {
-    die;
-} // Cannot access pages directly.
+<?php if ( ! defined( 'ABSPATH' ) ) {
+	die; } // Cannot access directly.
 /**
  *
  * Field: dimensions
@@ -9,97 +8,98 @@
  * @version 1.0.0
  *
  */
-if (! class_exists('CSF_Field_dimensions')) {
-    class CSF_Field_dimensions extends CSF_Fields
-    {
-        public function __construct($field, $value = '', $unique = '', $where = '', $parent = '')
-        {
-            parent::__construct($field, $value, $unique, $where, $parent);
-        }
+if ( ! class_exists( 'CSF_Field_dimensions' ) ) {
+	class CSF_Field_dimensions extends CSF_Fields {
 
-        public function render()
-        {
-            $args = wp_parse_args($this->field, array(
-        'width_icon'         => '<i class="fa fa-arrows-h"></i>',
-        'height_icon'        => '<i class="fa fa-arrows-v"></i>',
-        'width_placeholder'  => 'width',
-        'height_placeholder' => 'height',
-        'width'              => true,
-        'height'             => true,
-        'unit'               => true,
-        'medias'              => array( '576px', ' 768px', ' 992px', ' 1200px'),
-        'units'              => array( 'px', '%', 'em' )
-      ));
+		public function __construct( $field, $value = '', $unique = '', $where = '', $parent = '' ) {
+			parent::__construct( $field, $value, $unique, $where, $parent );
+		}
 
-            $default_values = array(
-        'width'  => '',
-        'height' => '',
-        'unit'   => 'px',
-      );
+		public function render() {
 
-            $value = wp_parse_args($this->value, $default_values);
+			$args = wp_parse_args(
+				$this->field,
+				array(
+					'width_icon'         => '<i class="fas fa-arrows-alt-h"></i>',
+					'height_icon'        => '<i class="fas fa-arrows-alt-v"></i>',
+					'width_placeholder'  => esc_html__( 'width', 'lerm' ),
+					'height_placeholder' => esc_html__( 'height', 'lerm' ),
+					'width'              => true,
+					'height'             => true,
+					'unit'               => true,
+					'show_units'         => true,
+					'units'              => array( 'px', '%', 'em' ),
+				)
+			);
 
-            echo $this->field_before();
+			$default_values = array(
+				'width'  => '',
+				'height' => '',
+				'unit'   => 'px',
+			);
 
-            if (! empty($args['width'])) {
-                $placeholder = (! empty($args['width_placeholder'])) ? ' placeholder="'. $args['width_placeholder'] .'"' : '';
+			$value   = wp_parse_args( $this->value, $default_values );
+			$unit    = ( count( $args['units'] ) === 1 && ! empty( $args['unit'] ) ) ? $args['units'][0] : '';
+			$is_unit = ( ! empty( $unit ) ) ? ' csf--is-unit' : '';
 
-                echo '<div class="csf--input">';
-                echo (! empty($args['width_icon'])) ? '<span class="csf--label csf--label-icon">'. $args['width_icon'] .'</span>' : '';
-                echo '<input type="text" name="'. $this->field_name('[width]') .'" value="'. $value['width'] .'"'. $placeholder .' class="csf-number" />';
-                echo (count($args['units']) === 1 && ! empty($args['unit'])) ? '<span class="csf--label csf--label-unit">'. $args['units'][0] .'</span>' : '';
-                echo '</div>';
-            }
+			echo $this->field_before();
 
-            if (! empty($args['height'])) {
-                $placeholder = (! empty($args['height_placeholder'])) ? ' placeholder="'. $args['height_placeholder'] .'"' : '';
+			echo '<div class="csf--inputs">';
 
-                echo '<div class="csf--input">';
-                echo (! empty($args['height_icon'])) ? '<span class="csf--label csf--label-icon">'. $args['height_icon'] .'</span>' : '';
-                echo '<input type="text" name="'. $this->field_name('[height]') .'" value="'. $value['height'] .'"'. $placeholder .' class="csf-number" />';
-                echo (count($args['units']) === 1 && ! empty($args['unit'])) ? '<span class="csf--label csf--label-unit">'. $args['units'][0] .'</span>' : '';
-                echo '</div>';
-            }
+			if ( ! empty( $args['width'] ) ) {
+				$placeholder = ( ! empty( $args['width_placeholder'] ) ) ? ' placeholder="' . esc_attr( $args['width_placeholder'] ) . '"' : '';
+				echo '<div class="csf--input">';
+				echo ( ! empty( $args['width_icon'] ) ) ? '<span class="csf--label csf--icon">' . wp_kses_post( $args['width_icon'] ) . '</span>' : '';
+				echo '<input type="number" name="' . esc_attr( $this->field_name( '[width]' ) ) . '" value="' . esc_attr( $value['width'] ) . '"' . $placeholder . ' class="csf-input-number' . esc_attr( $is_unit ) . '" />';
+				echo ( ! empty( $unit ) ) ? '<span class="csf--label csf--unit">' . esc_attr( $args['units'][0] ) . '</span>' : '';
+				echo '</div>';
+			}
 
-            if (! empty($args['unit']) && count($args['units']) > 1) {
-                echo '<select name="'. $this->field_name('[unit]') .'">';
-                foreach ($args['units'] as $unit) {
-                    $selected = ($value['unit'] === $unit) ? ' selected' : '';
-                    echo '<option value="'. $unit .'"'. $selected .'>'. $unit .'</option>';
-                }
-                echo '</select>';
-            }
-            if (! empty($args['medias']) && count($args['medias']) > 1) {
-                echo '<select name="'. $this->field_name('[media]') .'">';
-                foreach ($args['medias'] as $media) {
-                    $selected = ($value['media'] === $media) ? ' selected' : '';
-                    echo '<option value="'. $media .'"'. $selected .'>'. $media .'</option>';
-                }
-                echo '</select>';
-            }
-            echo '<div class="clear"></div>';
+			if ( ! empty( $args['height'] ) ) {
+				$placeholder = ( ! empty( $args['height_placeholder'] ) ) ? ' placeholder="' . esc_attr( $args['height_placeholder'] ) . '"' : '';
+				echo '<div class="csf--input">';
+				echo ( ! empty( $args['height_icon'] ) ) ? '<span class="csf--label csf--icon">' . wp_kses_post( $args['height_icon'] ) . '</span>' : '';
+				echo '<input type="number" name="' . esc_attr( $this->field_name( '[height]' ) ) . '" value="' . esc_attr( $value['height'] ) . '"' . $placeholder . ' class="csf-input-number' . esc_attr( $is_unit ) . '" />';
+				echo ( ! empty( $unit ) ) ? '<span class="csf--label csf--unit">' . esc_attr( $args['units'][0] ) . '</span>' : '';
+				echo '</div>';
+			}
 
-            echo $this->field_after();
-        }
+			if ( ! empty( $args['unit'] ) && ! empty( $args['show_units'] ) && count( $args['units'] ) > 1 ) {
+				echo '<div class="csf--input">';
+				echo '<select name="' . esc_attr( $this->field_name( '[unit]' ) ) . '">';
+				foreach ( $args['units'] as $unit ) {
+					$selected = ( $value['unit'] === $unit ) ? ' selected' : '';
+					echo '<option value="' . esc_attr( $unit ) . '"' . esc_attr( $selected ) . '>' . esc_attr( $unit ) . '</option>';
+				}
+				echo '</select>';
+				echo '</div>';
+			}
 
-        public function output()
-        {
-            $output    = '';
-            $element   = (is_array($this->field['output'])) ? join(',', $this->field['output']) : $this->field['output'];
-            $prefix    = (! empty($this->field['output_prefix'])) ? $this->field['output_prefix'] .'-' : '';
-            $important = (! empty($this->field['output_important'])) ? '!important' : '';
-            $unit      = (! empty($this->value['unit'])) ? $this->value['unit'] : 'px';
-            $width     = (isset($this->value['width']) && $this->value['width'] !== '') ? $prefix .'width:'. $this->value['width'] . $unit . $important .';' : '';
-            $height    = (isset($this->value['height']) && $this->value['width'] !== '') ? $prefix .'height:'. $this->value['height'] . $unit . $important .';' : '';
-            $media_open     = (! empty($this->value['media'])) ? '@media (min-width:' . $this->value['media'] . '){' : '';
-            $media_close     = (! empty($this->value['media'])) ? '}' : '';
-            if ($width !== '' || $height !== '') {
-                $output = $media_open . $element .'{'. $width . $height .'}'.$media_close;
-            }
+			echo '</div>';
 
-            $this->parent->output_css .= $output;
+			echo $this->field_after();
 
-            return $output;
-        }
-    }
+		}
+
+		public function output() {
+
+			$output    = '';
+			$element   = ( is_array( $this->field['output'] ) ) ? join( ',', $this->field['output'] ) : $this->field['output'];
+			$prefix    = ( ! empty( $this->field['output_prefix'] ) ) ? $this->field['output_prefix'] . '-' : '';
+			$important = ( ! empty( $this->field['output_important'] ) ) ? '!important' : '';
+			$unit      = ( ! empty( $this->value['unit'] ) ) ? $this->value['unit'] : 'px';
+			$width     = ( isset( $this->value['width'] ) && $this->value['width'] !== '' ) ? $prefix . 'width:' . $this->value['width'] . $unit . $important . ';' : '';
+			$height    = ( isset( $this->value['height'] ) && $this->value['height'] !== '' ) ? $prefix . 'height:' . $this->value['height'] . $unit . $important . ';' : '';
+
+			if ( $width !== '' || $height !== '' ) {
+				$output = $element . '{' . $width . $height . '}';
+			}
+
+			$this->parent->output_css .= $output;
+
+			return $output;
+
+		}
+
+	}
 }

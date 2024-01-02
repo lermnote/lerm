@@ -1,6 +1,4 @@
-<?php if (! defined('ABSPATH')) {
-    die;
-} // Cannot access pages directly.
+<?php if ( ! defined( 'ABSPATH' ) ) { die; } // Cannot access directly.
 /**
  *
  * Field: palette
@@ -9,45 +7,52 @@
  * @version 1.0.0
  *
  */
-if (! class_exists('CSF_Field_palette')) {
-    class CSF_Field_palette extends CSF_Fields
-    {
-        public function __construct($field, $value = '', $unique = '', $where = '', $parent = '')
-        {
-            parent::__construct($field, $value, $unique, $where, $parent);
-        }
+if ( ! class_exists( 'CSF_Field_palette' ) ) {
+  class CSF_Field_palette extends CSF_Fields {
 
-        public function render()
-        {
-            $palette = (! empty($this->field['options'])) ? $this->field['options'] : array();
+    public function __construct( $field, $value = '', $unique = '', $where = '', $parent = '' ) {
+      parent::__construct( $field, $value, $unique, $where, $parent );
+    }
 
-            echo $this->field_before();
+    public function render() {
 
-            if (! empty($palette)) {
-                echo '<div class="csf-siblings csf--palettes">';
+      $palette = ( ! empty( $this->field['options'] ) ) ? $this->field['options'] : array();
 
-                foreach ($palette as $key => $colors) {
-                    $active  = ($key === $this->value) ? ' csf--active' : '';
-                    $checked = ($key === $this->value) ? ' checked' : '';
+      echo $this->field_before();
 
-                    echo '<div class="csf--sibling csf--palette'. $active .'">';
+      if ( ! empty( $palette ) ) {
 
-                    if (! empty($colors)) {
-                        foreach ($colors as $color) {
-                            echo '<span style="background-color: '. $color .';"></span>';
-                        }
-                    }
+        echo '<div class="csf-siblings csf--palettes">';
 
-                    echo '<input type="radio" name="'. $this->field_name() .'" value="'. $key .'"'. $this->field_attributes() . $checked .'/>';
-                    echo '</div>';
-                }
+        foreach ( $palette as $key => $colors ) {
 
-                echo '</div>';
+          $active  = ( $key === $this->value ) ? ' csf--active' : '';
+          $checked = ( $key === $this->value ) ? ' checked' : '';
+
+          echo '<div class="csf--sibling csf--palette'. esc_attr( $active ) .'">';
+
+          if ( ! empty( $colors ) ) {
+
+            foreach ( $colors as $color ) {
+
+              echo '<span style="background-color: '. esc_attr( $color ) .';"></span>';
+
             }
 
-            echo '<div class="clear"></div>';
+          }
 
-            echo $this->field_after();
+          echo '<input type="radio" name="'. esc_attr( $this->field_name() ) .'" value="'. esc_attr( $key ) .'"'. $this->field_attributes() . esc_attr( $checked ) .'/>';
+          echo '</div>';
+
         }
+
+        echo '</div>';
+
+      }
+
+      echo $this->field_after();
+
     }
+
+  }
 }

@@ -32,7 +32,7 @@ if( ! class_exists( 'CSF_Taxonomy_Options' ) ) {
       $this->args       = apply_filters( "csf_{$this->unique}_args", wp_parse_args( $params['args'], $this->args ), $this );
       $this->sections   = apply_filters( "csf_{$this->unique}_sections", $params['sections'], $this );
       $this->taxonomies = ( is_array( $this->args['taxonomy'] ) ) ? $this->args['taxonomy'] : array_filter( (array) $this->args['taxonomy'] );
-      $this->taxonomy   = csf_get_var( 'taxonomy' );
+      // $this->taxonomy   = csf_get_var( 'taxonomy' );
 
       if( ! empty( $this->taxonomies ) && in_array( $this->taxonomy, $this->taxonomies ) ) {
         add_action( 'admin_init', array( &$this, 'add_taxonomy_options' ) );

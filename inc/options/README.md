@@ -1,4 +1,4 @@
-![Codestar Framework](http://s3.codestarthemes.com/codecanyon/23079100/github-banner.png)
+[![Codestar Framework](http://s3.codestarthemes.com/codecanyon/23079100/github-banner.png)](http://codestarframework.com/)
 
 # Codestar Framework
 A Simple and Lightweight WordPress Option Framework for Themes and Plugins. Built in Object Oriented Programming paradigm with high number of custom fields and tons of options. Allows you to bring custom admin, metabox, taxonomy and customize settings to all of your pages, posts and categories. It's highly modern and advanced framework.
@@ -9,7 +9,6 @@ A Simple and Lightweight WordPress Option Framework for Themes and Plugins. Buil
 - [Quick Start](#quick-start)
 - [Documentation](#documentation)
 - [Free vs Premium](#free-vs-premium)
-- [Whats news?](#whats-news-)
 - [Support](#support)
 - [Release Notes](#release-notes)
 - [License](#license)
@@ -90,8 +89,12 @@ Read the documentation for details :closed_book: [documentation](http://codestar
 | Admin Option Framework       | :heavy_check_mark: | :heavy_check_mark:
 | Customize Option Framework   | :x:                | :heavy_check_mark:
 | Metabox Option Framework     | :x:                | :heavy_check_mark:
+| Nav Menu Option Framework    | :x:                | :heavy_check_mark:
 | Taxonomy Option Framework    | :x:                | :heavy_check_mark:
-| Shortcode Generate Framework | :x:                | :heavy_check_mark:
+| Profile Option Framework     | :x:                | :heavy_check_mark:
+| Comment Option Framework     | :x:                | :heavy_check_mark:
+| Widget Option Framework      | :x:                | :heavy_check_mark:
+| Shortcode Option Framework   | :x:                | :heavy_check_mark:
 | All Option Fields            | :x:                | :heavy_check_mark:
 | Developer Packages           | :x:                | :heavy_check_mark:
 | Unminfy Library              | :x:                | :heavy_check_mark:
@@ -99,51 +102,6 @@ Read the documentation for details :closed_book: [documentation](http://codestar
 | Autoremove Advertisements    | :x:                | :heavy_check_mark:
 | Life-time access/updates     | :x:                | :heavy_check_mark:
 |                              |                    | :star2: <a href="http://codestarframework.com/">Upgrade Premium Version</a>
-
-## Whats news ?
-
-#### General
-- Added: Multiple instances support
-- Added: New option fields
-- Added: Filters/Actions for change to configs
-- Added: Output css featue
-- Added: Auto enqueue/load for google web fonts
-- Improved: Load time performance
-- Improved: Config array
-- Improved: Javascripts
-- Improved: PHP Functions/Classes
-
-#### Admin Option Framework
-- Added: Framework header title change parameter
-- Added: Detailed typography field
-- Added: Ajax save options
-- Added: Contextual helps option
-- Added: Admin bar menu option
-- Added: Search options feature
-- Added: WPMU Network menu option
-- Added: Sticky header
-- Added: Save defaults
-- Added: Database save data types ( for eg: `option`, `theme_mod`, `transient`, `network` )
-
-#### Metabox Option Framework
-- Added: Multiple post type support
-- Added: Database save data types ( for eg: `serialize`, `unserialize` )
-- Added: Exclude post types option
-- Added: Metabox display to specific page templates. ( for eg `default`, `sidebar-page.php`, `about-page.php` )
-- Added: Metabox display to specific post formats. ( for eg `standard`, `aside`, `gallery`, `video` )
-- Added: Restore metabox option button
-
-#### Customize Option Framework
-- Added: Multiple post type support
-- Added: Database save data types ( for eg: `option`, `theme_mod` )
-- Added: Save defaults
-
-#### Taxonomy Option Framework
-- Added: Multiple taxonomy type support
-- Added: Database save data types ( for eg: `serialize`, `unserialize` )
-
-#### Shortcode Generate Framework
-- Added: Gutenberg support as simply
 
 ## Available Option Fields
 
@@ -158,7 +116,7 @@ Read the documentation for details :closed_book: [documentation](http://codestar
 
 ## Support
 
-We are provide [support service](http://support.codestarthemes.com/) for premium version users. You can join to support service for submit any question after purchasing. Free version users support is limited on [github](https://github.com/Codestar/codestar-framework/issues).
+We are provide [support forum](http://support.codestarthemes.com/) for premium version users. You can join to support forum for submit any question after purchasing. Free version users support is limited on [github](https://github.com/Codestar/codestar-framework/issues).
 
 ## Release Notes
 Check out the [release notes](http://codestarframework.com/documentation/#/relnotes)

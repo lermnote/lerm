@@ -1,21 +1,18 @@
 <?php
-/*
- * @Author: your name
- * @Date: 2020-03-18 20:39:42
- * @LastEditTime: 2020-03-21 11:48:00
- * @LastEditors: your name
- * @Description: In User Settings Edit
- * @FilePath: \lerm\inc\options\config\options.config.php
+/**
+ * Theme options.
+ *
+ *  @package Lerm
  */
 
 if ( class_exists( 'CSF' ) ) {
-	// Set a unique slug-like ID
+	// Set a unique slug-like ID.
 	$prefix = 'lerm_theme_options';
 
-	// If using image radio buttons, define a directory path
+	// If using image radio buttons, define a directory path.
 	$imagepath = LERM_URI . 'assets/img/';
 
-	// Create options
+	// Create options.
 	CSF::createOptions(
 		$prefix,
 		array(
@@ -27,14 +24,27 @@ if ( class_exists( 'CSF' ) ) {
 	);
 
 	// ----------------------------------------
-	// Basic section
+	// Color Schemes
 	// ----------------------------------------
 	CSF::createSection(
 		$prefix,
 		array(
-			'title'  => __( 'Basic Settings', 'lerm' ),
-			'icon'   => 'fa fa-rocket',
+			'id'    => 'general_options',
+			'title' => __( 'General options', 'lerm' ),
+			'icon'  => 'fab fa-first-order',
+		)
+	);
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'general_options',
+			'title'  => __( 'Basic', 'lerm' ),
+			'icon'   => 'fa fa-tachometer',
 			'fields' => array(
+				array(
+					'type'    => 'heading',
+					'content' => __( 'Basic setting', 'lerm' ),
+				),
 				array(
 					'id'        => 'large_logo',
 					'type'      => 'media',
@@ -69,253 +79,6 @@ if ( class_exists( 'CSF' ) ) {
 					),
 				),
 				array(
-					'id'      => 'title_sepa',
-					'type'    => 'radio',
-					'title'   => __( 'Title Separator', 'lerm' ),
-					'inline'  => true,
-					'options' => array(
-						'|' => '|',
-						'-' => '-',
-					),
-					'default' => '|',
-					'after'   => __( 'Select the Title Separator of your Website. Default "|", eg: My Website|Just another WordPress site', 'lerm' ),
-				),
-
-				array(
-					'id'      => 'site_width',
-					'type'    => 'dimensions',
-					'title'   => __( 'Site Width', 'lerm' ),
-					'default' => array(
-						'width' => '1140',
-					),
-					'units'   => array( 'px' ),
-					'height'  => false,
-				),
-				array(
-					'id'      => 'global_layout',
-					'type'    => 'image_select',
-					'title'   => __( 'Layout', 'lerm' ),
-					'options' => array(
-						'layout-1c'        => $imagepath . '1c.png',
-						'layout-1c-narrow' => $imagepath . '1c-narrow.png',
-						'layout-2c-l'      => $imagepath . '2c-l.png',
-						'layout-2c-r'      => $imagepath . '2c-r.png',
-					),
-					'radio'   => true,
-					'default' => 'layout-2c-r',
-				),
-				array(
-					'id'    => 'affix',
-					'type'  => 'switcher',
-					'title' => __( 'Sidebar Affix', 'lerm' ),
-					'label' => __( 'Sidebar Affix', 'lerm' ),
-				),
-				array(
-					'id'            => 'copyright',
-					'type'          => 'wp_editor',
-					'title'         => __( 'Copyright', 'lerm' ),
-					'after'         => __( 'This copyright information will appear in the footer.', 'lerm' ),
-					'height'        => '100px',
-					'media_buttons' => false,
-					'quicktags'     => false,
-					'tinymce'       => false,
-				),
-
-			),
-		)
-	);
-	// ----------------------------------------
-	// Disign
-	// ----------------------------------------
-	CSF::createSection(
-		$prefix,
-		array(
-			'title'  => __( 'Design', 'lerm' ),
-			'icon'   => 'fa fa-tachometer',
-			'fields' => array(
-				array(
-					'type'    => 'heading',
-					'content' => __( 'Gobal Options', 'lerm' ),
-				),
-				array(
-					'id'      => 'main_color',
-					'type'    => 'color_group',
-					'title'   => __( 'Coler Schemes', 'lerm' ),
-					'options' => array(
-						'first_main_color'  => 'First Main Color',
-						'second_main_color' => 'Second Main Color',
-						'third_main_color'  => 'Third Main Color',
-						'forth_main_color'  => 'Forth Main Color',
-					),
-					'default' => array(
-						'first_main_color'  => '#fff',
-						'second_main_color' => '#5d6777',
-						'third_main_color'  => '#0084ba',
-						'forth_main_color'  => '#dd3333',
-					),
-				),
-				array(
-					'id'      => 'link_color',
-					'type'    => 'link_color',
-					'title'   => __( 'Link Color', 'lerm' ),
-					'active'  => true,
-					'focus'   => true,
-					'default' => array(
-						'color'  => '#0084ba',
-						'hover'  => '#0063aa',
-						'active' => '#0063aa',
-						'focus'  => '#0063aa',
-					),
-					'output'  => array( 'a' ),
-				),
-				array(
-					'id'                   => 'body_background',
-					'type'                 => 'background',
-					'title'                => 'Body Background',
-					'background_image_url' => false,
-					'default'              => array(
-						'background-color'      => '#ebebeb',
-						'background-position'   => 'center center',
-						'background-repeat'     => 'repeat',
-						'background-attachment' => 'fixed',
-						'background-size'       => 'cover',
-					),
-					'output'               => 'body',
-				),
-
-				array(
-					'id'             => 'body_typography',
-					'type'           => 'typography',
-					'title'          => 'Body Typography',
-					'font_family'    => '',
-					'text_transform' => false,
-					'unit'           => 'rem',
-					'default'        => array(
-						'font-weight' => '400',
-						'color'       => '#5d6777',
-						'font-size'   => '.875',
-						'unit'        => 'rem',
-					),
-					'output'         => 'body',
-				),
-				array(
-					'id'          => 'content_background',
-					'type'        => 'color',
-					'title'       => __( 'Content Background Color', 'lerm' ),
-					'default'     => '#fff',
-					'output_mode' => 'background-color',
-					'output'      => array(
-						'#related',
-						'#comment',
-						'.widget',
-						'.summary',
-						'.entry',
-						'.content-bg',
-						'img.avatar',
-						'.breadcrumb',
-						'.author-info',
-						'.page-numbers',
-						'.comment-respond',
-						'.post-navigation',
-						'.comment-list .comment',
-					),
-				),
-				array(
-					'id'           => 'title_wrap',
-					'type'         => 'color_pair',
-					'title'        => __( 'Widget title wrap', 'lerm' ),
-					'border_color' => true,
-					'default'      => array(
-						'color'            => '#fff',
-						'background_color' => '#0084ba',
-						'border_color'     => '#0084ba',
-					),
-					'output'       => array( '.widget-title .wrap', '.navigation .current', '.comment-pager .current', '.comment-reply-title .wrap' ),
-				),
-				array(
-					'type'    => 'heading',
-					'content' => __( 'Header and Footer', 'lerm' ),
-				),
-				array(
-					'id'          => 'header_bg_color',
-					'type'        => 'color',
-					'title'       => __( 'Header style', 'lerm' ),
-					'default'     => '#fff',
-					'output_mode' => 'background-color',
-					'output'      => array( '.site-header', '.primary-nav', '.navbar-nav .dropdown-menu' ),
-				),
-
-				array(
-					'id'               => 'navbar_link_color',
-					'type'             => 'link_color',
-					'title'            => __( 'Link color', 'lerm' ),
-					'bg_color'         => true,
-					'bg_hover'         => true,
-					'output_important' => true,
-					'default'          => array(
-						'color'    => '#828282',
-						'hover'    => '#fff ',
-						'bg_color' => '#fff ',
-						'bg_hover' => '#0084ba',
-					),
-					'output'           => array( '.navbar-nav .nav-link', '.dropdown-item', '.navbar-btn' ),
-				),
-				array(
-					'id'               => 'header_color',
-					'type'             => 'color_pair',
-					'title'            => __( 'Menu coler schemes', 'lerm' ),
-					'output_important' => true,
-					'default'          => array(
-						'color'            => '#0084ba',
-						'background_color' => '#fff',
-					),
-					'output'           => array( '.navbar-nav .active > .nav-link', '.navbar-nav .show > .nav-link' ),
-				),
-				array(
-					'id'           => 'navbar_item_spacing',
-					'type'         => 'spacing',
-					'title'        => 'Navbar item padding',
-					'units'        => array( 'px', '%', 'em', 'rem' ),
-					' output_mode' => 'padding',
-					'default'      => array(
-						'top'    => '1.5',
-						'bottom' => '1.5',
-						'unit'   => 'rem',
-					),
-					'left'         => false,
-					'right'        => false,
-					'output'       => array( '.nav-link' ),
-				),
-				array(
-					'id'      => 'site_header_border',
-					'type'    => 'border',
-					'title'   => 'Header border style',
-					'default' => array(
-						'top'    => '0',
-						'bottom' => '1',
-						'left'   => '0',
-						'right'  => '0',
-						'style'  => 'solid',
-						'color'  => '#82828244',
-					),
-					'output'  => '.site-header',
-				),
-
-				array(
-					'id'      => 'entry_header_border',
-					'type'    => 'border',
-					'title'   => 'Header Border Style',
-					'default' => array(
-						'top'    => '0',
-						'bottom' => '1',
-						'left'   => '0',
-						'right'  => '0',
-						'style'  => 'solid',
-						'color'  => '#82828244',
-					),
-					'output'  => '.entry-header',
-				),
-				array(
 					'id'      => 'narbar_align',
 					'type'    => 'button_set',
 					'title'   => __( 'Navbar align', 'lerm' ),
@@ -336,40 +99,252 @@ if ( class_exists( 'CSF' ) ) {
 					),
 					'default' => false,
 				),
+
 				array(
-					'id'      => 'copyright_style',
+					'id'         => 'icp_num',
+					'type'       => 'text',
+					'title'      => __( 'Website ICP Number', 'lerm' ),
+					'attributes' => array(
+						'placeholder' => get_option( 'zh_cn_l10n_icp_num' ),
+					),
+				),
+				array(
+					'id'          => 'footer_menus',
+					'type'        => 'select',
+					'title'       => 'Select a menus show on footer',
+					'placeholder' => 'Select a menu',
+					'options'     => 'menus',
+				),
+				array(
+					'id'            => 'copyright',
+					'type'          => 'wp_editor',
+					'title'         => __( 'Othor Information', 'lerm' ),
+					'after'         => __( 'This other information will appear on the footer.', 'lerm' ),
+					'height'        => '80px',
+					'media_buttons' => false,
+					'quicktags'     => false,
+					'tinymce'       => false,
+				),
+			),
+		)
+	);
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'general_options',
+			'title'  => __( 'Color', 'lerm' ),
+			'icon'   => 'fa fa-tachometer',
+			'fields' => array(
+				array(
+					'type'    => 'heading',
+					'content' => __( 'Color and style', 'lerm' ),
+				),
+
+				array(
+					'id'      => 'main_color',
+					'type'    => 'link_color',
+					'title'   => __( '_Primary Color', 'lerm' ),
+					'default' => array(
+						'color'  => '#0084ba',
+						'hover'  => '#0063aa',
+						'active' => '#0063aa',
+						'focus'  => '#0063aa',
+					),
+				),
+				array(
+					'id'      => 'link_color',
+					'type'    => 'link_color',
+					'title'   => __( 'Links Color', 'lerm' ),
+					'active'  => true,
+					'focus'   => true,
+					'default' => array(
+						'color'  => '#0084ba',
+						'hover'  => '#0063aa',
+						'active' => '#0063aa',
+						'focus'  => '#0063aa',
+					),
+					'output'  => array( 'a' ),
+				),
+				array(
+					'id'                   => 'body_background',
+					'type'                 => 'background',
+					'title'                => __( 'Body Background', 'lerm' ),
+					'subtitle'             => __( 'Default body background color', 'lerm' ),
+					'background_image_url' => false,
+					'default'              => array(
+						'background-color'      => '#fff',
+						'background-position'   => '',
+						'background-repeat'     => '',
+						'background-attachment' => '',
+						'background-size'       => '',
+					),
+
+					'output'               => 'body',
+				),
+				array(
+					'id'                   => 'content_background',
+					'type'                 => 'background',
+					'title'                => __( 'Content Background', 'lerm' ),
+					'subtitle'             => __( 'single content background color', 'lerm' ),
+					'background_image_url' => false,
+					'default'              => array(
+						'background-color'      => '#fff',
+						'background-position'   => '',
+						'background-repeat'     => '',
+						'background-attachment' => '',
+						'background-size'       => '',
+					),
+					'output'               => array(
+						'.card',
+					),
+				),
+
+				array(
+					'type'    => 'heading',
+					'content' => __( 'General setting', 'lerm' ),
+				),
+				array(
+					'id'          => 'header_bg_color',
+					'type'        => 'color',
+					'title'       => __( 'Site header background color', 'lerm' ),
+					'subtitle'    => __( 'site header and navbar background color', 'lerm' ),
+					'default'     => '#fff',
+					'output_mode' => 'background-color',
+					'output'      => array(
+						'.site-header',
+						'.dropdown-menu',
+						'.offcanvas',
+					),
+				),
+				array(
+					'id'             => 'body_typography',
+					'type'           => 'typography',
+					'title'          => 'Site Typography',
+					'preview'        => 'always',
+					'text_transform' => false,
+					'unit'           => 'rem',
+					'default'        => array(
+						'font-weight' => '400',
+						'color'       => '#5d6777',
+						'font-size'   => '.875',
+						'unit'        => 'rem',
+					),
+					'output'         => 'body',
+				),
+
+				array(
+					'id'           => 'title_wrap',
+					'type'         => 'color_pair',
+					'title'        => __( 'Widget header color', 'lerm' ),
+					'border_color' => true,
+					'default'      => array(
+						'color'            => '',
+						'background_color' => '',
+						'border_color'     => '',
+					),
+					'output'       => array( '.card-header, .navigation .current', '.comment-pager .current' ),
+				),
+				array(
+					'type'    => 'heading',
+					'content' => __( 'Header color schemes', 'lerm' ),
+				),
+
+				array(
+					'id'             => 'menu_typography',
+					'type'           => 'typography',
+					'title'          => 'Menu typography',
+					'font_family'    => '',
+					'text_transform' => false,
+					'unit'           => 'rem',
+					'default'        => array(
+						'font-weight' => '400',
+						'color'       => '#5d6777',
+						'font-size'   => '.875',
+						'unit'        => 'rem',
+						'line-height' => '1.5',
+					),
+					'output'         => '.navbar',
+				),
+				array(
+					'id'               => 'navbar_link_color',
+					'type'             => 'link_color',
+					'title'            => __( 'Menu links color', 'lerm' ),
+					'output_important' => true,
+					'default'          => array(
+						'color' => '#828282',
+						'hover' => '#0084ba',
+					),
+					'output'           => array( '.navbar-nav .nav-link', '.dropdown-item', '.navbar-btn' ),
+				),
+				array(
+					'id'               => 'header_color',
+					'type'             => 'color_pair',
+					'title'            => __( 'Menu items active color', 'lerm' ),
+					'output_important' => true,
+					'default'          => array(
+						'color'            => '#0084ba',
+						'background_color' => '#fff',
+					),
+					'output'           => array( '.navbar-nav .nav-link.active', '.navbar-nav .show > .nav-link', '.dropdown-item.active', '.dropdown-item:active' ),
+				),
+				array(
+					'id'          => 'navbar_item_spacing',
+					'type'        => 'spacing',
+					'title'       => 'Menu items padding',
+					'units'       => array( 'rem', 'em' ),
+					'output_mode' => 'padding',
+					'default'     => array(
+						'top'    => '1.5',
+						'bottom' => '1.5',
+						'unit'   => 'rem',
+					),
+					'left'        => false,
+					'right'       => false,
+					'output'      => array( '.nav-link' ),
+				),
+				array(
+					'id'      => 'site_header_border',
+					'type'    => 'border',
+					'title'   => 'Site header border',
+					'default' => array(
+						'top'    => '0',
+						'bottom' => '1',
+						'left'   => '0',
+						'right'  => '0',
+						'style'  => 'solid',
+						'color'  => '#82828244',
+					),
+					'output'  => '.site-header',
+				),
+				array(
+					'type'    => 'heading',
+					'content' => __( 'Footer color schemes', 'lerm' ),
+				),
+				array(
+					'id'      => 'colophon_style',
 					'type'    => 'color_pair',
-					'title'   => __( 'Footer style', 'lerm' ),
+					'title'   => __( 'Footer copyright color', 'lerm' ),
 					'default' => array(
 						'color'            => '#ddd',
 						'background_color' => '#555',
 					),
-					'output'  => array( '.copyright' ),
+					'output'  => array( '.colophon' ),
 				),
 				array(
-					'id'      => 'widget_color',
+					'id'      => 'footer_widget_color',
 					'type'    => 'color_pair',
-					'title'   => __( 'Footer widget style', 'lerm' ),
+					'title'   => __( 'Footer widgets color', 'lerm' ),
 					'default' => array(
 						'color'            => '#ddd',
 						'background_color' => '#333',
 					),
-					'output'  => array( '.footer-widget' ),
+					'output'  => array( '.footer' ),
 				),
 				array(
 					'type'    => 'heading',
-					'content' => __( 'Buttons', 'lerm' ),
+					'content' => __( 'Buttons Color', 'lerm' ),
 				),
-				array(
-					'id'      => 'like_button',
-					'type'    => 'color_pair',
-					'default' => array(
-						'color'            => '#fff',
-						'background_color' => '#c82333',
-					),
-					'title'   => __( 'Like button', 'lerm' ),
-					'output'  => '.like-button',
-				),
+
 				array(
 					'id'               => 'custom_button',
 					'type'             => 'color_pair',
@@ -377,36 +352,50 @@ if ( class_exists( 'CSF' ) ) {
 					'output_important' => true,
 					'default'          => array(
 						'color'            => '#0084ba',
-						'background_color' => '#fff',
+						'background_color' => '',
 						'border_color'     => '#0084ba',
 					),
-					'title'            => __( 'Custom button', 'lerm' ),
+					'title'            => __( 'Primary Buttons Color', 'lerm' ),
 					'output'           => array(
 						'.btn-custom',
-						'.comment-reply-link',
+						// '.comment-reply-link',
 						'a[id="cancel-comment-reply-link"]',
-						'.entry-tags a',
-						'.tag-cloud-link',
+						// '.tag-cloud-link',
 					),
 				),
 				array(
 					'id'               => 'custom_button_hover',
 					'type'             => 'color_pair',
+					'border_color'     => true,
 					'output_important' => true,
 					'default'          => array(
 						'color'            => '#fff',
 						'background_color' => '#0084ba',
 					),
-					'title'            => __( 'Custom Button hover', 'lerm' ),
+					'title'            => __( 'Primary Buttons Hover Color', 'lerm' ),
 					'output'           => array(
 						'.btn-custom:hover',
-						'.comment-reply-link:hover',
-						'.comment-reply-link:focus',
-						'.comment-reply-link:active',
 						'a[id="cancel-comment-reply-link"]:hover',
-						'.entry-tags a:hover',
-						'.tag-cloud-link:hover',
+						// '.tag-cloud-link:hover',
 					),
+				),
+				array(
+					'id'           => 'like_button',
+					'type'         => 'color_pair',
+					'title'        => __( 'Like Button Color', 'lerm' ),
+					'border_color' => true,
+					'default'      => array(
+						'color'            => '#fff',
+						'background_color' => '#c82333',
+					),
+					'output'       => array(
+						'.like-button,.like-button:hover',
+						'.like-button.done',
+					),
+				),
+				array(
+					'type'    => 'heading',
+					'content' => __( 'Custom Style', 'lerm' ),
 				),
 				array(
 					'id'       => 'custom_css',
@@ -417,16 +406,229 @@ if ( class_exists( 'CSF' ) ) {
 						'theme' => 'mbo',
 						'mode'  => 'css',
 					),
-					'default'  => '.like-button {
-					color: #fff;
-  					border-color:#bd2130;
-					background-color: #c82333;
-				}
-				.like-button:hover {
-					color: #fff;
-  					border-color:#dc3545;
-					background-color: #dc3545;
-			  }',
+				),
+			),
+		)
+	);
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'general_options',
+			'title'  => __( 'Layout', 'lerm' ),
+			'icon'   => 'fa fa-tachometer',
+			'fields' => array(
+				array(
+					'type'    => 'heading',
+					'content' => __( 'General layout', 'lerm' ),
+				),
+				array(
+					'id'       => 'layout_style',
+					'type'     => 'button_set',
+					'title'    => __( 'Layout style', 'lerm' ),
+					'subtitle' => __( 'Select site layout style', 'lerm' ),
+					'options'  => array(
+						'wide-layout'     => __( 'Wide', 'lerm' ),
+						'boxed-layout'    => __( 'Boxed', 'lerm' ),
+						'separate-layout' => __( 'Separate', 'lerm' ),
+					),
+					'default'  => 'separate-layout',
+				),
+				array(
+					'id'       => 'global_layout',
+					'type'     => 'image_select',
+					'title'    => __( 'Main Layout', 'lerm' ),
+					'subtitle' => __( 'Default site layout——sidebar select and position determin', 'lerm' ),
+					'options'  => array(
+						'layout-1c'        => $imagepath . '1c.png',
+						'layout-1c-narrow' => $imagepath . '1c-narrow.png',
+						'layout-2c-l'      => $imagepath . '2c-l.png',
+						'layout-2c-r'      => $imagepath . '2c-r.png',
+					),
+					'radio'    => true,
+					'default'  => 'layout-2c-r',
+				),
+				array(
+					'id'         => 'affix',
+					'type'       => 'switcher',
+					'dependency' => array( 'global_layout', 'any', 'layout-2c-l, layout-2c-r' ),
+					'title'      => __( 'Sidebar Affix', 'lerm' ),
+					'desc'       => __( 'Sidebar Affix', 'lerm' ),
+				),
+				array(
+					'id'          => 'boxed_width',
+					'type'        => 'spinner',
+					'title'       => __( 'Boxed Width (px)', 'lerm' ),
+					'subtitle'    => __( 'Main site container width', 'lerm' ),
+					'dependency'  => array( 'layout_style', '==', 'boxed-layout' ),
+					'min'         => 0,
+					'max'         => 4096,
+					'step'        => 1,
+					'unit'        => 'px',
+					'output'      => array( '.boxed-layout #page' ),
+					'output_mode' => 'width',
+					'default'     => 1140,
+				),
+				array(
+					'id'          => 'site_width',
+					'type'        => 'spinner',
+					'title'       => __( 'Main Container Width (px)', 'lerm' ),
+					'subtitle'    => __( 'Main site container width|default:1140|max:4096', 'lerm' ),
+					'dependency'  => array( 'layout_style', '!=', 'boxed-layout' ),
+					'min'         => 0,
+					'max'         => 4096,
+					'step'        => 1,
+					'output'      => array(
+						'.wide-layout .container',
+						'.separate-layout .container',
+					),
+					'output_mode' => 'width',
+				),
+
+				array(
+					'id'          => 'content_width',
+					'type'        => 'spinner',
+					'title'       => __( 'Content Width (%)', 'lerm' ),
+					'subtitle'    => __( 'Content area width|default:66.6666666667', 'lerm' ),
+					'min'         => 0,
+					'max'         => 100,
+					'step'        => 1,
+					'output_mode' => 'width',
+					'default'     => 66.6666666667,
+				),
+				array(
+					'id'          => 'sidebar_width',
+					'type'        => 'spinner',
+					'title'       => __( 'Sidebar Width (%)', 'lerm' ),
+					'subtitle'    => __( 'Sidebar area width|default:33.3333333333', 'lerm' ),
+					'min'         => 0,
+					'max'         => 100,
+					'step'        => 1,
+					'output_mode' => 'width',
+					'default'     => 33.3333333333,
+				),
+				array(
+					'id'          => 'outside_bg_color',
+					'type'        => 'color',
+					'title'       => __( 'Outside background', 'lerm' ),
+					'subtitle'    => __( 'Outside background color', 'lerm' ),
+					'default'     => '#ebebeb',
+					'output_mode' => 'background-color',
+					'output'      => array(
+						'.boxed-layout',
+					),
+				),
+				array(
+					'id'          => 'inner_bg_color',
+					'type'        => 'color',
+					'title'       => __( 'Inner background', 'lerm' ),
+					'subtitle'    => __( 'Inner background color', 'lerm' ),
+					'default'     => '#fff',
+					'output_mode' => 'background-color',
+					'output'      => array(
+						'.boxed-layout #page',
+					),
+				),
+			),
+		)
+	);
+	// ----------------------------------------
+	// an  option section for acceleration and optimization
+	// ----------------------------------------
+	CSF::createSection(
+		$prefix,
+		array(
+			'id'    => 'optimization',
+			'title' => __( 'Optimization', 'lerm' ),
+			'icon'  => 'fa fa-rocket',
+		)
+	);
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'optimization',
+			'title'  => __( 'Acceleration', 'lerm' ),
+			'icon'   => 'fa fa-star',
+			'fields' => array(
+				array(
+					'type'    => 'heading',
+					'content' => __( 'WordPress Acceleration', 'lerm' ),
+				),
+				array(
+					'id'      => 'super_admin',
+					'type'    => 'switcher',
+					'title'   => __( 'Backend Acceleration', 'lerm' ),
+					'desc'    => __( '将WordPress核心所依赖的静态文件切换为公共资源，此选项极大的加快管理后台访问速度 ', 'lerm' ),
+					'default' => false,
+				),
+				array(
+					'id'          => 'super_gravatar',
+					'type'        => 'select',
+					'title'       => __( 'Gravatar Acceleration', 'lerm' ),
+					'placeholder' => __( 'Select a gravatar acceleration services', 'lerm' ),
+					'desc'        => __( '提高Gravatar头像的加载速度', 'lerm' ),
+					'options'     => array(
+						'disable'                        => __( 'Disable', 'lerm' ),
+						'https://cdn.sep.cc/avatar/'     => __( 'Sep 加速服务', 'lerm' ),
+						'https://cravatar.cn/avatar/'    => __( 'Cravatar 加速服务', 'lerm' ),
+						'https://sdn.geekzu.org/avatar/' => __( 'Geekzu 加速服务', 'lerm' ),
+						'https://gravatar.loli.net/avatar/' => __( 'Loli 加速服务', 'lerm' ),
+						'https://weavatar.com/avatar/'   => __( 'WeAvatar 加速服务', 'lerm' ),
+					),
+					'default'     => 'disable',
+				),
+				array(
+					'id'          => 'super_googleapis',
+					'type'        => 'select',
+					'title'       => __( 'Googlefont acceleration', 'lerm' ),
+					'placeholder' => __( 'Select a goolge services acceleration', 'lerm' ),
+					'desc'        => __( 'Please enable this option only if Googlefonts are included to avoid unnecessary performance loss,', 'lerm' ),
+					'options'     => array(
+						'disable' => __( 'Disable', 'lerm' ),
+						'geekzu'  => __( 'Geekzu 加速服务', 'lerm' ),
+						'loli'    => __( 'Loli 加速服务', 'lerm' ),
+						'ustc'    => __( 'USTC 加速服务', 'lerm' ),
+					),
+					'default'     => 'disable',
+				),
+
+			),
+		)
+	);
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'optimization',
+			'title'  => __( 'Optimize', 'lerm' ),
+			'icon'   => 'fa fa-star',
+			'fields' => array(
+				array(
+					'type'    => 'heading',
+					'content' => __( 'WordPress Optimize', 'lerm' ),
+				),
+				array(
+					'id'       => 'super_optimize',
+					'type'     => 'checkbox',
+					'title'    => __( 'WordPress optimization', 'lerm' ),
+					'subtitle' => __( 'Cleanup wp_head unneccessary and unsecure codes.', 'lerm' ),
+					'options'  => array(
+						'rsd_link'                        => __( 'Remove RSD link', 'lerm' ),
+						'wlwmanifest_link'                => __( 'Remove Windows live writer', 'lerm' ),
+						'wp_generator'                    => __( 'Remove WordPress version', 'lerm' ),
+						'remove_ver'                      => __( 'Remove version in styles and scripts', 'lerm' ),
+						'start_post_rel_link'             => __( 'Remove random post link', 'lerm' ),
+						'index_rel_link'                  => __( 'Remove link to index page', 'lerm' ),
+						'adjacent_posts_rel_link_wp_head' => __( 'Remove the next and previous post links', 'lerm' ),
+						'parent_post_rel_link'            => __( 'Remove parent post link', 'lerm' ),
+						'wp_shortlink_wp_head'            => __( 'Remove wp head shortlink', 'lerm' ),
+						'feed_links'                      => __( 'Remove rss feed links', 'lerm' ),
+						'disable_emojis'                  => __( 'Remove WordPress emojis', 'lerm' ),
+						'disable_oembed'                  => __( 'Disable WordPress embed', 'lerm' ),
+						'remove_rest_api'                 => __( 'Remove rest api links in head', 'lerm' ),
+						'disable_rest_api'                => __( 'Disable rest api', 'lerm' ),
+						'remove_recent_comments_css'      => __( 'Remove recent comments widget styles', 'lerm' ),
+						'rel_canonical'                   => __( 'Remove rel canonical', 'lerm' ),
+						'remove_global_styles_render_svg' => __( 'Remove wp global styles render svg filters', 'lerm' ),
+					),
 				),
 			),
 		)
@@ -447,9 +649,8 @@ if ( class_exists( 'CSF' ) ) {
 					'label' => __( 'Enable notification email for comments', 'lerm' ),
 				),
 				array(
-					'id'         => 'mail_options',
+					'id'         => 'smtp_options',
 					'type'       => 'fieldset',
-					// 'title'           => __( 'From Mail','lerm' ),
 					'dependency' => array( 'email_notice', '==', 'true' ),
 					'fields'     => array(
 						array(
@@ -460,20 +661,14 @@ if ( class_exists( 'CSF' ) ) {
 							'id'    => 'from_email',
 							'type'  => 'text',
 							'title' => __( 'From Email', 'lerm' ),
+							'desc'  => __( 'The email address that emails are sent from.', 'lerm' ),
 						),
 						array(
 							'id'    => 'from_name',
 							'type'  => 'text',
 							'title' => __( 'From Name', 'lerm' ),
+							'desc'  => __( 'The name that emails are sent from.', 'lerm' ),
 						),
-					),
-				),
-				array(
-					'id'         => 'smtp_options',
-					'type'       => 'fieldset',
-					// 'title'           => __( 'SMTP Options','lerm' ),
-					'dependency' => array( 'email_notice', '==', 'true' ),
-					'fields'     => array(
 						array(
 							'type'    => 'heading',
 							'content' => __( 'SMTP Options', 'lerm' ),
@@ -485,33 +680,41 @@ if ( class_exists( 'CSF' ) ) {
 						),
 						array(
 							'id'    => 'smtp_port',
-							'type'  => 'text',
+							'type'  => 'number',
 							'title' => __( 'SMTP Port', 'lerm' ),
 						),
 						array(
-							'id'    => 'ssl_switcher',
-							'type'  => 'switcher',
-							'title' => __( 'SSL Encryption', 'lerm' ),
+							'id'      => 'ssl_enable',
+							'type'    => 'button_set',
+							'title'   => __( 'SSL Encryption', 'lerm' ),
+							'options' => array(
+								''    => 'None',
+								'tls' => 'TLS',
+								'ssl' => 'SSL',
+							),
+							'default' => 'tls',
+							'desc'    => __( 'For most servers TLS is the recommended option. If your SMTP provider offers both SSL and TLS options, we recommend using TLS.', 'lerm' ),
 						),
+
 						array(
 							'id'      => 'smtp_auth',
 							'type'    => 'radio',
 							'title'   => __( 'SMTP Authentication', 'lerm' ),
 							'label'   => __( 'If Your Email open the smtp authentication', 'lerm' ),
 							'options' => array(
-								'true'  => __( 'Use SMTP authentication', 'lerm' ),
-								'false' => __( 'Do NOT use SMTP authentication', 'lerm' ),
+								true  => __( 'Use SMTP authentication', 'lerm' ),
+								false => __( 'Do NOT use SMTP authentication', 'lerm' ),
 							),
 						),
 						array(
 							'id'    => 'username',
 							'type'  => 'text',
-							'title' => __( 'Username', 'lerm' ),
+							'title' => __( 'STMP Username', 'lerm' ),
 						),
 						array(
 							'id'         => 'pswd',
 							'type'       => 'text',
-							'title'      => __( 'Password', 'lerm' ),
+							'title'      => __( 'STMP Password', 'lerm' ),
 							'attributes' => array(
 								'type' => 'password',
 							),
@@ -521,24 +724,29 @@ if ( class_exists( 'CSF' ) ) {
 			),
 		)
 	);
+		// ----------------------------------------
+	// an  option section for seo-- done
+	// ----------------------------------------
 	CSF::createSection(
 		$prefix,
 		array(
+			'id'    => 'seo_optimize',
+			'title' => __( 'SEO optimize', 'lerm' ),
+			'icon'  => 'fas fa-gavel',
+		)
+	);
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'seo_optimize',
 			'icon'   => 'fa fa-flask',
-			'title'  => __( 'SEO Optimize', 'lerm' ),
+			'title'  => __( 'TDK', 'lerm' ),
 			'fields' => array(
-				array(
-					'id'      => 'lazyload',
-					'type'    => 'switcher',
-					'title'   => __( 'Images Lazyload', 'lerm' ),
-					'label'   => __( 'Images Lazyload', 'lerm' ),
-					'default' => true,
-				),
 				array(
 					'id'         => 'keywords',
 					'type'       => 'text',
 					'title'      => __( 'Keywords', 'lerm' ),
-					'label'      => __( 'Separate with commas', 'lerm' ),
+					'desc'       => __( 'Separate with commas', 'lerm' ),
 					'attributes' => array(
 						'style'       => 'width: 100%',
 						'placeholder' => __( 'eg: WordPress,Theme...', 'lerm' ),
@@ -552,30 +760,289 @@ if ( class_exists( 'CSF' ) ) {
 						'placeholder' => __( 'Description', 'lerm' ),
 					),
 				),
-
 				array(
-					'id'      => 'sitemap_submit',
+					'id'      => 'title_sep',
+					'type'    => 'button_set',
+					'title'   => __( 'Title separator', 'lerm' ),
+					'desc'    => __( 'Select a title separator of your Website. Default "|", eg: My Website|Just another WordPress site', 'lerm' ),
+					'options' => array(
+						'-'        => '-',
+						'&ndash;'  => '&ndash;',
+						'&mdash;'  => '&mdash;',
+						':'        => ':',
+						'&middot;' => '&middot;',
+						'&bull;'   => '&bull;',
+						'*'        => '*',
+						'&#8902;'  => '&#8902;',
+						'|'        => '|',
+						'~'        => '~',
+						'&laquo;'  => '&laquo;',
+						'&raquo;'  => '&raquo;',
+						'&gt;'     => '&gt;',
+					),
+					'default' => '-',
+				),
+				array(
+					'id'      => 'html_slug',
+					'type'    => 'switcher',
+					'title'   => __( 'HTML Slug', 'lerm' ),
+					'desc'    => __( 'Shows .html slug for pages (please RE-SAVE the permalink options after changed slug)', 'lerm' ),
+					'default' => false,
+				),
+				array(
+					'id'      => 'lazyload',
+					'type'    => 'switcher',
+					'title'   => __( 'Images Lazyload', 'lerm' ),
+					'desc'    => __( 'Images Lazyload', 'lerm' ),
+					'default' => false,
+				),
+				array(
+					'id'      => 'baidu_submit',
 					'type'    => 'switcher',
 					'title'   => __( 'Baidu Submit', 'lerm' ),
 					'default' => false,
 				),
 				array(
+					'id'         => 'submit_url',
+					'type'       => 'text',
+					'dependency' => array( 'baidu_submit', '==', 'true' ),
+					'title'      => __( 'Submit URL', 'lerm' ),
+				),
+				array(
 					'id'         => 'submit_token',
 					'type'       => 'text',
-					'dependency' => array( 'sitemap_submit', '==', 'true' ),
+					'dependency' => array( 'baidu_submit', '==', 'true' ),
 					'title'      => __( 'Submit Token', 'lerm' ),
 				),
 				array(
-					'id'            => 'baidu_tongji',
-					'type'          => 'wp_editor',
-					'title'         => __( 'Baidu Tongji', 'lerm' ),
-					'after'         => __( 'baidu tongji code in before <\/head\>', 'lerm' ),
-					'height'        => '100px',
-					'media_buttons' => false,
-					'quicktags'     => false,
-					'tinymce'       => false,
+					'id'       => 'baidu_tongji',
+					'type'     => 'code_editor',
+					'title'    => __( 'Baidu Tongji', 'lerm' ),
+					'after'    => __( 'Baidu tongji code in before head tag', 'lerm' ),
+					'sanitize' => false,
 				),
 
+				array(
+					'id'          => 'title_structure',
+					'type'        => 'select',
+					'title'       => __( 'Home title structure', 'lerm' ),
+					'chosen'      => true,
+					'multiple'    => true,
+					'sortable'    => true,
+					'placeholder' => 'Select an option',
+					'options'     => array(
+						'title'      => __( 'Site title', 'lerm' ),
+						'separator'  => __( 'Separator', 'lerm' ),
+						'tagline'    => __( 'Site tagline', 'lerm' ),
+						'post_title' => __( 'Post title', 'lerm' ),
+						'page_title' => __( 'Page title', 'lerm' ),
+					),
+					'default'     => array( 'title', 'separator', 'tagline' ),
+				),
+				array(
+					'id'          => 'post_title_structure',
+					'type'        => 'select',
+					'title'       => __( 'Post title structure', 'lerm' ),
+					'chosen'      => true,
+					'multiple'    => true,
+					'sortable'    => true,
+					'placeholder' => 'Select an option',
+					'options'     => array(
+						'title'      => __( 'Site title', 'lerm' ),
+						'separator'  => __( 'Separator', 'lerm' ),
+						'tagline'    => __( 'Site tagline', 'lerm' ),
+						'post_title' => __( 'Post title', 'lerm' ),
+						'page_title' => __( 'Page title', 'lerm' ),
+					),
+					'default'     => array( 'page_title', 'separator', 'title' ),
+				),
+				array(
+					'id'          => 'page_title_structure',
+					'type'        => 'select',
+					'title'       => __( 'Page title structure', 'lerm' ),
+					'chosen'      => true,
+					'multiple'    => true,
+					'sortable'    => true,
+					'placeholder' => 'Select an option',
+					'options'     => array(
+						'title'      => __( 'Site title', 'lerm' ),
+						'separator'  => __( 'Separator', 'lerm' ),
+						'tagline'    => __( 'Site tagline', 'lerm' ),
+						'post_title' => __( 'Post title', 'lerm' ),
+						'page_title' => __( 'Page title', 'lerm' ),
+					),
+					'default'     => array( 'page_title', 'separator', 'title' ),
+				),
+
+			),
+		)
+	);
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'seo_optimize',
+			'icon'   => 'fa fa-flask',
+			'title'  => __( 'Sitemap', 'lerm' ),
+			'fields' => array(
+				array(
+					'type'    => 'heading',
+					'content' => __( 'WordPress Sitemap', 'lerm' ),
+				),
+				array(
+					'id'      => 'sitemap_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Use WordPress sitemap', 'lerm' ),
+					'desc'    => __( 'Use WordPress sitemap', 'lerm' ),
+					'default' => true,
+				),
+				array(
+					'id'         => 'exclude_post_types',
+					'type'       => 'checkbox',
+					'dependency' => array( 'sitemap_enable', '==', 'true' ),
+					'inline'     => true,
+					'title'      => __( 'Post Types', 'lerm' ),
+					'desc'       => __( 'Here you can select post types that you do not want to include in your sitemap.', 'lerm' ),
+					'options'    => array(
+						'page'        => __( 'Pages', 'lerm' ),
+						'post'        => __( 'Posts', 'lerm' ),
+						'category'    => __( 'Categories', 'lerm' ),
+						'post_tag'    => __( 'Tags', 'lerm' ),
+						'post_format' => __( 'Formats', 'lerm' ),
+						'users'       => __( 'Users', 'lerm' ),
+					),
+				),
+				array(
+					'id'         => 'exclude_categories',
+					'type'       => 'checkbox',
+					'dependency' => array(
+						array( 'sitemap_enable', '==', 'true' ),
+						array( 'exclude_post_types', '!=', 'category' ),
+					),
+					'title'      => __( 'Categories', 'lerm' ),
+					'desc'       => __( 'Here you can select post types that you do not want to include in your sitemap.', 'lerm' ),
+					'options'    => 'categories',
+				),
+				array(
+					'id'         => 'exclude_tags',
+					'type'       => 'checkbox',
+					'dependency' => array(
+						array( 'sitemap_enable', '==', 'true' ),
+						array( 'exclude_post_types', '!=', 'post_tag' ),
+					),
+					'title'      => __( 'Tags', 'lerm' ),
+					'desc'       => __( 'Here you can select post types that you do not want to include in your sitemap.', 'lerm' ),
+					'options'    => 'tags',
+				),
+				array(
+					'id'         => 'exclude_users',
+					'type'       => 'checkbox',
+					'dependency' => array(
+						array( 'sitemap_enable', '==', 'true' ),
+						array( 'exclude_post_types', '!=', 'user' ),
+					),
+					'title'      => __( 'Users', 'lerm' ),
+					'desc'       => __( 'Here you can select post types that you do not want to include in your sitemap.', 'lerm' ),
+					'options'    => 'users',
+				),
+				array(
+					'id'         => 'exclude_page',
+					'type'       => 'checkbox',
+					'dependency' => array(
+						array( 'sitemap_enable', '==', 'true' ),
+						array( 'exclude_post_types', '!=', 'page' ),
+					),
+					'title'      => __( 'Pages', 'lerm' ),
+					'desc'       => __( 'Here you can select pages that you do not want to include in your sitemap.', 'lerm' ),
+					'options'    => 'pages',
+				),
+				array(
+					'id'         => 'exclude_post',
+					'type'       => 'checkbox',
+					'dependency' => array(
+						array( 'sitemap_enable', '==', 'true' ),
+						array( 'exclude_post_types', '!=', 'post' ),
+					),
+					'title'      => __( 'Posts', 'lerm' ),
+					'desc'       => __( 'Here you can select posts that you do not want to include in your sitemap.', 'lerm' ),
+					'options'    => 'posts',
+				),
+			),
+		)
+	);
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'seo_optimize',
+			'icon'   => 'fa fa-flask',
+			'title'  => __( 'Breadcrumb', 'lerm' ),
+			'fields' => array(
+				array(
+					'id'      => 'breadcrumb_container',
+					'type'    => 'button_set',
+					'title'   => __( 'Container', 'lerm' ),
+					'desc'    => __( 'Container HTML element. nav|div', 'lerm' ),
+					'options' => array(
+						'nav' => __( 'nav', 'lerm' ),
+						'div' => __( 'div', 'lerm' ),
+					),
+					'default' => 'nav',
+				),
+				array(
+					'id'    => 'breadcrumb_before',
+					'type'  => 'text',
+					'title' => __( 'Before', 'lerm' ),
+					'desc'  => __( 'String to output before breadcrumb menu.', 'lerm' ),
+				),
+				array(
+					'id'    => 'breadcrumb_after',
+					'type'  => 'text',
+					'title' => __( 'After', 'lerm' ),
+					'desc'  => __( 'String to output after breadcrumb menu.', 'lerm' ),
+				),
+				array(
+					'id'      => 'breadcrumb_list_tag',
+					'type'    => 'button_set',
+					'title'   => __( 'List tag', 'lerm' ),
+					'desc'    => __( 'The HTML tag to use for the list wrapper.', 'lerm' ),
+					'options' => array(
+						'ol'  => __( 'ol', 'lerm' ),
+						'ul'  => __( 'ul', 'lerm' ),
+						'div' => __( 'div', 'lerm' ),
+					),
+					'default' => 'ol',
+				),
+				array(
+					'id'      => 'breadcrumb_item_tag',
+					'type'    => 'button_set',
+					'title'   => __( 'Item tag', 'lerm' ),
+					'desc'    => __( 'The HTML tag to use for the list wrapper.', 'lerm' ),
+					'options' => array(
+						'li'   => __( 'li', 'lerm' ),
+						'span' => __( 'span', 'lerm' ),
+					),
+					'default' => 'li',
+				),
+				array(
+					'id'      => 'breadcrumb_separator',
+					'type'    => 'text',
+					'title'   => __( 'After', 'lerm' ),
+					'desc'    => __( 'Breadcrumb link separator, ex: \'»\',, Alt Code', 'lerm' ),
+					'default' => '/',
+				),
+				array(
+					'id'      => 'breadcrumb_front_show',
+					'type'    => 'switcher',
+					'title'   => __( 'Show on front', 'lerm' ),
+					'desc'    => __( 'Whether to show when `is_front_page()`.', 'lerm' ),
+					'default' => false,
+				),
+				array(
+					'id'      => 'breadcrumb_show_title',
+					'type'    => 'switcher',
+					'title'   => __( 'Show title', 'lerm' ),
+					'desc'    => __( 'Whether to show the title (last item) in the trail.', 'lerm' ),
+					'default' => true,
+				),
 			),
 		)
 	);
@@ -589,22 +1056,15 @@ if ( class_exists( 'CSF' ) ) {
 			'title'  => __( 'Blog Optimize', 'lerm' ),
 			'fields' => array(
 				array(
-					'id'      => 'summary_meta',
-					'type'    => 'sorter',
-					'title'   => __( 'Summary Meta', 'lerm' ),
-					'default' => array(
-						'enabled'  => array(
-							'categories' => 'Category',
-							'read'       => 'Read',
-						),
-						'disabled' => array(
-							'author'       => 'Author',
-							'comment'      => 'Comment',
-							'publish_date' => 'Publish Date',
-							'format'       => 'Format',
-							// 'modified_date' => 'Modified Date',
-						),
+					'id'      => 'summary_or_full',
+					'type'    => 'radio',
+					'title'   => __( 'Show post content on page', 'lerm' ),
+					'label'   => __( 'show post content on blog page', 'lerm' ),
+					'options' => array(
+						'content_full'    => __( 'Full', 'lerm' ),
+						'content_summary' => __( 'Summary', 'lerm' ),
 					),
+					'default' => 'content_summary',
 				),
 				array(
 					'id'      => 'cat-exclude',
@@ -619,21 +1079,11 @@ if ( class_exists( 'CSF' ) ) {
 					'label'   => __( 'Switcher on to show posts thumbnial', 'lerm' ),
 					'default' => true,
 				),
-
 				array(
-					'id'      => 'thumb_dimensions',
-					'type'    => 'dimensions',
-					'title'   => 'Blog page thumbnail width and height',
-					'units'   => array( 'px' ),
-					'meidas'  => array( 'breakpoint-sm', 'breakpoint-md', 'breakpoint-lg' ),
-					'default' => array(
-						'width'  => '180',
-						'height' => '120',
-						'meida'  => 'breakpoint-sm',
-					),
-					'output'  => array( '.post-thumbnail' ),
+					'id'    => 'thumbnail_gallery',
+					'type'  => 'gallery',
+					'title' => __( 'Post Thumbnail Gallery', 'lerm' ),
 				),
-
 				array(
 					'id'      => 'load_more',
 					'type'    => 'switcher',
@@ -642,28 +1092,13 @@ if ( class_exists( 'CSF' ) ) {
 					'default' => false,
 				),
 				array(
-					'id'         => 'cdn_jquery',
-					'type'       => 'text',
-					'title'      => __( 'jQuery CDN', 'lerm' ),
-					'label'      => __( 'jQuery CDN', 'lerm' ),
-					'attributes' => array(
-						'placeholder' => 'http://',
-					),
-				),
-				array(
-					'id'         => 'replace_avatar',
-					'type'       => 'text',
-					'title'      => __( 'Replace Avatar', 'lerm' ),
-					'attributes' => array(
-						'placeholder' => 'http://',
-					),
-				),
-				array(
-					'id'      => 'avatar_cache',
+					'id'      => 'loading-animate',
 					'type'    => 'switcher',
-					'title'   => __( 'Avatar Cache', 'lerm' ),
+					'title'   => __( 'Loading animate', 'lerm' ),
+					'label'   => __( 'Switcher on to Enable posts loading animate', 'lerm' ),
 					'default' => false,
 				),
+
 				array(
 					'id'      => 'excerpt_length',
 					'type'    => 'slider',
@@ -672,6 +1107,23 @@ if ( class_exists( 'CSF' ) ) {
 					'max'     => 300,
 					'step'    => 5,
 					'default' => 95,
+				),
+				array(
+					'id'      => 'summary_meta',
+					'type'    => 'sorter',
+					'title'   => __( 'Summary Meta', 'lerm' ),
+					'default' => array(
+						'enabled'  => array(
+							'categories' => 'Category',
+							'read'       => 'Read',
+						),
+						'disabled' => array(
+							'author'       => 'Author',
+							'comment'      => 'Comment',
+							'publish_date' => 'Publish Date',
+							'format'       => 'Format',
+						),
+					),
 				),
 			),
 		)
@@ -692,13 +1144,6 @@ if ( class_exists( 'CSF' ) ) {
 					'label'   => __( 'Search results exclude all pages', 'lerm' ),
 					'default' => true,
 				),
-				array(
-					'id'      => 'html_slug',
-					'type'    => 'switcher',
-					'title'   => __( 'HTML Slug', 'lerm' ),
-					'label'   => __( 'Shows .html slug for pages (please re-save the permalink options after changed slug)', 'lerm' ),
-					'default' => false,
-				),
 			),
 		)
 	);
@@ -715,30 +1160,7 @@ if ( class_exists( 'CSF' ) ) {
 					'type'    => 'heading',
 					'content' => __( 'Single page optimize', 'lerm' ),
 				),
-				array(
-					'id'      => 'single_top',
-					'type'    => 'sorter',
-					'title'   => __( 'Post Meta', 'lerm' ),
-					'default' => array(
-						'enabled'  => array(
-							'publish_date' => 'Publish Date',
-							'categories'   => 'Category',
-							'read'         => 'Read',
-							'comment'      => 'Comment',
-						),
-						'disabled' => array(
-							'format' => 'Format',
-							'author' => 'Author',
-							// 'modified_date' => 'Modified Date',
-						),
-					),
-				),
-				array(
-					'id'      => 'disable_embeds',
-					'type'    => 'switcher',
-					'title'   => __( 'Disable Embeds', 'lerm' ),
-					'default' => false,
-				),
+
 				array(
 					'id'      => 'disable_pingback',
 					'type'    => 'switcher',
@@ -780,6 +1202,42 @@ if ( class_exists( 'CSF' ) ) {
 					'title'      => __( 'Related posts number', 'lerm' ),
 					'default'    => 5,
 				),
+				array(
+					'id'      => 'single_top',
+					'type'    => 'sorter',
+					'title'   => __( 'Post meta top', 'lerm' ),
+					'desc'    => __( 'Show post meta on single top', 'lerm' ),
+					'default' => array(
+						'enabled'  => array(
+							'publish_date' => 'Publish Date',
+							'categories'   => 'Category',
+							'read'         => 'Read',
+							'comment'      => 'Comment',
+						),
+						'disabled' => array(
+							'format' => 'Format',
+							'author' => 'Author',
+						),
+					),
+				),
+				array(
+					'id'      => 'single_bottom',
+					'type'    => 'sorter',
+					'title'   => __( 'Post meta bottom', 'lerm' ),
+					'desc'    => __( 'Show post meta on single bottom', 'lerm' ),
+					'default' => array(
+						'enabled'  => array(
+							'publish_date' => 'Publish Date',
+							'categories'   => 'Category',
+						),
+						'disabled' => array(
+							'format'  => 'Format',
+							'author'  => 'Author',
+							'read'    => 'Read',
+							'comment' => 'Comment',
+						),
+					),
+				),
 			),
 		)
 	);
@@ -792,6 +1250,10 @@ if ( class_exists( 'CSF' ) ) {
 			'icon'   => 'fa fa-weixin',
 			'title'  => __( 'Sidebar', 'lerm' ),
 			'fields' => array(
+				array(
+					'type'    => 'heading',
+					'content' => __( 'Basic Setting', 'lerm' ),
+				),
 				array(
 					'id'     => 'register_sidebars',
 					'type'   => 'group',
@@ -833,12 +1295,17 @@ if ( class_exists( 'CSF' ) ) {
 					'options'     => 'sidebars',
 				),
 				array(
-					'id'      => 'footer_sidebars_count',
-					'type'    => 'spinner',
-					'title'   => __( 'Footer sidebars count', 'lerm' ),
-					'default' => 0,
+					'type'    => 'heading',
+					'content' => __( 'Widget Setting', 'lerm' ),
+				),
+				array(
+					'id'      => 'comment_excerpt_length',
+					'type'    => 'slider',
+					'title'   => __( 'Latest comment widget excerpt length', 'lerm' ),
 					'min'     => 0,
-					'max'     => 4,
+					'max'     => 300,
+					'step'    => 5,
+					'default' => 95,
 				),
 			),
 		)
@@ -903,41 +1370,41 @@ if ( class_exists( 'CSF' ) ) {
 			'title'  => __( 'Carousel Options', 'lerm' ),
 			'fields' => array(
 				array(
-					'id'    => 'slide_switcher',
+					'id'    => 'slide_enable',
 					'type'  => 'switcher',
 					'title' => __( 'Enable Slides', 'lerm' ),
 					'label' => __( 'Enable to show slides on frontpage', 'lerm' ),
 				),
 				array(
 					'id'         => 'slide_position',
-					'type'       => 'radio',
+					'type'       => 'image_select',
 					'title'      => __( 'Slides Position', 'lerm' ),
 					'label'      => __( 'Select Slides Position On frontpage', 'lerm' ),
-					'dependency' => array( 'slide_switcher', '==', 'true' ),
+					'dependency' => array( 'slide_enable', '==', 'true' ),
 					'options'    => array(
-						'under_navbar'     => __( 'Under navbar', 'lerm' ),
-						'above_entry_list' => __( 'Above entry list', 'lerm' ),
-						'full_width'       => __( 'Under navbar(Full width)', 'lerm' ),
+						'under_navbar'  => $imagepath . 'main_width.png',
+						'under_primary' => $imagepath . 'primary_width.png',
+						'full_width'    => $imagepath . 'full_width.png',
 					),
 				),
 				array(
 					'id'         => 'slide_indicators',
 					'type'       => 'switcher',
+					'dependency' => array( 'slide_enable', '==', 'true' ),
 					'title'      => __( 'Slides indicators', 'lerm' ),
-					'label'      => __( 'Enable to show slides indicators', 'lerm' ),
-					'dependency' => array( 'slide_switcher', '==', 'true' ),
+					'desc'       => __( 'Enable to show slides indicators', 'lerm' ),
 				),
 				array(
 					'id'         => 'slide_control',
 					'type'       => 'switcher',
+					'dependency' => array( 'slide_enable', '==', 'true' ),
 					'title'      => __( 'Slides control arrows', 'lerm' ),
-					'label'      => __( 'Enable to show slides control arrows', 'lerm' ),
-					'dependency' => array( 'slide_switcher', '==', 'true' ),
+					'desc'       => __( 'Enable to show slides control arrows', 'lerm' ),
 				),
 				array(
-					'id'                     => 'lerm_slides',
+					'id'                     => 'slide_images',
 					'type'                   => 'group',
-					'dependency'             => array( 'slide_switcher', '==', 'true' ),
+					'dependency'             => array( 'slide_enable', '==', 'true' ),
 					'title'                  => __( 'Slides', 'lerm' ),
 					'button_title'           => __( 'Add Slide', 'lerm' ),
 					'accordion_title'        => __( 'New Slide', 'lerm' ),
@@ -981,11 +1448,21 @@ if ( class_exists( 'CSF' ) ) {
 			'title'  => __( 'AD', 'lerm' ),
 			'fields' => array(
 				array(
-					'id'      => 'disable_rest_api',
+					'id'      => 'ad_switcher',
 					'type'    => 'switcher',
-					'title'   => __( 'Disable Rest API', 'lerm' ),
-					'label'   => __( 'If use GutenBerg editor, must enable rest_api', 'lerm' ),
+					'title'   => __( 'Show ads on Website', 'lerm' ),
 					'default' => false,
+				),
+				array(
+					'id'            => 'ad1',
+					'type'          => 'wp_editor',
+					'dependency'    => array( 'ad_switcher', '==', 'true' ),
+					'title'         => __( 'AD codes', 'lerm' ),
+					'after'         => __( 'This ad code on home.', 'lerm' ),
+					'height'        => '80px',
+					'media_buttons' => false,
+					'quicktags'     => false,
+					'tinymce'       => false,
 				),
 			),
 		)
@@ -997,14 +1474,52 @@ if ( class_exists( 'CSF' ) ) {
 		$prefix,
 		array(
 			'icon'   => 'fa fa-star',
-			'title'  => __( 'Other', 'lerm' ),
+			'title'  => __( 'Simple CDN', 'lerm' ),
 			'fields' => array(
 				array(
-					'id'      => 'disable_rest_api',
+					'id'      => 'enable_cdn',
 					'type'    => 'switcher',
-					'title'   => __( 'Disable Rest API', 'lerm' ),
-					'label'   => __( 'If use GutenBerg editor, must enable rest_api', 'lerm' ),
+					'title'   => __( 'Enable CDN', 'lerm' ),
+					'desc'    => __( 'Enable CDN suport', 'lerm' ),
 					'default' => false,
+				),
+				array(
+					'id'         => 'new_url',
+					'type'       => 'text',
+					'dependency' => array( 'enable_cdn', '==', 'true' ),
+					'title'      => __( 'Site URL', 'lerm' ),
+					'desc'       => __( 'The new URL to be used in place of site url for rewriting. No trailing <code>/</code> please. E.g. <code>http://cdn.lerm.local/wp-includes/js/jquery/jquery-migrate.js</code>', 'lerm' ),
+					'attributes' => array(
+						'placeholder' => get_bloginfo( 'url', 'display' ),
+					),
+					'default'    => get_bloginfo( 'url', 'display' ),
+				),
+				array(
+					'id'         => 'off_new_url',
+					'type'       => 'text',
+					'dependency' => array( 'enable_cdn', '==', 'true' ),
+					'title'      => __( 'Off-site URL', 'lerm' ),
+					'desc'       => __( 'Check this if you want to have links like <code><em>/</em>wp-content/xyz.png</code> rewritten - i.e. without your blog\'s domain as prefix.', 'lerm' ),
+					'attributes' => array(
+						'placeholder' => get_bloginfo( 'url', 'display' ),
+					),
+					'default'    => get_bloginfo( 'url', 'display' ),
+				),
+				array(
+					'id'         => 'include_dir',
+					'type'       => 'text',
+					'dependency' => array( 'enable_cdn', '==', 'true' ),
+					'title'      => __( 'Include DIR', 'lerm' ),
+					'desc'       => __( 'Directories to include in static file matching. Use a comma as the delimiter. Default is <code>wp-content, wp-includes</code>, which will be enforced if this field is left empty.', 'lerm' ),
+					'default'    => 'wp-content, wp-includes',
+				),
+				array(
+					'id'         => 'exclude_if_substring',
+					'type'       => 'text',
+					'dependency' => array( 'enable_cdn', '==', 'true' ),
+					'title'      => __( 'Exclude if substring', 'lerm' ),
+					'desc'       => __( 'Excludes something from being rewritten if one of the above strings is found in the match. Use a comma as the delimiter. E.g. <code>.php, .flv, .do</code>, always include <code>.php</code> (default).', 'lerm' ),
+					'default'    => '.php',
 				),
 			),
 		)
@@ -1020,6 +1535,84 @@ if ( class_exists( 'CSF' ) ) {
 			'fields' => array(
 				array(
 					'type' => 'backup',
+				),
+			),
+		)
+	);
+	// ----------------------------------------
+	// Field: User Center
+	// ----------------------------------------
+	CSF::createSection(
+		$prefix,
+		array(
+			'title'  => 'User Center',
+			'icon'   => 'fa fa-user',
+			'fields' => array(
+				array(
+					'type'  => 'heading',
+					'title' => __( 'Basic Setting', 'lerm' ),
+				),
+				array(
+					'id'    => 'frontend_register',
+					'type'  => 'switcher',
+					'title' => __( 'Frontend register', 'lerm' ),
+				),
+				array(
+					'id'         => 'frontend_profile',
+					'type'       => 'switcher',
+					'title'      => __( 'Frontend Profile Page', 'lerm' ),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
+				),
+				array(
+					'id'         => 'favorite_post',
+					'type'       => 'switcher',
+					'title'      => __( 'Favorite Post', 'lerm' ),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
+				),
+				array(
+					'id'         => 'my_posts',
+					'type'       => 'switcher',
+					'title'      => __( 'My Own Posts', 'lerm' ),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
+				),
+				array(
+					'id'         => 'favorite_post',
+					'type'       => 'switcher',
+					'title'      => __( 'Favorite Post', 'lerm' ),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
+				),
+				array(
+					'type'       => 'heading',
+					'title'      => __( 'Register And Login', 'lerm' ),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
+				),
+				array(
+					'id'         => 'login_redirect',
+					'type'       => 'switcher',
+					'title'      => __( 'Login Redirect to Homepage', 'lerm' ),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
+				),
+				array(
+					'id'         => 'default_login_page',
+					'type'       => 'switcher',
+					'title'      => __( 'Disable Default', 'lerm' ),
+					'label'      => __( 'Disable Default WordPress login page', 'lerm' ),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
+				),
+				array(
+					'id'         => 'users_can_register',
+					'type'       => 'switcher',
+					'title'      => __( 'User Can Register', 'lerm' ),
+					'label'      => __( 'Disable Default WordPress login page', 'lerm' ),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
+				),
+				array(
+					'id'         => 'default_role',
+					'type'       => 'select',
+					'title'      => __( 'Default Role', 'lerm' ),
+					'label'      => __( 'Select default WordPress register roles', 'lerm' ),
+					'options'    => $wp_roles->get_names(),
+					'dependency' => array( 'frontend_register', '==', 'true' ),
 				),
 			),
 		)

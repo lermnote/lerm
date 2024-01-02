@@ -1,0 +1,23 @@
+{
+	"name": "lerm/lerm",
+	"type": "package",
+	"description": "WordPress theme based on bootstrap",
+	"keywords": [
+		"WordPress",
+		"Themes"
+	],
+	"authors": [
+		{
+			"name": "Oconner",
+			"email": "admin@lerm.net",
+			"homepage": "https://lerm.net",
+			"role": "Developer"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"Lerm\\Inc\\": "inc/classes",
+			"Lerm\\Inc\\Traits\\": "inc/traits"
+		}
+	}
+}

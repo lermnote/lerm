@@ -25,19 +25,21 @@ function lerm_custom_logo() {
 	if ( ! empty( $large_logo ) ) {
 		$custom_logo_id = $large_logo;
 	}
-	$html = sprintf(
-		'<a href="%1$s" class="custom-logo-link" rel="home" itemprop="url">%2$s</a>',
-		esc_url( home_url( '/' ) ),
-		wp_get_attachment_image(
-			$custom_logo_id,
-			'full',
-			false,
-			array(
-				'class' => 'custom-logo',
+	if ( $custom_logo_id ) {
+		$html = sprintf(
+			'<a href="%1$s" class="custom-logo-link" rel="home" itemprop="url">%2$s</a>',
+			esc_url( home_url( '/' ) ),
+			wp_get_attachment_image(
+				$custom_logo_id,
+				'full',
+				false,
+				array(
+					'class' => 'custom-logo me-1',
+				)
 			)
-		)
-	);
-	return $html;
+		);
+		return $html;
+	}
 }
 add_filter( 'get_custom_logo', 'lerm_custom_logo' );
 
@@ -48,15 +50,18 @@ add_filter( 'get_custom_logo', 'lerm_custom_logo' );
  */
 function lerm_custom_site_width() {
 	$custom_width = '
-		@media (min-width:1200px) {
-			.container{
-				max-width:%1$spx;
+		@media (min-width:992px) {
+			#primary{
+				width:%1$s%%
+			}
+			#secondary{
+				width:%2$s%%
 			}
 		}
 		';
-	wp_add_inline_style( 'lerm_style', sprintf( $custom_width, lerm_options( 'site_width', 'width' ) ) );
+	wp_add_inline_style( 'lerm_style', sprintf( $custom_width, lerm_options( 'content_width' ), lerm_options( 'sidebar_width' ) ) );
 }
-add_action( 'wp_enqueue_scripts', 'lerm_custom_site_width', 21 );
+// add_action( 'wp_enqueue_scripts', 'lerm_custom_site_width', 21 );
 /**
  * custom css
  *

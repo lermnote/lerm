@@ -1,56 +1,53 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
-	die;}
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	die; }
 function lerm_post_meta( $location ) {
-	if ( 'single_top' === $location ) {
-		$arg = array_keys( (array) lerm_options( 'single_top', 'enabled' ) );
+	$meta_settings = array(
+		'single_top'     => array(
+			'option' => 'single_top',
+			'class'  => 'justify-content-center  mb-0 ',
+		),
+		'single_bottom'  => array(
+			'option' => 'single_bottom',
+			'class'  => 'justify-content-between mb-1',
+		),
+		'summary_bottom' => array(
+			'option' => 'summary_meta',
+			'class'  => ' justify-content-center justify-content-sm-start mb-0 ',
+		),
+	);
+
+	$arg     = array();
+	$classes = '';
+	if ( isset( $meta_settings[ $location ] ) && is_singular() ) {
+		$arg     = array_keys( (array) lerm_options( $meta_settings[ $location ]['option'], 'enabled' ) );
+		$classes = $meta_settings[ $location ]['class'];
 	}
 
-	if ( 'summary_bottom' === $location ) {
-		$arg = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
-	}
 	$post_meta = apply_filters( 'post_meta_show_on_post', $arg );
 
-	if ( $post_meta ) {?>
-		<ul class="list-unstyled mb-0 d-flex justify-content-center justify-content-md-start entry-meta small text-muted">
+	if ( isset( $post_meta[0] ) && 'disabled' !== $post_meta[0] ) {
+		$post_meta_items = array(
+			'format'       => 'lerm_post_format',
+			'publish_date' => 'lerm_post_date',
+			'categories'   => 'lerm_post_categories',
+			'read'         => 'lerm_post_views_number',
+			'comment'      => 'lerm_post_comments_number',
+			'author'       => 'lerm_post_author',
+		);
+
+		?>
+		<ul class="list-unstyled d-flex <?php echo esc_html( $classes ); ?> entry-meta small text-muted">
 			<?php
 			foreach ( $post_meta as $item ) {
-				switch ( $item ) {
-					case 'format':
-						lerm_post_format();
-						break;
-					case 'publish_date':
-						lerm_post_date();
-						break;
-					case 'categories':
-						lerm_post_categories();
-						break;
-					case 'read':
-						lerm_post_views_number();
-						break;
-					case 'comment':
-						lerm_post_comments_number();
-						break;
-					case 'author':
-						lerm_post_author();
-						break;
+				if ( isset( $post_meta_items[ $item ] ) ) {
+					$post_meta_items[ $item ]();
 				}
 			}
 			?>
 		</ul>
 		<?php
 	}
-}
-
-function lerm_post_meta_list( $location = null ) {
-	if ( 'single_top' === $location ) {
-		$arg = array_keys( (array) lerm_options( 'single_top', 'enabled' ) );
-	}
-
-	if ( 'summary_bottom' === $location ) {
-		$arg = array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) );
-	}
-	$post_meta = apply_filters( 'post_meta_show_on_post', $arg );
-	return $post_meta;
 }
 
 function lerm_post_format() {
@@ -73,14 +70,14 @@ function lerm_post_author() {
 	?>
 		<li class="post-author meta-item">
 			<span class="meta-icon">
-				<span class="screen-reader-text"><?php esc_attr_e( 'Post author', 'lerm' ); ?></span>
-				<i class="fa fa-user pr-1"></i>
+				<span class="screen-reader-text"><?php esc_html_e( 'Post author', 'lerm' ); ?></span>
+				<i class="fa fa-user pe-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php
 				printf(
 					/* translators: %s: Author name */
-					__( 'By %s', 'lerm' ),
+					esc_html__( 'By %s', 'lerm' ),
 					'<a href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author_meta( 'display_name' ) ) . '</a>'
 				);
 				?>
@@ -93,7 +90,7 @@ function lerm_post_date() {
 	?>
 		<li class="post-date meta-item">
 			<span>
-				<i class="fa fa-calendar pr-1"></i>
+				<i class="fa fa-calendar pe-1"></i>
 				<a href="<?php the_permalink(); ?>">
 					<?php the_time( get_option( 'date_format' ) ); ?>
 				</a>
@@ -107,8 +104,8 @@ function lerm_post_categories() {
 		?>
 		<li class="post-categories meta-item">
 			<span class="meta-icon">
-				<span class="screen-reader-text"><?php esc_attr_e( 'Categories', 'lerm' ); ?></span>
-				<i class="fa fa-hdd pr-1"></i>
+				<span class="screen-reader-text"><?php esc_html_e( 'Categories', 'lerm' ); ?></span>
+				<i class="fa fa-hdd pe-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php the_category( ', ' ); ?>
@@ -121,9 +118,9 @@ function lerm_post_categories() {
 function lerm_post_views_number() {
 	?>
 	<li  class="post-views meta-item">
-		<i class="fa fa-eye pr-1"></i>
+		<i class="fa fa-eye pe-1"></i>
 		<span>
-			<?php echo esc_html( post_views( '' ) ); ?>
+			<?php echo esc_html( lerm_post_views( '' ) ); ?>
 		</span>
 	</li>
 	<?php
@@ -134,14 +131,14 @@ function lerm_post_comments_number() {
 		?>
 		<li  class="comments-link meta-item">
 			<a href="<?php comments_link(); ?>">
-				<i class="fa fa-comment pr-1"></i>
+				<i class="fa fa-comment pe-1"></i>
 				<?php
 				/* translators: %s: number of comments  */
-				printf( _nx( '%s comment', '%s comments', get_comments_number(), 'comments title', 'lerm' ), esc_attr( number_format_i18n( get_comments_number() ) ) );
+				printf( _nx( '%s comment', '%s comments', esc_attr( get_comments_number() ), 'comments title', 'lerm' ), esc_attr( number_format_i18n( get_comments_number() ) ) );
 				?>
 			</a>
 		</li>
-		  <?php
+		<?php
 	}
 }
 
@@ -152,38 +149,9 @@ function lerm_edit_link() {
 			__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'lerm' ),
 			get_the_title()
 		),
-		'<span class="edit-link meta-item"><i class="fa fa-edit pr-1 pl-2"></i>',
+		'<span class="edit-link meta-item"><i class="fa fa-edit pe-1 ps-2"></i>',
 		'</span>'
 	);
-}
-
-/**
- * Displays the optional excerpt.
- *
- * @since Lerm 2.0
- */
-function lerm_excerpt_length( $length ) {
-	$length = lerm_options( 'excerpt_length' );
-	return $length;
-}
-add_filter( 'excerpt_length', 'lerm_excerpt_length', 999 );
-/**
- * Wether to show sidebar in webpage.
- *
- * @return string $layout
- */
-function lerm_page_layout() {
-	// page and post layout
-	$metabox = get_post_meta( get_the_ID(), '_lerm_metabox_options', true );
-	// global layout
-	$layout = lerm_options( 'global_layout' );
-	if ( wp_is_mobile() ) {
-		$layout = 'mobile';
-	}
-	if ( is_singular() && ! empty( $metabox['page_layout'] ) ) {
-		$layout = $metabox['page_layout'];
-	}
-	return $layout;
 }
 
 /**
@@ -194,28 +162,64 @@ function lerm_page_layout() {
  */
 function lerm_body_classes( $classes ) {
 	$classes[] = 'body-bg';
+
 	// Check singular
-	if ( is_singular() ) {
+	if ( is_single() || is_page() ) {
 		$classes[] = 'singular';
-	}
-	// Check for post thumbnail.
-	if ( is_singular() && has_post_thumbnail() ) {
-		$classes[] = 'has-post-thumbnail';
+		if ( has_post_thumbnail() ) {
+			$classes[] = 'has-post-thumbnail';
+		}
 	}
 	// Add class on front page.
 	if ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) {
-		$classes[] = 'lerm-front-page';
+		$lerm_front_page = get_option( 'page_on_front' );
+		if ( $lerm_front_page && is_page( $lerm_front_page ) ) {
+			$classes[] = 'lerm-front-page';
+		}
 	}
 	// Output layout
-	$classes[] = lerm_page_layout();
+	$classes[]    = lerm_site_layout();
+	$layout_style = lerm_options( 'layout_style' );
+	if ( $layout_style ) {
+		$classes[] = $layout_style;
+	}
 	return $classes;
 }
 add_filter( 'body_class', 'lerm_body_classes' );
 
+// add CSS class in WordPress post list and single page
 function lerm_post_class( $classes ) {
-	if ( ! is_singular() ) {
-		$classes[] = 'summary card mx-3 mx-md-0 mb-3 p-0 p-md-3';
+	$loading_animate = lerm_options( 'loading-animate' );
+
+	if ( is_page() || is_single() ) {
+		$classes[] = implode( ' ', array( 'entry', 'p-3', 'mb-2' ) );
+	} else {
+		$classes[] = implode( ' ', array( 'summary', 'mb-3', 'p-0', 'p-md-3' ) );
 	}
+
+	if ( $loading_animate ) {
+		$classes[] = implode( ' ', array( 'loading-animate', 'fadeIn' ) );
+	}
+
 	return $classes;
 }
 add_filter( 'post_class', 'lerm_post_class' );
+
+/**
+ * Share icon template
+ *
+ * @since lerm 3.0.0
+ */
+function lerm_social_icons( $icons = array( 'weibo', 'wechat', 'qq' ) ) {
+	if ( ! empty( $icons ) && is_array( $icons ) ) {
+		?>
+		<div class="social-share d-flex justify-content-center gap-1" data-initialized="true">
+			<?php foreach ( $icons as &$icon ) : ?>
+				<a href="#" class="social-share-icon icon-<?php echo esc_attr( $icon ); ?> btn-light btn-sm">
+					<i class="fa fa-<?php echo esc_attr( $icon ); ?>"></i>
+				</a>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+}

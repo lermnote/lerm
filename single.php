@@ -7,48 +7,39 @@
  */
 get_header();
 ?>
-<main role="main" class="container">
-	<?php $class = ( 'layout-1c-narrow' === lerm_page_layout() ) ? 'justify-content-md-center' : ''; ?>
-	<div class="row <?php echo esc_attr( $class ); ?>">
-
-		<?php $class = ( wp_is_mobile() || 'layout-1c' === lerm_page_layout() ) ? 'col-md-12' : 'col-lg-8'; ?>
-		<div class="px-0 <?php echo esc_attr( $class ); ?>">
+<main role="main" class="container"><!--.container-->
+	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<div <?php lerm_row_class(); ?> ><!--.row-->
+		<div id="primary" <?php lerm_column_class(); ?> ><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">
 				<?php
 				if ( have_posts() ) :
-					breadcrumb_trail();
-
 					while ( have_posts() ) :
 						the_post();
-						get_template_part( 'template/content/content', 'single' );
+						get_template_part( 'template-parts/content/content', get_post_type() );
 						?>
-							<?php lerm_entry_tag(); ?>
-							<div class="entry-copyright content-bg p-3 mb-2">
-								<div><i class="fa fa-exclamation-triangle pr-2 "></i> <strong>版权声明：</strong> <span>本文由<a href="<?php the_permalink(); ?>" rel="bookmark" title="本文固定链接 <?php the_permalink(); ?>"> <?php bloginfo( 'name' ); ?> </a> 整理发表，转载请注明出处</span> </div>
-								<div><i class="fa fa-bullseye pr-2 "></i> <strong>转载信息：</strong> <span><a href="<?php the_permalink(); ?>" rel="bookmark" title="本文固定链接 <?php the_permalink(); ?>"> <?php the_title(); ?> | <?php bloginfo( 'name' ); ?></a></span> </div>
-							</div>
-							<?php if ( lerm_options( 'related_posts' ) ) : ?>
-								<section id="related" class="mb-2">
-									<?php lerm_related_posts(); ?>
-								</section>
-								<?php
-							endif;
-							if ( lerm_options( 'post_navigation' ) ) {
-								lerm_post_navigation();
-							}
-
-								// If comments are open or we have at least one comment, load up the comment template.
-							if ( comments_open() || get_comments_number() ) :
-								comments_template();
-							endif;
-						endwhile;
-					lerm_pagination();
+						<ul class="card entry-copyright p-3 mb-2 list-unstyled">
+							<li><strong>版权声明：</strong> <span>本文由<a href="<?php the_permalink(); ?>" rel="bookmark" title="本文固定链接 <?php the_permalink(); ?>"> <?php bloginfo( 'name' ); ?> </a> 整理发表，转载请注明出处</span> </li>
+							<li><strong>转载信息：</strong> <span><a href="<?php the_permalink(); ?>" rel="bookmark" title="本文固定链接 <?php the_permalink(); ?>"> <?php the_title(); ?> | <?php bloginfo( 'name' ); ?></a></span> </li>
+						</ul>
+						<?php if ( lerm_options( 'related_posts' ) ) : ?>
+							<!-- <section id="related" class="card mb-2"> -->
+								<?php get_template_part( 'template-parts/related-posts' ); ?>
+							<!-- </section> -->
+							<?php
+						endif;
+						get_template_part( 'template-parts/navigation' );
+						// If comments are open or we have at least one comment, load up the comment template.
+						if ( comments_open() || get_comments_number() ) :
+							comments_template();
+						endif;
+					endwhile;
 				endif;
 				?>
 			</div>
 		</div>
-		<?php get_sidebar(); ?>
-	</div>
-</main>
+	<?php get_sidebar(); ?>
+	</div><!--.row-->
+</main><!--.container-->
 <?php
 get_footer();
