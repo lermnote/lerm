@@ -24,21 +24,23 @@ function lerm_init() {
 }
 add_action( 'init', 'lerm_init' );
 
+
 /**
  * Get the IP address of the current browser.
+ *
+ * @since    3.2.8
  */
 function lerm_client_ip() {
-	global $lerm_client_ip;
-
-	if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-		$lerm_client_ip = filter_var( $_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP );
-	} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-		$lerm_client_ip = filter_var( $_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP );
+	if ( isset( $_SERVER['HTTP_CLIENT_IP'] ) && ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
+		$ip = $_SERVER['HTTP_CLIENT_IP'];
+	} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 	} else {
-		$lerm_client_ip = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP );
+		$ip = ( isset( $_SERVER['REMOTE_ADDR'] ) ) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
 	}
+	$ip = ( false === filter_var( $ip, FILTER_VALIDATE_IP ) ) ? '0.0.0.0' : filter_var( $ip, FILTER_VALIDATE_IP );
 
-	return $lerm_client_ip;
+	return $ip;
 }
 
 /**
@@ -160,47 +162,49 @@ add_filter( 'wp_nav_menu_items', 'lerm_wp_nav_menu_items', 10, 2 );
  * authenticating $_POST['username'] and $_POST['password']
  */
 function lerm_try_to_login() {
+
 	// If we can't determine the client's IP address then something is very
 	// wrong - possibly a hack attempt. Don't do anything.
+
 	$client_ip_address = lerm_client_ip();
 	if ( empty( $client_ip_address ) ) {
-		die();
+		wp_die();
+	}
+	if ( ! wp_verify_nonce( $_POST['security'], 'user_nonce' ) ) {
+		\wp_die();
 	}
 
 	$client_key = 'login_attempt_' . $client_ip_address;
 
-	if ( check_ajax_referer( 'user_nonce', 'security', false ) ) {
+	$credentials['user_login']    = sanitize_text_field( $_POST['username'] );
+	$credentials['user_password'] = sanitize_text_field( $_POST['password'] );
+	$credentials['remember']      = isset( $_POST['rememberme'] ) ? true : false;
 
-		$credentials['user_login']    = sanitize_text_field( $_POST['username'] );
-		$credentials['user_password'] = sanitize_text_field( $_POST['password'] );
-		$credentials['remember']      = isset( $_POST['rememberme'] ) ? true : false;
+	$user = wp_signon( $credentials, false );
 
-		$user = wp_signon( $credentials, false );
+	$status_code = 200;
+	$response    = array(
+		'loggedin' => false,
+		'message'  => __( 'Incorrect username or password.', 'lerm' ),
+	);
 
-		$status_code = 200;
-		$response    = array(
-			'loggedin' => false,
-			'message'  => __( 'Incorrect username or password.', 'lerm' ),
-		);
+	if ( empty( $credentials['user_login'] ) ) {
+		$response['message'] = __( 'The username field is empty.', 'lerm' );
+	} elseif ( empty( $credentials['user_password'] ) ) {
+		$response['message'] = __( 'The password field is empty.', 'lerm' );
+	} elseif ( get_transient( $client_key ) !== false ) {
+		$response['message'] = __( 'Slow down a bit.', 'lerm' );
+	}
 
-		if ( empty( $credentials['user_login'] ) ) {
-			$response['message'] = __( 'The username field is empty.', 'lerm' );
-		} elseif ( empty( $credentials['user_password'] ) ) {
-			$response['message'] = __( 'The password field is empty.', 'lerm' );
-		} elseif ( get_transient( $client_key ) !== false ) {
-			$response['message'] = __( 'Slow down a bit.', 'lerm' );
-		}
+	if ( is_a( $user, 'WP_User' ) ) {
+		// Logged in OK.
+		$response['loggedin'] = true;
+		$response['message']  = __( 'Logedin successful,redirecting…', 'lerm' );
 
-		if ( is_a( $user, 'WP_User' ) ) {
-			// Logged in OK.
-			$response['loggedin'] = true;
-			$response['message']  = __( 'Logedin successful,redirecting…', 'lerm' );
-
-			wp_send_json_success( $response, $status_code );
-		} else {
-			// 验证失败
-			set_transient( $client_key, '1', LERM_LOGIN_RETRY_PAUSE );
-			wp_send_json_error( $response, $status_code );
-		}
+		wp_send_json_success( $response, $status_code );
+	} else {
+		// 验证失败
+		set_transient( $client_key, '1', LERM_LOGIN_RETRY_PAUSE );
+		wp_send_json_error( $response, $status_code );
 	}
 }

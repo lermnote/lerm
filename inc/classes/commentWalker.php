@@ -49,10 +49,12 @@ class CommentWalker extends Walker_Comment {
 		// Check ajax nonce first
 		$comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
 
-		$comment_post_id = isset( $_POST['comment_post_ID'] ) ? (int) $_POST['comment_post_ID'] : 0;
+		if ( check_ajax_referer( 'ajax_nonce', 'security', false ) && ! is_wp_error( $comment ) ) {
 
-		if ( check_ajax_referer( 'ajax_nonce', 'security', false ) && ! is_wp_error( $comment ) && 0 !== $comment_post_id ) {
-
+			$comment_post_id = isset( $_POST['comment_post_ID'] ) ? (int) $_POST['comment_post_ID'] : 0;
+			if ( 0 === $comment_post_id ) {
+				return;
+			}
 			$comment->avatar_url  = get_avatar_url( $comment );
 			$comment->avatar_size = ( 0 !== $_POST['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
 			/**

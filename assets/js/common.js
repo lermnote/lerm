@@ -103,24 +103,33 @@
 				duration: 700,
 			});
 		});
+
 		/**
 		 * ajax load more posts
 		 *
 		 * @since 3.2
 		 */
 		const likeBtn = document.querySelector(".like-button");
-		const countEl = document.querySelector(".count");
-		if (likeBtn) {
-			let postID = likeBtn.dataset.id;
+
+		if (typeof likeBtn != "undefined" && likeBtn != null) {
+			const countEl = likeBtn.querySelector(".count");
+			let postID = likeBtn.dataset.postId;
+			let likeCount = likeBtn.dataset.likeCount;
+			var iscomment = 0;
 			let count = localStorage.getItem(`post_like_${postID}`);
 			let sentRequest = false;
 
-			if (count) {
-				countEl.textContent = count;
-				likeBtn.classList.add("done");
-				likeBtn.disabled = true;
-			}
-
+			// if (count) {
+			// 	countEl.textContent = count;
+			// 	likeBtn.classList.add("done");
+			// 	likeBtn.disabled = true;
+			// }
+			// var iscomment = button.attr('data-iscomment');
+			// 	if ( iscomment === '1' ) { /* Comments can have same id */
+			// 	allbuttons = $('.sl-comment-button-'+post_id);
+			// } else {
+			// 	allbuttons = $('.sl-button-'+post_id);
+			// }
 			likeBtn.addEventListener("click", debounce(async (e) => {
 				e.preventDefault();
 				if (sentRequest) {
@@ -129,7 +138,8 @@
 				let params = new URLSearchParams({
 					action: "post_like",
 					security: adminajax.nonce,
-					post_ID: postID
+					post_id: postID,
+					is_comment: iscomment,
 				});
 
 				try {
@@ -137,20 +147,30 @@
 						method: "POST",
 						body: params,
 					});
-					const { success, data } = await response.json();
-
-					if (success && (typeof data === 'number')) {
+					const data  = await response.json();
+					console.log(data);
+					// if(response.status === 'unliked') {
+					// 	var like_text = simpleLikes.like;
+					// 	allbuttons.prop('title', like_text);
+					// 	allbuttons.removeClass('liked');
+					// } else {
+					// 	var unlike_text = simpleLikes.unlike;
+					// 	allbuttons.prop('title', unlike_text);
+					// 	allbuttons.addClass('liked');
+					// }
+					if ((typeof data.count === 'number')) {
 						localStorage.setItem(`post_like_${postID}`, data);
-						countEl.textContent = data;
+						countEl.textContent = data.count;
 						sentRequest = true;
+						likeCount = data.count;
 					} else {
 						console.log(data);
 					}
 				} catch (error) {
 					console.error(error);
 				} finally {
-					likeBtn.classList.add("done");
-					likeBtn.disabled = true;
+					// likeBtn.classList.add("done");
+					// likeBtn.disabled = true;
 				}
 			}, 500));
 		}
@@ -211,7 +231,7 @@
 			setTimeout(() => message.classList.remove("show"), 3000);
 		}
 
-		if (commentForm) {
+		if (typeof commentForm != "undefined" && commentForm != null) {
 			//error info display
 			commentForm.insertAdjacentHTML("beforeend", '<div id="message" class="text-danger wow visually-hidden"></div>');
 
@@ -343,10 +363,6 @@
 		const loadMoreBtn = document.querySelector(".more-posts");
 		const postsList = document.querySelector(".ajax-posts");
 
-		if (loadMoreBtn === null) {
-			//console.error("Can't find element with class '.more-posts'");
-			return;
-		}
 		if (typeof loadMoreBtn != "undefined" && loadMoreBtn != null) {
 			loadMoreBtn.addEventListener("click", debounce(async (e) => {
 				e.preventDefault();
