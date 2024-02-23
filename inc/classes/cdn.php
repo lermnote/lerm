@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Reperesents the CDN Linker's rewrite logic.
  *

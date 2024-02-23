@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * A custom WordPress nav walker class to implement the Bootstrap 5 navigation style in a custom theme using the WordPress built in menu manager.
  *
@@ -12,6 +12,7 @@
 namespace Lerm\Inc;
 
 use Walker_Nav_Menu;
+use Lerm\Inc\Traits\Singleton;
 
 // Check if Class Exists.
 if ( ! class_exists( 'Nav_Walker' ) ) :

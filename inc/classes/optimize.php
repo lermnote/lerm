@@ -1,12 +1,14 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 
 namespace Lerm\Inc;
 
-use Lerm\Inc\Traits\Hooker;
-
+use Lerm\Inc\Hooker;
+use Lerm\Inc\Traits\Singleton;
 class Optimize {
 
 	use hooker;
+	
+	use singleton;
 
 	public static $args = array(
 		'gravatar_accel' => 'disable',
@@ -21,14 +23,9 @@ class Optimize {
 		self::hooks();
 	}
 
-	// instance
-	public static function instance( $params = array() ) {
-		return new self( $params );
-	}
-
-	protected function hooks() {
+	protected static function hooks() {
 		if ( ! in_array( self::$args['gravatar_accel'], array( 'disable', '' ), true ) ) {
-			$this->filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), 'gravatar_replace', 100, 1 );
+			self::filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), 'gravatar_replace', 100, 1 );
 		}
 		if ( 'https://cravatar.cn/avatar/' === self::$args['gravatar_accel'] ) {
 			add_filter( 'user_profile_picture_description', array( __CLASS__, 'set_user_profile_picture_for_cravatar' ), 100, 1 );
@@ -45,7 +42,7 @@ class Optimize {
 		add_filter( 'frontpage_template', array( __CLASS__, 'front_page_template' ), 15, 1 );
 		add_filter( 'wp_tag_cloud', array( __CLASS__, 'tag_cloud' ), 10, 1 );
 		add_filter( 'pre_option_link_manager_enabled', '__return_true' );
-		$this->filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
+		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
 	}
 
 	/**

@@ -7,11 +7,11 @@
 
 namespace Lerm\Inc\Traits;
 
-use Lerm\Inc\Traits\Hooker;
+// use Lerm\Inc\Hooker;
 
 trait Ajax {
 
-	use Hooker;
+	// use Hooker;
 
 	/**
 	 * Register ajax action

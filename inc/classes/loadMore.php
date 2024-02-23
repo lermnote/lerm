@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Load more posts button
  *
@@ -7,11 +7,13 @@
 
 namespace Lerm\Inc;
 
-use Lerm\Inc\Traits\Ajax;
 use WP_Query;
-
+use Lerm\Inc\Traits\Ajax;
+use Lerm\Inc\Traits\Singleton;
 class LoadMore {
 	use Ajax;
+	
+	use singleton;
 
 	private $query_args;
 
@@ -24,10 +26,6 @@ class LoadMore {
 			);
 
 		$this->query_args = wp_parse_args( $query_args, $default_args );
-	}
-
-	public static function instance( $query_args = array() ) {
-		return new self( $query_args );
 	}
 
 	/** Load more posts on blog page.

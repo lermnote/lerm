@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Custom Mail SMTP
  *
@@ -7,10 +7,11 @@
 
 namespace Lerm\Inc;
 
-/**
- * Custom Mail SMTP
- */
+use Lerm\Inc\Traits\Singleton;
+
 class SMTP {
+
+	use singleton;
 
 	/**
 	 * This attribute will hold the "original" WP from email address passed to the wp_mail_from filter,
@@ -56,17 +57,6 @@ class SMTP {
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_smtp_', wp_parse_args( $params, self::$args ) );
 		self::hooks();
-	}
-
-	/**
-	 * Instance
-	 *
-	 * @param array $params Optional parameters.
-	 *
-	 * @return SMTP
-	 */
-	public static function instance( $params = array() ) {
-		return new self( $params );
 	}
 
 	/**
@@ -135,7 +125,6 @@ class SMTP {
 	 * Modify the sender name that is used for sending emails.
 	 *
 	 * @since 1.0.0
-	 * @since 1.3.0 Forcing name rewrite if option is selected.
 	 *
 	 * @param string $name The from name passed through the filter.
 	 *

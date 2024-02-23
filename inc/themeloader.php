@@ -8,7 +8,8 @@ namespace Lerm\Inc;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-require_once LERM_DIR . 'inc/options/codestar-framework.php';
+require_once LERM_DIR . 'inc/admin/codestar-framework.php';
+
 // loader function files
 require_once LERM_DIR . 'inc/functions/functions-opengraph.php';
 

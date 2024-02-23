@@ -1,6 +1,8 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 
 namespace Lerm\Inc;
+
+use Lerm\Inc\Traits\Singleton;
 
 /**
  * todo
@@ -11,6 +13,8 @@ namespace Lerm\Inc;
  * 5.seo标题
  */
 class SEO {
+	
+	use singleton;
 
 	public static $args = array(
 		'baidu_submit' => false,
@@ -27,17 +31,12 @@ class SEO {
 		self::hooks();
 	}
 
-	// instance
-	public static function instance( $params = array() ) {
-		return new self( $params );
-	}
-
 	public static function hooks() {
 		add_filter( 'document_title_separator', array( __NAMESPACE__ . '\SEO', 'title_separator' ), 15, 1 );
 
 		add_action( 'wp_head', array( __NAMESPACE__ . '\SEO', 'html' ), 1 );
 		// if ( self::$args['baidu_submit'] ) {
-		// 	add_action( 'publish_post', array( __NAMESPACE__ . '\SEO', 'baidu_submit' ) );
+		// add_action( 'publish_post', array( __NAMESPACE__ . '\SEO', 'baidu_submit' ) );
 		// }
 		if ( self::$args['html_slug'] ) {
 			add_filter( 'user_trailingslashit', array( __NAMESPACE__ . '\SEO', 'trailingslashit' ), 10, 2 );

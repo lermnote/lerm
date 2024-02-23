@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Lerm theme setup
  *
@@ -8,12 +8,14 @@
 namespace Lerm\Inc;
 
 use Lerm\Inc\User\User;
-
+use Lerm\Inc\Traits\Singleton;
 
 /**
  * Theme setup
  */
 class Setup {
+	
+	use singleton;
 
 	/**
 	 * Global options.
@@ -46,17 +48,6 @@ class Setup {
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_setup_', wp_parse_args( $params, self::$args ) );
 		self::hooks();
-	}
-
-	/**
-	 * Instance
-	 *
-	 * @param array $params Optional parameters.
-	 *
-	 * @return Setup
-	 */
-	public static function instance( $params = array() ) {
-		return new self( $params );
 	}
 
 	/**
@@ -227,6 +218,7 @@ class Setup {
 		}
 
 		// Theme update.
+		$params = array();
 		new Updater(
 			array(
 				'name' => 'Lerm',                     // Theme Name.

@@ -498,7 +498,7 @@ if ( ! class_exists( 'CSF' ) ) {
 				wp_enqueue_style( 'csf-fa', 'https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome' . $min . '.css', array(), '4.7.0', 'all' );
 			} else {
 				wp_enqueue_style( 'csf-fa5', 'https://cdn.staticfile.org/font-awesome/5.13.0/css/all' . $min . '.css', array(), '5.13.0', 'all' );
-				wp_enqueue_style( 'csf-fa5-v4-shims', 'https://cdn.staticfile.org/font-awesome/5.13.0/css/v4-shims' . $min . '.css', array(), '5.13.0', 'all' );
+				wp_enqueue_style( 'csf-fa5-v4-shims','https://cdn.staticfile.org/font-awesome/5.13.0/css/v4-shims' . $min . '.css', array(), '5.13.0', 'all' );
 			}
 
 			// Main style

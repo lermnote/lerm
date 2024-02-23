@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Transfer Chinese character to pinyin
  *
@@ -8,6 +8,8 @@
  */
 
 namespace Lerm\Inc;
+
+use Lerm\Inc\Traits\Singleton;
 
 class Chinese_To_Pinyin {
 	private static $maps = array(

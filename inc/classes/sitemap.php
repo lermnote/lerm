@@ -1,11 +1,23 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
+/**
+ * Class Sitemap
+ *
+ * @package Lerm\Inc
+ */
 
 namespace Lerm\Inc;
 
-/**
- */
+use Lerm\Inc\Traits\Singleton;
+
 class Sitemap {
 
+	use singleton;
+
+	/**
+	 * Default arguments.
+	 *
+	 * @var array
+	 */
 	public static $args = array(
 		'sitemap_enable' => true,
 		'max_urls'       => 6666,
@@ -14,43 +26,59 @@ class Sitemap {
 		'page_exclude'   => array(),
 	);
 
+	/**
+	 * Constructor.
+	 *
+	 * @param array $params
+	 */
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_sitemap_', wp_parse_args( $params, self::$args ) );
 		self::hooks();
 	}
 
-	// instance
-	public static function instance( $params = array() ) {
-		return new self( $params );
-	}
-
+	/**
+	 * Initialize hooks.
+	 */
 	public static function hooks() {
 		if ( self::$args['sitemap_enable'] ) {
+
+			add_filter( 'wp_sitemaps_posts_entry', array( __CLASS__, 'add_tag' ), 10, 2 );
+			add_filter( 'wp_sitemaps_max_urls', array( __CLASS__, 'max_urls' ) );
+
 			if ( is_array( self::$args['post_type'] ) && in_array( 'users', self::$args['post_type'], true ) ) {
-				add_filter( 'wp_sitemaps_add_provider', array( __NAMESPACE__ . '\Sitemap', 'remove_user' ), 10, 2 );
+				add_filter( 'wp_sitemaps_add_provider', array( __CLASS__, 'remove_user' ), 10, 2 );
 			}
 
-			add_filter( 'wp_sitemaps_post_types', array( __NAMESPACE__ . '\Sitemap', 'remove_post_type' ) );
-			add_filter( 'wp_sitemaps_taxonomies', array( __NAMESPACE__ . '\Sitemap', 'remove_post_type' ) );
+			add_filter( 'wp_sitemaps_post_types', array( __CLASS__, 'remove_post_type' ) );
+			add_filter( 'wp_sitemaps_taxonomies', array( __CLASS__, 'remove_post_type' ) );
 
-			if ( ( isset( self::$args['post_exclude'] ) && ! empty( self::$args['post_exclude'] ) ) || ( isset( self::$args['page_exclude'] ) && ! empty( self::$args['page_exclude'] ) ) ) {
-				add_filter( 'wp_sitemaps_posts_query_args', array( __NAMESPACE__ . '\Sitemap', 'exclude_post' ), 10, 2 );
+			if ( ! empty( self::$args['post_exclude'] ) || ! empty( self::$args['page_exclude'] ) ) {
+				add_filter( 'wp_sitemaps_posts_query_args', array( __CLASS__, 'exclude_post' ), 10, 2 );
 			}
-
-			add_filter( 'wp_sitemaps_posts_entry', array( __NAMESPACE__ . '\Sitemap', 'add_tag' ), 10, 2 );
-
-			add_filter( 'wp_sitemaps_max_urls', array( __NAMESPACE__ . '\Sitemap', 'max_urls' ) );
-
 		} else {
 			add_filter( 'wp_sitemaps_enabled', '__return_false' );
 		}
 	}
 
-	public static function remove_user( $provider, $name ) {
-		if ( 'users' === $name ) {
-			return false;
-		}
-		return $provider;
+	/**
+	 * Enable sitemap.
+	 *
+	 * @param bool $enabled
+	 * @return bool
+	 */
+	public function enable_sitemap( $enabled ) {
+		return self::$args['sitemap_enable'] && $enabled;
+	}
+
+	/**
+	 * Remove user from sitemap.
+	 *
+	 * @param mixed  $provider
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function remove_user( $provider, $name ) {
+		return 'users' === $name ? false : $provider;
 	}
 
 	public static function remove_post_type( $post_type ) {
@@ -71,15 +99,16 @@ class Sitemap {
 		return $taxonomies;
 	}
 
-
 	public static function exclude_post( $args, $post_type ) {
-		if ( 'post' !== $post_type ) {
+		if ( 'post' !== $post_type || empty( self::$args['post_exclude'] ) ) {
 			return $args;
 		}
-		$args['post__not_in'] = isset( $args['post__not_in'] ) ? $args['post__not_in'] : array();
-		foreach ( self::$args['post_exclude'] as $key => $value ) {
-			$args['post__not_in'][] = $value;
-		}
+
+		$args['post__not_in'] = array_merge(
+			isset( $args['post__not_in'] ) ? $args['post__not_in'] : array(),
+			self::$args['post_exclude']
+		);
+
 		return $args;
 	}
 
@@ -87,8 +116,15 @@ class Sitemap {
 		return self::$args['max_urls'];
 	}
 
-	public static function add_tag( $entry, $post ) {
-		$entry['lastmod']    = gmdate( DATE_W3C, strtotime( $post->post_modified_gmt ) );// DATE_W3C = 'Y-m-d\TH:i:sO'
+	/**
+	 * Add tags to sitemap entry.
+	 *
+	 * @param array    $entry
+	 * @param \WP_Post $post
+	 * @return array
+	 */
+	public function add_tags( $entry, $post ) {
+		$entry['lastmod']    = gmdate( DATE_W3C, strtotime( $post->post_modified_gmt ) );
 		$entry['changefreq'] = 'Daily';
 		$entry['priority']   = '0.6';
 		return $entry;

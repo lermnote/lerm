@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Post like button ajax handler functions.
  *
@@ -8,9 +8,12 @@
 namespace Lerm\Inc;
 
 use Lerm\Inc\Traits\Ajax;
+use Lerm\Inc\Traits\Singleton;
 
 class PostLike {
 	use Ajax;
+	
+	use singleton;
 
 	private const AJAX_ACTION = 'post_like';
 	/**
@@ -46,15 +49,6 @@ class PostLike {
 	public static function register() {
 		add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handler' ) );
 		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handler' ) );
-	}
-	/**
-	 * Get an instance of the Post_Like class.
-	 *
-	 * @param array $params Optional. Arguments for the class.
-	 * @return Post_Like
-	 */
-	public static function instance( $params = array() ) {
-		return new self( $params );
 	}
 
 	/**

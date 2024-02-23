@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Enqueue theme styles and scripts here
  *
@@ -7,10 +7,11 @@
 
 namespace Lerm\Inc;
 
-/**
- * Theme styles and scripts enqueue.
- */
+use Lerm\Inc\Traits\Singleton;
+
 class Enqueue {
+
+	use singleton;
 
 	/**
 	 * Default constants.
@@ -38,17 +39,6 @@ class Enqueue {
 	}
 
 	/**
-	 * Instance
-	 *
-	 * @param array $params Optional parameters.
-	 *
-	 * @return SMTP
-	 */
-	public static function instance( $params = array() ) {
-		return new self( $params );
-	}
-
-	/**
 	 * Hooks.
 	 *
 	 * @return void
@@ -70,8 +60,7 @@ class Enqueue {
 		if ( is_singular( 'post' ) && self::$args['enable_code_highlight'] ) {
 			wp_enqueue_style( 'lerm_solarized', LERM_URI . 'assets/css/solarized-dark.min.css', array(), LERM_VERSION );
 		}
-		wp_enqueue_style( 'lerm_style', get_stylesheet_uri(), array(), LERM_VERSION );
-		// wp_enqueue_style( 'main', LERM_URI . 'assets/css/main.css', array(), '1.0.0' );
+		wp_enqueue_style( 'main_style', LERM_URI . 'assets/css/main.css', array(), LERM_VERSION );
 	}
 
 	/**
@@ -87,9 +76,9 @@ class Enqueue {
 		wp_register_script( 'share', LERM_URI . 'assets/js/social-share.min.js', array(), LERM_VERSION, true );
 		wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 		wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
-		wp_register_script( 'lerm_common', LERM_URI . 'assets/js/common.js', array(), LERM_VERSION, true );
+		wp_register_script( 'main-js', LERM_URI . 'assets/js/main.js', array(), LERM_VERSION, true );
 		wp_register_script( 'wow', LERM_URI . 'assets/js/wow.min.js', array(), LERM_VERSION, true );
-		//wp_register_script( 'login_js', LERM_URI . 'assets/js/wow.min.js', array(), LERM_VERSION, true );
+		// wp_register_script( 'login_js', LERM_URI . 'assets/js/wow.min.js', array(), LERM_VERSION, true );
 		// enqueue script.
 		if ( self::$args['cdn_jquery'] ) {
 			wp_enqueue_script( 'jquery_cdn', self::$args['cdn_jquery'], array(), LERM_VERSION, true );
@@ -108,7 +97,7 @@ class Enqueue {
 		}
 		wp_enqueue_script( 'wow' );
 		wp_localize_script(
-			'lerm_common',
+			'main-js',
 			'adminajax',
 			array(
 				'url'      => admin_url( 'admin-ajax.php' ),
@@ -120,7 +109,7 @@ class Enqueue {
 				'loggedin' => is_user_logged_in(),
 			)
 		);
-		wp_enqueue_script( 'lerm_common' );
+		wp_enqueue_script( 'main-js' );
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 			wp_enqueue_script( 'comment-reply' );
 		}

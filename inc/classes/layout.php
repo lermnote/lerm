@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Layouts API - An API for themes to build layout options.
  *
@@ -10,17 +10,17 @@
 
 namespace Lerm\Inc;
 
+use Lerm\Inc\Traits\Singleton;
+
 class Layout {
+
+	use singleton;
 
 	private $site_layout; // Add a class property to cache the site layout.
 
 	private static $default_row_classes = array( 'row' ); // Define default row classes as a static variable.
 
 	private static $global_layout;
-
-	public static function instance( $params = array() ) {
-		return new self( $params );
-	}
 	/**
 	 * Add a filter to modify the site layout.
 	 *
@@ -113,7 +113,7 @@ class Layout {
 				'col-lg-8',
 				'pe-lg-0',
 			);
-		} elseif ( in_array( $site_layout, array( 'layout-1c', 'layout-1c-narrow' ) ) ) {
+		} elseif ( in_array( $site_layout, array( 'layout-1c', 'layout-1c-narrow' ), true ) ) {
 			$classes = array(
 				'col-12',
 			);

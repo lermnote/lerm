@@ -33,5 +33,5 @@
 		</header>
 		<?php
 		if ( lerm_options( 'slide_position' ) === 'full_width' ) {
-			get_template_part( 'template-parts/carousel' );
+			get_template_part( 'template-parts/components/carousel' );
 		}

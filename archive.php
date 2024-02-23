@@ -17,7 +17,7 @@ get_header();
 // $archive_header = sprintf( 'background: %s %s ; color: %s', $bg_image, $bg_color, $font_color );
 ?>
 <main role="main" class="container"><!--.container-->
-<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
@@ -36,7 +36,7 @@ get_header();
 				endif;
 				?>
 			</div>
-			<?php get_template_part( 'template-parts/pagination' ); ?>
+			<?php get_template_part( 'template-parts/components/pagination' ); ?>
 		</div>
 		<?php get_sidebar(); ?>
 		</div><!--.row-->

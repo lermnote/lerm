@@ -13,7 +13,7 @@ get_header();
 ?>
 <main role="main" class="container"><!--.container-->
 	<?php
-	get_template_part( 'template-parts/breadcrumb' );
+	get_template_part( 'template-parts/components/breadcrumb' );
 
 	if ( lerm_options( 'slide_position' ) === 'under_navbar' ) {
 		get_template_part( 'template-parts/carousel' );
@@ -23,7 +23,7 @@ get_header();
 		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<?php
 			if ( lerm_options( 'slide_position' ) === 'under_primary' ) {
-				get_template_part( 'template-parts/carousel' );
+				get_template_part( 'template-parts/components/carousel' );
 			}
 			?>
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
@@ -36,7 +36,7 @@ get_header();
 				endif;
 				?>
 			</div><!--.site-main-->
-			<?php get_template_part( 'template-parts/pagination' ); ?>
+			<?php get_template_part( 'template-parts/components/pagination' ); ?>
 		</div>
 		<?php get_sidebar(); ?>
 	</div><!--.row-->

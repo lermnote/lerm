@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Breadcrumb Trail - A breadcrumb menu script for WordPress.
  *
@@ -30,7 +30,11 @@
  */
 namespace Lerm\Inc;
 
+use Lerm\Inc\Traits\Singleton;
+
 class Breadcrumb {
+
+	use singleton;
 	/**
 	 * Array of items belonging to the current breadcrumb trail.
 	 *
@@ -115,11 +119,6 @@ class Breadcrumb {
 		self::add_items();
 
 		self::trail();
-	}
-
-	// instance
-	public static function instance( $params = array() ) {
-		return new self( $params );
 	}
 
 	/* ====== Public Methods ====== */

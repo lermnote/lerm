@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Display lerm_slides on Home page
  *
@@ -8,7 +8,11 @@
  */
 namespace Lerm\Inc;
 
+use Lerm\Inc\Traits\Singleton;
+
 class Carousel {
+
+	use singleton;
 
 	private static $args = array(
 		'slide_enable' => false,
@@ -24,11 +28,6 @@ class Carousel {
 		if ( self::$args['slide_enable'] ) {
 			self::render();
 		}
-	}
-
-	// instance
-	public static function instance( $params = array() ) {
-		return new self( $params );
 	}
 
 	public static function render( $args = array() ) {

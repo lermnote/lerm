@@ -38,9 +38,9 @@ global $post;
 		<div class="row no-gutters align-items-md-center">
 			<?php if ( has_post_thumbnail() ) : ?>
 				<div class="col-md-3 ">
-					
-					<?php get_template_part( 'template-parts/content/featured-image' ); ?>
-					
+
+					<?php get_template_part( 'template-parts/components/featured-image' ); ?>
+
 				</div>
 			<?php endif; ?>
 			<div class="<?php echo has_post_thumbnail() ? 'col-md-9' : 'col-md-12'; ?>">

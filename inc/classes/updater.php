@@ -1,6 +1,8 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
  * Gridd Theme Updater.
+ * The theme-review process on w.org takes months.
+ * In the meantime this can serve as a simple updater.
  *
  * @package Gridd
  * @since 1.0
@@ -8,13 +10,11 @@
 
 namespace Lerm\Inc;
 
-/**
- * Updater class.
- *
- * The theme-review process on w.org takes months.
- * In the meantime this can serve as a simple updater.
- */
+use Lerm\Inc\Traits\Singleton;
+
 class Updater {
+
+	use Singleton;
 
 	/**
 	 * The repository.

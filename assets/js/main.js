@@ -183,32 +183,32 @@
 		const commentForm = document.getElementById("commentform");
 
 		const commentLiStr = (data) => {
-			if (data.comment_parent == '0') {
-				str = `<li class="${data.comment_type} list-group-item" id="comment-${data.comment_ID}">`;
+			if (data.comment.comment_parent == '0') {
+				str = `<li class="${data.comment.comment_type} list-group-item" id="comment-${data.comment.comment_ID}">`;
 			} else {
-				str = `<li class="${data.comment_type} list-group-item p-0" id="comment-${data.comment_ID}">`;
+				str = `<li class="${data.comment.comment_type} list-group-item p-0" id="comment-${data.comment.comment_ID}">`;
 			}
 
-			str += `<article id="div-comment-${data.comment_ID}" class="comment-body">
+			str += `<article id="div-comment-${data.comment.comment_ID}" class="comment-body">
 				<footer class="comment-meta mb-1">
 					<span class="comment-author vcard">
-						<img src="${data.avatar_url}" srcset="${data.avatar_url} 2x" alt="${data.comment_author}" class="avatar avatar-${data.avatar_size} photo" height="${data.avatar_size}" width="${data.avatar_size}" loading="lazy" decoding="async">
-						<b class="fn">${data.comment_author}</b>
+						<img src="${data.avatar_url}" srcset="${data.avatar_url} 2x" alt="${data.comment.comment_author}" class="avatar avatar-${data.avatar_size} photo" height="${data.avatar_size}" width="${data.avatar_size}" loading="lazy" decoding="async">
+						<b class="fn">${data.comment.comment_author}</b>
 					</span>
 					<!--.comment-author -->
 					<span class="comment-metadata">
 						<span aria-hidden="true">•</span>
-						<a href="http://localhost/wordpress/${data.comment_post_ID}/#comment-${data.comment_ID}">
-							<time time datetime = "${data.comment_date_gmt}" > ${data.comment_date}</time >
+						<a href="http://localhost/wordpress/${data.comment.comment_post_ID}/#comment-${data.comment.comment_ID}">
+							<time time datetime = "${data.comment.comment_date_gmt}" > ${data.comment.comment_date}</time >
 						</a>
 					</span>
 				</footer>`;
 
-			if (data.comment_approved == '0') {
+			if (data.comment.comment_approved == '0') {
 				str += `<span class="comment-awaiting-moderation badge rounded-pill bg-info">您的评论正在等待审核。</span>`;
 			}
 			str += `<section class="comment-content" style="margin-left: 56px">
-					<p>${data.comment_content}</p>
+					<p>${data.comment.comment_content}</p>
 				</section>
 			</article>
 			</li>`;
@@ -216,7 +216,7 @@
 		}
 
 		const showError = (msg) => {
-			message.innerHTML = `< strong strong > <i class="fa fa-ok me-1"></i>${msg}</strong > `;
+			message.innerHTML = `<strong><i class="fa fa-ok me-1"></i>${msg}</strong>`;
 			message.classList.remove("visually-hidden");
 			message.classList.add("shake");
 			setTimeout(() => {
@@ -224,11 +224,19 @@
 				message.classList.add("visually-hidden");
 			}, 3000);
 		}
-
+		const showMessage = (msg) => {
+			message.innerHTML = `<strong><i class="fa fa-ok me-1"></i>${msg}</strong>`;
+			message.classList.remove("visually-hidden");
+			// message.classList.add("shake");
+			setTimeout(() => {
+				message.classList.remove("shake")
+				message.classList.add("visually-hidden");
+			}, 3000);
+		}
 		const showSuccess = (msg) => {
-			message.innerHTML = `< strong strong > <i class="fa fa-xmark me-1"></i>${msg}</strong > `;
-			message.classList.add("show");
-			setTimeout(() => message.classList.remove("show"), 3000);
+			message.innerHTML = `<strong><i class="fa fa-xmark me-1"></i>${msg}</strong>`;
+			message.classList.remove("visually-hidden");
+			setTimeout(() => message.classList.add("visually-hidden"), 3000);
 		}
 
 		if (typeof commentForm != "undefined" && commentForm != null) {
@@ -245,6 +253,7 @@
 					message.removeAttribute("style");
 					message.classList.remove("shake", "fadeOut");
 					message.innerHTML = '<strong><i class="fa fa-spinner fa-pulse me-1"></i>正在提交...</strong>';
+					showMessage('正在提交...');
 					new WOW().init();
 					// check user logged in.
 					const commentData = new FormData(commentForm)
@@ -275,7 +284,7 @@
 							body: params,
 						});
 						const { success, data } = await response.json();
-
+console.log(data);
 						if (success && data.length !== 0) {
 
 							const nodeLi = commentLiStr(data);
@@ -319,11 +328,11 @@
 						} else {
 							//throw commentNode;
 							showError("评论提交失败，请刷新后重试");
-							console.error(data);
+							console.log(data);
 						}
 					} catch (error) {
 						showError("评论提交失败，请刷新后重试！");
-						console.log(error);
+						console.error(error);
 					} finally {
 						e.target.removeAttribute("disabled");
 						setTimeout(() => message.classList.remove("show"), 3000);

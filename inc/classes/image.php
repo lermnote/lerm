@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Posts thumbnail handle.
  *
@@ -7,7 +7,11 @@
 
 namespace Lerm\Inc;
 
+use Lerm\Inc\Traits\Singleton;
+
 class Image {
+
+	use singleton;
 
 	/**
 	 * $default parse to arg;
@@ -41,11 +45,6 @@ class Image {
 
 		// Initialize the image handling process
 		$this->set_image_as_thumbnail( $this->args['post_id'] );
-	}
-
-	// instance
-	public static function instance( $params = array() ) {
-		return new self( $params );
 	}
 
 	public function set_image_as_thumbnail( $post_id ) {

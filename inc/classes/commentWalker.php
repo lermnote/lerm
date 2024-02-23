@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Comments walker
  *
@@ -10,10 +10,13 @@
 namespace Lerm\Inc;
 
 use Walker_Comment;
+use Lerm\Inc\Traits\Singleton;
 
 class CommentWalker extends Walker_Comment {
+	// Instance
+	use singleton;
 
-	public const AJAX_ACTION = 'ajax_login';
+	public const AJAX_ACTION = 'ajax_comment';
 
 	public static $args = array(
 		'make_clickable' => true,
@@ -29,23 +32,13 @@ class CommentWalker extends Walker_Comment {
 		}
 		$this->register();
 	}
-		/**
-		 * Instance
-		 *
-		 * @param array $params Optional parameters.
-		 *
-		 * @return Setup
-		 */
-	public static function instance( $params = array() ) {
-		return new self( $params );
-	}
 
 	public static function register() {
-		add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_comment' ) );
-		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_comment' ) );
+		add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
+		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
 	}
 
-	public function ajax_comment() {
+	public function ajax_handle() {
 		// Check ajax nonce first
 		$comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
 
@@ -55,8 +48,9 @@ class CommentWalker extends Walker_Comment {
 			if ( 0 === $comment_post_id ) {
 				return;
 			}
-			$comment->avatar_url  = get_avatar_url( $comment );
-			$comment->avatar_size = ( 0 !== $_POST['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
+			$avatar_url  = get_avatar_url( $comment );
+			$avatar_size = ( 0 !== $_POST['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
+			$avatar_size = ( 0 !== $_POST['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
 			/**
 			 * Set Cookies checkbox
 			 *
@@ -67,8 +61,13 @@ class CommentWalker extends Walker_Comment {
 				do_action( 'set_comment_cookies', $comment, $user );
 			}
 
-			wp_send_json_success( $comment );
-
+			wp_send_json_success(
+				array(
+					'comment'     => $comment,
+					'avatar_url'  => $avatar_url,
+					'avatar_size' => $avatar_size,
+				)
+			);
 		} else {
 			$error = intval( $comment->get_error_data() );
 			if ( ! empty( $error ) ) {
