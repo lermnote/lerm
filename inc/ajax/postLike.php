@@ -36,7 +36,7 @@ class PostLike {
 	 * @param array $params Optional. Arguments for the class.
 	 */
 	public function __construct( $params = array() ) {
-		$this->register( 'post_like' );
+		// $this->register( 'post_like' );
 		add_filter( 'manage_post_posts_columns', array( __CLASS__, 'set_post_columns' ) );
 		add_action( 'manage_post_posts_custom_column', array( __CLASS__, 'post_custom_column' ), 10, 2 );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'post_like_meta_box' ) );

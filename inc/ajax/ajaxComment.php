@@ -36,14 +36,17 @@ class AjaxComment {
 		if ( self::$args['escape_html'] ) {
 			add_filter( 'pre_comment_content', 'esc_html' );
 		}
-
+		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
 		$this->register();
 	}
 
-	public static function register() {
-		// Register ajax handlers for both logged in and non-logged in users
-		add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
+	public static function register( $public = false ) {
 		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
+
+		// Register ajax handlers for both logged in and non-logged in users
+		if ( $public ) {
+			add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
+		}
 	}
 
 	public function ajax_handle() {
@@ -85,5 +88,22 @@ class AjaxComment {
 			// If there's an error, send JSON error response
 			wp_send_json_error( $comment->get_error_message() );
 		}
+	}
+
+	/**
+	 * Generate AJAX localization data.
+	 *
+	 * This function generates an array of localized data for use in AJAX requests.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
+	public static function ajax_l10n_data( $l10n ) {
+
+		$data = array(
+
+		);
+		$data = wp_parse_args( $data, $l10n );
+		return $data;
 	}
 }

@@ -69,7 +69,6 @@ class Enqueue {
 	 * @return void
 	 */
 	public static function scripts() {
-		global $wp_query;
 		wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.bundle.min.js', array(), '5.3', true );
 		wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
 		// wp_register_script( 'lightbox', 'https://ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js', array(), '1.7.1' );
@@ -78,7 +77,6 @@ class Enqueue {
 		wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
 		wp_register_script( 'main-js', LERM_URI . 'assets/js/main.js', array(), LERM_VERSION, true );
 		wp_register_script( 'wow', LERM_URI . 'assets/js/wow.min.js', array(), LERM_VERSION, true );
-		// wp_register_script( 'login_js', LERM_URI . 'assets/js/wow.min.js', array(), LERM_VERSION, true );
 		// enqueue script.
 		if ( self::$args['cdn_jquery'] ) {
 			wp_enqueue_script( 'jquery_cdn', self::$args['cdn_jquery'], array(), LERM_VERSION, true );
@@ -95,20 +93,16 @@ class Enqueue {
 				wp_enqueue_script( 'highlight' );
 			}
 		}
-		wp_enqueue_script( 'wow' );
-		wp_localize_script(
-			'main-js',
-			'adminajax',
-			array(
-				'url'      => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'ajax_nonce' ),
-				'noposts'  => __( 'No older posts found', 'lerm' ),
-				'posts'    => wp_json_encode( $wp_query->query_vars ), // everything about your loop is here.
-				'loadmore' => __( 'Load more', 'lerm' ),
-				'loading'  => '<i class="fa fa-spinner fa-spin me-1"></i>' . __( 'Loading...', 'lerm' ),
-				'loggedin' => is_user_logged_in(),
-			)
+
+		$data = array(
+			'url'      => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'ajax_nonce' ),
+			'loggedin' => is_user_logged_in(),
 		);
+		$l10n = apply_filters( 'lerm_l10n_data', $data );
+
+		wp_localize_script( 'main-js', 'adminajax', $l10n );
+		wp_enqueue_script( 'wow' );
 		wp_enqueue_script( 'main-js' );
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 			wp_enqueue_script( 'comment-reply' );

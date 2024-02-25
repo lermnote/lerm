@@ -30,13 +30,17 @@ trait Ajax {
 	 *
 	 * @param string $action The nonce action name.
 	 */
-	protected function verify_nonce( $action ) {
+	// public function verify_nonce( $action ) {
 
-		if ( ! isset( $_REQUEST['security'] ) || ! \wp_verify_nonce( $_REQUEST['security'], $action ) ) {
-			$this->error( __( 'Error: Invalid request', 'lerm' ) );
+	// 	if ( ! isset( $_REQUEST['security'] ) || ! \wp_verify_nonce( $_REQUEST['security'], $action ) ) {
+	// 		$this->error( __( 'Error: Invalid request', 'lerm' ) );
+	// 	}
+	// }
+	public function verify_nonce( $nonce_field, $nonce_action ) {
+		if ( ! isset( $_POST[ $nonce_field ] ) || ! wp_verify_nonce( $_POST[ $nonce_field ], $nonce_action ) ) {
+			wp_send_json_error( 'Invalid nonce' );
 		}
 	}
-
 	/**
 	 * Wrapper function for sending success response
 	 *

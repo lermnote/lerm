@@ -8,25 +8,26 @@
 namespace Lerm\Inc\Ajax;
 
 use WP_Query;
-use Lerm\Inc\Traits\Ajax;
+use Lerm\Inc\Ajax\Ajax;
 use Lerm\Inc\Traits\Singleton;
 
-final class LoadMore {
-	use Ajax;
+final class LoadMore extends Ajax {
 
 	use singleton;
 
-	private $query_args;
+	private const ACTION = 'load_more';
+
+	public static $default_args = array(
+		'post_per_page' => 10,
+	);
+
+	private static $query_args;
 
 	public function __construct( $query_args = array() ) {
-		$this->register( 'load_more' );
+		self::register( self::ACTION, true );
 
-		$default_args =
-			array(
-				'post_per_page' => get_option( 'posts_per_page' ),
-			);
-
-		$this->query_args = wp_parse_args( $query_args, $default_args );
+		self::$query_args = wp_parse_args( $query_args, self::$default_args );
+		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
 	}
 
 	/** Load more posts on blog page.
@@ -34,10 +35,7 @@ final class LoadMore {
 	 * @return void
 	 */
 	public function load_more() {
-		$nonce = sanitize_text_field( $_POST['security'] );
-		if ( ! wp_verify_nonce( $nonce, 'ajax_nonce' ) ) {
-			$this->error( __( 'Invalid nonce', 'lerm' ) );
-		}
+		check_ajax_referer( 'ajax_nonce', 'security', true );
 
 		$requested_query_args = json_decode( stripslashes( $_POST['query'] ), true );
 
@@ -57,7 +55,29 @@ final class LoadMore {
 			$posts->the_post();
 			get_template_part( 'template-parts/content/content', get_post_format() );
 		endwhile;
+		wp_reset_postdata();
+
 		$content = ob_get_clean();
+
 		$this->success( $content );
+	}
+		/**
+	 * Generate AJAX localization data.
+	 *
+	 * This function generates an array of localized data for use in AJAX requests.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
+	public static function ajax_l10n_data( $l10n ) {
+		global $wp_query;
+		$data = array(
+			'posts'    => wp_json_encode( $wp_query->query_vars ), // everything about your loop is here.
+			'loadmore' => __( 'Load more', 'lerm' ),
+			'loading'  => '<i class="fa fa-spinner fa-spin me-1"></i>' . __( 'Loading...', 'lerm' ),
+			'noposts'  => __( 'No older posts found', 'lerm' ),
+		);
+		$data = wp_parse_args( $data, $l10n );
+		return $data;
 	}
 }

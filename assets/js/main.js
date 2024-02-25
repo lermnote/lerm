@@ -494,6 +494,7 @@ console.log(data);
 		const regExp = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$/;
 		return regExp.test(email);
 	}
+	
 	/**
 	 * animate function
 	 *

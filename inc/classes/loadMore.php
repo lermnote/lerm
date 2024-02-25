@@ -12,7 +12,7 @@ use Lerm\Inc\Traits\Ajax;
 use Lerm\Inc\Traits\Singleton;
 class LoadMore {
 	use Ajax;
-	
+
 	use singleton;
 
 	private $query_args;
@@ -26,6 +26,7 @@ class LoadMore {
 			);
 
 		$this->query_args = wp_parse_args( $query_args, $default_args );
+		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
 	}
 
 	/** Load more posts on blog page.
@@ -58,5 +59,25 @@ class LoadMore {
 		endwhile;
 		$content = ob_get_clean();
 		$this->success( $content );
+	}
+
+	/**
+	 * Generate AJAX localization data.
+	 *
+	 * This function generates an array of localized data for use in AJAX requests.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
+	public static function ajax_l10n_data( $l10n ) {
+		global $wp_query;
+		$data = array(
+			'posts'    => wp_json_encode( $wp_query->query_vars ), // everything about your loop is here.
+			'loadmore' => __( 'Load more', 'lerm' ),
+			'loading'  => '<i class="fa fa-spinner fa-spin me-1"></i>' . __( 'Loading...', 'lerm' ),
+			'noposts'  => __( 'No older posts found', 'lerm' ),
+		);
+		$data = wp_parse_args( $data, $l10n );
+		return $data;
 	}
 }
