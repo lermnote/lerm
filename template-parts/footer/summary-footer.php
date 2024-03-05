@@ -1,8 +1,8 @@
 
-<footer class="">
+<footer class="summary-footer">
 	<?php
 	if ( ! is_singular() ) {
-		lerm_post_meta( 'summary_bottom' );
+		\Lerm\Inc\Tags::post_meta( array_keys( (array) lerm_options( 'summary_meta', 'enabled' ) ), 'justify-content-center justify-content-sm-start mb-0' );
 	}
 	?>
 </footer>

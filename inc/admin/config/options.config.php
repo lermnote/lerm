@@ -1119,7 +1119,7 @@ if ( class_exists( 'CSF' ) ) {
 						),
 						'disabled' => array(
 							'author'       => 'Author',
-							'comment'      => 'Comment',
+							'responses'    => 'Comment',
 							'publish_date' => 'Publish Date',
 							'format'       => 'Format',
 						),
@@ -1212,7 +1212,7 @@ if ( class_exists( 'CSF' ) ) {
 							'publish_date' => 'Publish Date',
 							'categories'   => 'Category',
 							'read'         => 'Read',
-							'comment'      => 'Comment',
+							'responses'    => 'Comment',
 						),
 						'disabled' => array(
 							'format' => 'Format',
@@ -1231,10 +1231,10 @@ if ( class_exists( 'CSF' ) ) {
 							'categories'   => 'Category',
 						),
 						'disabled' => array(
-							'format'  => 'Format',
-							'author'  => 'Author',
-							'read'    => 'Read',
-							'comment' => 'Comment',
+							'format'    => 'Format',
+							'author'    => 'Author',
+							'read'      => 'Read',
+							'responses' => 'Comment',
 						),
 					),
 				),

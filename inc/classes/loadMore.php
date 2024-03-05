@@ -34,16 +34,17 @@ class LoadMore {
 	 * @return void
 	 */
 	public function load_more() {
+
 		$nonce = sanitize_text_field( $_POST['security'] );
 		if ( ! wp_verify_nonce( $nonce, 'ajax_nonce' ) ) {
 			$this->error( __( 'Invalid nonce', 'lerm' ) );
 		}
-
-		$requested_query_args = json_decode( stripslashes( $_POST['query'] ), true );
+		$postdata             = wp_unslash( $_POST );
+		$requested_query_args = json_decode( stripslashes( $postdata['query'] ), true );
 
 		$query_args = array_merge( $this->query_args, $requested_query_args );
 
-		$query_args['paged']       = (int) $_POST['current_page'] + 1;
+		$query_args['paged']       = (int) $postdata['current_page'] + 1;
 		$query_args['post_status'] = 'publish';
 
 		$posts = new WP_Query( $query_args );

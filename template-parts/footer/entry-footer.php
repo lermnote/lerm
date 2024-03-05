@@ -1,3 +1,4 @@
+
 <?php
 $like_class = isset( $_COOKIE[ 'post_like_' . $post->ID ] ) ? '' : '';
 $like_count = get_post_meta( $post->ID, '_post_like_count', true ) ? get_post_meta( $post->ID, '_post_like_count', true ) : 0;

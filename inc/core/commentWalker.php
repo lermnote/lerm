@@ -16,8 +16,6 @@ class CommentWalker extends Walker_Comment {
 	// Instance
 	use singleton;
 
-	public const AJAX_ACTION = 'ajax_comment';
-
 	public static $args = array(
 		'make_clickable' => true,
 		'escape_html'    => true,
@@ -30,51 +28,8 @@ class CommentWalker extends Walker_Comment {
 		if ( self::$args['escape_html'] ) {
 			add_filter( 'pre_comment_content', 'esc_html' );
 		}
-		$this->register();
 	}
 
-	public static function register() {
-		add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
-		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
-	}
-
-	public function ajax_handle() {
-		// Check ajax nonce first
-		$comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
-
-		if ( check_ajax_referer( 'ajax_nonce', 'security', false ) && ! is_wp_error( $comment ) ) {
-
-			$comment_post_id = isset( $_POST['comment_post_ID'] ) ? (int) $_POST['comment_post_ID'] : 0;
-			if ( 0 === $comment_post_id ) {
-				return;
-			}
-			$avatar_url  = get_avatar_url( $comment );
-			$avatar_size = ( 0 !== $_POST['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
-			/**
-			 * Set Cookies checkbox
-			 *
-			 * @since 3.2
-			 */
-			$user = wp_get_current_user();
-			if ( isset( $_POST['wp-comment-cookies-consent'] ) && 'yes' === $_POST['wp-comment-cookies-consent'] ) {
-				do_action( 'set_comment_cookies', $comment, $user );
-			}
-
-			wp_send_json_success(
-				array(
-					'comment'     => $comment,
-					'avatar_url'  => $avatar_url,
-					'avatar_size' => $avatar_size,
-				)
-			);
-		} else {
-			$error = intval( $comment->get_error_data() );
-			if ( ! empty( $error ) ) {
-				wp_send_json_error( $comment->get_error_message() );
-			}
-		}
-		wp_die();
-	}
 
 	public function html5_comment( $comment, $depth, $args ) {
 		$tag                = ( 'div' === $args['style'] ) ? 'div' : 'li';

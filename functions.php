@@ -80,7 +80,9 @@ function lerm_paginate_comments() {
  * Get post views count.
  *
  * @since  3.0.0
- * @return void
+ *
+ * @param  string $after Text to append after the view count.
+ * @return string        Formatted view count.
  */
 function lerm_post_views( $after = '' ) {
 	global $post;
@@ -95,14 +97,14 @@ function lerm_post_views( $after = '' ) {
 	return number_format( $views ) . $after;
 }
 // Update post views count.
-function add_page_views() {
-	if ( is_singular( 'post' ) ) {
+function lerm_add_page_views() {
+	if ( is_singular( 'post' ) && ! is_admin() ){
 		$post_ID    = get_queried_object_id();
 		$post_views = (int) get_post_meta( $post_ID, 'pageviews', true );
-		update_metadata( 'post', $post_ID, 'pageviews', $post_views + 1 );
+		update_post_meta( 'post', $post_ID, 'pageviews', $post_views + 1 );
 	}
 }
-add_action( 'wp_footer', 'add_page_views' );
+add_action( 'template_redirect', 'lerm_add_page_views' );
 
 /**
  * Style embed front-end.

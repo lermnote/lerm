@@ -7,9 +7,8 @@
  * @since lerm 3.0
  */
 
-namespace Lerm\Inc\Ajax;
+namespace Lerm\Inc;
 
-use Walker_Comment;
 use Lerm\Inc\Traits\Singleton;
 
 class AjaxComment {
@@ -100,9 +99,7 @@ class AjaxComment {
 	 */
 	public static function ajax_l10n_data( $l10n ) {
 
-		$data = array(
-
-		);
+		$data = array();
 		$data = wp_parse_args( $data, $l10n );
 		return $data;
 	}

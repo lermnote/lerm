@@ -16,7 +16,7 @@ get_header();
 	get_template_part( 'template-parts/components/breadcrumb' );
 
 	if ( lerm_options( 'slide_position' ) === 'under_navbar' ) {
-		get_template_part( 'template-parts/carousel' );
+		get_template_part( 'template-parts/components/carousel' );
 	}
 	?>
 	<div <?php lerm_row_class(); ?>><!--.row-->

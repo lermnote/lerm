@@ -28,7 +28,7 @@ global $post;
 			</div>
 			<?php
 			if ( is_singular( 'post' ) ) {
-				lerm_post_meta( 'single_bottom' );
+				\Lerm\Inc\Tags::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
 			}
 			?>
 			<?php the_tags( '<ul class="list-unstyled m-0 small text-muted"><li class="d-inline ms-2">#', '</li><li class="d-inline ms-2">#', '</li></ul>' ); ?>
