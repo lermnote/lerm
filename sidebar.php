@@ -2,7 +2,7 @@
 /**
  * Sidebar containing the main widget area
  *
- * @author Lerm https://www.hanost.com
+ * @package Lerm https://lerm.net
  * @since  1.0
  */
 

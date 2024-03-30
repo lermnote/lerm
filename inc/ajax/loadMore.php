@@ -25,11 +25,13 @@ final class LoadMore extends BaseAjax {
 	public function __construct( $query_args = array() ) {
 		self::register( self::ACTION, 'ajax_handle', true );
 
-		self::$query_args = wp_parse_args( $query_args, self::$default_args );
 		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
+
+		self::$query_args = apply_filters( 'lerm_load_more', wp_parse_args( $query_args, self::$default_args ) );
 	}
 
-	/** Load more posts on blog page.
+	/**
+	 * Load more posts on blog page.
 	 *
 	 * @return void
 	 */
@@ -61,12 +63,13 @@ final class LoadMore extends BaseAjax {
 
 		self::success( $content );
 	}
-		/**
-		 * Generate AJAX localization data.
-		 *
-		 * @param array $l10n Existing localization data.
-		 * @return array Localized data for AJAX requests.
-		 */
+
+	/**
+	 * Generate AJAX localization data.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
 	public static function ajax_l10n_data( $l10n ) {
 		global $wp_query;
 		$data = array(

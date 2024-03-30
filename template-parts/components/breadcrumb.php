@@ -1,6 +1,8 @@
 <?php
 /**
  * Breadcrumb trail template.
+ * 
+ *  @package Lerm https://lerm.net
  */
 \Lerm\Inc\Breadcrumb::instance(
 	array(

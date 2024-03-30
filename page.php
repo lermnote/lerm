@@ -2,8 +2,9 @@
 /**
  * Template Name: Page Template
  *
- * @author lerm https://www.hanost.com
- * @package Lerm
+ * @package Lerm https://lerm.net
+ * 
+ * @since  1.0
  */
 get_header();
 ?>

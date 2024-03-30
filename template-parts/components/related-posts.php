@@ -2,6 +2,8 @@
 /**
  * Related posts show on single bottom;
  *
+ * @package Lerm https://lerm.net
+ *
  * @since 2.0
  */
 $tags = get_the_tags();

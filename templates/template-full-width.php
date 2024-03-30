@@ -3,7 +3,7 @@
  * Template Name: Full Width
  * Template Post Type: post, page
  *
- * @author lerm  http://lerm.net
+* @package Lerm https://lerm.net
  * @date   2016-10-26
  * @since lerm 3.0
  */

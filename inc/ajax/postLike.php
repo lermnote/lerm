@@ -7,15 +7,14 @@
  */
 namespace Lerm\Inc\Ajax;
 
-use Lerm\Inc\Traits\Ajax;
 use Lerm\Inc\Traits\Singleton;
 
-class PostLike {
-	use Ajax;
+final class PostLike extends BaseAjax {
 
 	use singleton;
 
-	private const AJAX_ACTION = 'post_like';
+	private const ACTION = 'post_like';
+
 	/**
 	 * The arguments for the class.
 	 *
@@ -36,135 +35,54 @@ class PostLike {
 	 * @param array $params Optional. Arguments for the class.
 	 */
 	public function __construct( $params = array() ) {
-		// $this->register( 'post_like' );
+		self::register( self::ACTION, 'ajax_handle', true );
+
 		add_filter( 'manage_post_posts_columns', array( __CLASS__, 'set_post_columns' ) );
 		add_action( 'manage_post_posts_custom_column', array( __CLASS__, 'post_custom_column' ), 10, 2 );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'post_like_meta_box' ) );
 		self::$args = wp_parse_args( $params, self::$args );
-			// User Profile List
+		// User Profile List
 		add_action( 'show_user_profile', array( __CLASS__, 'show_user_likes' ) );
 		add_action( 'edit_user_profile', array( __CLASS__, 'show_user_likes' ) );
-	}
-
-	public static function register() {
-		add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handler' ) );
-		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handler' ) );
 	}
 
 	/**
 	 * Callback function for processing the post like button AJAX request.
 	 */
-	public static function ajax_handler() {
+	public static function ajax_handle() {
 
-		if ( ! wp_verify_nonce( $_REQUEST['security'], 'ajax_nonce' ) ) {
-			\wp_die( esc_html__( 'Invalid nonce', 'lerm' ) );
-		}
+		check_ajax_referer( 'ajax_nonce', 'security', true );
+		$postdata = wp_unslash( $_POST );
 
 		// Test if javascript is disabled
-		$disabled = ( isset( $_REQUEST['disabled'] ) && true === $_REQUEST['disabled'] ) ? true : false;
+		$disabled = ( isset( $postdata['disabled'] ) && true === $postdata['disabled'] ) ? true : false;
 		// Test if this is a comment
-		$is_comment = ( isset( $_REQUEST['is_comment'] ) && $_REQUEST['is_comment'] == 1 ) ? 1 : 0;
+		$is_comment = ( isset( $postdata['is_comment'] ) && 1 === $postdata['is_comment'] ) ? 1 : 0;
 		// Base variables
-		$post_id    = ( isset( $_REQUEST['post_id'] ) && is_numeric( $_REQUEST['post_id'] ) ) ? $_REQUEST['post_id'] : '';
+		$post_id    = ( isset( $postdata['post_id'] ) && is_numeric( $postdata['post_id'] ) ) ? $postdata['post_id'] : '';
 		$result     = array();
 		$post_users = null;
 		$like_count = 0;
 
-			// Get plugin options
+		// Get plugin options
 		if ( '' !== $post_id ) {
 			$count = ( 1 === $is_comment ) ? get_comment_meta( $post_id, '_comment_like_count', true ) : get_post_meta( $post_id, '_post_like_count', true ); // like count
 			$count = ( isset( $count ) && is_numeric( $count ) ) ? $count : 0;
-			if ( ! self::already_liked( $post_id, $is_comment ) ) { // Like the post
-				if ( is_user_logged_in() ) { // user is logged in
-					$user_id    = get_current_user_id();
-					$post_users = self::post_user_likes( $user_id, $post_id, $is_comment );
-					if ( 1 === $is_comment ) { // Update User & Comment
-						$user_like_count = get_user_option( '_comment_like_count', $user_id );
-						$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
-						update_user_option( $user_id, '_comment_like_count', ++$user_like_count );
-						if ( $post_users ) {
-							update_comment_meta( $post_id, '_user_comment_liked', $post_users );
-						}
-					} else {
-						// Update User & Post
-						$user_like_count = get_user_option( '_user_like_count', $user_id );
-						$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
-						update_user_option( $user_id, '_user_like_count', ++$user_like_count );
-						if ( $post_users ) {
-							update_post_meta( $post_id, '_user_liked', $post_users );
-						}
-					}
-				} else {
-					// user is anonymous
-					$user_ip    = self::lerm_client_ip();
-					$post_users = self::post_ip_likes( $user_ip, $post_id, $is_comment );
-					// Update Post
-					if ( $post_users ) {
-						if ( 1 === $is_comment ) {
-							update_comment_meta( $post_id, '_user_comment_IP', $post_users );
-						} else {
-							update_post_meta( $post_id, '_user_IP', $post_users );
-						}
-					}
-				}
-				$like_count         = ++$count;
-				$response['status'] = 'liked';
-				$response['icon']   = self::get_liked_icon();
+			if ( ! self::already_liked( $post_id, $is_comment ) ) {
+				// Like the post
+				$response = self::like( $post_id, $is_comment, $count );
 			} else {
-				// Unlike the post
-				if ( is_user_logged_in() ) { // user is logged in
-					$user_id    = get_current_user_id();
-					$post_users = self::post_user_likes( $user_id, $post_id, $is_comment );
-					// Update User
-					if ( 1 === $is_comment ) {
-						$user_like_count = get_user_option( '_comment_like_count', $user_id );
-						$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
-						if ( $user_like_count > 0 ) {
-							update_user_option( $user_id, '_comment_like_count', --$user_like_count );
-						}
-					} else {
-						$user_like_count = get_user_option( '_user_like_count', $user_id );
-						$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
-						if ( $user_like_count > 0 ) {
-							update_user_option( $user_id, '_user_like_count', --$user_like_count );
-						}
-					}
-					// Update Post
-					if ( $post_users ) {
-						$uid_key = array_search( $user_id, $post_users, true );
-						unset( $post_users[ $uid_key ] );
-						if ( 1 === $is_comment ) {
-							update_comment_meta( $post_id, '_user_comment_liked', $post_users );
-						} else {
-							update_post_meta( $post_id, '_user_liked', $post_users );
-						}
-					}
-				} else { // user is anonymous
-					$user_ip    = self::lerm_client_ip();
-					$post_users = self::post_ip_likes( $user_ip, $post_id, $is_comment );
-					// Update Post
-					if ( $post_users ) {
-						$uip_key = array_search( $user_ip, $post_users, true );
-						unset( $post_users[ $uip_key ] );
-						if ( 1 === $is_comment ) {
-							update_comment_meta( $post_id, '_user_comment_IP', $post_users );
-						} else {
-							update_post_meta( $post_id, '_user_IP', $post_users );
-						}
-					}
-				}
-				$like_count         = ( $count > 0 ) ? --$count : 0; // Prevent negative number
-				$response['status'] = 'unliked';
-				$response['icon']   = self::get_unliked_icon();
+				$response = self::unlike( $post_id, $is_comment, $count );
 			}
+
 			if ( 1 === $is_comment ) {
-				update_comment_meta( $post_id, '_comment_like_count', $like_count );
-				update_comment_meta( $post_id, '_comment_like_modified', date( 'Y-m-d H:i:s' ) );
+				update_comment_meta( $post_id, '_comment_like_count', $response['count'] );
+				update_comment_meta( $post_id, '_comment_like_modified', gmdate( 'Y-m-d H:i:s' ) );
 			} else {
-				update_post_meta( $post_id, '_post_like_count', $like_count );
-				update_post_meta( $post_id, '_post_like_modified', date( 'Y-m-d H:i:s' ) );
+				update_post_meta( $post_id, '_post_like_count', $response['count'] );
+				update_post_meta( $post_id, '_post_like_modified', gmdate( 'Y-m-d H:i:s' ) );
 			}
-			$response['count']   = $like_count;
+			// $response['count']   = $like_count;
 			$response['testing'] = $is_comment;
 			if ( true === $disabled ) {
 				if ( 1 === $is_comment ) {
@@ -179,6 +97,105 @@ class PostLike {
 			}
 		}
 	}
+
+	public static function like( $post_id, $is_comment, $count ) {
+
+		if ( is_user_logged_in() ) {
+			// user is logged in
+			$user_id    = get_current_user_id();
+			$post_users = self::post_user_likes( $user_id, $post_id, $is_comment );
+			if ( 1 === $is_comment ) {
+				// Update User & Comment
+				$user_like_count = get_user_option( '_comment_like_count', $user_id );
+				$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
+				update_user_option( $user_id, '_comment_like_count', ++$user_like_count );
+				if ( $post_users ) {
+					update_comment_meta( $post_id, '_user_comment_liked', $post_users );
+				}
+			} else {
+				// Update User & Post
+				$user_like_count = get_user_option( '_user_like_count', $user_id );
+				$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
+				update_user_option( $user_id, '_user_like_count', ++$user_like_count );
+				if ( $post_users ) {
+					update_post_meta( $post_id, '_user_liked', $post_users );
+				}
+			}
+		} else {
+			// user is anonymous
+			$user_ip    = self::lerm_client_ip();
+			$post_users = self::post_ip_likes( $user_ip, $post_id, $is_comment );
+			// Update Post
+			if ( $post_users ) {
+				if ( 1 === $is_comment ) {
+					update_comment_meta( $post_id, '_user_comment_IP', $post_users );
+				} else {
+					update_post_meta( $post_id, '_user_IP', $post_users );
+				}
+			}
+		}
+		$response['count']  = ++$count;
+		$response['status'] = 'liked';
+		$response['icon']   = self::get_liked_icon();
+
+		return $response;
+
+	}
+
+	public static function unlike( $post_id, $is_comment, $count ) {
+		// Unlike the post
+		if ( is_user_logged_in() ) {
+			// user is logged in
+			$user_id    = get_current_user_id();
+			$post_users = self::post_user_likes( $user_id, $post_id, $is_comment );
+			// Update User
+			if ( 1 === $is_comment ) {
+				$user_like_count = get_user_option( '_comment_like_count', $user_id );
+				$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
+				if ( $user_like_count > 0 ) {
+					update_user_option( $user_id, '_comment_like_count', --$user_like_count );
+				}
+			} else {
+				$user_like_count = get_user_option( '_user_like_count', $user_id );
+				$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
+				if ( $user_like_count > 0 ) {
+					update_user_option( $user_id, '_user_like_count', --$user_like_count );
+				}
+			}
+
+			// Update Post
+			if ( $post_users ) {
+				$uid_key = array_search( $user_id, $post_users, true );
+				unset( $post_users[ $uid_key ] );
+				if ( 1 === $is_comment ) {
+					update_comment_meta( $post_id, '_user_comment_liked', $post_users );
+				} else {
+					update_post_meta( $post_id, '_user_liked', $post_users );
+				}
+			}
+		} else {
+			// user is anonymous
+			$user_ip    = self::lerm_client_ip();
+			$post_users = self::post_ip_likes( $user_ip, $post_id, $is_comment );
+			// Update Post
+			if ( $post_users ) {
+				$uip_key = array_search( $user_ip, $post_users, true );
+				unset( $post_users[ $uip_key ] );
+				if ( 1 === $is_comment ) {
+					update_comment_meta( $post_id, '_user_comment_IP', $post_users );
+				} else {
+					update_post_meta( $post_id, '_user_IP', $post_users );
+				}
+			}
+		}
+		$response['count']  = ( $count > 0 ) ? --$count : 0; // Prevent negative number
+		$response['status'] = 'unliked';
+		$response['icon']   = self::get_unliked_icon();
+
+		return $response;
+	}
+
+
 	/**
 	 * Utility to test if the post is already liked
 	 *
@@ -246,17 +263,15 @@ class PostLike {
 		return $output;
 	}
 
-
 	/**
 	 * Utility retrieves post meta user likes (user id array),
 	 * then adds new user id to retrieved array
 	 *
-	 * @since    0.5
 	 */
 	public static function post_user_likes( $user_id, $post_id, $is_comment ) {
 		$post_users      = '';
 		$post_meta_users = ( 1 === $is_comment ) ? get_comment_meta( $post_id, '_user_comment_liked' ) : get_post_meta( $post_id, '_user_liked' );
-		if ( count( $post_meta_users ) != 0 ) {
+		if ( count( $post_meta_users ) !== 0 ) {
 			$post_users = $post_meta_users[0];
 		}
 		if ( ! is_array( $post_users ) ) {
@@ -272,13 +287,12 @@ class PostLike {
 	 * Utility retrieves post meta ip likes (ip array),
 	 * then adds new ip to retrieved array
 	 *
-	 * @since    0.5
 	 */
 	public static function post_ip_likes( $user_ip, $post_id, $is_comment ) {
 		$post_users      = '';
 		$post_meta_users = ( 1 === $is_comment ) ? get_comment_meta( $post_id, '_user_comment_IP' ) : get_post_meta( $post_id, '_user_IP' );
 		// Retrieve post information
-		if ( count( $post_meta_users ) != 0 ) {
+		if ( count( $post_meta_users ) !== 0 ) {
 			$post_users = $post_meta_users[0];
 		}
 		if ( ! is_array( $post_users ) ) {
@@ -289,7 +303,6 @@ class PostLike {
 		}
 		return $post_users;
 	}
-
 
 	/**
 	 * Get the IP address of the current browser.
@@ -372,46 +385,45 @@ class PostLike {
 		return $count;
 	}
 
-
 	public static function show_user_likes( $user ) {
 		?>
 	<table class="form-table">
 		<tr>
-			<th><label for="user_likes"><?php _e( 'You Like:', 'YourThemeTextDomain' ); ?></label></th>
+			<th><label for="user_likes"><?php esc_attr_e( 'You Like:', 'lerm' ); ?></label></th>
 			<td>
-				<?php
-				$types      = get_post_types( array( 'public' => true ) );
-				$args       = array(
-					'numberposts' => -1,
-					'post_type'   => $types,
-					'meta_query'  => array(
-						array(
-							'key'     => '_user_liked',
-							'value'   => $user->ID,
-							'compare' => 'LIKE',
-						),
+			<?php
+			$types      = get_post_types( array( 'public' => true ) );
+			$args       = array(
+				'numberposts' => -1,
+				'post_type'   => $types,
+				'meta_query'  => array(
+					array(
+						'key'     => '_user_liked',
+						'value'   => $user->ID,
+						'compare' => 'LIKE',
 					),
-				);
-				$sep        = '';
-				$like_query = new \WP_Query( $args );
-				if ( $like_query->have_posts() ) :
-					?>
+				),
+			);
+			$sep        = '';
+			$like_query = new \WP_Query( $args );
+			if ( $like_query->have_posts() ) :
+				?>
 			<p>
-					<?php
-					while ( $like_query->have_posts() ) :
-						$like_query->the_post();
-							echo $sep;
-						?>
+				<?php
+				while ( $like_query->have_posts() ) :
+					$like_query->the_post();
+						echo $sep;
+					?>
 			<a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
 						<?php
-							$sep = ' &middot; ';
+						$sep = ' &middot; ';
 				endwhile;
-					?>
+				?>
 			</p>
 				<?php else : ?>
-			<p><?php _e( 'You do not like anything yet.', 'YourThemeTextDomain' ); ?></p>
+			<p><?php esc_attr_e( 'You do not like anything yet.', 'lerm' ); ?></p>
 					<?php
-				endif;
+					endif;
 				wp_reset_postdata();
 				?>
 			</td>
@@ -419,7 +431,6 @@ class PostLike {
 	</table>
 		<?php
 	}
-
 
 	/**
 	 * Set the custom column for post like count in post list table.

@@ -2,7 +2,7 @@
 /**
  * The template part for displaying an Author biography
  *
- * @package Lerm
+* @package Lerm https://lerm.net
  * @since Lerm 2.0
  */
 ?>

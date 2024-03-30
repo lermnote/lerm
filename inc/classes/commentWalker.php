@@ -77,9 +77,12 @@ class CommentWalker extends Walker_Comment {
 	}
 
 	public function html5_comment( $comment, $depth, $args ) {
+		global $post;
 		$tag                = ( 'div' === $args['style'] ) ? 'div' : 'li';
 		$commenter          = wp_get_current_commenter();
 		$show_pending_links = ! empty( $commenter['comment_author'] );
+		$like_class         = isset( $_COOKIE[ 'comment_like_' . $post->ID ] ) ? '' : '';
+		$like_count         = get_post_meta( $post->ID, '_comment_like_count', true ) ? get_post_meta( $post->ID, '_comment_like_count', true ) : 0;
 
 		if ( $commenter['comment_author_email'] ) {
 			$moderation_note = __( 'Your comment is awaiting moderation.', 'lerm' );
@@ -152,6 +155,12 @@ class CommentWalker extends Walker_Comment {
 							)
 						);
 						?>
+						<button  role="button" id="comment-like-button" data-id="<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-like-count="<?php echo esc_attr( $like_count ); ?>" data-comment="<?php echo esc_attr( 1 ); ?>"  class="like-button <?php echo esc_attr( $like_class ); ?>">
+				<span><i class="fa fa-heart"></i></span>
+				<span class="count">
+					<?php echo esc_attr( $like_count ); ?>
+				</span>
+			</button>
 					</div>
 				</footer>
 				<?php if ( '0' === $comment->comment_approved ) : ?>

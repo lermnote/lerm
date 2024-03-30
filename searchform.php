@@ -2,9 +2,9 @@
 /**
  * WordPress search form.
  *
- * @authors lerm http://lerm.net
+ * @package Lerm https://lerm.net
  * @date    2016-07-14
- * @since version lerm 1.0
+ * @since  1.0
  */
 $class = wp_is_mobile() ? 'p-3' : '';
 $value = is_search() ? get_search_query() : ''

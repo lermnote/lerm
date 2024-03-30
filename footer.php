@@ -2,7 +2,7 @@
 /**
  * The template for displaying the footer
  *
- * @author lerm https://www.hansot.com
+ * @package Lerm https://lerm.net
  * @date   2016-08-28 21:57:52
  * @since  1.00
  */

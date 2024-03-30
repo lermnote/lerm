@@ -110,12 +110,16 @@
 		 * @since 3.2
 		 */
 		const likeBtn = document.querySelector(".like-button");
+		console.log(likeBtn);
+		var settings = {
+			security: adminajax.nonce
 
+		}
 		if (typeof likeBtn != "undefined" && likeBtn != null) {
 			const countEl = likeBtn.querySelector(".count");
 			let postID = likeBtn.dataset.postId;
 			let likeCount = likeBtn.dataset.likeCount;
-			var iscomment = 0;
+			var iscomment = likeBtn.dataset.comment;
 			let count = localStorage.getItem(`post_like_${postID}`);
 			let sentRequest = false;
 
@@ -130,47 +134,52 @@
 			// } else {
 			// 	allbuttons = $('.sl-button-'+post_id);
 			// }
-			likeBtn.addEventListener("click", debounce(async (e) => {
-				e.preventDefault();
-				if (sentRequest) {
-					return;
-				}
-				let params = new URLSearchParams({
-					action: "post_like",
-					security: adminajax.nonce,
-					post_id: postID,
-					is_comment: iscomment,
-				});
-
-				try {
-					const response = await fetch(adminajax.url, {
-						method: "POST",
-						body: params,
-					});
-					const data  = await response.json();
-					console.log(data);
-					// if(response.status === 'unliked') {
-					// 	var like_text = simpleLikes.like;
-					// 	allbuttons.prop('title', like_text);
-					// 	allbuttons.removeClass('liked');
-					// } else {
-					// 	var unlike_text = simpleLikes.unlike;
-					// 	allbuttons.prop('title', unlike_text);
-					// 	allbuttons.addClass('liked');
-					// }
-					if ((typeof data.count === 'number')) {
-						localStorage.setItem(`post_like_${postID}`, data);
-						countEl.textContent = data.count;
-						sentRequest = true;
-						likeCount = data.count;
-					} else {
-						console.log(data);
+			document.addEventListener("click", debounce(async (e) => {
+				if (e.target && e.target.matches('button.like-button')) {
+					e.preventDefault();
+					if (sentRequest) {
+						return;
 					}
-				} catch (error) {
-					console.error(error);
-				} finally {
-					// likeBtn.classList.add("done");
-					// likeBtn.disabled = true;
+					
+					settings.id = e.dataset.postId;
+
+					let params = new URLSearchParams({
+						action: "post_like",
+						security: adminajax.nonce,
+						post_id: postID,
+						is_comment: iscomment,
+					});
+
+					try {
+						const response = await fetch(adminajax.url, {
+							method: "POST",
+							body: params,
+						});
+						const data = await response.json();
+						console.log(data);
+						// if(response.status === 'unliked') {
+						// 	var like_text = simpleLikes.like;
+						// 	allbuttons.prop('title', like_text);
+						// 	allbuttons.removeClass('liked');
+						// } else {
+						// 	var unlike_text = simpleLikes.unlike;
+						// 	allbuttons.prop('title', unlike_text);
+						// 	allbuttons.addClass('liked');
+						// }
+						if ((typeof data.count === 'number')) {
+							localStorage.setItem(`post_like_${postID}`, data);
+							countEl.textContent = data.count;
+							sentRequest = true;
+							likeCount = data.count;
+						} else {
+							console.log(data);
+						}
+					} catch (error) {
+						console.error(error);
+					} finally {
+						// likeBtn.classList.add("done");
+						// likeBtn.disabled = true;
+					}
 				}
 			}, 500));
 		}
@@ -284,7 +293,7 @@
 							body: params,
 						});
 						const { success, data } = await response.json();
-console.log(data);
+						console.log(data);
 						if (success && data.length !== 0) {
 
 							const nodeLi = commentLiStr(data);
@@ -351,7 +360,7 @@ console.log(data);
 	 *
 	 * @param {Function} fn Callback function to run.
 	 */
-	function DomReady(fn) {
+	var ready = (fn) => {
 		if (typeof fn !== 'function') {
 			return;
 		}
@@ -363,7 +372,7 @@ console.log(data);
 		document.addEventListener('DOMContentLoaded', fn, false);
 	}
 
-	DomReady(function () {
+	ready(() => {
 
 
 	})
@@ -474,7 +483,7 @@ console.log(data);
 		let opacity = 0;
 		const duration = 400;
 		const start = performance.now();
-		function tick(now) {
+		function tick (now) {
 			const elapsed = now - start;
 			opacity = Math.min(1, opacity + elapsed / duration);
 			element.style.opacity = opacity;
@@ -494,7 +503,7 @@ console.log(data);
 		const regExp = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$/;
 		return regExp.test(email);
 	}
-	
+
 	/**
 	 * animate function
 	 *
@@ -528,7 +537,7 @@ console.log(data);
 	 * @param {*} wait
 	 * @returns
 	 */
-	function debounce(func, wait) {
+	function debounce (func, wait) {
 		let timeout;
 		return function (...args) {
 			clearTimeout(timeout);

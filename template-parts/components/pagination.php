@@ -1,4 +1,12 @@
-<?php if ( $wp_query->max_num_pages > 1 ) : ?>
+<?php
+/**
+ *
+ *
+ * @package Lerm https://lerm.net
+ *
+ * @since  3.0.0
+ */
+if ( $wp_query->max_num_pages > 1 ) : ?>
 	<div class="navigation mb-3">
 		<?php
 		if ( ( lerm_options( 'load_more' ) || wp_is_mobile() ) && ( $wp_query->max_num_pages > 1 ) ) :

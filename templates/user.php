@@ -2,7 +2,7 @@
 /**
  * Template Name: User Profile Page
  *
- * @authors lerm http://lerm.net
+* @package Lerm https://lerm.net
  * @date    2016-10-26
  * @since lerm 2.0
  */

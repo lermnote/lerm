@@ -2,7 +2,7 @@
 /**
  * The template for displaying the 404 template in the theme.
  *
- * @package Lerm
+* @package Lerm https://lerm.net
  */
 
 get_header();

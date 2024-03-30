@@ -5,7 +5,7 @@
  * the visitor has not yet entered the password we will
  * return early without loading the comments.
  *
- * @author Lerm https://www.hanost.com
+* @package Lerm https://lerm.net
  * @date   2019-12-11 21:57:52
  * @since  2.0
  */

@@ -2,6 +2,8 @@
 /**
  * Navigation post.
  *
+ * @package Lerm https://lerm.net
+ *
  * @since  4.0.0
  */
 ?>

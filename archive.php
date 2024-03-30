@@ -2,7 +2,7 @@
 /**
  * The template for displaying archive pages
  *
- * @author lerm https://www.hanost.com
+* @package Lerm https://lerm.net
  * @package Lerm
  */
 

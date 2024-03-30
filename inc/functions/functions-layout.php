@@ -37,7 +37,7 @@ function lerm_body_classes( $classes ) {
 	if ( $layout_style ) {
 		$classes[] = $layout_style;
 	}
-	
+
 	return $classes;
 }
 add_filter( 'body_class', 'lerm_body_classes' );
@@ -195,4 +195,11 @@ function lerm_get_column_class( $css_class = '' ) {
 	$classes = apply_filters( 'lerm_column_class', $classes, $css_class );
 
 	return array_unique( $classes );
+}
+
+function layout_style() {
+	$layout_style = lerm_options( 'layout_style' );
+	if ( $layout_style ) {
+		$classes[] = $layout_style;
+	}
 }

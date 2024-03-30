@@ -2,9 +2,8 @@
 /**
  * Functions and definitions
  *
- * @author Lerm https://www.hanost.com
+ *  @package Lerm https://lerm.net
  * @date   2016-08-28 21:57:52
- * @package Lerm\Inc
  * @since  lerm 1.0
  */
 use Lerm\Inc\Setup;

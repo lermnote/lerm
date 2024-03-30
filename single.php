@@ -2,7 +2,7 @@
 /**
  * The template for displaying all single posts and attachments
  *
- * @author Lerm https://www.hanost.com
+ * @package Lerm https://lerm.net
  * @since  1.0
  */
 get_header();

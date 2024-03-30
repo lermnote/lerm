@@ -7,7 +7,7 @@
 
 namespace Lerm\Inc\Ajax;
 
-class BaseAjax {
+abstract class BaseAjax {
 
 
 	private const ACTION = '';
@@ -35,9 +35,14 @@ class BaseAjax {
 	}
 
 
-
+	/**
+	 * Handle ajax request
+	 *
+	 * @return void
+	 */
 
 	public static function ajax_handle() {}
+
 	/**
 	 * Verify request nonce
 	 *
