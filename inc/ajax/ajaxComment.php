@@ -18,13 +18,10 @@ class AjaxComment {
 
 	public const AJAX_ACTION = 'ajax_comment';
 
-	public static $args = array(
-		'make_clickable' => true,
-		'escape_html'    => true,
-	);
+	public static $args = array();
 
 	public function __construct( $params ) {
-		self::$args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$args ) );
+		self::$args = apply_filters( 'lerm_comment_', wp_parse_args( $params, self::$args ) );
 
 		// Disable make_clickable filter if specified
 		if ( self::$args['make_clickable'] ) {
@@ -36,7 +33,7 @@ class AjaxComment {
 			add_filter( 'pre_comment_content', 'esc_html' );
 		}
 		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
-		$this->register();
+		self::register();
 	}
 
 	public static function register( $public = false ) {
@@ -58,22 +55,21 @@ class AjaxComment {
 		// Check if the comment submission was successful
 		if ( ! is_wp_error( $comment ) ) {
 			// Get comment post ID
-			$comment_post_id = isset( $_POST['comment_post_ID'] ) ? (int) $_POST['comment_post_ID'] : 0;
+			$comment_post_id = isset( $comment['comment_post_ID'] ) ? (int) $comment['comment_post_ID'] : 0;
 			if ( 0 === $comment_post_id ) {
+				wp_send_json_error( 'Invalid post ID.' );
 				return;
 			}
 
 			// Set avatar URL and size
-			// $comment->avatar_url  = get_avatar_url( $comment );
-			// $comment->avatar_size = ( 0 !== $_POST['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
-			// Set avatar URL and size
 			$avatar_url  = get_avatar_url( $comment );
-			$avatar_size = ( 0 !== $_POST['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
+			$avatar_size = ( 0 !== $comment['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
+
 			// Set comment cookies consent
-			$user = wp_get_current_user();
-			if ( isset( $_POST['wp-comment-cookies-consent'] ) && 'yes' === $_POST['wp-comment-cookies-consent'] ) {
-				do_action( 'set_comment_cookies', $comment, $user );
+			if ( isset( $comment['wp-comment-cookies-consent'] ) && 'yes' === $comment['wp-comment-cookies-consent'] ) {
+				do_action( 'set_comment_cookies', $comment, wp_get_current_user() );
 			}
+
 			// Send JSON success response with the comment data
 			wp_send_json_success(
 				array(

@@ -200,7 +200,9 @@ button {
 .btn:focus {
 	box-shadow: none;
 }
-
+/* button>*{
+	pointer-events: none;
+} */
 /*table*/
 table {
 	width: 100%;
@@ -493,15 +495,7 @@ body {
 	color: currentColor;
 }
 
-.like-button {
-	opacity: 0.6;
-	filter: alpha(opacity=0.6);
-}
 
-.like-button.done {
-	opacity: 1;
-	filter: alpha(opacity=1);
-}
 
 .meta-item+.meta-item {
 	padding-left: 0.5rem;

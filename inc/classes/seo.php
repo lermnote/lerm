@@ -13,7 +13,7 @@ use Lerm\Inc\Traits\Singleton;
  * 5.seo标题
  */
 class SEO {
-	
+
 	use singleton;
 
 	public static $args = array(
@@ -141,8 +141,8 @@ class SEO {
 	 * @return string
 	 */
 	public static function html() {
-		$keywords    = self::keywords( self::$args['keywords'] );
-		$description = self::description( self::$args['description'] );
+		$keywords    = self::keywords();
+		$description = self::description();
 		echo '<meta name="keywords" content="' . esc_attr( implode( ',', $keywords ) ) . '">';
 		echo '<meta name="description" content="' . esc_attr( $description ) . '">';
 	}

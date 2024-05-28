@@ -18,7 +18,7 @@ class Optimize {
 	);
 
 	public function __construct( $params = array() ) {
-		self::$args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$args ) );
+		self::$args = apply_filters( 'lerm_optimize_args', wp_parse_args( $params, self::$args ) );
 		self::optimize( self::$args['super_optimize'] );
 		self::hooks();
 	}
@@ -48,15 +48,17 @@ class Optimize {
 	/**
 	 * Clean up wp_head() from unused or unsecure stuff.
 	 *
+	 * @param array $args List of elements to be removed.
+	 *
 	 * @return void
 	 */
 	public static function optimize( $args = array() ) {
 		// Remove head links.
 		$actions = array( 'rsd_link', 'wlwmanifest_link', 'wp_generator', 'start_post_rel_link', 'index_rel_link', 'adjacent_posts_rel_link_wp_head', 'rel_canonical' );
 		if ( is_array( $args ) && ! empty( $args ) ) {
-			foreach ( $actions as $value ) {
-				if ( in_array( $value, $args, true ) ) {
-					remove_action( 'wp_head', $value );
+			foreach ( $actions as $action ) {
+				if ( in_array( $action, $args, true ) ) {
+					remove_action( 'wp_head', $action );
 				}
 			}
 			// remove feed links in head
@@ -92,35 +94,46 @@ class Optimize {
 			if ( in_array( 'remove_recent_comments_css', $args, true ) ) {
 				add_filter( 'show_recent_comments_widget_style', '__return_false' );
 			}
-			if ( in_array( 'disable_oembed', $args, true ) ) {
-				remove_action( 'rest_api_init', 'wp_oembed_register_route' );
-				remove_filter( 'rest_pre_serve_request', '_oembed_rest_pre_serve_request', 10, 4 );
-				remove_filter( 'oembed_dataparse', 'wp_filter_oembed_result', 10 );
-				remove_filter( 'oembed_response_data', 'get_oembed_response_data_rich', 10, 4 );
-				remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
-				remove_action( 'wp_head', 'wp_oembed_add_host_js' );
-				add_filter( 'embed_oembed_discover', '__return_false' );
-				add_filter( 'rewrite_rules_array', array( __CLASS__, 'disable_embeds_rewrites' ) );
-				add_filter( 'tiny_mce_plugins', array( __CLASS__, 'remove_wpembed_tinymce_plugins' ) );
-			}
-			if ( in_array( 'remove_global_styles_render_svg', $args, true ) ) {
-				remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
-				remove_filter( 'render_block', 'wp_render_layout_support_flag' );
-				// 移除 SVG 和全局样式
-				// remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
-				// 删除添加全局内联样式的 wp_footer 操作
-				// remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
-				// 删除render_block 过滤器
-				// remove_filter('render_block', 'wp_render_duotone_support');
-				// remove_filter('render_block', 'wp_restore_group_inner_container');
-			}
+		}
+	}
+
+	protected static function conditionalAddFilter( $args, $key, $callback ) {
+		if ( in_array( $key, $args, true ) ) {
+			add_filter( 'script_loader_src', array( __CLASS__, $callback ) );
+			add_filter( 'style_loader_src', array( __CLASS__, $callback ) );
+		}
+	}
+
+	protected static function disable_oembed( $args ) {
+		if ( in_array( 'disable_oembed', $args, true ) ) {
+			remove_action( 'rest_api_init', 'wp_oembed_register_route' );
+			remove_filter( 'rest_pre_serve_request', '_oembed_rest_pre_serve_request', 10, 4 );
+			remove_filter( 'oembed_dataparse', 'wp_filter_oembed_result', 10 );
+			remove_filter( 'oembed_response_data', 'get_oembed_response_data_rich', 10, 4 );
+			remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
+			remove_action( 'wp_head', 'wp_oembed_add_host_js' );
+			add_filter( 'embed_oembed_discover', '__return_false' );
+			add_filter( 'rewrite_rules_array', array( __CLASS__, 'disableEmbedsRewrites' ) );
+			add_filter( 'tiny_mce_plugins', array( __CLASS__, 'removeWpembedTinymcePlugins' ) );
+		}
+	}
+
+	protected static function remove_global_styles_render_svg( $args ) {
+		if ( in_array( 'remove_global_styles_render_svg', $args, true ) ) {
+			remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
+			remove_filter( 'render_block', 'wp_render_layout_support_flag' );
+			// Uncomment these lines if you want to remove global styles completely
+			// remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
+			// remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
+			// remove_filter('render_block', 'wp_render_duotone_support');
+			// remove_filter('render_block', 'wp_restore_group_inner_container');
 		}
 	}
 
 	/**
 	 * Remove JSON API links in header html.
 	 *
-	 * @return array
+	 * @return void
 	 */
 	public static function remove_rest_api() {
 		remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
@@ -131,16 +144,20 @@ class Optimize {
 	/**
 	 * Remove the wpembed TinyMCE plugins.
 	 *
-	 * @return array
+	 * @param array $plugins List of TinyMCE plugins.
+	 *
+	 * @return array Updated list of TinyMCE plugins.
 	 */
 	public static function remove_wpembed_tinymce_plugins( $plugins ) {
 		return array_diff( $plugins, array( 'wpembed' ) );
 	}
 
 	/**
-	 * Remove the wpembed TinyMCE plugins.
+	 * Disable embed rewrites.
 	 *
-	 * @return array
+	 * @param array $rules Rewrite rules.
+	 *
+	 * @return array Updated rewrite rules.
 	 */
 	public static function disable_embeds_rewrites( $rules ) {
 		foreach ( $rules as $rule => $rewrite ) {
@@ -150,19 +167,22 @@ class Optimize {
 		}
 		return $rules;
 	}
+
 	/**
 	 * Remove the emojis TinyMCE plugins.
 	 *
-	 * @return array
+	 * @param array $plugins List of TinyMCE plugins.
+	 *
+	 * @return array Updated list of TinyMCE plugins.
 	 */
 	public static function remove_emojis_tinymce_plugins( $plugins ) {
 		return array_diff( $plugins, array( 'wpemoji' ) );
 	}
 
 	/**
-	 * Disable rest api.
+	 * Handle REST API authentication error.
 	 *
-	 * @return void
+	 * @return WP_Error Authentication error.
 	 */
 	public static function disable_rest_api() {
 		return new \WP_Error(
@@ -173,10 +193,11 @@ class Optimize {
 	}
 
 	/**
-	 * Remove style and script version of urls.
+	 * Remove version query string from scripts and styles.
 	 *
-	 * @param string $url
-	 * @return $url
+	 * @param string $url The URL of the script or style.
+	 *
+	 * @return string Updated URL.
 	 */
 	public static function remove_ver( $url = '' ) {
 		return $url ? remove_query_arg( 'ver', $url ) : false;
@@ -185,19 +206,20 @@ class Optimize {
 	/**
 	 * Use front-page.php when Front page displays is set to a static page.
 	 *
-	 * @param string $template front-page.php.
+	 * @param string $template The template to be used.
 	 *
-	 * @return string The template to be used: blank if is_home() is true (defaults to index.php), else $template.
+	 * @return string The template to be used.
 	 */
 	public static function front_page_template( $template ) {
 		return is_home() ? '' : $template;
 	}
 
 	/**
-	 * Add custom class item to replay links.
+	 * Add custom class item to reply links.
 	 *
-	 * @param string $class
-	 * @return void
+	 * @param string $class CSS class.
+	 *
+	 * @return string Updated CSS class.
 	 */
 	public static function replace_reply_link_class( $class ) {
 		return str_replace( 'class=\'', 'class=\'btn btn-sm btn-custom ', $class );
@@ -206,7 +228,8 @@ class Optimize {
 	/**
 	 * Custom tags cloud args.
 	 *
-	 * @param array $args
+	 * @param array $args Tag cloud arguments.
+	 *
 	 * @return string|string[] Tag cloud as a string or an array, depending on 'format' argument.
 	 */
 	public static function tag_cloud( $args ) {
@@ -226,15 +249,20 @@ class Optimize {
 	/**
 	 * Clean up menu attributes.
 	 *
-	 * @param array $ver
-	 * @return $ver
+	 * @param array $attr Menu attributes.
+	 *
+	 * @return array Updated menu attributes.
 	 */
 	public static function remove_css_attributes( $attr ) {
 		return is_array( $attr ) ? array_intersect( $attr, array( 'nav-item', 'active', 'dropdown', 'open', 'show' ) ) : array();
 	}
 
 	/**
-	 * Replace WordPress gravatar url
+	 * Replace WordPress gravatar URL.
+	 *
+	 * @param string $subject Gravatar URL.
+	 *
+	 * @return string Updated Gravatar URL.
 	 */
 	public static function gravatar_replace( $subject ) {
 		$pattern = '/https?.*?\/avatar\//i';
@@ -243,7 +271,11 @@ class Optimize {
 	}
 
 	/**
-	 * 替换 WordPress 讨论设置中的默认头像
+	 * Replace default avatar in WordPress discussion settings.
+	 *
+	 * @param array $avatar_defaults Default avatars.
+	 *
+	 * @return array Updated default avatars.
 	 */
 	public static function set_defaults_for_cravatar( $avatar_defaults ) {
 		$avatar_defaults['gravatar_default'] = 'Cravatar avatar';
@@ -251,15 +283,18 @@ class Optimize {
 	}
 
 	/**
-	 * 替换个人资料卡中的头像上传地址
+	 * Replace profile picture upload URL in user profile.
+	 *
+	 * @return string Profile picture upload URL.
 	 */
 	public static function set_user_profile_picture_for_cravatar() {
 		return '<a href="https://cravatar.cn" target="_blank">您可以在 Cravatar 修改您的资料图片</a>';
 	}
 
 	/**
-	 * 将WordPress核心所依赖的静态文件访问链接替换为公共资源节点
-	 * 参考 wp-china-yes 插件
+	 * Replace WordPress core static file access links with public resource nodes.
+	 *
+	 * @return void
 	 */
 	public static function super_admin() {
 		$pattern = '~' . home_url( '/' ) . '(wp-admin|wp-includes)/(css|js)/~';
@@ -268,7 +303,9 @@ class Optimize {
 	}
 
 	/**
-	 * Replace Google services
+	 * Replace Google services.
+	 *
+	 * @return void
 	 */
 	public static function googleapis_replace( $replace ) {
 		$services = array(
@@ -282,8 +319,13 @@ class Optimize {
 	}
 
 	/**
-	 * Replace public function
-	 * 参考 wp-china-yes 插件
+	 * Replace buffer content.
+	 *
+	 * @param string $function Function to call for replacement.
+	 * @param mixed  $regexp   Regular expression or search string.
+	 * @param string $replace  Replacement string.
+	 *
+	 * @return void
 	 */
 	public static function replace( $function, $regexp, $replace ) {
 		ob_start(
@@ -293,6 +335,11 @@ class Optimize {
 		);
 	}
 
+	/**
+	 * End output buffering.
+	 *
+	 * @return void
+	 */
 	public static function ob_buffer_end() {
 		if ( ob_get_level() > 0 ) {
 			ob_end_flush();

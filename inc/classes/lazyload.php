@@ -33,7 +33,7 @@ class Lazyload {
 	 * @param array $params Optional parameters for lazy loading.
 	 */
 	public function __construct( $params = array() ) {
-		self::$default_args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$default_args ) );
+		self::$default_args = apply_filters( 'lerm_lazyload_', wp_parse_args( $params, self::$default_args ) );
 		self::hooks();
 	}
 
@@ -59,6 +59,7 @@ class Lazyload {
 	 */
 	public static function lazyload_content( $content ) {
 		$regexp = '/<img([^<>]*)\.(bmp|gif|jpeg|jpg|png)([^<>]*)>/i';
+
 		return preg_replace_callback( $regexp, array( __CLASS__, 'lazyload_match' ), $content );
 	}
 
@@ -120,31 +121,23 @@ class Lazyload {
 	 * @return string Image tag with lazy data attributes added.
 	 */
 	private static function add_lazy_data_attributes( $image ) {
-		if ( stripos( $image, 'srcset=' ) ) {
-			if ( ! stripos( $image, 'data-srcset=' ) ) {
-				$regexp  = "/<img([^<>]*)srcset=['\"]([^<>'\"]*)['\"]([^<>]*)>/i";
-				$replace = '<img loading="lazy"$1srcset="data:image/gif;base64,R0lGODlhCgAKAJEDAMzMzP9mZv8AAP///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQFAAADACwAAAAACgAKAAACF5wncgaAGgJzJ647cWua4sOBFEd62VEAACH5BAUAAAMALAEAAAAIAAMAAAIKnBM2IoMDAFMQFAAh+QQFAAADACwAAAAABgAGAAACDJwHMBGofKIRItJYAAAh+QQFAAADACwAAAEAAwAIAAACChxgOBPBvpYQYxYAIfkEBQAAAwAsAAAEAAYABgAAAgoEhmPJHOGgEGwWACH5BAUAAAMALAEABwAIAAMAAAIKBIYjYhOhRHqpAAAh+QQFAAADACwEAAQABgAGAAACDJwncqi7EQYAA0p6CgAh+QQJAAADACwHAAEAAwAIAAACCpRmoxoxvQAYchQAOw==" data-src="$2" data-srcset="$2"$3>';
-			}
-		} else {
-			$regexp  = "/<img([^<>]*)src=['\"]([^<>'\"]*)\.(bmp|gif|jpeg|jpg|png)([^<>'\"]*)['\"]([^<>]*)>/i";
-			$replace = '<img loading="lazy"$1src="data:image/gif;base64,R0lGODlhCgAKAJEDAMzMzP9mZv8AAP///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQFAAADACwAAAAACgAKAAACF5wncgaAGgJzJ647cWua4sOBFEd62VEAACH5BAUAAAMALAEAAAAIAAMAAAIKnBM2IoMDAFMQFAAh+QQFAAADACwAAAAABgAGAAACDJwHMBGofKIRItJYAAAh+QQFAAADACwAAAEAAwAIAAACChxgOBPBvpYQYxYAIfkEBQAAAwAsAAAEAAYABgAAAgoEhmPJHOGgEGwWACH5BAUAAAMALAEABwAIAAMAAAIKBIYjYhOhRHqpAAAh+QQFAAADACwEAAQABgAGAAACDJwncqi7EQYAA0p6CgAh+QQJAAADACwHAAEAAwAIAAACCpRmoxoxvQAYchQAOw==" data-src="$2.$3$4"$5>';
-		}
-		$image = preg_replace( $regexp, $replace, $image );
-		return $image;
-	}
+		$image = preg_replace_callback(
+			"/<img([^<>]*)src=['\"]([^<>'\"]*)\.(bmp|gif|jpeg|jpg|png)([^<>'\"]*)['\"]([^<>]*)>/i",
+			function( $matches ) {
+				$original_src = $matches[2] . '.' . $matches[3];
+				$data_src     = 'data-src="' . $original_src . '"';
+				$data_srcset  = '';
 
-	/**
-	 * Replace content using regular expression and replacement.
-	 *
-	 * @param string $regexp  Regular expression pattern to search for.
-	 * @param string $replace Replacement string.
-	 */
-	private function replace( $regexp, $replace ) {
-		// Start output buffering and apply regular expression replacement.
-		ob_start(
-			function ( $buffer ) use ( $regexp, $replace ) {
-				return preg_replace( $regexp, $replace, $buffer );
-			}
+				if ( stripos( $matches[0], 'srcset=' ) !== false ) {
+					$data_srcset = ' data-srcset="' . $original_src . '"';
+					$matches[0]  = preg_replace( '/srcset=["\'][^"\']*["\']/', '', $matches[0] );
+				}
+
+				return '<img' . $matches[1] . 'src="data:image/gif;base64,R0lGODlhCgAKAJEDAMzMzP9mZv8AAP///yH/C05FVFNDQVBFMi4wAwEAAAAh+QQFAAADACwAAAAACgAKAAACF5wncgaAGgJzJ647cWua4sOBFEd62VEAACH5BAUAAAMALAEAAAAIAAMAAAIKnBM2IoMDAFMQFAAh+QQFAAADACwAAAAABgAGAAACDJwHMBGofKIRItJYAAAh+QQFAAADACwAAAEAAwAIAAACChxgOBPBvpYQYxYAIfkEBQAAAwAsAAAEAAYABgAAAgoEhmPJHOGgEGwWACH5BAUAAAMALAEABwAIAAMAAAIKBIYjYhOhRHqpAAAh+QQFAAADACwEAAQABgAGAAACDJwncqi7EQYAA0p6CgAh+QQJAAADACwHAAEAAwAIAAACCpRmoxoxvQAYchQAOw==" ' . $data_src . $data_srcset . $matches[4] . '>';
+			},
+			$image
 		);
+
+		return $image;
 	}
 }

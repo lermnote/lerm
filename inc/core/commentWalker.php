@@ -13,36 +13,45 @@ use Walker_Comment;
 use Lerm\Inc\Traits\Singleton;
 
 class CommentWalker extends Walker_Comment {
-	// Instance
+
 	use singleton;
 
-	public static $args = array(
+	// Default arguments
+	protected static $args = array(
 		'make_clickable' => true,
 		'escape_html'    => true,
 	);
 
+	/**
+	 * Constructor
+	 *
+	 * @param array $params Optional parameters.
+	 */
 	public function __construct( $params ) {
-		self::$args = apply_filters( 'lerm_optimize_', wp_parse_args( $params, self::$args ) );
+		self::$args = apply_filters( 'lerm_comment_', wp_parse_args( $params, self::$args ) );
+
 		if ( self::$args['make_clickable'] ) {
-			remove_filter( 'comment_text', 'make_clickable', 9 );}
+			remove_filter( 'comment_text', 'make_clickable', 9 );
+		}
+
 		if ( self::$args['escape_html'] ) {
 			add_filter( 'pre_comment_content', 'esc_html' );
 		}
 	}
 
-
+	/**
+	 * Output a comment in the HTML5 format.
+	 *
+	 * @param WP_Comment $comment Comment to display.
+	 * @param int        $depth   Depth of the current comment.
+	 * @param array      $args    An array of arguments.
+	 */
 	public function html5_comment( $comment, $depth, $args ) {
 		$tag                = ( 'div' === $args['style'] ) ? 'div' : 'li';
 		$commenter          = wp_get_current_commenter();
 		$show_pending_links = ! empty( $commenter['comment_author'] );
-
-		if ( $commenter['comment_author_email'] ) {
-			$moderation_note = __( 'Your comment is awaiting moderation.', 'lerm' );
-		} else {
-			$moderation_note = __( 'Your comment is awaiting moderation. This is a preview; your comment will be visible after it has been approved.', 'lerm' );
-		}
 		?>
-		<li <?php comment_class( ( $depth > 1 ) ? 'list-group-item p-0' : 'list-group-item' ); ?> id="comment-<?php comment_ID(); ?>">
+		<<?php echo esc_html( $tag ); ?> <?php comment_class( ( $depth > 1 ) ? 'list-group-item p-0' : 'list-group-item' ); ?> id="comment-<?php comment_ID(); ?>">
 			<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
 				<footer class="comment-meta mb-1">
 					<span class="comment-author vcard">
@@ -82,15 +91,11 @@ class CommentWalker extends Walker_Comment {
 						$time_diff         = human_time_diff( $comment_timestamp, $current_timestamp ) ?? 'unknown time';
 
 						printf(
-							'<span aria-hidden="true">&bull;</span><a href="%s"><time datetime="%s">%s</time></a>',
+							'<span aria-hidden="true">&bull;</span><a href="%s"><time datetime="%s">%s %s</time></a>',
 							esc_url( get_comment_link( $comment, $args ) ),
 							esc_attr( get_comment_time( 'c' ) ),
-							sprintf(
-								/* translators: 1: Comment date, 2: Comment time. */
-								esc_html( '%1$s %2$s' ),
-								esc_html( $time_diff ),
-								esc_html__( 'ago', 'lerm' )
-							)
+							esc_html( $time_diff ),
+							esc_html__( 'ago', 'lerm' )
 						);
 						edit_comment_link( __( 'Edit', 'lerm' ), '<span aria-hidden="true">&bull;</span><span class="edit-link">', '</span>' );
 						?>

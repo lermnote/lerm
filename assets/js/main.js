@@ -110,7 +110,7 @@
 		 * @since 3.2
 		 */
 		const likeBtn = document.querySelector(".like-button");
-		console.log(likeBtn);
+		// console.log(likeBtn);
 		var settings = {
 			security: adminajax.nonce
 
@@ -134,54 +134,54 @@
 			// } else {
 			// 	allbuttons = $('.sl-button-'+post_id);
 			// }
-			document.addEventListener("click", debounce(async (e) => {
-				if (e.target && e.target.matches('button.like-button')) {
-					e.preventDefault();
-					if (sentRequest) {
-						return;
-					}
+			// document.addEventListener("click", debounce(async (e) => {
+			// 	if (e.target && e.target.matches('button.like-button')) {
+			// 		e.preventDefault();
+			// 		if (sentRequest) {
+			// 			return;
+			// 		}
 					
-					settings.id = e.dataset.postId;
+			// 		settings.id = e.dataset.postId;
 
-					let params = new URLSearchParams({
-						action: "post_like",
-						security: adminajax.nonce,
-						post_id: postID,
-						is_comment: iscomment,
-					});
+			// 		let params = new URLSearchParams({
+			// 			action: "post_like",
+			// 			security: adminajax.nonce,
+			// 			post_id: postID,
+			// 			is_comment: iscomment,
+			// 		});
 
-					try {
-						const response = await fetch(adminajax.url, {
-							method: "POST",
-							body: params,
-						});
-						const data = await response.json();
-						console.log(data);
-						// if(response.status === 'unliked') {
-						// 	var like_text = simpleLikes.like;
-						// 	allbuttons.prop('title', like_text);
-						// 	allbuttons.removeClass('liked');
-						// } else {
-						// 	var unlike_text = simpleLikes.unlike;
-						// 	allbuttons.prop('title', unlike_text);
-						// 	allbuttons.addClass('liked');
-						// }
-						if ((typeof data.count === 'number')) {
-							localStorage.setItem(`post_like_${postID}`, data);
-							countEl.textContent = data.count;
-							sentRequest = true;
-							likeCount = data.count;
-						} else {
-							console.log(data);
-						}
-					} catch (error) {
-						console.error(error);
-					} finally {
-						// likeBtn.classList.add("done");
-						// likeBtn.disabled = true;
-					}
-				}
-			}, 500));
+			// 		try {
+			// 			const response = await fetch(adminajax.url, {
+			// 				method: "POST",
+			// 				body: params,
+			// 			});
+			// 			const data = await response.json();
+			// 			console.log(data);
+			// 			// if(response.status === 'unliked') {
+			// 			// 	var like_text = simpleLikes.like;
+			// 			// 	allbuttons.prop('title', like_text);
+			// 			// 	allbuttons.removeClass('liked');
+			// 			// } else {
+			// 			// 	var unlike_text = simpleLikes.unlike;
+			// 			// 	allbuttons.prop('title', unlike_text);
+			// 			// 	allbuttons.addClass('liked');
+			// 			// }
+			// 			if ((typeof data.count === 'number')) {
+			// 				localStorage.setItem(`post_like_${postID}`, data);
+			// 				countEl.textContent = data.count;
+			// 				sentRequest = true;
+			// 				likeCount = data.count;
+			// 			} else {
+			// 				console.log(data);
+			// 			}
+			// 		} catch (error) {
+			// 			console.error(error);
+			// 		} finally {
+			// 			// likeBtn.classList.add("done");
+			// 			// likeBtn.disabled = true;
+			// 		}
+			// 	}
+			// }, 500));
 		}
 
 		/**
@@ -256,44 +256,41 @@
 
 			//submit event
 			commentForm.addEventListener("click", async (e) => {
+				e.preventDefault();
 				// ensure event target is submit button and within comment form
 				if (e.target.type === "submit" && e.target.closest("#commentform")) {
-					e.preventDefault();
 					message.removeAttribute("style");
 					message.classList.remove("shake", "fadeOut");
 					message.innerHTML = '<strong><i class="fa fa-spinner fa-pulse me-1"></i>正在提交...</strong>';
 					showMessage('正在提交...');
 					new WOW().init();
 					// check user logged in.
-					const commentData = new FormData(commentForm)
+					const requsetData = new FormData(commentForm)
+					requsetData.append("action", "ajax_comment");
+					requsetData.append("security", adminajax.nonce);
 					if (!adminajax.loggedin) {
 
-						if (!commentData.get('author')) {
+						if (!requsetData.get('author')) {
 							showError("请填写姓名");
 							return;
 						}
-						if (!validateEmail(commentData.get('email'))) {
+						if (!validateEmail(requsetData.get('email'))) {
 							showError("请填写正确的电子邮箱");
 							return;
 						}
 					}
-					if (!commentData.get('comment')) {
+					if (!requsetData.get('comment')) {
 						showError("请输入评论内容");
 						return;
 					}
 
-					// create URLSearchParams object and append necessary parameters
-					const params = new URLSearchParams(commentData);
-					params.append("action", "ajax_comment");
-					params.append("security", adminajax.nonce);
-
 					try {
 						const response = await fetch(adminajax.url, {
 							method: "POST",
-							body: params,
+							body: requsetData,
 						});
 						const { success, data } = await response.json();
-						console.log(data);
+
 						if (success && data.length !== 0) {
 
 							const nodeLi = commentLiStr(data);
@@ -401,7 +398,7 @@
 						method: "POST",
 						body: params,
 					});
-
+					if (!response.ok) throw new Error('Network response was not ok');
 					const { success, data } = await response.json();
 
 					if (success && data.length !== 0) {

@@ -2,7 +2,7 @@
 /**
  * Transfer Chinese character to pinyin
  *
- * @package Lerm https://www.hanost.com
+ * @package Lerm https://lerm.net
  *
  * @since lerm 3.0
  */
@@ -410,54 +410,35 @@ class Chinese_To_Pinyin {
 		'zun'    => -10256,
 		'zuo'    => -10254,
 	);
-
-	public static function get_pinyin( $chinese, $format = 'first' ) {
-		$gbk  = mb_convert_encoding( $chinese, 'GBK', 'UTF-8' );
-		$utf8 = mb_convert_encoding( $gbk, 'UTF-8', 'GBK' );
-
-		if ( $utf8 !== $chinese ) {
-			$gbk = $chinese;
-		}
-
-		$buffer = array();
-		$length = mb_strlen( $gbk, 'GBK' );
+	public static function zh_to_pinyin( $string ) {
+		$string  = iconv( 'UTF-8', 'GBK//IGNORE', $string );
+		$results = array();
+		$length  = strlen( $string ); // Store the length of the string in a variable
 
 		for ( $i = 0; $i < $length; $i++ ) {
-			$chara = ord( mb_substr( $gbk, $i, 1, 'GBK' ) );
+			$ord = ord( $string[ $i ] );
 
-			$py = self::zh_to_pinyin( $chara );
-
-			if ( '' !== $py ) {
-				$buffer[] = ( 'first' === $format || 'one' === $format ) ? substr( $py, 0, 1 ) : $py;
+			if ( $ord > 160 ) {
+				$ord = $ord * 256 + ord( $string[ ++$i ] ) - 65536;
 			}
+
+			$results[] = self::get_pinyin( $ord );
 		}
 
-		switch ( $format ) {
-			default:
-				return implode( ' ', $buffer );
-			case 'one':
-				return $buffer[0];
-			case 'first':
-				return implode( '', $buffer );
-		}
+		return implode( ' ', $results );
 	}
 
-	private static function zh_to_pinyin( $dword ) {
-		if ( $dword > 0 && $dword < 160 ) {
-			return chr( $dword );
-		} elseif ( $dword < -20319 || $dword > -10247 ) {
-			return '';
-		} else {
-			$result = '';
-			for ( $i = count( self::$maps ) - 1; $i >= 0; $i-- ) {
-				$py   = array_keys( self::$maps )[ $i ];
-				$code = array_values( self::$maps )[ $i ];
-				if ( $code <= $dword ) {
-					$result = $py;
-					break;
-				}
-			}
-			return $result;
+	private static function get_pinyin( $num ) {
+		if ( $num > 0 && $num < 160 ) {
+			return chr( $num );
 		}
+
+		foreach ( self::$maps as $pinyin => $code ) {
+			if ( $code <= $num ) {
+				return $pinyin;
+			}
+		}
+
+		return '';
 	}
 }

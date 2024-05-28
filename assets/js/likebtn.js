@@ -1,175 +1,172 @@
-/* global document, window, simpleLikes */
+// import {
+//     debounce,
+//     DOMReady,
+// } from './util'
 
-// Utilities
-var timeout = null;
-var ready = (callback) => {
-    if (document.readyState === "complete" || (document.readyState !== "loading" && !document.documentElement.doScroll)) callback();
-    else document.addEventListener("DOMContentLoaded", callback);
+// Utility functions
+const DOMReady = callback => {
+    if (document.readyState === "complete" || (document.readyState !== "loading" && !document.documentElement.doScroll)) {
+        callback();
+    } else {
+        document.addEventListener("DOMContentLoaded", callback);
+    }
 };
-// Start button processing
-var btnSwitch = function (btns, buttons, settings, x) {
-    for (var i = 0, len = buttons.length; i < len; i++) {
-        // Maybe show loading animation for linked buttons
+/**
+ * Limit the frequency of calls to the click event handler function.
+ * @param {*} func
+ * @param {*} wait
+ * @returns
+ */
+const debounce = (func, wait) => {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            func.apply(this, args);
+        }, wait);
+    };
+};
+
+/**
+ * Switches the state and style of buttons.
+ *
+ * @param {NodeList} btns - List of button nodes
+ * @param {Object} buttons - Collection of button objects
+ * @param {Object} settings - Settings object
+ * @param {number} x - Button state identifier (1: disable buttons, others: enable buttons)
+ */
+const btnSwitch = (btns, buttons, settings, x) => {
+    Object.keys(buttons).forEach(key => {
         if (settings.killLoader !== 1 && settings.noUnlike !== 1) {
-            buttons[i].classList.add('sl-loading');
+            buttons[key].classList.add('sl-loading');
         }
-        // Maybe show the tooltip on linked buttons while processing
-        if (!buttons[i].classList.contains('always-on') && settings.tooltip) {
-            buttons[i].classList.add('tooltip-on');
+        if (!buttons[key].classList.contains('always-on') && settings.tooltip) {
+            buttons[key].classList.add('tooltip-on');
         }
-    }
-    // Disable all buttons while processing
-    for (var i = 0, len = btns.length; i < len; i++) {
-        if (x === 1) {
-            btns[i].setAttribute('disabled', true);
-        } else {
-            btns[i].removeAttribute('disabled');
-        }
-    }
+    });
+    btns.forEach(btn => {
+        btn.disabled = x === 1;
+    });
 };
+
 // Process Like/Unlike
-var btnProcess = function (btns, status, count, num, text, tooltip, display) {
-    var always = false;
-    for (var i = 0, len = btns.length; i < len; i++) {
+const btnProcess = (btns, status, count, text, tooltip, display) => {
+    let always = false;
+    btns.forEach(button => {
         if (status === 'unliked') {
-            btns[i].classList.remove('liked', 'sl-clicked');
+            button.classList.remove('liked', 'sl-clicked', 'btn-outline-danger');
+        } else if (status === 'liked') {
+            button.classList.add('liked', 'sl-clicked', 'btn-danger');
+            button.classList.remove('btn-outline-danger');
         } else {
-            if (status === 'liked') {
-                btns[i].classList.add('liked', 'sl-clicked');
-            } else {
-                window.console.log('Error: Button like was not processed.');
-            }
+            console.error('Error: Button like was not processed.');
         }
-        btns[i].classList.remove('sl-loading');
+        button.classList.remove('sl-loading');
         if (tooltip) {
-            btns[i].setAttribute('data-tooltip', count);
-            if (btns[i].classList.contains('always-on')) {
+            button.setAttribute('data-tooltip', count);
+            if (button.classList.contains('always-on')) {
                 always = true;
             }
         } else {
-            btns[i].setAttribute('title', text);
-            var countClass = btns[i].querySelector('.sl-count');
-            if (typeof (countClass) != 'undefined' && countClass != null) {
-                countClass.innerHTML = count;
-                if (num === 0 && display === 'zero') {
-                    countClass.classList.add('sr-only');
-                } else {
-                    countClass.classList.remove('sr-only');
-                }
-            }
-        }
-    }
-    if (!always && tooltip) {
-        timeout = window.setTimeout(function () {
-            for (var i = 0, len = btns.length; i < len; i++) {
-                btns[i].classList.remove('tooltip-on');
-            }
-        }, 1500);
-    }
-}
-var prepData = function (settings) {
-    // Serialize Data
-    var serialize = [];
-    var obj = {
-        action: 'sl_process',
-        security: settings.nonce,
-        id: settings.id,
-        type: settings.type,
-        logged: settings.logged
-    };
-    for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            serialize.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
-        }
-    }
-    return serialize.join("&");
-}
-
-// When document ready
-ready(() => {
-    // Variables
-    var settings = {
-        killLoader: parseInt(simpleLikes.loader),
-        loggedOnly: parseInt(simpleLikes.loggedOnly),
-        noUnlike: parseInt(simpleLikes.noUnlike),
-        loginURL: simpleLikes.loginURL,
-        ajaxURL: simpleLikes.ajaxURL,
-        nonce: simpleLikes.security,
-        likeText: simpleLikes.like,
-        unlikeText: simpleLikes.unlike,
-        display: simpleLikes.display
-    };
-    var widgetAttrMap = {
-        'time-period': 'period',
-        'amount': 'amount',
-        'types': 'types',
-        'show-number': 'showNumber',
-        'separator': 'sep',
-        'include-comments': 'yesComments',
-        'include-topics': 'yesTopics',
-        'include-activities': 'yesActivities',
-        'link-type': 'linkType'
-    };
-    // Listen for button click on AJAX/server-rendered buttons
-    document.addEventListener('click', function (e) {
-        if (e.target && e.target.matches('button.sl-btn')) {
-            e.preventDefault();
-            // Setup variables
-            var tooltip;
-            if (!e.target.hasAttribute('data-tooltip')) {
-                tooltip = false;
-            } else {
-                tooltip = true;
-                // Clear timeout if it exists
-                if (timeout) {
-                    window.clearTimeout(timeout);
-                }
-            }
-            settings.tooltip = tooltip;
-            settings.id = e.target.getAttribute('data-id');
-            settings.logged = parseInt(e.target.getAttribute('data-logged'));
-            settings.type = e.target.getAttribute('data-type');
-            // Stop if no ID
-            if (typeof settings.id === typeof undefined && settings.id === false) return;
-            // Redirect if user is anonymous & "registered only" is true
-            if (settings.logged === 0 && settings.loggedOnly === 1) {
-                window.location.href = settings.loginURL;
-            } else {
-                // Get all instances of buttons
-                var btns = document.querySelectorAll('.sl-btn');
-                // Get matching buttons (multiple buttons on page for same post)
-                var buttons = document.querySelectorAll(".sl-" + settings.type + "-" + settings.id);
-                // Fire it up
-                btnSwitch(btns, buttons, settings, tooltip, 1);
-                // Start button AJAX
-                var rqst = new XMLHttpRequest();
-                rqst.open('POST', settings.ajaxURL, true);
-                rqst.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
-                rqst.onload = function () {
-                    if (this.status >= 200 && this.status < 400) {
-                        var rsp = JSON.parse(this.response);
-                        if (rsp.status !== 403) { // Do nothing if "no unlike"
-                            var text;
-                            var num = parseInt(rsp.number);
-                            if (rsp.status === 'unliked') {
-                                text = settings.likeText;
-                            } else {
-                                text = settings.unlikeText;
-                            }
-                            btnProcess(buttons, rsp.status, rsp.count, num, text, tooltip, settings.display);
-                        }
-                    } else {
-                        btnProcess(buttons, 'error', 'Error', 'Error', 'Error', tooltip, settings.display);
-                    }
-                    btnSwitch(btns, 0);
-                };
-                rqst.onerror = function () {
-                    btnProcess(buttons, 'error', 'Error', 'Error', 'Error', tooltip, settings.display);
-                    btnSwitch(btns, 0);
-                };
-                var data = prepData(settings);
-                rqst.send(data);
+            button.setAttribute('title', text);
+            const countClass = button.querySelector('.count');
+            if (countClass) {
+                countClass.textContent = count;
             }
         }
     });
-});
+    if (!always && tooltip) {
+        setTimeout(() => {
+            btns.forEach(button => {
+                button.classList.remove('tooltip-on');
+            });
+        }, 1500);
+    }
+};
+
+const prepareData = (settings) => {
+    return new URLSearchParams({
+        action: 'post_like',
+        security: settings.nonce,
+        post_id: settings.id,
+        type: settings.type,
+        logged: settings.logged
+    });
+};
+// Variables
+const settings = {
+    killLoader: parseInt(lermAjax.loader),
+    loggedOnly: parseInt(lermAjax.loggedOnly),
+    noUnlike: parseInt(lermAjax.noUnlike),
+    loginURL: lermAjax.loginURL,
+    ajaxURL: lermAjax.ajaxURL,
+    nonce: lermAjax.nonce,
+    likeText: lermAjax.like,
+    unlikeText: lermAjax.unlike,
+    display: lermAjax.display
+};
+
+DOMReady(() => {
+    // Listen for button click on AJAX/server-rendered buttons
+    document.addEventListener('click', debounce(async (e) => {
+        const target = e.target.closest('button.like-button');
+        if (!target) return;
+        // console.log('111',target);
+        e.preventDefault();
+        e.stopPropagation();
+
+        const { id, type, logged } = target.dataset;
+        if (!id) return;
+
+        settings.id = id;
+        settings.type = type;
+        settings.logged = parseInt(logged, 10);
+
+        if (settings.logged === 0 && settings.loggedOnly === 1) {
+            window.location.href = settings.loginURL;
+            return;
+        }
+
+        // Redirect if user is anonymous & "registered only" is true
+        if (settings.logged === 0 && settings.loggedOnly === 1) {
+            window.location.href = settings.loginURL;
+            return;
+        }
+
+        const btns = document.querySelectorAll('.like-button');
+        const buttons = document.querySelectorAll(`.like-${settings.type}-${settings.id}`);
+        const tooltip = target.hasAttribute('data-tooltip');
+
+        if (tooltip && timeout) clearTimeout(timeout);
+
+        // Fire it up
+        btnSwitch(btns, buttons, settings, tooltip, 1);
+
+        const requestData = prepareData(settings);
+
+        try {
+            const response = await fetch(settings.ajaxURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: requestData
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+            const { success, data } = await response.json();
+
+            if (success && data.status !== 403) {
+                const text = data.status === 'unliked' ? settings.likeText : settings.unlikeText;
+                btnProcess(buttons, data.status, data.count, text, tooltip, settings.display);
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            btnProcess(buttons, 'error', 'Error', 'Error', 'Error', tooltip, settings.display);
+        } finally {
+            btnSwitch(btns, 0);
+        }
+    }, 250));
+})

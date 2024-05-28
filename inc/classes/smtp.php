@@ -10,14 +10,10 @@ namespace Lerm\Inc;
 use Lerm\Inc\Traits\Singleton;
 
 class SMTP {
-
 	use singleton;
 
 	/**
-	 * This attribute will hold the "original" WP from email address passed to the wp_mail_from filter,
-	 * that is not equal to the default email address.
-	 *
-	 * It should hold an email address set via the wp_mail_from filter, before we might overwrite it.
+	 * Holds the original WP from email address passed to the wp_mail_from filter.
 	 *
 	 * @since 2.1.0
 	 *
@@ -27,12 +23,11 @@ class SMTP {
 
 	/**
 	 * Default constants.
-
+	 *
 	 * @since 2.1.0
 	 *
-	 * @var array $args default value.
+	 * @var array $args Default values.
 	 */
-
 	public static $args = array(
 		'email_notice' => false,
 		'smtp_options' => array(
@@ -51,8 +46,6 @@ class SMTP {
 	 * Constructor
 	 *
 	 * @param array $params Optional parameters.
-	 *
-	 * @return void
 	 */
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_smtp_', wp_parse_args( $params, self::$args ) );
@@ -61,6 +54,8 @@ class SMTP {
 
 	/**
 	 * Hooks
+	 *
+	 * Sets up the hooks for the SMTP configuration.
 	 *
 	 * @return void
 	 */
@@ -75,9 +70,9 @@ class SMTP {
 	}
 
 	/**
-	 * Mail_smtp
+	 * Configures the PHPMailer instance to use SMTP.
 	 *
-	 * @param phpmailer $phpmailer It's passed by reference, so no need to return anything.
+	 * @param PHPMailer $phpmailer PHPMailer instance passed by reference.
 	 *
 	 * @return void
 	 */
@@ -93,18 +88,18 @@ class SMTP {
 		// Set the SMTPSecure value, if set to none, leave this blank. Possible values: 'ssl', 'tls', ''.
 		$phpmailer->SMTPSecure = $smtp['ssl_enable'];
 
-		$phpmailer->SMTPAuth = $smtp['smtp_auth'] ? true : false;
+		$phpmailer->SMTPAuth = ! empty( $smtp['smtp_auth'] );
 
 		$phpmailer->Username = $smtp['username'];
-		$phpmailer->Password = $smtp['pswd'];
+		$phpmailer->Password = $smtp['pwd'];
 	}
 
 	/**
-	 * Filter_mail_from_email
+	 * Filters the 'from' email address used in wp_mail.
 	 *
 	 * @param string $wp_email The email address passed by the filter.
 	 *
-	 * @return string
+	 * @return string Filtered email address.
 	 */
 	public static function filter_mail_from_email( $wp_email ) {
 
@@ -114,30 +109,20 @@ class SMTP {
 		self::$wp_mail_from = filter_var( $wp_email, FILTER_VALIDATE_EMAIL );
 
 		// Return FROM EMAIL if forced in settings.
-		if ( ! empty( $from_email ) ) {
-			return $from_email;
-		}
-
 		return ! empty( $from_email ) ? $from_email : $wp_email;
 	}
 
 	/**
-	 * Modify the sender name that is used for sending emails.
+	 * Filters the 'from' name used in wp_mail.
 	 *
-	 * @since 1.0.0
 	 *
 	 * @param string $name The from name passed through the filter.
 	 *
-	 * @return string
+	 * @return string Filtered name.
 	 */
 	public static function filter_mail_from_name( $name ) {
-
 		$from_name = self::$args['smtp_options']['from_name'];
 
-		if ( ! empty( $from_name ) ) {
-			return $from_name;
-		}
-
-		return $name;
+		return ! empty( $from_name ) ? $from_name : $name;
 	}
 }

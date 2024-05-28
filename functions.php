@@ -97,7 +97,7 @@ function lerm_post_views( $after = '' ) {
 }
 // Update post views count.
 function lerm_add_page_views() {
-	if ( is_singular( 'post' ) && ! is_admin() ){
+	if ( is_singular( 'post' ) && ! is_admin() ) {
 		$post_ID    = get_queried_object_id();
 		$post_views = (int) get_post_meta( $post_ID, 'pageviews', true );
 		update_post_meta( 'post', $post_ID, 'pageviews', $post_views + 1 );
@@ -179,3 +179,13 @@ function smtplog_mailer_errors( $wp_error ) {
 	$currenttime = gmdate( 'Y-m-d H:i:s', $timestamp );
 	$wp_filesystem->put_contents( $file, $currenttime . ' Mailer Error: ' . $wp_error->get_error_message() . "\n", FS_CHMOD_FILE );
 }
+
+
+function add_type_attribute( $attributes ) {
+	// Only do this for a specific script.
+	if ( isset( $attributes['id'] ) && 'likebtn-js' === $attributes['id'] ) {
+		$attributes['type'] = 'module';
+	}
+	return $attributes;
+}
+add_filter( 'wp_script_attributes', 'add_type_attribute', 10, 1 );

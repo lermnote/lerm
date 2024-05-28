@@ -23,26 +23,29 @@ require_once plugin_dir_path( __FILE__ ) . 'config/metabox.config.php';
 require_once plugin_dir_path( __FILE__ ) . 'config/taxonomy.options.php';
 
 /**
- * Theme options functions.
+ * Retrieve theme options.
  *
- * @param string $id option id.
- * @param string $tag tag id.
- * @param string $value default option.
- * @return string $options options of theme.
+ * @param string $id    Option ID.
+ * @param string $tag   Optional. Tag ID. Default is an empty string.
+ * @param mixed  $default Optional. Default value if the option is not found. Default is an empty string.
+ * @return mixed The theme option value.
  */
-function lerm_options( string $id, string $tag = '', $value = '' ) {
+function lerm_options( string $id, string $tag = '', $default = '' ) {
+	// Fetch the theme options array from the database
 	$options = (array) get_option( 'lerm_theme_options', array() );
 
-	if ( array_key_exists( $id, $options ) ) {
-		if ( is_array( $options[ $id ] ) ) {
-			if ( ! empty( $tag ) && array_key_exists( $tag, $options[ $id ] ) ) {
-				$value = $options[ $id ][ $tag ];
-			} else {
-				$value = $options[ $id ];
-			}
-		} else {
-			$value = $options[ $id ];
-		}
+	// Check if the main option ID exists in the options array
+	if ( ! array_key_exists( $id, $options ) ) {
+		return $default;
 	}
-	return $value;
+
+	$option_value = $options[ $id ];
+
+	// If the option value is an array and a tag is specified, return the tagged value or default
+	if ( is_array( $option_value ) && '' !== $tag ) {
+		return $options[ $id ][ $tag ] ?? $default;
+	}
+
+	// Return the option value (either array or single value)
+	return $option_value;
 }

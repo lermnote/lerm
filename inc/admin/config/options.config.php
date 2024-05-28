@@ -379,20 +379,20 @@ if ( class_exists( 'CSF' ) ) {
 						// '.tag-cloud-link:hover',
 					),
 				),
-				array(
-					'id'           => 'like_button',
-					'type'         => 'color_pair',
-					'title'        => __( 'Like Button Color', 'lerm' ),
-					'border_color' => true,
-					'default'      => array(
-						'color'            => '#fff',
-						'background_color' => '#c82333',
-					),
-					'output'       => array(
-						'.like-button,.like-button:hover',
-						'.like-button.done',
-					),
-				),
+				// array(
+				// 	'id'           => 'like_button',
+				// 	'type'         => 'color_pair',
+				// 	'title'        => __( 'Like Button Color', 'lerm' ),
+				// 	'border_color' => true,
+				// 	'default'      => array(
+				// 		'color'            => '#fff',
+				// 		'background_color' => '#c82333',
+				// 	),
+				// 	'output'       => array(
+				// 		'.like-button,.like-button:hover',
+				// 		'.like-button.done',
+				// 	),
+				// ),
 				array(
 					'type'    => 'heading',
 					'content' => __( 'Custom Style', 'lerm' ),

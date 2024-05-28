@@ -25,7 +25,7 @@ namespace Lerm\Inc;
 use Lerm\Inc\Traits\Singleton;
 
 class SVG_Icons {
-	
+
 	use singleton;
 
 	/**

@@ -13,20 +13,30 @@ use Lerm\Inc\Traits\Singleton;
 
 class Tags {
 
-	// Instance
 	use singleton;
 
-	public static $args = array(
+	// Default arguments
+	protected static $args = array(
 		'location' => '',
 		'class'    => '',
 	);
 
+	/**
+	 * Constructor
+	 *
+	 * @param array $params Optional parameters.
+	 */
 	public function __construct( $params ) {
-		self::$args = apply_filters( 'lerm_tags_', wp_parse_args( $params, self::$args ) );
+		self::$args = apply_filters( 'lerm_tags_args', wp_parse_args( $params, self::$args ) );
 
 	}
-	public static function post_meta( $metas ) {
 
+	/**
+	 * Display post metadata
+	 *
+	 * @param array $metas Metadata to display.
+	 */
+	public static function post_meta( $metas ) {
 		$post_meta = apply_filters( 'post_meta_show_on_post', $metas );
 
 		if ( ! empty( $post_meta ) && 'disabled' !== $post_meta[0] ) {
@@ -48,6 +58,9 @@ class Tags {
 		}
 	}
 
+	/**
+	 * Display post format
+	 */
 	public static function format() {
 		$format = get_post_format();
 		if ( $format && current_theme_supports( 'post-formats', $format ) ) {
@@ -62,6 +75,9 @@ class Tags {
 		}
 	}
 
+	/**
+	 * Display post author
+	 */
 	public static function author() {
 		?>
 		<span class="meta-icon">
@@ -80,6 +96,9 @@ class Tags {
 		<?php
 	}
 
+	/**
+	 * Display publish date
+	 */
 	public static function publish_date() {
 		?>
 		<span>
@@ -91,6 +110,9 @@ class Tags {
 		<?php
 	}
 
+	/**
+	 * Display post categories
+	 */
 	public static function categories() {
 		$categories = get_the_category_list( ', ' );
 		if ( $categories ) {
@@ -105,6 +127,10 @@ class Tags {
 			<?php
 		}
 	}
+
+	/**
+	 * Display post views
+	 */
 	public static function read() {
 		$views = lerm_post_views( '' );
 		if ( '' !== $views ) {
@@ -115,6 +141,9 @@ class Tags {
 		}
 	}
 
+	/**
+	 * Display comments link
+	 */
 	public static function responses() {
 		if ( ! post_password_required() && ( comments_open() || get_comments_number() ) ) {
 			?>
@@ -129,7 +158,9 @@ class Tags {
 		}
 	}
 
-
+	/**
+	 * Display edit post link
+	 */
 	public static function edit_link() {
 		edit_post_link(
 			sprintf(
