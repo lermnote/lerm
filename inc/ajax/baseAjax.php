@@ -12,7 +12,7 @@ abstract class BaseAjax {
 
 	private const ACTION = '';
 
-	public static $args = array();
+	private static $args = array();
 
 	public function __construct( $args = array() ) {
 		self::register( self::ACTION, 'ajax_handle', true );

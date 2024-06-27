@@ -34,7 +34,7 @@ $recent_posts = new WP_Query(
 
 <div class="container">
 	<div class="row">
-	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 		<div class="col-md-8">
 			<div class="row row-cols-1 row-cols-md-3">
 				<?php

@@ -10,11 +10,8 @@ namespace Lerm\Inc;
 use Lerm\Inc\User\User;
 use Lerm\Inc\Traits\Singleton;
 
-/**
- * Theme setup
- */
 class Setup {
-	
+
 	use singleton;
 
 	/**

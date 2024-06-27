@@ -6,7 +6,6 @@
  * @date   2016-08-28 21:57:52
  * @since  lerm 1.0
  */
-use Lerm\Inc\Setup;
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
@@ -33,8 +32,8 @@ if ( ! defined( 'LERM_DIR' ) ) {
  * Requre admin framework
  */
 require LERM_DIR . 'inc/themeloader.php';
-Setup::instance();
-Setup::get_options( get_option( 'lerm_theme_options' ) );
+\Lerm\Inc\Setup::instance();
+\Lerm\Inc\Setup::get_options( get_option( 'lerm_theme_options' ) );
 
 /**
  * Shows a pagination for post page.

@@ -22,7 +22,7 @@
 			<?php endif; ?>
 			<!--尊重原创，请保留作者链接，谢谢 -->
 			<br>
-			<span><?php echo esc_html__( 'Theme By', 'lerm' ); ?><a href="<?php echo esc_url( 'https://www.hanost.com/', 'lerm' ); ?>"> Lerm </a></span>
+			<span><?php echo esc_html__( 'Theme By', 'lerm' ); ?><a href="<?php echo esc_url( 'https://lerm.net/', 'lerm' ); ?>"> Lerm </a></span>
 			<?php
 			wp_nav_menu(
 				array(

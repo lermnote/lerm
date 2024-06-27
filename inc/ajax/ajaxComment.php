@@ -7,7 +7,7 @@
  * @since lerm 3.0
  */
 
-namespace Lerm\Inc;
+namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
 
