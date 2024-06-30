@@ -5,7 +5,7 @@
  * @package  Lerm\Inc
  */
 
-namespace Lerm\Inc;
+// namespace Lerm\Inc;
 
 use Lerm\Inc\Traits\Singleton;
 
@@ -94,11 +94,7 @@ class Enqueue {
 			}
 		}
 
-		$data = array(
-			'url'      => admin_url( 'admin-ajax.php' ),
-			'nonce'    => wp_create_nonce( 'ajax_nonce' ),
-			'loggedin' => is_user_logged_in(),
-		);
+		$data = array();
 		$l10n = apply_filters( 'lerm_l10n_data', $data );
 
 		wp_localize_script( 'main-js', 'adminajax', $l10n );

@@ -1,6 +1,6 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
- * Load more posts button
+ * Load more posts Ajax handler.
  *
  * @package Lerm\Inc
  */
@@ -11,23 +11,16 @@ use WP_Query;
 use Lerm\Inc\Traits\Singleton;
 
 final class LoadMore extends BaseAjax {
-
 	use singleton;
 
-	private const ACTION = 'load_more';
+	protected const AJAX_ACTION = 'load_more';
 
-	public static $default_args = array(
+	public static $args = array(
 		'posts_per_page' => 10,
 	);
 
-	private static $query_args;
-
-	public function __construct( $query_args = array() ) {
-		self::register( self::ACTION, 'ajax_handle', true );
-
-		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
-
-		self::$query_args = apply_filters( 'lerm_load_more', wp_parse_args( $query_args, self::$default_args ) );
+	public function __construct( $params = array() ) {
+		parent::__construct( apply_filters( 'lerm_loadmore_args', wp_parse_args( $params, self::$args ) ) );
 	}
 
 	/**
@@ -39,12 +32,11 @@ final class LoadMore extends BaseAjax {
 		check_ajax_referer( 'ajax_nonce', 'security', true );
 		$postdata = wp_unslash( $_POST );
 
-		$requested_query_args = json_decode( stripslashes( $postdata['query'] ), true );
+		$query_args = json_decode( stripslashes( $postdata['query'] ), true );
 
-		$query_args = array_merge( self::$query_args, $requested_query_args );
-
-		$query_args['paged']       = isset( $postdata['current_page'] ) ? (int) $postdata['current_page'] + 1 : 1;
-		$query_args['post_status'] = 'publish';
+		$query_args['posts_per_page'] = self::$args['posts_per_page'] > get_option( 'posts_per_page' ) ? get_option( 'posts_per_page' ) : self::$args['posts_per_page'];
+		$query_args['paged']          = isset( $postdata['current_page'] ) ? (int) $postdata['current_page'] + 1 : 1;
+		$query_args['post_status']    = 'publish';
 
 		$posts = new WP_Query( $query_args );
 
@@ -72,6 +64,7 @@ final class LoadMore extends BaseAjax {
 	 */
 	public static function ajax_l10n_data( $l10n ) {
 		global $wp_query;
+
 		$data = array(
 			'posts'    => wp_json_encode( $wp_query->query_vars ), // everything about your loop is here.
 			'loadmore' => __( 'Load more', 'lerm' ),

@@ -1,137 +1,68 @@
 <?php // phpcs:disable WordPress.Files.FileName
-/**
- * Breadcrumb Trail - A breadcrumb menu script for WordPress.
- *
- * Breadcrumb Trail is a script for showing a breadcrumb trail for any type of page.  It tries to
- * anticipate any type of structure and display the best possible trail that matches your site's
- * permalink structure.  While not perfect, it attempts to fill in the gaps left by many other
- * breadcrumb scripts.
- *
- * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
- * General Public License as published by the Free Software Foundation; either version 2 of the License,
- * or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * @package   BreadcrumbTrail
- * @version   1.1.0
- * @author    Justin Tadlock <justin@justintadlock.com>
- * @copyright Copyright (c) 2008 - 2017, Justin Tadlock
- * @link      https://themehybrid.com/plugins/breadcrumb-trail
- * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- */
-
-/**
- * Creates a breadcrumbs menu for the site based on the current page that's being viewed by the user.
- *
- * @since  0.6.0
- * @access public
- */
-namespace Lerm\Inc;
+namespace Lerm\Inc\Core;
 
 use Lerm\Inc\Traits\Singleton;
 
 class Breadcrumb {
 
 	use singleton;
-	/**
-	 * Array of items belonging to the current breadcrumb trail.
-	 *
-	 * @since  0.1.0
-	 * @access public
-	 * @var    array
-	 */
-	public static $items = array();
 
-	/**
-	 * Sets up the breadcrumb trail properties.  Calls the `breadcrumb::add_items()` method
-	 * to creat the array of breadcrumb items.
-	 *
-	 * @since  0.6.0
-	 * @access public
-	 * @var    array $args  {
-	 *     @type string    $container      Container HTML element. nav|div
-	 *     @type string    $before         String to output before breadcrumb menu.
-	 *     @type string    $after          String to output after breadcrumb menu.
-	 *     @type string    $list_tag       The HTML tag to use for the list wrapper.
-	 *     @type string    $item_tag       The HTML tag to use for the item wrapper.
-	 *     @type bool      $show_on_front  Whether to show when `is_front_page()`.
-	 *     @type bool      $network        Whether to link to the network main site (multisite only).
-	 *     @type bool      $show_title     Whether to show the title (last item) in the trail.
-	 *     @type array     $labels         Text labels. @see breadcrumb::set_labels()
-	 *     @type array     $post_taxonomy  Taxonomies to use for post types. @see breadcrumb::set_post_taxonomy()
-	 *     @type bool      $echo           Whether to print or return the breadcrumbs.
-	 * }
-	 */
-	public static $args = array(
-		'container'     => 'nav',
-		'before'        => '',
-		'after'         => '',
-		'list_tag'      => 'ol',
-		'item_tag'      => 'li',
-		'separator'     => '/',
-		'show_on_front' => false,
-		'network'       => false,
-		'show_title'    => true,
-		'labels'        => array(),
-		'post_taxonomy' => array(),
-		'echo'          => true,
-	);
+	private static $items         = array();
+	private static $args          = array();
+	private static $labels        = array();
+	private static $post_taxonomy = array();
 
-	/**
-	 * Array of text labels.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    array
-	 */
-	public static $labels = array();
+	public function __construct( $params = array() ) {
+		$default_args = array(
+			'container'     => 'nav',
+			'before'        => '',
+			'after'         => '',
+			'list_tag'      => 'ol',
+			'item_tag'      => 'li',
+			'separator'     => '/',
+			'show_on_front' => false,
+			'network'       => false,
+			'show_title'    => true,
+			'labels'        => array(),
+			'post_taxonomy' => array(),
+			'echo'          => true,
+		);
 
-	/**
-	 * Array of post types (key) and taxonomies (value) to use for single post views.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    array
-	 */
-	public static $post_taxonomy = array();
+		self::$args = apply_filters( 'lerm_breadcrumb_args', wp_parse_args( $params, $default_args ) );
 
-	/**
-	 * Magic method to use in case someone tries to output the layout object as a string.
-	 * We'll just return the trail HTML.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return string
-	 */
+		self::set_labels();
+		self::set_post_taxonomy();
+		self::add_items();
+		self::trail();
+	}
+
 	public function __toString() {
 		return self::trail();
 	}
 
-	public function __construct( $params = array() ) {
-		// Parse the arguments with the deaults.
-		self::$args = apply_filters( 'lerm_breadcrumb_args', wp_parse_args( $params, self::$args ) );
-		// Set the labels and post taxonomy properties.
-		self::set_labels();
-		self::set_post_taxonomy();
-		// Let's find some items to add to the trail!
-		self::add_items();
-
-		self::trail();
+	protected static function set_labels() {
+		$defaults     = array(
+			'browse'         => esc_html__( 'Browse:', 'lerm' ),
+			'aria_label'     => esc_attr_x( 'breadcrumb', 'breadcrumbs aria label', 'lerm' ),
+			'home'           => esc_html__( 'Home', 'lerm' ),
+			'post'           => esc_html__( 'Article', 'lerm' ),
+			'error_404'      => esc_html__( '404 Not Found', 'lerm' ),
+			'archives'       => esc_html__( 'Archives', 'lerm' ),
+			// Translators: %s is the search query.
+			'search'         => esc_html__( 'Search results for: %s', 'lerm' ),
+			// Translators: %s is the page number.
+			'paged'          => esc_html__( 'Page %s', 'lerm' ),
+			// Translators: %s is the page number.
+			'paged_comments' => esc_html__( 'Comment Page %s', 'lerm' ),
+			// "%s" is replaced with the translated date/time format.
+			'archive_day'    => '%s',
+			'archive_month'  => '%s',
+			'archive_year'   => '%s',
+		);
+		self::$labels = apply_filters( 'lerm_breadcrumb_labels', wp_parse_args( self::$args['labels'], $defaults ) );
 	}
 
-	/* ====== Public Methods ====== */
-
-	/**
-	 * Formats the HTML output for the breadcrumb trail.
-	 *
-	 * @since  0.6.0
-	 * @access public
-	 * @return string
-	 */
 	public static function trail() {
-		// Set up variables that we'll need.
 		$breadcrumb    = '';
 		$item_count    = count( self::$items );
 		$item_position = 0;
@@ -150,6 +81,7 @@ class Breadcrumb {
 		foreach ( self::$items as $item ) {
 			// Iterate the item position.
 			++$item_position;
+			// $item = $this->wrap_item_with_schema($item);
 			// Check if the item is linked.
 			preg_match( '/(<a.*?>)(.*?)(<\/a>)/i', $item, $matches );
 
@@ -160,11 +92,7 @@ class Breadcrumb {
 			$item = ! empty( $matches ) ? preg_replace( '/(<a.*?)([\'"])>/i', '$1$2 itemprop=$2item$2>', $item ) : sprintf( '<span itemprop="item">%s</span>', $item );
 
 			// Add list item classes.
-			$item_class = 'breadcrumb-item';
-
-			if ( $item_count === $item_position ) {
-				$item_class .= ' active';
-			}
+			$item_class = 'breadcrumb-item' . ( $item_count === $item_position ? ' active' : '' );
 
 			// Create list item attributes.
 			$attributes = 'itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="' . $item_class . '"';
@@ -198,194 +126,61 @@ class Breadcrumb {
 		echo $breadcrumb; // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: $breadcrumb is safe.
 	}
 
-	/* ====== Protected Methods ====== */
+	private static function set_post_taxonomy() {
+		$defaults = array( 'post' => 'category' );
 
-	/**
-	 * Sets the labels property.  Parses the inputted labels array with the defaults.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function set_labels() {
-		$defaults     = array(
-			'browse'         => esc_html__( 'Browse:', 'lerm' ),
-			'aria_label'     => esc_attr_x( 'breadcrumb', 'breadcrumbs aria label', 'lerm' ),
-			'home'           => esc_html__( 'Home', 'lerm' ),
-			'post'           => esc_html__( 'Article', 'lerm' ),
-			'error_404'      => esc_html__( '404 Not Found', 'lerm' ),
-			'archives'       => esc_html__( 'Archives', 'lerm' ),
-			// Translators: %s is the search query.
-			'search'         => esc_html__( 'Search results for: %s', 'lerm' ),
-			// Translators: %s is the page number.
-			'paged'          => esc_html__( 'Page %s', 'lerm' ),
-			// Translators: %s is the page number.
-			'paged_comments' => esc_html__( 'Comment Page %s', 'lerm' ),
-			// Translators: Weekly archive title. %s is the week date format.
-			'archive_week'   => esc_html__( 'Week %s', 'lerm' ),
-			// "%s" is replaced with the translated date/time format.
-			'archive_day'    => '%s',
-			'archive_month'  => '%s',
-			'archive_year'   => '%s',
-		);
-		self::$labels = apply_filters( 'lerm_breadcrumb_labels', wp_parse_args( self::$args['labels'], $defaults ) );
-	}
-
-	/**
-	 * Sets the `$post_taxonomy` property.  This is an array of post types (key) and taxonomies (value).
-	 * The taxonomy's terms are shown on the singular post view if set.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function set_post_taxonomy() {
-		$defaults = array();
-		// If post permalink is set to `%postname%`, use the `category` taxonomy.
-		// if ( '%postname%' === trim( get_option( 'permalink_structure' ), '/' )||'%post_id%' === trim( get_option( 'permalink_structure' ), '/' ) ) {
-			$defaults['post'] = 'category';
-		// }
 		self::$post_taxonomy = apply_filters( 'lerm_breadcrumb_post_taxonomy', wp_parse_args( self::$args['post_taxonomy'], $defaults ) );
 	}
 
-	/**
-	 * Runs through the various WordPress conditional tags to check the current page being viewed.  Once
-	 * a condition is met, a specific method is launched to add items to the `$items` array.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_items() {
-		// If viewing the front page.
+	private static function add_items() {
 		if ( is_front_page() ) {
 			self::add_front_page_items();
 		} else {
-			// Add the network and site home links.
 			self::add_network_home_link();
 			self::add_site_home_link();
-			// If viewing the home/blog page.
+
 			if ( is_home() ) {
 				self::add_blog_items();
 			} elseif ( is_singular() ) {
-				// If viewing a single post.
 				self::add_singular_items();
 			} elseif ( is_archive() ) {
-				// If viewing an archive page.
-				if ( is_post_type_archive() ) {
-					self::add_post_type_archive_items();
-				} elseif ( is_category() || is_tag() || is_tax() ) {
-					self::add_term_archive_items();
-				} elseif ( is_author() ) {
-					self::add_user_archive_items();
-				} elseif ( is_day() ) {
-					self::add_day_archive_items();
-				} elseif ( get_query_var( 'w' ) ) {
-					self::add_week_archive_items();
-				} elseif ( is_month() ) {
-					self::add_month_archive_items();
-				} elseif ( is_year() ) {
-					self::add_year_archive_items();
-				} else {
-					self::add_default_archive_items();
-				}
+				self::add_archive_items();
 			} elseif ( is_search() ) {
-				// If viewing a search results page.
 				self::add_search_items();
 			} elseif ( is_404() ) {
-				// If viewing the 404 page.
-				self::add_404_items();
+				self::$items[] = self::$labels['error_404'];
 			}
 		}
-		// Add paged items if they exist.
+
 		self::add_paged_items();
 
-		// Allow developers to overwrite the items for the breadcrumb trail.
-		self::$items = array_unique( apply_filters( 'breadcrumb_items', self::$items, self::$args ) );
+		self::$items = array_unique( apply_filters( 'lerm_breadcrumb_items', self::$items, self::$args ) );
 	}
 
-	/**
-	 * Gets front items based on $wp_rewrite->front.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_rewrite_front_items() {
-		global $wp_rewrite;
-		if ( $wp_rewrite->front ) {
-			self::add_path_parents( $wp_rewrite->front );
+	private static function add_front_page_items() {
+		if ( self::$args['show_on_front'] || is_paged() || ( is_singular() && get_query_var( 'page' ) > 1 ) ) {
+			self::add_network_home_link();
+
+			if ( is_paged() ) {
+				self::add_site_home_link();
+			} elseif ( self::$args['show_title'] ) {
+				self::$items[] = is_multisite() && self::$args['network'] ? get_bloginfo( 'name' ) : self::$labels['home'];
+			}
 		}
 	}
 
-	/**
-	 * Adds the page/paged number to the items array.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_paged_items() {
-		// If viewing a paged singular post.
-		if ( is_singular() && 1 < get_query_var( 'page' ) && true === self::$args['show_title'] ) {
-			self::$items[] = sprintf( self::$labels['paged'], number_format_i18n( absint( get_query_var( 'page' ) ) ) );
-		} elseif ( is_singular() && get_option( 'page_comments' ) && 1 < get_query_var( 'cpage' ) ) {
-			// If viewing a singular post with paged comments.
-			self::$items[] = sprintf( self::$labels['paged_comments'], number_format_i18n( absint( get_query_var( 'cpage' ) ) ) );
-		} elseif ( is_paged() && true === self::$args['show_title'] ) {
-			// If viewing a paged archive-type page.
-			self::$items[] = sprintf( self::$labels['paged'], number_format_i18n( absint( get_query_var( 'paged' ) ) ) );
-		}
-	}
-
-	/**
-	 * Adds the network (all sites) home page link to the items array.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
 	protected static function add_network_home_link() {
-		if ( is_multisite() && ! is_main_site() && true === self::$args['network'] ) {
+		if ( is_multisite() && ! is_main_site() && self::$args['network'] ) {
 			self::$items[] = sprintf( '<a href="%s" rel="home">%s</a>', esc_url( network_home_url() ), self::$labels['home'] );
 		}
 	}
 
-	/**
-	 * Adds the current site's home page link to the items array.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
 	protected static function add_site_home_link() {
-		$network = is_multisite() && ! is_main_site() && true === self::$args['network'];
+		$network = is_multisite() && ! is_main_site() && self::$args['network'];
 		$label   = $network ? get_bloginfo( 'name' ) : self::$labels['home'];
 		$rel     = $network ? '' : ' rel="home"';
 
 		self::$items[] = sprintf( '<a href="%s"%s>%s</a>', esc_url( user_trailingslashit( home_url() ) ), $rel, $label );
-	}
-
-	/**
-	 * Adds items for the front page to the items array.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_front_page_items() {
-		// Only show front items if the 'show_on_front' argument is set to 'true'.
-		if ( true === self::$args['show_on_front'] || is_paged() || ( is_singular() && 1 < get_query_var( 'page' ) ) ) {
-			// Add network home link.
-			self::add_network_home_link();
-			// If on a paged view, add the site home link.
-			if ( is_paged() ) {
-				self::add_site_home_link();
-			} elseif ( true === self::$args['show_title'] ) {
-				// If on the main front page, add the network home title.
-				self::$items[] = is_multisite() && true === self::$args['network'] ? get_bloginfo( 'name' ) : self::$labels['home'];
-			}
-		}
 	}
 
 	/**
@@ -396,580 +191,122 @@ class Breadcrumb {
 	 * @return void
 	 */
 	protected static function add_blog_items() {
-		// Get the post ID and post.
-		$post_id = get_queried_object_id();
-		$post    = get_post( $post_id );
-		// If the post has parents, add them to the trail.
-		if ( 0 < $post->post_parent ) {
-			self::add_post_parents( $post->post_parent );
+		$post  = get_queried_object();
+		$title = get_the_title( $post->ID );
+
+		if ( $post->post_parent > 0 ) {
+			self::add_page_parents( $post->post_parent );
 		}
-		// Get the page title.
-		$title = get_the_title( $post_id );
-		// Add the posts page item.
+
 		if ( is_paged() ) {
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $post_id ) ), $title );
-		} elseif ( $title ) {
-			self::$items[] = $title;
+			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $post->ID ) ), $title );
+		} else {
+			self::$items[] = ( $title && self::$args['show_title'] ) ? $title : self::$labels['home'];
 		}
 	}
 
-	/**
-	 * Adds singular post items to the items array.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
 	protected static function add_singular_items() {
-		// Get the queried post.
-		$post    = get_queried_object();
-		$post_id = $post->ID;
-		$page_id = get_option( 'page_for_posts' );
-
-		if ( 'posts' !== get_option( 'show_on_front' ) && 0 < $page_id ) {
-			if ( 0 < get_post( $page_id )->post_parent ) {
-				self::add_post_parents( $page_id );
-			}
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $page_id ) ), get_the_title( $page_id ) );
-		}
+		$post = get_queried_object();
 
 		// If the post has a parent, follow the parent trail.
-		if ( 0 < $post->post_parent ) {
-			self::add_post_parents( $post->post_parent );
-
+		if ( $post->post_parent > 0 ) {
+			self::add_page_parents( $post->post_parent );
 		} else {
 			// If the post doesn't have a parent, get its hierarchy based off the post type.
-			self::add_post_hierarchy( $post_id );
-
+			self::add_post_hierarchy( $post->ID );
 		}
+
 		// Display terms for specific post type taxonomy if requested.
 		if ( ! empty( self::$post_taxonomy[ $post->post_type ] ) ) {
-			self::add_post_terms( $post_id, self::$post_taxonomy[ $post->post_type ] );
-
+			self::add_post_terms( $post->ID, self::$post_taxonomy[ $post->post_type ] );
 		}
 
-		// Get the post title.
-		$post_title = single_post_title( '', false );
-		$show_title = true === self::$args['show_title'];
-		$is_paged   = ( 1 < get_query_var( 'page' ) || is_paged() ) || ( get_option( 'page_comments' ) && 1 < absint( get_query_var( 'cpage' ) ) );
+		$is_paged = ( get_query_var( 'page' ) > 1 || is_paged() ) || ( get_option( 'page_comments' ) && absint( get_query_var( 'cpage' ) > 1 ) );
 
-		// End with the post title.
-		if ( $post_title ) {
-			if ( $is_paged ) {
-				self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $post_id ) ), $post_title );
-			} elseif ( true === self::$args['show_title'] ) {
-				self::$items[] = $post_title;
-			} else {
-				self::$items[] = self::$labels['post'];
-			}
+		if ( $is_paged ) {
+			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $post->ID ) ), single_post_title( '', false ) );
+		} else {
+			self::$items[] = self::$args['show_title'] ? single_post_title( '', false ) : self::$labels['post'];
 		}
 	}
 
-	/**
-	 * Adds the items to the trail items array for taxonomy term archives.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @global object $wp_rewrite
-	 * @return void
-	 */
-	protected static function add_term_archive_items() {
-		global $wp_rewrite;
-		// Get some taxonomy and term variables.
-		$term           = get_queried_object();
-		$taxonomy       = get_taxonomy( $term->taxonomy );
-		$done_post_type = false;
-		// If there are rewrite rules for the taxonomy.
-		if ( false !== $taxonomy->rewrite ) {
-			// If 'with_front' is true, dd $wp_rewrite->front to the trail.
-			if ( $taxonomy->rewrite['with_front'] && $wp_rewrite->front ) {
-				self::add_rewrite_front_items();
-			}
-			// Get parent pages by path if they exist.
-			self::add_path_parents( $taxonomy->rewrite['slug'] );
-			// Add post type archive if its 'has_archive' matches the taxonomy rewrite 'slug'.
-			if ( $taxonomy->rewrite['slug'] ) {
-				$slug = trim( $taxonomy->rewrite['slug'], '/' );
-				// Deals with the situation if the slug has a '/' between multiple
-				// strings. For example, "movies/genres" where "movies" is the post
-				// type archive.
-				$matches = explode( '/', $slug );
-				// If matches are found for the path.
-				if ( isset( $matches ) ) {
-					// Reverse the array of matches to search for posts in the proper order.
-					$matches = array_reverse( $matches );
-					// Loop through each of the path matches.
-					foreach ( $matches as $match ) {
-						// If a match is found.
-						$slug = $match;
-						// Get public post types that match the rewrite slug.
-						$post_types = self::get_post_types_by_slug( $match );
-						if ( ! empty( $post_types ) ) {
-							$post_type_object = $post_types[0];
-							// Add support for a non-standard label of 'archive_title' (special use case).
-							$label = ! empty( $post_type_object->labels->archive_title ) ? $post_type_object->labels->archive_title : $post_type_object->labels->name;
-							// Core filter hook.
-							$label = apply_filters( 'post_type_archive_title', $label, $post_type_object->name );
-							// Add the post type archive link to the trail.
-							self::$items[]  = sprintf( '<a href="%s">%s</a>', esc_url( get_post_type_archive_link( $post_type_object->name ) ), $label );
-							$done_post_type = true;
-							// Break out of the loop.
-							break;
-						}
-					}
-				}
-			}
-		}
-		// If there's a single post type for the taxonomy, use it.
-		if ( false === $done_post_type && 1 === count( $taxonomy->object_type ) && post_type_exists( $taxonomy->object_type[0] ) ) {
-			// If the post type is 'post'.
-			if ( 'post' === $taxonomy->object_type[0] ) {
-				$post_id = get_option( 'page_for_posts' );
-				if ( 'posts' !== get_option( 'show_on_front' ) && 0 < $post_id ) {
-					self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $post_id ) ), get_the_title( $post_id ) );
-				}
-				// If the post type is not 'post'.
-			} else {
-				$post_type_object = get_post_type_object( $taxonomy->object_type[0] );
-				$label            = ! empty( $post_type_object->labels->archive_title ) ? $post_type_object->labels->archive_title : $post_type_object->labels->name;
-				// Core filter hook.
-				$label = apply_filters( 'post_type_archive_title', $label, $post_type_object->name );
-
-				self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_post_type_archive_link( $post_type_object->name ) ), $label );
-			}
-		}
-		// If the taxonomy is hierarchical, list its parent terms.
-		if ( is_taxonomy_hierarchical( $term->taxonomy ) && $term->parent ) {
-			self::add_term_parents( $term->parent, $term->taxonomy );
-		}
-		// Add the term name to the trail end.
-		if ( is_paged() ) {
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_term_link( $term, $term->taxonomy ) ), single_term_title( '', false ) );
-
-		} elseif ( true === self::$args['show_title'] ) {
-			self::$items[] = single_term_title( '', false );
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for post type archives.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_post_type_archive_items() {
-		// Get the post type object.
-		$post_type_object = get_post_type_object( get_query_var( 'post_type' ) );
-
-		if ( false !== $post_type_object->rewrite ) {
-			// If 'with_front' is true, add $wp_rewrite->front to the trail.
-			if ( $post_type_object->rewrite['with_front'] ) {
-				self::add_rewrite_front_items();
-			}
-			// If there's a rewrite slug, check for parents.
-			if ( ! empty( $post_type_object->rewrite['slug'] ) ) {
-				self::add_path_parents( $post_type_object->rewrite['slug'] );
-			}
-		}
-		// Add the post type [plural] name to the trail end.
-		if ( is_paged() || is_author() ) {
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_post_type_archive_link( $post_type_object->name ) ), post_type_archive_title( '', false ) );
-		} elseif ( true === self::$args['show_title'] ) {
-			self::$items[] = post_type_archive_title( '', false );
-		}
-		// If viewing a post type archive by author.
-		if ( is_author() ) {
-			self::add_user_archive_items();
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for user (author) archives.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @global object $wp_rewrite
-	 * @return void
-	 */
-	protected static function add_user_archive_items() {
-		global $wp_rewrite;
-		// Add $wp_rewrite->front to the trail.
-		self::add_rewrite_front_items();
-		// Get the user ID.
-		$user_id = get_query_var( 'author' );
-		// If $author_base exists, check for parent pages.
-		if ( ! empty( $wp_rewrite->author_base ) && ! is_post_type_archive() ) {
-			self::add_path_parents( $wp_rewrite->author_base );
-		}
-		// Add the author's display name to the trail end.
-		if ( is_paged() ) {
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_author_posts_url( $user_id ) ), get_the_author_meta( 'display_name', $user_id ) );
-
-		} elseif ( true === self::$args['show_title'] ) {
-			self::$items[] = get_the_author_meta( 'display_name', $user_id );
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for day archives.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_day_archive_items() {
-		// Add $wp_rewrite->front to the trail.
-		self::add_rewrite_front_items();
-		// Get year, month, and day.
-		$year  = sprintf( self::$labels['archive_year'], get_the_time( esc_html_x( 'Y', 'yearly archives date format', 'lerm' ) ) );
-		$month = sprintf( self::$labels['archive_month'], get_the_time( esc_html_x( 'F', 'monthly archives date format', 'lerm' ) ) );
-		$day   = sprintf( self::$labels['archive_day'], get_the_time( esc_html_x( 'j', 'daily archives date format', 'lerm' ) ) );
-		// Add the year and month items.
-		self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_year_link( get_the_time( 'Y' ) ) ), $year );
-		self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_month_link( get_the_time( 'Y' ), get_the_time( 'm' ) ) ), $month );
-		// Add the day item.
-		if ( is_paged() ) {
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_day_link( get_the_time( 'Y' ) ), get_the_time( 'm' ), get_the_time( 'd' ) ), $day );
-		} elseif ( true === self::$args['show_title'] ) {
-			self::$items[] = $day;
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for week archives.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_week_archive_items() {
-		// Add $wp_rewrite->front to the trail.
-		self::add_rewrite_front_items();
-		// Get the year and week.
-		$year = sprintf( self::$labels['archive_year'], get_the_time( esc_html_x( 'Y', 'yearly archives date format', 'lerm' ) ) );
-		$week = sprintf( self::$labels['archive_week'], get_the_time( esc_html_x( 'W', 'weekly archives date format', 'lerm' ) ) );
-		// Add the year item.
-		self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_year_link( get_the_time( 'Y' ) ) ), $year );
-		// Add the week item.
-		if ( is_paged() ) {
-			self::$items[] = esc_url(
-				get_archives_link(
-					add_query_arg(
-						array(
-							'm' => get_the_time( 'Y' ),
-							'w' => get_the_time( 'W' ),
-						),
-						home_url()
-					),
-					$week,
-					false
-				)
-			);
-		} elseif ( true === self::$args['show_title'] ) {
-			self::$items[] = $week;
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for month archives.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_month_archive_items() {
-		// Add $wp_rewrite->front to the trail.
-		self::add_rewrite_front_items();
-		// Get the year and month.
-		$year  = sprintf( self::$labels['archive_year'], get_the_time( esc_html_x( 'Y', 'yearly archives date format', 'lerm' ) ) );
-		$month = sprintf( self::$labels['archive_month'], get_the_time( esc_html_x( 'F', 'monthly archives date format', 'lerm' ) ) );
-		// Add the year item.
-		self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_year_link( get_the_time( 'Y' ) ) ), $year );
-		// Add the month item.
-		if ( is_paged() ) {
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_month_link( get_the_time( 'Y' ), get_the_time( 'm' ) ) ), $month );
-		} elseif ( true === self::$args['show_title'] ) {
-			self::$items[] = $month;
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for year archives.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_year_archive_items() {
-		// Add $wp_rewrite->front to the trail.
-		self::add_rewrite_front_items();
-		// Get the year.
-		$year = sprintf( self::$labels['archive_year'], get_the_time( esc_html_x( 'Y', 'yearly archives date format', 'lerm' ) ) );
-		// Add the year item.
-		if ( is_paged() ) {
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_year_link( get_the_time( 'Y' ) ) ), $year );
-		} elseif ( true === self::$args['show_title'] ) {
-			self::$items[] = $year;
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for archives that don't have a more specific method
-	 * defined in this class.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_default_archive_items() {
-		// If this is a date-/time-based archive, add $wp_rewrite->front to the trail.
-		if ( is_date() || is_time() ) {
-			self::add_rewrite_front_items();
-		}
-		if ( true === self::$args['show_title'] ) {
-			self::$items[] = self::$labels['archives'];
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for search results.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_search_items() {
-		if ( is_paged() ) {
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_search_link() ), sprintf( self::$labels['search'], get_search_query() ) );
-		} elseif ( true === self::$args['show_title'] ) {
-			self::$items[] = sprintf( self::$labels['search'], get_search_query() );
-		}
-	}
-
-	/**
-	 * Adds the items to the trail items array for 404 pages.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return void
-	 */
-	protected static function add_404_items() {
-		if ( true === self::$args['show_title'] ) {
-			self::$items[] = self::$labels['error_404'];
-		}
-	}
-
-	/**
-	 * Adds a specific post's parents to the items array.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @param  int $post_id
-	 * @return void
-	 */
-	protected static function add_post_parents( $post_id ) {
+	protected static function add_page_parents( $parent_id ) {
 		$parents = array();
-		while ( $post_id ) {
+		while ( $parent_id ) {
 			// Get the post by ID.
-			$post = get_post( $post_id );
+			$parent = get_post( $parent_id );
+
 			// If we hit a page that's set as the front page, bail.
-			if ( 'page' === $post->post_type && 'page' === get_option( 'show_on_front' ) && get_option( 'page_on_front' ) === $post_id ) {
+			if ( 'page' === $parent->post_type && 'page' === get_option( 'show_on_front' ) && intval( get_option( 'page_on_front' ) ) === $parent_id ) {
 				break;
 			}
+
 			// Add the formatted post link to the array of parents.
-			$parents[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $post_id ) ), get_the_title( $post_id ) );
+			$parents[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $parent_id ) ), get_the_title( $parent_id ) );
 			// If there's no longer a post parent, break out of the loop.
-			if ( 0 >= $post->post_parent ) {
+			if ( $parent->post_parent <= 0 ) {
 				break;
 			}
 			// Change the post ID to the parent post to continue looping.
-			$post_id = $post->post_parent;
+			$parent_id = $parent->post_parent;
 		}
+
 		// Get the post hierarchy based off the final parent post.
-		self::add_post_hierarchy( $post_id );
-		// Display terms for specific post type taxonomy if requested.
-		if ( ! empty( self::$post_taxonomy[ $post->post_type ] ) ) {
-			self::add_post_terms( $post_id, self::$post_taxonomy[ $post->post_type ] );
-		}
+		self::add_post_hierarchy( $parent_id );
+
 		// Merge the parent items into the items array.
-		self::$items = array_merge( self::$items, array_reverse( $parents ) );
+		if ( ! empty( $parents ) ) {
+			self::$items = array_merge( self::$items, array_reverse( $parents ) );
+		}
 	}
 
-	/**
-	 * Adds a specific post's hierarchy to the items array.  The hierarchy is determined by post type's
-	 * rewrite arguments and whether it has an archive page.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @param  int $post_id
-	 * @return void
-	 */
 	protected static function add_post_hierarchy( $post_id ) {
-		// Get the post type.
-		$post_type        = get_post_type( $post_id );
-		$post_type_object = get_post_type_object( $post_type );
+		$post_type = get_post_type( $post_id );
 
 		if ( 'post' === $post_type ) {
-			// Add $wp_rewrite->front to the trail.
-			self::add_rewrite_front_items();
-			// Map the rewrite tags.
-			self::map_rewrite_tags( $post_id, get_option( 'permalink_structure' ) );
-			return;
-		}
+			self::add_post_terms( $post_id, self::$post_taxonomy[ $post_type ] );
+		} else {
+			$post_type_object = get_post_type_object( $post_type );
 
-		if ( false === $post_type_object->rewrite ) {
-			return;
-		}
-
-		// If 'with_front' is true, add $wp_rewrite->front to the trail.
-		if ( $post_type_object->rewrite['with_front'] ) {
-			self::add_rewrite_front_items();
-		}
-
-		// If there's a path, check for parents.
-		if ( ! empty( $post_type_object->rewrite['slug'] ) ) {
-			self::add_path_parents( $post_type_object->rewrite['slug'] );
-		}
-
-		// If there's an archive page, add it to the trail.
-		if ( $post_type_object->has_archive ) {
-			$label         = ! empty( $post_type_object->labels->archive_title ) ? $post_type_object->labels->archive_title : $post_type_object->labels->name;
-			$label         = apply_filters( 'post_type_archive_title', $label, $post_type_object->name );
-			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_post_type_archive_link( $post_type ) ), $label );
-		}
-
-		// Map the rewrite tags if there's a `%` in the slug.
-		if ( ! empty( $post_type_object->rewrite['slug'] ) && false !== strpos( $post_type_object->rewrite['slug'], '%' ) ) {
-			self::map_rewrite_tags( $post_id, $post_type_object->rewrite['slug'] );
-		}
-	}
-
-	/**
-	 * Gets post types by slug.  This is needed because the get_post_types() function doesn't exactly
-	 * match the 'has_archive' argument when it's set as a string instead of a boolean.
-	 *
-	 * @since  0.6.0
-	 * @access protected
-	 * @param  int $slug  The post type archive slug to search for.
-	 * @return void
-	 */
-	protected static function get_post_types_by_slug( $slug ) {
-		$return = array();
-
-		$post_types = get_post_types( array(), 'objects' );
-
-		foreach ( $post_types as $type ) {
-
-			if ( $slug === $type->has_archive || ( true === $type->has_archive && $slug === $type->rewrite['slug'] ) ) {
-				$return[] = $type;
+			if ( ! empty( $post_type_object->has_archive ) ) {
+				self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_post_type_archive_link( $post_type ) ), post_type_archive_title( '', false ) );
 			}
 		}
-		return $return;
 	}
 
-	/**
-	 * Adds a post's terms from a specific taxonomy to the items array.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @param  int    $post_id  The ID of the post to get the terms for.
-	 * @param  string $taxonomy The taxonomy to get the terms from.
-	 * @return void
-	 */
 	protected static function add_post_terms( $post_id, $taxonomy ) {
 		// Get the post categories.
 		$terms = get_the_terms( $post_id, $taxonomy );
+
 		// Check that categories were returned.
-		if ( ! $terms || is_wp_error( $terms ) ) {
-			return;
-		}
-
-		// Sort the terms by ID.
-		if ( function_exists( 'wp_list_sort' ) ) {
+		if ( $terms || ! is_wp_error( $terms ) ) {
+			// Sort the terms by ID in ascending order.
 			$terms = wp_list_sort( $terms, 'term_id' );
-		} else {
-			usort( $terms, '_usort_terms_by_ID' );
-		}
+			$term  = array_pop( $terms );
 
-		// Get the last term (i.e., the one with the highest ID).
-		$term = array_pop( $terms );
-
-		// If the category has a parent, add the hierarchy to the trail.
-		if ( $term->parent ) {
-			self::add_term_parents( $term->parent, $taxonomy );
-		}
-
-		// Add the category archive link to the trail.
-		self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_term_link( $term, $taxonomy ) ), $term->name );
-	}
-	/**
-	 * Get parent posts by path.  Currently, this method only supports getting parents of the 'page'
-	 * post type.  The goal of this function is to create a clear path back to home given what would
-	 * normally be a "ghost" directory.  If any page matches the given path, it'll be added.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @param  string $path The path (slug) to search for posts by.
-	 * @return void
-	 */
-	public static function add_path_parents( $path ) {
-		// Trim '/' off $path in case we just got a simple '/' instead of a real path.
-		$path = trim( $path, '/' );
-		// If there's no path, return.
-		if ( empty( $path ) ) {
-			return;
-		}
-		// Get parent post by the path.
-		$post = get_page_by_path( $path );
-
-		if ( ! empty( $post ) ) {
-			self::add_post_parents( $post->ID );
-		} elseif ( is_null( $post ) ) {
-			// Separate post names into separate paths by '/'.
-			$path = trim( $path, '/' );
-			preg_match_all( '/\/.*?\z/', $path, $matches );
-			// If matches are found for the path.
-			if ( isset( $matches ) ) {
-				// Reverse the array of matches to search for posts in the proper order.
-				$matches = array_reverse( $matches );
-				// Loop through each of the path matches.
-				foreach ( $matches as $match ) {
-					// If a match is found.
-					if ( isset( $match[0] ) ) {
-						// Get the parent post by the given path.
-						$path = str_replace( $match[0], '', $path );
-						$post = get_page_by_path( trim( $path, '/' ) );
-
-						// If a parent post is found, set the $post_id and break out of the loop.
-						if ( ! empty( $post ) && 0 < $post->ID ) {
-							self::add_post_parents( $post->ID );
-							break;
-						}
-					}
-				}
-			}
+			// If the category has a parent, add the hierarchy to the trail.
+			self::add_term_parents( $term, $taxonomy );
 		}
 	}
 
-	/**
-	 * Searches for term parents of hierarchical taxonomies.  This function is similar to the WordPress
-	 * function get_category_parents() but handles any type of taxonomy.
-	 *
-	 * @since  1.0.0
-	 * @param  int    $term_id  ID of the term to get the parents of.
-	 * @param  string $taxonomy Name of the taxonomy for the given term.
-	 * @return void
-	 */
-	public static function add_term_parents( $term_id, $taxonomy ) {
+	protected static function add_term_parents( $term_id, $taxonomy ) {
 		// Set up some default arrays.
 		$parents = array();
 		// While there is a parent ID, add the parent term link to the $parents array.
 		while ( $term_id ) {
 			// Get the parent term.
 			$term = get_term( $term_id, $taxonomy );
+
+			if ( ! $term || is_wp_error( $term ) ) {
+				break;
+			}
+
 			// Add the formatted term link to the array of parent terms.
 			$parents[] = sprintf( '<a href="%s">%s</a>', esc_url( get_term_link( $term, $taxonomy ) ), $term->name );
+
+			if ( $term->parent <= 0 ) {
+				break;
+			}
 			// Set the parent term's parent as the parent ID.
 			$term_id = $term->parent;
 		}
@@ -979,51 +316,132 @@ class Breadcrumb {
 		}
 	}
 
-	/**
-	 * Turns %tag% from permalink structures into usable links for the breadcrumb trail.  This feels kind of
-	 * hackish for now because we're checking for specific %tag% examples and only doing it for the 'post'
-	 * post type.  In the future, maybe it'll handle a wider variety of possibilities, especially for custom post
-	 * types.
-	 *
-	 * @since  0.6.0
-	 * @access protected
-	 * @param  int    $post_id ID of the post whose parents we want.
-	 * @param  string $path    Path of a potential parent page.
-	 * @param  array  $args    Mixed arguments for the menu.
-	 * @return array
-	 */
-	protected static function map_rewrite_tags( $post_id, $path ) {
-		$post = get_post( $post_id );
-		// Trim '/' from both sides of the $path.
-		$path = trim( $path, '/' );
-		// Split the $path into an array of strings.
-		$matches = explode( '/', $path );
-		// If matches are found for the path.
-		if ( is_array( $matches ) ) {
-			// Loop through each of the matches, adding each to the $trail array.
-			foreach ( $matches as $match ) {
-				// Trim any '/' from the $match.
-				$tag = trim( $match, '/' );
-				// If using the %year% tag, add a link to the yearly archive.
-				if ( '%year%' === $tag ) {
-					self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_year_link( get_the_time( 'Y', $post_id ) ) ), sprintf( self::$labels['archive_year'], get_the_time( esc_html_x( 'Y', 'yearly archives date format', 'lerm' ) ) ) );
-				} elseif ( '%monthnum%' === $tag ) {
-					// If using the %monthnum% tag, add a link to the monthly archive.
-					self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_month_link( get_the_time( 'Y', $post_id ), get_the_time( 'm', $post_id ) ) ), sprintf( self::$labels['archive_month'], get_the_time( esc_html_x( 'F', 'monthly archives date format', 'lerm' ) ) ) );
-				} elseif ( '%day%' === $tag ) {
-					// If using the %day% tag, add a link to the daily archive.
-					self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_day_link( get_the_time( 'Y', $post_id ), get_the_time( 'm', $post_id ), get_the_time( 'd', $post_id ) ) ), sprintf( self::$labels['archive_day'], get_the_time( esc_html_x( 'j', 'daily archives date format', 'lerm' ) ) ) );
-				} elseif ( '%author%' === $tag ) {
-					// If using the %author% tag, add a link to the post author archive.
-					self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_author_posts_url( $post->post_author ) ), get_the_author_meta( 'display_name', $post->post_author ) );
-				} elseif ( taxonomy_exists( trim( $tag, '%' ) ) ) {
-					// If using the %category% tag, add a link to the first category archive to match permalinks.
-					// Force override terms in this post type.
-					self::$post_taxonomy[ $post->post_type ] = false;
-					// Add the post categories.
-					self::add_post_terms( $post_id, trim( $tag, '%' ) );
+	private static function add_archive_items() {
+		if ( is_date() ) {
+			self::add_date_archive_items();
+		} elseif ( is_author() ) {
+			self::add_author_archive_items();
+		} elseif ( is_post_type_archive() ) {
+			self::add_post_type_archive_items();
+		} elseif ( is_category() || is_tag() || is_tax() ) {
+			self::add_term_archive_items();
+		} else {
+			self::$items[] = self::$labels['archives'];
+		}
+	}
+
+	protected static function add_term_archive_items() {
+		$term      = get_queried_object();
+		$taxonomy  = get_taxonomy( $term->taxonomy );
+		$post_type = $taxonomy->object_type[0] ?? '';
+
+		// If there's a single post type for the taxonomy, use it.
+		if ( $post_type && post_type_exists( $post_type ) ) {
+
+			// If the post type is 'post'.
+			if ( 'post' === $post_type ) {
+				$post_id = get_option( 'page_for_posts' );
+				if ( 'posts' !== get_option( 'show_on_front' ) && $post_id > 0 ) {
+					self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( $post_id ) ), get_the_title( $post_id ) );
+				}
+			} else {
+				// If the post type is not 'post'.
+				$post_type_object = get_post_type_object( $post_type );
+
+				if ( ! empty( $post_type_object->has_archive ) ) {
+					self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_post_type_archive_link( $post_type ) ), post_type_archive_title( '', false ) );
 				}
 			}
+		}
+
+		// If the taxonomy is hierarchical, list its parent terms.
+		if ( is_taxonomy_hierarchical( $term->taxonomy ) && $term->parent ) {
+			self::add_term_parents( $term->parent, $term->taxonomy );
+		}
+
+		// Add the term name to the trail end.
+		if ( is_paged() ) {
+			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_term_link( $term, $term->taxonomy ) ), single_term_title( '', false ) );
+		} elseif ( self::$args['show_title'] ) {
+			self::$items[] = single_term_title( '', false );
+		}
+	}
+	/**
+	 * Adds the items to the trail items array for search results.
+	 *
+	 * @since  1.0.0
+	 * @access protected
+	 * @return void
+	 */
+	protected static function add_search_items() {
+		$search_query = sprintf( self::$labels['search'], get_search_query() );
+
+		if ( is_paged() ) {
+			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_search_link() ), $search_query );
+		} else {
+			self::$items[] = $search_query;
+		}
+	}
+
+	protected static function add_author_archive_items() {
+		self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_permalink( get_option( 'page_for_posts' ) ) ), self::$labels['archives'] );
+		self::$items[] = sprintf( self::$labels['archive_author'], get_the_author_meta( 'display_name', get_query_var( 'author' ) ) );
+	}
+
+	protected static function add_post_type_archive_items() {
+		$post_type = get_query_var( 'post_type' );
+
+		if ( 'post' !== $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+			self::$items[]    = $post_type_object->labels->name;
+		}
+
+		// Get the post type object.
+		$post_type_object = get_post_type_object( get_query_var( 'post_type' ) );
+
+		// Add the post type [plural] name to the trail end.
+		if ( is_paged() ) {
+			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_post_type_archive_link( $post_type_object->name ) ), post_type_archive_title( '', false ) );
+		} else {
+			self::$items[] = post_type_archive_title( '', false );
+		}
+	}
+
+	/**
+	 * Adds the items to the trail items array for date archives.
+	 *
+	 * @since  1.0.0
+	 * @access protected
+	 * @param string $type Archive type ('day', 'month', 'year').
+	 * @return void
+	 */
+	protected static function add_date_archive_items() {
+		if ( is_day() ) {
+			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_year_link( get_the_time( 'Y' ) ) ), get_the_time( esc_html_x( 'Y', 'yearly archives date format', 'lerm' ) ) );
+			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_month_link( get_the_time( 'Y' ), get_the_time( 'm' ) ) ), get_the_time( esc_html_x( 'F', 'monthly archives date format', 'lerm' ) ) );
+			self::$items[] = get_the_time( esc_html_x( 'j', 'daily archives date format', 'lerm' ) );
+		} elseif ( is_month() ) {
+			self::$items[] = sprintf( '<a href="%s">%s</a>', esc_url( get_year_link( get_the_time( 'Y' ) ) ), get_the_time( esc_html_x( 'Y', 'yearly archives date format', 'lerm' ) ) );
+			self::$items[] = get_the_time( esc_html_x( 'F', 'monthly archives date format', 'lerm' ) );
+		} elseif ( is_year() ) {
+			self::$items[] = get_the_time( esc_html_x( 'Y', 'yearly archives date format', 'lerm' ) );
+		}
+	}
+
+	protected static function add_paged_items() {
+		// If viewing a paged singular post.
+		if ( is_singular() ) {
+			$page_number         = absint( get_query_var( 'page' ) );
+			$comment_page_number = absint( get_query_var( 'cpage' ) );
+			if ( $page_number ) {
+				self::$items[] = sprintf( self::$labels['paged'], number_format_i18n( absint( $page_number ) ) );
+			} elseif ( get_option( 'page_comments' ) && $comment_page_number ) {
+				// If viewing a singular post with paged comments.
+				self::$items[] = sprintf( self::$labels['paged_comments'], number_format_i18n( absint( $comment_page_number ) ) );
+			}
+		} elseif ( is_paged() ) {
+			// If viewing a paged archive-type page.
+			self::$items[] = sprintf( self::$labels['paged'], number_format_i18n( absint( get_query_var( 'paged' ) ) ) );
 		}
 	}
 }

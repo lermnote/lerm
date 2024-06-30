@@ -5,7 +5,7 @@
  * @package lerm
  */
 
-namespace Lerm\Inc;
+namespace Lerm\Inc\Traits;
 
 trait Hooker {
 
@@ -34,7 +34,7 @@ trait Hooker {
 	protected static function actions( $tags, $function_to_add, $priority = 10, $accepted_args = 1 ) {
 		$count = count( $tags );
 		array_map(
-			array( $this, 'action' ),
+			array( __CLASS__, 'action' ),
 			(array) $tags,
 			array_fill( 0, $count, $function_to_add ),
 			array_fill( 0, $count, $priority ),

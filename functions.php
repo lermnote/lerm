@@ -6,6 +6,9 @@
  * @date   2016-08-28 21:57:52
  * @since  lerm 1.0
  */
+
+use Lerm\Inc\Init;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
@@ -32,9 +35,10 @@ if ( ! defined( 'LERM_DIR' ) ) {
  * Requre admin framework
  */
 require LERM_DIR . 'inc/themeloader.php';
-\Lerm\Inc\Setup::instance();
-\Lerm\Inc\Setup::get_options( get_option( 'lerm_theme_options' ) );
-
+// \Lerm\Inc\Setup::instance();
+// \Lerm\Inc\Setup::get_options( get_option( 'lerm_theme_options' ) );
+Init::instance();
+Init::get_options( get_option( 'lerm_theme_options' ) );
 /**
  * Shows a pagination for post page.
  *
@@ -178,7 +182,6 @@ function smtplog_mailer_errors( $wp_error ) {
 	$currenttime = gmdate( 'Y-m-d H:i:s', $timestamp );
 	$wp_filesystem->put_contents( $file, $currenttime . ' Mailer Error: ' . $wp_error->get_error_message() . "\n", FS_CHMOD_FILE );
 }
-
 
 function add_type_attribute( $attributes ) {
 	// Only do this for a specific script.

@@ -878,6 +878,22 @@ a[rel="weixin"]:hover::after {
 
 
 /* Block: Shared Widget Styles --------------- */
+
+.wp-block-archives,
+.wp-block-categories,
+.wp-block-latest-posts,
+.wp-block-latest-comments {
+	list-style: none;
+	margin-left: 0;
+}
+
+.wp-block-archives ul,
+.wp-block-categories ul,
+.wp-block-latest-posts ul,
+.wp-block-latest-comments ul {
+	list-style: none;
+}
+
 .entry-content .wp-block-archives>li,
 .entry-content .wp-block-categories>li,
 .entry-content .wp-block-latest-posts>li,
@@ -1441,11 +1457,6 @@ figure.wp-block-table.is-style-stripes {
 
 .wp-block-latest-comments__comment-date {
 	margin-top: 0.4em;
-}
-
-.wp-block-latest-comments__comment-excerpt p {
-	font-size: 0.7em;
-	margin: 0.5rem 0 0 0;
 }
 
 /* Block: Widget Latest Posts ---------------- */

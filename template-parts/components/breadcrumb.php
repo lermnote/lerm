@@ -1,10 +1,10 @@
 <?php
 /**
  * Breadcrumb trail template.
- * 
+ *
  *  @package Lerm https://lerm.net
  */
-\Lerm\Inc\Breadcrumb::instance(
+\Lerm\Inc\Core\Breadcrumb::instance(
 	array(
 		'container'     => lerm_options( 'breadcrumb_container' ),
 		'before'        => lerm_options( 'breadcrumb_before' ),

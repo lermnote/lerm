@@ -7,13 +7,12 @@
  * @since lerm 3.0
  */
 
-namespace Lerm\Inc;
+namespace Lerm\Inc\Core;
 
 use Walker_Comment;
 use Lerm\Inc\Traits\Singleton;
 
 class CommentWalker extends Walker_Comment {
-
 	use singleton;
 
 	// Default arguments
@@ -28,7 +27,7 @@ class CommentWalker extends Walker_Comment {
 	 * @param array $params Optional parameters.
 	 */
 	public function __construct( $params ) {
-		self::$args = apply_filters( 'lerm_comment_', wp_parse_args( $params, self::$args ) );
+		self::$args = apply_filters( 'lerm_comment_args', wp_parse_args( $params, self::$args ) );
 
 		if ( self::$args['make_clickable'] ) {
 			remove_filter( 'comment_text', 'make_clickable', 9 );

@@ -2,12 +2,12 @@
 
 namespace Lerm\Inc;
 
-use Lerm\Inc\Hooker;
+use Lerm\Inc\Traits\Hooker;
 use Lerm\Inc\Traits\Singleton;
 class Optimize {
 
 	use hooker;
-	
+
 	use singleton;
 
 	public static $args = array(
@@ -28,19 +28,19 @@ class Optimize {
 			self::filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), 'gravatar_replace', 100, 1 );
 		}
 		if ( 'https://cravatar.cn/avatar/' === self::$args['gravatar_accel'] ) {
-			add_filter( 'user_profile_picture_description', array( __CLASS__, 'set_user_profile_picture_for_cravatar' ), 100, 1 );
-			add_filter( 'avatar_defaults', array( __CLASS__, 'set_defaults_for_cravatar' ), 100, 1 );
+			self::filter( 'user_profile_picture_description', 'set_user_profile_picture_for_cravatar', 100, 1 );
+			self::filter( 'avatar_defaults', 'set_defaults_for_cravatar', 100, 1 );
 		}
 		if ( self::$args['admin_accel'] ) {
-			add_action( 'init', array( __CLASS__, 'super_admin' ), 100, 1 );
-			add_action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
+			self::action( 'init', 'super_admin', 100, 1 );
+			self::action( 'shutdown', 'ob_buffer_end', 100, 1 );
 		}
 		if ( ! in_array( self::$args['google_replace'], array( 'disable', '' ), true ) ) {
-			add_action( 'init', array( __CLASS__, 'googleapis_replace' ), 100, 1 );
-			add_action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
+			self::action( 'init', 'googleapis_replace', 100, 1 );
+			self::action( 'shutdown', 'ob_buffer_end', 100, 1 );
 		}
-		add_filter( 'frontpage_template', array( __CLASS__, 'front_page_template' ), 15, 1 );
-		add_filter( 'wp_tag_cloud', array( __CLASS__, 'tag_cloud' ), 10, 1 );
+		self::filter( 'frontpage_template', 'front_page_template', 15, 1 );
+		self::filter( 'wp_tag_cloud', 'tag_cloud', 10, 2 );
 		add_filter( 'pre_option_link_manager_enabled', '__return_true' );
 		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
 	}
@@ -52,7 +52,7 @@ class Optimize {
 	 */
 	public static function optimize( $args = array() ) {
 		// Remove head links.
-		$actions = array( 'rsd_link', 'wlwmanifest_link', 'wp_generator', 'start_post_rel_link', 'index_rel_link', 'adjacent_posts_rel_link_wp_head', 'rel_canonical' );
+		$actions = array( 'rsd_link', 'wlwmanifest_link', 'wp_generator', 'start_post_rel_link', 'index_rel_link', 'adjacent_posts_rel_link_wp_head', 'rel_canonical', 'wp_shortlink_wp_head' );
 		if ( is_array( $args ) && ! empty( $args ) ) {
 			foreach ( $actions as $value ) {
 				if ( in_array( $value, $args, true ) ) {
@@ -74,9 +74,7 @@ class Optimize {
 				add_filter( 'script_loader_src', array( __CLASS__, 'remove_ver' ) );
 				add_filter( 'style_loader_src', array( __CLASS__, 'remove_ver' ) );
 			}
-			if ( in_array( 'wp_shortlink_wp_head', $args, true ) ) {
-				remove_action( 'wp_head', 'wp_shortlink_wp_head', 10, 0 );
-			}
+
 			if ( in_array( 'disable_emojis', $args, true ) ) {
 				remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 				remove_action( 'admin_print_styles', 'print_emoji_styles' );
@@ -209,18 +207,21 @@ class Optimize {
 	 * @param array $args
 	 * @return string|string[] Tag cloud as a string or an array, depending on 'format' argument.
 	 */
-	public static function tag_cloud( $args ) {
-		$args = array(
-			'largest'  => 22,
-			'smallest' => 8,
-			'unit'     => 'pt',
-			'number'   => 22,
-			'orderby'  => 'count',
-			'order'    => 'DESC',
+	public static function tag_cloud( $return, $args ) {
+		$defaults = array(
+			'orderby' => 'count',
+			'order'   => 'DESC',
 		);
+
+		$args = array_merge( $args, $defaults );
 		$tags = get_tags();
 
-		return wp_generate_tag_cloud( $tags, $args );
+		foreach ( $tags as $key => $tag ) {
+			$tags[ $key ]->link = get_tag_link( $tag->term_id );
+		}
+
+		$return = wp_generate_tag_cloud( $tags, $args );
+		return $return;
 	}
 
 	/**

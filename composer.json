@@ -16,7 +16,7 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"Lerm\\Inc\\": "inc/classes",
+			"Lerm\\Inc\\": "inc/",
 			"Lerm\\Inc\\Traits\\": "inc/traits"
 		}
 	}

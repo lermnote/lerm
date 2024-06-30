@@ -5,9 +5,8 @@
  * @package Lerm
  */
 
-namespace Lerm\Inc;
+namespace Lerm\Inc\Core;
 
-use Lerm\Inc\User\User;
 use Lerm\Inc\Traits\Singleton;
 
 /**
@@ -30,12 +29,9 @@ class Setup {
 	 * @var array $args
 	 */
 	public static $args = array(
-		'optimize_options' => array(),
-		'mail_options'     => array(),
-		'carousel_options' => array(),
-		'super_optimize'   => array(),
-		'seo_options'      => array(),
-		'sitemap_options'  => array(),
+		'excerpt_length'         => 100,
+		'comment_excerpt_length' => 100,
+		'content_width'          => 1440,
 	);
 
 	/**
@@ -46,7 +42,7 @@ class Setup {
 	 * @return void
 	 */
 	public function __construct( $params = array() ) {
-		self::$args = apply_filters( 'lerm_setup_', wp_parse_args( $params, self::$args ) );
+		self::$args = apply_filters( 'lerm_setup_args', wp_parse_args( $params, self::$args ) );
 		self::hooks();
 	}
 
@@ -57,11 +53,17 @@ class Setup {
 	 */
 	public static function hooks() {
 		add_action( 'after_setup_theme', array( __CLASS__, 'setup' ), 2 );
-		add_action( 'after_setup_theme', array( __CLASS__, 'content_width' ) );
-		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
-		add_action( 'widgets_init', array( __CLASS__, 'widgets' ) );
+
+		add_filter( 'frontpage_template', array( __CLASS__, 'front_page_template' ), 15, 1 );
+		add_filter( 'pre_option_link_manager_enabled', '__return_true' );
+
 		add_filter( 'excerpt_length', array( __CLASS__, 'excerpt_length' ), 999 );
 		add_filter( 'comment_excerpt_length', array( __CLASS__, 'comment_excerpt_length' ), 999 );
+
+		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
+		add_action( 'widgets_init', array( __CLASS__, 'widgets' ) );
+
+		add_filter( 'wp_tag_cloud', array( __CLASS__, 'tag_cloud' ), 10, 1 );
 	}
 
 	/**
@@ -135,17 +137,23 @@ class Setup {
 		 * Translations can be filed in the /languages/ directory
 		 */
 		load_theme_textdomain( DOMAIN, LERM_DIR . '/languages' );
-	}
 
+		/**
+		 * Define a max content width to allow WordPress to properly resize your images
+		 *
+		 */
+		$GLOBALS['content_width'] = apply_filters( 'content_width', self::$args['content_width'] );
+	}
 	/**
-	 * Define a max content width to allow WordPress to properly resize your images
+	 * Use front-page.php when Front page displays is set to a static page.
 	 *
-	 * @return void
+	 * @param string $template The template to be used.
+	 *
+	 * @return string The template to be used.
 	 */
-	public static function content_width() {
-		$GLOBALS['content_width'] = apply_filters( 'content_width', 1440 );
+	public static function front_page_template( $template ) {
+		return is_home() ? '' : $template;
 	}
-
 	/**
 	 * Displays the optional excerpt.
 	 *
@@ -154,8 +162,7 @@ class Setup {
 	 * @since Lerm 2.0
 	 */
 	public static function excerpt_length( $length ) {
-		$length = lerm_options( 'excerpt_length' );
-		return $length;
+		return self::$args['excerpt_length'];
 	}
 
 	/**
@@ -166,8 +173,7 @@ class Setup {
 	 * @since Lerm 2.0
 	 */
 	public static function comment_excerpt_length( $length ) {
-		$length = lerm_options( 'comment_excerpt_length' ) ? lerm_options( 'comment_excerpt_length' ) : 120;
-		return $length;
+		return self::$args['comment_excerpt_length'];
 	}
 
 	/**
@@ -210,5 +216,26 @@ class Setup {
 		// register_widget( '\Lerm\Inc\Widgets\Popular_Posts' );
 		// register_widget( '\Lerm\Inc\Widgets\Recent_Posts' );
 		// register_widget( '\Lerm\Inc\Widgets\Recent_Comments' );
+	}
+
+		/**
+	 * Custom tags cloud args.
+	 *
+	 * @param array $args Tag cloud arguments.
+	 *
+	 * @return string|string[] Tag cloud as a string or an array, depending on 'format' argument.
+	 */
+	public static function tag_cloud( $args ) {
+		$args = array(
+			'largest'  => 22,
+			'smallest' => 8,
+			'unit'     => 'pt',
+			'number'   => 22,
+			'orderby'  => 'count',
+			'order'    => 'DESC',
+		);
+		$tags = get_tags();
+
+		return wp_generate_tag_cloud( $tags, $args );
 	}
 }

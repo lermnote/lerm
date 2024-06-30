@@ -8,7 +8,7 @@
  * @since 1.0
  */
 
-namespace Lerm\Inc;
+namespace Lerm\Inc\Extras;
 
 use Lerm\Inc\Traits\Singleton;
 

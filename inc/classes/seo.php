@@ -1,6 +1,6 @@
 <?php // phpcs:disable WordPress.Files.FileName
 
-namespace Lerm\Inc;
+// namespace Lerm\Inc;
 
 use Lerm\Inc\Traits\Singleton;
 

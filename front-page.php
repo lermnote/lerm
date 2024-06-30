@@ -44,7 +44,7 @@ $recent_posts = new WP_Query(
 						?>
 						<div class="col mb-4">
 							<div class="card h-100">
-								<?php get_template_part( 'template-parts/content/featured-image' ); ?>
+								<?php get_template_part( 'template-parts/components/featured-image.php' ); ?>
 								<div class="card-body">
 									<h5 class="card-title">
 										<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>

@@ -3,7 +3,7 @@
  * The template for displaying archive pages
  *
  * @package Lerm https://lerm.net
- * 
+ *
  * @since  1.0
  */
 

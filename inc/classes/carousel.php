@@ -26,12 +26,11 @@ class Carousel {
 		self::$args = apply_filters( 'lerm_slide_', wp_parse_args( $params, self::$args ) );
 
 		if ( self::$args['slide_enable'] ) {
-			self::render();
+			self::render( self::$args['slides'] );
 		}
 	}
 
-	public static function render( $args = array() ) {
-		$slides    = self::$args['slides'];
+	public static function render( $slides ) {
 		$indicator = array();
 		$carousel  = array();
 

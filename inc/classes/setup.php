@@ -5,7 +5,7 @@
  * @package Lerm
  */
 
-namespace Lerm\Inc;
+// namespace Lerm\Inc;
 
 use Lerm\Inc\User\User;
 use Lerm\Inc\Traits\Singleton;
@@ -56,7 +56,6 @@ class Setup {
 		add_action( 'after_setup_theme', array( __CLASS__, 'setup' ), 2 );
 		add_action( 'after_setup_theme', array( __CLASS__, 'content_width' ) );
 		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
-		add_action( 'widgets_init', array( __CLASS__, 'widgets' ) );
 		add_filter( 'excerpt_length', array( __CLASS__, 'excerpt_length' ), 999 );
 		add_filter( 'comment_excerpt_length', array( __CLASS__, 'comment_excerpt_length' ), 999 );
 	}
@@ -289,16 +288,5 @@ class Setup {
 				'after_title'   => '</span></h4>',
 			)
 		);
-	}
-
-	/**
-	 * Register custom widgets
-	 *
-	 * @return void
-	 */
-	public static function widgets() {
-		// register_widget( '\Lerm\Inc\Widgets\Popular_Posts' );
-		// register_widget( '\Lerm\Inc\Widgets\Recent_Posts' );
-		// register_widget( '\Lerm\Inc\Widgets\Recent_Comments' );
 	}
 }

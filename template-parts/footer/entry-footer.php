@@ -1,6 +1,5 @@
 <?php
-// $like_class = isset( $_COOKIE[ 'post_like_' . $post->ID ] ) ? '' : '';
-\Lerm\Inc\PostLike::already_liked( $post->ID ) ? '' : '';
+\Lerm\Inc\Ajax\PostLike::already_liked( $post->ID ) ? '' : '';
 $like_class = 'like-post-' . $post->ID;
 $like_count = get_post_meta( $post->ID, '_post_like_count', true ) ? get_post_meta( $post->ID, '_post_like_count', true ) : 0;
 ?>
@@ -8,7 +7,7 @@ $like_count = get_post_meta( $post->ID, '_post_like_count', true ) ? get_post_me
 	<div class="line-text d-flex justify-content-center align-items-center">如果您觉得有用就请点赞和分享</div>
 	<div class="btn-toolbar d-flex justify-content-center mt-4 mb-3">
 		<div class="text-center">
-		<?php echo \Lerm\Inc\PostLike::get_likes_button( $post->ID ); ?>
+		<?php echo \Lerm\Inc\Ajax\PostLike::get_likes_button( $post->ID ); ?>
 			<a href="<?php comments_link(); ?>"  class="btn btn-custom entry-comment-btn">
 				<i class="fa fa-comment"></i>
 					<?php

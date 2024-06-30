@@ -9,50 +9,37 @@ namespace Lerm\Inc\Ajax;
 
 abstract class BaseAjax {
 
+	protected const AJAX_ACTION = '';
 
-	private const ACTION = '';
-
-	private static $args = array();
-
-	public function __construct( $args = array() ) {
-		self::register( self::ACTION, 'ajax_handle', true );
-
-		self::$args = wp_parse_args( $args, self::$args );
-		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
+	/**
+	 * Constructor.
+	 *
+	 * @param array $params Optional. Arguments for the class.
+	 */
+	public function __construct( $params ) {
+		if ( static::AJAX_ACTION ) {
+			self::register( static::AJAX_ACTION, 'ajax_handle', true );
+		}
+		add_filter( 'lerm_l10n_data', array( static::class, 'ajax_l10n_data' ) );
 	}
 	/**
-	 * Register ajax
+	 * Register AJAX handlers.
 	 *
-	 * @param string $action
-	 * @return void
+	 * @param string $action The action name.
+	 * @param string $callback The callback method.
+	 * @param bool $public Whether the action is public.
 	 */
-	public static function register( $action, $callback, $public = true ) {
-		// wp_ajax_{action} for registered users, wp_ajax_nopriv_{action} for not registered users
-		add_action( 'wp_ajax_' . $action, array( __CLASS__, $callback ), 10, 1 );
+	protected static function register( $action, $callback, $public = true ) {
+		add_action( 'wp_ajax_' . $action, array( static::class, $callback ), 10, 1 );
 		if ( $public ) {
-			add_action( 'wp_ajax_nopriv_' . $action, array( __CLASS__, $callback ), 10, 1 );
+			add_action( 'wp_ajax_nopriv_' . $action, array( static::class, $callback ), 10, 1 );
 		}
 	}
 
-
 	/**
-	 * Handle ajax request
-	 *
-	 * @return void
+	 * AJAX handler for processing the action.
 	 */
-
-	public static function ajax_handle() {}
-
-	/**
-	 * Verify request nonce
-	 *
-	 * @param string $action The nonce action name.
-	 */
-	public static function verify_nonce( $nonce_field, $nonce_action ) {
-		if ( ! isset( $_POST[ $nonce_field ] ) || ! wp_verify_nonce( $_POST[ $nonce_field ], $nonce_action ) ) {
-			self::error( 'Invalid nonce' );
-		}
-	}
+	abstract public static function ajax_handle();
 
 	/**
 	 * Wrapper function for sending success response
@@ -72,19 +59,16 @@ abstract class BaseAjax {
 		wp_send_json_error( $data );
 	}
 
-			/**
-		 * Generate AJAX localization data.
-		 *
-		 * @param array $l10n Existing localization data.
-		 * @return array Localized data for AJAX requests.
-		 */
+	/**
+	 * Generate AJAX localization data.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
 	public static function ajax_l10n_data( $l10n ) {
-		global $wp_query;
 		$data = array(
-			'posts'    => wp_json_encode( $wp_query->query_vars ), // everything about your loop is here.
-			'loadmore' => __( 'Load more', 'lerm' ),
-			'loading'  => '<i class="fa fa-spinner fa-spin me-1"></i>' . __( 'Loading...', 'lerm' ),
-			'noposts'  => __( 'No older posts found', 'lerm' ),
+			'url'   => admin_url( 'admin-ajax.php' ),
+			'nonce' => wp_create_nonce( 'ajax_nonce' ),
 		);
 		$data = wp_parse_args( $data, $l10n );
 		return $data;

@@ -10,10 +10,13 @@ namespace Lerm\Inc\Ajax;
 use Lerm\Inc\Traits\Singleton;
 
 final class PostLike extends BaseAjax {
-
 	use singleton;
 
-	private const ACTION = 'post_like';
+	protected const AJAX_ACTION               = 'post_like';
+	private const LIKE_COUNT_META_KEY         = '_post_like_count';
+	private const COMMENT_LIKE_COUNT_META_KEY = '_comment_like_count';
+	private const USER_LIKE_META_KEY          = '_user_liked';
+	private const USER_COMMENT_LIKE_META_KEY  = '_user_comment_liked';
 
 	/**
 	 * The arguments for the class.
@@ -35,188 +38,150 @@ final class PostLike extends BaseAjax {
 	 * @param array $params Optional. Arguments for the class.
 	 */
 	public function __construct( $params = array() ) {
-		self::register( self::ACTION, 'ajax_handle', true );
+		parent::__construct( apply_filters( 'lerm_postlike_args', wp_parse_args( $params, self::$args ) ) );
 
 		add_filter( 'manage_post_posts_columns', array( __CLASS__, 'set_post_columns' ) );
 		add_action( 'manage_post_posts_custom_column', array( __CLASS__, 'post_custom_column' ), 10, 2 );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'post_like_meta_box' ) );
-		self::$args = wp_parse_args( $params, self::$args );
+
 		// User Profile List
 		add_action( 'show_user_profile', array( __CLASS__, 'show_user_likes' ) );
 		add_action( 'edit_user_profile', array( __CLASS__, 'show_user_likes' ) );
+
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'scripts' ) );
+		// Hook the script_type_module function
+		add_filter( 'script_loader_tag', array( __CLASS__, 'script_type_module' ), 10, 3 );
 	}
 
 	/**
-	 * Callback function for processing the post like button AJAX request.
+	 * AJAX handler for processing like/unlike actions.
+	 *
+	 *
 	 */
 	public static function ajax_handle() {
+		// Verify the nonce
+		check_ajax_referer( 'lerm_nonce', 'security', true );
 
-		check_ajax_referer( 'ajax_nonce', 'security', true );
+		// Sanitize POST data
 		$postdata = wp_unslash( $_POST );
 
-		// Test if javascript is disabled
-		$disabled = ( isset( $postdata['disabled'] ) && true === $postdata['disabled'] ) ? true : false;
-		// Test if this is a comment
-		$is_comment = ( isset( $postdata['is_comment'] ) && 1 === $postdata['is_comment'] ) ? 1 : 0;
-		// Base variables
-		$post_id    = ( isset( $postdata['post_id'] ) && is_numeric( $postdata['post_id'] ) ) ? $postdata['post_id'] : '';
-		$result     = array();
-		$post_users = null;
-		$like_count = 0;
+		// Validate and sanitize input
+		$is_comment = isset( $postdata['type'] ) && 'comment' === $postdata['type'] ? 1 : 0;
+		$post_id    = isset( $postdata['post_id'] ) && is_numeric( $postdata['post_id'] ) ? intval( $postdata['post_id'] ) : '';
 
-		// Get plugin options
-		if ( '' !== $post_id ) {
-			$count = ( 1 === $is_comment ) ? get_comment_meta( $post_id, '_comment_like_count', true ) : get_post_meta( $post_id, '_post_like_count', true ); // like count
-			$count = ( isset( $count ) && is_numeric( $count ) ) ? $count : 0;
-			if ( ! self::already_liked( $post_id, $is_comment ) ) {
-				// Like the post
-				$response = self::like( $post_id, $is_comment, $count );
-			} else {
-				$response = self::unlike( $post_id, $is_comment, $count );
-			}
-
-			if ( 1 === $is_comment ) {
-				update_comment_meta( $post_id, '_comment_like_count', $response['count'] );
-				update_comment_meta( $post_id, '_comment_like_modified', gmdate( 'Y-m-d H:i:s' ) );
-			} else {
-				update_post_meta( $post_id, '_post_like_count', $response['count'] );
-				update_post_meta( $post_id, '_post_like_modified', gmdate( 'Y-m-d H:i:s' ) );
-			}
-			// $response['count']   = $like_count;
-			$response['testing'] = $is_comment;
-			if ( true === $disabled ) {
-				if ( 1 === $is_comment ) {
-					wp_safe_redirect( get_permalink( get_the_ID() ) );
-					exit();
-				} else {
-					wp_safe_redirect( get_permalink( $post_id ) );
-					exit();
-				}
-			} else {
-				wp_send_json( $response );
-			}
+		if ( ! $post_id ) {
+			self::error( array( 'message' => 'Invalid post ID' ) );
+			return;
 		}
-	}
 
-	public static function like( $post_id, $is_comment, $count ) {
+		// Process like action
+		$like_count  = self::process_like_action( $post_id, $is_comment );
+		$like_status = self::already_liked( $post_id, $is_comment );
 
-		if ( is_user_logged_in() ) {
-			// user is logged in
-			$user_id    = get_current_user_id();
-			$post_users = self::post_user_likes( $user_id, $post_id, $is_comment );
-			if ( 1 === $is_comment ) {
-				// Update User & Comment
-				$user_like_count = get_user_option( '_comment_like_count', $user_id );
-				$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
-				update_user_option( $user_id, '_comment_like_count', ++$user_like_count );
-				if ( $post_users ) {
-					update_comment_meta( $post_id, '_user_comment_liked', $post_users );
-				}
-			} else {
-				// Update User & Post
-				$user_like_count = get_user_option( '_user_like_count', $user_id );
-				$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
-				update_user_option( $user_id, '_user_like_count', ++$user_like_count );
-				if ( $post_users ) {
-					update_post_meta( $post_id, '_user_liked', $post_users );
-				}
-			}
-		} else {
-			// user is anonymous
-			$user_ip    = self::lerm_client_ip();
-			$post_users = self::post_ip_likes( $user_ip, $post_id, $is_comment );
-			// Update Post
-			if ( $post_users ) {
-				if ( 1 === $is_comment ) {
-					update_comment_meta( $post_id, '_user_comment_IP', $post_users );
-				} else {
-					update_post_meta( $post_id, '_user_IP', $post_users );
-				}
-			}
+		// Prepare response
+		$response = array(
+			'status' => $like_status ? 'liked' : 'unliked',
+			'count'  => $like_count,
+		);
+
+		if ( isset( $postdata['disabled'] ) && true === $postdata['disabled'] ) {
+			$redirect_url = ( $is_comment ) ? get_permalink( get_the_ID() ) : get_permalink( $post_id );
+			wp_safe_redirect( $redirect_url );
+			exit();
 		}
-		$response['count']  = ++$count;
-		$response['status'] = 'liked';
-		$response['icon']   = self::get_liked_icon();
 
-		return $response;
-
+		// Send JSON success response
+		self::success( $response );
 	}
-
-	public static function unlike( $post_id, $is_comment, $count ) {
-		// Unlike the post
-		if ( is_user_logged_in() ) {
-			// user is logged in
-			$user_id    = get_current_user_id();
-			$post_users = self::post_user_likes( $user_id, $post_id, $is_comment );
-			// Update User
-			if ( 1 === $is_comment ) {
-				$user_like_count = get_user_option( '_comment_like_count', $user_id );
-				$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
-				if ( $user_like_count > 0 ) {
-					update_user_option( $user_id, '_comment_like_count', --$user_like_count );
-				}
-			} else {
-				$user_like_count = get_user_option( '_user_like_count', $user_id );
-				$user_like_count = ( isset( $user_like_count ) && is_numeric( $user_like_count ) ) ? $user_like_count : 0;
-				if ( $user_like_count > 0 ) {
-					update_user_option( $user_id, '_user_like_count', --$user_like_count );
-				}
-			}
-
-			// Update Post
-			if ( $post_users ) {
-				$uid_key = array_search( $user_id, $post_users, true );
-				unset( $post_users[ $uid_key ] );
-				if ( 1 === $is_comment ) {
-					update_comment_meta( $post_id, '_user_comment_liked', $post_users );
-				} else {
-					update_post_meta( $post_id, '_user_liked', $post_users );
-				}
-			}
-		} else {
-			// user is anonymous
-			$user_ip    = self::lerm_client_ip();
-			$post_users = self::post_ip_likes( $user_ip, $post_id, $is_comment );
-			// Update Post
-			if ( $post_users ) {
-				$uip_key = array_search( $user_ip, $post_users, true );
-				unset( $post_users[ $uip_key ] );
-				if ( 1 === $is_comment ) {
-					update_comment_meta( $post_id, '_user_comment_IP', $post_users );
-				} else {
-					update_post_meta( $post_id, '_user_IP', $post_users );
-				}
-			}
-		}
-		$response['count']  = ( $count > 0 ) ? --$count : 0; // Prevent negative number
-		$response['status'] = 'unliked';
-		$response['icon']   = self::get_unliked_icon();
-
-		return $response;
-	}
-
 
 	/**
-	 * Utility to test if the post is already liked
+	 * Process like action for a post or comment.
 	 *
-	 * @since    0.5
+	 * @param int $post_id The ID of the post or comment.
+	 * @param bool $is_comment Whether the ID refers to a comment.
+	 * @return int The updated like count after processing the like action.
 	 */
-	public static function already_liked( $post_id, $is_comment ) {
-		$post_users = null;
-		$user_id    = null;
-		if ( is_user_logged_in() ) { // user is logged in
-			$user_id         = get_current_user_id();
-			$post_meta_users = ( 1 === $is_comment ) ? get_comment_meta( $post_id, '_user_comment_liked' ) : get_post_meta( $post_id, '_user_liked' );
-			if ( count( $post_meta_users ) !== 0 ) {
-				$post_users = $post_meta_users[0];
-			}
-		} else { // user is anonymous
-			$user_id         = self::lerm_client_ip();
-			$post_meta_users = ( 1 === $is_comment ) ? get_comment_meta( $post_id, '_user_comment_IP' ) : get_post_meta( $post_id, '_user_IP' );
-			if ( count( $post_meta_users ) !== 0 ) { // meta exists, set up values
-				$post_users = $post_meta_users[0];
-			}
-		}
+	private static function process_like_action( $post_id, $is_comment ) {
+		// Perform actions based on whether the post/comment is already liked or not
+		$like_count = self::already_liked( $post_id, $is_comment ) ? self::unlike_post( $post_id, $is_comment ) : self::like_post( $post_id, $is_comment );
+
+		// Constants for meta keys
+		$like_count_key    = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
+		$like_modified_key = $is_comment ? '_comment_like_modified' : '_post_like_modified';
+
+		self::update_like_meta( $post_id, $like_count_key, $like_modified_key, $like_count, $is_comment );
+
+		return $like_count;
+	}
+
+	/**
+	 * Update like count and modified time in meta.
+	 *
+	 * @param int $id The ID of the post or comment.
+	 * @param string $count_key The meta key for like count.
+	 * @param string $modified_key The meta key for modified time.
+	 * @param int $like_count The updated like count.
+	 */
+	private static function update_like_meta( $id, $count_key, $modified_key, $like_count, $is_comment ) {
+		update_metadata( $is_comment ? 'comment' : 'post', $id, $count_key, $like_count );
+		update_metadata( $is_comment ? 'comment' : 'post', $id, $modified_key, gmdate( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * Like a post or comment.
+	 *
+	 * @param int $post_id The ID of the post or comment.
+	 * @param bool $is_comment Whether the ID refers to a comment.
+	 * @return int The updated like count after liking the post or comment.
+	 */
+	private static function like_post( $post_id, $is_comment ) {
+		// Get current like count
+		$meta_key = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
+		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
+
+		//get user id
+		$user_id = is_user_logged_in() ? get_current_user_id() : self::lerm_client_ip();
+		self::update_user_likes( $user_id, $post_id, $is_comment, true );
+
+		// update like count
+		update_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, ++$count );
+		return $count;
+	}
+
+	/**
+	 * Unlike a post or comment.
+	 *
+	 * @param int $post_id The ID of the post or comment.
+	 * @param bool $is_comment Whether the ID refers to a comment.
+	 * @return int The updated like count after unliking the post or comment.
+	 */
+	private static function unlike_post( $post_id, $is_comment ) {
+		// Get current like count
+		$meta_key = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
+		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
+
+		//get user id
+		$user_id = is_user_logged_in() ? get_current_user_id() : self::lerm_client_ip();
+		self::update_user_likes( $user_id, $post_id, $is_comment, false );
+
+		// update like count.
+		$new_count = max( 0, --$count );
+		update_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, $new_count );
+		return $new_count;
+	}
+
+	/**
+	 * Checks if the current user has already liked the post or comment.
+	 *
+	 * @param int $post_id The ID of the post or comment.
+	 * @param bool $is_comment Whether the ID refers to a comment.
+	 * @return bool True if the user has already liked the post or comment, false otherwise.
+	 */
+	public static function already_liked( $post_id, $is_comment = null ) {
+		$user_id    = is_user_logged_in() ? get_current_user_id() : self::lerm_client_ip();
+		$meta_key   = $is_comment ? self::USER_COMMENT_LIKE_META_KEY : self::USER_LIKE_META_KEY;
+		$post_users = get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
+		// Check if user is in the list of liked users
 		if ( is_array( $post_users ) && in_array( $user_id, $post_users, true ) ) {
 			return true;
 		} else {
@@ -224,92 +189,63 @@ final class PostLike extends BaseAjax {
 		}
 	}
 
+	private static function update_user_likes( $user_id, $post_id, $is_comment, $like = true ) {
+		$meta_key   = $is_comment ? self::USER_COMMENT_LIKE_META_KEY : self::USER_LIKE_META_KEY;
+		$user_likes = get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true ) ? get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true ) : array();
+
+		if ( $like ) {
+			if ( ! in_array( $user_id, $user_likes, true ) ) {
+				$user_likes[] = $user_id;
+			}
+		} else {
+			$user_likes = array_diff( $user_likes, array( $user_id ) );
+		}
+
+		update_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, $user_likes );
+	}
+
 	/**
 	 * Output the like button
 	 *
 	 * @since    0.5
 	 */
-	public static function get_simple_likes_button( $post_id, $is_comment = null ) {
-		$is_comment = ( null === $is_comment ) ? 0 : 1;
-		$output     = '';
-		$nonce      = wp_create_nonce( 'simple-likes-nonce' ); // Security
-		if ( 1 === $is_comment ) {
-			$post_id_class = esc_attr( ' sl-comment-button-' . $post_id );
-			$comment_class = esc_attr( ' sl-comment' );
-			$like_count    = get_comment_meta( $post_id, '_comment_like_count', true );
-			$like_count    = ( isset( $like_count ) && is_numeric( $like_count ) ) ? $like_count : 0;
-		} else {
-			$post_id_class = esc_attr( ' sl-button-' . $post_id );
-			$comment_class = esc_attr( '' );
-			$like_count    = get_post_meta( $post_id, '_post_like_count', true );
-			$like_count    = ( isset( $like_count ) && is_numeric( $like_count ) ) ? $like_count : 0;
-		}
-		$count      = self::get_like_count( $like_count );
-		$icon_empty = self::get_unliked_icon();
-		$icon_full  = self::get_liked_icon();
-		// Loader
-		$loader = '<span id="sl-loader"></span>';
-		// Liked/Unliked Variables
-		if ( self::already_liked( $post_id, $is_comment ) ) {
-			$class = esc_attr( ' liked' );
-			$title = __( 'Unlike', 'YourThemeTextDomain' );
-			$icon  = $icon_full;
-		} else {
-			$class = '';
-			$title = __( 'Like', 'YourThemeTextDomain' );
-			$icon  = $icon_empty;
-		}
-		$output = '<span class="sl-wrapper"><a href="' . admin_url( 'admin-ajax.php?action=process_simple_like' . '&post_id=' . $post_id . '&nonce=' . $nonce . '&is_comment=' . $is_comment . '&disabled=true' ) . '" class="sl-button' . $post_id_class . $class . $comment_class . '" data-nonce="' . $nonce . '" data-post-id="' . $post_id . '" data-iscomment="' . $is_comment . '" title="' . $title . '">' . $icon . $count . '</a>' . $loader . '</span>';
+	public static function get_likes_button( $post_id, $is_comment = null ) {
+		$classes = array( 'btn', 'like-button' );
+		$id      = $is_comment ? get_comment_ID() : $post_id;
+		$type    = $is_comment ? 'comment' : 'post';
+
+		$classes[] = self::already_liked( $post_id, $is_comment ) ? 'btn-danger' : 'btn-outline-danger';
+		$classes[] = 'like-' . $type . '-' . $id;
+
+		// Get current like count
+		$meta_key   = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
+		$like_count = (int) get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
+
+		$count  = self::get_like_count( $like_count );
+		$output = sprintf(
+			'<button data-id="%d" data-post-id="%d" data-logged="%s" data-type="%s" class="%s">
+			<span><i class="fa fa-heart"></i></span> 
+			%s
+			</button>',
+			$id,
+			$post_id,
+			esc_attr( is_user_logged_in() ),
+			esc_attr( $type ),
+			esc_attr( implode( ' ', $classes ) ),
+			$count
+		);
+
 		return $output;
 	}
 
 	/**
-	 * Utility retrieves post meta user likes (user id array),
-	 * then adds new user id to retrieved array
+	 * Get client IP address.
 	 *
-	 */
-	public static function post_user_likes( $user_id, $post_id, $is_comment ) {
-		$post_users      = '';
-		$post_meta_users = ( 1 === $is_comment ) ? get_comment_meta( $post_id, '_user_comment_liked' ) : get_post_meta( $post_id, '_user_liked' );
-		if ( count( $post_meta_users ) !== 0 ) {
-			$post_users = $post_meta_users[0];
-		}
-		if ( ! is_array( $post_users ) ) {
-			$post_users = array();
-		}
-		if ( ! in_array( $user_id, $post_users, true ) ) {
-			$post_users[ 'user-' . $user_id ] = $user_id;
-		}
-		return $post_users;
-	}
-
-	/**
-	 * Utility retrieves post meta ip likes (ip array),
-	 * then adds new ip to retrieved array
-	 *
-	 */
-	public static function post_ip_likes( $user_ip, $post_id, $is_comment ) {
-		$post_users      = '';
-		$post_meta_users = ( 1 === $is_comment ) ? get_comment_meta( $post_id, '_user_comment_IP' ) : get_post_meta( $post_id, '_user_IP' );
-		// Retrieve post information
-		if ( count( $post_meta_users ) !== 0 ) {
-			$post_users = $post_meta_users[0];
-		}
-		if ( ! is_array( $post_users ) ) {
-			$post_users = array();
-		}
-		if ( ! in_array( $user_ip, $post_users, true ) ) {
-			$post_users[ 'ip-' . $user_ip ] = $user_ip;
-		}
-		return $post_users;
-	}
-
-	/**
-	 * Get the IP address of the current browser.
-	 *
-	 * @since    3.2.8
+	 * @return string Client IP address.
 	 */
 	public static function lerm_client_ip() {
+		$ip = '0.0.0.0';
+
 		if ( isset( $_SERVER['HTTP_CLIENT_IP'] ) && ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
 		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
@@ -317,9 +253,8 @@ final class PostLike extends BaseAjax {
 		} else {
 			$ip = ( isset( $_SERVER['REMOTE_ADDR'] ) ) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
 		}
-		$ip = ( false === filter_var( $ip, FILTER_VALIDATE_IP ) ) ? '0.0.0.0' : filter_var( $ip, FILTER_VALIDATE_IP );
 
-		return $ip;
+		return filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '0.0.0.0';
 	}
 
 	/**
@@ -329,8 +264,7 @@ final class PostLike extends BaseAjax {
 	 */
 	public static function get_liked_icon() {
 		/* If already using Font Awesome with your theme, replace svg with: <i class="fa fa-heart"></i> */
-		$icon = '<span class="sl-icon"><svg role="img" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0" y="0" viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve"><path id="heart-full" d="M124 20.4C111.5-7 73.7-4.8 64 19 54.3-4.9 16.5-7 4 20.4c-14.7 32.3 19.4 63 60 107.1C104.6 83.4 138.7 52.7 124 20.4z"/>&#9829;</svg></span>';
-		return $icon;
+		return '<i class="fa fa-heart"></i>';
 	}
 
 	/**
@@ -340,31 +274,34 @@ final class PostLike extends BaseAjax {
 	 */
 	public static function get_unliked_icon() {
 		/* If already using Font Awesome with your theme, replace svg with: <i class="fa fa-heart-o"></i> */
-		$icon = '<span class="sl-icon"><svg role="img" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0" y="0" viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve"><path id="heart" d="M64 127.5C17.1 79.9 3.9 62.3 1 44.4c-3.5-22 12.2-43.9 36.7-43.9 10.5 0 20 4.2 26.4 11.2 6.3-7 15.9-11.2 26.4-11.2 24.3 0 40.2 21.8 36.7 43.9C124.2 62 111.9 78.9 64 127.5zM37.6 13.4c-9.9 0-18.2 5.2-22.3 13.8C5 49.5 28.4 72 64 109.2c35.7-37.3 59-59.8 48.6-82 -4.1-8.7-12.4-13.8-22.3-13.8 -15.9 0-22.7 13-26.4 19.2C60.6 26.8 54.4 13.4 37.6 13.4z"/>&#9829;</svg></span>';
-		return $icon;
+		return '<i class="fa fa-heart-o"></i>';
 	}
 
 	/**
-	 * Utility function to format the button count,
-	 * appending "K" if one thousand or greater,
-	 * "M" if one million or greater,
-	 * and "B" if one billion or greater (unlikely).
-	 * $precision = how many decimal points to display (1.25K)
+	 * Format a number into a human-readable format.
 	 *
-	 * @since    0.5
+	 * @param int|float $number The number to format.
+	 *
+	 * @return string Formatted number.
 	 */
-	public static function sl_format_count( $number ) {
+	public static function format_count( $number ) {
 		$precision = 2;
-		if ( $number >= 1000 && $number < 1000000 ) {
-			$formatted = number_format( $number / 1000, $precision ) . 'K';
-		} elseif ( $number >= 1000000 && $number < 1000000000 ) {
-			$formatted = number_format( $number / 1000000, $precision ) . 'M';
-		} elseif ( $number >= 1000000000 ) {
+		if ( $number >= 1000000000 ) {
 			$formatted = number_format( $number / 1000000000, $precision ) . 'B';
+		} elseif ( $number >= 1000000 ) {
+			$formatted = number_format( $number / 1000000, $precision ) . 'M';
+		} elseif ( $number >= 1000 ) {
+			$formatted = number_format( $number / 1000, $precision ) . 'K';
 		} else {
 			$formatted = $number; // Number is less than 1000
 		}
-		$formatted = str_replace( '.00', '', $formatted );
+
+		// Remove unnecessary decimal places
+		if ( strpos( $formatted, '.' ) !== false ) {
+			$formatted = rtrim( $formatted, '0' );
+			$formatted = rtrim( $formatted, '.' );
+		}
+
 		return $formatted;
 	}
 
@@ -375,97 +312,124 @@ final class PostLike extends BaseAjax {
 	 * @since    0.5
 	 */
 	public static function get_like_count( $like_count ) {
-		$like_text = __( 'Like', 'YourThemeTextDomain' );
+		$like_text = __( 'Like', 'lerm' );
 		if ( is_numeric( $like_count ) && $like_count > 0 ) {
-			$number = self::sl_format_count( $like_count );
+			$number = self::format_count( $like_count );
 		} else {
 			$number = $like_text;
 		}
-		$count = '<span class="sl-count">' . $number . '</span>';
+		$count = '<span class="count">' . $number . '</span>';
 		return $count;
 	}
 
+	/**
+	 * Display the list of liked posts on the user profile page.
+	 *
+	 * @param \WP_User $user The current user object.
+	 */
 	public static function show_user_likes( $user ) {
-		?>
-	<table class="form-table">
-		<tr>
-			<th><label for="user_likes"><?php esc_attr_e( 'You Like:', 'lerm' ); ?></label></th>
-			<td>
-			<?php
-			$types      = get_post_types( array( 'public' => true ) );
-			$args       = array(
-				'numberposts' => -1,
-				'post_type'   => $types,
-				'meta_query'  => array(
-					array(
-						'key'     => '_user_liked',
-						'value'   => $user->ID,
-						'compare' => 'LIKE',
-					),
-				),
-			);
-			$sep        = '';
-			$like_query = new \WP_Query( $args );
-			if ( $like_query->have_posts() ) :
-				?>
-			<p>
-				<?php
-				while ( $like_query->have_posts() ) :
-					$like_query->the_post();
-						echo $sep;
-					?>
-			<a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a>
-						<?php
-						$sep = ' &middot; ';
-				endwhile;
-				?>
-			</p>
-				<?php else : ?>
-			<p><?php esc_attr_e( 'You do not like anything yet.', 'lerm' ); ?></p>
-					<?php
-					endif;
-				wp_reset_postdata();
-				?>
-			</td>
-		</tr>
-	</table>
-		<?php
-	}
-
-	/**
-	 * Set the custom column for post like count in post list table.
-	 *
-	 * @param array $columns Array of columns for the post list table.
-	 * @return array
-	 */
-	public static function set_post_columns( $columns ) {
-		$columns['like'] = esc_html__( 'Like', 'lerm' );
-		return $columns;
-	}
-
-	/**
-	 * Output the post like count for the custom column in post list table.
-	 *
-	 * @param string $column Name of the current column being processed.
-	 * @param int    $post_id ID of the current post being processed.
-	 */
-	public static function post_custom_column( $column, $post_id ) {
-		switch ( $column ) {
-			case 'like':
-				$like_count = get_post_meta( $post_id, 'lerm_post_like', true );
-				echo esc_html( $like_count );
-				break;
+		$user_likes = get_user_meta( $user->ID, self::USER_LIKE_META_KEY, true );
+		echo '<h3>' . esc_html__( 'Liked Posts', 'lerm' ) . '</h3>';
+		if ( ! empty( $user_likes ) ) {
+			echo '<ul>';
+			foreach ( $user_likes as $post_id ) {
+				echo '<li><a href="' . esc_url( get_permalink( $post_id ) ) . '">' . esc_html( get_the_title( $post_id ) ) . '</a></li>';
+			}
+			echo '</ul>';
+		} else {
+			echo '<p>' . esc_html__( 'No liked posts found.', 'lerm' ) . '</p>';
 		}
 	}
 
+	/**
+	 * Add custom column to the post list table.
+	 *
+	 * @param array $columns The existing columns.
+	 * @return array The modified columns.
+	 */
+	public static function set_post_columns( $columns ) {
+		$columns['likes'] = __( 'Likes', 'lerm' );
+		return $columns;
+	}
+	/**
+	 * Output the like count in the custom column.
+	 *
+	 * @param string $column The name of the column.
+	 * @param int    $post_id The ID of the current post.
+	 */
+	public static function post_custom_column( $column, $post_id ) {
+		if ( 'likes' === $column ) {
+			$like_count = get_post_meta( $post_id, self::LIKE_COUNT_META_KEY, true );
+			echo esc_html( $like_count );
+		}
+	}
+	/**
+	 * Add a meta box to the post editing screen.
+	 */
 	public static function post_like_meta_box() {
-		// add_meta_box( 'post_like', esc_html__( 'Like', 'lerm' ), self::post_like_callback( self::$post_id ), 'post', 'side' );
+		add_meta_box(
+			'post_like_meta_box',
+			__( 'Post Like Count', 'lerm' ),
+			array( __CLASS__, 'render_meta_box' ),
+			'post',
+			'side',
+			'high'
+		);
+	}
+	/**
+	 * Render the content of the meta box.
+	 *
+	 * @param \WP_Post $post The current post object.
+	 */
+	public static function render_meta_box( $post ) {
+		$like_count = get_post_meta( $post->ID, self::LIKE_COUNT_META_KEY, true );
+		echo '<p>' . esc_html__( 'Total Likes:', 'lerm' ) . ' ' . esc_html( $like_count ) . '</p>';
 	}
 
-	private static function post_like_callback( $post_id ) {
-		wp_nonce_field( 'lerm_save_like_data', 'lerm_post_like_meta_box_nonce' );
-		$value = get_post_meta( $post_id, 'lerm_post_like', true );
-		echo '<label for="lerm_like_field">' . esc_html__( 'Post Like Count', 'lerm' ) . '</label>';
-		echo '<input type="text" id="lerm_like_field" name="lerm_like_field" value="' . esc_attr( $value ) . '" size="25" />';
+	/**
+	 * Generate AJAX localization data.
+	 *
+	 * This function generates an array of localized data for use in AJAX requests.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
+	public static function scripts( $l10n ) {
+		wp_register_script( 'likebtn', LERM_URI . 'assets/js/likebtn.js', array(), LERM_VERSION, true );
+		wp_localize_script(
+			'likebtn',
+			'lermAjax',
+			array(
+				'ajaxURL'    => admin_url( 'admin-ajax.php' ),
+				'nonce'      => wp_create_nonce( 'lerm_nonce' ),
+				'logged'     => is_user_logged_in(),
+				'noUnlike'   => false,
+				'loggedOnly' => false,
+				'loginURL'   => '',
+				'like'       => 'like',
+				'unlike'     => 'unlike',
+				'loader'     => '',
+			)
+		);
+		wp_enqueue_script( 'likebtn' );
+	}
+
+	/**
+	 * Add module type check to module script.
+	 *
+	 * @param string $tag The script tag for the enqueued script.
+	 * @param string $handle The script's registered handle.
+	 * @param string $src The script's source URL.
+	 *
+	 * @return string The modified script tag.
+	 */
+	public static function script_type_module( $tag, $handle, $src ) {
+		// Only do this for a specific script.
+		if ( 'likebtn' === $handle ) {
+			// Modify the script tag to include type="module"
+			$tag = str_replace( '<script ', '<script type="module" ', $tag );
+		}
+
+		return $tag;
 	}
 }

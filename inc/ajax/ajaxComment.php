@@ -11,41 +11,18 @@ namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
 
-class AjaxComment {
-
-	// Instance
+final class AjaxComment extends BaseAjax {
 	use singleton;
 
-	public const AJAX_ACTION = 'ajax_comment';
+	protected const AJAX_ACTION = 'ajax_comment';
 
 	public static $args = array();
 
 	public function __construct( $params ) {
-		self::$args = apply_filters( 'lerm_comment_', wp_parse_args( $params, self::$args ) );
-
-		// Disable make_clickable filter if specified
-		if ( self::$args['make_clickable'] ) {
-			remove_filter( 'comment_text', 'make_clickable', 9 );
-		}
-
-		// Enable esc_html filter for comment content if specified
-		if ( self::$args['escape_html'] ) {
-			add_filter( 'pre_comment_content', 'esc_html' );
-		}
-		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
-		self::register();
+		parent::__construct( apply_filters( 'lerm_comment_args', wp_parse_args( $params, self::$args ) ) );
 	}
 
-	public static function register( $public = false ) {
-		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
-
-		// Register ajax handlers for both logged in and non-logged in users
-		if ( $public ) {
-			add_action( 'wp_ajax_nopriv_' . self::AJAX_ACTION, array( __CLASS__, 'ajax_handle' ) );
-		}
-	}
-
-	public function ajax_handle() {
+	public static function ajax_handle() {
 		// Check the AJAX nonce and handle comment submission
 		check_ajax_referer( 'ajax_nonce', 'security', true );
 
@@ -57,7 +34,7 @@ class AjaxComment {
 			// Get comment post ID
 			$comment_post_id = isset( $comment['comment_post_ID'] ) ? (int) $comment['comment_post_ID'] : 0;
 			if ( 0 === $comment_post_id ) {
-				wp_send_json_error( 'Invalid post ID.' );
+				self::error( 'Invalid post ID.' );
 				return;
 			}
 
@@ -71,7 +48,7 @@ class AjaxComment {
 			}
 
 			// Send JSON success response with the comment data
-			wp_send_json_success(
+			self::success(
 				array(
 					'comment'     => $comment,
 					'avatar_url'  => $avatar_url,
@@ -81,7 +58,7 @@ class AjaxComment {
 
 		} else {
 			// If there's an error, send JSON error response
-			wp_send_json_error( $comment->get_error_message() );
+			self::error( $comment->get_error_message() );
 		}
 	}
 
@@ -94,8 +71,9 @@ class AjaxComment {
 	 * @return array Localized data for AJAX requests.
 	 */
 	public static function ajax_l10n_data( $l10n ) {
-
-		$data = array();
+		$data = array(
+			'loggedin' => is_user_logged_in(),
+		);
 		$data = wp_parse_args( $data, $l10n );
 		return $data;
 	}

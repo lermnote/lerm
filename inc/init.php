@@ -7,20 +7,24 @@
 
 namespace Lerm\Inc;
 
-use Lerm\Inc\User\User;
 use Lerm\Inc\Traits\Singleton;
 
 class Init {
 
 	use Singleton;
-
 	/**
 	 * Default constants.
 	 *
 	 * @var array $args
 	 */
-	public static $args = array();
-
+	public static $args = array(
+		'optimize_options' => array(),
+		'mail_options'     => array(),
+		'carousel_options' => array(),
+		'super_optimize'   => array(),
+		'seo_options'      => array(),
+		'sitemap_options'  => array(),
+	);
 	/**
 	 * Constructor
 	 *
@@ -30,7 +34,6 @@ class Init {
 	 */
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_init_args', wp_parse_args( $params, self::$args ) );
-		self::hooks();
 	}
 
 	/**
@@ -90,47 +93,51 @@ class Init {
 			'ver'  => wp_get_theme()->get( 'Version' ), // Theme Version.
 		);
 
+		Core\Setup::instance();
+		Core\Enqueue::instance();
+
 		// Optimize options.
 		$params = array();
 		if ( ! empty( self::$args['optimize_options'] ) ) {
 			$params = self::$args['optimize_options'];
-			Optimize::instance( $params );
+			Core\Optimize::instance( $params );
 		}
 
-		// Mail SMTP options.
-		$params = array();
-		if ( ! empty( self::$args['mail_options'] ) ) {
-			$params = self::$args['mail_options'];
-			SMTP::instance( $params );
-		}
+		Ajax\PostLike::instance();
+		Ajax\LoadMore::instance();
+		Ajax\AjaxComment::instance();
 
 		// SEO options.
 		$params = array();
 		if ( ! empty( self::$args['seo_options'] ) ) {
 			$params = self::$args['seo_options'];
-			SEO::instance( $params );
+			Misc\SEO::instance( $params );
+		}
+
+
+		// Mail SMTP options.
+		$params = array();
+		if ( ! empty( self::$args['mail_options'] ) ) {
+			$params = self::$args['mail_options'];
+			//Lib\SMTP::instance( $params );
 		}
 
 		// Sitemap options.
 		$params = array();
 		if ( ! empty( self::$args['sitemap_options'] ) ) {
 			$params = self::$args['sitemap_options'];
-			Sitemap::instance( $params );
+			//Sitemap::instance( $params );
 		}
 
 		// Theme update.
 		$params = array();
 		if ( ! empty( self::$args['updater_options'] ) ) {
 			$params = self::$args['updater_options'];
-			Updater::instance( $params );
+			//Updater::instance( $params );
 		}
 
-		Enqueue::instance();
-		AjaxComment::instance();
-		LoadMore::instance();
-		PostLike::instance();
-		Lazyload::instance();
-		User::instance();
-		Image::instance();
+		// Lazyload::instance();
+		// User::instance();
+		// Image::instance();
 	}
 }

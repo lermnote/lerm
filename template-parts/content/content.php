@@ -6,7 +6,7 @@
  * @since Lerm 2.0
  */
 global $post;
-\Lerm\Inc\Image::instance();
+\Lerm\Inc\Classes\Image::instance();
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'card' ); ?>>
 
@@ -28,7 +28,7 @@ global $post;
 			</div>
 			<?php
 			if ( is_singular( 'post' ) ) {
-				\Lerm\Inc\Tags::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
+				\Lerm\Inc\Core\Tags::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
 			}
 			?>
 			<?php the_tags( '<ul class="list-unstyled m-0 small text-muted"><li class="d-inline ms-2">#', '</li><li class="d-inline ms-2">#', '</li></ul>' ); ?>
