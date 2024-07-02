@@ -32,11 +32,24 @@ final class LoadMore extends BaseAjax {
 		check_ajax_referer( 'ajax_nonce', 'security', true );
 		$postdata = wp_unslash( $_POST );
 
+		if ( ! isset( $postdata['query'], $postdata['current_page'] ) ) {
+			self::error( __( 'Invalid request data', 'lerm' ) );
+		}
+
 		$query_args = json_decode( stripslashes( $postdata['query'] ), true );
 
-		$query_args['posts_per_page'] = self::$args['posts_per_page'] > get_option( 'posts_per_page' ) ? get_option( 'posts_per_page' ) : self::$args['posts_per_page'];
-		$query_args['paged']          = isset( $postdata['current_page'] ) ? (int) $postdata['current_page'] + 1 : 1;
-		$query_args['post_status']    = 'publish';
+		if ( ! is_array( $query_args ) ) {
+			self::error( __( 'Invalid query parameters', 'lerm' ) );
+		}
+
+		$query_args = array_merge(
+			$query_args,
+			array(
+				'posts_per_page' => min( self::$args['posts_per_page'], get_option( 'posts_per_page' ) ),
+				'paged'          => (int) $postdata['current_page'] + 1,
+				'post_status'    => 'publish',
+			)
+		);
 
 		$posts = new WP_Query( $query_args );
 
@@ -45,10 +58,12 @@ final class LoadMore extends BaseAjax {
 		}
 
 		ob_start();
+
 		while ( $posts->have_posts() ) :
 			$posts->the_post();
 			get_template_part( 'template-parts/content/content', get_post_format() );
 		endwhile;
+
 		wp_reset_postdata();
 
 		$content = ob_get_clean();

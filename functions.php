@@ -35,10 +35,9 @@ if ( ! defined( 'LERM_DIR' ) ) {
  * Requre admin framework
  */
 require LERM_DIR . 'inc/themeloader.php';
-// \Lerm\Inc\Setup::instance();
-// \Lerm\Inc\Setup::get_options( get_option( 'lerm_theme_options' ) );
-Init::instance();
-Init::get_options( get_option( 'lerm_theme_options' ) );
+
+Init::instance( get_option( 'lerm_theme_options' ) );
+
 /**
  * Shows a pagination for post page.
  *
