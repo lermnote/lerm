@@ -215,7 +215,7 @@ if ( ! class_exists( 'CSF' ) ) {
 				}
 			} else {
 
-				  return self::$dir . '/' . $file;
+				return self::$dir . '/' . $file;
 
 			}
 

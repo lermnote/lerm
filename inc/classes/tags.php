@@ -107,12 +107,31 @@ class Tags {
 			<?php
 		}
 	}
+
+	/**
+	 * Display the page views of the current post.
+	 */
 	public static function read() {
-		$views = lerm_post_views( '' );
-		if ( '' !== $views ) {
+		global $post;
+
+		if ( ! isset( $post->ID ) ) {
+			return;
+		}
+
+		$post_ID = $post->ID;
+		$views   = get_transient( 'pageviews_' . $post_ID );
+
+		if ( false === $views ) {
+			$views = (int) get_post_meta( $post_ID, 'pageviews', true );
+			$views = max( 0, $views );
+		}
+
+		$formatted_views = number_format( $views );
+
+		if ( '' !== $formatted_views ) {
 			?>
 			<i class="fa fa-eye pe-1"></i>
-			<span><?php echo esc_html( $views ); ?></span>
+			<span><?php echo esc_html( $formatted_views ); ?></span>
 			<?php
 		}
 	}

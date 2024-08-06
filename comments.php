@@ -71,11 +71,7 @@ if ( post_password_required() ) {
 	<?php endif; ?>
 
 	<?php if ( $comments ) : ?>
-		<?php
-		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) {
-			lerm_paginate_comments();
-		}
-		?>
+		<?php get_template_part( 'template-parts/components/comment-pagination' ); ?>
 		<div class="card mb-3">
 		<h3 class="comment-title card-header border-bottom-0">
 			<?php
@@ -102,11 +98,6 @@ if ( post_password_required() ) {
 		<?php if ( ! comments_open() && get_comments_number() ) : ?>
 			<p class=" alert alert-info mb-3"><?php esc_html_e( 'Comments are closed.', 'lerm' ); ?></p>
 		<?php endif; ?>
-
-		<?php
-		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) {
-			lerm_paginate_comments();
-		}
-		?>
+		<?php get_template_part( 'template-parts/components/comment-pagination' ); ?>
 	<?php endif; // have comments. ?>
 </div>

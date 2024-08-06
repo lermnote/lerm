@@ -5,7 +5,7 @@
 
 namespace Lerm\Inc\Ajax;
 
-class AjaxLogin {
+class AjaxLogin extends BaseAjax {
 
 	// secs
 	public const LERM_MENU_LOCATION        = 'primary';
@@ -46,7 +46,7 @@ class AjaxLogin {
 	 * The main function will try to log in to the site by sanitising and
 	 * authenticating $_POST['username'] and $_POST['password']
 	 */
-	public static function ajax_login() {
+	public static function ajax_handle() {
 
 		// If we can't determine the client's IP address then something is very
 		// wrong - possibly a hack attempt. Don't do anything.

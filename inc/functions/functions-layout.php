@@ -6,6 +6,7 @@
  * structures. This file merely contains the API function calls at theme developers' disposal.
  */
 
+
 /**
  * Adds custom classes to the array of body classes.
  *
@@ -59,10 +60,6 @@ function lerm_post_class( $classes ) {
 	return $classes;
 }
 add_filter( 'post_class', 'lerm_post_class' );
-
-
-
-
 
 function lerm_site_layout( $layout = '' ) {
 
@@ -195,11 +192,4 @@ function lerm_get_column_class( $css_class = '' ) {
 	$classes = apply_filters( 'lerm_column_class', $classes, $css_class );
 
 	return array_unique( $classes );
-}
-
-function layout_style() {
-	$layout_style = lerm_options( 'layout_style' );
-	if ( $layout_style ) {
-		$classes[] = $layout_style;
-	}
 }

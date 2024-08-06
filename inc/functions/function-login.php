@@ -5,6 +5,7 @@
  * @author     Lerm
  * @since      2.0
  */
+
 function lerm_login_style() {
 	$url        = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=';
 	$resolution = '1920x1080';
@@ -75,21 +76,29 @@ function lerm_login_style() {
 }
 add_action( 'login_head', 'lerm_login_style' );
 
-// logo link
-add_filter(
-	'login_headerurl',
-	function () {
-		return home_url();
-	}
-);
+/**
+ * Customize the login logo URL.
+ *
+ * @return string The URL of the home page.
+ */
+function lerm_login_logo_url() {
+	return home_url();
+}
+add_filter( 'login_headerurl', 'lerm_login_logo_url' );
 
-// 登陆用户名和密码错误提示
-add_filter(
-	'login_errors',
-	function () {
-		return __( 'Incorrect username or password', 'lerm' );
-	}
-);
+/**
+ * Customize the login error message.
+ *
+ * @return string The customized error message.
+ */
+function lerm_login_error_message() {
+	return __( 'Incorrect username or password', 'lerm' );
+}
+add_filter( 'login_errors', 'lerm_login_error_message' );
+
+/**
+ * Output custom content in the login header.
+ */
 function lerm_login_header() {
 	echo '<div class="login-h">';
 }

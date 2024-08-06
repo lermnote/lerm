@@ -10,10 +10,11 @@ class Optimize {
 	use Hooker;
 
 	public static $args = array(
-		'gravatar_accel' => 'disable',
-		'admin_accel'    => false,
-		'google_replace' => 'disable',
-		'super_optimize' => array(),
+		'gravatar_accel'   => 'disable',
+		'admin_accel'      => false,
+		'google_replace'   => 'disable',
+		'disable_pingback' => false,
+		'super_optimize'   => array(),
 	);
 
 	public function __construct( $params = array() ) {
@@ -39,11 +40,15 @@ class Optimize {
 			add_action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
 		}
 
-		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
+		if ( $args['disable_pingback'] ) {
+			add_action( 'pre_ping', array( __CLASS__, 'disable_pingback' ) );
+		}
 
 		if ( is_array( $args['super_optimize'] ) && ! empty( $args['super_optimize'] ) ) {
 			self::optimize( $args['super_optimize'] );
 		}
+
+		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
 	}
 
 	/**
@@ -91,6 +96,11 @@ class Optimize {
 				self::remove_global_styles_render_svg();
 			}
 		}
+
+		remove_action( 'embed_footer', 'print_embed_sharing_dialog' );
+		remove_action( 'embed_footer', 'print_embed_sharing_icon' );
+		add_action( 'embed_footer', array( __CLASS__, 'embed_custom_footer_style' ) );
+
 	}
 	protected static function disable_emojis() {
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
@@ -220,6 +230,39 @@ class Optimize {
 	 */
 	public static function remove_css_attributes( $attr ) {
 		return is_array( $attr ) ? array_intersect( $attr, array( 'nav-item', 'active', 'dropdown', 'open', 'show' ) ) : array();
+	}
+
+	/**
+	 * Style embed front-end.
+	 *
+	 * @return void
+	 */
+
+	public static function embed_custom_footer_style() {
+		?>
+		<style>
+			.wp-embed-share {
+				display: none;
+			}
+		</style>
+		<?php
+	}
+
+	/**
+	 * Removes self pings from the list of pings.
+	 *
+	 * @param array &$links List of ping URLs.
+	 */
+	public static function disable_pingback( array &$links ) {
+		$home_url = home_url();
+
+		// Filter out self ping URLs from the list
+		$links = array_filter(
+			$links,
+			static function( string $link ) use ( $home_url ): bool {
+				return strpos( $link, $home_url ) !== 0;
+			}
+		);
 	}
 
 	/**

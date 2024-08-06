@@ -24,6 +24,7 @@ class Init {
 		'super_optimize'   => array(),
 		'seo_options'      => array(),
 		'sitemap_options'  => array(),
+		'custom_options'   => array(),
 	);
 	/**
 	 * Constructor
@@ -82,6 +83,13 @@ class Init {
 			Misc\Sitemap::instance( $params );
 		}
 
+		// Custom options.
+		$params = array();
+		if ( ! empty( $args['custom_options'] ) ) {
+			$params = $args['custom_options'];
+			Misc\Custom::instance( $params );
+		}
+
 		// Theme update.
 		$params = array();
 		if ( ! empty( $args['updater_options'] ) ) {
@@ -89,7 +97,6 @@ class Init {
 			Misc\Updater::instance( $params );
 		}
 
-		// Lazyload::instance();
 		// User::instance();
 		// Image::instance();
 	}
@@ -108,10 +115,11 @@ class Init {
 
 		// Set optimize options
 		self::$args['optimize_options'] = array(
-			'gravatar_accel' => $options['super_gravatar'] ?? '',
-			'admin_accel'    => $options['super_admin'] ?? '',
-			'google_replace' => $options['super_googleapis'] ?? '',
-			'super_optimize' => $options['super_optimize'] ?? '',
+			'gravatar_accel'   => $options['super_gravatar'] ?? '',
+			'admin_accel'      => $options['super_admin'] ?? '',
+			'google_replace'   => $options['super_googleapis'] ?? '',
+			'super_optimize'   => $options['super_optimize'] ?? '',
+			'disable_pingback' => $options['disable_pingback'] ?? '',
 		);
 
 		// Set mail options.
@@ -138,6 +146,15 @@ class Init {
 			'post_type'      => $options['exclude_post_types'] ?? array(),
 			'post_exclude'   => $options['exclude_post'] ?? array(),
 			'page_exclude'   => $options['exclude_page'] ?? array(),
+		);
+
+		//Set sitemap options.
+		self::$args['custom_options'] = array(
+			'large_logo'    => $options['large_logo'] ?? '',
+			'mobile_logo'   => $options['mobile_logo'] ?? '',
+			'content_width' => $options['content_width'] ?? '',
+			'sidebar_width' => $options['sidebar_width'] ?? '',
+			'custom_css'    => $options['custom_css'] ?? '',
 		);
 
 		// Set updater options.

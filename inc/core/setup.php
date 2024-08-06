@@ -60,6 +60,8 @@ class Setup {
 		add_filter( 'excerpt_length', array( __CLASS__, 'excerpt_length' ), 999 );
 		add_filter( 'comment_excerpt_length', array( __CLASS__, 'comment_excerpt_length' ), 999 );
 
+		add_action( 'template_redirect', array( __CLASS__, 'add_post_views' ) );
+
 		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
 		add_action( 'widgets_init', array( __CLASS__, 'widgets' ) );
 
@@ -174,6 +176,15 @@ class Setup {
 	 */
 	public static function comment_excerpt_length( $length ) {
 		return self::$args['comment_excerpt_length'];
+	}
+
+	// Update post views count.
+	public static function add_post_views() {
+		if ( is_singular( 'post' ) && ! is_admin() ) {
+			$post_ID    = get_queried_object_id();
+			$post_views = (int) get_post_meta( $post_ID, 'pageviews', true );
+			update_post_meta( 'post', $post_ID, 'pageviews', $post_views + 1 );
+		}
 	}
 
 	/**

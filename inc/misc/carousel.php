@@ -23,7 +23,7 @@ class Carousel {
 	);
 
 	public function __construct( $params = array() ) {
-		self::$args = apply_filters( 'lerm_slide_', wp_parse_args( $params, self::$args ) );
+		self::$args = apply_filters( 'lerm_slide_args', wp_parse_args( $params, self::$args ) );
 
 		if ( self::$args['slide_enable'] ) {
 			self::render();

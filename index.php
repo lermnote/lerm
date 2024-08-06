@@ -6,11 +6,12 @@
  * e.g., it puts together the home page when no home.php file exists.
  *
  * @package Lerm https://lerm.net
- * 
+ *
  * @since  1.0
  */
 
 get_header();
+
 ?>
 <main role="main" class="container"><!--.container-->
 	<?php

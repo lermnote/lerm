@@ -10,7 +10,6 @@ namespace Lerm\Inc\Core;
 use Lerm\Inc\Traits\Singleton;
 
 class Enqueue {
-
 	use singleton;
 
 	/**

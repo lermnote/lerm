@@ -32,6 +32,12 @@ trait Singleton {
 	final protected function __clone() {}
 
 	/**
+	 * Prevents unserializing of the instance.
+	 */
+	final public function __wakeup() {
+		throw new \Exception( 'Cannot unserialize a singleton.' );
+	}
+	/**
 	 * Returns the single instance of the class.
 	 *
 	 * @param array $args Optional parameters for the constructor.

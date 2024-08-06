@@ -16,8 +16,14 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"Lerm\\Inc\\": "inc/",
-			"Lerm\\Inc\\Traits\\": "inc/traits"
-		}
+			"Lerm\\Inc\\": "inc/"
+		},
+		"files": [
+			"inc/functions/functions.php",
+            "inc/functions/functions-layout.php",
+			"inc/functions/functions-opengraph.php",
+			"inc/functions/function-login.php",
+			"inc/functions/functions-icon.php"
+        ]
 	}
 }

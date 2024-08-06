@@ -13,7 +13,6 @@ use Lerm\Inc\Traits\Singleton;
  * 5.seo标题
  */
 class SEO {
-
 	use singleton;
 
 	protected static $args = array(
