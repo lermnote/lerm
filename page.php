@@ -2,13 +2,14 @@
 /**
  * Template Name: Page Template
  *
- * @author lerm https://www.hanost.com
- * @package Lerm
+ * @package Lerm https://lerm.net
+ * 
+ * @since  1.0
  */
 get_header();
 ?>
 <main role="main" class="container"><!--.container-->
-	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">

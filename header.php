@@ -4,7 +4,8 @@
  *
  * Displays all of the head element and everything up until the "row" div.
  *
- * @package lerm
+ * @package Lerm https://lerm.net
+ * 
  * @since  1.0
  */
 ?>
@@ -33,5 +34,5 @@
 		</header>
 		<?php
 		if ( lerm_options( 'slide_position' ) === 'full_width' ) {
-			get_template_part( 'template-parts/carousel' );
+			get_template_part( 'template-parts/components/carousel' );
 		}

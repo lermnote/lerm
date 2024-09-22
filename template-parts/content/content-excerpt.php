@@ -12,7 +12,7 @@ global $post;
 	<div class="row no-gutters">
 		<?php if ( null !== lerm_post_image() ) : ?>
 			<div class="col-md-3">
-				<?php get_template_part( 'template-parts/content/featured-image' ); ?>
+				<?php get_template_part( 'template-parts/components/featured-image' ); ?>
 			</div>
 			<div class="col-md-9">
 			<?php //endif; ?>

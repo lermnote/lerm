@@ -2,7 +2,7 @@
 /**
  * Template Name: Links
  *
- * @author Lerm http://www.hanost.com
+* @package Lerm https://lerm.net
  * @date    2016-09-02
  * @since   lerm 2.0
  */

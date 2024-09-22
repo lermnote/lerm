@@ -2,7 +2,7 @@
 /**
  * The template for displaying the footer
  *
- * @author lerm https://www.hansot.com
+ * @package Lerm https://lerm.net
  * @date   2016-08-28 21:57:52
  * @since  1.00
  */
@@ -22,7 +22,7 @@
 			<?php endif; ?>
 			<!--尊重原创，请保留作者链接，谢谢 -->
 			<br>
-			<span><?php echo esc_html__( 'Theme By', 'lerm' ); ?><a href="<?php echo esc_url( 'https://www.hanost.com/', 'lerm' ); ?>"> Lerm </a></span>
+			<span><?php echo esc_html__( 'Theme By', 'lerm' ); ?><a href="<?php echo esc_url( 'https://lerm.net/', 'lerm' ); ?>"> Lerm </a></span>
 			<?php
 			wp_nav_menu(
 				array(

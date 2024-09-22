@@ -2,7 +2,7 @@
 /**
  * Sidebar containing the main widget area
  *
- * @author Lerm https://www.hanost.com
+ * @package Lerm https://lerm.net
  * @since  1.0
  */
 
@@ -15,7 +15,7 @@ if ( wp_is_mobile() || in_array( lerm_site_layout(), array( 'layout-1c', 'layout
 
 			<?php if ( lerm_options( 'author_bio' ) ) : ?>
 				<section class="card author-info text-center mb-3">
-					<?php get_template_part( 'template-parts/content/biography' ); ?>
+					<?php get_template_part( 'template-parts/components/biography' ); ?>
 				</section>
 			<?php endif; ?>
 

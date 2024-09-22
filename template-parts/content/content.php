@@ -6,7 +6,15 @@
  * @since Lerm 2.0
  */
 global $post;
-\Lerm\Inc\Image::instance();
+$image = new Lerm\Inc\Misc\Image(
+	array(
+		'post_id' => get_the_ID(),
+		'size'    => 'thumbnail',
+		'lazy'    => 'lazy',
+		'order'   => array( 'featured', 'block', 'scan', 'default' ),
+		'default' => lerm_options( 'thumbnail_gallery' ),
+	)
+);
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'card' ); ?>>
 
@@ -28,7 +36,7 @@ global $post;
 			</div>
 			<?php
 			if ( is_singular( 'post' ) ) {
-				lerm_post_meta( 'single_bottom' );
+				\Lerm\Inc\Core\Tags::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
 			}
 			?>
 			<?php the_tags( '<ul class="list-unstyled m-0 small text-muted"><li class="d-inline ms-2">#', '</li><li class="d-inline ms-2">#', '</li></ul>' ); ?>
@@ -36,14 +44,15 @@ global $post;
 		</div>
 	<?php else : ?>
 		<div class="row no-gutters align-items-md-center">
-			<?php if ( has_post_thumbnail() ) : ?>
+			<?php if ( ! empty( $image ) ) : ?>
 				<div class="col-md-3 ">
-					
-					<?php get_template_part( 'template-parts/content/featured-image' ); ?>
-					
+
+					<?php
+					get_template_part( 'template-parts/components/featured-image' );
+					?>
 				</div>
 			<?php endif; ?>
-			<div class="<?php echo has_post_thumbnail() ? 'col-md-9' : 'col-md-12'; ?>">
+			<div class="col-md-9 <?php echo ! empty( $image ) ? 'col-md-9' : 'col-md-12'; ?>">
 				<div class="card-body p-md-0">
 					<h2 class="entry-title card-title">
 						<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>

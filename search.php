@@ -2,8 +2,9 @@
 /**
  * The template for displaying archive pages
  *
- * @author lerm https://www.hanost.com
- * @package Lerm
+ * @package Lerm https://lerm.net
+ *
+ * @since  1.0
  */
 
 get_header();
@@ -34,7 +35,7 @@ get_header();
 				<?php endif; ?>
 			</div>
 
-			<?php get_template_part( 'template-parts/pagination' ); ?>
+			<?php get_template_part( 'template-parts/components/pagination' ); ?>
 		</div>
 		<?php get_sidebar(); ?>
 		</div><!--.row-->

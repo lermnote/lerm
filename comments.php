@@ -5,7 +5,7 @@
  * the visitor has not yet entered the password we will
  * return early without loading the comments.
  *
- * @author Lerm https://www.hanost.com
+* @package Lerm https://lerm.net
  * @date   2019-12-11 21:57:52
  * @since  2.0
  */
@@ -61,8 +61,9 @@ if ( post_password_required() ) {
 			),
 			'class_container'      => 'card comment-respond mb-3',
 			'class_form'           => 'card-body comment-form',
-			'id_submit'            => 'submit',
-			'class_submit'         => 'btn btn-sm btn-custom',
+			'id_submit'            => 'commentform-submit',
+			// 'class_submit'         => 'btn btn-sm btn-custom',
+			'submit_button'        => '<button type="submit" class="btn btn-sm btn-custom" id="%1$s">%4$s</button>',
 			'title_reply'          => '<i class="fa fa-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
 			'title_reply_before'   => '<h3 id="reply-title" class="comment-reply-title card-header border-bottom-0">',
 		);
@@ -71,11 +72,7 @@ if ( post_password_required() ) {
 	<?php endif; ?>
 
 	<?php if ( $comments ) : ?>
-		<?php
-		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) {
-			lerm_paginate_comments();
-		}
-		?>
+		<?php get_template_part( 'template-parts/components/comment-pagination' ); ?>
 		<div class="card mb-3">
 		<h3 class="comment-title card-header border-bottom-0">
 			<?php
@@ -91,7 +88,7 @@ if ( post_password_required() ) {
 			<?php
 			wp_list_comments(
 				array(
-					'walker'      => \Lerm\Inc\CommentWalker::instance(),
+					'walker'      => \Lerm\Inc\Core\CommentWalker::instance(),
 					'short_ping'  => true,
 					'avatar_size' => wp_is_mobile() ? 32 : 48,
 				)
@@ -102,11 +99,6 @@ if ( post_password_required() ) {
 		<?php if ( ! comments_open() && get_comments_number() ) : ?>
 			<p class=" alert alert-info mb-3"><?php esc_html_e( 'Comments are closed.', 'lerm' ); ?></p>
 		<?php endif; ?>
-
-		<?php
-		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) {
-			lerm_paginate_comments();
-		}
-		?>
+		<?php get_template_part( 'template-parts/components/comment-pagination' ); ?>
 	<?php endif; // have comments. ?>
 </div>

@@ -2,7 +2,7 @@
 /**
  * Template Name: 归档模板
  *
- * @author lerm https://www.hanost.com
+* @package Lerm https://lerm.net
  * @package Lerm
  */
 get_header();

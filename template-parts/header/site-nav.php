@@ -27,10 +27,9 @@ if ( false === wp_cache_get( 'lerm_nav_menu' ) && has_nav_menu( $theme_location 
 			'container'       => 'div',
 			'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav flex-grow-1 d-none d-lg-flex mx-2',
 			'container_id'    => 'navbar',
-			'fallback_cb'     => '\Lerm\Inc\Nav_Walker::fallback',
 			'menu_class'      => 'navbar-nav',
 			'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
-			'walker'          => new \Lerm\Inc\NavWalker(),
+			'walker'          => new \Lerm\Inc\Core\NavWalker(),
 			'depth'           => 2,
 		)
 	);
@@ -65,7 +64,7 @@ if ( false === wp_cache_get( 'lerm_nav_menu' ) && has_nav_menu( $theme_location 
 						'fallback_cb'     => '\Lerm\Inc\Nav_Walker::fallback',
 						'menu_class'      => 'navbar-nav',
 						'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
-						'walker'          => new \Lerm\Inc\Nav_Walker(),
+						'walker'          => new \Lerm\Inc\Core\NavWalker(),
 						'depth'           => 2,
 					)
 				);
