@@ -103,3 +103,4 @@ function lerm_login_header() {
 	echo '<div class="login-h">';
 }
 add_action( 'login_header', 'lerm_login_header' );
+add_filter( 'login_display_language_dropdown', '__return_false' );

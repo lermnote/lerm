@@ -35,12 +35,8 @@ if ( ! defined( 'LERM_DIR' ) ) {
  * Requre admin framework
  */
 require_once LERM_DIR . 'inc/admin/codestar-framework.php';
-require_once __DIR__ . '/vendor/autoload.php';
-// require_once LERM_DIR . 'inc/misc/thumbnail.php';
+require_once LERM_DIR . 'vendor/autoload.php';
 Init::instance( get_option( 'lerm_theme_options' ) );
-
-
-
 
 // functions used for debug mail errors, log is stored at SERVER_ROOT_DIR/mail.log
 function smtplog_mailer_errors( $wp_error ) {
@@ -54,11 +50,3 @@ function smtplog_mailer_errors( $wp_error ) {
 	$wp_filesystem->put_contents( $file, $currenttime . ' Mailer Error: ' . $wp_error->get_error_message() . "\n", FS_CHMOD_FILE );
 }
 add_action( 'wp_mail_failed', 'smtplog_mailer_errors', 10, 1 );
-
-
-// function get_the_image( $args = array() ) {
-
-// 	$image = new \Lerm\Inc\Misc\Get_The_Image( $args );
-
-// 	return $image->get_image();
-// }

@@ -61,8 +61,9 @@ if ( post_password_required() ) {
 			),
 			'class_container'      => 'card comment-respond mb-3',
 			'class_form'           => 'card-body comment-form',
-			'id_submit'            => 'submit',
-			'class_submit'         => 'btn btn-sm btn-custom',
+			'id_submit'            => 'commentform-submit',
+			// 'class_submit'         => 'btn btn-sm btn-custom',
+			'submit_button'        => '<button type="submit" class="btn btn-sm btn-custom" id="%1$s">%4$s</button>',
 			'title_reply'          => '<i class="fa fa-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
 			'title_reply_before'   => '<h3 id="reply-title" class="comment-reply-title card-header border-bottom-0">',
 		);

@@ -10,7 +10,7 @@ namespace Lerm\Inc\Ajax;
 abstract class BaseAjax {
 
 	protected const AJAX_ACTION = '';
-
+	protected const PUBLIC      = true;
 	/**
 	 * Constructor.
 	 *
@@ -18,7 +18,7 @@ abstract class BaseAjax {
 	 */
 	public function __construct( $params ) {
 		if ( static::AJAX_ACTION ) {
-			self::register( static::AJAX_ACTION, 'ajax_handle', true );
+			self::register( static::AJAX_ACTION, 'ajax_handle', static::PUBLIC );
 		}
 		add_filter( 'lerm_l10n_data', array( static::class, 'ajax_l10n_data' ) );
 	}

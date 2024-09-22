@@ -5,13 +5,16 @@
 
 namespace Lerm\Inc\Ajax;
 
+use Lerm\Inc\Traits\Singleton;
 class AjaxLogin extends BaseAjax {
+	use singleton;
 
-	// secs
-	public const LERM_MENU_LOCATION        = 'primary';
-	public const LERM_LOGIN_RETRY_PAUSE    = 5;
-	public const LERM_LOGIN_ACTION         = 'lerm_ajax_login';
-	public const LERM_LOGIN_FORM_FILE_NAME = 'login';
+	protected const AJAX_ACTION          = 'front_login';
+	protected const PUBLIC               = true;
+	protected const RETRY_PAUSE          = 5;
+	protected const LOGIN_FORM_FILE_NAME = 'form-login.php';
+
+	public const LERM_MENU_LOCATION = 'primary';
 
 	public static $args = array(
 		'login_enable'         => true,
@@ -20,26 +23,21 @@ class AjaxLogin extends BaseAjax {
 		'page_exclude'         => array(),
 		'login_from_file_name' => 'login.php',
 		'login_redirect'       => 'home_url()',
+		'menu_login_item'      => true,
 	);
 
 	public function __construct( $params = array() ) {
-		self::$args = apply_filters( 'lerm_user_', wp_parse_args( $params, self::$args ) );
+		parent::__construct( apply_filters( 'lerm_user_args', wp_parse_args( $params, self::$args ) ) );
 		self::hooks();
 	}
 
-	// instance
-	public static function instance( $params = array() ) {
-		return new self( $params );
-	}
-
 	public static function hooks() {
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'lerm_enqueue_scripts' ) );
-		/**
-		* Listen for incoming login requests from the Ajax form.
-		*/
-		add_action( 'wp_ajax_nopriv_' . self::LERM_LOGIN_ACTION, array( __CLASS__, 'ajax_login' ) );
-		add_filter( 'login_redirect', array( __CLASS__, 'my_login_redirect' ), 10, 3 );
-		add_filter( 'wp_nav_menu_items', array( __CLASS__, 'lerm_wp_nav_menu_items' ), 10, 2 );
+		add_action( 'wp_logout', array( __CLASS__, 'loginout' ) );
+		if ( self::$args['menu_login_item'] ) {
+			add_filter( 'wp_nav_menu_items', array( __CLASS__, 'add_menu_item' ), 10, 2 );
+		}
+
+		add_filter( 'lerm_l10n_data', array( static::class, 'ajax_l10n_data' ) );
 	}
 
 	/**
@@ -47,166 +45,142 @@ class AjaxLogin extends BaseAjax {
 	 * authenticating $_POST['username'] and $_POST['password']
 	 */
 	public static function ajax_handle() {
+		check_ajax_referer( 'login_nonce', 'security' );
 
-		// If we can't determine the client's IP address then something is very
-		// wrong - possibly a hack attempt. Don't do anything.
-		$client_ip_address = self::lerm_client_ip();
+		// Check client IP for any login attempt limits.
+		$client_ip_address = self::client_ip();
 		if ( empty( $client_ip_address ) ) {
-			die();
+			self::error( __( 'Cannot determine IP address.', 'lerm' ) );
 		}
 
-		$client_key = 'login_attempt_' . $client_ip_address;
+		$response = self::validate_login_data( $_POST );
 
-		if ( check_ajax_referer( 'user_nonce', 'security', false ) ) {
-
-			$credentials['user_login']    = sanitize_text_field( $_POST['username'] );
-			$credentials['user_password'] = sanitize_text_field( $_POST['password'] );
-			$credentials['remember']      = isset( $_POST['rememberme'] ) ? true : false;
-
-			$user = wp_signon( $credentials, false );
-
-			$status_code = 200;
-			$response    = array(
-				'loggedin' => false,
-				'message'  => __( 'Incorrect username or password.', 'lerm' ),
-			);
-
-			if ( empty( $credentials['user_login'] ) ) {
-				$response['message'] = __( 'The username field is empty.', 'lerm' );
-			} elseif ( empty( $credentials['user_password'] ) ) {
-				$response['message'] = __( 'The password field is empty.', 'lerm' );
-			} elseif ( get_transient( $client_key ) !== false ) {
-				$response['message'] = __( '1Slow down a bit.', 'lerm' );
-			}
-
-			if ( is_a( $user, 'WP_User' ) ) {
-				// Logged in OK.
-				$response['loggedin'] = true;
-				$response['message']  = __( 'Logedin successful,redirecting…', 'lerm' );
-
-				wp_send_json_success( $response, $status_code );
-			} else {
-				// 验证失败
-				set_transient( $client_key, '1', self::LERM_LOGIN_RETRY_PAUSE );
-				wp_send_json_error( $response, $status_code );
-			}
+		if ( is_wp_error( $response ) ) {
+			self::error( $response->get_error_message() );
 		}
+
+		$user = wp_signon( $response['credentials'], false );
+
+		if ( is_wp_error( $user ) ) {
+			// 限制登录尝试次数
+			self::track_login_attempts( $response['credentials']['user_login'] );
+			self::error( $user->get_error_message() );
+		}
+
+		// Login successful
+		self::success(
+			array(
+				'loggedin' => true,
+				'message'  => __( 'Login successful. Redirecting...', 'lerm' ),
+				'redirect' => self::login_redirect( '', $user ),
+			)
+		);
+	}
+	private static function validate_login_data( $data ) {
+		$username = isset( $data['login_username'] ) ? sanitize_text_field( wp_unslash( $data['login_username'] ) ) : '';
+		$password = isset( $data['login_password'] ) ? sanitize_text_field( wp_unslash( $data['login_password'] ) ) : '';
+
+		if ( empty( $username ) || empty( $password ) ) {
+			return new \WP_Error( 'empty_fields', __( 'Username or password cannot be empty.', 'lerm' ) );
+		}
+		// 检查用户名是否存在
+		$user = get_user_by( 'login', $username );
+		if ( ! $user ) {
+			return new \WP_Error( 'invalid_username', __( 'Invalid username. Please try again.', 'lerm' ) );
+		}
+
+		// 检查密码是否正确
+		if ( ! wp_check_password( $password, $user->user_pass, $user->ID ) ) {
+			return new \WP_Error( 'incorrect_password', __( 'Incorrect password. Please try again.', 'lerm' ) );
+		}
+
+		// 可以进一步检查密码的复杂性或其他规则
+		if ( strlen( $password ) < 8 ) {
+			return new \WP_Error( 'password_too_short', __( 'Password must be at least 8 characters long.', 'lerm' ) );
+		}
+
+		return array(
+			'credentials' => array(
+				'user_login'    => $username,
+				'user_password' => $password,
+				'remember'      => isset( $data['rememberme'] ),
+			),
+		);
 	}
 
-	public static function user_profile() {
+	private static function track_login_attempts( $username ) {
+		$attempt_key = 'login_attempt_' . $username;
+		$attempts    = get_transient( $attempt_key );
+		if ( $attempts >= 5 ) {
+			return new \WP_Error( 'too_many_attempts', __( 'Too many login attempts. Please try again later.', 'lerm' ) );
+		}
+		set_transient( $attempt_key, $attempts + 1, MINUTE_IN_SECONDS * self::RETRY_PAUSE );
 	}
+
 	/**
-	 * Render the login menu item and form. $items is a string that we're going
-	 * to append our HTML to.
+	 * WordPress function for redirecting users on login based on user role
 	 */
-	public static function lerm_wp_nav_menu_items( $items, $args ) {
-		// The file name of the login form (PHP) we're going to "include".
-		$file_name = __DIR__ . '/../../../templates/' . self::LERM_LOGIN_FORM_FILE_NAME;
+	public static function login_redirect( $url, $user ) {
+		if ( is_a( $user, 'WP_User' ) ) {
+			$url = home_url( '/user.html' );
+		}
+		return apply_filters( 'lerm_custom_login_redirect', $url, $user );
+	}
 
-		if ( ! self::lerm_is_login_menu_required() ) {
-			// We're already logged in so we don't need a login form.
-		} elseif ( $args->theme_location !== self::LERM_MENU_LOCATION ) {
-			// These aren't the menu item's you're looking for.
-		} elseif ( ! is_file( $file_name ) ) {
-			$items .= sprintf(
-				'<li class="menu-item"><a class="menu-link"><strong>%s</strong></a></li>',
-				self::LERM_LOGIN_FORM_FILE_NAME
-			);
+	/**
+	 * Render the login menu item and form.
+	 */
+	public static function add_menu_item( $items, $args ) {
+		if ( self::LERM_MENU_LOCATION !== $args->theme_location ) {
+			return $items; // Not the correct menu location.
+		}
+		if ( ! self::is_login_menu_required() ) {
+			$outer_classes = array( 'nav-item', 'dropdown', 'menu-item-login' );
 		} else {
-			// Start rendering the HTML for the menu item.
-			$outer_classes = array(
-				'menu-item',
-				'menu-item-has-children',
-				'menu-item-login',
-			);
-			$items        .= sprintf( '<li class="%s">', esc_attr( implode( ' ', $outer_classes ) ) );
+			$outer_classes = array( 'nav-item', 'menu-item-login' );
+		}
 
-			// The login menu item. You can change the "Login" label here.
+		$items .= sprintf( '<li class="%s">', esc_attr( implode( ' ', $outer_classes ) ) );
+
+		if ( ! self::is_login_menu_required() ) {
 			$items .= sprintf(
-				'<a href="%s">%s</a>',
+				'<a class="nav-link dropdown-toggle" href="%s" role="button" data-bs-toggle="dropdown" aria-expanded="false">%s</a>',
 				esc_url( self::lerm_front_door_url() ),
-				esc_html__( 'Login', 'wp-tutorials' )
+				get_avatar( get_current_user_id(), 16 ),
 			);
 
-			// Start rendering a sub menu to hold the login form.
-			$sub_menu_classes = array(
-				'sub-menu',
-				'lerm-container',
+			$sub_menu_classes = array( 'dropdown-menu' );
+
+			$items .= sprintf( '<ul class="%s">', esc_attr( implode( ' ', $sub_menu_classes ) ) );
+
+			$current_user = wp_get_current_user();
+
+			$items .= '<li><a class="dropdown-item" href="' . self::login_redirect( '', $current_user ) . '">' . $current_user->user_login . '</a></li>
+						<li><a class="dropdown-item" href="#">Another action</a></li>
+						<li><a class="dropdown-item" href="' . esc_url( wp_logout_url( self::lerm_front_door_url() ) ) . '">' . __( 'Log out' ) . '</a></li>';
+
+			$items .= '</ul></li>';
+		} else {
+			$items .= sprintf(
+				'<a class="nav-link" href="%s">%s</a>',
+				esc_url( self::lerm_front_door_url() ),
+				esc_html__( 'Login', 'lerm' )
 			);
-			$items           .= sprintf( '<ul class="%s">', esc_attr( implode( ' ', $sub_menu_classes ) ) );
 
-			// Include the login form PHP/HTML file.
-			ob_start();
-			include $file_name;
-			$items .= ob_get_clean();
-
-			$items .= '</ul>'; // .sub-menu
-
-			$items .= '</li>'; // .menu-item
+			$items .= '</li>';
 		}
 
 		return $items;
 	}
 
 	/**
-	 * WordPress function for redirecting users on login based on user role
+	 * Get client IP address.
+	 *
+	 * @return string Client IP address.
 	 */
-	public static function my_login_redirect( $url, $request, $user ) {
-		if ( $user && is_object( $user ) && is_a( $user, 'WP_User' ) ) {
-			if ( $user->has_cap( 'administrator' ) ) {
-				$url = admin_url();
-			} else {
-				$url = home_url( '/members-only/' );
-			}
-		}
-		return $url;
+	private static function client_ip() {
+		return lerm_client_ip();
 	}
-
-	/**
-	 * We add our assets to every page of the site, because the primay
-	 * nav menu is probably on every page.
-	 */
-	public static function lerm_enqueue_scripts() {
-		// if ( lerm_is_login_menu_required() ) {
-			$base_uri = get_stylesheet_directory_uri();
-			$version  = wp_get_theme()->get( 'Version' );
-
-			// Enqueue our main JavaScript file.
-			wp_enqueue_script( 'lerm', $base_uri . '/assets/js/ajax-login.js', array(), $version, true );
-
-			// Pass some settings and variables to the browser in a
-			// JavaScript global variable called lermData.
-			wp_localize_script(
-				'lerm',
-				'lermData',
-				array(
-					'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
-					'user_nonce' => wp_create_nonce( 'user_nonce' ),
-					'action'     => self::LERM_LOGIN_ACTION,
-					'frontDoor'  => self::lerm_front_door_url(),
-
-				)
-			);
-		// }
-	}
-
-	/**
-	 * Get the IP address of the current browser.
-	 */
-	private static function lerm_client_ip() {
-		global $lerm_client_ip;
-
-		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-			$lerm_client_ip = filter_var( $_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP );
-		} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$lerm_client_ip = filter_var( $_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP );
-		} else {
-			$lerm_client_ip = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP );
-		}
-
-		return $lerm_client_ip;
-	}
-
 	/**
 	 * Get the URL for the site's main login page, with the redirect
 	 * (after login) set to the page we're currently viewing.
@@ -215,13 +189,13 @@ class AjaxLogin extends BaseAjax {
 	 */
 	private static function lerm_front_door_url() {
 
-		$login_page_url = wp_login_url( home_url( $_SERVER['REQUEST_URI'] ) );
+		$login_page_url = home_url( '/login.html' );
 
 		// If WooCommerce is installed, use the my-account page as the frontdoor,
 		// so we get a nice front-end login form.
-		if ( function_exists( 'wc_get_account_endpoint_url' ) ) {
-			$frontdoor_url = wc_get_account_endpoint_url( 'dashboard' );
-		}
+		// if ( function_exists( 'wc_get_account_endpoint_url' ) ) {
+		// 	//$frontdoor_url = wc_get_account_endpoint_url( 'dashboard' );
+		// }
 
 		return $login_page_url;
 	}
@@ -229,14 +203,73 @@ class AjaxLogin extends BaseAjax {
 	 * A convenience function that lets us disable the login menu item under
 	 * certain conditions.
 	 */
-	private static function lerm_is_login_menu_required() {
-		$is_required = ! is_user_logged_in();
+	/**
+	 * Determine if login menu is required.
+	 */
+	private static function is_login_menu_required() {
+		return ! is_user_logged_in();
+	}
+	public static function loginout() {
+		wp_safe_redirect( home_url( '/login.html' ) );
+		exit;
+	}
 
-		// You can put extra conditions in here.
-		// if ($some_test == true) {
-		// $is_required = false;
-		// }
 
-		return $is_required;
+	public static function regist_form() {
+		ob_start();
+		include LERM_DIR . '/template-parts/account/regist.php';
+		$form = ob_get_clean();
+		return $form;
+	}
+	public static function login_form() {
+		ob_start();
+		include LERM_DIR . '/template-parts/account/login.php';
+		$form = ob_get_clean();
+		return $form;
+	}
+	public static function reset_form() {
+		ob_start();
+		include LERM_DIR . '/template-parts/account/reset.php';
+		$form = ob_get_clean();
+		return $form;
+	}
+	/**
+	 * Generate AJAX localization data.
+	 *
+	 * This function generates an array of localized data for use in AJAX requests.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
+	public static function scripts( $l10n ) {
+		wp_register_script( 'frontlogin', LERM_URI . 'assets/js/front-login.js', array(), LERM_VERSION, true );
+		$data = array(
+			'ajaxURL'      => admin_url( 'admin-ajax.php' ),
+			'login_nonce'  => wp_create_nonce( 'login_nonce' ),
+			'login_action' => self::AJAX_ACTION,
+			'logged'       => is_user_logged_in(),
+			'frontDoor'    => self::lerm_front_door_url(),
+		);
+
+		$l10n = apply_filters( 'lerm_l10n_user_data', $data );
+
+		wp_localize_script( 'frontlogin', 'lermDatas', $l10n );
+		wp_enqueue_script( 'frontlogin' );
+	}
+		/**
+	 * Generate AJAX localization data.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
+	public static function ajax_l10n_data( $l10n ) {
+		$data = array(
+			'login_nonce'  => wp_create_nonce( 'login_nonce' ),
+			'login_action' => self::AJAX_ACTION,
+			'logged'       => is_user_logged_in(),
+			'frontDoor'    => self::lerm_front_door_url(),
+		);
+		$data = wp_parse_args( $data, $l10n );
+		return $data;
 	}
 }

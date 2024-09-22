@@ -23,7 +23,8 @@
             "inc/functions/functions-layout.php",
 			"inc/functions/functions-opengraph.php",
 			"inc/functions/function-login.php",
-			"inc/functions/functions-icon.php"
+			"inc/functions/functions-icon.php",
+			"inc/functions/helpers.php"
         ]
 	}
 }

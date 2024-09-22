@@ -48,9 +48,10 @@ final class PostLike extends BaseAjax {
 		add_action( 'show_user_profile', array( __CLASS__, 'show_user_likes' ) );
 		add_action( 'edit_user_profile', array( __CLASS__, 'show_user_likes' ) );
 
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'scripts' ) );
+		// add_action( 'wp_enqueue_scripts', array( __CLASS__, 'scripts' ) );
 		// Hook the script_type_module function
-		add_filter( 'script_loader_tag', array( __CLASS__, 'script_type_module' ), 10, 3 );
+		// add_filter( 'script_loader_tag', array( __CLASS__, 'script_type_module' ), 10, 3 );
+		add_filter( 'lerm_l10n_data', array( __CLASS__, 'l10n_data' ) );
 	}
 
 	/**
@@ -60,14 +61,14 @@ final class PostLike extends BaseAjax {
 	 */
 	public static function ajax_handle() {
 		// Verify the nonce
-		check_ajax_referer( 'lerm_nonce', 'security', true );
+		check_ajax_referer( 'like_nonce', 'security', true );
 
 		// Sanitize POST data
 		$postdata = wp_unslash( $_POST );
 
 		// Validate and sanitize input
 		$is_comment = isset( $postdata['type'] ) && 'comment' === $postdata['type'] ? 1 : 0;
-		$post_id    = isset( $postdata['post_id'] ) && is_numeric( $postdata['post_id'] ) ? intval( $postdata['post_id'] ) : '';
+		$post_id    = isset( $postdata['postId'] ) && is_numeric( $postdata['postId'] ) ? intval( $postdata['postId'] ) : '';
 
 		if ( ! $post_id ) {
 			self::error( array( 'message' => 'Invalid post ID' ) );
@@ -140,7 +141,7 @@ final class PostLike extends BaseAjax {
 		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
 
 		//get user id
-		$user_id = is_user_logged_in() ? get_current_user_id() : self::lerm_client_ip();
+		$user_id = is_user_logged_in() ? get_current_user_id() : self::client_ip();
 		self::update_user_likes( $user_id, $post_id, $is_comment, true );
 
 		// update like count
@@ -161,7 +162,7 @@ final class PostLike extends BaseAjax {
 		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
 
 		//get user id
-		$user_id = is_user_logged_in() ? get_current_user_id() : self::lerm_client_ip();
+		$user_id = is_user_logged_in() ? get_current_user_id() : self::client_ip();
 		self::update_user_likes( $user_id, $post_id, $is_comment, false );
 
 		// update like count.
@@ -178,7 +179,7 @@ final class PostLike extends BaseAjax {
 	 * @return bool True if the user has already liked the post or comment, false otherwise.
 	 */
 	public static function already_liked( $post_id, $is_comment = null ) {
-		$user_id    = is_user_logged_in() ? get_current_user_id() : self::lerm_client_ip();
+		$user_id    = is_user_logged_in() ? get_current_user_id() : self::client_ip();
 		$meta_key   = $is_comment ? self::USER_COMMENT_LIKE_META_KEY : self::USER_LIKE_META_KEY;
 		$post_users = get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
 		// Check if user is in the list of liked users
@@ -243,18 +244,8 @@ final class PostLike extends BaseAjax {
 	 *
 	 * @return string Client IP address.
 	 */
-	public static function lerm_client_ip() {
-		$ip = '0.0.0.0';
-
-		if ( isset( $_SERVER['HTTP_CLIENT_IP'] ) && ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-			$ip = $_SERVER['HTTP_CLIENT_IP'];
-		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		} else {
-			$ip = ( isset( $_SERVER['REMOTE_ADDR'] ) ) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-		}
-
-		return filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '0.0.0.0';
+	private static function client_ip() {
+		return lerm_client_ip();
 	}
 
 	/**
@@ -413,7 +404,22 @@ final class PostLike extends BaseAjax {
 		);
 		wp_enqueue_script( 'likebtn' );
 	}
-
+	/**
+	 * Generate AJAX localization data.
+	 *
+	 * This function generates an array of localized data for use in AJAX requests.
+	 *
+	 * @param array $l10n Existing localization data.
+	 * @return array Localized data for AJAX requests.
+	 */
+	public static function l10n_data( $l10n ) {
+		$data = array(
+			'like_nonce'  => wp_create_nonce( 'like_nonce' ),
+			'like_action' => self::AJAX_ACTION,
+		);
+		$data = wp_parse_args( $data, $l10n );
+		return $data;
+	}
 	/**
 	 * Add module type check to module script.
 	 *

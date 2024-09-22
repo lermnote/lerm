@@ -96,7 +96,7 @@ class Enqueue {
 		$data = array();
 		$l10n = apply_filters( 'lerm_l10n_data', $data );
 
-		wp_localize_script( 'main-js', 'adminajax', $l10n );
+		wp_localize_script( 'main-js', 'lermData', $l10n );
 		wp_enqueue_script( 'wow' );
 		wp_enqueue_script( 'main-js' );
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {

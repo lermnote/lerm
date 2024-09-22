@@ -58,10 +58,6 @@ class Init {
 			Core\Optimize::instance( $params );
 		}
 
-		Ajax\PostLike::instance();
-		Ajax\LoadMore::instance();
-		Ajax\AjaxComment::instance();
-
 		// SEO options.
 		$params = array();
 		if ( ! empty( $args['seo_options'] ) ) {
@@ -97,8 +93,15 @@ class Init {
 			Misc\Updater::instance( $params );
 		}
 
-		// User::instance();
-		// Image::instance();
+		// Ajax.
+		Ajax\PostLike::instance();
+		Ajax\LoadMore::instance();
+		Ajax\AjaxComment::instance();
+		Ajax\AjaxLogin::instance();
+		Ajax\AjaxRegist::instance();
+		Ajax\AjaxReset::instance();
+
+		Core\CommentWalker::instance();
 	}
 
 	/**

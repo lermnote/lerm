@@ -20,6 +20,7 @@ final class AjaxComment extends BaseAjax {
 
 	public function __construct( $params ) {
 		parent::__construct( apply_filters( 'lerm_comment_args', wp_parse_args( $params, self::$args ) ) );
+		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
 	}
 
 	/**
@@ -27,8 +28,9 @@ final class AjaxComment extends BaseAjax {
 	 */
 	public static function ajax_handle() {
 		// Check the AJAX nonce and handle comment submission
-		check_ajax_referer( 'ajax_nonce', 'security', true );
-
+		check_ajax_referer( 'comment_nonce', 'security', true );
+		$postdata = wp_unslash( $_POST );
+		// var_dump( $postdata );
 		// Handle comment submission
 		$comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
 
@@ -39,7 +41,7 @@ final class AjaxComment extends BaseAjax {
 		}
 
 		// Get comment post ID
-		$comment_post_id = isset( $comment['comment_post_ID'] ) ? (int) $comment['comment_post_ID'] : 0;
+		$comment_post_id = isset( $postdata['comment_post_ID'] ) ? (int) $postdata['comment_post_ID'] : 0;
 		if ( 0 === $comment_post_id ) {
 			self::error( 'Invalid post ID.', 'lerm' );
 			return;
@@ -47,10 +49,10 @@ final class AjaxComment extends BaseAjax {
 
 		// Set avatar URL and size
 		$avatar_url  = get_avatar_url( $comment );
-		$avatar_size = ( 0 !== $comment['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
+		$avatar_size = ( 0 !== $postdata['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
 
 		// Set comment cookies consent
-		if ( isset( $comment['wp-comment-cookies-consent'] ) && 'yes' === $comment['wp-comment-cookies-consent'] ) {
+		if ( isset( $postdata['wp-comment-cookies-consent'] ) && 'yes' === $postdata['wp-comment-cookies-consent'] ) {
 			do_action( 'set_comment_cookies', $comment, wp_get_current_user() );
 		}
 
@@ -74,7 +76,9 @@ final class AjaxComment extends BaseAjax {
 	 */
 	public static function ajax_l10n_data( $l10n ) {
 		$data = array(
-			'loggedin' => is_user_logged_in(),
+			'comment_nonce'  => wp_create_nonce( 'comment_nonce' ),
+			'comment_action' => self::AJAX_ACTION,
+			'loggedin'       => is_user_logged_in(),
 		);
 		$data = wp_parse_args( $data, $l10n );
 		return $data;

@@ -30,9 +30,10 @@ final class LoadMore extends BaseAjax {
 	 */
 	public static function ajax_handle() {
 		check_ajax_referer( 'ajax_nonce', 'security', true );
+
 		$postdata = wp_unslash( $_POST );
 
-		if ( ! isset( $postdata['query'], $postdata['current_page'] ) ) {
+		if ( ! isset( $postdata['query'], $postdata['currentPage'] ) ) {
 			self::error( __( 'Invalid request data', 'lerm' ) );
 		}
 
@@ -46,7 +47,7 @@ final class LoadMore extends BaseAjax {
 			$query_args,
 			array(
 				'posts_per_page' => min( self::$args['posts_per_page'], get_option( 'posts_per_page' ) ),
-				'paged'          => (int) $postdata['current_page'] + 1,
+				'paged'          => (int) $postdata['currentPage'] + 1,
 				'post_status'    => 'publish',
 			)
 		);
@@ -68,7 +69,16 @@ final class LoadMore extends BaseAjax {
 
 		$content = ob_get_clean();
 
-		self::success( $content );
+		self::success(
+			array(
+				'content'     => $content,
+				'maxPage'     => $posts->max_num_pages,
+				'currentPage' => $query_args['paged'],
+				'nextPage'    => $query_args['paged'] + 1,
+				'hasMore'     => $query_args['paged'] < $posts->max_num_pages,
+				'test'        => ( ! $posts->have_posts() || $query_args['paged'] > $posts->max_num_pages ),
+			)
+		);
 	}
 
 	/**

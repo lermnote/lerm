@@ -1,30 +1,595 @@
 /**
  * Global Javascript Functions
  *
- * @Authors Lerm https://www.hanost.com
- * @Date    2016-04-17 22:02:49
- * @Version 2.0
+ * @package Lerm https://lerm.net
  */
-// (function (global, factory) {
-//     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-//     typeof define === 'function' && define.amd ? define(factory) :
-//     (global.libName = factory());
-// }(this, (function () { 'use strict';})));
 (function () {
-
-
-	/**
- * --------------------------------------------------------------------------
- * Bootstrap dom/data.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
- * --------------------------------------------------------------------------
- */
+	'use strict';
 
 	/**
-	 * Constants
+	* --------------------------------------------------------------------------
+	* Lerm Theme BaseService
+	* --------------------------------------------------------------------------
+	*/
+	class BaseService {
+		constructor(apiUrl) {
+			this.apiUrl = apiUrl;
+		}
+
+		fetchData = async ({ url, method = 'GET', body = {}, headers = {} }) => {
+			try {
+				const options = {
+					method,
+					headers: { ...headers },
+					body: method !== 'GET' ? body : null,
+				};
+
+				const response = await fetch(url, options);
+
+				if (!response.ok) {
+					throw new Error(`Error: ${response.status} - ${response.statusText}`);
+				}
+
+				return await response.json();
+			} catch (error) {
+				this.handleError(error);
+				throw error;
+			}
+		}
+
+		handleError = (error) => {
+			console.error("An error occurred:", error.message);
+			alert(`An error occurred: ${error.message}`);
+		}
+		rateLimit = (func, wait, isThrottle = false) => {
+			let timeout, lastTime = 0;
+			return (...args) => {
+				const context = this;
+				const now = Date.now();
+				const later = () => {
+					timeout = null;
+					if (!isThrottle) func.apply(context, args);
+				};
+				const remaining = wait - (now - lastTime);
+				if (isThrottle && remaining <= 0) {
+					clearTimeout(timeout);
+					timeout = null;
+					lastTime = now;
+					func.apply(context, args);
+				} else if (!timeout) {
+					timeout = setTimeout(later, isThrottle ? remaining : wait);
+				}
+			};
+		}
+
+		addGlobalEventListener = (type, selector, callback) => {
+			document.addEventListener(type, event => {
+				const targetElement = event.target.closest(selector);
+				if (targetElement && targetElement.matches(selector)) {
+					callback(event, targetElement);
+				}
+			});
+		}
+		displayMessage = (message, type = 'info', duration = 5000) => {
+			if (!this.messageId) return;
+
+			const messageElement = document.getElementById(this.messageId);
+			if (messageElement) {
+				messageElement.innerHTML = message;
+				messageElement.classList.add(`text-${type}`);
+				messageElement.classList.remove('invisible');
+				clearTimeout(this.messageTimeout);
+				this.messageTimeout = setTimeout(() => {
+					messageElement.classList.add('invisible');
+					messageElement.classList.remove(`text-${type}`);
+				}, duration);
+			}
+		}
+		toggleButton = (button, isLoading, diabled = false) => {
+			if (isLoading) {
+				button.insertAdjacentHTML('afterbegin', '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> ');
+			} else {
+
+				const tempElement = document.querySelector('.spinner-border');
+				if (tempElement) {
+					tempElement.remove();
+				}
+			}
+			if (diabled === false) {
+				button.removeAttribute('disabled');
+			};
+		}
+	}
+	/**
+	 * --------------------------------------------------------------------------
+	 * Lerm Theme ClickService
+	 * --------------------------------------------------------------------------
 	 */
-	document.addEventListener("DOMContentLoaded", function (e) {
-		// Initialize the WOW animation library
+	class ClickService extends BaseService {
+		constructor({ apiUrl, selector, action, security, url, headers = {}, additionalData = {}, isThrottled = false, cacheExpiryTime = 60000,
+			enableCache = true }) {
+			super(apiUrl);
+			this.selector = selector;
+			this.action = action;
+			this.security = security;
+			this.url = url;
+			this.headers = headers;
+			this.additionalData = additionalData;
+			this.cacheExpiryTime = cacheExpiryTime;
+			this.enableCache = enableCache;
+
+			const clickHandler = this.handleClick;
+
+			this.clickHandler = isThrottled
+				? this.rateLimit(clickHandler, 1000, true)
+				: clickHandler;
+
+			this.addGlobalEventListener('click', this.selector, this.clickHandler);
+		}
+
+		handleClick = async (event, target) => {
+			event.preventDefault()
+
+			this.beforeClick(event);
+
+			let requestData = new URLSearchParams({
+				action: this.action,
+				security: this.security,
+				...target.dataset,
+				...this.additionalData
+			});
+
+			const cacheKey = `click_action_${this.selector}`;
+
+			if (this.enableCache && this.isCacheValid(cacheKey)) {
+				const cachedResponse = localStorage.getItem(cacheKey);
+				this.afterClickSuccess(JSON.parse(cachedResponse), target);
+			} else {
+				this.toggleButton(target, true);
+				try {
+					const response = await this.submitClickData(requestData);
+					if (this.enableCache) {
+						this.cacheResponse(cacheKey, response);
+					}
+					if (response.success) {
+						this.afterClickSuccess(response.data, target);
+					} else {
+						throw new Error(response.data || 'Unknown error occurred');
+					}
+
+				} catch (error) {
+					this.afterClickFail(error, target);
+				}
+				this.toggleButton(target, false);
+			}
+		}
+		// 提交点击数据
+		submitClickData = async (data) => {
+			return await this.fetchData({
+				url: this.url,
+				method: 'POST',
+				body: data,
+				headers: this.headers,
+			});
+		}
+
+		beforeClick = () => { console.log('Processing click...'); }
+
+		getRequsetData = () => {
+			return new URLSearchParams({
+				action: this.action,
+				security: this.security,
+				...this.additionalData
+			});
+		}
+		afterClickSuccess = (response, target) => {
+			this.displayMessage('Click action was successful!');
+			console.log('Response:', response);
+		}
+
+		afterClickFail = (error, target) => {
+			this.displayMessage('Failed to process click action.');
+			console.error('Error:', error);
+			target.setAttribute('disabled', 'disabled');
+			target.innerHTML = error.message
+		}
+		// 检查缓存是否有效
+		isCacheValid = (cacheKey) => {
+			const cachedTime = localStorage.getItem(`${cacheKey}_time`);
+			if (!cachedTime) return false;
+			const currentTime = Date.now();
+			return currentTime - cachedTime < this.cacheExpiryTime;
+		}
+
+		// 缓存响应并记录缓存时间
+		cacheResponse = (cacheKey, response) => {
+			localStorage.setItem(cacheKey, JSON.stringify(response));
+			localStorage.setItem(`${cacheKey}_time`, Date.now());
+		}
+	}
+
+	/**
+	* --------------------------------------------------------------------------
+	* Lerm Theme Like button
+	* --------------------------------------------------------------------------
+	*/
+	const likeBtnSuccess = (data, target) => {
+		const { id, type } = target.dataset;
+		const buttons = document.querySelectorAll(`.like-${type}-${id}`);
+		const status = data.status;
+		const count = data.count;
+
+		buttons.forEach(button => {
+			button.classList.toggle('liked', status === 'liked');
+			button.querySelector('.count').textContent = count;
+			button.setAttribute('title', status === 'liked' ? 'unlike' : 'like');
+		});
+	}
+	const likeBtnHandle = () => {
+		const postLikeConfig = {
+			selector: '.like-button',
+			action: 'post_like',
+			security: lermData.like_nonce,
+			url: lermData.url,
+			isThrottled: true,
+			cacheExpiryTime: 60000,
+			enableCache: false
+		};
+
+		const postLike = new ClickService(postLikeConfig);
+		postLike.afterClickSuccess = likeBtnSuccess;
+	}
+
+	/**
+	* --------------------------------------------------------------------------
+	* Lerm Theme Load More button
+	* --------------------------------------------------------------------------
+	*/
+	const appendPostsToDOM = (data) => {
+		const loadMoreBtn = document.querySelector(".more-posts");
+		const postsList = document.querySelector(".ajax-posts");
+		if (postsList) {
+			postsList.insertAdjacentHTML('beforeend', data.content);
+		}
+
+		loadMoreBtn.dataset.currentPage = data.currentPage;
+	};
+	const loadMoreHanle = () => {
+		// Load more button setup
+		const loadMore = new ClickService({
+			selector: '.more-posts',
+			action: 'load_more',
+			security: lermData.nonce,
+			url: lermData.url,
+			additionalData: { query: lermData.posts },
+			isThrottled: true,
+			cacheExpiryTime: 60000,
+			enableCache: false
+		});
+		loadMore.afterClickSuccess = appendPostsToDOM;
+	}
+	/**
+	 * --------------------------------------------------------------------------
+	 * Lerm Theme FormService
+	 * --------------------------------------------------------------------------
+	 */
+	const validationRules = {
+		email: {
+			pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+			message: 'Invalid email format',
+		},
+		username: {
+			minLength: 3,
+			errorMessage: {
+				minLength: 'Register must be at least {minLength} characters long.',
+			}
+		},
+		author: {
+			minLength: 3,
+			errorMessage: {
+				minLength: 'Comment username must be at least {minLength} characters long.',
+			}
+		},
+		regist_password: {
+			minLength: 8,
+			hasUppercase: /[A-Z]/,
+			hasNumber: /\d/,
+			hasSpecialChar: /[!@#$%^&*]/,
+			message: 'Password must be at least 8 characters long, include one uppercase letter, one number, and one special character.',
+			errorMessage: {
+				minLength: 'Password must be at least {minLength} characters long.',
+				hasUppercase: 'Password must contain at least one uppercase letter.',
+				hasNumber: 'Password must contain at least one number.',
+				hasSpecialChar: 'Password must contain at least one special character.',
+			}
+		},
+		confirm_password: {
+			match: 'password',
+			message: 'Passwords do not match'
+		},
+		comment: {
+			minLength: 6,
+			message: 'Textarea must be at least 10 characters long',
+			errorMessage: {
+				minLength: 'Comment textarea must be at least {minLength} characters long.',
+			}
+		}
+	};
+
+	const validateField = (field, rules) => {
+		const rule = rules[field.name];
+		const value = field.value;
+
+		if (!rule) return { valid: true };
+
+		const { pattern, minLength, hasUppercase, hasNumber, hasSpecialChar, errorMessage } = rule;
+		if (pattern && !pattern.test(value)) {
+			return { valid: false, message: rule.message || 'Invalid format' };
+		}
+		if (minLength && value.length < minLength) {
+			return { valid: false, message: errorMessage.minLength.replace('{minLength}', minLength) };
+		}
+		if (hasUppercase && !hasUppercase.test(value)) {
+			return { valid: false, message: errorMessage.hasUppercase };
+		}
+		if (hasNumber && !hasNumber.test(value)) {
+			return { valid: false, message: errorMessage.hasNumber };
+		}
+		if (hasSpecialChar && !hasSpecialChar.test(value)) {
+			return { valid: false, message: errorMessage.hasSpecialChar };
+		}
+		return { valid: true };
+	};
+	const togglePasswordVisibility = (passwordFields, toggleElement) => {
+		passwordFields.forEach(field => {
+			const isPasswordVisible = field.type === 'password';
+			field.type = isPasswordVisible ? 'text' : 'password';
+		});
+		toggleElement.innerText = passwordFields[0].type === 'password' ? 'show' : 'hide';
+	};
+
+	class FormService extends BaseService {
+		constructor({ apiUrl, formId, url, action, security, headers = {}, messageId, passwordToggle = false }) {
+			super(apiUrl);
+			this.formId = formId;
+			this.url = url;
+			this.action = action;
+			this.security = security;
+			this.headers = headers;
+			this.messageId = messageId;
+			this.passwordToggle = passwordToggle;
+
+			const form = document.getElementById(this.formId);
+			if (form) {
+				this.form = form;
+				this.init();
+			}
+		}
+
+		init = () => {
+			document.addEventListener('submit', event => {
+				const form = event.target;
+				if (form.id === this.formId) {
+					event.preventDefault();
+					this.handleFormSubmit();
+				}
+			});
+			if (this.passwordToggle) {
+				const toggleElement = document.getElementById(`${this.formId}-toggle`);
+				const passwordFields = Array.from(this.form.querySelectorAll('input[type="password"]'));
+				toggleElement?.addEventListener('click', () => togglePasswordVisibility(passwordFields, toggleElement));
+			}
+		}
+
+		handleFormSubmit = async () => {
+			const isValid = this.validateForm();
+			if (!isValid) return;
+
+			const submitButton = this.form.querySelector('button[type="submit"]');
+			if (submitButton.disabled) return;
+
+			this.toggleButton(submitButton, true);
+			const formData = this.getFormData();
+
+			this.beforeSubmit();
+			try {
+				const response = await this.fetchData({
+					url: this.url,
+					method: 'POST',
+					body: formData,
+					headers: this.headers
+				});
+				this.handleSubmitResponse(response);
+			} catch (error) {
+				this.displayMessage(error.message, 'danger');
+				this.afterSubmitFail(error);
+			} finally {
+				this.toggleButton(submitButton, false);
+			}
+		}
+
+		validateForm = () => {
+			const fields = this.form.querySelectorAll('input, textarea, select');
+			let isFormValid = true;
+
+			fields.forEach(field => {
+				const { valid, message } = validateField(field, validationRules);
+				if (!valid) {
+					field.classList.add('is-invalid');
+					this.displayMessage(message, 'danger');
+					isFormValid = false;
+				} else {
+					field.classList.remove('is-invalid');
+				}
+			});
+
+			return isFormValid;
+		};
+
+		getFormData () {
+			const formData = new FormData(this.form);
+			formData.append('action', this.action);
+			formData.append('security', this.security);
+			return formData;
+		}
+
+		handleSubmitResponse = (response) => {
+			if (response.success) {
+				this.form.reset();
+				this.afterSubmitSuccess(response.data);
+				this.displayMessage('Form submitted successfully!', 'success');
+			} else {
+				throw new Error(response.data || 'Unknown error occurred');
+			}
+		}
+		beforeSubmit = () => { }
+		afterSubmitSuccess = (_response) => { }
+		afterSubmitFail = (_error) => { }
+	}
+
+	/**
+	 * Handles the successful submission of a comment by adding the new comment to the comment list.
+	 *
+	 * @param {Object} data - The data returned after a successful comment submission.
+	 */
+	const handleCommentSuccess = (data) => {
+		const respond = document.getElementById("respond");
+		const commentList = document.querySelector(".comment-list");
+		const isParentComment = data.comment.comment_parent === '0';
+
+		const nodeLi = `
+        <li class="${data.comment.comment_type} list-group-item${!isParentComment ? ' p-0' : ''}" id="comment-${data.comment.comment_ID}">
+            <article id="div-comment-${data.comment.comment_ID}" class="comment-body">
+                <footer class="comment-meta mb-1">
+                    <span class="comment-author vcard">
+                        <img src="${data.avatar_url}" srcset="${data.avatar_url} 2x" alt="${data.comment.comment_author}" class="avatar avatar-${data.avatar_size} photo" height="${data.avatar_size}" width="${data.avatar_size}" loading="lazy" decoding="async">
+                        <b class="fn">${data.comment.comment_author}</b>
+                    </span>
+                    <span class="comment-metadata">
+                        <span aria-hidden="true">•</span>
+                        <a href="http://localhost/wordpress/${data.comment.comment_post_ID}/#comment-${data.comment.comment_ID}">
+                            <time datetime="${data.comment.comment_date_gmt}">${data.comment.comment_date}</time>
+                        </a>
+                    </span>
+                </footer>
+                ${data.comment.comment_approved === '0' ? `<span class="comment-awaiting-moderation badge rounded-pill bg-info">您的评论正在等待审核。</span>` : ''}
+                <section class="comment-content" style="margin-left: 56px">
+                    <p>${data.comment.comment_content}</p>
+                </section>
+            </article>
+        </li>
+    `;
+
+		const fragment = document.createDocumentFragment();
+
+		if (commentList) {
+			const previousElement = respond.previousElementSibling;
+			if (previousElement) {
+				const lastChild = previousElement.lastElementChild;
+
+				if (lastChild && lastChild.classList.contains("children")) {
+					lastChild.insertAdjacentHTML('beforeend', nodeLi);
+				} else {
+					const childrenUl = document.createElement('ul');
+					childrenUl.classList.add('children');
+					childrenUl.innerHTML = nodeLi;
+					previousElement.appendChild(childrenUl);
+				}
+			} else {
+				commentList.insertAdjacentHTML('afterbegin', nodeLi);
+			}
+		} else {
+			const newCard = document.createElement('div');
+			newCard.classList.add('card', 'mb-3');
+			newCard.innerHTML = `
+            <ol class="comment-list p-0 m-0 list-group list-group-flush">
+                ${nodeLi}
+            </ol>
+        `;
+			fragment.appendChild(newCard);
+			respond.parentNode.appendChild(fragment);
+		}
+	};
+
+	const formAjaxHandle = () => {
+		const formConfigs = [
+			{ formId: 'login', action: lermData.login_action, security: lermData.login_nonce },
+			{ formId: 'reset', action: lermData.reset_action, security: lermData.reset_nonce },
+			{ formId: 'regist', action: lermData.regist_action, security: lermData.regist_nonce, passwordToggle: true },
+			{ formId: 'commentform', action: lermData.comment_action, security: lermData.comment_nonce },
+		];
+
+		formConfigs.forEach(config => {
+			const FormHandle = new FormService({
+				...config,
+				url: lermData.url,
+				messageId: `${config.formId}-msg`,
+			});
+			if (config.formId === 'commentform') FormHandle.afterSubmitSuccess = handleCommentSuccess;
+		});
+	};
+
+	const DOMContentLoaded = callback => {
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", callback, { once: true });
+		} else {
+			callback();
+		}
+	};
+
+	//calendar add class
+	const calendarAddClass = () => {
+		const calendar = document.querySelector("#wp-calendar");
+		if (!calendar) return;  // Exit if the calendar element is not found
+
+		const calendarLinks = calendar.querySelectorAll("tbody td a");
+
+		if (calendarLinks.length === 0) {
+			console.warn("No calendar links found.");
+			return;
+		}
+
+		calendarLinks.forEach(link => {
+			link.classList.add("has-posts");
+		});
+	};
+
+
+
+	/**
+	* smooth scroll to top
+	*
+	*/
+	const scrollTop = () => {
+		let scrollUp = document.getElementById("scroll-up");
+		scrollUp.addEventListener("click", (e) => {
+			e.preventDefault();
+			document.documentElement.scrollIntoView({ behavior: 'smooth' });
+		});
+	}
+
+	const lazyLoadImages = (() => {
+		let observer;
+
+		return () => {
+			if (!observer) {
+				observer = new IntersectionObserver((entries, observer) => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							const img = entry.target;
+							img.src = img.dataset.src;
+							observer.unobserve(img);
+						}
+					});
+				}, { rootMargin: "0px 0px", threshold: 0 });
+			}
+
+			const images = document.querySelectorAll('.lazy');
+			images.forEach(img => observer.observe(img));
+		};
+	})();
+	// wowAnimation.js
+	const initializeWOW = () => {
 		const wow = new WOW({
 			boxClass: "loading-animate",
 			animateClass: "animated",
@@ -32,29 +597,34 @@
 			mobile: true,
 		});
 		wow.init();
+	};
 
-		// Get the `html` and `body` elements
-		const html = document.documentElement;
-		const body = document.body;
-
-		// Resize images to fill the container
-		const imageResize = (parentNode) => {
-			const items = document.querySelectorAll(parentNode);
-			if (items.length === 0) {
-				return;
-			}
-
-			const item = items[0];
-			const offsetWidth = item.querySelector("img").offsetWidth;
-			const offsetHeight = item.querySelector("img").offsetHeight;
-
-			items.forEach((e) => {
-				e.querySelector("img").style.width = offsetWidth + "px";
-				e.querySelector("img").style.height = offsetHeight + "px";
+	// imageResize.js
+	const imageResize = (parentNode) => {
+		const items = document.querySelectorAll(parentNode);
+		if (items.length === 0) {
+			return;
+		}
+		const item = items[0];
+		const offsetWidth = item.querySelector("img").offsetWidth;
+		const offsetHeight = item.querySelector("img").offsetHeight;
+		items.forEach((e) => {
+			e.querySelector("img").style.width = offsetWidth + "px";
+			e.querySelector("img").style.height = offsetHeight + "px";
+		});
+	};
+	/**
+	* code highlight
+	*/
+	const codeHighlight = () => {
+		if (typeof hljs !== "undefined") {
+			document.querySelectorAll("pre code").forEach((block) => {
+				hljs.highlightBlock(block);
 			});
-		};
+		}
+	}
 
-		//adminbar height
+	const offCanvasMenu = () => {
 		// Get window width once
 		const windowWidth = document.body.clientWidth;
 		const siteHeader = document.querySelector("#site-header");
@@ -68,479 +638,18 @@
 			) + "px";
 		}
 
-		/**
-		 * images lazyload
-		 *
-		 */
-		let lazyLoadInstance = new LazyLoad({
-			elements_selector: ".lazy",
-			threshold: 0,
-		});
-		if (lazyLoadInstance) {
-			lazyLoadInstance.update();
-		}
-
-		/**
-		 * code highlight
-		 *
-		 */
-		if ("undefined" !== typeof hljs) {
-			document.querySelectorAll("pre code").forEach((block) => {
-				hljs.highlightBlock(block);
-			});
-		}
-
-		/**
-		 * smooth scroll to top
-		 *
-		 */
-		let scrollUp = document.getElementById("scroll-up");
-		scrollUp.addEventListener("click", (e) => {
-			e.preventDefault();
-			animateScrolling({
-				timing: (progress) => (html.scrollTop = html.scrollTop * (1 - progress)),
-				draw: (timeFraction) => (1 - Math.sin(Math.acos(timeFraction))),
-				duration: 700,
-			});
-		});
-
-		/**
-		 * ajax load more posts
-		 *
-		 * @since 3.2
-		 */
-		const likeBtn = document.querySelector(".like-button");
-		// console.log(likeBtn);
-		var settings = {
-			security: adminajax.nonce
-
-		}
-		if (typeof likeBtn != "undefined" && likeBtn != null) {
-			const countEl = likeBtn.querySelector(".count");
-			let postID = likeBtn.dataset.postId;
-			let likeCount = likeBtn.dataset.likeCount;
-			var iscomment = likeBtn.dataset.comment;
-			let count = localStorage.getItem(`post_like_${postID}`);
-			let sentRequest = false;
-
-			// if (count) {
-			// 	countEl.textContent = count;
-			// 	likeBtn.classList.add("done");
-			// 	likeBtn.disabled = true;
-			// }
-			// var iscomment = button.attr('data-iscomment');
-			// 	if ( iscomment === '1' ) { /* Comments can have same id */
-			// 	allbuttons = $('.sl-comment-button-'+post_id);
-			// } else {
-			// 	allbuttons = $('.sl-button-'+post_id);
-			// }
-			// document.addEventListener("click", debounce(async (e) => {
-			// 	if (e.target && e.target.matches('button.like-button')) {
-			// 		e.preventDefault();
-			// 		if (sentRequest) {
-			// 			return;
-			// 		}
-					
-			// 		settings.id = e.dataset.postId;
-
-			// 		let params = new URLSearchParams({
-			// 			action: "post_like",
-			// 			security: adminajax.nonce,
-			// 			post_id: postID,
-			// 			is_comment: iscomment,
-			// 		});
-
-			// 		try {
-			// 			const response = await fetch(adminajax.url, {
-			// 				method: "POST",
-			// 				body: params,
-			// 			});
-			// 			const data = await response.json();
-			// 			console.log(data);
-			// 			// if(response.status === 'unliked') {
-			// 			// 	var like_text = simpleLikes.like;
-			// 			// 	allbuttons.prop('title', like_text);
-			// 			// 	allbuttons.removeClass('liked');
-			// 			// } else {
-			// 			// 	var unlike_text = simpleLikes.unlike;
-			// 			// 	allbuttons.prop('title', unlike_text);
-			// 			// 	allbuttons.addClass('liked');
-			// 			// }
-			// 			if ((typeof data.count === 'number')) {
-			// 				localStorage.setItem(`post_like_${postID}`, data);
-			// 				countEl.textContent = data.count;
-			// 				sentRequest = true;
-			// 				likeCount = data.count;
-			// 			} else {
-			// 				console.log(data);
-			// 			}
-			// 		} catch (error) {
-			// 			console.error(error);
-			// 		} finally {
-			// 			// likeBtn.classList.add("done");
-			// 			// likeBtn.disabled = true;
-			// 		}
-			// 	}
-			// }, 500));
-		}
-
-		/**
-		 * Ajax comment submission
-		 *
-		 * @since 3.2
-		 */
-		const commentForm = document.getElementById("commentform");
-
-		const commentLiStr = (data) => {
-			if (data.comment.comment_parent == '0') {
-				str = `<li class="${data.comment.comment_type} list-group-item" id="comment-${data.comment.comment_ID}">`;
-			} else {
-				str = `<li class="${data.comment.comment_type} list-group-item p-0" id="comment-${data.comment.comment_ID}">`;
-			}
-
-			str += `<article id="div-comment-${data.comment.comment_ID}" class="comment-body">
-				<footer class="comment-meta mb-1">
-					<span class="comment-author vcard">
-						<img src="${data.avatar_url}" srcset="${data.avatar_url} 2x" alt="${data.comment.comment_author}" class="avatar avatar-${data.avatar_size} photo" height="${data.avatar_size}" width="${data.avatar_size}" loading="lazy" decoding="async">
-						<b class="fn">${data.comment.comment_author}</b>
-					</span>
-					<!--.comment-author -->
-					<span class="comment-metadata">
-						<span aria-hidden="true">•</span>
-						<a href="http://localhost/wordpress/${data.comment.comment_post_ID}/#comment-${data.comment.comment_ID}">
-							<time time datetime = "${data.comment.comment_date_gmt}" > ${data.comment.comment_date}</time >
-						</a>
-					</span>
-				</footer>`;
-
-			if (data.comment.comment_approved == '0') {
-				str += `<span class="comment-awaiting-moderation badge rounded-pill bg-info">您的评论正在等待审核。</span>`;
-			}
-			str += `<section class="comment-content" style="margin-left: 56px">
-					<p>${data.comment.comment_content}</p>
-				</section>
-			</article>
-			</li>`;
-			return str;
-		}
-
-		const showError = (msg) => {
-			message.innerHTML = `<strong><i class="fa fa-ok me-1"></i>${msg}</strong>`;
-			message.classList.remove("visually-hidden");
-			message.classList.add("shake");
-			setTimeout(() => {
-				message.classList.remove("shake")
-				message.classList.add("visually-hidden");
-			}, 3000);
-		}
-		const showMessage = (msg) => {
-			message.innerHTML = `<strong><i class="fa fa-ok me-1"></i>${msg}</strong>`;
-			message.classList.remove("visually-hidden");
-			// message.classList.add("shake");
-			setTimeout(() => {
-				message.classList.remove("shake")
-				message.classList.add("visually-hidden");
-			}, 3000);
-		}
-		const showSuccess = (msg) => {
-			message.innerHTML = `<strong><i class="fa fa-xmark me-1"></i>${msg}</strong>`;
-			message.classList.remove("visually-hidden");
-			setTimeout(() => message.classList.add("visually-hidden"), 3000);
-		}
-
-		if (typeof commentForm != "undefined" && commentForm != null) {
-			//error info display
-			commentForm.insertAdjacentHTML("beforeend", '<div id="message" class="text-danger wow visually-hidden"></div>');
-
-			const message = commentForm.querySelector("#message");
-
-			//submit event
-			commentForm.addEventListener("click", async (e) => {
-				e.preventDefault();
-				// ensure event target is submit button and within comment form
-				if (e.target.type === "submit" && e.target.closest("#commentform")) {
-					message.removeAttribute("style");
-					message.classList.remove("shake", "fadeOut");
-					message.innerHTML = '<strong><i class="fa fa-spinner fa-pulse me-1"></i>正在提交...</strong>';
-					showMessage('正在提交...');
-					new WOW().init();
-					// check user logged in.
-					const requsetData = new FormData(commentForm)
-					requsetData.append("action", "ajax_comment");
-					requsetData.append("security", adminajax.nonce);
-					if (!adminajax.loggedin) {
-
-						if (!requsetData.get('author')) {
-							showError("请填写姓名");
-							return;
-						}
-						if (!validateEmail(requsetData.get('email'))) {
-							showError("请填写正确的电子邮箱");
-							return;
-						}
-					}
-					if (!requsetData.get('comment')) {
-						showError("请输入评论内容");
-						return;
-					}
-
-					try {
-						const response = await fetch(adminajax.url, {
-							method: "POST",
-							body: requsetData,
-						});
-						const { success, data } = await response.json();
-
-						if (success && data.length !== 0) {
-
-							const nodeLi = commentLiStr(data);
-
-							//respond form
-							const respond = document.getElementById("respond");
-
-							e.target.setAttribute("disabled", "disabled");
-
-							if (document.querySelector(".comment-list")) {
-								if (respond.previousElementSibling) {
-
-									if (respond.previousElementSibling.lastElementChild.classList.contains("children")) {
-										//评论有子元素的父元素，需要添加li到ul里面
-										respond.previousElementSibling.lastElementChild.insertAdjacentHTML('beforeend', nodeLi)
-									} else {
-										//评论无子元素的评论，需添加子元素到li，新增ul元素
-										respond.previousElementSibling.insertAdjacentHTML('beforeend',
-											`<ul class="children">
-											${nodeLi}
-										</ul>`
-										)
-									}
-								} else {
-									//评论有子元素的父元素，需要添加li到ul里面
-									document.querySelector(".comment-list").insertAdjacentHTML('afterbegin', nodeLi)
-									// respond.previousElementSibling.lastElementChild.insertAdjacentHTML('beforeend', nodeLi)
-								}
-
-							} else {
-								respond.parentNode.insertAdjacentHTML('beforeend',
-									`<div class= "card mb-3">
-										<ol class="comment-list p-0 m-0 list-group list-group-flush">
-											${nodeLi}
-										</ol>
-									</div>`
-								);
-							}
-							showSuccess("评论已成功提交");
-							commentForm.querySelector("#comment").value = "";
-						} else {
-							//throw commentNode;
-							showError("评论提交失败，请刷新后重试");
-							console.log(data);
-						}
-					} catch (error) {
-						showError("评论提交失败，请刷新后重试！");
-						console.error(error);
-					} finally {
-						e.target.removeAttribute("disabled");
-						setTimeout(() => message.classList.remove("show"), 3000);
-					};
-				}
-			});
-		}
-
-		loadMore();
-		calendarAddClass();
-	});
-	/**
-	 * Is the DOM ready
-	 *
-	 * this implementation is coming from https://gomakethings.com/a-native-javascript-equivalent-of-jquerys-ready-method/
-	 *
-	 * @param {Function} fn Callback function to run.
-	 */
-	var ready = (fn) => {
-		if (typeof fn !== 'function') {
-			return;
-		}
-
-		if (document.readyState === 'interactive' || document.readyState === 'complete') {
-			return fn();
-		}
-
-		document.addEventListener('DOMContentLoaded', fn, false);
 	}
-
-	ready(() => {
-
-
+	DOMContentLoaded(() => {
+		requestIdleCallback(() => {
+			initializeWOW();
+			lazyLoadImages();
+			codeHighlight();
+			calendarAddClass();
+			offCanvasMenu();
+		});
+		scrollTop();
+		likeBtnHandle();
+		loadMoreHanle();
+		formAjaxHandle();
 	})
-
-	const loadMore = () => {
-		const loadMoreBtn = document.querySelector(".more-posts");
-		const postsList = document.querySelector(".ajax-posts");
-
-		if (typeof loadMoreBtn != "undefined" && loadMoreBtn != null) {
-			loadMoreBtn.addEventListener("click", debounce(async (e) => {
-				e.preventDefault();
-				loadMoreBtn.innerHTML = adminajax.loading;
-
-				let currentPage = postsList.dataset.page;
-				let maxPages = postsList.dataset.max;
-
-				let params = new URLSearchParams({
-					action: "load_more",
-					query: adminajax.posts,
-					security: adminajax.nonce,
-					current_page: currentPage,
-					max_pages: maxPages,
-				});
-				try {
-					const response = await fetch(adminajax.url, {
-						method: "POST",
-						body: params,
-					});
-					if (!response.ok) throw new Error('Network response was not ok');
-					const { success, data } = await response.json();
-
-					if (success && data.length !== 0) {
-						let newData = parseToDOM(data);
-
-						postsList.dataset.page++;
-
-						const fragment = document.createDocumentFragment();
-						newData.forEach((e) => fragment.appendChild(e));
-						postsList.appendChild(fragment);
-
-						loadMoreBtn.textContent = adminajax.loadmore;
-						loadMoreBtn.blur();
-					} else {
-						loadMoreBtn.textContent = adminajax.noposts;
-						loadMoreBtn.blur();
-						loadMoreBtn.disabled = true;
-						loadMoreBtn.setAttribute("aria-disabled", "true");
-					}
-				} catch (error) {
-					//console.error(error);
-					loadMoreBtn.textContent = "出错啦，请刷新";
-					loadMoreBtn.disabled = true;
-					loadMoreBtn.setAttribute("aria-disabled", "true");
-				}
-			}, 500));
-		}
-	}
-
-	//calendar add class
-	const calendarAddClass = () => {
-		const calendar = document.querySelector("#wp-calendar");
-		if (calendar === null) {
-			//console.error("Can't find element with id '#wp-calendar'");
-			return;
-		}
-		const calendarLinks = calendar.querySelectorAll("tbody td a");
-
-		calendarLinks.forEach((e) => {
-			e.classList.add("has-posts");
-		});
-	}
-	/**
-	 *Parse to DOM Array
-	 *
-	 * @param {*} str
-	 * @returns {array}
-	 */
-	const parseToDOM = (str) => {
-		const div = document.createElement("div");
-		if (typeof str === "string") {
-			div.innerHTML = str;
-		}
-		return Array.from(div.childNodes);
-	}
-	/**
-	 *
-	 * @param {*} el
-	 * @param {*} selector
-	 */
-	const matches = function (el, selector) {
-		return (
-			el.matches ||
-			el.matchesSelector ||
-			el.msMatchesSelector ||
-			el.mozMatchesSelector ||
-			el.webkitMatchesSelector ||
-			el.oMatchesSelector
-		).call(el, selector);
-	};
-
-	/**
-	 *fade in and out
-	 *
-	 * @param {*} e
-	 */
-	const fadeIn = (element) => {
-		element.style.opacity = 0;
-		let opacity = 0;
-		const duration = 400;
-		const start = performance.now();
-		function tick (now) {
-			const elapsed = now - start;
-			opacity = Math.min(1, opacity + elapsed / duration);
-			element.style.opacity = opacity;
-			if (opacity < 1) {
-				(window.requestAnimationFrame && requestAnimationFrame(tick)) ||
-					setTimeout(() => tick(performance.now()), 16);
-			}
-		}
-		tick(start);
-	}
-	/**
-	 * validate email
-	 *
-	 * @param {*} email
-	 */
-	const validateEmail = (email) => {
-		const regExp = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$/;
-		return regExp.test(email);
-	}
-
-	/**
-	 * animate function
-	 *
-	 * @param {*} options
-	 */
-
-	let animateScrolling = (options) => {
-		let startTime = performance.now();
-
-		let animate = (currentTime) => {
-			let timeFraction = (currentTime - startTime) / options.duration;
-			if (timeFraction > 1) timeFraction = 1;
-
-			let progress = options.timing(timeFraction);
-			options.draw(progress);
-
-			if (timeFraction < 1) {
-				requestAnimationFrame(animate);
-			}
-		};
-		requestAnimationFrame(animate);
-	};
-
-
-
-
-
-	/**
-	 * Limit the frequency of calls to the click event handler function.
-	 * @param {*} func
-	 * @param {*} wait
-	 * @returns
-	 */
-	function debounce (func, wait) {
-		let timeout;
-		return function (...args) {
-			clearTimeout(timeout);
-			timeout = setTimeout(() => {
-				func.apply(this, args);
-			}, wait);
-		};
-	}
-})()
+})();

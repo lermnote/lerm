@@ -28,6 +28,7 @@ class CommentWalker extends Walker_Comment {
 	 */
 	public function __construct( $params ) {
 		self::$args = apply_filters( 'lerm_comment_args', wp_parse_args( $params, self::$args ) );
+		add_action( 'comment_form', array( $this, 'comment_form_message' ) );
 
 		if ( self::$args['make_clickable'] ) {
 			remove_filter( 'comment_text', 'make_clickable', 9 );
@@ -36,7 +37,17 @@ class CommentWalker extends Walker_Comment {
 		if ( self::$args['escape_html'] ) {
 			add_filter( 'pre_comment_content', 'esc_html' );
 		}
+
 	}
+	/**
+	 * Displays an extra text area for more comments.
+	 *
+	 * @param int $post_id The ID of the post where the comment form was rendered.
+	 */
+	public function comment_form_message( $post_id ) {
+		echo '<label id="commentform-msg" class="wow invisible">#</label>';
+	}
+
 
 	/**
 	 * Output a comment in the HTML5 format.
@@ -46,6 +57,7 @@ class CommentWalker extends Walker_Comment {
 	 * @param array      $args    An array of arguments.
 	 */
 	public function html5_comment( $comment, $depth, $args ) {
+		global $post;
 		$tag                = ( 'div' === $args['style'] ) ? 'div' : 'li';
 		$commenter          = wp_get_current_commenter();
 		$show_pending_links = ! empty( $commenter['comment_author'] );
@@ -100,6 +112,7 @@ class CommentWalker extends Walker_Comment {
 						?>
 					</span>
 					<div class="reply float-end">
+					<?php echo \Lerm\Inc\Ajax\PostLike::get_likes_button( $post->ID, true ); ?>
 						<?php
 						comment_reply_link(
 							array_merge(

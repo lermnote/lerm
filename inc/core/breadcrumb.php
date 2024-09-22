@@ -194,7 +194,7 @@ class Breadcrumb {
 		$post  = get_queried_object();
 		$title = get_the_title( $post->ID );
 
-		if ( $post->post_parent > 0 ) {
+		if ( isset( $post->post_parent ) && $post->post_parent > 0 ) {
 			self::add_page_parents( $post->post_parent );
 		}
 
