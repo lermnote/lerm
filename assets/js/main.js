@@ -5,7 +5,113 @@
  */
 (function () {
 	'use strict';
+	const domain_name = `${window.location.protocol}//${window.location.host}`;
+	const ajaxcontent = 'page';
+	const ajaxsearch_class = 'search-form';
+	const ajaxignore = ''.split(', ');
+	const ajaxloading_error_code = 'error';
 
+	let ajaxStarted = false;
+	let ajaxLoading = false;
+	let ajaxSearchPath = null;
+
+	if (!document.getElementById(ajaxcontent)) return;
+
+	window.onpopstate = () => {
+		if (ajaxStarted && ajaxCheckIgnore(window.location.toString())) {
+			loadPage(window.location.toString(), true);
+		}
+	};
+
+	const initPageLoading = () => {
+		document.querySelectorAll('a').forEach(link => {
+			link.addEventListener('click', async (event) => {
+				if (link.href.startsWith(domain_name) && ajaxCheckIgnore(link.href)) {
+					event.preventDefault();
+					try {
+						// ajaxClickCode(link);
+						await loadPage(link.href);
+					} catch (err) {
+						console.error(err);
+					}
+				}
+			});
+		});
+		formAjaxHandle();
+		console.log('Page loaded successfully!');
+		document.querySelectorAll(`.${ajaxsearch_class}`).forEach(form => {
+			if (form.action) {
+				ajaxSearchPath = form.action;
+				form.addEventListener('submit', event => {
+					event.preventDefault();
+					submitSearch(new URLSearchParams(new FormData(form)).toString());
+				});
+			}
+		});
+	};
+
+	const loadPage = async (url, push, getData = null) => {
+		if (ajaxLoading) return;
+		ajaxLoading = true;
+		ajaxStarted = true;
+
+		if (!push && history.pushState) {
+			history.pushState({ foo: Math.random() * 1001 }, 'ajax page loaded...', new URL(url).pathname);
+		}
+
+		const container = document.getElementById(ajaxcontent);
+		container.style.opacity = '0.5';
+
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: { 'X-Requested-With': 'XMLHttpRequest' }
+			});
+			if (!response.ok) throw new Error('Network response was not ok');
+
+			const data = await response.text();
+
+			const titleMatch = data.match(/<title>(.*?)<\/title>/i);
+			if (titleMatch) {
+				const tempDiv = document.createElement('div');
+				tempDiv.innerHTML = titleMatch[1];
+				document.title = tempDiv.textContent;
+			}
+
+			const newContent = new DOMParser().parseFromString(data, 'text/html').getElementById(ajaxcontent);
+			if (newContent) container.innerHTML = newContent.innerHTML;
+
+			scrollTop();
+			container.style.opacity = '1';
+			// initPageLoading();
+		} catch (error) {
+			document.title = 'Error loading requested page!';
+			container.innerHTML = ajaxloading_error_code;
+			console.error('Fetch operation error:', error);
+		} finally {
+			ajaxLoading = false;
+		}
+	};
+
+	const submitSearch = params => {
+		if (!ajaxLoading) loadPage(ajaxSearchPath, false, params);
+	};
+
+	const ajaxCheckIgnore = url => ajaxignore.some(ignore => url.includes(ignore));
+
+	const ajaxReloadCode = () => {
+		document.querySelectorAll('.mod-index__feature .img_list_6pic a').forEach(el => el.classList.remove('word_display'));
+		const rightContainer = document.getElementById('continar-right');
+		if (rightContainer) {
+			Object.assign(rightContainer.style, { position: 'static', bottom: 'auto', left: 'auto' });
+		}
+	};
+
+	const ajaxClickCode = el => {
+		document.querySelectorAll('ul.nav li').forEach(item => item.classList.remove('current-menu-item'));
+		const parentLi = el.closest('li');
+		if (parentLi) parentLi.classList.add('current-menu-item');
+	};
 	/**
 	* --------------------------------------------------------------------------
 	* Lerm Theme BaseService
@@ -88,6 +194,7 @@
 		toggleButton = (button, isLoading, diabled = false) => {
 			if (isLoading) {
 				button.insertAdjacentHTML('afterbegin', '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> ');
+
 			} else {
 
 				const tempElement = document.querySelector('.spinner-border');
@@ -304,7 +411,7 @@
 			}
 		},
 		confirm_password: {
-			match: 'password',
+			match: 'regist_password',
 			message: 'Passwords do not match'
 		},
 		comment: {
@@ -322,7 +429,7 @@
 
 		if (!rule) return { valid: true };
 
-		const { pattern, minLength, hasUppercase, hasNumber, hasSpecialChar, errorMessage } = rule;
+		const { pattern, minLength, hasUppercase, hasNumber, hasSpecialChar, match, errorMessage } = rule;
 		if (pattern && !pattern.test(value)) {
 			return { valid: false, message: rule.message || 'Invalid format' };
 		}
@@ -337,6 +444,9 @@
 		}
 		if (hasSpecialChar && !hasSpecialChar.test(value)) {
 			return { valid: false, message: errorMessage.hasSpecialChar };
+		}
+		if (match && value !== formValues[match]) {
+			return { valid: false, message: rule.message || 'Values do not match' };
 		}
 		return { valid: true };
 	};
@@ -510,7 +620,9 @@
 			respond.parentNode.appendChild(fragment);
 		}
 	};
-
+	const handleLoginSuccess = () => {
+		loadPage(lermData.frontDoor);
+	}
 	const formAjaxHandle = () => {
 		const formConfigs = [
 			{ formId: 'login', action: lermData.login_action, security: lermData.login_nonce },
@@ -526,6 +638,7 @@
 				messageId: `${config.formId}-msg`,
 			});
 			if (config.formId === 'commentform') FormHandle.afterSubmitSuccess = handleCommentSuccess;
+			if (config.formId === 'login') FormHandle.afterSubmitSuccess = handleLoginSuccess;
 		});
 	};
 
@@ -554,12 +667,7 @@
 		});
 	};
 
-
-
-	/**
-	* smooth scroll to top
-	*
-	*/
+	//smooth scroll to top
 	const scrollTop = () => {
 		let scrollUp = document.getElementById("scroll-up");
 		scrollUp.addEventListener("click", (e) => {
@@ -625,14 +733,11 @@
 	}
 
 	const offCanvasMenu = () => {
-		// Get window width once
 		const windowWidth = document.body.clientWidth;
 		const siteHeader = document.querySelector("#site-header");
 		const offCanvasMenu = document.querySelector("#offcanvasMenu");
 
-		// Check if window width is less than 992px
 		if (windowWidth < 992) {
-			// Set off-canvas menu top to HTML margin top
 			offCanvasMenu.style.top = parseFloat(
 				getComputedStyle(document.documentElement).marginTop
 			) + "px";
@@ -651,5 +756,6 @@
 		likeBtnHandle();
 		loadMoreHanle();
 		formAjaxHandle();
+		// initPageLoading();
 	})
 })();

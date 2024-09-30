@@ -58,6 +58,7 @@ class Breadcrumb {
 			'archive_day'    => '%s',
 			'archive_month'  => '%s',
 			'archive_year'   => '%s',
+			'archive_author' => '%s',
 		);
 		self::$labels = apply_filters( 'lerm_breadcrumb_labels', wp_parse_args( self::$args['labels'], $defaults ) );
 	}

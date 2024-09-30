@@ -160,6 +160,14 @@ class Init {
 			'custom_css'    => $options['custom_css'] ?? '',
 		);
 
+		//user options.
+		self::$args['user_options'] = array(
+			'login_front_enable'   => $options['large_logo'] ?? '',
+			'login_from_file_name' => $options['mobile_logo'] ?? '',
+			'login_redirect'       => $options['content_width'] ?? '',
+			'menu_login_item'      => $options['sidebar_width'] ?? '',
+		);
+
 		// Set updater options.
 		self::$args['updater_options'] = array(
 			'name' => 'Lerm',                     // Theme Name.

@@ -6,6 +6,8 @@
 namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
+use um\core\Logout;
+
 class AjaxLogin extends BaseAjax {
 	use singleton;
 
@@ -18,12 +20,10 @@ class AjaxLogin extends BaseAjax {
 
 	public static $args = array(
 		'login_enable'         => true,
-		'post_type'            => array(),
-		'post_exclude'         => array(),
-		'page_exclude'         => array(),
 		'login_from_file_name' => 'login.php',
 		'login_redirect'       => 'home_url()',
 		'menu_login_item'      => true,
+		'logout_redirect'      => 'home_url()',
 	);
 
 	public function __construct( $params = array() ) {
@@ -32,7 +32,7 @@ class AjaxLogin extends BaseAjax {
 	}
 
 	public static function hooks() {
-		add_action( 'wp_logout', array( __CLASS__, 'loginout' ) );
+		// add_action( 'wp_logout', array( __CLASS__, 'logout' ) );
 		if ( self::$args['menu_login_item'] ) {
 			add_filter( 'wp_nav_menu_items', array( __CLASS__, 'add_menu_item' ), 10, 2 );
 		}
@@ -77,8 +77,8 @@ class AjaxLogin extends BaseAjax {
 		);
 	}
 	private static function validate_login_data( $data ) {
-		$username = isset( $data['login_username'] ) ? sanitize_text_field( wp_unslash( $data['login_username'] ) ) : '';
-		$password = isset( $data['login_password'] ) ? sanitize_text_field( wp_unslash( $data['login_password'] ) ) : '';
+		$username = isset( $data['username'] ) ? sanitize_text_field( wp_unslash( $data['username'] ) ) : '';
+		$password = isset( $data['password'] ) ? sanitize_text_field( wp_unslash( $data['password'] ) ) : '';
 
 		if ( empty( $username ) || empty( $password ) ) {
 			return new \WP_Error( 'empty_fields', __( 'Username or password cannot be empty.', 'lerm' ) );
@@ -135,6 +135,7 @@ class AjaxLogin extends BaseAjax {
 			return $items; // Not the correct menu location.
 		}
 		if ( ! self::is_login_menu_required() ) {
+
 			$outer_classes = array( 'nav-item', 'dropdown', 'menu-item-login' );
 		} else {
 			$outer_classes = array( 'nav-item', 'menu-item-login' );
@@ -143,22 +144,22 @@ class AjaxLogin extends BaseAjax {
 		$items .= sprintf( '<li class="%s">', esc_attr( implode( ' ', $outer_classes ) ) );
 
 		if ( ! self::is_login_menu_required() ) {
+			$current_user = wp_get_current_user();
+
 			$items .= sprintf(
-				'<a class="nav-link dropdown-toggle" href="%s" role="button" data-bs-toggle="dropdown" aria-expanded="false">%s</a>',
-				esc_url( self::lerm_front_door_url() ),
-				get_avatar( get_current_user_id(), 16 ),
+				'<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">%s %s</a>',
+				get_avatar( get_current_user_id(), 20 ),
+				$current_user->user_login,
 			);
 
 			$sub_menu_classes = array( 'dropdown-menu' );
 
 			$items .= sprintf( '<ul class="%s">', esc_attr( implode( ' ', $sub_menu_classes ) ) );
 
-			$current_user = wp_get_current_user();
-
-			$items .= '<li><a class="dropdown-item" href="' . self::login_redirect( '', $current_user ) . '">' . $current_user->user_login . '</a></li>
-						<li><a class="dropdown-item" href="#">Another action</a></li>
+			$items .= '<li class="text-center"><h6 class="dropdown-header text-center">' . get_avatar( get_current_user_id(), 64 ) . '</h6><label class="text-info">' . $current_user->user_login . '</label></li>
+			<li><a class="dropdown-item" href="' . self::login_redirect( '', $current_user ) . '">Account</a></li>
+						 <li><hr class="dropdown-divider"></li>
 						<li><a class="dropdown-item" href="' . esc_url( wp_logout_url( self::lerm_front_door_url() ) ) . '">' . __( 'Log out' ) . '</a></li>';
-
 			$items .= '</ul></li>';
 		} else {
 			$items .= sprintf(
@@ -203,60 +204,17 @@ class AjaxLogin extends BaseAjax {
 	 * A convenience function that lets us disable the login menu item under
 	 * certain conditions.
 	 */
+	public static function logout() {
+		wp_safe_redirect( self::$args['logout_redirect'] );
+		exit;
+	}
 	/**
 	 * Determine if login menu is required.
 	 */
 	private static function is_login_menu_required() {
 		return ! is_user_logged_in();
 	}
-	public static function loginout() {
-		wp_safe_redirect( home_url( '/login.html' ) );
-		exit;
-	}
-
-
-	public static function regist_form() {
-		ob_start();
-		include LERM_DIR . '/template-parts/account/regist.php';
-		$form = ob_get_clean();
-		return $form;
-	}
-	public static function login_form() {
-		ob_start();
-		include LERM_DIR . '/template-parts/account/login.php';
-		$form = ob_get_clean();
-		return $form;
-	}
-	public static function reset_form() {
-		ob_start();
-		include LERM_DIR . '/template-parts/account/reset.php';
-		$form = ob_get_clean();
-		return $form;
-	}
 	/**
-	 * Generate AJAX localization data.
-	 *
-	 * This function generates an array of localized data for use in AJAX requests.
-	 *
-	 * @param array $l10n Existing localization data.
-	 * @return array Localized data for AJAX requests.
-	 */
-	public static function scripts( $l10n ) {
-		wp_register_script( 'frontlogin', LERM_URI . 'assets/js/front-login.js', array(), LERM_VERSION, true );
-		$data = array(
-			'ajaxURL'      => admin_url( 'admin-ajax.php' ),
-			'login_nonce'  => wp_create_nonce( 'login_nonce' ),
-			'login_action' => self::AJAX_ACTION,
-			'logged'       => is_user_logged_in(),
-			'frontDoor'    => self::lerm_front_door_url(),
-		);
-
-		$l10n = apply_filters( 'lerm_l10n_user_data', $data );
-
-		wp_localize_script( 'frontlogin', 'lermDatas', $l10n );
-		wp_enqueue_script( 'frontlogin' );
-	}
-		/**
 	 * Generate AJAX localization data.
 	 *
 	 * @param array $l10n Existing localization data.

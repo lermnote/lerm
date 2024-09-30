@@ -3,9 +3,9 @@
  * user center handle
  */
 
-namespace Lerm\Inc;
+namespace Lerm\Inc\Ajax;
 
-class User_Profile {
+class UserProfile {
 
 	private static $action;
 

@@ -33,8 +33,6 @@ class AjaxReset extends BaseAjax {
 	}
 
 	public static function hooks() {
-		add_action( 'wp_logout', array( __CLASS__, 'loginout' ) );
-
 		add_filter( 'lerm_l10n_data', array( __CLASS__, 'l10n_data' ) );
 	}
 

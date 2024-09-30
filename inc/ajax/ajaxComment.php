@@ -29,8 +29,8 @@ final class AjaxComment extends BaseAjax {
 	public static function ajax_handle() {
 		// Check the AJAX nonce and handle comment submission
 		check_ajax_referer( 'comment_nonce', 'security', true );
+
 		$postdata = wp_unslash( $_POST );
-		// var_dump( $postdata );
 		// Handle comment submission
 		$comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
 

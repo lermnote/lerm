@@ -47,15 +47,12 @@ $urememberme = array(
 		<a id="forget-btn" type="button" title="forget password" ><?php echo esc_html__( 'Forget password?', 'lerm' ); ?></a>
 	</div>
 	<button id="login-submit" type="submit" name='btn_submit' class="btn btn-primary w-100 mb-3" type="submit"><?php echo esc_html__( 'LOGIN', 'lerm' ); ?></button>
-	<!-- <input type="hidden" name="action" value="login" />
-	<input type="hidden" name="redirect_to" value="<?php //echo esc_url( home_url( '/' ) ); ?>"> -->
 	<small id="login-msg" class="user-msg text-danger wow invisible">#</small>
-
 </form>
 <?php if ( get_option( 'users_can_register' ) ) : ?>
-		<hr class="my-3">
-		<div class="text-center "><span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span> <a id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit"><?php echo esc_html__( 'Register', 'lerm' ); ?></a></div>
-	<?php endif; ?>
+	<hr class="my-3">
+	<div class="text-center "><span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span> <a id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit"><?php echo esc_html__( 'Register', 'lerm' ); ?></a></div>
+<?php endif; ?>
 
 <div class="text-center py-3">
 	<label class="py-3" for=""><?php echo esc_html__( 'or sign up with', 'lerm' ); ?></label>

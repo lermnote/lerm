@@ -70,7 +70,6 @@ class Enqueue {
 	public static function scripts() {
 		wp_register_script( 'bootstrap', LERM_URI . 'assets/js/bootstrap.bundle.min.js', array(), '5.3', true );
 		wp_register_script( 'lazyload', LERM_URI . 'assets/js/lazyload.min.js', array(), '2.0.0', true );
-		// wp_register_script( 'lightbox', 'https://ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js', array(), '1.7.1' );
 		wp_register_script( 'share', LERM_URI . 'assets/js/social-share.min.js', array(), LERM_VERSION, true );
 		wp_register_script( 'qrcode', LERM_URI . 'assets/js/qrcode.min.js', array(), '2.0', true );
 		wp_register_script( 'highlight', LERM_URI . 'assets/js/highlight.pack.js', array(), '9.14.2', true );
@@ -83,6 +82,7 @@ class Enqueue {
 		wp_enqueue_script( 'bootstrap' );
 		wp_enqueue_script( 'lazyload' );
 		wp_enqueue_script( 'lightbox' );
+		wp_enqueue_script( 'loadjs' );
 
 		if ( is_singular( 'post' ) ) {
 			wp_enqueue_script( 'qrcode' );
