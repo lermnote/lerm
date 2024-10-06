@@ -67,8 +67,9 @@ abstract class BaseAjax {
 	 */
 	public static function ajax_l10n_data( $l10n ) {
 		$data = array(
-			'url'   => admin_url( 'admin-ajax.php' ),
-			'nonce' => wp_create_nonce( 'ajax_nonce' ),
+			'url'      => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'ajax_nonce' ),
+			'loggedin' => is_user_logged_in(),
 		);
 		$data = wp_parse_args( $data, $l10n );
 		return $data;

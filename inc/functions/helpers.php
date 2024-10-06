@@ -36,9 +36,9 @@ function float_form_input( $args ) {
 	ob_start();
 	echo sprintf(
 		'<div class="%1$s">
-		<input type="%2$s" name="%3$s" id="%4$s"  class="%5$s" placeholder="%6$s" %7$s %8$s>
-		<label for="%5$s">%9$s</label>
-	</div>',
+			<input type="%2$s" name="%3$s" id="%4$s"  class="%5$s" placeholder="%6$s" %7$s %8$s>
+			<label for="%5$s">%9$s</label>
+		</div>',
 		esc_attr( $args['container_class'] ),
 		esc_attr( $args['type'] ),
 		esc_attr( $args['name'] ),

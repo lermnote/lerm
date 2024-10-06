@@ -7,7 +7,7 @@ namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
 
-class AjaxRegist extends BaseAjax {
+final class AjaxRegist extends BaseAjax {
 	use singleton;
 
 	protected const AJAX_ACTION           = 'front_regist';
@@ -33,8 +33,6 @@ class AjaxRegist extends BaseAjax {
 	}
 
 	public static function hooks() {
-		add_action( 'wp_logout', array( __CLASS__, 'loginout' ) );
-
 		add_filter( 'lerm_l10n_user_data', array( __CLASS__, 'l10n_data' ) );
 	}
 
@@ -46,7 +44,7 @@ class AjaxRegist extends BaseAjax {
 		check_ajax_referer( 'regist_nonce', 'security' );
 
 		$request_data = $_POST;
-		$username     = $request_data['username'];
+		$username     = sanitize_text_field( $request_data['username'] );
 		$email        = $request_data['email'];
 		$password     = $request_data['regist-password'];
 
@@ -77,6 +75,39 @@ class AjaxRegist extends BaseAjax {
 				'redirect' => self::login_redirect( '', $user_id ),
 			)
 		);
+		 // Post values
+		//  $username = sanitize_text_field($_POST['register_username']);
+		//  $password = sanitize_text_field($_POST['register_password']);
+		//  $email = sanitize_text_field($_POST['register_email']);
+		//  $name = sanitize_text_field($_POST['register_name']);
+		//  $nick = sanitize_text_field($_POST['register_name']);
+
+		//  $userdata = array(
+		// 	 'user_login' => $username,
+		// 	 'user_pass' => $password,
+		// 	 'user_password' => $password,
+		// 	 'user_email' => $email,
+		// 	 'first_name' => $name,
+		// 	 'nickname' => $nick,
+		//  );
+
+		//  $user_id = wp_insert_user($userdata);
+
+		//  // add user meta
+		//  $custom_user_meta_value = 'custom_user_meta_value';
+		//  add_user_meta( $user_id, 'custom_user_meta', $custom_user_meta_value);
+
+		//  // Return
+		//  if (!is_wp_error($user_id)) {
+		// 	 $user_signon = wp_signon($userdata, false);
+		// 	 if (!is_wp_error($user_signon)) {
+		// 		 wp_send_json(array('status' => 2, 'message' => __('your registration is successfuled and logined.')));
+		// 	 } else {
+		// 		 wp_send_json(array('status' => 1, 'message' => __('your registration is successfuled and logined')));
+		// 	 }
+		//  } else {
+		// 	 wp_send_json(array('status' => 0, 'message' => __($user_id->get_error_message())));
+		//  }
 	}
 
 	/**

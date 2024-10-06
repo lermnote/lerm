@@ -16,7 +16,7 @@ final class LoadMore extends BaseAjax {
 	protected const AJAX_ACTION = 'load_more';
 
 	public static $args = array(
-		'posts_per_page' => 10,
+		'posts_count' => 10,
 	);
 
 	public function __construct( $params = array() ) {
@@ -46,7 +46,7 @@ final class LoadMore extends BaseAjax {
 		$query_args = array_merge(
 			$query_args,
 			array(
-				'posts_per_page' => min( self::$args['posts_per_page'], get_option( 'posts_per_page' ) ),
+				'posts_per_page' => min( self::$args['posts_count'], get_option( 'posts_per_page' ) ),
 				'paged'          => (int) $postdata['currentPage'] + 1,
 				'post_status'    => 'publish',
 			)
@@ -76,7 +76,6 @@ final class LoadMore extends BaseAjax {
 				'currentPage' => $query_args['paged'],
 				'nextPage'    => $query_args['paged'] + 1,
 				'hasMore'     => $query_args['paged'] < $posts->max_num_pages,
-				'test'        => ( ! $posts->have_posts() || $query_args['paged'] > $posts->max_num_pages ),
 			)
 		);
 	}

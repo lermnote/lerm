@@ -112,7 +112,6 @@ class CommentWalker extends Walker_Comment {
 						?>
 					</span>
 					<div class="reply float-end">
-					<?php echo \Lerm\Inc\Ajax\PostLike::get_likes_button( $post->ID, true ); ?>
 						<?php
 						comment_reply_link(
 							array_merge(
@@ -121,6 +120,18 @@ class CommentWalker extends Walker_Comment {
 									'depth'     => $depth,
 									'max_depth' => $args['max_depth'],
 								)
+							)
+						);
+						?>
+						<?php
+						\Lerm\Inc\Ajax\PostLike::get_likes_button(
+							$post->ID,
+							true,
+							array(
+								'style' => 'a',
+								'class' => 'text-danger',
+								'text'  => __( 'Like', 'lerm' ),
+								'echo'  => true,
 							)
 						);
 						?>

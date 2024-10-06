@@ -3,7 +3,7 @@
  * Template Name: Page Template
  *
  * @package Lerm https://lerm.net
- * 
+ *
  * @since  1.0
  */
 get_header();

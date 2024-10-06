@@ -28,9 +28,9 @@ final class PostLike extends BaseAjax {
 	/**
 	 * The ID of the post being processed.
 	 *
-	 * @var int $post_id
+	 * @var int $id
 	 */
-	private static $post_id;
+	private static $id;
 
 	/**
 	 * Constructor.
@@ -48,9 +48,6 @@ final class PostLike extends BaseAjax {
 		add_action( 'show_user_profile', array( __CLASS__, 'show_user_likes' ) );
 		add_action( 'edit_user_profile', array( __CLASS__, 'show_user_likes' ) );
 
-		// add_action( 'wp_enqueue_scripts', array( __CLASS__, 'scripts' ) );
-		// Hook the script_type_module function
-		// add_filter( 'script_loader_tag', array( __CLASS__, 'script_type_module' ), 10, 3 );
 		add_filter( 'lerm_l10n_data', array( __CLASS__, 'l10n_data' ) );
 	}
 
@@ -68,16 +65,16 @@ final class PostLike extends BaseAjax {
 
 		// Validate and sanitize input
 		$is_comment = isset( $postdata['type'] ) && 'comment' === $postdata['type'] ? 1 : 0;
-		$post_id    = isset( $postdata['postId'] ) && is_numeric( $postdata['postId'] ) ? intval( $postdata['postId'] ) : '';
+		$id         = isset( $postdata['id'] ) && is_numeric( $postdata['id'] ) ? intval( $postdata['id'] ) : '';
 
-		if ( ! $post_id ) {
+		if ( ! $id ) {
 			self::error( array( 'message' => 'Invalid post ID' ) );
 			return;
 		}
 
 		// Process like action
-		$like_count  = self::process_like_action( $post_id, $is_comment );
-		$like_status = self::already_liked( $post_id, $is_comment );
+		$like_count  = self::process_like_action( $id, $is_comment );
+		$like_status = self::already_liked( $id, $is_comment );
 
 		// Prepare response
 		$response = array(
@@ -86,7 +83,7 @@ final class PostLike extends BaseAjax {
 		);
 
 		if ( isset( $postdata['disabled'] ) && true === $postdata['disabled'] ) {
-			$redirect_url = ( $is_comment ) ? get_permalink( get_the_ID() ) : get_permalink( $post_id );
+			$redirect_url = ( $is_comment ) ? get_permalink( get_the_ID() ) : get_permalink( $id );
 			wp_safe_redirect( $redirect_url );
 			exit();
 		}
@@ -98,19 +95,19 @@ final class PostLike extends BaseAjax {
 	/**
 	 * Process like action for a post or comment.
 	 *
-	 * @param int $post_id The ID of the post or comment.
+	 * @param int $id The ID of the post or comment.
 	 * @param bool $is_comment Whether the ID refers to a comment.
 	 * @return int The updated like count after processing the like action.
 	 */
-	private static function process_like_action( $post_id, $is_comment ) {
+	private static function process_like_action( $id, $is_comment ) {
 		// Perform actions based on whether the post/comment is already liked or not
-		$like_count = self::already_liked( $post_id, $is_comment ) ? self::unlike_post( $post_id, $is_comment ) : self::like_post( $post_id, $is_comment );
+		$like_count = self::already_liked( $id, $is_comment ) ? self::unlike_post( $id, $is_comment ) : self::like_post( $id, $is_comment );
 
 		// Constants for meta keys
 		$like_count_key    = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
 		$like_modified_key = $is_comment ? '_comment_like_modified' : '_post_like_modified';
 
-		self::update_like_meta( $post_id, $like_count_key, $like_modified_key, $like_count, $is_comment );
+		self::update_like_meta( $id, $like_count_key, $like_modified_key, $like_count, $is_comment );
 
 		return $like_count;
 	}
@@ -131,57 +128,46 @@ final class PostLike extends BaseAjax {
 	/**
 	 * Like a post or comment.
 	 *
-	 * @param int $post_id The ID of the post or comment.
+	 * @param int $id The ID of the post or comment.
 	 * @param bool $is_comment Whether the ID refers to a comment.
 	 * @return int The updated like count after liking the post or comment.
 	 */
-	private static function like_post( $post_id, $is_comment ) {
-		// Get current like count
-		$meta_key = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
-		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
-
-		//get user id
-		$user_id = is_user_logged_in() ? get_current_user_id() : self::client_ip();
-		self::update_user_likes( $user_id, $post_id, $is_comment, true );
-
-		// update like count
-		update_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, ++$count );
-		return $count;
+	private static function like_post( $id, $is_comment ) {
+		return self::update_like( $id, $is_comment, true );
 	}
 
 	/**
 	 * Unlike a post or comment.
 	 *
-	 * @param int $post_id The ID of the post or comment.
+	 * @param int $id The ID of the post or comment.
 	 * @param bool $is_comment Whether the ID refers to a comment.
 	 * @return int The updated like count after unliking the post or comment.
 	 */
-	private static function unlike_post( $post_id, $is_comment ) {
-		// Get current like count
+	private static function unlike_post( $id, $is_comment ) {
+		return self::update_like( $id, $is_comment, false );
+	}
+	private static function update_like( $id, $is_comment, $like ) {
 		$meta_key = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
-		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
+		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
 
-		//get user id
 		$user_id = is_user_logged_in() ? get_current_user_id() : self::client_ip();
-		self::update_user_likes( $user_id, $post_id, $is_comment, false );
+		self::update_user_likes( $user_id, $id, $is_comment, $like );
 
-		// update like count.
-		$new_count = max( 0, --$count );
-		update_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, $new_count );
+		$new_count = $like ? ++$count : max( 0, --$count );
+		update_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, $new_count );
 		return $new_count;
 	}
-
 	/**
 	 * Checks if the current user has already liked the post or comment.
 	 *
-	 * @param int $post_id The ID of the post or comment.
+	 * @param int $id The ID of the post or comment.
 	 * @param bool $is_comment Whether the ID refers to a comment.
 	 * @return bool True if the user has already liked the post or comment, false otherwise.
 	 */
-	public static function already_liked( $post_id, $is_comment = null ) {
+	public static function already_liked( $id, $is_comment = null ) {
 		$user_id    = is_user_logged_in() ? get_current_user_id() : self::client_ip();
 		$meta_key   = $is_comment ? self::USER_COMMENT_LIKE_META_KEY : self::USER_LIKE_META_KEY;
-		$post_users = get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true );
+		$post_users = get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
 		// Check if user is in the list of liked users
 		if ( is_array( $post_users ) && in_array( $user_id, $post_users, true ) ) {
 			return true;
@@ -190,9 +176,9 @@ final class PostLike extends BaseAjax {
 		}
 	}
 
-	private static function update_user_likes( $user_id, $post_id, $is_comment, $like = true ) {
+	private static function update_user_likes( $user_id, $id, $is_comment, $like ) {
 		$meta_key   = $is_comment ? self::USER_COMMENT_LIKE_META_KEY : self::USER_LIKE_META_KEY;
-		$user_likes = get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true ) ? get_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, true ) : array();
+		$user_likes = get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true ) ? get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true ) : array();
 
 		if ( $like ) {
 			if ( ! in_array( $user_id, $user_likes, true ) ) {
@@ -202,41 +188,43 @@ final class PostLike extends BaseAjax {
 			$user_likes = array_diff( $user_likes, array( $user_id ) );
 		}
 
-		update_metadata( $is_comment ? 'comment' : 'post', $post_id, $meta_key, $user_likes );
+		update_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, $user_likes );
 	}
-
 	/**
 	 * Output the like button
 	 *
 	 * @since    0.5
 	 */
-	public static function get_likes_button( $post_id, $is_comment = null ) {
-		$classes = array( 'btn', 'like-button' );
-		$id      = $is_comment ? get_comment_ID() : $post_id;
-		$type    = $is_comment ? 'comment' : 'post';
-
-		$classes[] = self::already_liked( $post_id, $is_comment ) ? 'btn-danger' : 'btn-outline-danger';
+	public static function get_likes_button( $id, $is_comment = null, $args ) {
+		$tag       = ( 'button' === $args['style'] ) ? 'button' : 'a';
+		$classes   = array( 'like-button' );
+		$classes[] = $args['class'];
+		$id        = $is_comment ? get_comment_ID() : $id;
+		$type      = $is_comment ? 'comment' : 'post';
+		$classes[] = self::already_liked( $id, $is_comment ) ? 'btn-danger' : 'btn-outline-danger';
 		$classes[] = 'like-' . $type . '-' . $id;
 
 		// Get current like count
 		$meta_key   = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
-		$like_count = (int) get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
+		$like_count = (int) get_metadata( $type, $id, $meta_key, true );
 
 		$count  = self::get_like_count( $like_count );
 		$output = sprintf(
-			'<button data-id="%d" data-post-id="%d" data-logged="%s" data-type="%s" class="%s">
-			<span><i class="fa fa-heart"></i></span> 
-			%s
-			</button>',
+			'<%1$s  class="%2$s" data-id="%3$d" data-logged="%4$s" data-type="%5$s">
+			<span class="fa fa-heart"></span>
+			%6$s
+			</%1$s>',
+			$tag,
+			implode( ' ', $classes ),
 			$id,
-			$post_id,
 			esc_attr( is_user_logged_in() ),
 			esc_attr( $type ),
-			esc_attr( implode( ' ', $classes ) ),
 			$count
 		);
-
-		return $output;
+		if ( false === $args['echo'] ) {
+			return $output;
+		}
+		echo $output;// phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
 	}
 
 	/**
@@ -303,35 +291,49 @@ final class PostLike extends BaseAjax {
 	 * @since    0.5
 	 */
 	public static function get_like_count( $like_count ) {
-		$like_text = __( 'Like', 'lerm' );
-		if ( is_numeric( $like_count ) && $like_count > 0 ) {
-			$number = self::format_count( $like_count );
-		} else {
-			$number = $like_text;
-		}
-		$count = '<span class="count">' . $number . '</span>';
-		return $count;
+		$number = ( is_numeric( $like_count ) && $like_count > 0 ) ? self::format_count( $like_count ) : 0;
+		return '<span class="count">' . $number . '</span>';
 	}
-
 	/**
 	 * Display the list of liked posts on the user profile page.
 	 *
 	 * @param \WP_User $user The current user object.
 	 */
 	public static function show_user_likes( $user ) {
-		$user_likes = get_user_meta( $user->ID, self::USER_LIKE_META_KEY, true );
-		echo '<h3>' . esc_html__( 'Liked Posts', 'lerm' ) . '</h3>';
-		if ( ! empty( $user_likes ) ) {
-			echo '<ul>';
-			foreach ( $user_likes as $post_id ) {
-				echo '<li><a href="' . esc_url( get_permalink( $post_id ) ) . '">' . esc_html( get_the_title( $post_id ) ) . '</a></li>';
-			}
-			echo '</ul>';
-		} else {
-			echo '<p>' . esc_html__( 'No liked posts found.', 'lerm' ) . '</p>';
-		}
-	}
+		$types = get_post_types( array( 'public' => true ) );
+		$args  = array(
+			'numberposts' => -1,
+			'post_type'   => $types,
+			'meta_query'  => array(
+				array(
+					'key'     => self::USER_LIKE_META_KEY,
+					'value'   => $user->ID,
+					'compare' => 'LIKE',
+				),
+			),
+		);
 
+		$like_query = new \WP_Query( $args );
+
+		echo '<h3>' . esc_html__( 'Liked Posts', 'lerm' ) . '</h3>';
+
+		if ( $like_query->have_posts() ) {
+			$links = array();
+			while ( $like_query->have_posts() ) {
+				$like_query->the_post();
+				$links[] = sprintf(
+					'<a href="%1$s" title="%2$s">%3$s</a>',
+					esc_url( get_permalink() ),
+					esc_attr( get_the_title() ),
+					esc_html( get_the_title() )
+				);
+			}
+			echo implode( ' &middot; ', $links );// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		} else {
+			echo esc_html__( 'You do not like anything yet.', 'lerm' );
+		}
+		wp_reset_postdata();
+	}
 	/**
 	 * Add custom column to the post list table.
 	 *
@@ -346,11 +348,11 @@ final class PostLike extends BaseAjax {
 	 * Output the like count in the custom column.
 	 *
 	 * @param string $column The name of the column.
-	 * @param int    $post_id The ID of the current post.
+	 * @param int    $id The ID of the current post.
 	 */
-	public static function post_custom_column( $column, $post_id ) {
+	public static function post_custom_column( $column, $id ) {
 		if ( 'likes' === $column ) {
-			$like_count = get_post_meta( $post_id, self::LIKE_COUNT_META_KEY, true );
+			$like_count = get_post_meta( $id, self::LIKE_COUNT_META_KEY, true );
 			echo esc_html( $like_count );
 		}
 	}
@@ -376,34 +378,6 @@ final class PostLike extends BaseAjax {
 		$like_count = get_post_meta( $post->ID, self::LIKE_COUNT_META_KEY, true );
 		echo '<p>' . esc_html__( 'Total Likes:', 'lerm' ) . ' ' . esc_html( $like_count ) . '</p>';
 	}
-
-	/**
-	 * Generate AJAX localization data.
-	 *
-	 * This function generates an array of localized data for use in AJAX requests.
-	 *
-	 * @param array $l10n Existing localization data.
-	 * @return array Localized data for AJAX requests.
-	 */
-	public static function scripts( $l10n ) {
-		wp_register_script( 'likebtn', LERM_URI . 'assets/js/likebtn.js', array(), LERM_VERSION, true );
-		wp_localize_script(
-			'likebtn',
-			'lermAjax',
-			array(
-				'ajaxURL'    => admin_url( 'admin-ajax.php' ),
-				'nonce'      => wp_create_nonce( 'lerm_nonce' ),
-				'logged'     => is_user_logged_in(),
-				'noUnlike'   => false,
-				'loggedOnly' => false,
-				'loginURL'   => '',
-				'like'       => 'like',
-				'unlike'     => 'unlike',
-				'loader'     => '',
-			)
-		);
-		wp_enqueue_script( 'likebtn' );
-	}
 	/**
 	 * Generate AJAX localization data.
 	 *
@@ -419,23 +393,5 @@ final class PostLike extends BaseAjax {
 		);
 		$data = wp_parse_args( $data, $l10n );
 		return $data;
-	}
-	/**
-	 * Add module type check to module script.
-	 *
-	 * @param string $tag The script tag for the enqueued script.
-	 * @param string $handle The script's registered handle.
-	 * @param string $src The script's source URL.
-	 *
-	 * @return string The modified script tag.
-	 */
-	public static function script_type_module( $tag, $handle, $src ) {
-		// Only do this for a specific script.
-		if ( 'likebtn' === $handle ) {
-			// Modify the script tag to include type="module"
-			$tag = str_replace( '<script ', '<script type="module" ', $tag );
-		}
-
-		return $tag;
 	}
 }

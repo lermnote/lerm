@@ -8,20 +8,20 @@
  */
 global $user_ID;
 get_header();
-?>
-<?php
-if ( ! is_user_logged_in() ) :
-	;
-	?>
-	<style>
-		.login-page {
-			background-image: url(http://lerm.local/wp-content/uploads/2020/12/0030_Calque-2.png);
-			background-size: cover;
-			background-repeat: no-repeat;
-			background-position: center;
-		}
-	</style>
 
+if ( is_user_logged_in() ) {
+	wp_safe_redirect( home_url() );
+	exit;
+}
+?>
+<style>
+	.login-page {
+		background-image: url(http://lerm.local/wp-content/uploads/2020/12/0030_Calque-2.png);
+		background-size: cover;
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+</style>
 <main role="main" class="container-fluid login-page d-flex flex-column justify-content-center bg-body-tertiary bg-opacity-75"><!--.container-->
 	<div class="container">
 		<div class="row g-lg-5 py-5">
@@ -59,11 +59,6 @@ if ( ! is_user_logged_in() ) :
 		</div>
 	</div>
 </main>
-	<?php
-else :
-	get_template_part( 'templates/user' );
-endif;
-?>
 <script>
 	<?php if ( ! is_user_logged_in() ) : ?>
 	document.addEventListener("DOMContentLoaded", function (e) {
@@ -84,6 +79,5 @@ endif;
 	})
 	<?php endif; ?>
 </script>
-
 <?php
 get_footer();

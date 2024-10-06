@@ -102,6 +102,7 @@ class Init {
 		Ajax\AjaxReset::instance();
 
 		Core\CommentWalker::instance();
+		Ajax\UserProfile::instance();
 	}
 
 	/**
@@ -158,6 +159,14 @@ class Init {
 			'content_width' => $options['content_width'] ?? '',
 			'sidebar_width' => $options['sidebar_width'] ?? '',
 			'custom_css'    => $options['custom_css'] ?? '',
+		);
+
+		//user options.
+		self::$args['user_options'] = array(
+			'login_front_enable'   => $options['large_logo'] ?? '',
+			'login_from_file_name' => $options['mobile_logo'] ?? '',
+			'login_redirect'       => $options['content_width'] ?? '',
+			'menu_login_item'      => $options['sidebar_width'] ?? '',
 		);
 
 		// Set updater options.
