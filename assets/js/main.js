@@ -623,13 +623,20 @@
 	const handleLoginSuccess = () => {
 		loadPage(lermData.frontDoor);
 	}
+
+	const handleUpdateProfileSuccess = () => {
+		loadPage(lermData.redirect);
+	}
 	const formAjaxHandle = () => {
 		const formConfigs = [
 			{ formId: 'login', action: lermData.login_action, security: lermData.login_nonce },
 			{ formId: 'reset', action: lermData.reset_action, security: lermData.reset_nonce },
 			{ formId: 'regist', action: lermData.regist_action, security: lermData.regist_nonce, passwordToggle: true },
-			{ formId: 'commentform', action: lermData.comment_action, security: lermData.comment_nonce },
+			{ formId: 'commentform', action: lermData.comment_action, security: lermData.comment_nonce }
 		];
+		if (lermData.loggedin) {
+			formConfigs.push({ formId: 'update-profile', action: lermData.profile_action, security: lermData.profile_nonce })
+		}
 
 		formConfigs.forEach(config => {
 			const FormHandle = new FormService({
@@ -639,6 +646,7 @@
 			});
 			if (config.formId === 'commentform') FormHandle.afterSubmitSuccess = handleCommentSuccess;
 			if (config.formId === 'login') FormHandle.afterSubmitSuccess = handleLoginSuccess;
+			if (config.formId === 'update-profile') FormHandle.afterSubmitSuccess = handleUpdateProfileSuccess;
 		});
 	};
 

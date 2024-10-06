@@ -78,7 +78,6 @@ final class AjaxComment extends BaseAjax {
 		$data = array(
 			'comment_nonce'  => wp_create_nonce( 'comment_nonce' ),
 			'comment_action' => self::AJAX_ACTION,
-			'loggedin'       => is_user_logged_in(),
 		);
 		$data = wp_parse_args( $data, $l10n );
 		return $data;

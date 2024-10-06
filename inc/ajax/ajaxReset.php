@@ -7,7 +7,7 @@ namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
 
-class AjaxReset extends BaseAjax {
+final class AjaxReset extends BaseAjax {
 	use singleton;
 
 	protected const AJAX_ACTION           = 'front_reset';

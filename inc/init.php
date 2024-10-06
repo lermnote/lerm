@@ -102,6 +102,7 @@ class Init {
 		Ajax\AjaxReset::instance();
 
 		Core\CommentWalker::instance();
+		Ajax\UserProfile::instance();
 	}
 
 	/**

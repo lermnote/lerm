@@ -65,5 +65,10 @@ $forms = array(
 		<small id="regist-msg" class="invisible user-msg text-danger wow">#</small>
 	</form>
 	<hr class="my-3">
-	<div class="text-center "><span><?php echo esc_html__( 'Have already an account?', 'lerm' ); ?> </span> <a id="login-btn" type="submit" name='btn_submit' class="my-4" type="submit"><?php echo esc_html__( 'Login', 'lerm' ); ?></a></div>
+	<div class="text-center ">
+		<span><?php echo esc_html__( 'Have already an account?', 'lerm' ); ?> </span>
+		<a id="login-btn" type="submit" name='btn_submit' class="my-4" type="submit">
+			<?php echo esc_html__( 'Login', 'lerm' ); ?>
+		</a>
+	</div>
 <?php endif; ?>

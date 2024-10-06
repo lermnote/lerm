@@ -133,17 +133,7 @@ final class PostLike extends BaseAjax {
 	 * @return int The updated like count after liking the post or comment.
 	 */
 	private static function like_post( $id, $is_comment ) {
-		// Get current like count
-		$meta_key = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
-		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
-
-		//get user id
-		$user_id = is_user_logged_in() ? get_current_user_id() : self::client_ip();
-		self::update_user_likes( $user_id, $id, $is_comment, true );
-
-		// update like count
-		update_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, ++$count );
-		return $count;
+		return self::update_like( $id, $is_comment, true );
 	}
 
 	/**
@@ -154,20 +144,19 @@ final class PostLike extends BaseAjax {
 	 * @return int The updated like count after unliking the post or comment.
 	 */
 	private static function unlike_post( $id, $is_comment ) {
-		// Get current like count
+		return self::update_like( $id, $is_comment, false );
+	}
+	private static function update_like( $id, $is_comment, $like ) {
 		$meta_key = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
 		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
 
-		//get user id
 		$user_id = is_user_logged_in() ? get_current_user_id() : self::client_ip();
-		self::update_user_likes( $user_id, $id, $is_comment, false );
+		self::update_user_likes( $user_id, $id, $is_comment, $like );
 
-		// update like count.
-		$new_count = max( 0, --$count );
+		$new_count = $like ? ++$count : max( 0, --$count );
 		update_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, $new_count );
 		return $new_count;
 	}
-
 	/**
 	 * Checks if the current user has already liked the post or comment.
 	 *
@@ -187,7 +176,7 @@ final class PostLike extends BaseAjax {
 		}
 	}
 
-	private static function update_user_likes( $user_id, $id, $is_comment, $like = true ) {
+	private static function update_user_likes( $user_id, $id, $is_comment, $like ) {
 		$meta_key   = $is_comment ? self::USER_COMMENT_LIKE_META_KEY : self::USER_LIKE_META_KEY;
 		$user_likes = get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true ) ? get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true ) : array();
 
@@ -201,7 +190,6 @@ final class PostLike extends BaseAjax {
 
 		update_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, $user_likes );
 	}
-
 	/**
 	 * Output the like button
 	 *
@@ -303,35 +291,49 @@ final class PostLike extends BaseAjax {
 	 * @since    0.5
 	 */
 	public static function get_like_count( $like_count ) {
-		$like_text = '';
-		if ( is_numeric( $like_count ) && $like_count > 0 ) {
-			$number = self::format_count( $like_count );
-		} else {
-			$number = $like_text;
-		}
-		$count = '<span class="count">' . $number . '</span>';
-		return $count;
+		$number = ( is_numeric( $like_count ) && $like_count > 0 ) ? self::format_count( $like_count ) : 0;
+		return '<span class="count">' . $number . '</span>';
 	}
-
 	/**
 	 * Display the list of liked posts on the user profile page.
 	 *
 	 * @param \WP_User $user The current user object.
 	 */
 	public static function show_user_likes( $user ) {
-		$user_likes = get_user_meta( $user->ID, self::USER_LIKE_META_KEY, true );
-		echo '<h3>' . esc_html__( 'Liked Posts', 'lerm' ) . '</h3>';
-		if ( ! empty( $user_likes ) ) {
-			echo '<ul>';
-			foreach ( $user_likes as $id ) {
-				echo '<li><a href="' . esc_url( get_permalink( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a></li>';
-			}
-			echo '</ul>';
-		} else {
-			echo '<p>' . esc_html__( 'No liked posts found.', 'lerm' ) . '</p>';
-		}
-	}
+		$types = get_post_types( array( 'public' => true ) );
+		$args  = array(
+			'numberposts' => -1,
+			'post_type'   => $types,
+			'meta_query'  => array(
+				array(
+					'key'     => self::USER_LIKE_META_KEY,
+					'value'   => $user->ID,
+					'compare' => 'LIKE',
+				),
+			),
+		);
 
+		$like_query = new \WP_Query( $args );
+
+		echo '<h3>' . esc_html__( 'Liked Posts', 'lerm' ) . '</h3>';
+
+		if ( $like_query->have_posts() ) {
+			$links = array();
+			while ( $like_query->have_posts() ) {
+				$like_query->the_post();
+				$links[] = sprintf(
+					'<a href="%1$s" title="%2$s">%3$s</a>',
+					esc_url( get_permalink() ),
+					esc_attr( get_the_title() ),
+					esc_html( get_the_title() )
+				);
+			}
+			echo implode( ' &middot; ', $links );// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		} else {
+			echo esc_html__( 'You do not like anything yet.', 'lerm' );
+		}
+		wp_reset_postdata();
+	}
 	/**
 	 * Add custom column to the post list table.
 	 *

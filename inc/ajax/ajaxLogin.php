@@ -8,7 +8,7 @@ namespace Lerm\Inc\Ajax;
 use Lerm\Inc\Traits\Singleton;
 use um\core\Logout;
 
-class AjaxLogin extends BaseAjax {
+final class AjaxLogin extends BaseAjax {
 	use singleton;
 
 	protected const AJAX_ACTION          = 'front_login';
@@ -32,7 +32,6 @@ class AjaxLogin extends BaseAjax {
 	}
 
 	public static function hooks() {
-		// add_action( 'wp_logout', array( __CLASS__, 'logout' ) );
 		if ( self::$args['menu_login_item'] ) {
 			add_filter( 'wp_nav_menu_items', array( __CLASS__, 'add_menu_item' ), 10, 2 );
 		}

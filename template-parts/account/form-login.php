@@ -51,7 +51,12 @@ $urememberme = array(
 </form>
 <?php if ( get_option( 'users_can_register' ) ) : ?>
 	<hr class="my-3">
-	<div class="text-center "><span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span> <a id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit"><?php echo esc_html__( 'Register', 'lerm' ); ?></a></div>
+	<div class="text-center ">
+		<span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span>
+		<a id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit">
+			<?php echo esc_html__( 'Register', 'lerm' ); ?>
+		</a>
+	</div>
 <?php endif; ?>
 
 <div class="text-center py-3">
