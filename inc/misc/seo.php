@@ -12,7 +12,7 @@ use Lerm\Inc\Traits\Singleton;
  * 4.面包屑导航
  * 5.seo标题
  */
-class SEO {
+class Seo {
 	use singleton;
 
 	protected static $args = array(

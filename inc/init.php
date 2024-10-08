@@ -62,14 +62,14 @@ class Init {
 		$params = array();
 		if ( ! empty( $args['seo_options'] ) ) {
 			$params = $args['seo_options'];
-			Misc\SEO::instance( $params );
+			Misc\Seo::instance( $params );
 		}
 
 		// Mail SMTP options.
 		$params = array();
 		if ( ! empty( $args['mail_options'] ) ) {
 			$params = $args['mail_options'];
-			Misc\SMTP::instance( $params );
+			Misc\Smtp::instance( $params );
 		}
 
 		// Sitemap options.

@@ -11,7 +11,7 @@ namespace Lerm\Inc\Misc;
 
 use Lerm\Inc\Traits\Singleton;
 
-class Chinese_To_Pinyin {
+class ChineseToPinyin {
 	private static $maps = array(
 		'a'      => -20319,
 		'ai'     => -20317,

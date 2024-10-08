@@ -16,15 +16,15 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"Lerm\\Inc\\": "inc/"
+			"Lerm\\Inc\\": "Inc/"
 		},
 		"files": [
-			"inc/functions/functions.php",
-            "inc/functions/functions-layout.php",
-			"inc/functions/functions-opengraph.php",
-			"inc/functions/function-login.php",
-			"inc/functions/functions-icon.php",
-			"inc/functions/helpers.php"
+			"Inc/Functions/functions.php",
+            "Inc/Functions/functions-layout.php",
+			"Inc/Functions/functions-opengraph.php",
+			"Inc/Functions/function-login.php",
+			"Inc/Functions/functions-icon.php",
+			"Inc/Functions/helpers.php"
         ]
 	}
 }

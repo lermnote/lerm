@@ -9,7 +9,7 @@ namespace Lerm\Inc\Misc;
 
 use Lerm\Inc\Traits\Singleton;
 
-class SMTP {
+class Smtp {
 	use singleton;
 
 	/**
