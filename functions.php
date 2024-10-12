@@ -34,19 +34,19 @@ if ( ! defined( 'LERM_DIR' ) ) {
 /**
  * Requre admin framework
  */
-require_once LERM_DIR . 'inc/admin/codestar-framework.php';
+require_once LERM_DIR . 'Inc/admin/codestar-framework.php';
 require_once LERM_DIR . 'vendor/autoload.php';
 Init::instance( get_option( 'lerm_theme_options' ) );
 
-// functions used for debug mail errors, log is stored at SERVER_ROOT_DIR/mail.log
-function smtplog_mailer_errors( $wp_error ) {
-	global $wp_filesystem;
-	WP_Filesystem();
+// // functions used for debug mail errors, log is stored at SERVER_ROOT_DIR/mail.log
+// function smtplog_mailer_errors( $wp_error ) {
+// 	global $wp_filesystem;
+// 	WP_Filesystem();
 
-	$file = ABSPATH . '/mail.log';
+// 	$file = ABSPATH . '/mail.log';
 
-	$timestamp   = time();
-	$currenttime = gmdate( 'Y-m-d H:i:s', $timestamp );
-	$wp_filesystem->put_contents( $file, $currenttime . ' Mailer Error: ' . $wp_error->get_error_message() . "\n", FS_CHMOD_FILE );
-}
-add_action( 'wp_mail_failed', 'smtplog_mailer_errors', 10, 1 );
+// 	$timestamp   = time();
+// 	$currenttime = gmdate( 'Y-m-d H:i:s', $timestamp );
+// 	$wp_filesystem->put_contents( $file, $currenttime . ' Mailer Error: ' . $wp_error->get_error_message() . "\n", FS_CHMOD_FILE );
+// }
+// add_action( 'wp_mail_failed', 'smtplog_mailer_errors', 10, 1 );
