@@ -10,6 +10,7 @@ namespace Lerm\Inc\Ajax;
 use Lerm\Inc\Traits\Singleton;
 
 final class PostLike extends BaseAjax {
+
 	use singleton;
 
 	protected const AJAX_ACTION               = 'post_like';
@@ -195,7 +196,7 @@ final class PostLike extends BaseAjax {
 	 *
 	 * @since    0.5
 	 */
-	public static function get_likes_button( $id, $is_comment = null, $args ) {
+	public static function get_likes_button( $id, $is_comment = null, $args = array() ) {
 		$tag       = ( 'button' === $args['style'] ) ? 'button' : 'a';
 		$classes   = array( 'like-button' );
 		$classes[] = $args['class'];
@@ -224,7 +225,7 @@ final class PostLike extends BaseAjax {
 		if ( false === $args['echo'] ) {
 			return $output;
 		}
-		echo $output;// phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
 	}
 
 	/**
@@ -328,7 +329,7 @@ final class PostLike extends BaseAjax {
 					esc_html( get_the_title() )
 				);
 			}
-			echo implode( ' &middot; ', $links );// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo implode( ' &middot; ', $links ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} else {
 			echo esc_html__( 'You do not like anything yet.', 'lerm' );
 		}

@@ -5,7 +5,9 @@
 namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
+
 final class UserProfile extends BaseAjax {
+
 	use singleton;
 
 	protected const AJAX_ACTION = 'update_profile';
@@ -22,7 +24,7 @@ final class UserProfile extends BaseAjax {
 	}
 
 	public static function hooks() {
-		add_filter( 'get_avatar', array( __CLASS__, 'lerm_get_avatar' ), 10, 5 );
+		add_filter( 'get_avatar', array( __CLASS__, 'lerm_get_avatar' ), 1, 5 );
 		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
 	}
 
@@ -94,7 +96,7 @@ final class UserProfile extends BaseAjax {
 				self::success(
 					array(
 						'message'   => __( 'Profile updated successfully.', 'lerm' ),
-						'avatarUrl' => $avatar_url,  // 将新的头像 URL 发送给前端
+						'avatarUrl' => $avatar_url, // 将新的头像 URL 发送给前端
 					)
 				);
 				update_user_meta( $current_user->ID, 'avatar', wp_get_attachment_image_src( $avatar_id, 'thumbnail' )[0] );
@@ -109,14 +111,15 @@ final class UserProfile extends BaseAjax {
 		do_action( 'edit_user_profile_update', $current_user->ID );
 	}
 
-	public static function lerm_get_avatar( $avatar = '', $id_or_email, $size = 128, $default = '', $alt = false ) {
+	public static function lerm_get_avatar( $avatar, $id_or_email, $size = 128, $default = '', $alt = false ) {
 		static $cached_user_meta = array();
 		$user_id                 = self::get_user_id_from_input( $id_or_email );
 		if ( ! isset( $cached_user_meta[ $user_id ] ) ) {
 			$cached_user_meta[ $user_id ] = get_user_meta( $user_id, 'avatar', true );
 		}
-		$avatar = $cached_user_meta[ $user_id ];
-		if ( $avatar ) {
+		$local_avatar = $cached_user_meta[ $user_id ];
+
+		if ( $local_avatar ) {
 			$avatar = "<img alt='{$alt}' src='{$avatar}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
 		}
 		return $avatar;
