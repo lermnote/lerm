@@ -263,11 +263,12 @@ class Image {
 			return;
 		}
 
-		$size = $this->args['size'];
-		$attr = array(
+		$size    = $this->args['size'];
+		$classes = implode( ' ', array( 'attachment-' . $size, 'w-100', 'h-100', 'rounded' ) );
+		$attr    = array(
 			'alt'     => get_the_title( $attachment_id ),
 			'title'   => get_the_title( $attachment_id ),
-			'class'   => 'attachment-' . $size,
+			'class'   => $classes,
 			'loading' => $this->args['lazy'],
 		);
 		return wp_get_attachment_image( $attachment_id, $size, false, $attr );

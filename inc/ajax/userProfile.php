@@ -15,7 +15,7 @@ final class UserProfile extends BaseAjax {
 
 	public static $args = array(
 		'profile_enable'  => true,
-		'update_redirect' => 'user.html',
+		'update_redirect' => 'user-frofile',
 	);
 
 	public function __construct( $params = array() ) {
@@ -24,7 +24,7 @@ final class UserProfile extends BaseAjax {
 	}
 
 	public static function hooks() {
-		add_filter( 'get_avatar', array( __CLASS__, 'lerm_get_avatar' ), 1, 5 );
+		add_filter( 'pre_get_avatar', array( __CLASS__, 'lerm_get_avatar' ), 10, 3 );
 		add_filter( 'lerm_l10n_data', array( __CLASS__, 'ajax_l10n_data' ) );
 	}
 
@@ -111,32 +111,24 @@ final class UserProfile extends BaseAjax {
 		do_action( 'edit_user_profile_update', $current_user->ID );
 	}
 
-	public static function lerm_get_avatar( $avatar, $id_or_email, $size = 128, $default = '', $alt = false ) {
+	public static function lerm_get_avatar( $avatar, $id_or_email, $args ) {
 		static $cached_user_meta = array();
-		$user_id                 = self::get_user_id_from_input( $id_or_email );
-		if ( ! isset( $cached_user_meta[ $user_id ] ) ) {
-			$cached_user_meta[ $user_id ] = get_user_meta( $user_id, 'avatar', true );
-		}
-		$local_avatar = $cached_user_meta[ $user_id ];
+		// Retrieve the user by ID, email or other input
+		$user = get_user_by( 'id', $id_or_email );
 
-		if ( $local_avatar ) {
-			$avatar = "<img alt='{$alt}' src='{$avatar}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
+		if ( $user ) {
+			if ( ! isset( $cached_user_meta[ $user->ID ] ) ) {
+				$cached_user_meta[ $user->ID ] = get_user_meta( $user->ID, 'avatar', true );
+			}
+			$local_avatar = $cached_user_meta[ $user->ID ];
+			if ( $local_avatar ) {
+				$avatar = "<img alt='{$args['alt']}' src='{$local_avatar }' class='avatar avatar-{$args['size']} photo' height='{$args['height']}' width='{$args['width']}'/>";
+			}
 		}
 		return $avatar;
 	}
 
-	private static function get_user_id_from_input( $id_or_email ) {
-		if ( is_numeric( $id_or_email ) ) {
-			return (int) $id_or_email;
-		} elseif ( is_object( $id_or_email ) && ! empty( $id_or_email->user_id ) ) {
-			return (int) $id_or_email->user_id;
-		} else {
-			$user = get_user_by( 'email', $id_or_email );
-			return $user ? $user->ID : null;
-		}
-	}
-
-	private function handle_avatar_upload( $file ) {
+	private static function handle_avatar_upload( $file ) {
 		if ( ! function_exists( 'wp_handle_upload' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}

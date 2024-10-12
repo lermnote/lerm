@@ -77,7 +77,6 @@ class CommentWalker extends Walker_Comment {
 						if ( '0' === $comment->comment_approved && ! $show_pending_links ) {
 							$comment_author = get_comment_author( $comment );
 						}
-
 						printf(
 							/* translators: %s: Comment author link. */
 							'<b class="fn">%s</b>',
