@@ -4,6 +4,9 @@
  *
  * @package Lerm https://lerm.net
  */
+
+use function Lerm\Inc\Functions\Helpers\float_form_input;
+
 $forms = array(
 	'username' => array(
 		'type'        => 'text',

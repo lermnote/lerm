@@ -65,7 +65,8 @@ class Setup {
 		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
 		add_action( 'widgets_init', array( __CLASS__, 'widgets' ) );
 
-		add_filter( 'wp_tag_cloud', array( __CLASS__, 'tag_cloud' ), 10, 1 );
+		// add_filter( 'wp_tag_cloud', array( __CLASS__, 'tag_cloud' ), 10, 2 );
+		// add_filter( 'tag_cloud_sort', array( __CLASS__, 'tag_cloud' ), 10, 2 );
 	}
 
 	/**
@@ -236,17 +237,29 @@ class Setup {
 	 *
 	 * @return string|string[] Tag cloud as a string or an array, depending on 'format' argument.
 	 */
-	public static function tag_cloud( $args ) {
-		$args = array(
-			'largest'  => 22,
-			'smallest' => 8,
-			'unit'     => 'pt',
-			'number'   => 22,
-			'orderby'  => 'count',
-			'order'    => 'DESC',
-		);
-		$tags = get_tags();
+	public static function tag_cloud( $return, $args ) {
+		// $cloud_args = array(
+		// 	'largest'  => 22,
+		// 	'smallest' => 8,
+		// 	'unit'     => 'pt',
+		// 	'number'   => 22,
+		// 	'orderby'  => 'count',
+		// 	'order'    => 'DESC',
+		// );
 
-		return wp_generate_tag_cloud( $tags, $args );
+		// $args = wp_parse_args( $cloud_args, $args );
+
+		$tags = get_terms(
+			array_merge(
+				$args,
+				array(
+					'orderby' => 'count',
+					'order'   => 'DESC',
+				)
+			)
+		); // Always query top tags.
+
+		$return = wp_generate_tag_cloud( $tags, $args );
+		return $return;
 	}
 }

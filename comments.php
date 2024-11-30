@@ -12,7 +12,9 @@
 global $post_id;
 if ( post_password_required() ) {
 	return;
-}?>
+}
+use Lerm\Inc\Core\CommentWalker;
+?>
 <div id="comments" class="comments">
 	<?php if ( comments_open() || pings_open() ) : ?>
 		<?php
@@ -62,7 +64,6 @@ if ( post_password_required() ) {
 			'class_container'      => 'card comment-respond mb-3',
 			'class_form'           => 'card-body comment-form',
 			'id_submit'            => 'commentform-submit',
-			// 'class_submit'         => 'btn btn-sm btn-custom',
 			'submit_button'        => '<button type="submit" class="btn btn-sm btn-custom" id="%1$s">%4$s</button>',
 			'title_reply'          => '<i class="fa fa-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
 			'title_reply_before'   => '<h3 id="reply-title" class="comment-reply-title card-header border-bottom-0">',
@@ -88,7 +89,7 @@ if ( post_password_required() ) {
 			<?php
 			wp_list_comments(
 				array(
-					'walker'      => \Lerm\Inc\Core\CommentWalker::instance(),
+					'walker'      => CommentWalker::instance(),
 					'short_ping'  => true,
 					'avatar_size' => wp_is_mobile() ? 32 : 48,
 				)

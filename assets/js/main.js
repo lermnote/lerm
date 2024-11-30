@@ -757,7 +757,7 @@
 			initializeWOW();
 			lazyLoadImages();
 			codeHighlight();
-			calendarAddClass();
+			// calendarAddClass();
 			offCanvasMenu();
 		});
 		scrollTop();

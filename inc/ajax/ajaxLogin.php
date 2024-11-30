@@ -7,6 +7,7 @@ namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
 use um\core\Logout;
+use function Lerm\Inc\Functions\Helpers\client_ip;
 
 final class AjaxLogin extends BaseAjax {
 	use singleton;
@@ -47,7 +48,7 @@ final class AjaxLogin extends BaseAjax {
 		check_ajax_referer( 'login_nonce', 'security' );
 
 		// Check client IP for any login attempt limits.
-		$client_ip_address = self::client_ip();
+		$client_ip_address = client_ip();
 		if ( empty( $client_ip_address ) ) {
 			self::error( __( 'Cannot determine IP address.', 'lerm' ) );
 		}
@@ -173,14 +174,6 @@ final class AjaxLogin extends BaseAjax {
 		return $items;
 	}
 
-	/**
-	 * Get client IP address.
-	 *
-	 * @return string Client IP address.
-	 */
-	private static function client_ip() {
-		return lerm_client_ip();
-	}
 	/**
 	 * Get the URL for the site's main login page, with the redirect
 	 * (after login) set to the page we're currently viewing.

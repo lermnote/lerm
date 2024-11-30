@@ -8,6 +8,7 @@
 namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
+use function Lerm\Inc\Functions\Helpers\client_ip;
 
 final class PostLike extends BaseAjax {
 
@@ -151,7 +152,7 @@ final class PostLike extends BaseAjax {
 		$meta_key = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
 		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
 
-		$user_id = is_user_logged_in() ? get_current_user_id() : self::client_ip();
+		$user_id = is_user_logged_in() ? get_current_user_id() : client_ip();
 		self::update_user_likes( $user_id, $id, $is_comment, $like );
 
 		$new_count = $like ? ++$count : max( 0, --$count );
@@ -166,7 +167,7 @@ final class PostLike extends BaseAjax {
 	 * @return bool True if the user has already liked the post or comment, false otherwise.
 	 */
 	public static function already_liked( $id, $is_comment = null ) {
-		$user_id    = is_user_logged_in() ? get_current_user_id() : self::client_ip();
+		$user_id    = is_user_logged_in() ? get_current_user_id() : client_ip();
 		$meta_key   = $is_comment ? self::USER_COMMENT_LIKE_META_KEY : self::USER_LIKE_META_KEY;
 		$post_users = get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
 		// Check if user is in the list of liked users
@@ -226,15 +227,6 @@ final class PostLike extends BaseAjax {
 			return $output;
 		}
 		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
-	}
-
-	/**
-	 * Get client IP address.
-	 *
-	 * @return string Client IP address.
-	 */
-	private static function client_ip() {
-		return lerm_client_ip();
 	}
 
 	/**
