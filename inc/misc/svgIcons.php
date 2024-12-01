@@ -20,7 +20,7 @@
  * @since 1.0.0
  */
 
- namespace Lerm\Inc\Misc;
+namespace Lerm\Inc\Misc;
 
 use Lerm\Inc\Traits\Singleton;
 

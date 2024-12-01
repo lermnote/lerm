@@ -711,6 +711,7 @@
 			animateClass: "animated",
 			offset: 0,
 			mobile: true,
+			live:   true
 		});
 		wow.init();
 	};
@@ -750,9 +751,41 @@
 				getComputedStyle(document.documentElement).marginTop
 			) + "px";
 		}
-
 	}
+	const siteFade = () => {
+		// Start opacity of body tag at 0 and transition it to 100% when the page is loaded.
+		document.body.classList.add('fadeInOut');
+
+		// Add a click event listener to all anchor links
+		document.querySelectorAll('a').forEach(function (anchor) {
+			anchor.addEventListener('click', function (event) {
+				event.preventDefault(); // Stop the link from its default behavior
+
+				var link = anchor.getAttribute('href');
+				var target = anchor.getAttribute('target');
+
+				// If the link starts with # (e.g., an anchor link), don't run the animation
+				if (link.startsWith('#')) {
+					return;
+				}
+
+				if (target === '_blank') {
+					// If the target is "_blank", open the link in a new tab
+					window.open(link, '_blank');
+				} else {
+					// Otherwise, animate fade out and then navigate
+					document.body.classList.remove('fadeInOut');
+					setTimeout(function () {
+						
+						window.location.href = link;
+					}, 500); // Delay for 500ms to allow the fade-out effect
+				}
+			});
+		});
+	};
 	DOMContentLoaded(() => {
+				// initPageLoading();
+				siteFade();
 		requestIdleCallback(() => {
 			initializeWOW();
 			lazyLoadImages();
@@ -764,6 +797,6 @@
 		likeBtnHandle();
 		loadMoreHanle();
 		formAjaxHandle();
-		// initPageLoading();
+
 	})
 })();

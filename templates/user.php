@@ -27,7 +27,7 @@ get_header();
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div class="site-main card mb-3" aria-hidden="true">
-				<img src="http://lerm.local/wp-content/uploads/2024/09/2024082513474928.jpg" class="card-img-top rounded" alt="...">
+				<img src="https://images.unsplash.com/photo-1552652893-2aa10a0ab4df?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top rounded bg-success" alt=" " style="min-height: 176px; height: 176px;">
 				<div class="card-body">
 					<div class="d-flex gap-3 align-items-start" aria-current="true">
 						<figure class="figure" class="rounded" style="margin-top:-5rem; cursor: pointer;">

@@ -122,7 +122,7 @@ final class AjaxLogin extends BaseAjax {
 	 */
 	public static function login_redirect( $url, $user ) {
 		if ( is_a( $user, 'WP_User' ) ) {
-			$url = home_url( '/user.html' );
+			$url = home_url( $url );
 		}
 		return apply_filters( 'lerm_custom_login_redirect', $url, $user );
 	}

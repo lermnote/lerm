@@ -64,7 +64,9 @@ $fields = array(
 				<label for="address" class="form-label">Address</label>
 			</div>
 		</div>
-
-		<button type="submit" name="update_profile" class="w-100 btn btn-primary btn-sm">Update Profile</button>
+		<div>
+			<button type="submit" name="update_profile" class="btn btn-primary btn-sm">Update Profile</button>
+			<button type="cancel" name="cancel" class=" btn btn-danger btn-sm">Cancel</button>
+		</div>
 	</div>
 </form>

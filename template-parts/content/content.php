@@ -54,7 +54,7 @@ $image = new Image(
 					?>
 				</div>
 			<?php endif; ?>
-			<div class="<?php echo ! empty( $image ) ? 'col-md-9' : 'col-md-12'; ?>">
+			<div class="<?php echo ! empty( $image->attachment_id ) ? 'col-md-9' : 'col-md-12'; ?>">
 				<div class="card-body p-md-0">
 					<h2 class="entry-title card-title">
 						<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>

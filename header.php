@@ -5,7 +5,7 @@
  * Displays all of the head element and everything up until the "row" div.
  *
  * @package Lerm https://lerm.net
- * 
+ *
  * @since  1.0
  */
 ?>
