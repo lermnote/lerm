@@ -6,29 +6,25 @@
 namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
-use um\core\Logout;
 use function Lerm\Inc\Functions\Helpers\client_ip;
 
 final class AjaxLogin extends BaseAjax {
 	use singleton;
 
-	protected const AJAX_ACTION          = 'front_login';
-	protected const PUBLIC               = true;
-	protected const RETRY_PAUSE          = 5;
-	protected const LOGIN_FORM_FILE_NAME = 'form-login.php';
+	protected const AJAX_ACTION = 'front_login';
+	protected const PUBLIC      = true;
+	protected const RETRY_PAUSE = 5;
 
-	public const LERM_MENU_LOCATION = 'primary';
-
-	public static $args = array(
-		'login_enable'         => true,
-		'login_from_file_name' => 'login.php',
-		'login_redirect'       => 'home_url()',
-		'menu_login_item'      => true,
-		'logout_redirect'      => 'home_url()',
+	private static $args = array(
+		'front_login_enable'  => true,
+		'login_page_id'       => '',
+		'login_redirect_url'  => '',
+		'logout_redirect_url' => 'home_url()',
 	);
 
 	public function __construct( $params = array() ) {
-		parent::__construct( apply_filters( 'lerm_user_args', wp_parse_args( $params, self::$args ) ) );
+		self::$args = apply_filters( 'lerm_user_args', wp_parse_args( $params, self::$args ) );
+		parent::__construct( self::$args );
 		self::hooks();
 	}
 
@@ -43,27 +39,29 @@ final class AjaxLogin extends BaseAjax {
 	/**
 	 * The main function will try to log in to the site by sanitising and
 	 * authenticating $_POST['username'] and $_POST['password']
+	 * and return the result.
+	 *
+	 * @return void
 	 */
 	public static function ajax_handle() {
 		check_ajax_referer( 'login_nonce', 'security' );
 
 		// Check client IP for any login attempt limits.
-		$client_ip_address = client_ip();
-		if ( empty( $client_ip_address ) ) {
+		$client_ip = client_ip();
+		if ( empty( $client_ip ) ) {
 			self::error( __( 'Cannot determine IP address.', 'lerm' ) );
 		}
 
-		$response = self::validate_login_data( $_POST );
-
-		if ( is_wp_error( $response ) ) {
-			self::error( $response->get_error_message() );
+		// Validate login data.
+		$credentials = self::validate_login_data( $_POST );
+		if ( is_wp_error( $credentials ) ) {
+			self::error( $credentials->get_error_message() );
 		}
 
-		$user = wp_signon( $response['credentials'], false );
-
+		// Authenticate user.
+		$user = wp_signon( $credentials, false );
 		if ( is_wp_error( $user ) ) {
-			// 限制登录尝试次数
-			self::track_login_attempts( $response['credentials']['user_login'] );
+			self::limit_login_attempts( $credentials['user_login'] );
 			self::error( $user->get_error_message() );
 		}
 
@@ -72,45 +70,46 @@ final class AjaxLogin extends BaseAjax {
 			array(
 				'loggedin' => true,
 				'message'  => __( 'Login successful. Redirecting...', 'lerm' ),
-				'redirect' => self::login_redirect( '', $user ),
+				'redirect' => self::get_redirect_url( $user ),
 			)
 		);
 	}
+
+	/**
+	 * Validate login data
+	 *
+	 * @param array $data Submitted data.
+	 * @return array|WP_Error Validated data or error object.
+	 */
 	private static function validate_login_data( $data ) {
-		$username = isset( $data['username'] ) ? sanitize_text_field( wp_unslash( $data['username'] ) ) : '';
-		$password = isset( $data['password'] ) ? sanitize_text_field( wp_unslash( $data['password'] ) ) : '';
+		$username = sanitize_text_field( wp_unslash( $data['username'] ?? '' ) );
+		$password = wp_unslash( $data['password'] ?? '' );
 
 		if ( empty( $username ) || empty( $password ) ) {
 			return new \WP_Error( 'empty_fields', __( 'Username or password cannot be empty.', 'lerm' ) );
 		}
-		// 检查用户名是否存在
+
 		$user = get_user_by( 'login', $username );
-		if ( ! $user ) {
-			return new \WP_Error( 'invalid_username', __( 'Invalid username. Please try again.', 'lerm' ) );
-		}
-
-		// 检查密码是否正确
-		if ( ! wp_check_password( $password, $user->user_pass, $user->ID ) ) {
-			return new \WP_Error( 'incorrect_password', __( 'Incorrect password. Please try again.', 'lerm' ) );
-		}
-
-		// 可以进一步检查密码的复杂性或其他规则
-		if ( strlen( $password ) < 8 ) {
-			return new \WP_Error( 'password_too_short', __( 'Password must be at least 8 characters long.', 'lerm' ) );
+		if ( ! $user || ! wp_check_password( $password, $user->user_pass, $user->ID ) ) {
+			return new \WP_Error( 'invalid_credentials', __( 'Invalid username or password.', 'lerm' ) );
 		}
 
 		return array(
-			'credentials' => array(
-				'user_login'    => $username,
-				'user_password' => $password,
-				'remember'      => isset( $data['rememberme'] ),
-			),
+			'user_login'    => $username,
+			'user_password' => $password,
+			'remember'      => ! empty( $data['rememberme'] ),
 		);
 	}
 
-	private static function track_login_attempts( $username ) {
+	/**
+	 * Limit login attempts
+	 *
+	 * @param string $username Username.
+	 * @return WP_Error|null Error object if login attempts exceeded.
+	 */
+	private static function limit_login_attempts( $username ) {
 		$attempt_key = 'login_attempt_' . $username;
-		$attempts    = get_transient( $attempt_key );
+		$attempts    = (int) get_transient( $attempt_key );
 		if ( $attempts >= 5 ) {
 			return new \WP_Error( 'too_many_attempts', __( 'Too many login attempts. Please try again later.', 'lerm' ) );
 		}
@@ -118,24 +117,29 @@ final class AjaxLogin extends BaseAjax {
 	}
 
 	/**
-	 * WordPress function for redirecting users on login based on user role
+	 * Get redirect URL after login
+	 *
+	 * @param object $user User object.
+	 * @return string Redirect URL.
 	 */
-	public static function login_redirect( $url, $user ) {
-		if ( is_a( $user, 'WP_User' ) ) {
-			$url = home_url( $url );
-		}
+	private static function get_redirect_url( $user ) {
+		$url = ( self::$args['login_redirect_url'] ) ? ( self::$args['login_redirect_url'] ) : home_url();
 		return apply_filters( 'lerm_custom_login_redirect', $url, $user );
 	}
 
 	/**
 	 * Render the login menu item and form.
+	 *
+	 * @param string $items Menu items.
+	 * @param object $args Menu arguments.
+	 * @return string Modified menu items.
 	 */
 	public static function add_menu_item( $items, $args ) {
-		if ( self::LERM_MENU_LOCATION !== $args->theme_location ) {
-			return $items; // Not the correct menu location.
+		if ( 'primary' !== $args->theme_location ) {
+			return $items;
 		}
-		if ( ! self::is_login_menu_required() ) {
 
+		if ( is_user_logged_in() ) {
 			$outer_classes = array( 'nav-item', 'dropdown', 'menu-item-login' );
 		} else {
 			$outer_classes = array( 'nav-item', 'menu-item-login' );
@@ -143,7 +147,7 @@ final class AjaxLogin extends BaseAjax {
 
 		$items .= sprintf( '<li class="%s">', esc_attr( implode( ' ', $outer_classes ) ) );
 
-		if ( ! self::is_login_menu_required() ) {
+		if ( is_user_logged_in() ) {
 			$current_user = wp_get_current_user();
 
 			$items .= sprintf(
@@ -157,17 +161,16 @@ final class AjaxLogin extends BaseAjax {
 			$items .= sprintf( '<ul class="%s">', esc_attr( implode( ' ', $sub_menu_classes ) ) );
 
 			$items .= '<li class="text-center"><h6 class="dropdown-header text-center">' . get_avatar( get_current_user_id(), 64 ) . '</h6><label class="text-info">' . $current_user->user_login . '</label></li>
-			<li><a class="dropdown-item" href="' . self::login_redirect( '', $current_user ) . '">Account</a></li>
+			<li><a class="dropdown-item" href="' . self::$args['login_redirect_url'] . '">Account</a></li>
 						 <li><hr class="dropdown-divider"></li>
-						<li><a class="dropdown-item" href="' . esc_url( wp_logout_url( self::lerm_front_door_url() ) ) . '">' . __( 'Log out' ) . '</a></li>';
+						<li><a class="dropdown-item" href="' . esc_url( wp_logout_url( self::$args['logout_redirect_url'] ) ) . '">' . __( 'Log out' ) . '</a></li>';
 			$items .= '</ul></li>';
 		} else {
 			$items .= sprintf(
 				'<a class="nav-link" href="%s">%s</a>',
-				esc_url( self::lerm_front_door_url() ),
+				esc_url( self::get_login_page_url() ),
 				esc_html__( 'Login', 'lerm' )
 			);
-
 			$items .= '</li>';
 		}
 
@@ -175,37 +178,14 @@ final class AjaxLogin extends BaseAjax {
 	}
 
 	/**
-	 * Get the URL for the site's main login page, with the redirect
-	 * (after login) set to the page we're currently viewing.
-	 * This is useful for mobile devices where the Ajax login form might
-	 * not be available.
+	 * Get login page URL
+	 *
+	 * @return string
 	 */
-	private static function lerm_front_door_url() {
-
-		$login_page_url = home_url( '/login.html' );
-
-		// If WooCommerce is installed, use the my-account page as the frontdoor,
-		// so we get a nice front-end login form.
-		// if ( function_exists( 'wc_get_account_endpoint_url' ) ) {
-		// 	//$frontdoor_url = wc_get_account_endpoint_url( 'dashboard' );
-		// }
-
-		return $login_page_url;
+	private static function get_login_page_url() {
+		return get_permalink( absint( self::$args['login_page_id'] ) ) ? get_permalink( absint( self::$args['login_page_id'] ) ) : wp_login_url();
 	}
-	/**
-	 * A convenience function that lets us disable the login menu item under
-	 * certain conditions.
-	 */
-	public static function logout() {
-		wp_safe_redirect( self::$args['logout_redirect'] );
-		exit;
-	}
-	/**
-	 * Determine if login menu is required.
-	 */
-	private static function is_login_menu_required() {
-		return ! is_user_logged_in();
-	}
+
 	/**
 	 * Generate AJAX localization data.
 	 *
@@ -217,7 +197,6 @@ final class AjaxLogin extends BaseAjax {
 			'login_nonce'  => wp_create_nonce( 'login_nonce' ),
 			'login_action' => self::AJAX_ACTION,
 			'logged'       => is_user_logged_in(),
-			'frontDoor'    => self::lerm_front_door_url(),
 		);
 		$data = wp_parse_args( $data, $l10n );
 		return $data;

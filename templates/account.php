@@ -6,13 +6,12 @@
  * @date    2016-10-26
  * @since lerm 2.0
  */
-global $user_ID;
-get_header();
-
 if ( is_user_logged_in() ) {
 	wp_safe_redirect( home_url() );
 	exit;
 }
+global $user_ID;
+get_header();
 ?>
 <style>
 	.login-page {
@@ -23,8 +22,8 @@ if ( is_user_logged_in() ) {
 	}
 </style>
 <main role="main" class="container"><!--.container-->
-	<div class="row py-3 ">
-		<div class="col-lg-7 text-center text-lg-start  d-none d-lg-block mb-3">
+	<div class="row py-3">
+		<div class="col-lg-7 text-center text-lg-start d-none d-lg-block mb-3">
 			<?php
 			if ( have_posts() ) :
 				while ( have_posts() ) :

@@ -13,7 +13,7 @@
 get_header();
 
 ?>
-<main role="main" class="container"><!--.container-->
+<main role="mazin" class="container"><!--.container-->
 	<?php
 	get_template_part( 'template-parts/components/breadcrumb' );
 

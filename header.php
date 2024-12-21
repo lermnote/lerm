@@ -22,7 +22,7 @@
 <body <?php body_class(); ?>>
 	<?php wp_body_open(); ?>
 	<div id="page" class="site">
-		<header id="site-header" class="site-header" itemscope="" itemtype="http://schema.org/WPHeader">
+		<header id="site-header" class="card site-header" itemscope="" itemtype="http://schema.org/WPHeader">
 			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
 				<div class="container">
 					<!-- .navbar-brand  begin -->

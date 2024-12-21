@@ -63,10 +63,8 @@ class Setup {
 		add_action( 'template_redirect', array( __CLASS__, 'add_post_views' ) );
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
-		add_action( 'widgets_init', array( __CLASS__, 'widgets' ) );
 
-		// add_filter( 'wp_tag_cloud', array( __CLASS__, 'tag_cloud' ), 10, 2 );
-		// add_filter( 'tag_cloud_sort', array( __CLASS__, 'tag_cloud' ), 10, 2 );
+		add_filter( 'tag_cloud_sort', array( __CLASS__, 'tag_cloud_sort' ), 10, 2 );
 	}
 
 	/**
@@ -182,9 +180,18 @@ class Setup {
 	// Update post views count.
 	public static function add_post_views() {
 		if ( is_singular( 'post' ) && ! is_admin() ) {
-			$post_ID    = get_queried_object_id();
-			$post_views = (int) get_post_meta( $post_ID, 'pageviews', true );
-			update_post_meta( 'post', $post_ID, 'pageviews', $post_views + 1 );
+			$post_ID = get_queried_object_id();
+
+			// Check Cookie
+			if ( ! isset( $_COOKIE[ 'post_viewed_' . $post_ID ] ) ) {
+				$post_views = (int) get_post_meta( $post_ID, 'pageviews', true );
+
+				if ( ! update_post_meta( $post_ID, 'pageviews', ( $post_views + 1 ) ) ) {
+					add_post_meta( $post_ID, 'pageviews', 1, true );
+				}
+				//Set cookies
+				setcookie( 'post_viewed_' . $post_ID, '1', time() + 3600, '/' ); // 1 小时有效
+			}
 		}
 	}
 
@@ -220,46 +227,15 @@ class Setup {
 	}
 
 	/**
-	 * Register custom widgets
-	 *
-	 * @return void
-	 */
-	public static function widgets() {
-		// register_widget( '\Lerm\Inc\Widgets\Popular_Posts' );
-		// register_widget( '\Lerm\Inc\Widgets\Recent_Posts' );
-		// register_widget( '\Lerm\Inc\Widgets\Recent_Comments' );
-	}
-
-		/**
-	 * Custom tags cloud args.
+	 * Custom tags cloud sort.
 	 *
 	 * @param array $args Tag cloud arguments.
 	 *
 	 * @return string|string[] Tag cloud as a string or an array, depending on 'format' argument.
 	 */
-	public static function tag_cloud( $return, $args ) {
-		// $cloud_args = array(
-		// 	'largest'  => 22,
-		// 	'smallest' => 8,
-		// 	'unit'     => 'pt',
-		// 	'number'   => 22,
-		// 	'orderby'  => 'count',
-		// 	'order'    => 'DESC',
-		// );
-
-		// $args = wp_parse_args( $cloud_args, $args );
-
-		$tags = get_terms(
-			array_merge(
-				$args,
-				array(
-					'orderby' => 'count',
-					'order'   => 'DESC',
-				)
-			)
-		); // Always query top tags.
-
-		$return = wp_generate_tag_cloud( $tags, $args );
-		return $return;
+	public static function tag_cloud_sort( $args ) {
+		$args['orderby'] = 'count';
+		$args['order']   = 'DESC';
+		return $args;
 	}
 }

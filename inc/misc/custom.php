@@ -103,13 +103,8 @@ class Custom {
 	 */
 	public static function custom_css() {
 		wp_add_inline_style(
-			'lerm_style',
+			'main_style',
 			sprintf( '%s', self::$args['custom_css'] )
 		);
 	}
-
-
-
-
-
 }

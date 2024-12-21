@@ -26,7 +26,7 @@ class Enqueue {
 
 	public static $styles = array(
 		'bootstrap'  => LERM_URI . 'assets/css/bootstrap.min.css',
-		'lerm_font'  => LERM_URI . 'assets/css/lerm-font.min.css',
+		'lerm_font'  => LERM_URI . 'assets/css/lerm-icons.css',
 		'animate'    => LERM_URI . 'assets/css/animate.min.css',
 		'solarized'  => LERM_URI . 'assets/css/solarized-dark.min.css',
 		'main_style' => LERM_URI . 'assets/css/main.css',

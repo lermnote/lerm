@@ -13,14 +13,14 @@ $like_count = get_post_meta( $post->ID, '_post_like_count', true ) ? get_post_me
 				false,
 				array(
 					'style' => 'button',
-					'class' => 'btn btn-sm btn-outline-secondary',
+					'class' => 'btn btn-sm',
 					'text'  => __( 'Like', 'lerm' ),
 					'echo'  => true,
 				)
 			);
 			?>
 			<a href="<?php comments_link(); ?>"  class="btn btn-custom entry-comment-btn">
-				<i class="fa fa-comment"></i>
+				<i class="li li-comment"></i>
 					<?php
 					/* translators: %s = comment number */
 					printf( esc_attr( _nx( '%s comment', '%s comments', get_comments_number(), 'comments title', 'lerm' ) ), esc_attr( number_format_i18n( get_comments_number() ) ) );

@@ -35,7 +35,7 @@ get_header();
 						</figure>
 						<div>
 							<h2 class="card-title">
-								<i class="fa fa-heart"></i>
+								<i class="li li-heart"></i>
 								<?php echo esc_html( $profile_data['nickname'] ); ?>
 								<small class="badge text-bg-light opacity-50 text-nowrap">学前班</small>
 								<span role="tablist" >
@@ -45,7 +45,7 @@ get_header();
 							<p class="card-text opacity-50 text-nowrap">
 								<?php echo esc_url( $profile_data['user_url'] ); ?>
 								<a class="btn-sm" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-									<i class="fa fa-chevron-down"></i>
+									<i class="li li-chevron-down"></i>
 								</a>
 							</p>
 							<div class="collapse" id="collapseExample">

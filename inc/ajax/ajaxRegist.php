@@ -68,7 +68,10 @@ final class AjaxRegist extends BaseAjax {
 				)
 			);
 		}
-
+		// // 可以进一步检查密码的复杂性或其他规则
+		// if ( strlen( $password ) < 8 ) {
+		// 	return new \WP_Error( 'password_too_short', __( 'Password must be at least 8 characters long.', 'lerm' ) );
+		// }
 		// Login successful
 		self::success(
 			array(

@@ -36,9 +36,9 @@ use Lerm\Inc\Core\CommentWalker;
 			<textarea id="comment" class="rq form-control mb-1"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea>',
 
 			'fields'               => array(
-				'author' => '<div class="form-group input-form"><label class="visually-hidden-focusable" for="author">Username</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
-				'email'  => '<label class="visually-hidden-focusable" for="email">Email</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-envelope"></i></span><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . __( 'E-mail', 'lerm' ) . '" required></div>',
-				'url'    => '<label class="visually-hidden-focusable" for="url">Url</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-link"></i></span><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></div></fieldset>',
+				'author' => '<div class="form-group input-form"><label class="visually-hidden-focusable" for="author">Username</label><div class="input-group mb-1"><span class="input-group-text"><i class="li li-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
+				'email'  => '<label class="visually-hidden-focusable" for="email">Email</label><div class="input-group mb-1"><span class="input-group-text"><i class="li li-envelope"></i></span><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . __( 'E-mail', 'lerm' ) . '" required></div>',
+				'url'    => '<label class="visually-hidden-focusable" for="url">Url</label><div class="input-group mb-1"><span class="input-group-text"><i class="li li-link"></i></span><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . __( 'Website', 'lerm' ) . '"></div></div></fieldset>',
 			),
 
 			'logged_in_as'         => '<p class="logged-in-as">' . sprintf(
@@ -65,7 +65,7 @@ use Lerm\Inc\Core\CommentWalker;
 			'class_form'           => 'card-body comment-form',
 			'id_submit'            => 'commentform-submit',
 			'submit_button'        => '<button type="submit" class="btn btn-sm btn-custom" id="%1$s">%4$s</button>',
-			'title_reply'          => '<i class="fa fa-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
+			'title_reply'          => '<i class="li li-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
 			'title_reply_before'   => '<h3 id="reply-title" class="comment-reply-title card-header border-bottom-0">',
 		);
 		comment_form( $args );

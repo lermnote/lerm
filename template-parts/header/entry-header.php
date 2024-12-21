@@ -5,6 +5,10 @@
  * @package Lerm
  */
 use Lerm\Inc\Core\Tags;
+
+if ( empty( get_the_title() ) ) {
+	return;
+}
 ?>
 
 <header class="entry-header d-flex flex-column text-center mb-2">

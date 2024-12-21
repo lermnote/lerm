@@ -203,9 +203,8 @@ final class PostLike extends BaseAjax {
 		$classes[] = $args['class'];
 		$id        = $is_comment ? get_comment_ID() : $id;
 		$type      = $is_comment ? 'comment' : 'post';
-		$classes[] = self::already_liked( $id, $is_comment ) ? 'btn-danger' : 'btn-outline-danger';
+		$classes[] = self::already_liked( $id, $is_comment ) ? 'btn-outline-danger' : 'btn-outline-secondary';
 		$classes[] = 'like-' . $type . '-' . $id;
-
 		// Get current like count
 		$meta_key   = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
 		$like_count = (int) get_metadata( $type, $id, $meta_key, true );
@@ -213,7 +212,7 @@ final class PostLike extends BaseAjax {
 		$count  = self::get_like_count( $like_count );
 		$output = sprintf(
 			'<%1$s  class="%2$s" data-id="%3$d" data-logged="%4$s" data-type="%5$s">
-			<span class="fa fa-heart"></span>
+			<span class="li li-heart"></span>
 			%6$s
 			</%1$s>',
 			$tag,
@@ -235,8 +234,8 @@ final class PostLike extends BaseAjax {
 	 * @since    0.5
 	 */
 	public static function get_liked_icon() {
-		/* If already using Font Awesome with your theme, replace svg with: <i class="fa fa-heart"></i> */
-		return '<i class="fa fa-heart"></i>';
+		/* If already using Font Awesome with your theme, replace svg with: <i class="li li-heart"></i> */
+		return '<i class="li li-heart"></i>';
 	}
 
 	/**
@@ -245,8 +244,8 @@ final class PostLike extends BaseAjax {
 	 * @since    0.5
 	 */
 	public static function get_unliked_icon() {
-		/* If already using Font Awesome with your theme, replace svg with: <i class="fa fa-heart-o"></i> */
-		return '<i class="fa fa-heart-o"></i>';
+		/* If already using Font Awesome with your theme, replace svg with: <i class="li li-heart-o"></i> */
+		return '<i class="li li-heart-o"></i>';
 	}
 
 	/**
