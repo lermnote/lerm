@@ -5,112 +5,161 @@
  */
 (function () {
 	'use strict';
-	const domain_name = `${window.location.protocol}//${window.location.host}`;
-	const ajaxcontent = 'page';
-	const ajaxsearch_class = 'search-form';
-	const ajaxignore = ''.split(', ');
-	const ajaxloading_error_code = 'error';
+	const state = {
+		domain_name: `${window.location.protocol}//${window.location.host}`,
+		ajaxhome: `${window.location.protocol}//${window.location.host}/`,
+		ajaxcontent: "page",
+		ajaxsearch_class: "searchform",
+		ajaxignore_string: "/page/",
+		ajaxignore: ["/page/"],
+		ajaxloading_error_code: "An error occurred while loading content.",
+		ajaxLoading: false,
+		ajaxStarted: false,
+		ajaxsearchPath: null,
+	};
 
-	let ajaxStarted = false;
-	let ajaxLoading = false;
-	let ajaxSearchPath = null;
+	// 检查容器是否存在
+	const container = document.getElementById(state.ajaxcontent);
+	if (!container) return;
 
-	if (!document.getElementById(ajaxcontent)) return;
-
-	window.onpopstate = () => {
-		if (ajaxStarted && ajaxCheckIgnore(window.location.toString())) {
+	// 浏览器后退/前进操作处理
+	window.onpopstate = (state) => {
+		if (state.ajaxStarted && !ajaxCheckIgnore(window.location.toString())) {
 			loadPage(window.location.toString(), true);
 		}
 	};
 
+	// 初始化页面加载功能
 	const initPageLoading = () => {
-		document.querySelectorAll('a').forEach(link => {
-			link.addEventListener('click', async (event) => {
-				if (link.href.startsWith(domain_name) && ajaxCheckIgnore(link.href)) {
-					event.preventDefault();
-					try {
-						// ajaxClickCode(link);
-						await loadPage(link.href);
-					} catch (err) {
-						console.error(err);
-					}
-				}
-			});
+		document.querySelectorAll("a").forEach(link => {
+			if (!link.href.includes(state.ajaxhome)) return;
+
+			link.removeEventListener("click", handleLinkClick);
+			link.addEventListener("click", event => handleLinkClick(event, link));
 		});
-		formAjaxHandle();
-		console.log('Page loaded successfully!');
-		document.querySelectorAll(`.${ajaxsearch_class}`).forEach(form => {
-			if (form.action) {
-				ajaxSearchPath = form.action;
-				form.addEventListener('submit', event => {
-					event.preventDefault();
-					submitSearch(new URLSearchParams(new FormData(form)).toString());
-				});
-			}
+
+		document.querySelectorAll(`.${state.ajaxsearch_class}`).forEach(form => {
+			if (!form.action) return;
+			state.ajaxsearchPath = form.action;
+
+			form.removeEventListener("submit", handleFormSubmit);
+			form.addEventListener("submit", handleFormSubmit);
 		});
+
+		console.log("Page interactions initialized!");
 	};
 
-	const loadPage = async (url, push, getData = null) => {
-		if (ajaxLoading) return;
-		ajaxLoading = true;
-		ajaxStarted = true;
+	// 链接点击处理
+	const handleLinkClick = (event, link) => {
+		if (!ajaxCheckIgnore(link.href)) {
+			event.preventDefault();
+			link.blur();
+			try {
+				updateNavigation(link);
+			} catch (error) {
+				console.error("Navigation update error:", error);
+			}
+			loadPage(link.href);
+		}
+	};
 
-		if (!push && history.pushState) {
-			history.pushState({ foo: Math.random() * 1001 }, 'ajax page loaded...', new URL(url).pathname);
+	// 表单提交处理
+	const handleFormSubmit = (event, state) => {
+		event.preventDefault();
+		const form = event.target;
+		const params = new URLSearchParams(new FormData(form)).toString();
+		loadPage(state.ajaxsearchPath, false, params);
+	};
+
+	// AJAX加载页面内容
+	const loadPage = async (url, isPopState = false, queryParams = null) => {
+		if (state.ajaxLoading) return;
+
+		state.ajaxLoading = true;
+		state.ajaxStarted = true;
+
+		const path = url.replace(state.domain_name, "");
+		if (!isPopState && history.pushState) {
+			history.pushState({}, "", path);
 		}
 
-		const container = document.getElementById(ajaxcontent);
-		container.style.opacity = '0.5';
+		const container = document.getElementById(state.ajaxcontent);
+		container.style.opacity = "0.5";
 
 		try {
-			const response = await fetch(url, {
-				method: 'GET',
-				headers: { 'X-Requested-With': 'XMLHttpRequest' }
+			const response = await fetch(url + (queryParams ? `?${queryParams}` : ""), {
+				method: "GET",
+				headers: { "X-Requested-With": "XMLHttpRequest" },
 			});
-			if (!response.ok) throw new Error('Network response was not ok');
+
+			if (!response.ok) throw new Error("Network response was not ok");
 
 			const data = await response.text();
-
-			const titleMatch = data.match(/<title>(.*?)<\/title>/i);
-			if (titleMatch) {
-				const tempDiv = document.createElement('div');
-				tempDiv.innerHTML = titleMatch[1];
-				document.title = tempDiv.textContent;
-			}
-
-			const newContent = new DOMParser().parseFromString(data, 'text/html').getElementById(ajaxcontent);
-			if (newContent) container.innerHTML = newContent.innerHTML;
-
-			scrollTop();
-			container.style.opacity = '1';
-			// initPageLoading();
+			updateContent(data);
+			container.style.opacity = "1";
+			window.scrollTo({ top: 0, behavior: "smooth" });
 		} catch (error) {
-			document.title = 'Error loading requested page!';
-			container.innerHTML = ajaxloading_error_code;
-			console.error('Fetch operation error:', error);
+			console.error("Error during fetch operation:", error);
+			displayError(container);
 		} finally {
-			ajaxLoading = false;
+			scrollTop();
+			navegationToggle();
+			lazyLoadImages();
+			state.ajaxLoading = false;
 		}
 	};
 
-	const submitSearch = params => {
-		if (!ajaxLoading) loadPage(ajaxSearchPath, false, params);
-	};
+	// 更新页面内容
+	const updateContent = data => {
+		const doc = new DOMParser().parseFromString(data, "text/html");
 
-	const ajaxCheckIgnore = url => ajaxignore.some(ignore => url.includes(ignore));
+		const newContent = doc.getElementById(state.ajaxcontent);
+		const title = doc.querySelector("title");
+		const description = doc.querySelector('meta[name="description"]');
 
-	const ajaxReloadCode = () => {
-		document.querySelectorAll('.mod-index__feature .img_list_6pic a').forEach(el => el.classList.remove('word_display'));
-		const rightContainer = document.getElementById('continar-right');
-		if (rightContainer) {
-			Object.assign(rightContainer.style, { position: 'static', bottom: 'auto', left: 'auto' });
+		if (newContent) {
+			container.innerHTML = newContent.innerHTML;
+			document.dispatchEvent(new Event('contentLoaded'));
+			// 重新绑定事件和初始化功能
+			initPageLoading();
+
+			formAjaxHandle();
+		}
+		if (title) {
+			document.title = title.textContent;
+		}
+		if (description) {
+			const metaDescription = document.querySelector('meta[name="description"]');
+			if (metaDescription) {
+				metaDescription.content = description.content;
+			} else {
+				const newMeta = document.createElement('meta');
+				newMeta.name = "description";
+				newMeta.content = description.content;
+				document.head.appendChild(newMeta);
+			}
 		}
 	};
 
-	const ajaxClickCode = el => {
-		document.querySelectorAll('ul.nav li').forEach(item => item.classList.remove('current-menu-item'));
-		const parentLi = el.closest('li');
-		if (parentLi) parentLi.classList.add('current-menu-item');
+	// 显示错误消息
+	const displayError = container => {
+		container.style.opacity = "1";
+		container.innerHTML = `<p>${state.ajaxloading_error_code}</p>`;
+	};
+
+	// 检查是否需要忽略某些URL
+	const ajaxCheckIgnore = (url) => state.ajaxignore.some(ignore => url.includes(ignore));
+
+	// 更新导航状态
+	const updateNavigation = link => {
+		document.querySelectorAll("ul.nav li").forEach(item => {
+			item.classList.remove("current-menu-item");
+		});
+
+		const parentLi = link.closest("li");
+		if (parentLi) {
+			parentLi.classList.add("current-menu-item");
+		}
 	};
 	/**
 	* --------------------------------------------------------------------------
@@ -368,7 +417,6 @@
 			action: 'load_more',
 			security: lermData.nonce,
 			url: lermData.url,
-			additionalData: { query: lermData.posts },
 			isThrottled: true,
 			cacheExpiryTime: 60000,
 			enableCache: false
@@ -678,6 +726,7 @@
 	//smooth scroll to top
 	const scrollTop = () => {
 		let scrollUp = document.getElementById("scroll-up");
+		if (!scrollUp) return;
 		scrollUp.addEventListener("click", (e) => {
 			e.preventDefault();
 			document.documentElement.scrollIntoView({ behavior: 'smooth' });
@@ -711,7 +760,7 @@
 			animateClass: "animated",
 			offset: 0,
 			mobile: true,
-			live:   true
+			live: true
 		});
 		wow.init();
 	};
@@ -752,6 +801,13 @@
 			) + "px";
 		}
 	}
+	const navegationToggle = () => {
+		let navbarToggler = document.querySelector('.navbar-toggler');
+		if (!navbarToggler) return;
+		navbarToggler.addEventListener('click', function () {
+			this.classList.toggle('active');
+		});
+	}
 	const siteFade = () => {
 		// Start opacity of body tag at 0 and transition it to 100% when the page is loaded.
 		document.body.classList.add('fadeInOut');
@@ -776,7 +832,7 @@
 					// Otherwise, animate fade out and then navigate
 					document.body.classList.remove('fadeInOut');
 					setTimeout(function () {
-						
+
 						window.location.href = link;
 					}, 500); // Delay for 500ms to allow the fade-out effect
 				}
@@ -784,19 +840,19 @@
 		});
 	};
 	DOMContentLoaded(() => {
-				// initPageLoading();
-				siteFade();
+		initPageLoading();
+		// siteFade();
 		requestIdleCallback(() => {
 			initializeWOW();
 			lazyLoadImages();
 			codeHighlight();
-			// calendarAddClass();
+			calendarAddClass();
 			offCanvasMenu();
+			navegationToggle();
 		});
 		scrollTop();
 		likeBtnHandle();
-		loadMoreHanle();
 		formAjaxHandle();
-
+		loadMoreHanle();
 	})
 })();

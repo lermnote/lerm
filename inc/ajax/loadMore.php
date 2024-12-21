@@ -33,11 +33,10 @@ final class LoadMore extends BaseAjax {
 
 		$postdata = wp_unslash( $_POST );
 
-		if ( ! isset( $postdata['query'], $postdata['currentPage'] ) ) {
+		if ( ! isset( $postdata['archive'], $postdata['currentPage'] ) ) {
 			self::error( __( 'Invalid request data', 'lerm' ) );
 		}
-
-		$query_args = json_decode( stripslashes( $postdata['query'] ), true );
+		$query_args = json_decode( stripslashes( $postdata['archive'] ), true );
 
 		if ( ! is_array( $query_args ) ) {
 			self::error( __( 'Invalid query parameters', 'lerm' ) );
@@ -46,13 +45,13 @@ final class LoadMore extends BaseAjax {
 		$query_args = array_merge(
 			$query_args,
 			array(
+				'post_type'      => 'post',
 				'posts_per_page' => min( self::$args['posts_count'], get_option( 'posts_per_page' ) ),
 				'paged'          => (int) $postdata['currentPage'] + 1,
 				'post_status'    => 'publish',
 			)
 		);
-
-		$posts = new WP_Query( $query_args );
+		$posts      = new WP_Query( $query_args );
 
 		if ( ! $posts->have_posts() || $query_args['paged'] > $posts->max_num_pages ) {
 			self::error( __( 'No more posts!', 'lerm' ) );
@@ -87,12 +86,9 @@ final class LoadMore extends BaseAjax {
 	 * @return array Localized data for AJAX requests.
 	 */
 	public static function ajax_l10n_data( $l10n ) {
-		global $wp_query;
-
 		$data = array(
-			'posts'    => wp_json_encode( $wp_query->query_vars ), // everything about your loop is here.
 			'loadmore' => __( 'Load more', 'lerm' ),
-			'loading'  => '<i class="fa fa-spinner fa-spin me-1"></i>' . __( 'Loading...', 'lerm' ),
+			'loading'  => '<i class="li li-spinner fa-spin me-1"></i>' . __( 'Loading...', 'lerm' ),
 			'noposts'  => __( 'No older posts found', 'lerm' ),
 		);
 		$data = wp_parse_args( $data, $l10n );
