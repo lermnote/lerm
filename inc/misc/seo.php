@@ -46,7 +46,7 @@ class Seo {
 		}
 
 		if ( self::$args['baidu_submit'] ) {
-			add_action( 'publish_post', array( __CLASS__, 'baidu_submit' ) );
+			add_action( 'publish_post', array( __CLASS__, 'post_submit' ) );
 		}
 	}
 
@@ -160,7 +160,7 @@ class Seo {
 	public function post_submit( $post_ID ) {
 		if ( ! empty( $post_ID ) ) {
 			$post_url = get_permalink( $post_ID );
-			$this->baidu_submit( $post_url, self::$args['submit_url'], self::$args['submit_token'] );
+			self::baidu_submit( $post_url, self::$args['submit_url'], self::$args['submit_token'] );
 		}
 	}
 	/**

@@ -42,11 +42,13 @@ final class LoadMore extends BaseAjax {
 			self::error( __( 'Invalid query parameters', 'lerm' ) );
 		}
 
+		$load_count = min( self::$args['posts_count'], get_option( 'posts_per_page' ) );
+
 		$query_args = array_merge(
 			$query_args,
 			array(
 				'post_type'      => 'post',
-				'posts_per_page' => min( self::$args['posts_count'], get_option( 'posts_per_page' ) ),
+				'posts_per_page' => $load_count,
 				'paged'          => (int) $postdata['currentPage'] + 1,
 				'post_status'    => 'publish',
 			)
@@ -88,7 +90,7 @@ final class LoadMore extends BaseAjax {
 	public static function ajax_l10n_data( $l10n ) {
 		$data = array(
 			'loadmore' => __( 'Load more', 'lerm' ),
-			'loading'  => '<i class="li li-spinner fa-spin me-1"></i>' . __( 'Loading...', 'lerm' ),
+			'loading'  => '<i class="li li-spinner me-1"></i>' . __( 'Loading...', 'lerm' ),
 			'noposts'  => __( 'No older posts found', 'lerm' ),
 		);
 		$data = wp_parse_args( $data, $l10n );
