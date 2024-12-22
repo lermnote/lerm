@@ -23,7 +23,6 @@
             "Inc/Functions/functions-layout.php",
 			"Inc/Functions/functions-opengraph.php",
 			"Inc/Functions/function-login.php",
-			"Inc/Functions/functions-icon.php",
 			"Inc/Functions/helpers.php"
         ]
 	}
