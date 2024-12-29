@@ -56,7 +56,7 @@ $urememberme = array(
 	<hr class="my-3">
 	<div class="text-center ">
 		<span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span>
-		<a id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit">
+		<a  href="http://localhost/lerm/regist" id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit">
 			<?php echo esc_html__( 'Register', 'lerm' ); ?>
 		</a>
 	</div>

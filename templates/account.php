@@ -40,7 +40,7 @@ get_header();
 					<button class="active visually-hidden" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-tab-pane" type="hidden" role="tab" aria-controls="login-tab-pane" aria-selected="true">Login</button>
 					<button class="visually-hidden" id="forget-tab" data-bs-toggle="tab" data-bs-target="#forget-tab-pane" type="hidden" role="tab" aria-controls="forget-tab-pane" aria-selected="false">Forget</button>
 					<?php if ( get_option( 'users_can_register' ) ) : ?>
-						<button class="visually-hidden" id="regist-tab" data-bs-toggle="tab" data-bs-target="#regist-tab-pane" type="hidden" role="tab" aria-controls="regist-tab-pane" aria-selected="false">Regist</button>
+						<!-- <button class="visually-hidden" id="regist-tab" data-bs-toggle="tab" data-bs-target="#regist-tab-pane" type="hidden" role="tab" aria-controls="regist-tab-pane" aria-selected="false">Regist</button> -->
 					<?php endif; ?>
 				</div>
 
@@ -65,25 +65,25 @@ get_header();
 	</div>
 </main>
 <script>
-	<?php if ( ! is_user_logged_in() ) : ?>
-	document.addEventListener("DOMContentLoaded", function (e) {
-		document.getElementById("forget-btn").addEventListener('click',function(e){
-			document.getElementById("forget-tab").click();
-		})
-		<?php if ( get_option( 'users_can_register' ) ) : ?>
-			document.getElementById("regist-btn").addEventListener('click',function(e){
-				document.getElementById("regist-tab").click();
-			})
-			document.getElementById("login-btn").addEventListener('click',function(e){
-			document.getElementById("login-tab").click();
-		})
-		<?php endif; ?>
+	<?php //if ( ! is_user_logged_in() ) : ?>
+	// document.addEventListener("DOMContentLoaded", function (e) {
+	// 	document.getElementById("forget-btn").addEventListener('click',function(e){
+	// 		document.getElementById("forget-tab").click();
+	// 	})
+	// 	<?php //if ( get_option( 'users_can_register' ) ) : ?>
+	// 		document.getElementById("regist-btn").addEventListener('click',function(e){
+	// 			document.getElementById("regist-tab").click();
+	// 		})
+	// 		document.getElementById("login-btn").addEventListener('click',function(e){
+	// 		document.getElementById("login-tab").click();
+	// 	})
+	// 	<?php //endif; ?>
 
-		document.getElementById("login-btn2").addEventListener('click',function(e){
-			document.getElementById("login-tab").click();
-		})
-	})
-	<?php endif; ?>
+	// 	document.getElementById("login-btn2").addEventListener('click',function(e){
+	// 		document.getElementById("login-tab").click();
+	// 	})
+	// })
+	<?php //endif; ?>
 </script>
 <?php
 get_footer();

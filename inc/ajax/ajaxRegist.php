@@ -1,6 +1,7 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
  * Handle ajax login
+ * 
  */
 
 namespace Lerm\Inc\Ajax;

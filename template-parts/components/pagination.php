@@ -8,7 +8,7 @@
  */
 $query = $wp_query->query_vars;
 foreach ( $query as $key => $value ) {
-	if ( empty( $value ) ) {
+	if ( empty( $value ) || ! is_scalar( $value ) ) {
 		unset( $query[ $key ] );
 	}
 }

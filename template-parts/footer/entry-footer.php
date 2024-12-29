@@ -1,5 +1,6 @@
 <?php
-\Lerm\Inc\Ajax\PostLike::already_liked( $post->ID ) ? '' : '';
+use Lerm\Inc\Ajax\PostLike;
+PostLike::already_liked( $post->ID ) ? '' : '';
 $like_class = 'like-post-' . $post->ID;
 $like_count = get_post_meta( $post->ID, '_post_like_count', true ) ? get_post_meta( $post->ID, '_post_like_count', true ) : 0;
 ?>
@@ -8,7 +9,7 @@ $like_count = get_post_meta( $post->ID, '_post_like_count', true ) ? get_post_me
 	<div class="btn-toolbar d-flex justify-content-center mt-4 mb-3">
 		<div class="text-center">
 		<?php
-			\Lerm\Inc\Ajax\PostLike::get_likes_button(
+			PostLike::get_likes_button(
 				$post->ID,
 				false,
 				array(

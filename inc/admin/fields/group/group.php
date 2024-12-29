@@ -40,8 +40,8 @@ if ( ! class_exists( 'CSF_Field_group' ) ) {
 			$title_by        = ( empty( $title_by ) ) ? array( $title_first ) : $title_by;
 			$title_by_prefix = ( ! empty( $args['accordion_title_by_prefix'] ) ) ? $args['accordion_title_by_prefix'] : '';
 
-			if ( preg_match( '/' . preg_quote( '[' . $this->field['id'] . ']' ) . '/', $this->unique ) ) {
-
+			// if ( preg_match( '/' . preg_quote( '[' . $this->field['id'] . ']' ) . '/', $this->unique ) ) {
+			if ( preg_match( '/' . preg_quote( '[' . $this->field['id'] . ']', '/' ) . '/', $this->unique ) ) {
 				echo '<div class="csf-notice csf-notice-danger">' . esc_html__( 'Error: Field ID conflict.', 'csf' ) . '</div>';
 
 			} else {
