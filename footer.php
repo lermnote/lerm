@@ -7,7 +7,7 @@
  * @since  1.00
  */
 ?>
-
+</main>
 <footer class="card footer" itemscope="" itemtype="http://schema.org/WPFooter">
 	<?php if ( ! is_404() && ( is_home() || is_front_page() ) ) : ?>
 		<div class="container card-body">

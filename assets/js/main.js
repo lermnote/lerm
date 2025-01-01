@@ -7,6 +7,27 @@
 	'use strict';
 
 	/**
+	 * --------------------------------------------------------------------------
+	 * DOM Utilities
+	 * --------------------------------------------------------------------------
+	 */
+	/**
+	 * Utility function to add a global event listener for a specific selector.
+	 * @param {string} type - Event type (e.g., "click", "mouseover").
+	 * @param {string} selector - CSS selector to match target elements.
+	 * @param {Function} callback - Function to execute when event is triggered.
+	 */
+	const addEventListener = (type, selector, callback) => {
+		document.addEventListener(type, event => {
+			const targetElement = event.target.closest(selector);
+			if (targetElement && targetElement.matches(selector)) {
+				event.preventDefault();
+				callback(event, targetElement);
+			}
+		});
+	}
+
+	/**
 	 * BaseService - Handles API interactions with reusable methods
 	 */
 	class BaseService {
@@ -24,16 +45,13 @@
 				headers: { ...headers },
 				body: method !== 'GET' ? body : null,
 			};
+
 			try {
 				const response = await fetch(url, options);
 				if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 				return await response.json();
 			} catch (error) {
-				if (error.name === 'AbortError') {
-					console.warn('Fetch aborted');
-				} else {
-					this.handleError(error);
-				}
+				this.handleError(error);
 				throw error;
 			}
 		}
@@ -114,27 +132,6 @@
 				button.removeAttribute('disabled');
 			}
 		}
-	}
-
-	/**
-	 * --------------------------------------------------------------------------
-	 * DOM Utilities
-	 * --------------------------------------------------------------------------
-	 */
-	/**
-	 * Utility function to add a global event listener for a specific selector.
-	 * @param {string} type - Event type (e.g., "click", "mouseover").
-	 * @param {string} selector - CSS selector to match target elements.
-	 * @param {Function} callback - Function to execute when event is triggered.
-	 */
-	const addEventListener = (type, selector, callback) => {
-		document.addEventListener(type, event => {
-			const targetElement = event.target.closest(selector);
-			if (targetElement && targetElement.matches(selector)) {
-				event.preventDefault();
-				callback(event, targetElement);
-			}
-		});
 	}
 
 	/**
@@ -254,31 +251,43 @@
 	 * --------------------------------------------------------------------------
 	 */
 	class LoadPageService extends BaseService {
-		constructor({ apiUrl, containerId, ignoreUrls = [], errorText = "An error occurred while loading content." }) {
+		constructor({ apiUrl, action, containerId, allowUrls = [], ignoreUrls = [], cacheExpiry = 5 * 60 * 1000 }) {
 			super(apiUrl);
 			this.containerId = containerId;
 			this.ignoreUrls = ignoreUrls;
-			this.errorText = errorText;
+			this.allowUrls = allowUrls;
+			this.action = action;
+			this.cacheExpiry = cacheExpiry;
 			this.state = {
 				ajaxLoading: false,
 				ajaxStarted: false,
 			};
+
+			// Pre-bind methods to ensure correct 'this' context
+			this.onPopState = this.onPopState.bind(this);
+			this.shouldInterceptLink = this.shouldInterceptLink.bind(this);
+			this.loadPage = this.loadPage.bind(this);
+			this.ajaxClickCode = this.ajaxClickCode.bind(this);
 		}
 
 		init () {
-			this.bindLinkClicks((link) => this.shouldInterceptLink(link), (href) => this.loadPage(href));
-			this.bindSearchForm('form[method="GET"]', (action, params) => this.loadPage(action, false, params));
-			window.onpopstate = () => this.handlePopState();
+			this.onLinkClicks(this.shouldInterceptLink, this.loadPage);
+			this.onSearchForm('form[method="GET"]', this.loadPage);
+			window.onpopstate = this.onPopState;
 			console.log("LoadPageService initialized.");
+			;
 		}
+
 		/**
-		* Example: Bind click events to links with interception logic.
-		* @param {Function} interceptCallback - Callback function to determine if a link should be intercepted.
-		*/
-		bindLinkClicks = (interceptCallback, callback) => {
+		 * Example: Bind click events to links with interception logic.
+		 * Uses event delegation for better performance.
+		 * @param {Function} interceptCallback - Callback function to determine if a link should be intercepted.
+		 */
+		onLinkClicks = (interceptCallback, callback) => {
 			addEventListener("click", "a", (event, link) => {
 				if (interceptCallback && interceptCallback(link)) {
 					event.preventDefault();
+					this.updateNavState(link); // 更新导航状态
 					callback(link.href);
 				}
 			});
@@ -289,31 +298,64 @@
 		 * @param {string} selector - CSS selector for the forms
 		 * @param {Function} callback - Logic to handle the form submission
 		 */
-		bindSearchForm = (selector, callback) => {
+		onSearchForm = (selector, callback) => {
 			addEventListener("submit", selector, (event, form) => {
-				event.preventDefault(); // Prevent default form submission
-				const params = new URLSearchParams(new FormData(form)).toString(); // Serialize form data to query string
-				callback(form.action, params); // Execute the callback with action URL and parameters
+				event.preventDefault();
+				const params = new URLSearchParams(new FormData(form)).toString();
+				callback(form.action, params);
 			});
 		};
+
 		// Handle browser back/forward navigation
-		handlePopState () {
-			if (this.state.ajaxStarted && !this.isIgnoredUrl(window.location.href)) {
-				this.loadPage(window.location.href, true);
+		onPopState () {
+			if (!this.state.ajaxStarted && !this.isIgnoredUrl(window.location.href)) {
+				this.loadPage(window.location.href);
 			}
 		}
+
 		/**
-		 * Determine if a link should be intercepted for custom handling
-		 * @param {HTMLAnchorElement} link - The link element to evaluate
-		 * @returns {boolean} - Returns true if the link should be intercepted
+		 * Cache page content in localStorage.
+		 * @param {string} url - The URL to cache.
+		 * @param {object} data - The page content data to cache.
 		 */
-		shouldInterceptLink (link) {
-			return (
-				link.href.includes(window.location.origin) && // Only intercept internal links
-				!this.isIgnoredUrl(link.href) &&              // Exclude links to ignored URLs
-				!this.state.ajaxLoading                       // Ensure no concurrent loading is happening
-			);
+		cachePage (url, data) {
+			const cache = JSON.parse(localStorage.getItem('pageCache') || '{}');
+			cache[url] = { data, timestamp: Date.now() };
+			localStorage.setItem('pageCache', JSON.stringify(cache));
 		}
+
+		/**
+		 * Retrieve cached page content.
+		 * @param {string} url - The URL of the cached page.
+		 * @returns {object|null} - The cached data or null if expired.
+		 */
+		getCachedPage (url) {
+			const cache = JSON.parse(localStorage.getItem('pageCache') || '{}');
+			const cachedEntry = cache[url];
+
+			// If cached data exists and is not expired, return it
+			if (cachedEntry && (Date.now() - cachedEntry.timestamp) < this.cacheExpiry) {
+				return cachedEntry.data;
+			}
+
+			// If expired or not present, delete the entry and return null
+			if (cachedEntry) {
+				delete cache[url];
+				localStorage.setItem('pageCache', JSON.stringify(cache));
+			}
+
+			return null;
+		}
+
+		/**
+		 * Save the current page state to sessionStorage.
+		 * @param {string} url - The page URL.
+		 * @param {object} data - The page content data.
+		 */
+		savePageState (url, data) {
+			sessionStorage.setItem("ajaxPageState", JSON.stringify({ url, data, scrollY: window.scrollY }));
+		}
+
 		/**
 		 * Load a page via AJAX and dynamically update the content.
 		 * @param {string} url - The URL to load.
@@ -333,32 +375,51 @@
 
 			// Update browser history
 			if (!isPopState && history.pushState) {
-				const updatedUrl = params ? `${url}?${params}` : url;
+				const updatedUrl = params ? `${url}?${new URLSearchParams(params).toString()}` : url;
 				history.pushState({}, "", new URL(updatedUrl, window.location.origin).href);
 			}
-			fadeOut(container);
+
+			const fullUrl = params ? `${url}?${new URLSearchParams(params).toString()}` : url;
+			const cachedData = this.getCachedPage(fullUrl);
+
+			if (cachedData) {
+				console.log("Using cached data for:", fullUrl);
+
+				// 优化加载顺序：先淡出动画，再更新内容，最后淡入
+				this.fadeOut(container, () => {
+					this.updatePageContent(container, cachedData);
+					this.fadeIn(container);
+					window.scrollTo({ top: 0, behavior: "smooth" });
+					this.state.ajaxLoading = false; // 动画完成后解除锁定状态
+				});
+				return;
+			}
 
 			try {
-				const fullUrl = params ? `${url}?${params}` : url;
+				this.fadeOut(container);
 
 				const response = await this.fetchData({
-					url: `${this.apiUrl}?action=load_page_content&url=${encodeURIComponent(fullUrl)}`,
-					method: "GET"
+					url: `${this.apiUrl}?action=${this.action}&url=${fullUrl}`,
+					method: "GET",
 				});
+
 				if (response.success) {
 					this.updatePageContent(container, response.data);
+					this.cachePage(fullUrl, response.data);
+					this.savePageState(fullUrl, response.data);
 				} else {
-					throw new Error(response.message || this.errorText);
+					throw new Error(response.message);
 				}
-				fadeIn(container);
+				this.fadeIn(container);
 				window.scrollTo({ top: 0, behavior: "smooth" });
 			} catch (error) {
 				console.error("Error during page load:", error);
-				this.displayError(container);
+				this.displayError(container, "Failed to load page.");
 			} finally {
 				this.state.ajaxLoading = false;
 			}
 		}
+
 		/**
 		 * Update the page content dynamically.
 		 * @param {HTMLElement} container - The container element to update.
@@ -371,10 +432,12 @@
 			this.updateMeta("keywords", data.meta_keywords);
 
 			container.innerHTML = data.content || "";
+
 			document.dispatchEvent(new Event("contentLoaded"));
 		}
+
 		/**
-		 * Update meta tags dynamically.
+		 * Dynamically update meta tags.
 		 * @param {string} name - The name of the meta tag.
 		 * @param {string} content - The content for the meta tag.
 		 */
@@ -389,6 +452,55 @@
 			meta.setAttribute("content", content);
 		}
 		/**
+		 * Updates the navigation menu's active state.
+		 * Removes the 'active' class from all navigation links and adds it to the clicked link.
+		 *
+		 * @param {HTMLElement} el - The navigation link element that was clicked.
+		 */
+		updateNavState (el) {
+			if (!el) return;
+
+			// Select all navigation links
+			const navLinks = document.querySelectorAll('.nav-link');
+
+			// Remove 'active' class from all navigation links
+			navLinks.forEach(link => link.classList.remove('active'));
+
+			// Add 'active' class to the clicked link
+			el.classList.add('active');
+		}
+		/**
+		 * Determine if a link should be intercepted.
+		 * @param {HTMLAnchorElement} link - The link to evaluate.
+		 * @returns {boolean} - True if the link should be intercepted.
+		 */
+		shouldInterceptLink (link) {
+			return (
+				link.href.includes(window.location.origin) &&
+				this.shouldProcessUrl(link.href) &&
+				!this.state.ajaxLoading
+			);
+		}
+
+		/**
+		 * Determine if a URL should be processed.
+		 * @param {string} url - The URL to evaluate.
+		 * @returns {boolean} - True if the URL should be processed.
+		 */
+		shouldProcessUrl (url) {
+			return this.isAllowedUrl(url) && !this.isIgnoredUrl(url);
+		}
+
+		/**
+		 * Check if a URL is explicitly allowed
+		 * @param {string} url - The URL to evaluate
+		 * @returns {boolean} - Returns true if the URL matches any allowed pattern
+		 */
+		isAllowedUrl (url) {
+			return this.allowUrls.length === 0 || this.allowUrls.some(allow => url.includes(allow));
+		}
+
+		/**
 		 * Check if a URL is in the ignore list
 		 * @param {string} url - The URL to evaluate
 		 * @returns {boolean} - Returns true if the URL matches any ignored pattern
@@ -396,14 +508,63 @@
 		isIgnoredUrl (url) {
 			return this.ignoreUrls.some(ignore => url.includes(ignore));
 		}
+
 		/**
 		 * Display an error message in the container.
 		 * @param {HTMLElement} container - The container to display the error in.
 		 * @param {string} message - The error message to display.
 		 */
 		displayError (container, message) {
-			fadeIn(container);
+			this.fadeIn(container);
 			container.innerHTML = `<p class="text-danger">${message}</p>`;
+		}
+
+		/**
+		 * Fade-in animation.
+		 * @param {HTMLElement} element - The element to fade in.
+		 */
+		fadeIn (element) {
+			element.style.opacity = 0.5;
+			// element.style.visibility = "visible";
+			const duration = 500;
+			const startTime = performance.now();
+
+			const fade = (currentTime) => {
+				const elapsed = currentTime - startTime;
+				const progress = Math.min(elapsed / duration, 1);
+				element.style.opacity = progress;
+
+				if (progress < 1) {
+					requestAnimationFrame(fade);
+				}
+			};
+
+			requestAnimationFrame(fade);
+		}
+
+		/**
+		 * Fade-out animation.
+		 * @param {HTMLElement} element - The element to fade out.
+		 * @param {Function} [callback] - Optional callback after fade-out completes.
+		 */
+		fadeOut (element, callback) {
+			const duration = 500;
+			const startTime = performance.now();
+
+			const fade = (currentTime) => {
+				const elapsed = currentTime - startTime;
+				const progress = Math.min(elapsed / duration, 1);
+				element.style.opacity = 1.2 - progress;
+
+				if (progress < 1) {
+					requestAnimationFrame(fade);
+				} else {
+					// element.style.visibility = "hidden";
+					if (callback) callback();
+				}
+			};
+
+			requestAnimationFrame(fade);
 		}
 	}
 
@@ -515,7 +676,7 @@
 		}
 	};
 
-	const validateField = (field, rules,formValues={}) => {
+	const validateField = (field, rules, formValues = {}) => {
 		const rule = rules[field.name];
 		const value = field.value;
 
@@ -529,10 +690,9 @@
 			hasSpecialChar,
 			match,
 			errorMessage,
-		  } = rule;
-		  console.log(pattern);
-		if (pattern && !pattern.test(value)) {
+		} = rule;
 
+		if (pattern && !pattern.test(value)) {
 			return { valid: false, message: errorMessage?.pattern || 'Invalid format' };
 		}
 		if (minLength && value.length < minLength) {
@@ -673,8 +833,13 @@
 			let isFormValid = true;
 			const formValues = Object.fromEntries(new FormData(form));
 
+			const isValid = form.checkValidity();
+			if (!isValid) {
+				form.reportValidity(); // 浏览器提示验证错误
+			}
+
 			fields.forEach(field => {
-				const { valid, message } = validateField(field, validationRules,formValues);
+				const { valid, message } = validateField(field, validationRules, formValues);
 				if (!valid) {
 					field.classList.add('is-invalid');
 					this.displayMessage(message, 'danger');
@@ -686,13 +851,6 @@
 
 			return isFormValid;
 		};
-		// validateForm (form) {
-		// 	const isValid = form.checkValidity();
-		// 	if (!isValid) {
-		// 		form.reportValidity(); // 浏览器提示验证错误
-		// 	}
-		// 	return isValid;
-		// }
 
 		beforeSubmit = () => { }
 		afterSubmit (form) {
@@ -920,44 +1078,34 @@
 			toggler.classList.toggle("active");
 		});
 	};
-	const fadeOut = (element, duration) => {
-		let opacity = 1; // 初始不透明度
-		const interval = 50; // 每次更新的间隔时间（毫秒）
-		const step = interval / duration; // 每次减少的透明度
-
-		const fade = setInterval(() => {
-			opacity -= step;
-			if (opacity <= 0.5) {
-				clearInterval(fade);
-				opacity = 0.5; // 确保不透明度不会低于 0
-			}
-			element.style.opacity = opacity;
-		}, interval);
-	}
-	const fadeIn = (element, duration) => {
-		let opacity = 0.5; // 初始不透明度
-		const interval = 50; // 每次更新的间隔时间（毫秒）
-		const step = interval / duration; // 每次增加的透明度
-
-		const fade = setInterval(() => {
-			opacity += step;
-			if (opacity >= 1) {
-				clearInterval(fade);
-				opacity = 1; // 确保不透明度不会高于 1
-			}
-			element.style.opacity = opacity;
-		}, interval);
-	}
 
 	const loadPageService = new LoadPageService({
 		apiUrl: lermData.url,
+		containerId: "page-ajax",
+		action: 'load_page_content',
+		ignoreUrls: ["/regist", "/reset/", "/wp-admin/", "/wp-login.php"],
+		errorText: "Failed to load the content. Please try again later."
+	});
+	const loadRegistService = new LoadPageService({
+		apiUrl: lermData.url,
 		containerId: "myTabContent",
-		ignoreUrls: ["/page/", "/wp-admin/", "/wp-login.php"],
+		action: 'load_form',
+		allowUrls: ["/regist", "/login/", "/reset/"],
 		errorText: "Failed to load the content. Please try again later."
 	});
 
 	DOMContentLoaded(() => {
+
+		// loadRegistService.init();
 		loadPageService.init();
+		// Handle specific interactions (e.g., registration button click)
+		// document.querySelectorAll(".change-form").forEach((link) => {
+		// 	link.addEventListener("click", (event) => {
+		// 		event.preventDefault();
+		// 		loadRegistService.loadPage(link.href, "load_form", false, { action_type: event.target.dataset.form });
+		// 	});
+		// });
+
 		requestIdleCallback(() => {
 			initializeWOW();
 			lazyLoadImages();
@@ -975,5 +1123,12 @@
 	document.addEventListener('contentLoaded', () => {
 		scrollTop();
 		formAjaxHandle();
+		// Handle specific interactions (e.g., registration button click)
+		document.querySelectorAll(".change-form").forEach((link) => {
+			link.addEventListener("click", (event) => {
+				event.preventDefault();
+				loadRegistService.loadPage(link.href, "load_form", false, { action_type: event.target.dataset.form });
+			});
+		});
 	});
 })();

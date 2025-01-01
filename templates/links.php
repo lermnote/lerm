@@ -14,7 +14,6 @@ $link_categories = get_terms(
 );
 
 ?>
-<main role="main" class="container"><!--.container-->
 	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
@@ -88,6 +87,5 @@ $link_categories = get_terms(
 		</div>
 		<?php get_sidebar(); ?>
 	</div><!--.row-->
-</main><!--.container-->
 <?php
 get_footer();

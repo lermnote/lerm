@@ -37,7 +37,6 @@ foreach ( $langs as $lang ) {
 $row_class    = ( 'layout-1c-narrow' === lerm_site_layout() ) ? 'justify-content-md-center' : '';
 $colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_site_layout() ) ? 'col-md-12' : 'col-lg-8';
 ?>
-<main role="main" class="container"><!--.container-->
 	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
 	<div class="row <?php echo esc_attr( $row_class ); ?> "><!--.row-->
 		<div class="<?php echo esc_attr( $colunm_class ); ?> px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
@@ -65,6 +64,5 @@ $colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_site_layout() ) ? 'col-
 </div>
 <?php get_sidebar(); ?>
 		</div><!--.row-->
-</main><!--.container-->
 <?php
 get_footer();

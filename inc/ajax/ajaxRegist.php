@@ -1,7 +1,7 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
  * Handle ajax login
- * 
+ *
  */
 
 namespace Lerm\Inc\Ajax;
@@ -69,10 +69,7 @@ final class AjaxRegist extends BaseAjax {
 				)
 			);
 		}
-		// // 可以进一步检查密码的复杂性或其他规则
-		// if ( strlen( $password ) < 8 ) {
-		// 	return new \WP_Error( 'password_too_short', __( 'Password must be at least 8 characters long.', 'lerm' ) );
-		// }
+
 		// Login successful
 		self::success(
 			array(
@@ -80,39 +77,6 @@ final class AjaxRegist extends BaseAjax {
 				'redirect' => self::login_redirect( '', $user_id ),
 			)
 		);
-		 // Post values
-		//  $username = sanitize_text_field($_POST['register_username']);
-		//  $password = sanitize_text_field($_POST['register_password']);
-		//  $email = sanitize_text_field($_POST['register_email']);
-		//  $name = sanitize_text_field($_POST['register_name']);
-		//  $nick = sanitize_text_field($_POST['register_name']);
-
-		//  $userdata = array(
-		// 	 'user_login' => $username,
-		// 	 'user_pass' => $password,
-		// 	 'user_password' => $password,
-		// 	 'user_email' => $email,
-		// 	 'first_name' => $name,
-		// 	 'nickname' => $nick,
-		//  );
-
-		//  $user_id = wp_insert_user($userdata);
-
-		//  // add user meta
-		//  $custom_user_meta_value = 'custom_user_meta_value';
-		//  add_user_meta( $user_id, 'custom_user_meta', $custom_user_meta_value);
-
-		//  // Return
-		//  if (!is_wp_error($user_id)) {
-		// 	 $user_signon = wp_signon($userdata, false);
-		// 	 if (!is_wp_error($user_signon)) {
-		// 		 wp_send_json(array('status' => 2, 'message' => __('your registration is successfuled and logined.')));
-		// 	 } else {
-		// 		 wp_send_json(array('status' => 1, 'message' => __('your registration is successfuled and logined')));
-		// 	 }
-		//  } else {
-		// 	 wp_send_json(array('status' => 0, 'message' => __($user_id->get_error_message())));
-		//  }
 	}
 
 	/**

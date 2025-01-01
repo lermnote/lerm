@@ -7,7 +7,7 @@
 ?>
 
 <!--start reset-->
-<form method="post" id="reset">
+<form method="post" id="reset" action = "reset">
 	<h2><?php echo esc_html__( 'PASSWORD RESET', 'lerm' ); ?></h2>
 	<label for="reset-email"><?php echo esc_html__( 'Enter your email address and we\'ll send you an email with instructions to reset your password.', 'lerm' ); ?></label>
 	<div class="form-floating mb-3">
@@ -19,5 +19,6 @@
 	<small id="reset-msg" class="invisible user-msg text-danger wow">#</small>
 </form>
 <hr class="my-3">
-<div class="text-center"><span><?php echo esc_html__( 'Return to login', 'lerm' ); ?> </span> <a id="login-btn2" type="submit" name='btn_submit' class="my-4" type="submit"><?php echo esc_html__( 'Login', 'lerm' ); ?></a></div>
+<div class="text-center"><span><?php echo esc_html__( 'Return to login', 'lerm' ); ?> </span> 
+<a  href="http://localhost/lerm/login/" id="login-btn2"  class="change-form my-4" type="submit" data-form="login"><?php echo esc_html__( 'Login', 'lerm' ); ?></a></div>
 <!--end reset-->

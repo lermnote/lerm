@@ -21,7 +21,6 @@ get_header();
 		background-position: center;
 	}
 </style>
-<main role="main" class="container"><!--.container-->
 	<div class="row py-3">
 		<div class="col-lg-7 text-center text-lg-start d-none d-lg-block mb-3">
 			<?php
@@ -63,7 +62,6 @@ get_header();
 			</section>
 		</div>
 	</div>
-</main>
 <script>
 	<?php //if ( ! is_user_logged_in() ) : ?>
 	// document.addEventListener("DOMContentLoaded", function (e) {

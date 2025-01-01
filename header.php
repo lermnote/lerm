@@ -36,3 +36,5 @@
 		if ( lerm_options( 'slide_position' ) === 'full_width' ) {
 			get_template_part( 'template-parts/components/carousel' );
 		}
+		?>
+		<main role="main" class="container" id="page-ajax"><!--.container-->

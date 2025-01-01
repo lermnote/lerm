@@ -40,7 +40,7 @@ $forms = array(
 
 <?php if ( get_option( 'users_can_register' ) ) : ?>
 	<!--start regist-->
-	<form method="post" id="regist">
+	<form method="post" id="regist"  action="regist">
 		<h2><?php echo esc_html__( 'Regist', 'lerm' ); ?></h2>
 		<?php
 		echo float_form_input( $forms['username'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
@@ -68,7 +68,7 @@ $forms = array(
 	<hr class="my-3">
 	<div class="text-center ">
 		<span><?php echo esc_html__( 'Have already an account?', 'lerm' ); ?> </span>
-		<a id="login-btn" type="submit" name='btn_submit' class="my-4" type="submit">
+		<a  href="http://localhost/lerm/login/" id="login-btn" type="submit" name='btn_submit' class="change-form my-4" type="submit" data-form="login">
 			<?php echo esc_html__( 'Login', 'lerm' ); ?>
 		</a>
 	</div>
