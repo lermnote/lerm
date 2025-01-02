@@ -42,7 +42,7 @@ $colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_site_layout() ) ? 'col-
 	<div class="row <?php echo esc_attr( $row_class ); ?> "><!--.row-->
 		<div class="<?php echo esc_attr( $colunm_class ); ?> px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
 
-	<div class="site-main card">
+	<div class="card site-main">
 		<?php
 		if ( have_posts() ) :
 			while ( have_posts() ) :

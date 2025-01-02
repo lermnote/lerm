@@ -3,150 +3,56 @@
  *
  * @package Lerm https://lerm.net
  */
-(function () {
+(() => {
 	'use strict';
-	const domain_name = `${window.location.protocol}//${window.location.host}`;
-	const ajaxcontent = 'page';
-	const ajaxsearch_class = 'search-form';
-	const ajaxignore = ''.split(', ');
-	const ajaxloading_error_code = 'error';
 
-	let ajaxStarted = false;
-	let ajaxLoading = false;
-	let ajaxSearchPath = null;
-
-	if (!document.getElementById(ajaxcontent)) return;
-
-	window.onpopstate = () => {
-		if (ajaxStarted && ajaxCheckIgnore(window.location.toString())) {
-			loadPage(window.location.toString(), true);
-		}
-	};
-
-	const initPageLoading = () => {
-		document.querySelectorAll('a').forEach(link => {
-			link.addEventListener('click', async (event) => {
-				if (link.href.startsWith(domain_name) && ajaxCheckIgnore(link.href)) {
-					event.preventDefault();
-					try {
-						// ajaxClickCode(link);
-						await loadPage(link.href);
-					} catch (err) {
-						console.error(err);
-					}
-				}
-			});
-		});
-		formAjaxHandle();
-		console.log('Page loaded successfully!');
-		document.querySelectorAll(`.${ajaxsearch_class}`).forEach(form => {
-			if (form.action) {
-				ajaxSearchPath = form.action;
-				form.addEventListener('submit', event => {
-					event.preventDefault();
-					submitSearch(new URLSearchParams(new FormData(form)).toString());
-				});
-			}
-		});
-	};
-
-	const loadPage = async (url, push, getData = null) => {
-		if (ajaxLoading) return;
-		ajaxLoading = true;
-		ajaxStarted = true;
-
-		if (!push && history.pushState) {
-			history.pushState({ foo: Math.random() * 1001 }, 'ajax page loaded...', new URL(url).pathname);
-		}
-
-		const container = document.getElementById(ajaxcontent);
-		container.style.opacity = '0.5';
-
-		try {
-			const response = await fetch(url, {
-				method: 'GET',
-				headers: { 'X-Requested-With': 'XMLHttpRequest' }
-			});
-			if (!response.ok) throw new Error('Network response was not ok');
-
-			const data = await response.text();
-
-			const titleMatch = data.match(/<title>(.*?)<\/title>/i);
-			if (titleMatch) {
-				const tempDiv = document.createElement('div');
-				tempDiv.innerHTML = titleMatch[1];
-				document.title = tempDiv.textContent;
-			}
-
-			const newContent = new DOMParser().parseFromString(data, 'text/html').getElementById(ajaxcontent);
-			if (newContent) container.innerHTML = newContent.innerHTML;
-
-			scrollTop();
-			container.style.opacity = '1';
-			// initPageLoading();
-		} catch (error) {
-			document.title = 'Error loading requested page!';
-			container.innerHTML = ajaxloading_error_code;
-			console.error('Fetch operation error:', error);
-		} finally {
-			ajaxLoading = false;
-		}
-	};
-
-	const submitSearch = params => {
-		if (!ajaxLoading) loadPage(ajaxSearchPath, false, params);
-	};
-
-	const ajaxCheckIgnore = url => ajaxignore.some(ignore => url.includes(ignore));
-
-	const ajaxReloadCode = () => {
-		document.querySelectorAll('.mod-index__feature .img_list_6pic a').forEach(el => el.classList.remove('word_display'));
-		const rightContainer = document.getElementById('continar-right');
-		if (rightContainer) {
-			Object.assign(rightContainer.style, { position: 'static', bottom: 'auto', left: 'auto' });
-		}
-	};
-
-	const ajaxClickCode = el => {
-		document.querySelectorAll('ul.nav li').forEach(item => item.classList.remove('current-menu-item'));
-		const parentLi = el.closest('li');
-		if (parentLi) parentLi.classList.add('current-menu-item');
-	};
 	/**
-	* --------------------------------------------------------------------------
-	* Lerm Theme BaseService
-	* --------------------------------------------------------------------------
-	*/
+	 * BaseService - Handles API interactions with reusable methods
+	 */
 	class BaseService {
 		constructor(apiUrl) {
 			this.apiUrl = apiUrl;
 		}
-
+		/**
+		  * Fetch data from API with flexible configuration
+		  * @param {Object} config - Request configuration object
+		  * @returns {Promise<Object>} - Parsed JSON response
+		  */
 		fetchData = async ({ url, method = 'GET', body = {}, headers = {} }) => {
+			const options = {
+				method,
+				headers: { ...headers },
+				body: method !== 'GET' ? body : null,
+			};
 			try {
-				const options = {
-					method,
-					headers: { ...headers },
-					body: method !== 'GET' ? body : null,
-				};
-
 				const response = await fetch(url, options);
-
-				if (!response.ok) {
-					throw new Error(`Error: ${response.status} - ${response.statusText}`);
-				}
-
+				if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 				return await response.json();
 			} catch (error) {
-				this.handleError(error);
+				if (error.name === 'AbortError') {
+					console.warn('Fetch aborted');
+				} else {
+					this.handleError(error);
+				}
 				throw error;
 			}
 		}
 
+		/**
+		 * Handle errors by logging them and displaying an alert.
+		 * @param {Error} error - The error object to handle.
+		 */
 		handleError = (error) => {
 			console.error("An error occurred:", error.message);
 			alert(`An error occurred: ${error.message}`);
 		}
+		/**
+		 * Rate limit a function to prevent it from being called too frequently.
+		 * @param {Function} func - The function to rate limit.
+		 * @param {number} wait - The number of milliseconds to wait before allowing the function to be called again.
+		 * @param {boolean} isThrottle - Whether to use throttling (true) or debouncing (false).
+		 * @returns {Function} - The rate-limited function.
+		 */
 		rateLimit = (func, wait, isThrottle = false) => {
 			let timeout, lastTime = 0;
 			return (...args) => {
@@ -168,14 +74,12 @@
 			};
 		}
 
-		addGlobalEventListener = (type, selector, callback) => {
-			document.addEventListener(type, event => {
-				const targetElement = event.target.closest(selector);
-				if (targetElement && targetElement.matches(selector)) {
-					callback(event, targetElement);
-				}
-			});
-		}
+		/**
+		 * Display a message in a specified element for a limited duration.
+		 * @param {string} message - The message to display.
+		 * @param {string} [type='info'] - The type of message (e.g., 'info', 'success', 'danger').
+		 * @param {number} [duration=5000] - The duration to display the message (in milliseconds).
+		 */
 		displayMessage = (message, type = 'info', duration = 5000) => {
 			if (!this.messageId) return;
 
@@ -191,47 +95,72 @@
 				}, duration);
 			}
 		}
-		toggleButton = (button, isLoading, diabled = false) => {
+		/**
+		 * Toggle the loading state of a button by adding/removing a spinner and disabling/enabling the button.
+		 * @param {HTMLElement} button - The button element to toggle.
+		 * @param {boolean} isLoading - Whether to show the loading spinner.
+		 * @param {boolean} [disabled=false] - Whether to disable the button.
+		 */
+		toggleButton = (button, isLoading, disabled = false) => {
 			if (isLoading) {
 				button.insertAdjacentHTML('afterbegin', '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> ');
-
 			} else {
-
 				const tempElement = document.querySelector('.spinner-border');
 				if (tempElement) {
 					tempElement.remove();
 				}
 			}
-			if (diabled === false) {
+			if (!disabled) {
 				button.removeAttribute('disabled');
-			};
+			}
 		}
 	}
+
+	/**
+	 * --------------------------------------------------------------------------
+	 * DOM Utilities
+	 * --------------------------------------------------------------------------
+	 */
+	/**
+	 * Utility function to add a global event listener for a specific selector.
+	 * @param {string} type - Event type (e.g., "click", "mouseover").
+	 * @param {string} selector - CSS selector to match target elements.
+	 * @param {Function} callback - Function to execute when event is triggered.
+	 */
+	const addEventListener = (type, selector, callback) => {
+		document.addEventListener(type, event => {
+			const targetElement = event.target.closest(selector);
+			if (targetElement && targetElement.matches(selector)) {
+				event.preventDefault();
+				callback(event, targetElement);
+			}
+		});
+	}
+
 	/**
 	 * --------------------------------------------------------------------------
 	 * Lerm Theme ClickService
 	 * --------------------------------------------------------------------------
 	 */
 	class ClickService extends BaseService {
-		constructor({ apiUrl, selector, action, security, url, headers = {}, additionalData = {}, isThrottled = false, cacheExpiryTime = 60000,
+		constructor({ apiUrl, selector, action, security, headers = {}, additionalData = {}, isThrottled = false, cacheExpiryTime = 60000,
 			enableCache = true }) {
 			super(apiUrl);
-			this.selector = selector;
-			this.action = action;
-			this.security = security;
-			this.url = url;
-			this.headers = headers;
-			this.additionalData = additionalData;
-			this.cacheExpiryTime = cacheExpiryTime;
-			this.enableCache = enableCache;
-
-			const clickHandler = this.handleClick;
+			Object.assign(this, {
+				selector,
+				action,
+				security,
+				headers,
+				additionalData,
+				cacheExpiryTime,
+				enableCache,
+			});
 
 			this.clickHandler = isThrottled
-				? this.rateLimit(clickHandler, 1000, true)
-				: clickHandler;
+				? this.rateLimit(this.handleClick, 1000, true)
+				: this.handleClick;
 
-			this.addGlobalEventListener('click', this.selector, this.clickHandler);
+			addEventListener('click', this.selector, this.clickHandler);
 		}
 
 		handleClick = async (event, target) => {
@@ -247,71 +176,234 @@
 			});
 
 			const cacheKey = `click_action_${this.selector}`;
-
 			if (this.enableCache && this.isCacheValid(cacheKey)) {
-				const cachedResponse = localStorage.getItem(cacheKey);
-				this.afterClickSuccess(JSON.parse(cachedResponse), target);
-			} else {
-				this.toggleButton(target, true);
-				try {
-					const response = await this.submitClickData(requestData);
-					if (this.enableCache) {
-						this.cacheResponse(cacheKey, response);
-					}
-					if (response.success) {
-						this.afterClickSuccess(response.data, target);
-					} else {
-						throw new Error(response.data || 'Unknown error occurred');
-					}
-
-				} catch (error) {
-					this.afterClickFail(error, target);
-				}
-				this.toggleButton(target, false);
+				this.useCache(cacheKey);
+				return;
 			}
+			this.toggleButton(target, true);
+			try {
+				const response = await this.fetchData({
+					url: this.apiUrl,
+					method: 'POST',
+					body: requestData.toString(),
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						...this.headers,
+					},
+				});
+
+				if (response.success) {
+					this.onSuccess(response.data, target);
+				} else {
+					throw new Error(response.data || 'Unknown error occurred');
+				}
+
+				if (this.enableCache) {
+					this.updateCache(cacheKey, response);
+				}
+			} catch (error) {
+				this.onError(error, target);
+			}
+			this.toggleButton(target, false);
 		}
-		// 提交点击数据
-		submitClickData = async (data) => {
-			return await this.fetchData({
-				url: this.url,
-				method: 'POST',
-				body: data,
-				headers: this.headers,
-			});
+		// 检查缓存是否有效
+		isCacheValid = (cacheKey) => {
+			const cachedData = sessionStorage.getItem(cacheKey);
+			const cacheTime = sessionStorage.getItem(`${cacheKey}_time`);
+			return cachedData && Date.now() - cacheTime < this.cacheExpiryTime;
+		}
+		/**
+		 * 使用缓存数据
+		 * @param {string} cacheKey
+		 */
+		useCache (cacheKey) {
+			const cachedResponse = JSON.parse(sessionStorage.getItem(cacheKey));
+			this.onSuccess(cachedResponse);
+		}
+		// 缓存响应并记录缓存时间
+		cacheResponse = (cacheKey, response) => {
+			localStorage.setItem(cacheKey, JSON.stringify(response));
+			localStorage.setItem(`${cacheKey}_time`, Date.now());
+		}
+		/**
+		 * 更新缓存
+		 * @param {string} cacheKey
+		 * @param {Object} response
+		 */
+		updateCache (cacheKey, response) {
+			sessionStorage.setItem(cacheKey, JSON.stringify(response));
+			sessionStorage.setItem(`${cacheKey}_time`, Date.now());
 		}
 
 		beforeClick = () => { console.log('Processing click...'); }
-
-		getRequsetData = () => {
-			return new URLSearchParams({
-				action: this.action,
-				security: this.security,
-				...this.additionalData
-			});
-		}
-		afterClickSuccess = (response, target) => {
+		onSuccess = (response, target) => {
 			this.displayMessage('Click action was successful!');
 			console.log('Response:', response);
 		}
-
-		afterClickFail = (error, target) => {
+		onError = (error, target) => {
 			this.displayMessage('Failed to process click action.');
 			console.error('Error:', error);
 			target.setAttribute('disabled', 'disabled');
 			target.innerHTML = error.message
 		}
-		// 检查缓存是否有效
-		isCacheValid = (cacheKey) => {
-			const cachedTime = localStorage.getItem(`${cacheKey}_time`);
-			if (!cachedTime) return false;
-			const currentTime = Date.now();
-			return currentTime - cachedTime < this.cacheExpiryTime;
+	}
+
+	/**
+	 * --------------------------------------------------------------------------
+	 * Lerm Theme LoadPageService
+	 * --------------------------------------------------------------------------
+	 */
+	class LoadPageService extends BaseService {
+		constructor({ apiUrl, containerId, ignoreUrls = [], errorText = "An error occurred while loading content." }) {
+			super(apiUrl);
+			this.containerId = containerId;
+			this.ignoreUrls = ignoreUrls;
+			this.errorText = errorText;
+			this.state = {
+				ajaxLoading: false,
+				ajaxStarted: false,
+			};
 		}
 
-		// 缓存响应并记录缓存时间
-		cacheResponse = (cacheKey, response) => {
-			localStorage.setItem(cacheKey, JSON.stringify(response));
-			localStorage.setItem(`${cacheKey}_time`, Date.now());
+		init () {
+			this.bindLinkClicks((link) => this.shouldInterceptLink(link), (href) => this.loadPage(href));
+			this.bindSearchForm('form[method="GET"]', (action, params) => this.loadPage(action, false, params));
+			window.onpopstate = () => this.handlePopState();
+			console.log("LoadPageService initialized.");
+		}
+		/**
+		* Example: Bind click events to links with interception logic.
+		* @param {Function} interceptCallback - Callback function to determine if a link should be intercepted.
+		*/
+		bindLinkClicks = (interceptCallback, callback) => {
+			addEventListener("click", "a", (event, link) => {
+				if (interceptCallback && interceptCallback(link)) {
+					event.preventDefault();
+					callback(link.href);
+				}
+			});
+		};
+		/**
+		 * Bind global search form submit events
+		 * Uses a global event listener to handle form submissions dynamically
+		 * @param {string} selector - CSS selector for the forms
+		 * @param {Function} callback - Logic to handle the form submission
+		 */
+		bindSearchForm = (selector, callback) => {
+			addEventListener("submit", selector, (event, form) => {
+				event.preventDefault(); // Prevent default form submission
+				const params = new URLSearchParams(new FormData(form)).toString(); // Serialize form data to query string
+				callback(form.action, params); // Execute the callback with action URL and parameters
+			});
+		};
+		// Handle browser back/forward navigation
+		handlePopState () {
+			if (this.state.ajaxStarted && !this.isIgnoredUrl(window.location.href)) {
+				this.loadPage(window.location.href, true);
+			}
+		}
+		/**
+		 * Determine if a link should be intercepted for custom handling
+		 * @param {HTMLAnchorElement} link - The link element to evaluate
+		 * @returns {boolean} - Returns true if the link should be intercepted
+		 */
+		shouldInterceptLink (link) {
+			return (
+				link.href.includes(window.location.origin) && // Only intercept internal links
+				!this.isIgnoredUrl(link.href) &&              // Exclude links to ignored URLs
+				!this.state.ajaxLoading                       // Ensure no concurrent loading is happening
+			);
+		}
+		/**
+		 * Load a page via AJAX and dynamically update the content.
+		 * @param {string} url - The URL to load.
+		 * @param {boolean} isPopState - Whether the call is from popstate navigation.
+		 * @param {string} [params=null] - Optional query parameters.
+		 */
+		async loadPage (url, isPopState = false, params = null) {
+			if (this.state.ajaxLoading) return;
+			this.state.ajaxLoading = true;
+
+			const container = document.getElementById(this.containerId);
+			if (!container) {
+				console.error("Container not found.");
+				this.state.ajaxLoading = false;
+				return;
+			}
+
+			// Update browser history
+			if (!isPopState && history.pushState) {
+				const updatedUrl = params ? `${url}?${params}` : url;
+				history.pushState({}, "", new URL(updatedUrl, window.location.origin).href);
+			}
+			fadeOut(container);
+
+			try {
+				const fullUrl = params ? `${url}?${params}` : url;
+
+				const response = await this.fetchData({
+					url: `${this.apiUrl}?action=load_page_content&url=${encodeURIComponent(fullUrl)}`,
+					method: "GET"
+				});
+				if (response.success) {
+					this.updatePageContent(container, response.data);
+				} else {
+					throw new Error(response.message || this.errorText);
+				}
+				fadeIn(container);
+				window.scrollTo({ top: 0, behavior: "smooth" });
+			} catch (error) {
+				console.error("Error during page load:", error);
+				this.displayError(container);
+			} finally {
+				this.state.ajaxLoading = false;
+			}
+		}
+		/**
+		 * Update the page content dynamically.
+		 * @param {HTMLElement} container - The container element to update.
+		 * @param {object} data - The new content and metadata to display.
+		 */
+		updatePageContent (container, data) {
+			document.title = data.title || document.title;
+
+			this.updateMeta("description", data.meta_description);
+			this.updateMeta("keywords", data.meta_keywords);
+
+			container.innerHTML = data.content || "";
+			document.dispatchEvent(new Event("contentLoaded"));
+		}
+		/**
+		 * Update meta tags dynamically.
+		 * @param {string} name - The name of the meta tag.
+		 * @param {string} content - The content for the meta tag.
+		 */
+		updateMeta (name, content) {
+			if (!content) return;
+			let meta = document.querySelector(`meta[name="${name}"]`);
+			if (!meta) {
+				meta = document.createElement("meta");
+				meta.setAttribute("name", name);
+				document.head.appendChild(meta);
+			}
+			meta.setAttribute("content", content);
+		}
+		/**
+		 * Check if a URL is in the ignore list
+		 * @param {string} url - The URL to evaluate
+		 * @returns {boolean} - Returns true if the URL matches any ignored pattern
+		 */
+		isIgnoredUrl (url) {
+			return this.ignoreUrls.some(ignore => url.includes(ignore));
+		}
+		/**
+		 * Display an error message in the container.
+		 * @param {HTMLElement} container - The container to display the error in.
+		 * @param {string} message - The error message to display.
+		 */
+		displayError (container, message) {
+			fadeIn(container);
+			container.innerHTML = `<p class="text-danger">${message}</p>`;
 		}
 	}
 
@@ -327,7 +419,8 @@
 		const count = data.count;
 
 		buttons.forEach(button => {
-			button.classList.toggle('liked', status === 'liked');
+			button.classList.toggle('btn-outline-danger', status === 'liked');
+			button.classList.toggle('btn-outline-secondary', status === 'unliked');
 			button.querySelector('.count').textContent = count;
 			button.setAttribute('title', status === 'liked' ? 'unlike' : 'like');
 		});
@@ -337,14 +430,14 @@
 			selector: '.like-button',
 			action: 'post_like',
 			security: lermData.like_nonce,
-			url: lermData.url,
+			apiUrl: lermData.url,
 			isThrottled: true,
 			cacheExpiryTime: 60000,
 			enableCache: false
 		};
 
 		const postLike = new ClickService(postLikeConfig);
-		postLike.afterClickSuccess = likeBtnSuccess;
+		postLike.onSuccess = likeBtnSuccess;
 	}
 
 	/**
@@ -367,13 +460,12 @@
 			selector: '.more-posts',
 			action: 'load_more',
 			security: lermData.nonce,
-			url: lermData.url,
-			additionalData: { query: lermData.posts },
+			apiUrl: lermData.url,
 			isThrottled: true,
 			cacheExpiryTime: 60000,
 			enableCache: false
 		});
-		loadMore.afterClickSuccess = appendPostsToDOM;
+		loadMore.onSuccess = appendPostsToDOM;
 	}
 	/**
 	 * --------------------------------------------------------------------------
@@ -382,7 +474,7 @@
 	 */
 	const validationRules = {
 		email: {
-			pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+			pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
 			message: 'Invalid email format',
 		},
 		username: {
@@ -423,18 +515,28 @@
 		}
 	};
 
-	const validateField = (field, rules) => {
+	const validateField = (field, rules,formValues={}) => {
 		const rule = rules[field.name];
 		const value = field.value;
 
 		if (!rule) return { valid: true };
 
-		const { pattern, minLength, hasUppercase, hasNumber, hasSpecialChar, match, errorMessage } = rule;
+		const {
+			pattern,
+			minLength,
+			hasUppercase,
+			hasNumber,
+			hasSpecialChar,
+			match,
+			errorMessage,
+		  } = rule;
+		  console.log(pattern);
 		if (pattern && !pattern.test(value)) {
-			return { valid: false, message: rule.message || 'Invalid format' };
+
+			return { valid: false, message: errorMessage?.pattern || 'Invalid format' };
 		}
 		if (minLength && value.length < minLength) {
-			return { valid: false, message: errorMessage.minLength.replace('{minLength}', minLength) };
+			return { valid: false, message: errorMessage?.minLength.replace('{minLength}', minLength) };
 		}
 		if (hasUppercase && !hasUppercase.test(value)) {
 			return { valid: false, message: errorMessage.hasUppercase };
@@ -459,71 +561,120 @@
 	};
 
 	class FormService extends BaseService {
-		constructor({ apiUrl, formId, url, action, security, headers = {}, messageId, passwordToggle = false }) {
+		constructor({ apiUrl, formId, action, security, headers = {}, messageId, passwordToggle = false }) {
 			super(apiUrl);
-			this.formId = formId;
-			this.url = url;
-			this.action = action;
-			this.security = security;
-			this.headers = headers;
-			this.messageId = messageId;
-			this.passwordToggle = passwordToggle;
+			Object.assign(this, {
+				formId,
+				action,
+				security,
+				headers,
+				messageId,
+				passwordToggle,
+			});
 
-			const form = document.getElementById(this.formId);
-			if (form) {
-				this.form = form;
-				this.init();
-			}
+			this.init();
 		}
 
 		init = () => {
-			document.addEventListener('submit', event => {
-				const form = event.target;
-				if (form.id === this.formId) {
-					event.preventDefault();
-					this.handleFormSubmit();
-				}
+			const form = document.getElementById(this.formId);
+			if (!form) return
+
+			addEventListener('submit', `#${this.formId}`, (event, form) => {
+				this.handleFormSubmit(event, form);
 			});
+
 			if (this.passwordToggle) {
+				// this.initPasswordToggle();
 				const toggleElement = document.getElementById(`${this.formId}-toggle`);
-				const passwordFields = Array.from(this.form.querySelectorAll('input[type="password"]'));
+				const passwordFields = Array.from(document.querySelectorAll('input[type="password"]'));
 				toggleElement?.addEventListener('click', () => togglePasswordVisibility(passwordFields, toggleElement));
 			}
 		}
 
-		handleFormSubmit = async () => {
-			const isValid = this.validateForm();
-			if (!isValid) return;
+		togglePasswordVisibility = (passwordFields, toggleElement) => {
+			passwordFields.forEach(field => {
+				const isPasswordVisible = field.type === 'password';
+				field.type = isPasswordVisible ? 'text' : 'password';
+			});
+			toggleElement.innerText = passwordFields[0].type === 'password' ? 'show' : 'hide';
+		};
 
-			const submitButton = this.form.querySelector('button[type="submit"]');
+		/**
+		 * 初始化密码可见性切换功能
+		 */
+		initPasswordToggle () {
+			const toggleElement = document.getElementById(`${this.formId}-toggle`);
+			const passwordFields = Array.from(
+				document.querySelectorAll(`#${this.formId} input[type="password"]`)
+			);
+
+			if (!toggleElement || passwordFields.length === 0) {
+				console.warn(`Password toggle or fields not found for form ID "${this.formId}".`);
+				return;
+			}
+
+			toggleElement.addEventListener('click', () =>
+				this.togglePasswordVisibility(passwordFields, toggleElement)
+			);
+		}
+
+		/**
+		 * 切换密码字段的可见性
+		 * @param {Array} passwordFields - 密码字段数组
+		 * @param {Element} toggleElement - 切换按钮元素
+		 */
+		togglePasswordVisibility (passwordFields, toggleElement) {
+			const isVisible = toggleElement.classList.toggle('visible');
+			passwordFields.forEach((field) => {
+				field.type = isVisible ? 'text' : 'password';
+			});
+		}
+
+		handleFormSubmit = async (event, form) => {
+			event.preventDefault();
+
+			if (!this.validateForm(form)) {
+				console.warn(`Form validation failed for ID "${this.formId}".`);
+				return;
+			}
+
+			const submitButton = form.querySelector('button[type="submit"]');
 			if (submitButton.disabled) return;
 
 			this.toggleButton(submitButton, true);
-			const formData = this.getFormData();
+
+			const formData = new FormData(form);
+			formData.append('action', this.action);
+			formData.append('security', this.security);
 
 			this.beforeSubmit();
+
 			try {
 				const response = await this.fetchData({
-					url: this.url,
+					url: this.apiUrl,
 					method: 'POST',
 					body: formData,
-					headers: this.headers
+					headers: this.headers,
 				});
-				this.handleSubmitResponse(response);
+				if (response.success) {
+					this.onSuccess(response, form);
+				} else {
+					throw new Error(response || 'Unknown error occurred');
+				}
 			} catch (error) {
-				this.displayMessage(error.message, 'danger');
-				this.afterSubmitFail(error);
+				this.onError(error);
 			} finally {
 				this.toggleButton(submitButton, false);
 			}
 		}
 
-		validateForm = () => {
-			const fields = this.form.querySelectorAll('input, textarea, select');
+		validateForm = (form) => {
+			const fields = document.querySelectorAll('input, textarea, select');
 			let isFormValid = true;
+			const formValues = Object.fromEntries(new FormData(form));
 
 			fields.forEach(field => {
-				const { valid, message } = validateField(field, validationRules);
+				const { valid, message } = validateField(field, validationRules,formValues);
 				if (!valid) {
 					field.classList.add('is-invalid');
 					this.displayMessage(message, 'danger');
@@ -535,26 +686,31 @@
 
 			return isFormValid;
 		};
+		// validateForm (form) {
+		// 	const isValid = form.checkValidity();
+		// 	if (!isValid) {
+		// 		form.reportValidity(); // 浏览器提示验证错误
+		// 	}
+		// 	return isValid;
+		// }
 
-		getFormData () {
-			const formData = new FormData(this.form);
-			formData.append('action', this.action);
-			formData.append('security', this.security);
-			return formData;
+		beforeSubmit = () => { }
+		afterSubmit (form) {
+			console.log('After submitting form:', form);
+		}
+		onSuccess = (response, form) => {
+			form.reset();
+			this.afterSubmitSuccess(response.data);
+			this.displayMessage('Form submitted successfully!', 'success');
 		}
 
-		handleSubmitResponse = (response) => {
-			if (response.success) {
-				this.form.reset();
-				this.afterSubmitSuccess(response.data);
-				this.displayMessage('Form submitted successfully!', 'success');
-			} else {
-				throw new Error(response.data || 'Unknown error occurred');
+		afterSubmitSuccess = (_response) => { }
+		onError (error) {
+			console.error('Form submission failed:', error);
+			if (this.messageId) {
+				this.displayMessage(error.message, 'danger');
 			}
 		}
-		beforeSubmit = () => { }
-		afterSubmitSuccess = (_response) => { }
-		afterSubmitFail = (_error) => { }
 	}
 
 	/**
@@ -566,34 +722,38 @@
 		const respond = document.getElementById("respond");
 		const commentList = document.querySelector(".comment-list");
 		const isParentComment = data.comment.comment_parent === '0';
-
-		const nodeLi = `
-        <li class="${data.comment.comment_type} list-group-item${!isParentComment ? ' p-0' : ''}" id="comment-${data.comment.comment_ID}">
-            <article id="div-comment-${data.comment.comment_ID}" class="comment-body">
+		const createCommentHTML = (comment) => `
+        <li class="${comment.comment_type} list-group-item${comment.comment_parent !== '0' ? ' p-0' : ''}" id="comment-${comment.comment_ID}">
+            <article id="div-comment-${comment.comment_ID}" class="comment-body">
                 <footer class="comment-meta mb-1">
                     <span class="comment-author vcard">
-                        <img src="${data.avatar_url}" srcset="${data.avatar_url} 2x" alt="${data.comment.comment_author}" class="avatar avatar-${data.avatar_size} photo" height="${data.avatar_size}" width="${data.avatar_size}" loading="lazy" decoding="async">
-                        <b class="fn">${data.comment.comment_author}</b>
+                        <img src="${comment.avatar_url}" srcset="${comment.avatar_url} 2x"
+                             alt="${comment.comment_author}" class="avatar avatar-${comment.avatar_size} photo"
+                             height="${comment.avatar_size}" width="${comment.avatar_size}" loading="lazy" decoding="async">
+                        <b class="fn">${comment.comment_author}</b>
                     </span>
                     <span class="comment-metadata">
                         <span aria-hidden="true">•</span>
-                        <a href="http://localhost/wordpress/${data.comment.comment_post_ID}/#comment-${data.comment.comment_ID}">
-                            <time datetime="${data.comment.comment_date_gmt}">${data.comment.comment_date}</time>
+                        <a href="http://localhost/wordpress/${comment.comment_post_ID}/#comment-${comment.comment_ID}">
+                            <time datetime="${comment.comment_date_gmt}">${comment.comment_date}</time>
                         </a>
                     </span>
                 </footer>
-                ${data.comment.comment_approved === '0' ? `<span class="comment-awaiting-moderation badge rounded-pill bg-info">您的评论正在等待审核。</span>` : ''}
+                ${comment.comment_approved === '0' ? `
+                    <span class="comment-awaiting-moderation badge rounded-pill bg-info">
+                        您的评论正在等待审核。
+                    </span>` : ''}
                 <section class="comment-content" style="margin-left: 56px">
-                    <p>${data.comment.comment_content}</p>
+                    <p>${comment.comment_content}</p>
                 </section>
             </article>
-        </li>
-    `;
+        </li>`;
 
-		const fragment = document.createDocumentFragment();
+		const nodeLi = createCommentHTML(data.comment);
 
 		if (commentList) {
 			const previousElement = respond.previousElementSibling;
+
 			if (previousElement) {
 				const lastChild = previousElement.lastElementChild;
 
@@ -609,15 +769,13 @@
 				commentList.insertAdjacentHTML('afterbegin', nodeLi);
 			}
 		} else {
-			const newCard = document.createElement('div');
-			newCard.classList.add('card', 'mb-3');
-			newCard.innerHTML = `
-            <ol class="comment-list p-0 m-0 list-group list-group-flush">
-                ${nodeLi}
-            </ol>
-        `;
-			fragment.appendChild(newCard);
-			respond.parentNode.appendChild(fragment);
+			const newCommentCard = document.createElement('div');
+			newCommentCard.classList.add('card', 'mb-3');
+			newCommentCard.innerHTML = `
+				<ol class="comment-list p-0 m-0 list-group list-group-flush">
+					${nodeLi}
+				</ol>`;
+			respond.parentNode.appendChild(newCommentCard);
 		}
 	};
 	const handleLoginSuccess = () => {
@@ -632,18 +790,21 @@
 			{ formId: 'login', action: lermData.login_action, security: lermData.login_nonce },
 			{ formId: 'reset', action: lermData.reset_action, security: lermData.reset_nonce },
 			{ formId: 'regist', action: lermData.regist_action, security: lermData.regist_nonce, passwordToggle: true },
-			{ formId: 'commentform', action: lermData.comment_action, security: lermData.comment_nonce }
+			{ formId: 'commentform', action: lermData.comment_action, security: lermData.nonce }
 		];
 		if (lermData.loggedin) {
 			formConfigs.push({ formId: 'update-profile', action: lermData.profile_action, security: lermData.profile_nonce })
 		}
 
 		formConfigs.forEach(config => {
+			const form = document.getElementById(config.formId);
+			if (!form) return;
 			const FormHandle = new FormService({
 				...config,
-				url: lermData.url,
+				apiUrl: lermData.url,
 				messageId: `${config.formId}-msg`,
 			});
+			console.log(config.formId);
 			if (config.formId === 'commentform') FormHandle.afterSubmitSuccess = handleCommentSuccess;
 			if (config.formId === 'login') FormHandle.afterSubmitSuccess = handleLoginSuccess;
 			if (config.formId === 'update-profile') FormHandle.afterSubmitSuccess = handleUpdateProfileSuccess;
@@ -663,7 +824,7 @@
 		const calendar = document.querySelector("#wp-calendar");
 		if (!calendar) return;  // Exit if the calendar element is not found
 
-		const calendarLinks = calendar.querySelectorAll("tbody td a");
+		const calendarLinks = document.querySelectorAll("tbody td a");
 
 		if (calendarLinks.length === 0) {
 			console.warn("No calendar links found.");
@@ -675,15 +836,15 @@
 		});
 	};
 
-	//smooth scroll to top
+	/**
+	 * Smoothly scrolls the page to the top when the "scroll-up" button is clicked.
+	 */
 	const scrollTop = () => {
-		let scrollUp = document.getElementById("scroll-up");
-		scrollUp.addEventListener("click", (e) => {
-			e.preventDefault();
-			document.documentElement.scrollIntoView({ behavior: 'smooth' });
+		addEventListener("click", "#scroll-up", (event) => {
+			event.preventDefault();
+			document.documentElement.scrollIntoView({ behavior: "smooth" });
 		});
-	}
-
+	};
 	const lazyLoadImages = (() => {
 		let observer;
 
@@ -711,6 +872,7 @@
 			animateClass: "animated",
 			offset: 0,
 			mobile: true,
+			live: true
 		});
 		wow.init();
 	};
@@ -742,7 +904,6 @@
 
 	const offCanvasMenu = () => {
 		const windowWidth = document.body.clientWidth;
-		const siteHeader = document.querySelector("#site-header");
 		const offCanvasMenu = document.querySelector("#offcanvasMenu");
 
 		if (windowWidth < 992) {
@@ -750,20 +911,69 @@
 				getComputedStyle(document.documentElement).marginTop
 			) + "px";
 		}
-
 	}
+	/**
+	 * Toggles the "active" class on the navbar-toggler element when clicked.
+	 */
+	const navigationToggle = () => {
+		addEventListener("click", ".navbar-toggler", (event, toggler) => {
+			toggler.classList.toggle("active");
+		});
+	};
+	const fadeOut = (element, duration) => {
+		let opacity = 1; // 初始不透明度
+		const interval = 50; // 每次更新的间隔时间（毫秒）
+		const step = interval / duration; // 每次减少的透明度
+
+		const fade = setInterval(() => {
+			opacity -= step;
+			if (opacity <= 0.5) {
+				clearInterval(fade);
+				opacity = 0.5; // 确保不透明度不会低于 0
+			}
+			element.style.opacity = opacity;
+		}, interval);
+	}
+	const fadeIn = (element, duration) => {
+		let opacity = 0.5; // 初始不透明度
+		const interval = 50; // 每次更新的间隔时间（毫秒）
+		const step = interval / duration; // 每次增加的透明度
+
+		const fade = setInterval(() => {
+			opacity += step;
+			if (opacity >= 1) {
+				clearInterval(fade);
+				opacity = 1; // 确保不透明度不会高于 1
+			}
+			element.style.opacity = opacity;
+		}, interval);
+	}
+
+	const loadPageService = new LoadPageService({
+		apiUrl: lermData.url,
+		containerId: "myTabContent",
+		ignoreUrls: ["/page/", "/wp-admin/", "/wp-login.php"],
+		errorText: "Failed to load the content. Please try again later."
+	});
+
 	DOMContentLoaded(() => {
+		loadPageService.init();
 		requestIdleCallback(() => {
 			initializeWOW();
 			lazyLoadImages();
 			codeHighlight();
 			calendarAddClass();
 			offCanvasMenu();
+			navigationToggle();
 		});
 		scrollTop();
 		likeBtnHandle();
 		loadMoreHanle();
 		formAjaxHandle();
-		// initPageLoading();
 	})
+
+	document.addEventListener('contentLoaded', () => {
+		scrollTop();
+		formAjaxHandle();
+	});
 })();

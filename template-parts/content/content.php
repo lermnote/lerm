@@ -6,7 +6,9 @@
  * @since Lerm 2.0
  */
 global $post;
-$image = new Lerm\Inc\Misc\Image(
+use Lerm\Inc\Misc\Image;
+use Lerm\Inc\Core\Tags;
+$image = new Image(
 	array(
 		'post_id' => get_the_ID(),
 		'size'    => 'thumbnail',
@@ -36,7 +38,7 @@ $image = new Lerm\Inc\Misc\Image(
 			</div>
 			<?php
 			if ( is_singular( 'post' ) ) {
-				\Lerm\Inc\Core\Tags::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
+				Tags::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
 			}
 			?>
 			<?php the_tags( '<ul class="list-unstyled m-0 small text-muted"><li class="d-inline ms-2">#', '</li><li class="d-inline ms-2">#', '</li></ul>' ); ?>
@@ -44,7 +46,7 @@ $image = new Lerm\Inc\Misc\Image(
 		</div>
 	<?php else : ?>
 		<div class="row no-gutters align-items-md-center">
-			<?php if ( ! empty( $image ) ) : ?>
+			<?php if ( ! empty( $image->attachment_id ) ) : ?>
 				<div class="col-md-3 ">
 
 					<?php
@@ -52,7 +54,7 @@ $image = new Lerm\Inc\Misc\Image(
 					?>
 				</div>
 			<?php endif; ?>
-			<div class="col-md-9 <?php echo ! empty( $image ) ? 'col-md-9' : 'col-md-12'; ?>">
+			<div class="<?php echo ! empty( $image->attachment_id ) ? 'col-md-9' : 'col-md-12'; ?>">
 				<div class="card-body p-md-0">
 					<h2 class="entry-title card-title">
 						<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>

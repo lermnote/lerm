@@ -15,7 +15,13 @@ use Walker_Nav_Menu;
 
 if ( ! class_exists( 'NavWalker' ) ) :
 	class NavWalker extends Walker_Nav_menu {
+		private $has_schema = false;
 
+		public function __construct() {
+			if ( ! has_filter( 'wp_nav_menu_args', array( $this, 'add_schema_to_navbar_ul' ) ) ) {
+				add_filter( 'wp_nav_menu_args', array( $this, 'add_schema_to_navbar_ul' ) );
+			}
+		}
 		public function start_lvl( &$output, $depth = 0, $args = null ) {
 			$indent = str_repeat( "\t", $depth );
 
@@ -96,7 +102,15 @@ if ( ! class_exists( 'NavWalker' ) ) :
 
 			parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
 		}
-
+		public function add_schema_to_navbar_ul( $args ) {
+			if ( isset( $args['items_wrap'] ) ) {
+				$wrap = $args['items_wrap'];
+				if ( strpos( $wrap, 'SiteNavigationElement' ) === false ) {
+					$args['items_wrap'] = preg_replace( '/(>).*>?\%3\$s/', ' itemscope itemtype="http://www.schema.org/SiteNavigationElement"$0', $wrap );
+				}
+			}
+			return $args;
+		}
 		/**
 		 * Builds a string of HTML attributes from an array of key/value pairs.
 		 * Empty values are ignored.
