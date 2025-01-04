@@ -267,7 +267,6 @@
 			this.onPopState = this.onPopState.bind(this);
 			this.shouldInterceptLink = this.shouldInterceptLink.bind(this);
 			this.loadPage = this.loadPage.bind(this);
-			this.ajaxClickCode = this.ajaxClickCode.bind(this);
 		}
 
 		init () {

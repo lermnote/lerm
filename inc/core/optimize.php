@@ -25,30 +25,30 @@ class Optimize {
 
 	protected static function hooks( $args = array() ) {
 		if ( ! in_array( $args['gravatar_accel'], array( 'disable', '' ), true ) ) {
-			self::filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), 'gravatar_replace', 100, 1 );
+			self::filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), array( __CLASS__,'gravatar_replace'), 100, 1 );
 		}
 		if ( 'https://cravatar.cn/avatar/' === $args['gravatar_accel'] ) {
-			add_filter( 'user_profile_picture_description', array( __CLASS__, 'set_user_profile_picture_for_cravatar' ), 100, 1 );
-			add_filter( 'avatar_defaults', array( __CLASS__, 'set_defaults_for_cravatar' ), 100, 1 );
+			self::filter( 'user_profile_picture_description', array( __CLASS__, 'set_user_profile_picture_for_cravatar' ), 100, 1 );
+			self::filter( 'avatar_defaults', array( __CLASS__, 'set_defaults_for_cravatar' ), 100, 1 );
 		}
 		if ( $args['admin_accel'] ) {
-			add_action( 'init', array( __CLASS__, 'super_admin' ), 100, 1 );
-			add_action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
+			self::action( 'init', array( __CLASS__, 'super_admin' ), 100, 1 );
+			self::action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
 		}
 		if ( ! in_array( $args['google_replace'], array( 'disable', '' ), true ) ) {
-			add_action( 'init', array( __CLASS__, 'googleapis_replace' ), 100, 1 );
-			add_action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
+			self::action( 'init', array( __CLASS__, 'googleapis_replace' ), 100, 1 );
+			self::action( 'shutdown', array( __CLASS__, 'ob_buffer_end' ), 100, 1 );
 		}
 
 		if ( $args['disable_pingback'] ) {
-			add_action( 'pre_ping', array( __CLASS__, 'disable_pingback' ) );
+			self::action( 'pre_ping', array( __CLASS__, 'disable_pingback' ) );
 		}
 
 		if ( is_array( $args['super_optimize'] ) && ! empty( $args['super_optimize'] ) ) {
 			self::optimize( $args['super_optimize'] );
 		}
 
-		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), 'remove_css_attributes', 100, 1 );
+		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), array( __CLASS__,'remove_css_attributes'), 100, 1 );
 	}
 
 	/**
