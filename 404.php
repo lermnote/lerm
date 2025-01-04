@@ -8,7 +8,7 @@
 get_header();
 ?>
 <style>
-	.layout {
+.layout {
 	width: 1190px;
 	margin: 150px auto;
 }

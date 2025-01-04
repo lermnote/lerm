@@ -1331,7 +1331,7 @@ if ( class_exists( 'CSF' ) ) {
 					'background_attachment' => false,
 					'background_image_url'  => false,
 					'label'                 => __( 'Show Qrcode mouse hover', 'lerm' ),
-					'output'                => 'a[rel="weixin"]::after',
+					'output'                => 'a[rel~="weixin"]::after',
 				),
 				array(
 					'id'    => 'donate-qrcode',

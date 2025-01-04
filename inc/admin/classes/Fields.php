@@ -9,6 +9,11 @@
  */
 if ( ! class_exists( 'CSF_Fields' ) ) {
 	abstract class CSF_Fields extends CSF_Abstract {
+		public $field;
+		public $value;
+		public $unique;
+		public $where;
+		public $parent;
 
 		public function __construct( $field = array(), $value = '', $unique = '', $where = '', $parent = '' ) {
 			$this->field  = $field;
@@ -52,7 +57,7 @@ if ( ! class_exists( 'CSF_Fields' ) ) {
 
 			if ( ! empty( $attributes ) ) {
 				foreach ( $attributes as $key => $value ) {
-					if ( $value === 'only-key' ) {
+					if ( 'only-key' === $value ) {
 						$atts .= ' ' . esc_attr( $key );
 					} else {
 						$atts .= ' ' . esc_attr( $key ) . '="' . esc_attr( $value ) . '"';
@@ -249,7 +254,7 @@ if ( ! class_exists( 'CSF_Fields' ) ) {
 
 					if ( ! is_wp_error( $post_types ) && ! empty( $post_types ) ) {
 						foreach ( $post_types as $post_type ) {
-							  $options[ $post_type->name ] = $post_type->labels->name;
+							$options[ $post_type->name ] = $post_type->labels->name;
 						}
 					}
 
@@ -263,7 +268,7 @@ if ( ! class_exists( 'CSF_Fields' ) ) {
 
 					if ( ! is_wp_error( $nav_menus ) && ! empty( $nav_menus ) ) {
 						foreach ( $nav_menus as $nav_menu_key => $nav_menu_name ) {
-							  $options[ $nav_menu_key ] = $nav_menu_name;
+							$options[ $nav_menu_key ] = $nav_menu_name;
 						}
 					}
 
@@ -274,7 +279,7 @@ if ( ! class_exists( 'CSF_Fields' ) ) {
 				default:
 					if ( is_callable( $type ) ) {
 						if ( ! empty( $term ) ) {
-							  $options = call_user_func( $type, $query_args );
+							$options = call_user_func( $type, $query_args );
 						} else {
 							$options = call_user_func( $type, $term, $query_args );
 						}
@@ -321,7 +326,7 @@ if ( ! class_exists( 'CSF_Fields' ) ) {
 						case 'posts':
 						case 'page':
 						case 'pages':
-							  $title = get_the_title( $value );
+							$title = get_the_title( $value );
 
 							if ( ! is_wp_error( $title ) && ! empty( $title ) ) {
 								$options[ $value ] = $title;
@@ -358,7 +363,7 @@ if ( ! class_exists( 'CSF_Fields' ) ) {
 							global $wp_registered_sidebars;
 
 							if ( ! empty( $wp_registered_sidebars[ $value ] ) ) {
-									$options[ $value ] = $wp_registered_sidebars[ $value ]['name'];
+								$options[ $value ] = $wp_registered_sidebars[ $value ]['name'];
 							}
 
 							break;

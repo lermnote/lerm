@@ -7,26 +7,26 @@
  * @since 1.0.0
  */
 
-
+use Lerm\Inc\Misc\SvgIcons;
 /**
  * Gets the SVG code for a given icon.
  */
 function lerm_get_icon_svg( $icon, $size = 24 ) {
-	return Lerm\Inc\SVG_Icons::get_svg( 'ui', $icon, $size );
+	return SvgIcons::get_svg( 'ui', $icon, $size );
 }
 
 /**
  * Gets the SVG code for a given social icon.
  */
 function lerm_get_social_icon_svg( $icon, $size = 24 ) {
-	return Lerm\Inc\SVG_Icons::get_svg( 'social', $icon, $size );
+	return SvgIcons::get_svg( 'social', $icon, $size );
 }
 
 /**
  * Detects the social network from a URL and returns the SVG code for its icon.
  */
 function lerm_get_social_link_svg( $uri, $size = 24 ) {
-	return Lerm\Inc\SVG_Icons::get_social_link_svg( $uri, $size );
+	return SvgIcons::get_social_link_svg( $uri, $size );
 }
 
 /**
@@ -63,7 +63,7 @@ function lerm_social_icons( $icons = array( 'weibo', 'wechat', 'qq' ) ) {
 		<div class="social-share d-flex justify-content-center gap-1" data-initialized="true">
 			<?php foreach ( $icons as &$icon ) : ?>
 				<a href="#" class="social-share-icon icon-<?php echo esc_attr( $icon ); ?> btn-light btn-sm">
-					<i class="fa fa-<?php echo esc_attr( $icon ); ?>"></i>
+					<i class="li li-<?php echo esc_attr( $icon ); ?>"></i>
 				</a>
 			<?php endforeach; ?>
 		</div>

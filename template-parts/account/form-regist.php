@@ -4,6 +4,7 @@
  *
  * @package Lerm https://lerm.net
  */
+use function Lerm\Inc\Functions\Helpers\float_form_input;
 $forms = array(
 	'username'  => array(
 		'type'        => 'text',
@@ -39,7 +40,7 @@ $forms = array(
 
 <?php if ( get_option( 'users_can_register' ) ) : ?>
 	<!--start regist-->
-	<form method="post" id="regist">
+	<form method="post" id="regist"  action="regist">
 		<h2><?php echo esc_html__( 'Regist', 'lerm' ); ?></h2>
 		<?php
 		echo float_form_input( $forms['username'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
@@ -59,7 +60,7 @@ $forms = array(
 				<input id="captcha2" type="captcha"  name="captcha" required class="form-control" placeholder="Captcha" >
 				<label for="floatingCaptcha"><?php echo esc_html__( 'Captcha', 'lerm' ); ?></label>
 			</div>
-			<image src="http://lerm.local/wp-content/uploads/2020/12/0030_Calque-2.png" class="ms-3 py-1" type="button" id="button-addon2" width='80' height='58' alt="<?php echo esc_html__( 'Get Email Captcha', 'lerm' ); ?>"></image>
+			<!-- <image src="http://http://localhost/lerm/wp-content/uploads/2020/12/0030_Calque-2.png" class="ms-3 py-1" type="button" id="button-addon2" width='80' height='58' alt="<?php echo esc_html__( 'Get Email Captcha', 'lerm' ); ?>"></image> -->
 		</div>
 		<button id="regist-submit" type="submit" name='regist_submit' class="w-100 btn btn-primary" type="submit"><?php echo esc_html__( 'REGISTER', 'lerm' ); ?></button>
 		<small id="regist-msg" class="invisible user-msg text-danger wow">#</small>
@@ -67,7 +68,7 @@ $forms = array(
 	<hr class="my-3">
 	<div class="text-center ">
 		<span><?php echo esc_html__( 'Have already an account?', 'lerm' ); ?> </span>
-		<a id="login-btn" type="submit" name='btn_submit' class="my-4" type="submit">
+		<a  href="http://localhost/lerm/login/" id="login-btn" type="submit" name='btn_submit' class="change-form my-4" type="submit" data-form="login">
 			<?php echo esc_html__( 'Login', 'lerm' ); ?>
 		</a>
 	</div>

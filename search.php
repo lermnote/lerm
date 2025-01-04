@@ -10,7 +10,7 @@
 get_header();
 ?>
 <main role="main" class="container"><!--.container-->
-	<div <?php lerm_row_class(); ?>><!--.row-->
+	<div <?php lerm_row_class( 'py-3' ); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
 				<header class="archive-header card mb-2 p-3">

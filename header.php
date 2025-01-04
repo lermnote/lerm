@@ -5,7 +5,7 @@
  * Displays all of the head element and everything up until the "row" div.
  *
  * @package Lerm https://lerm.net
- * 
+ *
  * @since  1.0
  */
 ?>
@@ -22,7 +22,7 @@
 <body <?php body_class(); ?>>
 	<?php wp_body_open(); ?>
 	<div id="page" class="site">
-		<header id="site-header" class="site-header" itemscope="" itemtype="http://schema.org/WPHeader">
+		<header id="site-header" class="card site-header" itemscope="" itemtype="http://schema.org/WPHeader">
 			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
 				<div class="container">
 					<!-- .navbar-brand  begin -->
@@ -36,3 +36,5 @@
 		if ( lerm_options( 'slide_position' ) === 'full_width' ) {
 			get_template_part( 'template-parts/components/carousel' );
 		}
+		?>
+		<main role="main" class="container" id="page-ajax"><!--.container-->

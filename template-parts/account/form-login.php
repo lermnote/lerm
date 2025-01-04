@@ -4,6 +4,9 @@
  *
  * @package Lerm https://lerm.net
  */
+
+use function Lerm\Inc\Functions\Helpers\float_form_input;
+
 $forms = array(
 	'username' => array(
 		'type'        => 'text',
@@ -35,7 +38,7 @@ $urememberme = array(
 ?>
 
 <!--start lgoin-->
-<form method="post" id="login">
+<form method="post" id="login" action="login">
 	<h2><?php echo esc_html__( 'Login', 'lerm' ); ?></h2>
 	<?php
 	foreach ( $forms as $key => $form ) {
@@ -44,7 +47,7 @@ $urememberme = array(
 	?>
 	<div class="d-flex justify-content-between align-items-center mb-3 ">
 		<?php echo float_form_input( $urememberme ); // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped. ?>
-		<a id="forget-btn" type="button" title="forget password" ><?php echo esc_html__( 'Forget password?', 'lerm' ); ?></a>
+		<a href="http://localhost/lerm/reset/" class="change-form" id="forget-btn" type="button" title="forget password" data-form="reset" ><?php echo esc_html__( 'Forget password?', 'lerm' ); ?></a>
 	</div>
 	<button id="login-submit" type="submit" name='btn_submit' class="btn btn-primary w-100 mb-3" type="submit"><?php echo esc_html__( 'LOGIN', 'lerm' ); ?></button>
 	<small id="login-msg" class="user-msg text-danger wow invisible">#</small>
@@ -53,7 +56,7 @@ $urememberme = array(
 	<hr class="my-3">
 	<div class="text-center ">
 		<span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span>
-		<a id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit">
+		<a  class="change-form" href="http://localhost/lerm/regist" id="regist-btn" class="my-4" data-form="regist">
 			<?php echo esc_html__( 'Register', 'lerm' ); ?>
 		</a>
 	</div>
@@ -63,19 +66,19 @@ $urememberme = array(
 	<label class="py-3" for=""><?php echo esc_html__( 'or sign up with', 'lerm' ); ?></label>
 	<div class="social-share d-flex justify-content-around gap-1 " data-initialized="true">
 		<a href="#" class="social-share-icon icon-weibo btn-light btn-sm" target="_blank">
-			<i class="fa fa-weibo"></i>
+			<i class="li li-weibo"></i>
 		</a>
 		<a href="#" class="social-share-icon icon-qq btn-light btn-sm"  target="_blank">
-			<i class="fa fa-qq"></i>
+			<i class="li li-qq"></i>
 		</a>
 		<a href="#" class="social-share-icon icon-facebook btn-light btn-sm" target="_blank">
-			<i class="fa fa-facebook"></i>
+			<i class="li li-facebook"></i>
 		</a>
 		<a href="#" class="social-share-icon icon-twitter btn-light btn-sm" target="_blank">
-			<i class="fa fa-twitter"></i>
+			<i class="li li-twitter"></i>
 		</a>
 		<a href="#" class="social-share-icon icon-github btn-light btn-sm">
-			<i class="fa fa-github"></i>
+			<i class="li li-github"></i>
 		</a>
 	</div>
 </div>

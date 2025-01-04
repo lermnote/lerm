@@ -1,11 +1,13 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
  * Handle ajax login
+ *
  */
 
 namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
+use function Lerm\Inc\Functions\Helpers\client_ip;
 
 final class AjaxRegist extends BaseAjax {
 	use singleton;
@@ -49,7 +51,7 @@ final class AjaxRegist extends BaseAjax {
 		$password     = $request_data['regist-password'];
 
 		// Check client IP for any login attempt limits.
-		$client_ip_address = self::client_ip();
+		$client_ip_address = client_ip();
 		if ( empty( $client_ip_address ) ) {
 			self::error( array( 'message' => __( 'Cannot determine IP address.', 'lerm' ) ) );
 		}
@@ -75,39 +77,6 @@ final class AjaxRegist extends BaseAjax {
 				'redirect' => self::login_redirect( '', $user_id ),
 			)
 		);
-		 // Post values
-		//  $username = sanitize_text_field($_POST['register_username']);
-		//  $password = sanitize_text_field($_POST['register_password']);
-		//  $email = sanitize_text_field($_POST['register_email']);
-		//  $name = sanitize_text_field($_POST['register_name']);
-		//  $nick = sanitize_text_field($_POST['register_name']);
-
-		//  $userdata = array(
-		// 	 'user_login' => $username,
-		// 	 'user_pass' => $password,
-		// 	 'user_password' => $password,
-		// 	 'user_email' => $email,
-		// 	 'first_name' => $name,
-		// 	 'nickname' => $nick,
-		//  );
-
-		//  $user_id = wp_insert_user($userdata);
-
-		//  // add user meta
-		//  $custom_user_meta_value = 'custom_user_meta_value';
-		//  add_user_meta( $user_id, 'custom_user_meta', $custom_user_meta_value);
-
-		//  // Return
-		//  if (!is_wp_error($user_id)) {
-		// 	 $user_signon = wp_signon($userdata, false);
-		// 	 if (!is_wp_error($user_signon)) {
-		// 		 wp_send_json(array('status' => 2, 'message' => __('your registration is successfuled and logined.')));
-		// 	 } else {
-		// 		 wp_send_json(array('status' => 1, 'message' => __('your registration is successfuled and logined')));
-		// 	 }
-		//  } else {
-		// 	 wp_send_json(array('status' => 0, 'message' => __($user_id->get_error_message())));
-		//  }
 	}
 
 	/**
@@ -118,15 +87,6 @@ final class AjaxRegist extends BaseAjax {
 			$url = home_url( '/user.html' );
 		}
 		return apply_filters( 'lerm_custom_login_redirect', $url, $user );
-	}
-
-	/**
-	 * Get client IP address.
-	 *
-	 * @return string Client IP address.
-	 */
-	private static function client_ip() {
-		return lerm_client_ip();
 	}
 
 	/**

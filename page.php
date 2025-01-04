@@ -8,7 +8,7 @@
  */
 get_header();
 ?>
-<main role="main" class="container"><!--.container-->
+
 	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
@@ -30,6 +30,5 @@ get_header();
 		</div>
 		<?php get_sidebar(); ?>
 	</div><!--.row-->
-</main><!--.container-->
 <?php
 get_footer();

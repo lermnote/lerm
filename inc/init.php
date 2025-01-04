@@ -18,13 +18,15 @@ class Init {
 	 * @var array $args
 	 */
 	public static $args = array(
-		'optimize_options' => array(),
-		'mail_options'     => array(),
-		'carousel_options' => array(),
-		'super_optimize'   => array(),
-		'seo_options'      => array(),
-		'sitemap_options'  => array(),
-		'custom_options'   => array(),
+		'optimize_options'    => array(),
+		'mail_options'        => array(),
+		'carousel_options'    => array(),
+		'super_optimize'      => array(),
+		'seo_options'         => array(),
+		'sitemap_options'     => array(),
+		'custom_options'      => array(),
+		'updater_options'     => array(),
+		'front_login_options' => array(),
 	);
 	/**
 	 * Constructor
@@ -62,14 +64,14 @@ class Init {
 		$params = array();
 		if ( ! empty( $args['seo_options'] ) ) {
 			$params = $args['seo_options'];
-			Misc\SEO::instance( $params );
+			Misc\Seo::instance( $params );
 		}
 
 		// Mail SMTP options.
 		$params = array();
 		if ( ! empty( $args['mail_options'] ) ) {
 			$params = $args['mail_options'];
-			Misc\SMTP::instance( $params );
+			Misc\Smtp::instance( $params );
 		}
 
 		// Sitemap options.
@@ -93,16 +95,23 @@ class Init {
 			Misc\Updater::instance( $params );
 		}
 
-		// Ajax.
+		// Front login.
+		$params = array();
+		if ( ! empty( $args['front_login_options'] ) ) {
+			$params = $args['front_login_options'];
+			Ajax\AjaxLogin::instance( $params );
+		}
+
 		Ajax\PostLike::instance();
 		Ajax\LoadMore::instance();
 		Ajax\AjaxComment::instance();
-		Ajax\AjaxLogin::instance();
 		Ajax\AjaxRegist::instance();
 		Ajax\AjaxReset::instance();
 
 		Core\CommentWalker::instance();
 		Ajax\UserProfile::instance();
+		Misc\OpenGraph::instance();
+
 	}
 
 	/**
@@ -152,21 +161,13 @@ class Init {
 			'page_exclude'   => $options['exclude_page'] ?? array(),
 		);
 
-		//Set sitemap options.
+		// custom options.
 		self::$args['custom_options'] = array(
 			'large_logo'    => $options['large_logo'] ?? '',
 			'mobile_logo'   => $options['mobile_logo'] ?? '',
 			'content_width' => $options['content_width'] ?? '',
 			'sidebar_width' => $options['sidebar_width'] ?? '',
 			'custom_css'    => $options['custom_css'] ?? '',
-		);
-
-		//user options.
-		self::$args['user_options'] = array(
-			'login_front_enable'   => $options['large_logo'] ?? '',
-			'login_from_file_name' => $options['mobile_logo'] ?? '',
-			'login_redirect'       => $options['content_width'] ?? '',
-			'menu_login_item'      => $options['sidebar_width'] ?? '',
 		);
 
 		// Set updater options.
@@ -176,6 +177,15 @@ class Init {
 			'slug' => 'lerm',                     // Theme Slug.
 			'url'  => 'https://wplemon.com/gridd', // Theme URL.
 			'ver'  => wp_get_theme()->get( 'Version' ), // Theme Version.
+		);
+
+		// Front login options.
+		self::$args['front_login_options'] = array(
+			'front_login_enable'  => $options['frontend_lgoin'],
+			'login_page_id'       => $options['frontend_lgoin_page'],
+			'menu_login_item'     => $options['menu_login_item'],
+			'login_redirect_url'  => '',
+			'logout_redirect_url' => 'home_url()',
 		);
 	}
 }
