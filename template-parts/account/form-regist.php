@@ -4,6 +4,7 @@
  *
  * @package Lerm https://lerm.net
  */
+use function Lerm\Inc\Functions\Helpers\float_form_input;
 $forms = array(
 	'username'  => array(
 		'type'        => 'text',
@@ -59,7 +60,7 @@ $forms = array(
 				<input id="captcha2" type="captcha"  name="captcha" required class="form-control" placeholder="Captcha" >
 				<label for="floatingCaptcha"><?php echo esc_html__( 'Captcha', 'lerm' ); ?></label>
 			</div>
-			<image src="http://lerm.local/wp-content/uploads/2020/12/0030_Calque-2.png" class="ms-3 py-1" type="button" id="button-addon2" width='80' height='58' alt="<?php echo esc_html__( 'Get Email Captcha', 'lerm' ); ?>"></image>
+			<!-- <image src="http://http://localhost/lerm/wp-content/uploads/2020/12/0030_Calque-2.png" class="ms-3 py-1" type="button" id="button-addon2" width='80' height='58' alt="<?php echo esc_html__( 'Get Email Captcha', 'lerm' ); ?>"></image> -->
 		</div>
 		<button id="regist-submit" type="submit" name='regist_submit' class="w-100 btn btn-primary" type="submit"><?php echo esc_html__( 'REGISTER', 'lerm' ); ?></button>
 		<small id="regist-msg" class="invisible user-msg text-danger wow">#</small>

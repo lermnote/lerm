@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Singleton Trait
  *
@@ -15,16 +15,19 @@ trait Singleton {
 	/**
 	 * Static array to store instances of classes.
 	 *
-	 * @var array
+	 * @var object|null
 	 */
-	private static $instance = array();
+	private static $instance = null;
 
 	/**
 	 * Private constructor to prevent instantiation from outside the class.
 	 *
 	 * @param array $args Optional parameters for the constructor.
 	 */
-	protected function __construct( $args = array() ) {}
+	final protected function __construct( $args = array() ) {
+		// Trigger an action to indicate initialization of the singleton.
+		do_action( 'lerm_singleton_init_' . get_called_class() );
+	}
 
 	/**
 	 * Prevents the instance from being cloned.
@@ -41,22 +44,12 @@ trait Singleton {
 	 * Returns the single instance of the class.
 	 *
 	 * @param array $args Optional parameters for the constructor.
-	 * @return mixed The single instance of the class.
+	 * @return static The single instance of the class.
 	 */
 	final public static function instance( $args = array() ) {
-
-		// Get the name of the calling class.
-		$class = get_called_class();
-
-		// Check if an instance of the class already exists.
-		if ( ! isset( self::$instance[ $class ] ) ) {
-			// Create a new instance of the class if it doesn't exist.
-			self::$instance[ $class ] = new static( $args );
-			// Trigger an action to indicate initialization of the singleton.
-			do_action( 'lerm_singleton_init_' . $class );
+		if ( null === static::$instance ) {
+			static::$instance = new static( $args );
 		}
-
-		// Return the instance of the class.
-		return self::$instance[ $class ];
+		return static::$instance;
 	}
 }

@@ -1,6 +1,8 @@
 <?php
+use Lerm\Inc\Misc\Carousel;
+
 if ( is_home() || is_front_page() || ! is_paged() ) {
-	\Lerm\Inc\Misc\Carousel::instance(
+	Carousel::instance(
 		array(
 			'slide_enable' => lerm_options( 'slide_enable' ),
 			'slides'       => lerm_options( 'slide_images' ),

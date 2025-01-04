@@ -32,7 +32,7 @@ if ( $query->have_posts() ) :?>
 		while ( $query->have_posts() ) {
 			$query->the_post();
 			printf(
-				'<li class="mb-1"><i class="fa fa-chevron-right me-1"></i><a href="%s" rel="bookmark">%s</a></li>',
+				'<li class="mb-1"><i class="li li-chevron-right me-1"></i><a href="%s" rel="bookmark">%s</a></li>',
 				esc_url( get_permalink() ),
 				esc_html( get_the_title() )
 			);

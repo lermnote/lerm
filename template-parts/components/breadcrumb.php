@@ -4,7 +4,9 @@
  *
  *  @package Lerm https://lerm.net
  */
-\Lerm\Inc\Core\Breadcrumb::instance(
+use Lerm\Inc\Core\Breadcrumb;
+
+Breadcrumb::instance(
 	array(
 		'container'     => lerm_options( 'breadcrumb_container' ),
 		'before'        => lerm_options( 'breadcrumb_before' ),

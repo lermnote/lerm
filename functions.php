@@ -34,7 +34,7 @@ if ( ! defined( 'LERM_DIR' ) ) {
 /**
  * Requre admin framework
  */
-require_once LERM_DIR . 'inc/admin/codestar-framework.php';
+require_once LERM_DIR . 'Inc/admin/codestar-framework.php';
 require_once LERM_DIR . 'vendor/autoload.php';
 Init::instance( get_option( 'lerm_theme_options' ) );
 

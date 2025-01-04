@@ -4,6 +4,9 @@
  *
  * @package Lerm https://lerm.net
  */
+
+use function Lerm\Inc\Functions\Helpers\float_form_input;
+
 $forms = array(
 	'username' => array(
 		'type'        => 'text',
@@ -53,7 +56,7 @@ $urememberme = array(
 	<hr class="my-3">
 	<div class="text-center ">
 		<span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span>
-		<a id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit">
+		<a  href="http://localhost/lerm/regist" id="regist-btn" type="submit" name='btn_submit' class="my-4" type="submit">
 			<?php echo esc_html__( 'Register', 'lerm' ); ?>
 		</a>
 	</div>
@@ -63,19 +66,19 @@ $urememberme = array(
 	<label class="py-3" for=""><?php echo esc_html__( 'or sign up with', 'lerm' ); ?></label>
 	<div class="social-share d-flex justify-content-around gap-1 " data-initialized="true">
 		<a href="#" class="social-share-icon icon-weibo btn-light btn-sm" target="_blank">
-			<i class="fa fa-weibo"></i>
+			<i class="li li-weibo"></i>
 		</a>
 		<a href="#" class="social-share-icon icon-qq btn-light btn-sm"  target="_blank">
-			<i class="fa fa-qq"></i>
+			<i class="li li-qq"></i>
 		</a>
 		<a href="#" class="social-share-icon icon-facebook btn-light btn-sm" target="_blank">
-			<i class="fa fa-facebook"></i>
+			<i class="li li-facebook"></i>
 		</a>
 		<a href="#" class="social-share-icon icon-twitter btn-light btn-sm" target="_blank">
-			<i class="fa fa-twitter"></i>
+			<i class="li li-twitter"></i>
 		</a>
 		<a href="#" class="social-share-icon icon-github btn-light btn-sm">
-			<i class="fa fa-github"></i>
+			<i class="li li-github"></i>
 		</a>
 	</div>
 </div>
