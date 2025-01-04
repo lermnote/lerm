@@ -38,7 +38,7 @@ require_once LERM_DIR . 'Inc/admin/codestar-framework.php';
 require_once LERM_DIR . 'vendor/autoload.php';
 Init::instance( get_option( 'lerm_theme_options' ) );
 
-// functions used for debug mail errors, log is stored at SERVER_ROOT_DIR/mail.log
+// // functions used for debug mail errors, log is stored at SERVER_ROOT_DIR/mail.log
 // function smtplog_mailer_errors( $wp_error ) {
 // 	global $wp_filesystem;
 // 	WP_Filesystem();
@@ -50,9 +50,9 @@ Init::instance( get_option( 'lerm_theme_options' ) );
 // 	$wp_filesystem->put_contents( $file, $currenttime . ' Mailer Error: ' . $wp_error->get_error_message() . "\n", FS_CHMOD_FILE );
 // }
 // add_action( 'wp_mail_failed', 'smtplog_mailer_errors', 10, 1 );
-
 add_action( 'wp_ajax_load_page_content', 'handle_load_page_content' );
 add_action( 'wp_ajax_nopriv_load_page_content', 'handle_load_page_content' );
+
 function handle_load_page_content() {
 	// 验证请求是否包含 URL 参数
 	if ( ! isset( $_GET['url'] ) || empty( $_GET['url'] ) ) {
@@ -196,7 +196,7 @@ function custom_load_form_via_get() {
 	} else {
 		wp_die( 'Invalid action.', 400 );
 	}
-	wp_die();
+	wp_die();// 确保脚本终止
 }
 add_action( 'wp_ajax_nopriv_load_form', 'custom_load_form_via_get' );
 add_action( 'wp_ajax_load_form', 'custom_load_form_via_get' );
