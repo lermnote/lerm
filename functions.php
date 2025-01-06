@@ -50,6 +50,7 @@ Init::instance( get_option( 'lerm_theme_options' ) );
 // 	$wp_filesystem->put_contents( $file, $currenttime . ' Mailer Error: ' . $wp_error->get_error_message() . "\n", FS_CHMOD_FILE );
 // }
 // add_action( 'wp_mail_failed', 'smtplog_mailer_errors', 10, 1 );
+<<<<<<< HEAD
 add_action( 'wp_ajax_load_page_content', 'handle_load_page_content' );
 add_action( 'wp_ajax_nopriv_load_page_content', 'handle_load_page_content' );
 
@@ -205,3 +206,5 @@ function custom_flush_rewrite_rules() {
 	flush_rewrite_rules();
 }
 register_activation_hook( __FILE__, 'custom_flush_rewrite_rules' );
+=======
+>>>>>>> c16f3d36dab0e1581e7834ed9472e77ce6ba0868
