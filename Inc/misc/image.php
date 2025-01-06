@@ -9,7 +9,6 @@ namespace Lerm\Inc\Misc;
 use Lerm\Inc\Traits\Singleton;
 
 class Image {
-
 	use singleton;
 
 	public $attachment_id = '';
@@ -127,26 +126,10 @@ class Image {
 	public function get_scan_image( $post_id ) {
 		$post_content = apply_filters( 'get_the_image_post_content', get_post_field( 'post_content', $post_id ) );
 
-		// Check the content for `id="wp-image-%d"`.
-		preg_match( '/id=[\'"]wp-image-([\d]*)[\'"]/i', $post_content, $image_ids );
-
-		// Loop through any found image IDs.
-		if ( is_array( $image_ids ) ) {
-
-			foreach ( $image_ids as $image_id ) {
-				if ( ! empty( $image_id ) ) {
-					$this->attachment_id = $image_id;
-					return;
-				}
-			}
-		}
-
-		// Search the post's content for the <img /> tag and get its URL.
-		preg_match_all( '|<img.*?src=[\'"](.*?)[\'"].*?>|i', $post_content, $matches );
-
-		// If there is a match for the image, set the image args.
-		if ( isset( $matches[1] ) && ! empty( $matches[1] ) ) {
-			$this->attachment_id = attachment_url_to_postid( $matches[1][0] );
+		// Match both image ID and img tags in one go
+		if ( preg_match( '/id=[\'"]wp-image-(\d+)[\'"]/i', $post_content, $matches )
+		|| preg_match( '|<img.*?src=[\'"](.*?)[\'"].*?>|i', $post_content, $matches ) ) {
+			$this->attachment_id = isset( $matches[1] ) ? (int) $matches[1] : attachment_url_to_postid( $matches[1] );
 		}
 	}
 
@@ -244,7 +227,6 @@ class Image {
 	 * @access public
 	 * @return void
 	 */
-
 	private function set_image_as_thumbnail( $post_id, $attachment_id ) {
 
 		if ( has_post_thumbnail() ) {
@@ -260,15 +242,16 @@ class Image {
 	public function generate_image_html() {
 		$attachment_id = absint( $this->attachment_id );
 		if ( empty( $attachment_id ) ) {
-			return;
+			return ''; // Return an empty string instead of nothing
 		}
 
-		$size = $this->args['size'];
-		$attr = array(
-			'alt'     => get_the_title( $attachment_id ),
-			'title'   => get_the_title( $attachment_id ),
-			'class'   => 'attachment-' . $size,
-			'loading' => $this->args['lazy'],
+		$size    = sanitize_key( $this->args['size'] );
+		$classes = implode( ' ', array( 'attachment-' . $size, 'w-100', 'h-100', 'rounded' ) );
+		$attr    = array(
+			'alt'     => esc_attr( get_the_title( $attachment_id ) ),
+			'title'   => esc_attr( get_the_title( $attachment_id ) ),
+			'class'   => esc_attr( $classes ),
+			'loading' => esc_attr( $this->args['lazy'] ),
 		);
 		return wp_get_attachment_image( $attachment_id, $size, false, $attr );
 	}

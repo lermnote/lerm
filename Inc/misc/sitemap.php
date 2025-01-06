@@ -41,8 +41,7 @@ class Sitemap {
 	 */
 	public static function hooks() {
 		if ( self::$args['sitemap_enable'] ) {
-
-			add_filter( 'wp_sitemaps_posts_entry', array( __CLASS__, 'add_tag' ), 10, 2 );
+			add_filter( 'wp_sitemaps_posts_entry', array( __CLASS__, 'add_tags' ), 10, 2 );
 			add_filter( 'wp_sitemaps_max_urls', array( __CLASS__, 'max_urls' ) );
 
 			if ( is_array( self::$args['post_type'] ) && in_array( 'users', self::$args['post_type'], true ) ) {

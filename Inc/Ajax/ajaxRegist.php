@@ -1,11 +1,13 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
  * Handle ajax login
+ * 
  */
 
 namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
+use function Lerm\Inc\Functions\Helpers\client_ip;
 
 final class AjaxRegist extends BaseAjax {
 	use singleton;
@@ -49,7 +51,7 @@ final class AjaxRegist extends BaseAjax {
 		$password     = $request_data['regist-password'];
 
 		// Check client IP for any login attempt limits.
-		$client_ip_address = self::client_ip();
+		$client_ip_address = client_ip();
 		if ( empty( $client_ip_address ) ) {
 			self::error( array( 'message' => __( 'Cannot determine IP address.', 'lerm' ) ) );
 		}
@@ -67,7 +69,10 @@ final class AjaxRegist extends BaseAjax {
 				)
 			);
 		}
-
+		// // 可以进一步检查密码的复杂性或其他规则
+		// if ( strlen( $password ) < 8 ) {
+		// 	return new \WP_Error( 'password_too_short', __( 'Password must be at least 8 characters long.', 'lerm' ) );
+		// }
 		// Login successful
 		self::success(
 			array(
@@ -118,15 +123,6 @@ final class AjaxRegist extends BaseAjax {
 			$url = home_url( '/user.html' );
 		}
 		return apply_filters( 'lerm_custom_login_redirect', $url, $user );
-	}
-
-	/**
-	 * Get client IP address.
-	 *
-	 * @return string Client IP address.
-	 */
-	private static function client_ip() {
-		return lerm_client_ip();
 	}
 
 	/**

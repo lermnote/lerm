@@ -82,7 +82,7 @@ class Tags {
 		?>
 		<span class="meta-icon">
 			<span class="screen-reader-text"><?php esc_html_e( 'Post author', 'lerm' ); ?></span>
-			<i class="fa fa-user pe-1"></i>
+			<i class="li li-user pe-1"></i>
 		</span>
 		<span class="meta-text">
 			<?php
@@ -102,7 +102,7 @@ class Tags {
 	public static function publish_date() {
 		?>
 		<span>
-			<i class="fa fa-calendar pe-1"></i>
+			<i class="li li-calendar pe-1"></i>
 			<a href="<?php the_permalink(); ?>">
 				<?php the_time( get_option( 'date_format' ) ); ?>
 			</a>
@@ -119,7 +119,7 @@ class Tags {
 			?>
 			<span class="meta-icon">
 				<span class="screen-reader-text"><?php esc_html_e( 'Categories', 'lerm' ); ?></span>
-				<i class="fa fa-hdd pe-1"></i>
+				<i class="li li-hdd pe-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php echo wp_kses_post( $categories ); ?>
@@ -152,7 +152,7 @@ class Tags {
 
 		if ( '' !== $formatted_views ) {
 			?>
-			<i class="fa fa-eye pe-1"></i>
+			<i class="li li-eye pe-1"></i>
 			<span><?php echo esc_html( $formatted_views ); ?></span>
 			<?php
 		}
@@ -165,7 +165,7 @@ class Tags {
 		if ( ! post_password_required() && ( comments_open() || get_comments_number() ) ) {
 			?>
 			<a href="<?php comments_link(); ?>">
-				<i class="fa fa-comment pe-1"></i>
+				<i class="li li-comment pe-1"></i>
 				<?php
 				$comments_number = get_comments_number_text( esc_attr( get_comments_number() ) );
 				echo esc_html( $comments_number );
@@ -185,7 +185,7 @@ class Tags {
 				esc_html__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'lerm' ),
 				get_the_title()
 			),
-			'<span class="edit-link meta-item"><i class="fa fa-edit pe-1 ps-2"></i>',
+			'<span class="edit-link meta-item"><i class="li li-edit pe-1 ps-2"></i>',
 			'</span>'
 		);
 	}

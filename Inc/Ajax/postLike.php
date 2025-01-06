@@ -8,8 +8,10 @@
 namespace Lerm\Inc\Ajax;
 
 use Lerm\Inc\Traits\Singleton;
+use function Lerm\Inc\Functions\Helpers\client_ip;
 
 final class PostLike extends BaseAjax {
+
 	use singleton;
 
 	protected const AJAX_ACTION               = 'post_like';
@@ -150,7 +152,7 @@ final class PostLike extends BaseAjax {
 		$meta_key = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
 		$count    = (int) get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
 
-		$user_id = is_user_logged_in() ? get_current_user_id() : self::client_ip();
+		$user_id = is_user_logged_in() ? get_current_user_id() : client_ip();
 		self::update_user_likes( $user_id, $id, $is_comment, $like );
 
 		$new_count = $like ? ++$count : max( 0, --$count );
@@ -165,7 +167,7 @@ final class PostLike extends BaseAjax {
 	 * @return bool True if the user has already liked the post or comment, false otherwise.
 	 */
 	public static function already_liked( $id, $is_comment = null ) {
-		$user_id    = is_user_logged_in() ? get_current_user_id() : self::client_ip();
+		$user_id    = is_user_logged_in() ? get_current_user_id() : client_ip();
 		$meta_key   = $is_comment ? self::USER_COMMENT_LIKE_META_KEY : self::USER_LIKE_META_KEY;
 		$post_users = get_metadata( $is_comment ? 'comment' : 'post', $id, $meta_key, true );
 		// Check if user is in the list of liked users
@@ -195,15 +197,14 @@ final class PostLike extends BaseAjax {
 	 *
 	 * @since    0.5
 	 */
-	public static function get_likes_button( $id, $is_comment = null, $args ) {
+	public static function get_likes_button( $id, $is_comment = null, $args = array() ) {
 		$tag       = ( 'button' === $args['style'] ) ? 'button' : 'a';
 		$classes   = array( 'like-button' );
 		$classes[] = $args['class'];
 		$id        = $is_comment ? get_comment_ID() : $id;
 		$type      = $is_comment ? 'comment' : 'post';
-		$classes[] = self::already_liked( $id, $is_comment ) ? 'btn-danger' : 'btn-outline-danger';
+		$classes[] = self::already_liked( $id, $is_comment ) ? 'btn-outline-danger' : 'btn-outline-secondary';
 		$classes[] = 'like-' . $type . '-' . $id;
-
 		// Get current like count
 		$meta_key   = $is_comment ? self::COMMENT_LIKE_COUNT_META_KEY : self::LIKE_COUNT_META_KEY;
 		$like_count = (int) get_metadata( $type, $id, $meta_key, true );
@@ -211,7 +212,7 @@ final class PostLike extends BaseAjax {
 		$count  = self::get_like_count( $like_count );
 		$output = sprintf(
 			'<%1$s  class="%2$s" data-id="%3$d" data-logged="%4$s" data-type="%5$s">
-			<span class="fa fa-heart"></span>
+			<span class="li li-heart"></span>
 			%6$s
 			</%1$s>',
 			$tag,
@@ -224,16 +225,7 @@ final class PostLike extends BaseAjax {
 		if ( false === $args['echo'] ) {
 			return $output;
 		}
-		echo $output;// phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
-	}
-
-	/**
-	 * Get client IP address.
-	 *
-	 * @return string Client IP address.
-	 */
-	private static function client_ip() {
-		return lerm_client_ip();
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
 	}
 
 	/**
@@ -242,8 +234,8 @@ final class PostLike extends BaseAjax {
 	 * @since    0.5
 	 */
 	public static function get_liked_icon() {
-		/* If already using Font Awesome with your theme, replace svg with: <i class="fa fa-heart"></i> */
-		return '<i class="fa fa-heart"></i>';
+		/* If already using Font Awesome with your theme, replace svg with: <i class="li li-heart"></i> */
+		return '<i class="li li-heart"></i>';
 	}
 
 	/**
@@ -252,8 +244,8 @@ final class PostLike extends BaseAjax {
 	 * @since    0.5
 	 */
 	public static function get_unliked_icon() {
-		/* If already using Font Awesome with your theme, replace svg with: <i class="fa fa-heart-o"></i> */
-		return '<i class="fa fa-heart-o"></i>';
+		/* If already using Font Awesome with your theme, replace svg with: <i class="li li-heart-o"></i> */
+		return '<i class="li li-heart-o"></i>';
 	}
 
 	/**
@@ -328,7 +320,7 @@ final class PostLike extends BaseAjax {
 					esc_html( get_the_title() )
 				);
 			}
-			echo implode( ' &middot; ', $links );// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo implode( ' &middot; ', $links ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} else {
 			echo esc_html__( 'You do not like anything yet.', 'lerm' );
 		}

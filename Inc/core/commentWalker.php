@@ -11,6 +11,7 @@ namespace Lerm\Inc\Core;
 
 use Walker_Comment;
 use Lerm\Inc\Traits\Singleton;
+use Lerm\Inc\Ajax\PostLike;
 
 class CommentWalker extends Walker_Comment {
 	use singleton;
@@ -28,6 +29,7 @@ class CommentWalker extends Walker_Comment {
 	 */
 	public function __construct( $params ) {
 		self::$args = apply_filters( 'lerm_comment_args', wp_parse_args( $params, self::$args ) );
+
 		add_action( 'comment_form', array( $this, 'comment_form_message' ) );
 
 		if ( self::$args['make_clickable'] ) {
@@ -37,7 +39,6 @@ class CommentWalker extends Walker_Comment {
 		if ( self::$args['escape_html'] ) {
 			add_filter( 'pre_comment_content', 'esc_html' );
 		}
-
 	}
 	/**
 	 * Displays an extra text area for more comments.
@@ -77,7 +78,6 @@ class CommentWalker extends Walker_Comment {
 						if ( '0' === $comment->comment_approved && ! $show_pending_links ) {
 							$comment_author = get_comment_author( $comment );
 						}
-
 						printf(
 							/* translators: %s: Comment author link. */
 							'<b class="fn">%s</b>',
@@ -117,14 +117,15 @@ class CommentWalker extends Walker_Comment {
 							array_merge(
 								$args,
 								array(
-									'depth'     => $depth,
-									'max_depth' => $args['max_depth'],
+									'reply_text' => __( 'Respond', 'lerm' ),
+									'depth'      => $depth,
+									'max_depth'  => $args['max_depth'],
 								)
 							)
 						);
 						?>
 						<?php
-						\Lerm\Inc\Ajax\PostLike::get_likes_button(
+						PostLike::get_likes_button(
 							$post->ID,
 							true,
 							array(
