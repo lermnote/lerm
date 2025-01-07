@@ -110,7 +110,7 @@ class Init {
 
 		Core\CommentWalker::instance();
 		Ajax\UserProfile::instance();
-
+		Misc\OpenGraph::instance();
 	}
 
 	/**
