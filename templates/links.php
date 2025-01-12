@@ -6,6 +6,7 @@
  * @date    2016-09-02
  * @since   lerm 2.0
  */
+use function Lerm\Inc\Functions\Helpers\link_pagination;
 get_header();
 $link_categories = get_terms(
 	array(
@@ -76,7 +77,7 @@ $link_categories = get_terms(
 									?>
 
 									<div class="py-3 clearfix">
-										<?php lerm_link_pagination(); ?>
+										<?php link_pagination(); ?>
 									</div>
 								</div>
 							</div>

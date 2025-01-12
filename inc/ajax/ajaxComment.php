@@ -16,7 +16,7 @@ final class AjaxComment extends BaseAjax {
 
 	protected const AJAX_ACTION = 'ajax_comment';
 
-	public static $args = array();
+	protected static $args = array();
 
 	public function __construct( $params ) {
 		parent::__construct( apply_filters( 'lerm_comment_args', wp_parse_args( $params, self::$args ) ) );
@@ -48,8 +48,10 @@ final class AjaxComment extends BaseAjax {
 		}
 
 		// Set avatar URL and size
-		$avatar_url  = get_avatar_url( $comment );
-		$avatar_size = ( 0 !== $postdata['comment_parent'] ) ? ( wp_is_mobile() ? 32 : 48 ) * 2 / 3 : ( wp_is_mobile() ? 32 : 48 );
+		$avatar_url     = get_avatar_url( $comment );
+		$comment_parent = isset( $postdata['comment_parent'] ) ? absint( $postdata['comment_parent'] ) : 0;
+		$is_mobile      = wp_is_mobile();
+		$avatar_size    = ( 0 !== $comment_parent ) ? ( $is_mobile ? 32 : 48 ) * 2 / 3 : ( $is_mobile ? 32 : 48 );
 
 		// Set comment cookies consent
 		if ( isset( $postdata['wp-comment-cookies-consent'] ) && 'yes' === $postdata['wp-comment-cookies-consent'] ) {

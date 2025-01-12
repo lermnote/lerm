@@ -6,6 +6,7 @@
  * @date   2016-08-28 21:57:52
  * @since  1.00
  */
+use function Lerm\Inc\Functions\Helpers\copyright_text;
 ?>
 </main>
 <footer class="card footer" itemscope="" itemtype="http://schema.org/WPFooter">
@@ -16,7 +17,7 @@
 	<?php endif; ?>
 	<div class="colophon py-3 text-center">
 		<div class="container">
-			<span><?php lerm_create_copyright(); ?></span>
+			<span><?php copyright_text( 'long' ); ?></span>
 			<?php if ( lerm_options( 'icp_num' ) ) : ?>
 				<span><a href="https://beian.miit.gov.cn"><?php echo esc_html( lerm_options( 'icp_num' ) ); ?></a></span>
 			<?php endif; ?>

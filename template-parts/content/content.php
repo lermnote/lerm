@@ -8,6 +8,7 @@
 global $post;
 use Lerm\Inc\Misc\Image;
 use Lerm\Inc\Core\Tags;
+use function Lerm\Inc\Functions\Helpers\link_pagination;
 $image = new Image(
 	array(
 		'post_id' => get_the_ID(),
@@ -33,7 +34,7 @@ $image = new Image(
 							get_the_title()
 						)
 					);
-					lerm_link_pagination();
+					link_pagination();
 				?>
 			</div>
 			<?php

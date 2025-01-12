@@ -117,7 +117,7 @@ class CommentWalker extends Walker_Comment {
 							array_merge(
 								$args,
 								array(
-									'reply_text' => __( 'Respond', 'lerm' ),
+									'reply_text' => '<i class="li li-comment me-2"></i><span class="screen-reader-text">' . __( 'Respond', 'lerm' ) . '</span>',
 									'depth'      => $depth,
 									'max_depth'  => $args['max_depth'],
 								)
