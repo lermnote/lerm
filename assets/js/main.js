@@ -18,15 +18,13 @@
 	 * @param {Function} callback - Function to execute when event is triggered.
 	 */
 	const addEventListener = (type, selector, callback) => {
-		document.addEventListener(type, event => {
+		document.addEventListener(type, (event) => {
 			const targetElement = event.target.closest(selector);
-			if (targetElement && targetElement.matches(selector)) {
-				event.preventDefault();
+			if (targetElement) {
 				callback(event, targetElement);
 			}
 		});
-	}
-
+	};
 	/**
 	 * BaseService - Handles API interactions with reusable methods
 	 */
@@ -264,17 +262,18 @@
 			};
 
 			// Pre-bind methods to ensure correct 'this' context
+			this.cacheDB = new CacheDB(); // IndexedDB 实例
 			this.onPopState = this.onPopState.bind(this);
 			this.shouldInterceptLink = this.shouldInterceptLink.bind(this);
 			this.loadPage = this.loadPage.bind(this);
 		}
 
-		init () {
-			this.onLinkClicks(this.shouldInterceptLink, this.loadPage);
+		async init () {
+			this.onLinkClick(this.shouldInterceptLink, this.loadPage);
 			this.onSearchForm('form[method="GET"]', this.loadPage);
 			window.onpopstate = this.onPopState;
-			console.log("LoadPageService initialized.");
-			;
+			await this.clearExpiredCache(); // 清理过期缓存
+			console.log("LoadPageService initialized.");;
 		}
 
 		/**
@@ -282,7 +281,7 @@
 		 * Uses event delegation for better performance.
 		 * @param {Function} interceptCallback - Callback function to determine if a link should be intercepted.
 		 */
-		onLinkClicks = (interceptCallback, callback) => {
+		onLinkClick = (interceptCallback, callback) => {
 			addEventListener("click", "a", (event, link) => {
 				if (interceptCallback && interceptCallback(link)) {
 					event.preventDefault();
@@ -307,54 +306,29 @@
 
 		// Handle browser back/forward navigation
 		onPopState () {
-			if (!this.state.ajaxStarted && !this.isIgnoredUrl(window.location.href)) {
+			if (!this.state.ajaxStarted && this.shouldInterceptLink(window.location.href)) {
+				console.log('Popstate triggered');
 				this.loadPage(window.location.href);
 			}
 		}
 
-		/**
-		 * Cache page content in localStorage.
-		 * @param {string} url - The URL to cache.
-		 * @param {object} data - The page content data to cache.
-		 */
-		cachePage (url, data) {
-			const cache = JSON.parse(localStorage.getItem('pageCache') || '{}');
-			cache[url] = { data, timestamp: Date.now() };
-			localStorage.setItem('pageCache', JSON.stringify(cache));
+		async clearExpiredCache () {
+			const db = await this.cacheDB.openDB();
+			const transaction = db.transaction(this.cacheDB.storeName, "readwrite");
+			const store = transaction.objectStore(this.cacheDB.storeName);
+			const request = store.openCursor();
+
+			request.onsuccess = (event) => {
+				const cursor = event.target.result;
+				if (cursor) {
+					const { timestamp, expiry } = cursor.value;
+					if (Date.now() - timestamp > expiry) {
+						store.delete(cursor.key);
+					}
+					cursor.continue();
+				}
+			};
 		}
-
-		/**
-		 * Retrieve cached page content.
-		 * @param {string} url - The URL of the cached page.
-		 * @returns {object|null} - The cached data or null if expired.
-		 */
-		getCachedPage (url) {
-			const cache = JSON.parse(localStorage.getItem('pageCache') || '{}');
-			const cachedEntry = cache[url];
-
-			// If cached data exists and is not expired, return it
-			if (cachedEntry && (Date.now() - cachedEntry.timestamp) < this.cacheExpiry) {
-				return cachedEntry.data;
-			}
-
-			// If expired or not present, delete the entry and return null
-			if (cachedEntry) {
-				delete cache[url];
-				localStorage.setItem('pageCache', JSON.stringify(cache));
-			}
-
-			return null;
-		}
-
-		/**
-		 * Save the current page state to sessionStorage.
-		 * @param {string} url - The page URL.
-		 * @param {object} data - The page content data.
-		 */
-		savePageState (url, data) {
-			sessionStorage.setItem("ajaxPageState", JSON.stringify({ url, data, scrollY: window.scrollY }));
-		}
-
 		/**
 		 * Load a page via AJAX and dynamically update the content.
 		 * @param {string} url - The URL to load.
@@ -362,9 +336,10 @@
 		 * @param {string} [params=null] - Optional query parameters.
 		 */
 		async loadPage (url, isPopState = false, params = null) {
-			if (this.state.ajaxLoading) return;
+			console.log("Loading page:", this.state.ajaxLoading, this.state.ajaxStarted);
+			if (this.state.ajaxLoading || this.state.ajaxStarted) return; // 如果正在加载或 AJAX 已经开始，就不要再执行
+			this.state.ajaxStarted = true; // 标记 AJAX 已开始
 			this.state.ajaxLoading = true;
-
 			const container = document.getElementById(this.containerId);
 			if (!container) {
 				console.error("Container not found.");
@@ -379,7 +354,7 @@
 			}
 
 			const fullUrl = params ? `${url}?${new URLSearchParams(params).toString()}` : url;
-			const cachedData = this.getCachedPage(fullUrl);
+			const cachedData = await this.cacheDB.get(fullUrl);
 
 			if (cachedData) {
 				console.log("Using cached data for:", fullUrl);
@@ -390,6 +365,7 @@
 					this.fadeIn(container);
 					window.scrollTo({ top: 0, behavior: "smooth" });
 					this.state.ajaxLoading = false; // 动画完成后解除锁定状态
+					this.state.ajaxStarted = false;
 				});
 				return;
 			}
@@ -400,12 +376,12 @@
 				const response = await this.fetchData({
 					url: `${this.apiUrl}?action=${this.action}&url=${fullUrl}`,
 					method: "GET",
+					headers: { 'X-WP-Nonce': lermData.nonce },
 				});
 
 				if (response.success) {
 					this.updatePageContent(container, response.data);
-					this.cachePage(fullUrl, response.data);
-					this.savePageState(fullUrl, response.data);
+					await this.cacheDB.set(fullUrl, response.data, this.cacheExpiry); // 缓存数据
 				} else {
 					throw new Error(response.message);
 				}
@@ -415,6 +391,7 @@
 				console.error("Error during page load:", error);
 				this.displayError(container, "Failed to load page.");
 			} finally {
+				this.state.ajaxStarted = false; // 加载完成后恢复状态
 				this.state.ajaxLoading = false;
 			}
 		}
@@ -431,6 +408,7 @@
 			this.updateMeta("keywords", data.meta_keywords);
 
 			container.innerHTML = data.content || "";
+			container.setAttribute("aria-live", "polite");
 
 			document.dispatchEvent(new Event("contentLoaded"));
 		}
@@ -474,11 +452,53 @@
 		 * @returns {boolean} - True if the link should be intercepted.
 		 */
 		shouldInterceptLink (link) {
-			return (
-				link.href.includes(window.location.origin) &&
-				this.shouldProcessUrl(link.href) &&
-				!this.state.ajaxLoading
-			);
+			// 确保链接是 HTMLAnchorElement 类型
+			if (!link || !(link instanceof HTMLAnchorElement)) {
+				return false;
+			}
+
+			// 获取解析后的绝对路径
+			const url = new URL(link.href, window.location.origin);
+
+			// 检查协议（仅允许 http 和 https）
+			if (!["http:", "https:"].includes(url.protocol)) {
+				console.warn(`Invalid protocol: ${url.protocol}`);
+				return false;
+			}
+
+			// 检查是否是同页面的锚点导航
+			if (url.origin === window.location.origin && url.pathname === window.location.pathname) {
+				if (url.hash) {
+					console.log(`Anchor navigation detected: ${url.hash}`);
+					return false; // 不拦截同页面的锚点导航
+				}
+			}
+
+			// 检查跨页面锚点
+			if (url.hash && url.pathname !== window.location.pathname) {
+				console.log(`Cross-page anchor detected: ${url.href}`);
+				// 可视情况选择是否拦截跨页面锚点
+				return true;
+			}
+
+			// 确保链接属于同源域名或白名单子域
+			if (!this.isSameOrigin(url) && !this.isAllowedSubdomain(url)) {
+				console.warn(`Cross-origin URL not allowed: ${url.href}`);
+				return false;
+			}
+
+			// 检查是否应处理该 URL
+			if (!this.shouldProcessUrl(url.href)) {
+				console.warn(`URL not processed: ${url.href}`);
+				return false;
+			}
+
+			// 防止 AJAX 重复加载
+			if (this.state.ajaxLoading) {
+				console.warn(`AJAX is currently loading. Ignoring link: ${url.href}`);
+				return false;
+			}
+			return true;
 		}
 
 		/**
@@ -489,14 +509,37 @@
 		shouldProcessUrl (url) {
 			return this.isAllowedUrl(url) && !this.isIgnoredUrl(url);
 		}
-
+		/**
+		 * Check if the URL belongs to the same origin.
+		 * @param {URL} url - The URL to check.
+		 * @returns {boolean} - True if the URL is from the same origin.
+		 */
+		isSameOrigin (url) {
+			return url.origin === window.location.origin;
+		}
+		/**
+		 * Check if a URL is explicitly allowed (e.g., subdomains or patterns).
+		 * @param {URL} url - The URL to evaluate.
+		 * @returns {boolean} - True if the URL matches any allowed pattern.
+		 */
+		isAllowedSubdomain (url) {
+			// 允许的子域名配置（示例）
+			const allowedSubdomains = ["sub1.example.com", "sub2.example.com"];
+			return allowedSubdomains.some((subdomain) => url.hostname.endsWith(subdomain));
+		}
 		/**
 		 * Check if a URL is explicitly allowed
 		 * @param {string} url - The URL to evaluate
 		 * @returns {boolean} - Returns true if the URL matches any allowed pattern
 		 */
 		isAllowedUrl (url) {
-			return this.allowUrls.length === 0 || this.allowUrls.some(allow => url.includes(allow));
+			// 如果未配置 allowUrls，默认允许所有
+			if (this.allowUrls.length === 0) {
+				return true;
+			}
+
+			// 使用正则或字符串匹配
+			return this.allowUrls.some((pattern) => url.includes(pattern));
 		}
 
 		/**
@@ -507,7 +550,6 @@
 		isIgnoredUrl (url) {
 			return this.ignoreUrls.some(ignore => url.includes(ignore));
 		}
-
 		/**
 		 * Display an error message in the container.
 		 * @param {HTMLElement} container - The container to display the error in.
@@ -566,6 +608,97 @@
 			requestAnimationFrame(fade);
 		}
 	}
+
+	class CacheDB {
+		constructor(dbName = "PageCacheDB", storeName = "pages") {
+			this.dbName = dbName;
+			this.storeName = storeName;
+			this.db = null;
+		}
+
+		// 打开或创建数据库
+		async openDB () {
+			return new Promise((resolve, reject) => {
+				const request = indexedDB.open(this.dbName, 1);
+
+				request.onupgradeneeded = (event) => {
+					const db = event.target.result;
+					if (!db.objectStoreNames.contains(this.storeName)) {
+						db.createObjectStore(this.storeName, { keyPath: "url" });
+					}
+				};
+
+				request.onsuccess = (event) => resolve(event.target.result);
+				request.onerror = (event) => reject(event.target.error);
+			});
+		}
+
+		// 添加或更新缓存
+		async set (url, data, expiry = 5 * 60 * 1000) {
+			const db = await this.openDB();
+			return new Promise((resolve, reject) => {
+				const transaction = db.transaction(this.storeName, "readwrite");
+				const store = transaction.objectStore(this.storeName);
+				const entry = { url, data, timestamp: Date.now(), expiry };
+				const request = store.put(entry);
+
+				request.onsuccess = () => resolve(true);
+				request.onerror = (event) => reject(event.target.error);
+			});
+		}
+
+		// 获取缓存
+		async get (url) {
+			const db = await this.openDB();
+			return new Promise((resolve, reject) => {
+				const transaction = db.transaction(this.storeName, "readonly");
+				const store = transaction.objectStore(this.storeName);
+				const request = store.get(url);
+
+				request.onsuccess = (event) => {
+					const result = event.target.result;
+
+					// 检查是否过期
+					if (result && Date.now() - result.timestamp > result.expiry) {
+						this.delete(url); // 删除过期缓存
+						resolve(null);
+					} else {
+						resolve(result ? result.data : null);
+					}
+				};
+				request.onerror = (event) => reject(event.target.error);
+			});
+		}
+
+		// 删除缓存
+		async delete (url) {
+			const db = await this.openDB();
+			return new Promise((resolve, reject) => {
+				const transaction = db.transaction(this.storeName, "readwrite");
+				const store = transaction.objectStore(this.storeName);
+				const request = store.delete(url);
+
+				request.onsuccess = () => resolve(true);
+				request.onerror = (event) => reject(event.target.error);
+			});
+		}
+
+		// 清空所有缓存
+		async clear () {
+			const db = await this.openDB();
+			return new Promise((resolve, reject) => {
+				const transaction = db.transaction(this.storeName, "readwrite");
+				const store = transaction.objectStore(this.storeName);
+				const request = store.clear();
+
+				request.onsuccess = () => resolve(true);
+				request.onerror = (event) => reject(event.target.error);
+			});
+		}
+	}
+
+
+
 
 	/**
 	* --------------------------------------------------------------------------
@@ -1081,8 +1214,10 @@
 	const loadPageService = new LoadPageService({
 		apiUrl: lermData.url,
 		containerId: "page-ajax",
+		headers: { 'X-WP-Nonce': lermData.nonce },
 		action: 'load_page_content',
-		ignoreUrls: ["/regist", "/reset/", "/wp-admin/", "/wp-login.php"],
+		ignoreUrls: ["/regist", "/reset/", "/wp-admin/", "/wp-login.php",],
+		cacheExpiry: 1 * 60 * 1000,
 		errorText: "Failed to load the content. Please try again later."
 	});
 	const loadRegistService = new LoadPageService({
@@ -1123,11 +1258,11 @@
 		scrollTop();
 		formAjaxHandle();
 		// Handle specific interactions (e.g., registration button click)
-		document.querySelectorAll(".change-form").forEach((link) => {
-			link.addEventListener("click", (event) => {
-				event.preventDefault();
-				loadRegistService.loadPage(link.href, "load_form", false, { action_type: event.target.dataset.form });
-			});
-		});
+		// document.querySelectorAll(".change-form").forEach((link) => {
+		// 	link.addEventListener("click", (event) => {
+		// 		event.preventDefault();
+		// 		loadRegistService.loadPage(link.href, "load_form", false, { action_type: event.target.dataset.form });
+		// 	});
+		// });
 	});
 })();
