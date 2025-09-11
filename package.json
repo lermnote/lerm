@@ -1,0 +1,21 @@
+{
+  "name": "lerm-wp-frontend",
+  "version": "1.0.0",
+  "description": "Frontend services for WordPress REST API (ClickService, FormService, LoadPageService)",
+  "main": "assets/dist/bundle.js",
+  "scripts": {
+     "dev": "webpack --watch",
+    "build": "webpack --mode production"
+  },
+  "author": "lerm",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "babel-loader": "^9.2.1",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.2.2"
+  },
+  "keywords": []
+}
