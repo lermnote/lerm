@@ -50,7 +50,8 @@ class Init {
 	 */
 	public function __construct( $params = array() ) {
 		self::$args = apply_filters( 'lerm_init_args', wp_parse_args( $params, self::$args ) );
-		self::set_options( $params );
+
+		self::set_options( self::$args );
 		self::get_options( self::$args );
 	}
 
@@ -118,10 +119,16 @@ class Init {
 			'ver'  => wp_get_theme()->get( 'Version' ), // Theme Version.
 		);
 
-		// Front login options.
+		/*
+		 * Front login options.
+		 * NOTE: accept both 'frontend_lgoin' (legacy typo) and 'frontend_login' for backward compatibility.
+		 */
+		$front_login_enable = $options['frontend_login'] ?? $options['frontend_lgoin'] ?? false;
+		$front_login_page   = $options['frontend_login_page'] ?? $options['frontend_lgoin_page'] ?? 0;
+
 		self::$args['front_login_options'] = array(
-			'front_login_enable'  => (bool) ( $options['frontend_lgoin'] ?? false ),
-			'login_page_id'       => $options['frontend_lgoin_page'] ?? 0,
+			'front_login_enable'  => (bool) $front_login_enable,
+			'login_page_id'       => $front_login_page,
 			'menu_login_item'     => $options['menu_login_item'] ?? '',
 			'login_redirect_url'  => $options['login_redirect_url'] ?? '',
 			'logout_redirect_url' => $options['logout_redirect_url'] ?? home_url(),
@@ -137,53 +144,47 @@ class Init {
 	 * @return void
 	 */
 	public static function get_options( $args ) {
-
 		// Core initialization (keeps previous behavior)
-		Setup::instance();
-		Enqueue::instance();
-		CommentWalker::instance();
-		
-		// Optimize options.
-		$params = array();
-		if ( ! empty( $args['optimize_options'] ) ) {
-			$params = $args['optimize_options'];
+		if ( class_exists( Setup::class ) ) {
+			Setup::instance();
+		}
 
-			Optimizer::instance( $params );
+		if ( class_exists( Enqueue::class ) ) {
+			Enqueue::instance();
+		}
+
+		if ( class_exists( CommentWalker::class ) ) {
+			CommentWalker::instance();
+		}
+
+		// Optimize options.
+		if ( ! empty( $args['optimize_options'] ) && class_exists( Optimizer::class ) ) {
+			Optimizer::instance( (array) $args['optimize_options'] );
 		}
 
 		// SEO options.
-		$params = array();
-		if ( ! empty( $args['seo_options'] ) ) {
-			$params = $args['seo_options'];
-			Seo::instance( $params );
+		if ( ! empty( $args['seo_options'] ) && class_exists( Seo::class ) ) {
+			Seo::instance( (array) $args['seo_options'] );
 		}
 
 		// Mail SMTP options.
-		$params = array();
-		if ( ! empty( $args['mail_options'] ) ) {
-			$params = $args['mail_options'];
-			Smtp::instance( $params );
+		if ( ! empty( $args['mail_options'] ) && class_exists( Smtp::class ) ) {
+			Smtp::instance( (array) $args['mail_options'] );
 		}
 
 		// Sitemap options.
-		$params = array();
-		if ( ! empty( $args['sitemap_options'] ) ) {
-			$params = $args['sitemap_options'];
-			Sitemap::instance( $params );
+		if ( ! empty( $args['sitemap_options'] ) && class_exists( Sitemap::class ) ) {
+			Sitemap::instance( (array) $args['sitemap_options'] );
 		}
 
 		// Custom options.
-		$params = array();
-		if ( ! empty( $args['custom_options'] ) ) {
-			$params = $args['custom_options'];
-			Customizer::instance( $params );
+		if ( ! empty( $args['custom_options'] ) && class_exists( Customizer::class ) ) {
+			Customizer::instance( (array) $args['custom_options'] );
 		}
 
 		// Theme updater options.
-		$params = array();
-		if ( ! empty( $args['updater_options'] ) ) {
-			$params = $args['updater_options'];
-			Updater::instance( $params );
+		if ( ! empty( $args['updater_options'] ) && class_exists( Updater::class ) ) {
+			Updater::instance( (array) $args['updater_options'] );
 		}
 
 		/*
@@ -205,10 +206,12 @@ class Init {
 			CommentController::instance();
 		}
 		// if ( class_exists( PageController::class ) ) {
-		// 	PageController::instance();
+		//  PageController::instance();
 		// }
-		// Comment walker (no REST equivalent, always instantiate).
 
-		OpenGraph::instance();
+		// OpenGraph (helper) - only instantiate if present
+		if ( class_exists( OpenGraph::class ) ) {
+			OpenGraph::instance();
+		}
 	}
 }

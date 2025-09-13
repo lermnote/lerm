@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  entry: './assets/src/index.js', // 项目入口
+  entry: './assets/src/js/index.js', // 项目入口
   output: {
     path: path.resolve(__dirname, 'assets/dist'),
     filename: 'bundle.js',
@@ -25,10 +25,4 @@ module.exports = {
   },
   mode: 'development', // 开发模式
   devtool: 'source-map',    // 调试用
-  // devServer: {
-  //   static: path.join(__dirname, 'assets/dist'),
-  //   hot: true,
-  //   port: 3000,
-  //   open: true              // 自动打开浏览器
-  // }
 };

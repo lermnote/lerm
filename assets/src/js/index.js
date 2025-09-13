@@ -2,25 +2,25 @@
 import { DOMContentLoaded, safeRequestIdleCallback, initializeWOW, lazyLoadImages, codeHighlight, calendarAddClass, offCanvasMenu, navigationToggle, scrollTop } from './utils.js';
 import { likeBtnHandle, loadMoreHandle, handleCommentSuccess, handleLoginSuccess, handleUpdateProfileSuccess } from './components.js';
 import FormService from './services/FormService.js';
-import LoadPageService from './services/LoadPageService.js';
+// import LoadPageService from './services/LoadPageService.js';
 
-const loadPageService = new LoadPageService({
-  apiUrl: lermData.url,
-  containerId: "page-ajax",
-  headers: { 'X-WP-Nonce': lermData.nonce },
-  action: 'load_page_content',
-  ignoreUrls: ["/regist", "/reset/", "/wp-admin/", "/wp-login.php"],
-  cacheExpiry: 1 * 60 * 1000,
-  errorText: "Failed to load the content. Please try again later."
-});
+// const loadPageService = new LoadPageService({
+//   apiUrl: lermData.url,
+//   containerId: "page-ajax",
+//   headers: { 'X-WP-Nonce': lermData.nonce },
+//   action: 'load_page_content',
+//   ignoreUrls: ["/regist", "/reset/", "/wp-admin/", "/wp-login.php"],
+//   cacheExpiry: 1 * 60 * 1000,
+//   errorText: "Failed to load the content. Please try again later."
+// });
 
-const loadRegistService = new LoadPageService({
-  apiUrl: lermData.url,
-  containerId: "myTabContent",
-  action: 'load_form',
-  allowUrls: ["/regist", "/login/", "/reset/"],
-  errorText: "Failed to load the content. Please try again later."
-});
+// const loadRegistService = new LoadPageService({
+//   apiUrl: lermData.url,
+//   containerId: "myTabContent",
+//   action: 'load_form',
+//   allowUrls: ["/regist", "/login/", "/reset/"],
+//   errorText: "Failed to load the content. Please try again later."
+// });
 
 const formAjaxHandle = () => {
   const formConfigs = [

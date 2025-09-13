@@ -1,11 +1,19 @@
 {
 	"name": "lerm/lerm",
-	"type": "package",
+	"type": "wordpress-theme",
 	"description": "WordPress theme based on bootstrap",
+	"license": "GPL-2.0-or-later",
 	"keywords": [
 		"WordPress",
-		"Themes"
+		"Themes",
+		"Bootstrap"
 	],
+	"homepage": "https://lerm.net",
+	"support": {
+		"issues": "https://lerm.net/issues",
+		"source": "https://lerm.net",
+		"email": "admin@lerm.net"
+	},
 	"authors": [
 		{
 			"name": "Oconner",
@@ -14,24 +22,34 @@
 			"role": "Developer"
 		}
 	],
+	"require": {
+		"php": ">=8.0",
+		"composer/installers": "^2.2"
+	},
+	"require-dev": {
+		"squizlabs/php_codesniffer": "*",
+		"wp-coding-standards/wpcs": "*",
+		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.2"
+	},
 	"autoload": {
 		"psr-4": {
 			"Lerm\\": "src/"
 		},
 		"files": [
-            "src/Functions/Layout.php",
+			"src/Functions/Layout.php",
 			"src/Functions/Opengraph.php",
 			"src/Functions/Icon.php",
 			"src/Functions/Utilities.php"
-        ]
+		]
 	},
-	"require-dev": {
-		"squizlabs/php_codesniffer": "*",
-		"wp-coding-standards/wpcs": "*"
+	"scripts": {
+		"lint": "phpcs --standard=WordPress .",
+		"fix": "phpcbf --standard=WordPress ."
 	},
 	"config": {
 		"allow-plugins": {
-			"dealerdirect/phpcodesniffer-composer-installer": true
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"composer/installers": true
 		}
 	}
 }

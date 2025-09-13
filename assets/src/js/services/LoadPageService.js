@@ -253,7 +253,7 @@
 // }
 // services/LoadPageService.js
 import BaseService from './BaseService.js';
-import CacheDB from './CacheDB.js';
+import CacheDB from './cache/CacheDB.js';
 import { delegate } from '../utils.js';
 
 export default class LoadPageService extends BaseService {

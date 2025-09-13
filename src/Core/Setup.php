@@ -52,7 +52,7 @@ class Setup {
 	 * @return void
 	 */
 	public static function hooks() {
-		add_action( 'after_setup_theme', array( __CLASS__, 'setup' ), 2 );
+		add_action( 'init', array( __CLASS__, 'setup' ), 2 );
 
 		add_filter( 'frontpage_template', array( __CLASS__, 'front_page_template' ), 15, 1 );
 		add_filter( 'pre_option_link_manager_enabled', '__return_true' );
@@ -89,7 +89,6 @@ class Setup {
 			)
 		);
 
-		// Adds core WordPress HTML5 support.
 		add_theme_support(
 			'html5',
 			array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'script', 'style' )
@@ -110,7 +109,6 @@ class Setup {
 
 		// Add support for link color control.
 		add_theme_support( 'link-color' );
-
 		// Post formats.
 		add_theme_support(
 			'post-formats',
@@ -163,7 +161,7 @@ class Setup {
 	 * @since Lerm 2.0
 	 */
 	public static function excerpt_length( $length ) {
-		return self::$args['excerpt_length'];
+		return self::$args['excerpt_length'] ? self::$args['excerpt_length'] : $length;
 	}
 
 	/**
@@ -174,7 +172,7 @@ class Setup {
 	 * @since Lerm 2.0
 	 */
 	public static function comment_excerpt_length( $length ) {
-		return self::$args['comment_excerpt_length'];
+		return self::$args['comment_excerpt_length'] ? self::$args['excerpt_length'] : $length;
 	}
 
 	// Update post views count.
