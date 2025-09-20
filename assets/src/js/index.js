@@ -1,7 +1,18 @@
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+import 'animate.css';
+import WOW from 'wowjs';
+
 // main.js
 import { DOMContentLoaded, safeRequestIdleCallback, initializeWOW, lazyLoadImages, codeHighlight, calendarAddClass, offCanvasMenu, navigationToggle, scrollTop } from './utils.js';
 import { likeBtnHandle, loadMoreHandle, handleCommentSuccess, handleLoginSuccess, handleUpdateProfileSuccess } from './components.js';
 import FormService from './services/FormService.js';
+import BaseService from './services/BaseService.js';
+import { fetchAndRenderPosts, initLoadMore, attachDOMPurify } from './Post/post.js';
+import DOMPurify from 'dompurify';
+// import { attachDOMPurify } from './renderPostCard.template';
+attachDOMPurify(DOMPurify);
 // import LoadPageService from './services/LoadPageService.js';
 
 // const loadPageService = new LoadPageService({
@@ -48,26 +59,9 @@ const formAjaxHandle = () => {
 };
 
 DOMContentLoaded(async () => {
-  // 1) 先创建实例（确保传入正确的 apiUrl / action / containerId）
-  // const svc = new LoadPageService({
-  //   apiUrl: (window.lermData?.rest_url ?? '/wp-json/lerm/v1') + '/page', // 或 '/wp-admin/admin-ajax.php'
-  //   action: '', // admin-ajax 情况下填 'my_load_page'
-  //   containerId: "page-ajax",
-  //   allowUrls: [],
-  //   ignoreUrls: ['/wp-login.php', '/wp-admin/'],
-  //   cacheExpiry: 5 * 60 * 1000,
-  // });
+  // fetchAndRenderPosts({ containerSelector: '#app', per_page: 9 });
+  initLoadMore({ containerSelector: '#app', per_page: 6, buttonContainer: '#load-more-container', autoScroll: false });
 
-  // // 2) 暴露实例供调试 & 手动清缓存
-  // window.lermLoadPage = svc;
-
-  // // 3) 等待 init 完成 —— 确保 delegate、popstate 等已注册
-  // try {
-  //   await svc.init();
-  // } catch (err) {
-  //   console.error('LoadPageService init failed:', err);
-  //   // 可选回退：location.reload();
-  // }
   safeRequestIdleCallback(() => {
     initializeWOW();
     lazyLoadImages();
@@ -80,7 +74,7 @@ DOMContentLoaded(async () => {
   scrollTop();
   formAjaxHandle();
   likeBtnHandle();
-  loadMoreHandle();
+  // loadMoreHandle();
 });
 
 // Re-run some init on dynamic content loads

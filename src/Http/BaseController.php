@@ -179,6 +179,7 @@ abstract class BaseController extends WP_REST_Controller {
 	 */
 	public static function rest_l10n_data( $l10n ) {
 		$data = array(
+			'root'     => esc_url_raw( rest_url() ),
 			'rest_url' => rest_url( static::NAMESPACE ),
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
 			'loggedin' => is_user_logged_in(),

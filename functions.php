@@ -74,6 +74,47 @@ if ( file_exists( $csf ) ) {
 }
 
 
+/**
+ * 从 assets/dist/manifest.json 获取构建后真实文件名
+ * 返回完整 URL 或 false
+ */
+// function lerm_get_dist_file_url( $key ) {
+// 	$dist_dir      = get_template_directory() . '/assets/dist';
+// 	$manifest_path = $dist_dir . '/manifest.json';
+
+// 	if ( ! file_exists( $manifest_path ) ) {
+// 		return false;
+// 	}
+
+// 	$manifest = json_decode( file_get_contents( $manifest_path ), true );
+// 	if ( ! is_array( $manifest ) || ! isset( $manifest[ $key ] ) ) {
+// 		return false;
+// 	}
+
+// 	// 返回完整 URL
+// 	return get_template_directory_uri() . '/assets/dist/' . $manifest[ $key ];
+// }
+
+// function lerm_enqueue_dist_assets() {
+// 	if ( is_admin() ) {
+// 		return;
+// 	}
+
+// 	// CSS
+// 	$styles = lerm_get_dist_file_url( 'styles.css' );
+// 	if ( $styles ) {
+// 		wp_enqueue_style( 'lerm-styles', $styles, array(), null );
+// 	}
+
+// 	// JS
+// 	$bundle = lerm_get_dist_file_url( 'bundle.js' );
+// 	if ( $bundle ) {
+// 		wp_enqueue_script( 'lerm-bundle', $bundle, array(), null, true );
+// 	}
+// }
+// add_action( 'wp_enqueue_scripts', 'lerm_enqueue_dist_assets' );
+
+
 // // functions used for debug mail errors, log is stored at SERVER_ROOT_DIR/mail.log
 // function smtplog_mailer_errors( $wp_error ) {
 //  global $wp_filesystem;

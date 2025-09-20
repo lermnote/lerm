@@ -112,3 +112,92 @@ export const initializeWOW = () => {
   });
   wow.init();
 };
+
+// utils.js （替换或新增此函数）
+export async function crossFadeReplace(mount, newContent, { duration = 240, easing = 'cubic-bezier(.2,.8,.2,1)' } = {}) {
+  if (!mount) return;
+  // ensure mount is positioned so absolute layers can overlay
+  const prevPosition = mount.style.position || '';
+  if (getComputedStyle(mount).position === 'static') {
+    mount.style.position = 'relative';
+  }
+
+  // Keep a min-height so layout doesn't collapse during crossfade
+  const mountRect = mount.getBoundingClientRect();
+  if (!mount.style.minHeight) {
+    mount.style.minHeight = `${Math.max(64, Math.round(mountRect.height))}px`;
+  }
+
+  // Create overlay layers
+  const oldLayer = document.createElement('div');
+  const newLayer = document.createElement('div');
+  oldLayer.className = newLayer.className = 'xfade-layer';
+  // Put existing children into oldLayer
+  while (mount.firstChild) {
+    oldLayer.appendChild(mount.firstChild);
+  }
+  // Put newContent into newLayer (clone if you want to keep original)
+  newLayer.appendChild(newContent);
+
+  // initial styles: newLayer invisible
+  newLayer.style.opacity = '0';
+  newLayer.style.pointerEvents = 'none';
+  oldLayer.style.pointerEvents = 'none';
+
+  // append layers
+  mount.appendChild(oldLayer);
+  mount.appendChild(newLayer);
+
+  // wait for images in newLayer to load (prevents layout jumps)
+  await waitForImages(newLayer);
+
+  // hint to browser for compositing
+  oldLayer.style.willChange = newLayer.style.willChange = 'opacity, transform';
+  oldLayer.style.transform = newLayer.style.transform = 'translateZ(0)';
+
+  // animate with Web Animations API (works well and returns a Promise)
+  let anims = [];
+  try {
+    const fadeIn = newLayer.animate([{ opacity: 0 }, { opacity: 1 }], { duration, easing, fill: 'forwards' });
+    const fadeOut = oldLayer.animate([{ opacity: 1 }, { opacity: 0 }], { duration, easing, fill: 'forwards' });
+    anims = [fadeIn, fadeOut];
+
+    await Promise.all(anims.map(a => a.finished));
+  } catch (e) {
+    // if WAAPI not available or fails, fallback to immediate swap
+    newLayer.style.opacity = '1';
+    oldLayer.style.opacity = '0';
+  }
+
+  // remove old layer and move new content back to normal flow
+  // (we append its children into a fresh container to preserve structure)
+  const finalContainer = document.createElement('div');
+  // keep same classes as your expected outer wrapper (e.g. row)
+  finalContainer.className = newContent.className || '';
+  while (newLayer.firstChild) {
+    finalContainer.appendChild(newLayer.firstChild);
+  }
+
+  // cleanup mount and restore
+  mount.innerHTML = '';
+  mount.appendChild(finalContainer);
+
+  // cleanup styles we changed
+  if (!prevPosition) mount.style.position = '';
+  mount.style.minHeight = '';
+}
+  
+// helper: wait for images to finish loading (resolve even if errored)
+function waitForImages(node) {
+  const imgs = Array.from(node.querySelectorAll('img'));
+  if (imgs.length === 0) return Promise.resolve();
+  return Promise.all(imgs.map(img => {
+    if (img.complete) return Promise.resolve();
+    return new Promise(resolve => {
+      img.addEventListener('load', resolve, { once: true });
+      img.addEventListener('error', resolve, { once: true });
+      // if not fired in 3s, resolve (defensive)
+      setTimeout(resolve, 3000);
+    });
+  }));
+}

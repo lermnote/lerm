@@ -14,3 +14,14 @@ License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: blog, two-columns, right-sidebar, custom-menu, featured-images, footer-widgets, post-formats, sticky-post
 */
+/* overlay 层，覆盖父元素 */
+.xfade-layer {
+  position: absolute;
+  inset: 0;            /* top:0; right:0; bottom:0; left:0 */
+  display: block;
+  overflow: hidden;
+  pointer-events: none; /* 禁止事件，避免点击穿透问题 */
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
