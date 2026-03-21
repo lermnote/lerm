@@ -1,0 +1,665 @@
+# Copyright (C) 2021 Codestar
+# This file is distributed under the same license as the Codestar Framework package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Codestar Framework 2.2.1\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: hi_IN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#: classes/admin-options.class.php:224
+msgid "Error while saving the changes."
+msgstr "परिवर्तन सहेजते सम�?त्रुटि�?
+
+#: classes/admin-options.class.php:284
+msgid "Settings successfully imported."
+msgstr "सेटिंग्स सफलतापूर्व�?आयात की गईं।"
+
+#: classes/admin-options.class.php:296 classes/admin-options.class.php:312
+msgid "Default settings restored."
+msgstr "डिफ़ॉल्ट सेटिंग्स को पुनर्स्थापित किया�?
+
+#: classes/admin-options.class.php:383
+msgid "Settings saved."
+msgstr "सेटिंग्स सहेज�?गया।"
+
+#: classes/admin-options.class.php:561
+msgid "You have unsaved changes, save your changes!"
+msgstr "आपके बदला�?सहेज�?नही�?गए है�? बदला�?को सहेजें!"
+
+#: classes/admin-options.class.php:563
+msgid "show all settings"
+msgstr "सभी विकल्प दिखाएं"
+
+#: classes/admin-options.class.php:565 fields/icon/icon.php:57
+#: fields/map/map.php:23
+msgid "Search..."
+msgstr "खो�?.."
+
+#: classes/admin-options.class.php:568 classes/admin-options.class.php:691
+msgid "Save"
+msgstr "सहेजें"
+
+#: classes/admin-options.class.php:568 classes/admin-options.class.php:691
+msgid "Saving..."
+msgstr "सहेज�?जा रह�?.."
+
+#: classes/admin-options.class.php:569 classes/admin-options.class.php:692
+msgid "Reset Section"
+msgstr "रीसे�?सेक्शन"
+
+#: classes/admin-options.class.php:569 classes/admin-options.class.php:692
+msgid "Are you sure to reset this section options?"
+msgstr "क्या आप निश्चिंत है?"
+
+#: classes/admin-options.class.php:570 classes/admin-options.class.php:693
+msgid "Reset All"
+msgstr "सभी को रीसे�?कर�?
+
+#: classes/admin-options.class.php:570 classes/admin-options.class.php:693
+#: classes/comment-options.class.php:213 classes/metabox-options.class.php:282
+#: fields/backup/backup.php:31
+msgid "Reset"
+msgstr "रीसे�?
+
+#: classes/admin-options.class.php:570 classes/admin-options.class.php:693
+msgid "Are you sure you want to reset all settings to default values?"
+msgstr "क्या आप निश्चिंत है?"
+
+#: classes/admin-options.class.php:668 classes/comment-options.class.php:196
+#: classes/metabox-options.class.php:265 fields/button_set/button_set.php:56
+#: fields/checkbox/checkbox.php:76 fields/radio/radio.php:75
+#: fields/select/select.php:113 functions/actions.php:41
+msgid "No data available."
+msgstr "डाटा अनुपलब्ध"
+
+#: classes/comment-options.class.php:214 classes/metabox-options.class.php:283
+msgid "update post"
+msgstr "अपडे�?पोस्�?
+
+#: classes/comment-options.class.php:214 classes/metabox-options.class.php:283
+msgid "Cancel"
+msgstr "रद्द करें"
+
+#: classes/setup.class.php:529
+msgid "Are you sure?"
+msgstr "क्या आप निश्चिंत है?"
+
+#: classes/setup.class.php:530
+msgid "Please enter %s or more characters"
+msgstr "कृपय�?%s या अधिक वर्ण दर्ज करें"
+
+#: classes/setup.class.php:531
+msgid "Searching..."
+msgstr "खो�?कर..."
+
+#: classes/setup.class.php:532
+msgid "No results found."
+msgstr "को�?परिणाम नही मिला�?
+
+#: classes/setup.class.php:615
+msgid "Oops! Not allowed."
+msgstr "उफ�? अनुमति नही�?हैं।"
+
+#: classes/setup.class.php:689 classes/setup.class.php:693
+msgid "Field not found!"
+msgstr "मैदा�?नही�?मिला!"
+
+#: classes/shortcode-options.class.php:251 fields/group/group.php:23
+msgid "Add New"
+msgstr "नय�?जोड़ें"
+
+#: classes/shortcode-options.class.php:288 functions/actions.php:16
+#: functions/actions.php:68 functions/actions.php:106 functions/actions.php:141
+#: functions/actions.php:170
+msgid "Error: Invalid nonce verification."
+msgstr "त्रुटि:  अमान्य अस्थायी रू�?से सत्यापन।"
+
+#: fields/background/background.php:35 fields/media/media.php:57
+msgid "Not selected"
+msgstr "नही�?चुने गए"
+
+#: fields/background/background.php:66 fields/date/date.php:31
+msgid "From"
+msgstr ""
+
+#: fields/background/background.php:84 fields/date/date.php:32
+msgid "To"
+msgstr ""
+
+#: fields/background/background.php:102
+msgid "Direction"
+msgstr ""
+
+#: fields/background/background.php:108
+msgid "Gradient Direction"
+msgstr ""
+
+#: fields/background/background.php:109
+msgid "&#8659; top to bottom"
+msgstr ""
+
+#: fields/background/background.php:110
+msgid "&#8658; left to right"
+msgstr ""
+
+#: fields/background/background.php:111
+msgid "&#8664; corner top to right"
+msgstr ""
+
+#: fields/background/background.php:112
+msgid "&#8665; corner top to left"
+msgstr ""
+
+#: fields/background/background.php:155
+msgid "Background Position"
+msgstr "पृष्ठभूम�?की अवस्था"
+
+#: fields/background/background.php:156
+msgid "Left Top"
+msgstr ""
+
+#: fields/background/background.php:157
+msgid "Left Center"
+msgstr ""
+
+#: fields/background/background.php:158
+msgid "Left Bottom"
+msgstr ""
+
+#: fields/background/background.php:159
+msgid "Center Top"
+msgstr ""
+
+#: fields/background/background.php:160
+msgid "Center Center"
+msgstr ""
+
+#: fields/background/background.php:161
+msgid "Center Bottom"
+msgstr ""
+
+#: fields/background/background.php:162
+msgid "Right Top"
+msgstr ""
+
+#: fields/background/background.php:163
+msgid "Right Center"
+msgstr ""
+
+#: fields/background/background.php:164
+msgid "Right Bottom"
+msgstr ""
+
+#: fields/background/background.php:178
+msgid "Background Repeat"
+msgstr "पृष्ठभूम�?दोहराए�?
+
+#: fields/background/background.php:179
+msgid "Repeat"
+msgstr ""
+
+#: fields/background/background.php:180
+msgid "No Repeat"
+msgstr ""
+
+#: fields/background/background.php:181
+msgid "Repeat Horizontally"
+msgstr ""
+
+#: fields/background/background.php:182
+msgid "Repeat Vertically"
+msgstr ""
+
+#: fields/background/background.php:196
+msgid "Background Attachment"
+msgstr "पृष्ठभूम�?संलग्न"
+
+#: fields/background/background.php:197
+msgid "Scroll"
+msgstr ""
+
+#: fields/background/background.php:198
+msgid "Fixed"
+msgstr ""
+
+#: fields/background/background.php:212
+msgid "Background Size"
+msgstr "पृष्ठभूम�?का आकार"
+
+#: fields/background/background.php:213
+msgid "Cover"
+msgstr ""
+
+#: fields/background/background.php:214
+msgid "Contain"
+msgstr ""
+
+#: fields/background/background.php:215
+msgid "Auto"
+msgstr ""
+
+#: fields/background/background.php:229
+msgid "Background Origin"
+msgstr "पृष्ठभूम�?की उत्पत्ति"
+
+#: fields/background/background.php:230 fields/background/background.php:248
+msgid "Padding Box"
+msgstr ""
+
+#: fields/background/background.php:231 fields/background/background.php:247
+msgid "Border Box"
+msgstr ""
+
+#: fields/background/background.php:232 fields/background/background.php:249
+msgid "Content Box"
+msgstr ""
+
+#: fields/background/background.php:246
+msgid "Background Clip"
+msgstr "पृष्ठभूम�?क्लि�?
+
+#: fields/background/background.php:263
+msgid "Background Blend Mode"
+msgstr ""
+
+#: fields/background/background.php:264 fields/link_color/link_color.php:36
+#: fields/typography/typography.php:175
+msgid "Normal"
+msgstr ""
+
+#: fields/background/background.php:265
+msgid "Multiply"
+msgstr ""
+
+#: fields/background/background.php:266
+msgid "Screen"
+msgstr ""
+
+#: fields/background/background.php:267
+msgid "Overlay"
+msgstr ""
+
+#: fields/background/background.php:268
+msgid "Darken"
+msgstr ""
+
+#: fields/background/background.php:269
+msgid "Lighten"
+msgstr ""
+
+#: fields/background/background.php:270
+msgid "Color Dodge"
+msgstr ""
+
+#: fields/background/background.php:271
+msgid "Saturation"
+msgstr ""
+
+#: fields/background/background.php:272
+msgid "Color"
+msgstr ""
+
+#: fields/background/background.php:273
+msgid "Luminosity"
+msgstr ""
+
+#: fields/backup/backup.php:26
+msgid "Import"
+msgstr "आयात"
+
+#: fields/backup/backup.php:29
+msgid "Export & Download"
+msgstr "निर्या�?�?डाउनलो�?
+
+#: fields/border/border.php:25 fields/spacing/spacing.php:25
+msgid "top"
+msgstr ""
+
+#: fields/border/border.php:26 fields/spacing/spacing.php:26
+msgid "right"
+msgstr ""
+
+#: fields/border/border.php:27 fields/spacing/spacing.php:27
+msgid "bottom"
+msgstr ""
+
+#: fields/border/border.php:28 fields/spacing/spacing.php:28
+msgid "left"
+msgstr ""
+
+#: fields/border/border.php:29 fields/spacing/spacing.php:29
+msgid "all"
+msgstr ""
+
+#: fields/border/border.php:51 fields/typography/typography.php:203
+msgid "Solid"
+msgstr ""
+
+#: fields/border/border.php:52 fields/typography/typography.php:206
+msgid "Dashed"
+msgstr ""
+
+#: fields/border/border.php:53 fields/typography/typography.php:205
+msgid "Dotted"
+msgstr ""
+
+#: fields/border/border.php:54 fields/typography/typography.php:204
+msgid "Double"
+msgstr ""
+
+#: fields/border/border.php:55
+msgid "Inset"
+msgstr ""
+
+#: fields/border/border.php:56
+msgid "Outset"
+msgstr ""
+
+#: fields/border/border.php:57
+msgid "Groove"
+msgstr ""
+
+#: fields/border/border.php:58
+msgid "ridge"
+msgstr ""
+
+#: fields/border/border.php:59 fields/typography/typography.php:188
+#: fields/typography/typography.php:202
+msgid "None"
+msgstr ""
+
+#: fields/dimensions/dimensions.php:22
+msgid "width"
+msgstr ""
+
+#: fields/dimensions/dimensions.php:23
+msgid "height"
+msgstr ""
+
+#: fields/gallery/gallery.php:20
+msgid "Add Gallery"
+msgstr "गैलरी मे�?जोड़ें"
+
+#: fields/gallery/gallery.php:21
+msgid "Edit Gallery"
+msgstr "गैलरी को संपादि�?कर�?
+
+#: fields/gallery/gallery.php:22
+msgid "Clear"
+msgstr "साफ़ करें"
+
+#: fields/group/group.php:35 fields/repeater/repeater.php:27
+msgid "Error: Field ID conflict."
+msgstr "त्रुटि: फ़ील्�?आईडी संघर्ष�?
+
+#: fields/group/group.php:46 fields/group/group.php:87
+#: fields/repeater/repeater.php:48 fields/repeater/repeater.php:76
+msgid "Are you sure to delete this item?"
+msgstr "क्या आप निश्चिंत है?"
+
+#: fields/group/group.php:121 fields/repeater/repeater.php:89
+msgid "You cannot add more."
+msgstr "आप अधिक नही�?जोड़ सकते�?
+
+#: fields/group/group.php:122 fields/repeater/repeater.php:90
+msgid "You cannot remove more."
+msgstr "आप अधिक नही�?निका�?सकते�?
+
+#: fields/icon/icon.php:20 fields/icon/icon.php:53
+msgid "Add Icon"
+msgstr "चिह्�?जोड़ें"
+
+#: fields/icon/icon.php:21
+msgid "Remove Icon"
+msgstr "चिह्�?हटाए�?
+
+#: fields/link/link.php:20
+msgid "Add Link"
+msgstr "कड़ी जोडे�?
+
+#: fields/link/link.php:21
+msgid "Edit Link"
+msgstr "कड़ी का संपादन कर�?
+
+#: fields/link/link.php:22
+msgid "Remove Link"
+msgstr "कड़ी हटायें"
+
+#: fields/link_color/link_color.php:37
+msgid "Hover"
+msgstr ""
+
+#: fields/link_color/link_color.php:38
+msgid "Active"
+msgstr ""
+
+#: fields/link_color/link_color.php:39
+msgid "Visited"
+msgstr ""
+
+#: fields/link_color/link_color.php:40
+msgid "Focus"
+msgstr ""
+
+#: fields/map/map.php:24
+msgid "Latitude"
+msgstr "अक्षां�?
+
+#: fields/map/map.php:25
+msgid "Longitude"
+msgstr "देशान्तर"
+
+#: fields/media/media.php:23 fields/upload/upload.php:21
+msgid "Upload"
+msgstr "अपलो�?
+
+#: fields/media/media.php:24 fields/upload/upload.php:22
+msgid "Remove"
+msgstr "अपलो�?
+
+#: fields/sorter/sorter.php:21
+msgid "Enabled"
+msgstr "सक्रिय करें"
+
+#: fields/sorter/sorter.php:22
+msgid "Disabled"
+msgstr "निष्क्रि�?करें"
+
+#: fields/switcher/switcher.php:20
+msgid "On"
+msgstr ""
+
+#: fields/switcher/switcher.php:21
+msgid "Off"
+msgstr ""
+
+#: fields/typography/typography.php:85
+msgid "Font Family"
+msgstr ""
+
+#: fields/typography/typography.php:86
+msgid "Select a font"
+msgstr ""
+
+#: fields/typography/typography.php:94
+msgid "Backup Font Family"
+msgstr ""
+
+#: fields/typography/typography.php:108 fields/typography/typography.php:121
+#: fields/typography/typography.php:134 fields/typography/typography.php:149
+#: fields/typography/typography.php:165 fields/typography/typography.php:178
+#: fields/typography/typography.php:192 fields/typography/typography.php:210
+msgid "Default"
+msgstr ""
+
+#: fields/typography/typography.php:119
+msgid "Font Style"
+msgstr ""
+
+#: fields/typography/typography.php:133 fields/typography/typography.php:134
+msgid "Load Extra Styles"
+msgstr ""
+
+#: fields/typography/typography.php:147
+msgid "Subset"
+msgstr ""
+
+#: fields/typography/typography.php:157
+msgid "Text Align"
+msgstr ""
+
+#: fields/typography/typography.php:159
+msgid "Inherit"
+msgstr ""
+
+#: fields/typography/typography.php:160
+msgid "Left"
+msgstr ""
+
+#: fields/typography/typography.php:161
+msgid "Center"
+msgstr ""
+
+#: fields/typography/typography.php:162
+msgid "Right"
+msgstr ""
+
+#: fields/typography/typography.php:163
+msgid "Justify"
+msgstr ""
+
+#: fields/typography/typography.php:164
+msgid "Initial"
+msgstr ""
+
+#: fields/typography/typography.php:173
+msgid "Font Variant"
+msgstr ""
+
+#: fields/typography/typography.php:176
+msgid "Small Caps"
+msgstr ""
+
+#: fields/typography/typography.php:177
+msgid "All Small Caps"
+msgstr ""
+
+#: fields/typography/typography.php:186
+msgid "Text Transform"
+msgstr ""
+
+#: fields/typography/typography.php:189
+msgid "Capitalize"
+msgstr ""
+
+#: fields/typography/typography.php:190
+msgid "Uppercase"
+msgstr ""
+
+#: fields/typography/typography.php:191
+msgid "Lowercase"
+msgstr ""
+
+#: fields/typography/typography.php:200
+msgid "Text Decoration"
+msgstr ""
+
+#: fields/typography/typography.php:207
+msgid "Wavy"
+msgstr ""
+
+#: fields/typography/typography.php:208
+msgid "Overline"
+msgstr ""
+
+#: fields/typography/typography.php:209
+msgid "Line-through"
+msgstr ""
+
+#: fields/typography/typography.php:222
+msgid "Font Size"
+msgstr ""
+
+#: fields/typography/typography.php:234
+msgid "Line Height"
+msgstr ""
+
+#: fields/typography/typography.php:246
+msgid "Letter Spacing"
+msgstr ""
+
+#: fields/typography/typography.php:258
+msgid "Word Spacing"
+msgstr ""
+
+#: fields/typography/typography.php:273
+msgid "Font Color"
+msgstr ""
+
+#: fields/typography/typography.php:284
+msgid "Custom Style"
+msgstr ""
+
+#: fields/typography/typography.php:351
+msgid "Custom Web Fonts"
+msgstr ""
+
+#: fields/typography/typography.php:357
+msgid "Safe Web Fonts"
+msgstr ""
+
+#: fields/typography/typography.php:377
+msgid "Google Web Fonts"
+msgstr ""
+
+#: functions/actions.php:72 functions/actions.php:110
+msgid "Error: Invalid key."
+msgstr "त्रुटि: अमान्य कुंजी�?
+
+#: functions/actions.php:114
+msgid "Error: The response is not a valid JSON response."
+msgstr "त्रुटि: प्रतिक्रिय�?वै�?JSON प्रतिक्रिय�?नही�?है�?
+
+#: functions/actions.php:174
+msgid "Error: Invalid term ID."
+msgstr "त्रुटि: अमान्य टर्म आईडी�?
+
+#: functions/actions.php:180
+msgid "Error: You do not have permission to do that."
+msgstr "त्रुटि: आपके पा�?यह कार्�?करने कि अनुमति नही�?है�?
+
+#: functions/validate.php:14 functions/validate.php:86
+msgid "Please enter a valid email address."
+msgstr "कृपय�?एक मान्�?ईमेल पत�?दर्ज करें�?
+
+#: functions/validate.php:32 functions/validate.php:106
+msgid "Please enter a valid number."
+msgstr "कृपय�?एक सही संख्या डालिये�?
+
+#: functions/validate.php:50 functions/validate.php:126
+msgid "This field is required."
+msgstr "यह फील्�?अपेक्षित है�?
+
+#: functions/validate.php:68 functions/validate.php:146
+msgid "Please enter a valid URL."
+msgstr "कृपय�?एक मान्�?यूआरएल दर्ज कीजिए।"
+
+#~ msgid "Add Shortcode"
+#~ msgstr "शॉर्टकोड जोड़ें"
+
+#~ msgid "Select a shortcode"
+#~ msgstr "एक शोर्�?का चय�?करें"
+
+#~ msgid "Insert Shortcode"
+#~ msgstr "शॉर्टकोड डाले�?
+
+#~ msgid "Write shortcode here..."
+#~ msgstr "यहां शोर्टकोड लिखे�?.."
+

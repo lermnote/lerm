@@ -1,0 +1,232 @@
+// // services/ClickService.js
+// import BaseService from './BaseService.js';
+// import { delegate } from '../utils.js';
+
+// export default class ClickService extends BaseService {
+//   constructor({ apiUrl, selector, route, security, headers = {}, additionalData = {}, isThrottled = false, cacheExpiryTime = 60000, enableCache = true }) {
+//     super(apiUrl);
+//     Object.assign(this, { selector, route, security, headers, additionalData, cacheExpiryTime, enableCache });
+//     this.messageId = null; // 可设置以使用 displayMessage
+//     this.clickHandler = isThrottled ? this.rateLimit(this.handleClick, 1000, true) : this.handleClick;
+//     delegate('click', this.selector, this.clickHandler);
+//   }
+
+//   handleClick = async (event, target) => {
+//     // compatibility: if delegate passed only event, try to find target
+//     if (!target) target = event && event.currentTarget ? event.currentTarget : event.target;
+//     if (!target) return;
+
+//     event.preventDefault();
+//     this.beforeClick(event, target);
+
+//     //  validate
+//     const nonce = this.security ?? target.dataset.nonce;
+//     if (!nonce) {
+//       this.onError(new Error('Missing nonce'), target);
+//       return;
+//     }
+
+//     const payload = {
+//       ...target.dataset,
+//       ...this.additionalData,
+//     };
+
+//     const cacheKey = `click_action_${this.route}`;
+//     if (this.enableCache && this.isCacheValid(cacheKey)) {
+//       this.useCache(cacheKey);
+//       return;
+//     }
+
+//     this.toggleButton(target, true);
+
+//     const url = `${this.apiUrl.replace(/\/$/, '')}/${this.route.replace(/^\//, '')}`;
+
+//     try {
+//       const response = await this.fetchData({
+//         url: url,
+//         method: 'POST',
+//         credentials: 'same-origin',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'X-WP-Nonce': nonce,
+//           ...this.headers
+//         },
+//         body: JSON.stringify(payload),
+//       });
+
+
+
+//       this.onSuccess(response, target);
+//       if (this.enableCache) this.updateCache(cacheKey, data);
+//     } catch (err) {
+//       this.onError(err, target);
+//     } finally {
+//       this.toggleButton(target, false);
+//     }
+//   }
+
+//   isCacheValid = (cacheKey) => {
+//     const cachedData = sessionStorage.getItem(cacheKey);
+//     const cacheTime = sessionStorage.getItem(`${cacheKey}_time`);
+//     return cachedData && (Date.now() - cacheTime) < this.cacheExpiryTime;
+//   }
+
+//   useCache = (cacheKey) => {
+//     const cachedResponse = JSON.parse(sessionStorage.getItem(cacheKey));
+//     this.onSuccess(cachedResponse);
+//   }
+
+//   cacheResponse = (cacheKey, response) => {
+//     localStorage.setItem(cacheKey, JSON.stringify(response));
+//     localStorage.setItem(`${cacheKey}_time`, Date.now());
+//   }
+
+//   updateCache = (cacheKey, response) => {
+//     sessionStorage.setItem(cacheKey, JSON.stringify(response));
+//     sessionStorage.setItem(`${cacheKey}_time`, Date.now());
+//   }
+
+//   beforeClick = () => { console.log('Processing click...'); }
+  
+//   onSuccess = (response, target) => {
+//     this.displayMessage('Click action was successful!');
+//     console.log('Response:', response);
+//   }
+//   onError = (error, target) => {
+//     this.displayMessage('Failed to process click action.');
+//     console.error('Error:', error);
+//     if (target) {
+//       target.setAttribute('disabled', 'disabled');
+//       target.innerHTML = error.message;
+//     }
+//   }
+
+// }
+// services/ClickService.js
+import BaseService from './BaseService.js';
+import { delegate } from '../utils.js';
+
+export default class ClickService extends BaseService {
+  /**
+   * options:
+   * { apiUrl, selector, route, security, headers = {}, additionalData = {}, isThrottled = false, cacheExpiryTime = 60000, enableCache = true, cacheStorage = 'session' }
+   */
+  constructor(options = {}) {
+    super(options.apiUrl);
+    const {
+      selector,
+      route,
+      security,
+      headers = {},
+      additionalData = {},
+      isThrottled = false,
+      cacheExpiryTime = 60000,
+      enableCache = true,
+      cacheStorage = 'session'
+    } = options;
+
+    Object.assign(this, { selector, route, security, headers, additionalData, cacheExpiryTime, enableCache, cacheStorage });
+    this.messageId = options.messageId || null;
+
+    // bind handler
+    this.clickHandler = isThrottled ? this.rateLimit(this.handleClick, 1000, true) : this.handleClick;
+    delegate('click', this.selector, this.clickHandler);
+  }
+
+  handleClick = async (event, target) => {
+    // compatibility: if delegate passed only event, try to find target
+    if (!target) target = event && event.currentTarget ? event.currentTarget : event.target;
+    if (!target) return;
+
+    event.preventDefault();
+    this.beforeClick(event, target);
+
+    // validate nonce
+    const nonce = this.security ?? target.dataset.nonce;
+    if (!nonce) {
+      this.onError(new Error('Missing nonce'), target);
+      return;
+    }
+
+    // build payload: merge explicit dataset and additionalData
+    const payload = { ...this.additionalData };
+    Object.keys(target.dataset || {}).forEach((k) => {
+      if (['nonce', 'action'].includes(k)) return;
+      payload[k] = target.dataset[k];
+    });
+
+    // generate unique cacheKey using payload fingerprint
+    let payloadFingerprint = '';
+    try { payloadFingerprint = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).slice(0, 24); } catch (e) { payloadFingerprint = String(Date.now()); }
+    const cacheKey = `click_action_${this.route}_${payloadFingerprint}`;
+
+    if (this.enableCache && this.isCacheValid(cacheKey)) {
+      this.useCache(cacheKey);
+      return;
+    }
+
+    // find the button element for spinner control
+    const buttonEl = target instanceof HTMLElement ? target : (target.closest && target.closest('button, a')) || target;
+    this.toggleButton(buttonEl, true);
+
+    const url = `${this.apiUrl.replace(/\/$/, '')}/${this.route.replace(/^\//, '')}`;
+
+    try {
+      const response = await this.fetchData({
+        url,
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-WP-Nonce': nonce,
+          ...this.headers
+        },
+        fetchOptions: {
+          credentials: 'same-origin'
+        }
+      });
+
+      if (this.enableCache) this.updateCache(cacheKey, response);
+      this.onSuccess(response, target);
+    } catch (err) {
+      this.onError(err, target);
+    } finally {
+      this.toggleButton(buttonEl, false);
+    }
+  }
+
+  isCacheValid = (cacheKey) => {
+    const storage = this.cacheStorage === 'local' ? localStorage : sessionStorage;
+    const cachedData = storage.getItem(cacheKey);
+    const cacheTime = parseInt(storage.getItem(`${cacheKey}_time`), 10);
+    return cachedData && !Number.isNaN(cacheTime) && (Date.now() - cacheTime) < this.cacheExpiryTime;
+  }
+
+  useCache = (cacheKey) => {
+    const storage = this.cacheStorage === 'local' ? localStorage : sessionStorage;
+    const cachedResponse = JSON.parse(storage.getItem(cacheKey));
+    this.onSuccess(cachedResponse);
+  }
+
+  updateCache = (cacheKey, response) => {
+    const storage = this.cacheStorage === 'local' ? localStorage : sessionStorage;
+    storage.setItem(cacheKey, JSON.stringify(response));
+    storage.setItem(`${cacheKey}_time`, String(Date.now()));
+  }
+
+  beforeClick = () => { /* hook */ }
+
+  onSuccess = (response, target) => {
+    this.displayMessage && this.displayMessage('Click action was successful!', 'success');
+    console.log('Response:', response);
+  }
+
+  onError = (error, target) => {
+    this.displayMessage && this.displayMessage('Failed to process click action.', 'danger');
+    console.error('Error:', error);
+    if (target && (target instanceof HTMLElement)) {
+      target.setAttribute('disabled', 'disabled');
+      if (error && error.message) target.textContent = error.message;
+    }
+  }
+}

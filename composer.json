@@ -1,0 +1,35 @@
+{
+	"name": "lerm/lerm",
+	"type": "package",
+	"description": "WordPress theme based on bootstrap",
+	"keywords": [
+		"WordPress",
+		"Themes"
+	],
+	"authors": [
+		{
+			"name": "Oconner",
+			"email": "admin@lerm.net",
+			"homepage": "https://lerm.net",
+			"role": "Developer"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"Lerm\\": "app/"
+		},
+		"files": [
+			"app/View/Layout.php",
+			"app/Support/Utilities.php"
+		]
+	},
+	"require-dev": {
+		"squizlabs/php_codesniffer": "*",
+		"wp-coding-standards/wpcs": "*"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}
