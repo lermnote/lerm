@@ -25,7 +25,7 @@ get_header();
 						 * - 文章会加载 template-parts/content/content-post.php（如果存在）
 						 * - 或者统一使用 content.php 作为兜底
 						 */
-						get_template_part( 'template-parts/content/content', get_post_type() );
+						get_template_part( 'template-parts/post/content', get_post_type() );
 
 						// 下面为仅在文章（post）显示的部分
 						if ( is_singular( 'post' ) ) :
@@ -40,10 +40,10 @@ get_header();
 							</ul>
 
 							<?php if ( lerm_options( 'related_posts' ) ) : ?>
-								<?php get_template_part( 'template-parts/related-posts' ); ?>
+								<?php get_template_part( 'template-parts/components/related-posts' ); ?>
 							<?php endif; ?>
 
-							<?php get_template_part( 'template-parts/components/navigation' ); ?>
+							<?php get_template_part( 'template-parts/components/post-navigation' ); ?>
 
 							<?php
 						endif;

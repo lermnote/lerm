@@ -13,7 +13,7 @@ $args  = array(
 );
 $query = new WP_Query( $args );
 ?>
-	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">

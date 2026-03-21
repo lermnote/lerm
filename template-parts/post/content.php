@@ -6,9 +6,9 @@
  * @since Lerm 2.0
  */
 
-use Lerm\Helpers\Image;
-use Lerm\Core\Tags;
-use function Lerm\Functions\Utilities\link_pagination;
+use Lerm\Support\Image;
+use Lerm\View\Tags;
+use function Lerm\Support\link_pagination;
 
 $current_post_id = get_the_ID(); // 缓存 ID，避免多次调用
 $card_classes    = 'card';
@@ -17,7 +17,7 @@ $card_classes    = 'card';
 
 	<?php if ( is_singular() ) : ?>
 		<div class="content-area">
-			<?php get_template_part( 'template-parts/header/entry-header' ); ?>
+			<?php get_template_part( 'template-parts/layout/entry-header' ); ?>
 
 			<div class="entry-content clearfix mb-3">
 				<?php
@@ -34,9 +34,8 @@ $card_classes    = 'card';
 				);
 				the_content( $continue_text );
 
-				if ( function_exists( 'link_pagination' ) ) {
-					link_pagination();
-				}
+
+				link_pagination();
 				?>
 			</div>
 
@@ -65,7 +64,7 @@ $card_classes    = 'card';
 				);
 			}
 
-			get_template_part( 'template-parts/footer/entry-footer' );
+			get_template_part( 'template-parts/layout/entry-footer' );
 			?>
 		</div>
 
@@ -102,7 +101,7 @@ $card_classes    = 'card';
 					</h2>
 
 					<?php the_excerpt(); ?>
-					<?php get_template_part( 'template-parts/footer/summary-footer' ); ?>
+					<?php get_template_part( 'template-parts/layout/summary-footer' ); ?>
 				</div>
 			</div>
 		</div>

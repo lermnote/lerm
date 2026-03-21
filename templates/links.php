@@ -15,7 +15,7 @@ $link_categories = get_terms(
 );
 
 ?>
-	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">

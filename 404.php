@@ -39,7 +39,7 @@ get_header();
 }
 </style>
 <main role="main" class="container"><!--.container-->
-	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div class="err">
 				<p class="err_text">
 					非常抱歉，您访

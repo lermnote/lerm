@@ -8,6 +8,8 @@ use Lerm\Http\Rest\Controllers\ViewsController;
 use Lerm\Http\Rest\Controllers\SearchController;
 use Lerm\Http\Rest\Controllers\PostsController;
 use Lerm\Http\Rest\Controllers\TocController;
+use Lerm\Http\Rest\Controllers\LoginController;
+use Lerm\Http\Rest\Controllers\ProfileController;
 
 /**
  * REST API 路由注册中心
@@ -106,6 +108,32 @@ final class Router {
 			'callback'            => [ TocController::class, 'handle' ],
 			'permission_callback' => '__return_true',
 			'args'                => self::post_id_arg(),
+		] );
+
+		// ── 前台登录 ──────────────────────────────────────────
+		register_rest_route( $ns, '/auth/login', [
+			'methods'             => \WP_REST_Server::CREATABLE,
+			'callback'            => [ LoginController::class, 'handle' ],
+			'permission_callback' => '__return_true',
+			'args'                => [
+				'username' => [ 'required' => true,  'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ],
+				'password' => [ 'required' => true,  'type' => 'string' ],
+				'remember' => [ 'required' => false, 'type' => 'boolean', 'default' => false ],
+			],
+		] );
+
+		// ── 个人资料 ──────────────────────────────────────────
+		register_rest_route( $ns, '/profile', [
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ ProfileController::class, 'get' ],
+				'permission_callback' => '__return_true',
+			],
+			[
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => [ ProfileController::class, 'update' ],
+				'permission_callback' => '__return_true',
+			],
 		] );
 	}
 

@@ -4,7 +4,7 @@
  *
  * @package Lerm
  */
-use Lerm\Core\Tags;
+use Lerm\View\Tags;
 
 if ( empty( get_the_title() ) ) {
 	return;

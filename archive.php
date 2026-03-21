@@ -31,7 +31,7 @@ $archive_header = sprintf( 'background: %s %s ; color: %s', $bg_image, $bg_color
 					<?php
 					while ( have_posts() ) :
 						the_post();
-						get_template_part( 'template-parts/content/content', get_post_format() );
+						get_template_part( 'template-parts/post/content', get_post_format() );
 					endwhile;
 				endif;
 				?>

@@ -1,6 +1,7 @@
 {
 	"name": "lerm/lerm",
-	"type": "package",
+	"type": "wordpress-theme",
+	"version": "2.0.0",
 	"description": "WordPress theme based on bootstrap",
 	"keywords": [
 		"WordPress",

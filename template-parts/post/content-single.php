@@ -11,10 +11,10 @@ global $post;
 	<div class="row no-gutters">
 		<?php if ( null !== lerm_post_image() ) : ?>
 			<div class="col-md-3">
-				<?php get_template_part( 'template-parts/content/featured-image' ); ?>
+				<?php get_template_part( 'template-parts/components/featured-image' ); ?>
 			</div>
 		<?php endif; ?>
-		<div class="<?php lerm_post_image() ? 'col-md-9' : 'col-md-12'; ?>">
+		<div class="<?php echo lerm_post_image() ? 'col-md-9' : 'col-md-12'; ?>">
 			<div class="card-body py-md-0">
 				<h2 class="entry-title card-title">
 					<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>

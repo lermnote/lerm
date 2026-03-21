@@ -26,9 +26,9 @@
 			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
 				<div class="container">
 					<!-- .navbar-brand  begin -->
-					<?php get_template_part( 'template-parts/header/site-brand' ); ?>
+					<?php get_template_part( 'template-parts/layout/site-brand' ); ?>
 					<!-- .navbar-brand end -->
-					<?php get_template_part( 'template-parts/header/site-nav' ); ?>
+					<?php get_template_part( 'template-parts/layout/site-nav' ); ?>
 				</div><!-- .container -->
 			</nav>
 		</header>

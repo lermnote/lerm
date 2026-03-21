@@ -11,7 +11,7 @@ global $post;
 
 	<?php if ( is_singular() ) : ?>
 		<div class="content-area">
-			<?php get_template_part( 'template-parts/header/entry-header' ); ?>
+			<?php get_template_part( 'template-parts/layout/entry-header' ); ?>
 
 			<div class="entry-content clearfix pt-2">
 				<?php

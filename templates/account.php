@@ -27,7 +27,7 @@ get_header();
 			if ( have_posts() ) :
 				while ( have_posts() ) :
 					the_post();
-					get_template_part( 'template-parts/content/content', 'page' );
+					get_template_part( 'template-parts/post/content', 'page' );
 				endwhile;
 				?>
 			<?php endif; ?>
@@ -45,19 +45,19 @@ get_header();
 
 				<!--start lgoin-->
 				<div class="login tab-pane fade show active" id="login-tab-pane" role="tabpanel" aria-labelledby="login-tab" tabindex="0">
-					<?php get_template_part( 'template-parts/account/form', 'login' ); ?>
+					<?php get_template_part( 'template-parts/form/login'); ?>
 				</div><!--end lgoin-->
 
 				<?php if ( get_option( 'users_can_register' ) ) : ?>
 					<!--start regist-->
 					<div class="regist tab-pane fade" id="regist-tab-pane" role="tabpanel" aria-labelledby="regist-tab" tabindex="0">
-						<?php get_template_part( 'template-parts/account/form', 'regist' ); ?>
+						<?php get_template_part( 'template-parts/form/regist' ); ?>
 					</div><!--end regist-->
 				<?php endif; ?>
 
 				<!--start forget-->
 				<div class="forget tab-pane fade" id="forget-tab-pane" role="tabpanel" aria-labelledby="forget-tab" tabindex="0">
-					<?php get_template_part( 'template-parts/account/form', 'reset' ); ?>
+					<?php get_template_part( 'template-parts/form/reset' ); ?>
 				</div><!--end forget-->
 			</section>
 		</div>

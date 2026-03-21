@@ -1,5 +1,5 @@
 <?php
-use Lerm\Helpers\Carousel;
+use Lerm\View\Carousel;
 
 if ( is_home() || is_front_page() || ! is_paged() ) {
 	Carousel::instance(

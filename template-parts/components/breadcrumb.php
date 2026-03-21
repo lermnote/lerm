@@ -4,7 +4,7 @@
  *
  *  @package Lerm https://lerm.net
  */
-use Lerm\Core\Breadcrumb;
+use Lerm\View\Breadcrumb;
 
 Breadcrumb::instance(
 	array(

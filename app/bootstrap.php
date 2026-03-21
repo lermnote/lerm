@@ -152,12 +152,43 @@ if ( ! empty( $updater_options ) ) {
 Router::register();
 Handler::register();
 
+// 本地头像替换 Gravatar（原 UserProfile::lerm_get_avatar，与 Ajax 无关，放这里更合适）
+add_filter( 'pre_get_avatar', static function( $avatar, $id_or_email, $args ) {
+	static $cache = array();
+	$user = false;
+	if ( is_numeric( $id_or_email ) ) {
+		$user = get_user_by( 'id', (int) $id_or_email );
+	} elseif ( $id_or_email instanceof \WP_User ) {
+		$user = $id_or_email;
+	} elseif ( $id_or_email instanceof \WP_Comment ) {
+		$user = get_user_by( 'id', (int) $id_or_email->user_id );
+	}
+	if ( ! $user ) return $avatar;
+	if ( ! isset( $cache[ $user->ID ] ) ) {
+		$cache[ $user->ID ] = (int) get_user_meta( $user->ID, 'avatar_id', true );
+	}
+	$avatar_id = $cache[ $user->ID ];
+	if ( ! $avatar_id ) return $avatar;
+	$url = wp_get_attachment_image_url( $avatar_id, 'thumbnail' );
+	if ( ! $url ) return $avatar;
+	return sprintf(
+		'<img alt="%1$s" src="%2$s" class="avatar avatar-%3$d photo" height="%4$d" width="%5$d" loading="lazy" />',
+		esc_attr( $args['alt'] ?? '' ),
+		esc_url( $url ),
+		(int) ( $args['size'] ?? 96 ),
+		(int) ( $args['height'] ?? 96 ),
+		(int) ( $args['width'] ?? 96 )
+	);
+}, 10, 3 );
+
 // ---------------------------------------------------------------------------
 // 6. 前台登录模块（可选）
 // ---------------------------------------------------------------------------
 
 if ( ! empty( $login_options['front_login_enable'] ) ) {
-	// 登录模块实现后在此实例化，例如：
-	// \Lerm\Http\Auth\LoginPage::instance( $login_options );
+	// 导航栏登录菜单项
+	if ( ! empty( $login_options['menu_login_item'] ) ) {
+		\Lerm\View\NavMenu::init( $login_options );
+	}
 	do_action( 'lerm_front_login_init', $login_options );
 }

@@ -8,7 +8,7 @@
 
 declare( strict_types = 1 );
 
-namespace Lerm\Views;
+namespace Lerm\View;
 
 use Lerm\Traits\Singleton;
 

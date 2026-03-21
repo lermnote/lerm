@@ -5,7 +5,7 @@
  *
  * @package Lerm https://lerm.net
  */
-use Lerm\Helpers\Image;
+use Lerm\Support\Image;
 $image = new Image(
 	array(
 		'post_id' => get_the_ID(),
@@ -15,13 +15,11 @@ $image = new Image(
 		'default' => lerm_options( 'thumbnail_gallery' ),
 	)
 );
-if ( empty( $image ) ) {
-	return;
-}
+if ( empty( $image->attachment_id ) ) return;
 ?>
 <figure class="figure w-100 m-0" style="max-height:115px; overflow:hidden">
 	<?php
-	// echo $image->generate_image_html();// phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
+	echo $image->generate_image_html();// phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped.
 	/**
 	 * 生成 HTML（支持响应式 srcset，允许外部覆盖 class/attr）
 	 *

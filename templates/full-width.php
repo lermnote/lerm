@@ -8,7 +8,7 @@
  * @since lerm 3.0
  */
 get_header();?>
-	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div class="row justify-content-md-center"><!--.row-->
 		<div class="col-md-12 px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">
@@ -16,7 +16,7 @@ get_header();?>
 				if ( have_posts() ) :
 					while ( have_posts() ) :
 						the_post();
-						get_template_part( 'template-parts/content/content', 'page' );
+						get_template_part( 'template-parts/post/content', 'page' );
 						// If comments are open or we have at least one comment, load up the comment template.
 						if ( comments_open() || get_comments_number() ) :
 							comments_template();
