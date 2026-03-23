@@ -9,19 +9,28 @@
 function lerm_login_style() {
 	$url        = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=';
 	$resolution = '1920x1080';
-	if ( false === wp_cache_get( 'lerm_login_background' ) ) {
+	$image_url  = '';
+
+	
+	$data = wp_cache_get( 'lerm_login_background' );
+	if ( false === $data ) {
 		$request = wp_remote_get( $url );
-		$data    = wp_remote_retrieve_body( $request );
-		wp_cache_set( 'lerm_login_background', $data, '', HOUR_IN_SECONDS );
-	}
-	$json = json_decode( trim( $data ), true );
-	if ( $json ) {
-		$images = $json['images'];
-		foreach ( $images as $image ) {
-			$urlbase   = $image['urlbase'];
-			$image_url = 'https://www.bing.com' . $urlbase . '_' . $resolution . '.jpg';
+		if ( ! is_wp_error( $request ) ) {
+			$data = wp_remote_retrieve_body( $request );
+			wp_cache_set( 'lerm_login_background', $data, '', HOUR_IN_SECONDS );
 		}
-	} ?>
+	}
+ 
+	if ( $data ) {
+		$json = json_decode( trim( $data ), true );
+		if ( $json && ! empty( $json['images'] ) ) {
+			// 取第一张图（API 通常只返回一张）
+			$urlbase   = $json['images'][0]['urlbase'] ?? '';
+			$image_url = $urlbase
+				? 'https://www.bing.com' . $urlbase . '_' . $resolution . '.jpg'
+				: '';
+		}
+	}?>
 	<style type="text/css">
 		.login {
 			background:rgba(255,255,255,.6) url(<?php echo esc_url( $image_url ); ?>) no-repeat center;

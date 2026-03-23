@@ -20,7 +20,6 @@ use Lerm\SEO\Manager as SeoManager;
 use Lerm\Mail\Smtp;
 use Lerm\Update\Updater;
 use Lerm\Http\Rest\Router;
-use Lerm\Http\Ajax\Handler;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -150,7 +149,6 @@ if ( ! empty( $updater_options ) ) {
 // ---------------------------------------------------------------------------
 
 Router::register();
-Handler::register();
 
 // 本地头像替换 Gravatar（原 UserProfile::lerm_get_avatar，与 Ajax 无关，放这里更合适）
 add_filter( 'pre_get_avatar', static function( $avatar, $id_or_email, $args ) {

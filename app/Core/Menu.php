@@ -14,7 +14,7 @@ namespace Lerm\Core;
 use Walker_Nav_Menu;
 
 
-class NavWalker extends Walker_Nav_menu {
+class NavWalker extends Walker_Nav_Menu {
 	private $has_schema = false;
 
 	public function __construct() {

@@ -1,0 +1,26 @@
+/*
+ * assets/resources/css/index.css
+ * CSS 打包入口 — 由 webpack 处理，输出到 assets/dist/main.css
+ *
+ * 合并策略：
+ *   - bootstrap      从 npm 引入（有版本管理，不再手动维护 vendor 文件）
+ *   - animate.css    从 npm 引入
+ *   - lerm-font      本地自定义图标字体
+ *   - main.css       主题核心样式
+ *
+ * 不在此处引入：
+ *   - solarized-dark.min.css  代码高亮，仅在 singular 页有代码块时按需加载
+ *                              由 PHP Enqueue 条件注册，保持独立
+ */
+
+/* 1. Bootstrap 5 — npm 管理，自动获得版本更新 */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* 2. Animate.css — npm 管理 */
+@import 'animate.css';
+
+/* 3. Lerm 自定义图标字体 */
+@import './lerm-font.css';
+
+/* 4. 主题核心样式（最后引入，确保能覆盖前面的默认样式）*/
+@import './main.css';

@@ -2,7 +2,7 @@
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Repository;
-
+use Lerm\Infrastructure\CacheRepository;
 /**
  * 浏览数数据层
  *
@@ -13,17 +13,16 @@ namespace Lerm\Http\Rest\Repository;
  */
 final class ViewsRepository {
 
-	const META_COUNT   = '_lerm_view_count';
-	const CACHE_GROUP  = 'lerm_views';
+	const META_COUNT   = 'pageviews';
 	const DEDUP_WINDOW = 1800; // 30 分钟
 
 	public static function get_count( int $post_id ): int {
-		$cached = wp_cache_get( "count_{$post_id}", self::CACHE_GROUP );
-		if ( false !== $cached ) return (int) $cached;
-
-		$count = (int) get_post_meta( $post_id, self::META_COUNT, true );
-		wp_cache_set( "count_{$post_id}", $count, self::CACHE_GROUP, MINUTE_IN_SECONDS );
-		return $count;
+		return (int) CacheRepository::remember(
+			CacheRepository::GROUP_VIEWS,
+			"count_{$post_id}",
+			MINUTE_IN_SECONDS,
+			fn() => (int) get_post_meta( $post_id, self::META_COUNT, true )
+		);
 	}
 
 	/** @return array{ count: int, recorded: bool } */
@@ -36,12 +35,12 @@ final class ViewsRepository {
 
 		set_transient( $dedup_key, 1, self::DEDUP_WINDOW );
 		$count = self::increment( $post_id );
-		wp_cache_delete( "count_{$post_id}", self::CACHE_GROUP );
+		CacheRepository::delete( CacheRepository::GROUP_VIEWS, "count_{$post_id}" );
 
 		return [ 'count' => $count, 'recorded' => true ];
 	}
 
-	private static function increment( int $post_id ): int {
+	public static function increment( int $post_id ): int {
 		global $wpdb;
 		if ( '' === get_post_meta( $post_id, self::META_COUNT, true ) ) {
 			add_post_meta( $post_id, self::META_COUNT, 0, true );

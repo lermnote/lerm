@@ -2,11 +2,10 @@
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Repository;
-
+use Lerm\Infrastructure\CacheRepository;
 final class SearchRepository {
 	const HOT_OPTION_KEY = 'lerm_search_hot_words';
 	const HOT_LIMIT      = 10;
-	const CACHE_GROUP    = 'lerm_search';
 
 	public static function search( string $keyword, string $post_type = 'post', int $per_page = 6 ): array {
 		if ( ! post_type_exists( $post_type ) ) $post_type = 'post';
@@ -45,17 +44,21 @@ final class SearchRepository {
 		$hot[ $keyword ] = ( $hot[ $keyword ] ?? 0 ) + 1;
 		arsort( $hot );
 		update_option( self::HOT_OPTION_KEY, array_slice( $hot, 0, 200, true ), false );
-		wp_cache_delete( 'hot_words', self::CACHE_GROUP );
+		CacheRepository::delete( CacheRepository::GROUP_SEARCH, 'hot_words' );
 	}
 
 	public static function get_hot_words( int $limit = self::HOT_LIMIT ): array {
-		$cached = wp_cache_get( 'hot_words', self::CACHE_GROUP );
-		if ( false !== $cached ) return (array) $cached;
-		$hot   = self::get_raw_hot_words();
-		arsort( $hot );
-		$words = array_slice( array_keys( $hot ), 0, $limit );
-		wp_cache_set( 'hot_words', $words, self::CACHE_GROUP, 10 * MINUTE_IN_SECONDS );
-		return $words;
+		$result = CacheRepository::remember(
+			CacheRepository::GROUP_SEARCH,
+			'hot_words',
+			10 * MINUTE_IN_SECONDS,
+			static function () use ( $limit ) {
+				$hot = SearchRepository::get_raw_hot_words();
+				arsort( $hot );
+				return array_slice( array_keys( $hot ), 0, $limit );
+			}
+		);
+		return (array) $result;
 	}
 
 	private static function get_raw_hot_words(): array {

@@ -2,7 +2,7 @@
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Repository;
-
+use Lerm\Infrastructure\CacheRepository;
 /**
  * 点赞数据层
  *
@@ -18,19 +18,14 @@ final class LikeRepository {
 
 	const META_COUNT  = '_lerm_like_count';
 	const META_USERS  = '_lerm_like_users';
-	const CACHE_GROUP = 'lerm_likes';
 
 	// -------------------------------------------------------------------------
 	// 查询
 	// -------------------------------------------------------------------------
 
 	public static function get_count( int $post_id ): int {
-		$cached = wp_cache_get( "count_{$post_id}", self::CACHE_GROUP );
-		if ( false !== $cached ) return (int) $cached;
-
-		$count = (int) get_post_meta( $post_id, self::META_COUNT, true );
-		wp_cache_set( "count_{$post_id}", $count, self::CACHE_GROUP, 5 * MINUTE_IN_SECONDS );
-		return $count;
+			return (int) CacheRepository::remember( CacheRepository::GROUP_LIKES, "count_{$post_id}", 5 * MINUTE_IN_SECONDS, fn() => (int) get_post_meta( $post_id, self::META_COUNT, true )
+		);
 	}
 
 	public static function has_liked( int $post_id, string $user_id ): bool {
@@ -39,13 +34,16 @@ final class LikeRepository {
 
 	/** @return string[] */
 	public static function get_users( int $post_id ): array {
-		$cached = wp_cache_get( "users_{$post_id}", self::CACHE_GROUP );
-		if ( false !== $cached ) return (array) $cached;
-
-		$raw   = get_post_meta( $post_id, self::META_USERS, true );
-		$users = is_array( $raw ) ? $raw : [];
-		wp_cache_set( "users_{$post_id}", $users, self::CACHE_GROUP, 5 * MINUTE_IN_SECONDS );
-		return $users;
+			$result = CacheRepository::remember(
+			CacheRepository::GROUP_LIKES,
+			"users_{$post_id}",
+			5 * MINUTE_IN_SECONDS,
+			static function () use ( $post_id ) {
+				$raw = get_post_meta( $post_id, LikeRepository::META_USERS, true );
+				return is_array( $raw ) ? $raw : [];
+			}
+		);
+		return (array) $result;
 	}
 
 	// -------------------------------------------------------------------------
@@ -68,8 +66,8 @@ final class LikeRepository {
 		// 最多保留 5000 条，防止 meta 无限膨胀
 		update_post_meta( $post_id, self::META_USERS, array_slice( $users, -5000 ) );
 
-		wp_cache_delete( "count_{$post_id}", self::CACHE_GROUP );
-		wp_cache_delete( "users_{$post_id}", self::CACHE_GROUP );
+		CacheRepository::delete( CacheRepository::GROUP_LIKES, "count_{$post_id}" );
+		CacheRepository::delete( CacheRepository::GROUP_LIKES, "users_{$post_id}" );
 
 		return [ 'liked' => ! $liked, 'count' => max( 0, $count ) ];
 	}

@@ -10,7 +10,7 @@ use function Lerm\Support\link_pagination;
 get_header();
 $link_categories = get_terms(
 	array(
-		'taxonmomy' => 'link_category',
+		'taxonomy' => 'link_category',
 	)
 );
 

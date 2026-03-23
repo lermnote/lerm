@@ -29,11 +29,8 @@ class Enqueue {
 	);
 
 	private static $styles = array(
-		'bootstrap'  => 'assets/css/bootstrap.min.css',
-		'lerm_font'  => 'assets/css/lerm-icons.css',
-		'animate'    => 'assets/css/animate.min.css',
+		'main_style' => 'assets/dist/main.css',
 		'solarized'  => 'assets/css/solarized-dark.min.css',
-		'main_style' => 'assets/css/main.css',
 	);
 
 	private static array $scripts = array(
@@ -43,6 +40,7 @@ class Enqueue {
 		'qrcode'    => 'assets/js/qrcode.min.js',
 		'highlight' => 'assets/js/highlight.pack.js',
 		'wow'       => 'assets/js/wow.min.js',
+		
 		'main-js'   => 'assets/dist/bundle.js',
 	);
 
@@ -95,7 +93,7 @@ class Enqueue {
 	 */
 	public static function enqueue_scripts() {
 		$scripts = apply_filters( 'lerm_enqueue_scripts', self::$scripts );
-		foreach ( self::$scripts as $handle => $relative_path ) {
+		foreach ( $scripts as $handle => $relative_path ) {
 			$src = self::LERM_URI . $relative_path;
 			wp_register_script( $handle, $src, array(), self::ASSET_VERSION, true );
 			if ( 'highlight' === $handle && ! ( is_singular() && self::$args['enable_code_highlight'] ) ) {

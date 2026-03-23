@@ -8,7 +8,7 @@ use WP_REST_Response;
 use WP_Error;
 use Lerm\Http\Rest\Middleware;
 use Lerm\Http\Rest\Repository\ViewsRepository;
-use Lerm\Support\Utilities;
+use function Lerm\Support\client_ip;
 
 /**
  * 浏览数接口控制器
@@ -59,7 +59,7 @@ final class ViewsController {
 		}
 
 		// 用 IP hash 作为防重复标识，不直接暴露 IP
-		$client_key = substr( md5( Utilities::client_ip() . wp_salt() ), 0, 16 );
+		$client_key = substr( md5(  client_ip() . wp_salt() ), 0, 16 );
 		$result     = ViewsRepository::increment( $post_id, $client_key );
 
 		return new WP_REST_Response( $result, 200 );

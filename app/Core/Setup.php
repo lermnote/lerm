@@ -59,7 +59,6 @@ class Setup {
 		add_filter( 'excerpt_more', array( __CLASS__, 'excerpt_more' ), 999 );
 		add_filter( 'the_content', array( __CLASS__, 'remove_empty_p' ), 20 );
 
-		add_action( 'template_redirect', array( __CLASS__, 'add_post_views' ) );
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
 
@@ -168,34 +167,6 @@ class Setup {
 	 */
 	public static function remove_empty_p( string $content ): string {
 		return preg_replace( '/<p>\s*<\/p>/', '', $content );
-	}
-
-	/**
-	 * Update post views count.
-	 *
-	 * Uses cookies to prevent multiple counts from the same visitor.
-	 */
-	public static function add_post_views(): void {
-		if ( ! is_singular( 'post' ) || is_admin() ) {
-			return;
-		}
-
-		$post_id = (int) get_queried_object_id();
-
-		// Check cookie to prevent duplicate counting.
-		$cookie_name = 'post_viewed_' . $post_id;
-		if ( isset( $_COOKIE[ $cookie_name ] ) ) {
-			return;
-		}
-
-		$post_views = (int) get_post_meta( $post_id, 'pageviews', true );
-
-		if ( ! update_post_meta( $post_id, 'pageviews', $post_views + 1 ) ) {
-			add_post_meta( $post_id, 'pageviews', 1, true );
-		}
-
-		// Set cookie for 1 hour.
-		setcookie( $cookie_name, '1', time() + HOUR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl() );
 	}
 
 	/**

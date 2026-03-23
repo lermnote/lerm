@@ -8,7 +8,7 @@ use WP_REST_Response;
 use WP_Error;
 use Lerm\Http\Rest\Middleware;
 use Lerm\Http\Rest\Repository\LikeRepository;
-use Lerm\Support\Utilities;
+use function Lerm\Support\get_like_user_id;
 
 /**
  * 点赞接口控制器
@@ -31,10 +31,27 @@ final class LikeController {
 			return $check;
 		}
 
-		$user_id = Utilities::get_like_user_id();
-		$data    = LikeRepository::get( $post_id, $user_id );
+		// Ensure cookie is set before performing any business logic
+		// to avoid data inconsistency when headers are already sent
+		if ( headers_sent() && ! is_user_logged_in() ) {
+			return new WP_Error(
+				'headers_already_sent',
+				__( 'Cannot set like tracking cookie. Response headers already sent.', 'lerm' ),
+				array( 'status' => 500 )
+			);
+		}
 
-		return new WP_REST_Response( $data, 200 );
+		$user_id = get_like_user_id();
+		$liked    = LikeRepository::has_liked( $post_id, $user_id );
+
+		return new WP_REST_Response(
+			[
+				'count'  => LikeRepository::get_count( $post_id ),
+				'liked'  => $liked,
+				'status' => $liked ? 'liked' : 'unliked',
+			],
+			200
+		);
 	}
 
 	/**
@@ -45,6 +62,16 @@ final class LikeController {
 	public static function toggle( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$post_id = absint( $request->get_param( 'id' ) );
 
+		// Ensure cookie can be set before processing the request
+		// This prevents data inconsistency when headers are already sent
+		if ( headers_sent() && ! is_user_logged_in() ) {
+			return new WP_Error(
+				'headers_already_sent',
+				__( 'Cannot set like tracking cookie. Response headers already sent.', 'lerm' ),
+				array( 'status' => 500 )
+			);
+		}
+
 		// 中间件链：先验文章，再限速
 		$check = Middleware::chain(
 			fn() => Middleware::require_published_post( $post_id ),
@@ -54,7 +81,7 @@ final class LikeController {
 			return $check;
 		}
 
-		$user_id = Utilities::get_like_user_id();
+		$user_id = get_like_user_id();
 		$result  = LikeRepository::toggle( $post_id, $user_id );
 
 		return new WP_REST_Response( $result, 200 );

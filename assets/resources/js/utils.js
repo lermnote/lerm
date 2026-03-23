@@ -100,15 +100,3 @@ export const navigationToggle = () => {
     toggler.classList.toggle("active");
   });
 };
-
-export const initializeWOW = () => {
-  if (typeof WOW === "undefined") return;
-  const wow = new WOW({
-    boxClass: "loading-animate",
-    animateClass: "animated",
-    offset: 0,
-    mobile: true,
-    live: true
-  });
-  wow.init();
-};

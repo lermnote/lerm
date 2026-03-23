@@ -37,7 +37,7 @@ foreach ( $langs as $lang ) {
 $row_class    = ( 'layout-1c-narrow' === lerm_site_layout() ) ? 'justify-content-md-center' : '';
 $colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_site_layout() ) ? 'col-md-12' : 'col-lg-8';
 ?>
-	<?php get_template_part( 'template-parts/breadcrumb' ); ?>
+	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div class="row <?php echo esc_attr( $row_class ); ?> "><!--.row-->
 		<div class="<?php echo esc_attr( $colunm_class ); ?> px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
 
@@ -48,7 +48,7 @@ $colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_site_layout() ) ? 'col-
 				the_post();
 				?>
 				<figure class="figure">
-					<img src="<?php echo esc_url( $image_url ); ?>" alt="<?php esc_attr( $copyright ); ?>" class="figure-img img-fluid rounded">
+					<img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $copyright ); ?>" class="figure-img img-fluid rounded">
 					<figcaption  class="figure-caption text-center">
 						<?php echo esc_html( $copyright ); ?>
 					</figcaption>
