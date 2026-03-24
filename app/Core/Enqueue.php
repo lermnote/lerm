@@ -34,13 +34,7 @@ class Enqueue {
 	);
 
 	private static array $scripts = array(
-		'bootstrap' => 'assets/js/bootstrap.bundle.min.js',
-		'lazyload'  => 'assets/js/lazyload.min.js',
-		'share'     => 'assets/js/social-share.min.js',
-		'qrcode'    => 'assets/js/qrcode.min.js',
-		'highlight' => 'assets/js/highlight.pack.js',
-
-		'main-js'   => 'assets/dist/bundle.js',
+		'main-js' => 'assets/dist/bundle.js',
 	);
 
 	/**
@@ -61,13 +55,6 @@ class Enqueue {
 	public static function hooks() {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
-		add_filter( 'script_loader_tag', function( $tag, $handle ) {
-		$defer_handles = array( 'share', 'qrcode' );
-			if ( in_array( $handle, $defer_handles, true ) ) {
-				return str_replace( '<script ', '<script defer ', $tag );
-			}
-			return $tag;
-		}, 10, 2 );
 	}
 
 	/**
@@ -94,26 +81,14 @@ class Enqueue {
 		$scripts = apply_filters( 'lerm_enqueue_scripts', self::$scripts );
 		foreach ( $scripts as $handle => $relative_path ) {
 			$src = self::LERM_URI . $relative_path;
-			wp_register_script( $handle, $src, array(), self::ASSET_VERSION, true );
-			if ( 'highlight' === $handle && ! ( is_singular() && self::$args['enable_code_highlight'] ) ) {
-				continue;
-			}
-			if ( in_array( $handle, array( 'share', 'qrcode' ), true ) && ! self::should_enqueue_social_share() ) {
-				continue;
-			}
-			wp_enqueue_script( $handle );
 
-			// Apply defer or async for non-essential scripts
-			if ( in_array( $handle, array( 'share', 'qrcode' ), true ) ) {
-				wp_script_add_data( $handle, 'defer', true ); // Add defer for lazy loading
-			}
+			wp_enqueue_script( $handle );
 		}
 
 		if ( self::$args['cdn_jquery'] ) {
 			wp_enqueue_script( 'jquery_cdn', self::$args['cdn_jquery'], array(), self::ASSET_VERSION, true );
 		}
 
-		// wp_localize_script( 'main-js', 'lermData', apply_filters( 'lerm_l10n_datas', array() ) );
 		wp_localize_script(
 			'main-js',
 			'lermData',
@@ -121,29 +96,29 @@ class Enqueue {
 				'lerm_l10n_data',
 				array(
 					// API 地址
-					'rest_url'  => esc_url_raw( rest_url( 'lerm/v1/' ) ),
-					'ajax_url'  => admin_url( 'admin-ajax.php' ),
- 
+					'rest_url'        => esc_url_raw( rest_url( 'lerm/v1/' ) ),
+					'ajax_url'        => admin_url( 'admin-ajax.php' ),
+
 					// Nonce
-					'nonce'       => wp_create_nonce( 'wp_rest' ),
-					'ajax_nonce'  => wp_create_nonce( 'lerm_admin_ajax' ),
-					'profile_nonce' => wp_create_nonce( 'lerm_profile' ),
- 
+					'nonce'           => wp_create_nonce( 'wp_rest' ),
+					'ajax_nonce'      => wp_create_nonce( 'lerm_admin_ajax' ),
+					'profile_nonce'   => wp_create_nonce( 'lerm_profile' ),
+
 					// 用户状态
-					'loggedin' => is_user_logged_in(),
-					'post_id'  => is_singular() ? get_the_ID() : 0,
- 
+					'loggedin'        => is_user_logged_in(),
+					'post_id'         => is_singular() ? get_the_ID() : 0,
+
 					// REST 路由名（对应 Router::boot() 中注册的路径片段）
 					'route'           => 'like',
 					'loadmore_action' => 'posts',
 					'comment_action'  => 'comment',
 					'profile_action'  => 'profile',
- 
+
 					// 登录/更新后跳转地址
-					'front_door' => esc_url( home_url( '/' ) ),
-					'redirect'   => esc_url(
+					'front_door'      => esc_url( home_url( '/' ) ),
+					'redirect'        => esc_url(
 						is_user_logged_in()
-							? ( get_edit_profile_url() ?: home_url( '/' ) )
+							? ( get_edit_profile_url() !== false ? get_edit_profile_url() : home_url( '/' ) )
 							: home_url( '/' )
 					),
 				)
@@ -164,6 +139,3 @@ class Enqueue {
 		return (bool) apply_filters( 'lerm_enqueue_social_share', $should );
 	}
 }
-
-
-

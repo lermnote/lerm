@@ -1,11 +1,12 @@
+// bootstrap.js
+import 'bootstrap';
 // main.js
 import '../css/index.css';
-import WOW from 'wow.js';
 
 import {
 	DOMContentLoaded,
 	safeRequestIdleCallback,
-	initializeWOW,
+	initScrollAnimate,
 	lazyLoadImages,
 	codeHighlight,
 	calendarAddClass,
@@ -62,13 +63,7 @@ const formAjaxHandle = () => {
 
 DOMContentLoaded(async () => {
 	safeRequestIdleCallback(() => {
-		new WOW({
-			boxClass: 'loading-animate',
-			animateClass: 'animated',
-			offset: 0,
-			mobile: true,
-			live: true,
-		}).init();
+		initScrollAnimate()
 		//initializeWOW();
 		lazyLoadImages();
 		codeHighlight();

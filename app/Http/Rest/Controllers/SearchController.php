@@ -7,22 +7,30 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
 use Lerm\Http\Rest\Middleware;
-use Lerm\Helpers\Image;
+use Lerm\Http\Rest\Repository\SearchRepository;
 
 /**
  * 实时搜索接口控制器
  *
  * GET /lerm/v1/search?q={query}&post_type={type}&per_page={n}
  *
- * 返回格式：
+ * 职责划分：
+ *   - 参数验证、频率限制（Controller 层）
+ *   - 查询执行 + 缓存管理（SearchRepository 层）
+ *   - 关键词高亮（展示逻辑，留在 Controller）
+ *   - 热词记录（shutdown 异步，不阻塞响应）
+ *
+ * 响应格式：
  * {
  *   "results": [
  *     {
- *       "id": 1,
- *       "title": "文章标题",
- *       "excerpt": "摘要...",
- *       "url": "https://...",
- *       "thumbnail": "https://..."
+ *       "id":        1,
+ *       "title":     "文章<mark>标题</mark>（含高亮标签）",
+ *       "excerpt":   "摘要...",
+ *       "url":       "https://...",
+ *       "thumbnail": "https://...",
+ *       "date":      "2024-01-01",
+ *       "category":  "分类名"
  *     }
  *   ],
  *   "total": 5
@@ -31,9 +39,6 @@ use Lerm\Helpers\Image;
  * @package Lerm\Http\Rest\Controllers
  */
 final class SearchController {
-
-	private const CACHE_GROUP = 'lerm_search';
-	private const CACHE_TTL   = 5 * MINUTE_IN_SECONDS;
 
 	/**
 	 * 处理搜索请求
@@ -70,69 +75,40 @@ final class SearchController {
 			);
 		}
 
-		// 缓存 key 基于参数组合
-		$cache_key = 'search_' . md5( $keyword . $post_type . $per_page );
-		$cached    = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		// ── 委托 Repository 执行查询（含缓存管理）────────────
+		// SearchRepository::search() 内部通过 CacheRepository::remember()
+		// 统一处理缓存读写，Controller 无需感知缓存细节。
+		$result = SearchRepository::search( $keyword, $post_type, $per_page );
+		// ── 关键词高亮（展示层逻辑，Repository 返回原始标题）─
+		// 先 esc_html 再做正则替换，防止 XSS：
+		// <mark> 标签是我们自己插入的，不来自用户输入。
+		$safe_kw = preg_quote( $keyword, '/' );
+		$results = array_map(
+			static function ( array $item ) use ( $safe_kw ): array {
+				$item['title'] = preg_replace(
+					'/(' . $safe_kw . ')/iu',
+					'<mark>$1</mark>',
+					esc_html( $item['title'] )
+				);
+				return $item;
+			},
+			$result['items']
+		);
 
-		if ( false !== $cached ) {
-			return new WP_REST_Response( $cached, 200 );
-		}
+		// ── 热词记录（shutdown 异步，不阻塞响应）─────────────
+		add_action(
+			'shutdown',
+			static function () use ( $keyword ) {
+				SearchRepository::record_keyword( $keyword );
+			}
+		);
 
-		$query = new \WP_Query(
+		return new WP_REST_Response(
 			array(
-				'post_type'           => $post_type,
-				'post_status'         => 'publish',
-				's'                   => $keyword,
-				'posts_per_page'      => $per_page,
-				'no_found_rows'       => false,
-				'ignore_sticky_posts' => true,
-				'fields'              => 'ids', // 先拿 ID，减少内存
-			)
+				'results' => $results,
+				'total'   => $result['total'],
+			),
+			200
 		);
-
-		$results = array();
-		foreach ( $query->posts as $post_id ) {
-			$post = get_post( (int) $post_id );
-			if ( ! $post ) {
-				continue;
-			}
-
-			// 摘要：优先 post_excerpt，否则截取正文
-			$excerpt = $post->post_excerpt
-				? $post->post_excerpt
-				: wp_trim_words( wp_strip_all_tags( $post->post_content ), 20, '...' );
-
-			// 缩略图
-			$thumbnail = '';
-			if ( has_post_thumbnail( $post_id ) ) {
-				$thumbnail = (string) get_the_post_thumbnail_url( $post_id, 'home-thumb' );
-			}
-
-			// 高亮关键词（转义后再替换，防止 XSS）
-			$safe_keyword    = preg_quote( $keyword, '/' );
-			$title_plain     = get_the_title( $post_id );
-			$title_highlight = preg_replace(
-				'/(' . $safe_keyword . ')/iu',
-				'<mark>$1</mark>',
-				esc_html( $title_plain )
-			);
-
-			$results[] = array(
-				'id'        => $post_id,
-				'title'     => $title_highlight,
-				'excerpt'   => esc_html( mb_substr( $excerpt, 0, 100 ) ),
-				'url'       => get_permalink( $post_id ),
-				'thumbnail' => esc_url( $thumbnail ),
-			);
-		}
-
-		$data = array(
-			'results' => $results,
-			'total'   => $query->found_posts,
-		);
-
-		wp_cache_set( $cache_key, $data, self::CACHE_GROUP, self::CACHE_TTL );
-
-		return new WP_REST_Response( $data, 200 );
 	}
 }

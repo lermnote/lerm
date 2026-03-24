@@ -19,8 +19,10 @@
 /* 2. Animate.css — npm 管理 */
 @import 'animate.css';
 
-/* 3. Lerm 自定义图标字体 */
+/* 3. Glightbox — npm 管理 */
+@import 'glightbox/dist/css/glightbox.min.css';
+/* 4. Lerm 自定义图标字体 */
 @import './lerm-font.css';
 
-/* 4. 主题核心样式（最后引入，确保能覆盖前面的默认样式）*/
+/* 5. 主题核心样式（最后引入，确保能覆盖前面的默认样式）*/
 @import './main.css';

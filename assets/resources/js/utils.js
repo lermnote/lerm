@@ -53,13 +53,45 @@ export const lazyLoadImages = (() => {
   };
 })();
 
-export const codeHighlight = () => {
-  if (typeof hljs !== "undefined") {
-    document.querySelectorAll("pre code").forEach((block) => {
-      hljs.highlightBlock(block);
+// utils.js — 替换 initializeWOW，删除 index.js 顶部的 import WOW
+export const initScrollAnimate = () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        el.classList.add('animated');
+        observer.unobserve(el);
+      }
     });
-  }
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.loading-animate').forEach(el => observer.observe(el));
 };
+
+export const codeHighlight = async () => {
+   if (!blocks.length) return;
+ 
+  const { default: hljs } = await import('highlight.js/lib/core');
+  const [js, php, bash, css, html, json] = await Promise.all([
+    import('highlight.js/lib/languages/javascript'),
+    import('highlight.js/lib/languages/php'),
+    import('highlight.js/lib/languages/bash'),
+    import('highlight.js/lib/languages/css'),
+    import('highlight.js/lib/languages/xml'),
+    import('highlight.js/lib/languages/json'),
+  ]);
+ 
+  hljs.registerLanguage('javascript', js.default);
+  hljs.registerLanguage('php',        php.default);
+  hljs.registerLanguage('bash',       bash.default);
+  hljs.registerLanguage('css',        css.default);
+  hljs.registerLanguage('html',       html.default);
+  hljs.registerLanguage('xml',        html.default);
+  hljs.registerLanguage('json',       json.default);
+ 
+  blocks.forEach(block => hljs.highlightElement(block));
+};
+
 
 export const calendarAddClass = () => {
   const calendar = document.querySelector("#wp-calendar");
@@ -99,4 +131,30 @@ export const navigationToggle = () => {
   delegate("click", ".navbar-toggler", (event, toggler) => {
     toggler.classList.toggle("active");
   });
+};
+
+// utils.js 新增
+const SHARE_URLS = {
+  twitter:  (url, title) => `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+  facebook: (url)        => `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+  weibo:    (url, title) => `https://service.weibo.com/share/share.php?url=${url}&title=${title}`,
+  telegram: (url, title) => `https://t.me/share/url?url=${url}&text=${title}`,
+};
+
+export const initSocialShare = () => {
+  delegate('click', '[data-share]', (e, el) => {
+    e.preventDefault();
+    const platform = el.dataset.share;
+    const builder = SHARE_URLS[platform];
+    if (!builder) return;
+    const url   = encodeURIComponent(el.dataset.url  || location.href);
+    const title = encodeURIComponent(el.dataset.title || document.title);
+    window.open(builder(url, title), '_blank', 'width=600,height=400');
+  });
+};
+
+export const initLightbox = async () => {
+  if (!document.querySelector('[data-glightbox]')) return;
+  const { default: GLightbox } = await import('glightbox');
+  GLightbox({ selector: '[data-glightbox]' });
 };

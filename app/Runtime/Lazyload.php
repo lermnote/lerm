@@ -113,7 +113,6 @@ class Lazyload {
 			return;
 		}
 
-
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
 		$img_html = $img->ownerDocument->saveHTML( $img );
 		if ( $this->should_skip( $img_html ) ) {
@@ -170,7 +169,7 @@ class Lazyload {
 		 * @param string $img_html 图片标签 HTML
 		 * @return bool
 		 */
-	private function should_skip( $img_html ) {
+	private function should_skip( $img_html ): bool {
 		$skips = (array) $this->default_args['skip_list'];
 
 		foreach ( $skips as $needle ) {
