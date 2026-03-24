@@ -5,7 +5,7 @@ namespace Lerm\Http\Rest;
 
 use WP_Error;
 use WP_REST_Request;
-use Lerm\Support\Utilities;
+use function Lerm\Support\client_ip;
 
 /**
  * REST API 中间件
@@ -28,7 +28,7 @@ final class Middleware {
 	 * @param int    $window 时间窗口（秒），默认 60
 	 */
 	public static function rate_limit( string $action, int $limit = 10, int $window = 60 ): true|WP_Error {
-		$ip  = Utilities::client_ip();
+		$ip  = client_ip();
 		$key = 'lerm_rl_' . md5( $action . $ip );
 
 		$count = (int) get_transient( $key );

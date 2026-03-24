@@ -1,5 +1,4 @@
 <?php // phpcs:disable WordPress.Files.FileName
-
 /**
  * Post Tags / Post Meta (optimized)
  *
@@ -14,7 +13,7 @@ namespace Lerm\View;
 
 use Lerm\Traits\Singleton;
 
-class Tags {
+class PostMeta {
 
 	use Singleton;
 

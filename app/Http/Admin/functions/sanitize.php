@@ -26,4 +26,3 @@ if ( ! function_exists( 'csf_sanitize_title' ) ) {
 		return sanitize_title( $value );
 	}
 }
-

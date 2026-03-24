@@ -22,4 +22,3 @@ if ( ! class_exists( 'CSF_Field_heading' ) ) {
 
   }
 }
-

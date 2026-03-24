@@ -662,4 +662,3 @@ msgstr "Lütfen geçerli bir web adresi girin."
 
 #~ msgid "Write shortcode here..."
 #~ msgstr "Kısa kodu buraya yaz..."
-

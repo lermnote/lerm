@@ -231,4 +231,3 @@ if ( ! class_exists( 'CSF_Taxonomy_Options' ) ) {
 		}
 	}
 }
-

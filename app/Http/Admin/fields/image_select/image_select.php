@@ -77,4 +77,3 @@ if ( ! class_exists( 'CSF_Field_image_select' ) ) {
 
   }
 }
-

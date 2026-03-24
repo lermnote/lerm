@@ -183,4 +183,3 @@ if ( ! class_exists( 'CSF_Abstract' ) ) {
 
 	}
 }
-

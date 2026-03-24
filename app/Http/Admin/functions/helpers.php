@@ -8,34 +8,24 @@
  * @version 1.0.0
  */
 if ( ! function_exists( 'csf_array_search' ) ) {
-	// function csf_array_search( $array, $key, $value ) {
-
-	//  $results = array();
-
-	//  if ( is_array( $array ) ) {
-	//      if ( isset( $array[ $key ] ) && $array[ $key ] === $value ) {
-	//          $results[] = $array;
-	//      }
-
-	//      foreach ( $array as $sub_array ) {
-	//          $results = array_merge( $results, csf_array_search( $sub_array, $key, $value ) );
-	//      }
-	//  }
-
-	//  return $results;
-	// }
 	function csf_array_search( $array, $key, $value ) {
+
 		$results = array();
-		$iter    = new RecursiveIteratorIterator( new RecursiveArrayIterator( $array ) );
-		foreach ( $iter as $val ) {
-			if ( isset( $val[ $key ] ) && $val[ $key ] === $value ) {
-				$results[] = $val;
+
+		if ( is_array( $array ) ) {
+			if ( isset( $array[ $key ] ) && $array[ $key ] === $value ) {
+				$results[] = $array;
+			}
+
+			foreach ( $array as $sub_array ) {
+				$results = array_merge( $results, csf_array_search( $sub_array, $key, $value ) );
 			}
 		}
+
 		return $results;
+
 	}
 }
-
 /**
  *
  * Getting POST Var

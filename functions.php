@@ -35,7 +35,7 @@ if ( ! defined( 'LERM_URI' ) ) {
 }
 
 if ( ! defined( 'LERM_VERSION' ) ) {
-	define( 'LERM_VERSION', wp_get_theme()->get( 'Version' ) ?: '1.0.0' );
+	define( 'LERM_VERSION', wp_get_theme()->get( 'Version' ) ? wp_get_theme()->get( 'Version' ) : '1.0.0' );
 }
 
 // -----------------------------------------------------------------------------

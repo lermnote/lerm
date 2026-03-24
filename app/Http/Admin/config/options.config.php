@@ -568,11 +568,11 @@ if ( class_exists( 'CSF' ) ) {
 					'desc'        => __( '提高Gravatar头像的加载速度', 'lerm' ),
 					'options'     => array(
 						'disable'                        => __( 'Disable', 'lerm' ),
-						'https://cdn.sep.cc/avatar/'     => __( 'Sep 加速服�?, 'lerm' ),
-						'https://cravatar.cn/avatar/'    => __( 'Cravatar 加速服�?, 'lerm' ),
-						'https://sdn.geekzu.org/avatar/' => __( 'Geekzu 加速服�?, 'lerm' ),
-						'https://gravatar.loli.net/avatar/' => __( 'Loli 加速服�?, 'lerm' ),
-						'https://weavatar.com/avatar/'   => __( 'WeAvatar 加速服�?, 'lerm' ),
+						'https://cdn.sep.cc/avatar/'     => __( 'Sep 加速服务', 'lerm' ),
+						'https://cravatar.cn/avatar/'    => __( 'Cravatar 加速服务', 'lerm' ),
+						'https://sdn.geekzu.org/avatar/' => __( 'Geekzu 加速服务', 'lerm' ),
+						'https://gravatar.loli.net/avatar/' => __( 'Loli 加速服务', 'lerm' ),
+						'https://weavatar.com/avatar/'   => __( 'WeAvatar 加速服务', 'lerm' ),
 					),
 					'default'     => 'disable',
 				),
@@ -584,9 +584,9 @@ if ( class_exists( 'CSF' ) ) {
 					'desc'        => __( 'Please enable this option only if Googlefonts are included to avoid unnecessary performance loss,', 'lerm' ),
 					'options'     => array(
 						'disable' => __( 'Disable', 'lerm' ),
-						'geekzu'  => __( 'Geekzu 加速服�?, 'lerm' ),
-						'loli'    => __( 'Loli 加速服�?, 'lerm' ),
-						'ustc'    => __( 'USTC 加速服�?, 'lerm' ),
+						'geekzu'  => __( 'Geekzu 加速服务', 'lerm' ),
+						'loli'    => __( 'Loli 加速服务', 'lerm' ),
+						'ustc'    => __( 'USTC 加速服务', 'lerm' ),
 					),
 					'default'     => 'disable',
 				),
@@ -1665,4 +1665,3 @@ if ( class_exists( 'CSF' ) ) {
 		)
 	);
 }
-

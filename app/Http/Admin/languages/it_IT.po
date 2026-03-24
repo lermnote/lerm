@@ -662,4 +662,3 @@ msgstr "Inserisci un URL valido."
 
 #~ msgid "Write shortcode here..."
 #~ msgstr "Scrivi qui lo shortcode..."
-

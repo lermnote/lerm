@@ -171,17 +171,11 @@ function copyright_text( $type = 'short', $echo_output = true ) {
 				'fields'         => 'post_date_gmt',
 			)
 		);
-		$year            = ! empty( $first_post_date )
+
+		$year = ! empty( $first_post_date )
 			? substr( $first_post_date[0]->post_date_gmt, 0, 4 )
 			: gmdate( 'Y' );
 		set_transient( 'lerm_first_post_year', $year, MONTH_IN_SECONDS );
-	}
-
-	if ( ! empty( $first_posts ) && isset( $first_posts[0]->post_date_gmt ) ) {
-		$first_date = $first_posts[0]->post_date_gmt;
-		$year       = (int) substr( $first_date, 0, 4 );
-	} else {
-		$year = (int) gmdate( 'Y' );
 	}
 
 	$current_year = (int) gmdate( 'Y' );
@@ -295,12 +289,12 @@ function social_link_icon_classes( $block_content, $block ) {
 }
 
 // Register filters for core blocks
-add_filter( 'render_block_core/archives', __NAMESPACE__ . '\archives_classes', 10, 2 );
-add_filter( 'render_block_core/calendar', __NAMESPACE__ . '\calendar_classes', 10, 2 );
-add_filter( 'render_block_core/categories', __NAMESPACE__ . '\categories_classes', 10, 2 );
-add_filter( 'render_block_core/latest-comments', __NAMESPACE__ . '\latest_comments_classes', 10, 2 );
-add_filter( 'render_block_core/latest-posts', __NAMESPACE__ . '\latest_posts_classes', 10, 2 );
-add_filter( 'render_block_core/search', __NAMESPACE__ . '\search_classes', 10, 2 );
+// add_filter( 'render_block_core/archives', __NAMESPACE__ . '\archives_classes', 10, 2 );
+// add_filter( 'render_block_core/calendar', __NAMESPACE__ . '\calendar_classes', 10, 2 );
+// add_filter( 'render_block_core/categories', __NAMESPACE__ . '\categories_classes', 10, 2 );
+// add_filter( 'render_block_core/latest-comments', __NAMESPACE__ . '\latest_comments_classes', 10, 2 );
+// add_filter( 'render_block_core/latest-posts', __NAMESPACE__ . '\latest_posts_classes', 10, 2 );
+// add_filter( 'render_block_core/search', __NAMESPACE__ . '\search_classes', 10, 2 );
 add_filter( 'render_block_core/social-link', __NAMESPACE__ . '\social_link_icon_classes', 10, 2 );
 
 // End of file

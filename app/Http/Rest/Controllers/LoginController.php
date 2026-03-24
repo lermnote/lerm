@@ -7,7 +7,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
 use Lerm\Http\Rest\Middleware;
-use Lerm\Support\Utilities;
+use function Lerm\Support\client_ip;
 
 /**
  * 前台登录接口
@@ -68,7 +68,7 @@ final class LoginController {
 		}
 
 		// 登录尝试次数限制（IP + 用户名组合，防止暴力破解）
-		$ip          = Utilities::client_ip();
+		$ip          = client_ip();
 		$attempt_key = 'lerm_login_' . md5( strtolower( $username ) . '|' . $ip );
 		$attempts    = (int) get_transient( $attempt_key );
 

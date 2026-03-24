@@ -13,4 +13,3 @@ if ( ! function_exists( 'csf_get_default_icons' ) ) {
 		);
 	}
 }
-

@@ -665,4 +665,3 @@ msgstr "Veuillez saisir une adresse valide."
 
 #~ msgid "Write shortcode here..."
 #~ msgstr "Placez le code court ici..."
-

@@ -7,7 +7,7 @@
  */
 
 use Lerm\Support\Image;
-use Lerm\View\Tags;
+use Lerm\View\PostMeta;
 use function Lerm\Support\link_pagination;
 
 $current_post_id = get_the_ID(); // 缓存 ID，避免多次调用
@@ -41,7 +41,7 @@ $card_classes    = 'card';
 
 			<?php
 			if ( is_singular( 'post' ) ) {
-				Tags::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
+				PostMeta::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
 			}
 
 			$tag_list = get_the_tag_list(

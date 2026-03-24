@@ -64,7 +64,7 @@ final class BaiduSubmit {
 			return;
 		}
 
-		$throttle_key = 'lerm_baidu_push_' . $post_id;
+		$throttle_key = 'lerm_baidu_push_' . $post_ID;
 		if ( get_transient( $throttle_key ) ) {
 			return;
 		}

@@ -33,7 +33,7 @@ class OpenGraph {
 	 * @param array $params Optional parameters to override default settings.
 	 */
 	public function __construct( $params = array() ) {
-		self::$default_args = apply_filters( 'lerm_opengraph_args', wp_parse_args( $params, self::$args ) );
+		self::$args = apply_filters( 'lerm_opengraph_args', wp_parse_args( $params, self::$args ) );
 		$this->hooks();
 	}
 
@@ -62,13 +62,13 @@ class OpenGraph {
 		$twitter = self::generate_twitter_tags( $og );
 
 		// If tags are empty and skipping is allowed, exit.
-		if ( empty( $tags ) ) {
+		if ( empty( $og ) ) {
 			return;
 		}
 		echo PHP_EOL . '<!-- Open Graph / Twitter Card -->' . PHP_EOL;
 
 		// Ensure the site name is always included.
-		$tags['og:site_name'] = get_bloginfo( 'name' );
+		$og['og:site_name'] = get_bloginfo( 'name' );
 
 		// Output Open Graph meta tags
 		foreach ( $og as $property => $content ) {

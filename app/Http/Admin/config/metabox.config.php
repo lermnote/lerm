@@ -57,4 +57,3 @@ if ( class_exists( 'CSF' ) ) {
 	);
 	$prefix_post_opts = '_lerm_post_options';
 }
-

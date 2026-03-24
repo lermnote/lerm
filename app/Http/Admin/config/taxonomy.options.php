@@ -37,4 +37,3 @@ CSF::createSection(
 		),
 	)
 );
-

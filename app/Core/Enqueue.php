@@ -81,7 +81,7 @@ class Enqueue {
 		$scripts = apply_filters( 'lerm_enqueue_scripts', self::$scripts );
 		foreach ( $scripts as $handle => $relative_path ) {
 			$src = self::LERM_URI . $relative_path;
-
+			wp_register_script( $handle, $src, array(), self::ASSET_VERSION, true );
 			wp_enqueue_script( $handle );
 		}
 

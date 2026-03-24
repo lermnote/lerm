@@ -665,4 +665,3 @@ msgstr "Voer een geldige URL in."
 
 #~ msgid "Write shortcode here..."
 #~ msgstr "Hier een shortcode schrijven..."
-

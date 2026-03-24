@@ -92,7 +92,7 @@ class Customizer {
 			}
 		}
 		';
-		wp_add_inline_style( 'lerm_style', sprintf( $custom_width, self::$args['content_width'], self::$args['sidebar_width'] ) );
+		wp_add_inline_style( 'main_style', sprintf( $custom_width, self::$args['content_width'], self::$args['sidebar_width'] ) );
 	}
 
 	/**

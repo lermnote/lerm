@@ -17,7 +17,19 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color' ) ); ?>">
 	<?php wp_head(); ?>
-	<?php echo wp_kses( lerm_options( 'baidu_tongji' ), array( 'script' => array() ) ); ?>
+	<?php
+	add_action(
+		'wp_head',
+		function () {
+			$code = lerm_options( 'baidu_tongji' );
+			if ( $code ) {
+				// 只允许纯文本 JS 内容，不允许外部 src
+				echo '';
+			}
+		},
+		99
+	);
+	?>
 </head>
 <body <?php body_class(); ?>>
 	<?php wp_body_open(); ?>

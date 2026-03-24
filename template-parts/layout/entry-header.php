@@ -4,7 +4,7 @@
  *
  * @package Lerm
  */
-use Lerm\View\Tags;
+use Lerm\View\PostMeta;
 
 if ( empty( get_the_title() ) ) {
 	return;
@@ -15,7 +15,7 @@ if ( empty( get_the_title() ) ) {
 	<?php
 	the_title( '<h1 class="entry-title">', '</h1>' );
 	if ( is_singular( 'post' ) ) {
-		Tags::post_meta( array_keys( (array) lerm_options( 'single_top', 'enabled' ) ), 'justify-content-center  mb-0 ' );
+		PostMeta::post_meta( array_keys( (array) lerm_options( 'single_top', 'enabled' ) ), 'justify-content-center  mb-0 ' );
 	}
 	?>
 </header>

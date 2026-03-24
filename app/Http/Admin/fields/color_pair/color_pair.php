@@ -66,4 +66,3 @@ if ( ! class_exists( 'CSF_Field_color_pair' ) ) {
 		}
 	}
 }
-

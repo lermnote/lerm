@@ -132,11 +132,11 @@ class Breadcrumb {
 
 		$breadcrumb = (string) apply_filters( 'lerm_breadcrumb', $breadcrumb, self::$args );
 
-		if ( false === self::$args['echo'] ) {
+		//if ( false === self::$args['echo'] ) {
 			return $breadcrumb;
-		}
+		//}
 
-		echo $breadcrumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		//echo $breadcrumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**

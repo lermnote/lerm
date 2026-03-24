@@ -33,8 +33,9 @@ final class Smtp {
 	);
 
 	public function __construct( array $params = array() ) {
-		self::$args                 = apply_filters( 'lerm_smtp_args', wp_parse_args( $params, self::$args ) );
-		self::$args['smtp_options'] = $this->validate_smtp_options( self::$args['smtp_options'] );
+		self::$args = apply_filters( 'lerm_smtp_args', wp_parse_args( $params, self::$args ) );
+		//var_dump( self::$args );
+		//self::$args['smtp_options'] = $this->validate_smtp_options( self::$args['smtp_options'] );
 		$this->hooks();
 	}
 
@@ -96,6 +97,7 @@ final class Smtp {
 	}
 
 	protected function validate_smtp_options( array $opts ): array {
+
 		$defaults = self::$args['smtp_options'];
 
 		$opts = wp_parse_args( $opts, $defaults );

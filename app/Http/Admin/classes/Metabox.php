@@ -379,4 +379,3 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 		}
 	}
 }
-
