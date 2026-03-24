@@ -56,7 +56,7 @@ class MetaTags {
 			$keywords = array_merge( $keywords, (array) self::$args['keywords'] );
 		} elseif ( is_singular() && isset( $post->ID ) ) {
 			$tags = get_the_tags( $post->ID );
-			if ( $tags 	&& ! is_wp_error( $tags ) ) {
+			if ( $tags && ! is_wp_error( $tags ) ) {
 				$keywords = wp_list_pluck( $tags, 'name' );
 			} else {
 				$cats = get_the_category( $post->ID );
@@ -83,7 +83,7 @@ class MetaTags {
 			return mb_substr( $description, 0, 200, 'UTF-8' );
 		}
 
-		if ( is_singular()  && isset( $post->ID ) ) {
+		if ( is_singular() && isset( $post->ID ) ) {
 			if ( ! empty( $post->post_excerpt ) ) {
 				$description = $post->post_excerpt;
 			} else {
@@ -91,7 +91,7 @@ class MetaTags {
 			}
 		} elseif ( is_archive() ) {
 			$archive_desc = get_the_archive_description();
-			$description = $archive_desc ? wp_strip_all_tags( $archive_desc ) : get_bloginfo( 'name' ) . ' - ' . single_term_title( '', false );
+			$description  = $archive_desc ? wp_strip_all_tags( $archive_desc ) : get_bloginfo( 'name' ) . ' - ' . single_term_title( '', false );
 		} else {
 			$description = get_bloginfo( 'description' );
 		}
@@ -118,7 +118,7 @@ class MetaTags {
 	}
 
 	public static function title_separator( string $sep ): string {
-		return self::$args['separator'] ?: $sep;
+		return self::$args['separator'] ? self::$args['separator'] : $sep;
 	}
 	public static function get_args(): array {
 		return self::$args;

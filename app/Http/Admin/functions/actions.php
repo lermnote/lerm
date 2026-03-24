@@ -43,7 +43,6 @@ if ( ! function_exists( 'csf_get_icons' ) ) {
 		$content = ob_get_clean();
 
 		wp_send_json_success( array( 'content' => $content ) );
-
 	}
 	add_action( 'wp_ajax_csf-get-icons', 'csf_get_icons' );
 }
@@ -79,7 +78,6 @@ if ( ! function_exists( 'csf_export' ) ) {
 		echo wp_json_encode( get_option( $unique ) );
 
 		die();
-
 	}
 	add_action( 'wp_ajax_csf-export', 'csf_export' );
 }
@@ -114,7 +112,6 @@ if ( ! function_exists( 'csf_import_ajax' ) ) {
 		update_option( $unique, $data );
 
 		wp_send_json_success();
-
 	}
 	add_action( 'wp_ajax_csf-import', 'csf_import_ajax' );
 }
@@ -140,7 +137,6 @@ if ( ! function_exists( 'csf_reset_ajax' ) ) {
 		delete_option( $unique );
 
 		wp_send_json_success();
-
 	}
 	add_action( 'wp_ajax_csf-reset', 'csf_reset_ajax' );
 }
@@ -178,8 +174,6 @@ if ( ! function_exists( 'csf_chosen_ajax' ) ) {
 		$options = CSF_Fields::field_data( $type, $term, $query );
 
 		wp_send_json_success( $options );
-
 	}
 	add_action( 'wp_ajax_csf-chosen', 'csf_chosen_ajax' );
 }
-

@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
@@ -48,7 +48,7 @@ final class TocController {
 		$cached    = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
 		if ( false !== $cached ) {
-			return new WP_REST_Response( [ 'toc' => $cached ], 200 );
+			return new WP_REST_Response( array( 'toc' => $cached ), 200 );
 		}
 
 		$content = get_post_field( 'post_content', $post_id );
@@ -58,11 +58,14 @@ final class TocController {
 		wp_cache_set( $cache_key, $toc, self::CACHE_GROUP, self::CACHE_TTL );
 
 		// 文章更新时清除缓存
-		add_action( 'save_post_' . $post_id, static function () use ( $post_id, $cache_key ) {
-			wp_cache_delete( $cache_key, self::CACHE_GROUP );
-		} );
+		add_action(
+			'save_post_' . $post_id,
+			static function () use ( $post_id, $cache_key ) {
+				wp_cache_delete( $cache_key, self::CACHE_GROUP );
+			}
+		);
 
-		return new WP_REST_Response( [ 'toc' => $toc ], 200 );
+		return new WP_REST_Response( array( 'toc' => $toc ), 200 );
 	}
 
 	/**
@@ -72,7 +75,7 @@ final class TocController {
 	 */
 	private static function parse( string $content ): array {
 		if ( empty( $content ) ) {
-			return [];
+			return array();
 		}
 
 		// 匹配 H2/H3，捕获已有 id 属性或将从文字生成
@@ -82,11 +85,11 @@ final class TocController {
 			$matches,
 			PREG_SET_ORDER
 		) ) {
-			return [];
+			return array();
 		}
 
-		$slug_count = [];
-		$flat       = [];
+		$slug_count = array();
+		$flat       = array();
 
 		foreach ( $matches as $match ) {
 			$level    = (int) $match[1];
@@ -103,18 +106,18 @@ final class TocController {
 
 			// 防止重复 slug
 			if ( isset( $slug_count[ $slug ] ) ) {
-				$slug_count[ $slug ]++;
+				++$slug_count[ $slug ];
 				$slug .= '-' . $slug_count[ $slug ];
 			} else {
 				$slug_count[ $slug ] = 0;
 			}
 
-			$flat[] = [
+			$flat[] = array(
 				'id'       => $slug,
 				'text'     => esc_html( $text ),
 				'level'    => $level,
-				'children' => [],
-			];
+				'children' => array(),
+			);
 		}
 
 		return self::build_tree( $flat );
@@ -127,21 +130,19 @@ final class TocController {
 	 * @return array
 	 */
 	private static function build_tree( array $flat ): array {
-		$tree    = [];
+		$tree             = array();
 		$current_h2_index = -1;
 
 		foreach ( $flat as $item ) {
 			if ( 2 === $item['level'] ) {
 				$tree[]           = $item;
 				$current_h2_index = count( $tree ) - 1;
-			} else {
+			} elseif ( $current_h2_index >= 0 ) {
 				// H3 挂在最近的 H2 下
-				if ( $current_h2_index >= 0 ) {
-					$tree[ $current_h2_index ]['children'][] = $item;
-				} else {
-					// 没有父级 H2，提升为根节点
-					$tree[] = $item;
-				}
+				$tree[ $current_h2_index ]['children'][] = $item;
+			} else {
+				// 没有父级 H2，提升为根节点
+				$tree[] = $item;
 			}
 		}
 

@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 // phpcs:disable WordPress.Files.FileName
@@ -33,7 +33,7 @@ final class Smtp {
 	);
 
 	public function __construct( array $params = array() ) {
-		self::$args = apply_filters( 'lerm_smtp_args', wp_parse_args( $params, self::$args ) );
+		self::$args                 = apply_filters( 'lerm_smtp_args', wp_parse_args( $params, self::$args ) );
 		self::$args['smtp_options'] = $this->validate_smtp_options( self::$args['smtp_options'] );
 		$this->hooks();
 	}
@@ -75,7 +75,7 @@ final class Smtp {
 	}
 
 	public function filter_mail_from_email( $wp_email ): string {
-		$original = is_string( $wp_email ) ? sanitize_email( $wp_email ) : '';
+		$original           = is_string( $wp_email ) ? sanitize_email( $wp_email ) : '';
 		self::$wp_mail_from = ! empty( $original ) ? $original : null;
 
 		$from_email = self::$args['smtp_options']['from_email'] ?? '';

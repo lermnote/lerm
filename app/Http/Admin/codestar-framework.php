@@ -27,10 +27,10 @@ require_once plugin_dir_path( __FILE__ ) . 'config/taxonomy.options.php';
  *
  * @param string $id    Option ID.
  * @param string $tag   Optional. Tag ID. Default is an empty string.
- * @param mixed  $default Optional. Default value if the option is not found. Default is an empty string.
+ * @param mixed  $default_value Optional. Default value if the option is not found. Default is an empty string.
  * @return mixed The theme option value.
  */
-function lerm_options( string $id, string $tag = '', $default = '' ) {
+function lerm_options( string $id, string $tag = '', $default_value = '' ) {
 	// Fetch the theme options array from the database
 	static $options = null;
 	if ( null === $options ) {
@@ -39,17 +39,16 @@ function lerm_options( string $id, string $tag = '', $default = '' ) {
 
 	// Check if the main option ID exists in the options array
 	if ( ! array_key_exists( $id, $options ) ) {
-		return $default;
+		return $default_value;
 	}
 
 	$option_value = $options[ $id ];
 
 	// If the option value is an array and a tag is specified, return the tagged value or default
 	if ( is_array( $option_value ) && '' !== $tag ) {
-		return $options[ $id ][ $tag ] ?? $default;
+		return $options[ $id ][ $tag ] ?? $default_value;
 	}
 
 	// Return the option value (either array or single value)
 	return $option_value;
 }
-

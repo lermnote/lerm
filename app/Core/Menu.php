@@ -15,7 +15,7 @@ use Walker_Nav_Menu;
 
 
 class NavWalker extends Walker_Nav_Menu {
-	private $has_schema = false;
+
 
 	public function __construct() {
 		if ( ! has_filter( 'wp_nav_menu_args', array( $this, 'add_schema_to_navbar_ul' ) ) ) {
@@ -131,5 +131,3 @@ class NavWalker extends Walker_Nav_Menu {
 		return $attribute_string;
 	}
 }
-
-

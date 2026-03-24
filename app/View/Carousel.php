@@ -228,4 +228,3 @@ class Carousel {
 		return in_array( $animation, $allowed, true ) ? $animation : '';
 	}
 }
-

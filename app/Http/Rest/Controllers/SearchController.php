@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
@@ -55,13 +55,19 @@ final class SearchController {
 			return new WP_Error(
 				'invalid_post_type',
 				__( '无效的文章类型', 'lerm' ),
-				[ 'status' => 400 ]
+				array( 'status' => 400 )
 			);
 		}
 
 		// 关键词太短，直接返回空（避免全表扫描）
 		if ( mb_strlen( $keyword ) < 2 ) {
-			return new WP_REST_Response( [ 'results' => [], 'total' => 0 ], 200 );
+			return new WP_REST_Response(
+				array(
+					'results' => array(),
+					'total'   => 0,
+				),
+				200
+			);
 		}
 
 		// 缓存 key 基于参数组合
@@ -72,17 +78,19 @@ final class SearchController {
 			return new WP_REST_Response( $cached, 200 );
 		}
 
-		$query = new \WP_Query( [
-			'post_type'           => $post_type,
-			'post_status'         => 'publish',
-			's'                   => $keyword,
-			'posts_per_page'      => $per_page,
-			'no_found_rows'       => false,
-			'ignore_sticky_posts' => true,
-			'fields'              => 'ids', // 先拿 ID，减少内存
-		] );
+		$query = new \WP_Query(
+			array(
+				'post_type'           => $post_type,
+				'post_status'         => 'publish',
+				's'                   => $keyword,
+				'posts_per_page'      => $per_page,
+				'no_found_rows'       => false,
+				'ignore_sticky_posts' => true,
+				'fields'              => 'ids', // 先拿 ID，减少内存
+			)
+		);
 
-		$results = [];
+		$results = array();
 		foreach ( $query->posts as $post_id ) {
 			$post = get_post( (int) $post_id );
 			if ( ! $post ) {
@@ -91,7 +99,8 @@ final class SearchController {
 
 			// 摘要：优先 post_excerpt，否则截取正文
 			$excerpt = $post->post_excerpt
-				?: wp_trim_words( wp_strip_all_tags( $post->post_content ), 20, '...' );
+				? $post->post_excerpt
+				: wp_trim_words( wp_strip_all_tags( $post->post_content ), 20, '...' );
 
 			// 缩略图
 			$thumbnail = '';
@@ -108,19 +117,19 @@ final class SearchController {
 				esc_html( $title_plain )
 			);
 
-			$results[] = [
+			$results[] = array(
 				'id'        => $post_id,
 				'title'     => $title_highlight,
 				'excerpt'   => esc_html( mb_substr( $excerpt, 0, 100 ) ),
 				'url'       => get_permalink( $post_id ),
 				'thumbnail' => esc_url( $thumbnail ),
-			];
+			);
 		}
 
-		$data = [
+		$data = array(
 			'results' => $results,
 			'total'   => $query->found_posts,
-		];
+		);
 
 		wp_cache_set( $cache_key, $data, self::CACHE_GROUP, self::CACHE_TTL );
 

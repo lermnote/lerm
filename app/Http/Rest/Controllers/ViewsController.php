@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
@@ -37,7 +37,7 @@ final class ViewsController {
 		}
 
 		return new WP_REST_Response(
-			[ 'count' => ViewsRepository::get_count( $post_id ) ],
+			array( 'count' => ViewsRepository::get_count( $post_id ) ),
 			200
 		);
 	}
@@ -59,7 +59,7 @@ final class ViewsController {
 		}
 
 		// 用 IP hash 作为防重复标识，不直接暴露 IP
-		$client_key = substr( md5(  client_ip() . wp_salt() ), 0, 16 );
+		$client_key = substr( md5( client_ip() . wp_salt() ), 0, 16 );
 		$result     = ViewsRepository::increment( $post_id, $client_key );
 
 		return new WP_REST_Response( $result, 200 );

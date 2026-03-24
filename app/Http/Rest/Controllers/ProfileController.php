@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
@@ -67,14 +67,19 @@ final class ProfileController {
 		$pass1 = (string) ( $request->get_param( 'pass1' ) ?? '' );
 		$pass2 = (string) ( $request->get_param( 'pass2' ) ?? '' );
 
-		if ( $pass1 !== '' || $pass2 !== '' ) {
+		if ( '' !== $pass1 || '' !== $pass2 ) {
 			if ( $pass1 !== $pass2 ) {
 				return new WP_Error( 'password_mismatch', __( 'The passwords you entered do not match.', 'lerm' ), array( 'status' => 400 ) );
 			}
 			if ( strlen( $pass1 ) < 8 ) {
 				return new WP_Error( 'password_too_short', __( 'Password must be at least 8 characters long.', 'lerm' ), array( 'status' => 400 ) );
 			}
-			wp_update_user( array( 'ID' => $user->ID, 'user_pass' => $pass1 ) );
+			wp_update_user(
+				array(
+					'ID'        => $user->ID,
+					'user_pass' => $pass1,
+				)
+			);
 		}
 
 		// --- 文本字段更新 ---

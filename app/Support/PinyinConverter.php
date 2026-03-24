@@ -410,16 +410,16 @@ class ChineseToPinyin {
 		'zun'    => -10256,
 		'zuo'    => -10254,
 	);
-	public static function zh_to_pinyin( $string ) {
-		$string  = iconv( 'UTF-8', 'GBK//IGNORE', $string );
+	public static function zh_to_pinyin( $str ) {
+		$str     = iconv( 'UTF-8', 'GBK//IGNORE', $str );
 		$results = array();
-		$length  = strlen( $string ); // Store the length of the string in a variable
+		$length  = strlen( $str ); // Store the length of the string in a variable
 
 		for ( $i = 0; $i < $length; $i++ ) {
-			$ord = ord( $string[ $i ] );
+			$ord = ord( $str[ $i ] );
 
 			if ( $ord > 160 ) {
-				$ord = $ord * 256 + ord( $string[ ++$i ] ) - 65536;
+				$ord = $ord * 256 + ord( $str[ ++$i ] ) - 65536;
 			}
 
 			$results[] = self::get_pinyin( $ord );
@@ -442,4 +442,3 @@ class ChineseToPinyin {
 		return '';
 	}
 }
-

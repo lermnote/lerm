@@ -130,7 +130,8 @@ class OpenGraph {
 
 		// Handle static front page
 		if ( 'page' === get_option( 'show_on_front' ) ) {
-			if ( $front_page_id = (int) get_option( 'page_on_front' ) ) {
+			$front_page_id = (int) get_option( 'page_on_front' );
+			if ( $front_page_id ) {
 				$tags['og:url'] = (string) get_permalink( $front_page_id );
 			}
 		}
@@ -152,7 +153,7 @@ class OpenGraph {
 		return array(
 			'og:type'            => 'profile',
 			'og:title'           => $author->display_name,
-			'og:url'             => $author->user_url ?: get_author_posts_url( $author->ID ),
+			'og:url'             => $author->user_url ? $author->user_url : get_author_posts_url( $author->ID ),
 			'og:description'     => $author->description,
 			'profile:first_name' => get_the_author_meta( 'first_name', $author->ID ),
 			'profile:last_name'  => get_the_author_meta( 'last_name', $author->ID ),
@@ -174,7 +175,7 @@ class OpenGraph {
 
 		$tags = array(
 			'og:type'                => 'article',
-			'og:title'               => get_the_title( $post->ID ) ?: get_bloginfo( 'name' ),
+			'og:title'               => get_the_title( $post->ID ) ? get_the_title( $post->ID ) : get_bloginfo( 'name' ),
 			'og:url'                 => (string) get_permalink( $post->ID ),
 			'og:description'         => $description,
 			'og:site_name'           => get_bloginfo( 'name' ),
@@ -208,13 +209,13 @@ class OpenGraph {
 	 */
 	private static function archive_tags(): array {
 		$term  = get_queried_object();
-		$title = single_term_title( '', false ) ?: get_bloginfo( 'name' );
+		$title = single_term_title( '', false ) ? single_term_title( '', false ) : get_bloginfo( 'name' );
 
 		$desc = '';
 		if ( $term instanceof \WP_Term && $term->description ) {
 			$desc = wp_strip_all_tags( $term->description );
 		}
-		$desc = $desc ?: ( get_bloginfo( 'name' ) . ' - ' . $title );
+		$desc = $desc ? $desc : ( get_bloginfo( 'name' ) . ' - ' . $title );
 
 		return array(
 			'og:type'        => 'website',
@@ -265,7 +266,7 @@ class OpenGraph {
 			);
 			if ( $thumb ) {
 				[ $src, $width, $height ] = $thumb;
-				$alt = (string) get_post_meta(
+				$alt                      = (string) get_post_meta(
 					(int) get_post_thumbnail_id( $post_id ),
 					'_wp_attachment_image_alt',
 					true

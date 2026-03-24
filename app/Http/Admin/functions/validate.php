@@ -135,4 +135,3 @@ if ( ! function_exists( 'csf_customize_validate_url' ) ) {
 		return $validity;
 	}
 }
-

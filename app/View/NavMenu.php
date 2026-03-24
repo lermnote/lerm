@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\View;
@@ -50,15 +50,15 @@ final class NavMenu {
 	// -------------------------------------------------------------------------
 
 	private static function render_user_dropdown(): string {
-		$user         = wp_get_current_user();
-		$account_url  = esc_url( self::$args['login_redirect_url'] ?: home_url( '/' ) );
-		$logout_url   = esc_url( wp_logout_url( self::$args['logout_redirect_url'] ?: home_url( '/' ) ) );
+		$user        = wp_get_current_user();
+		$account_url = esc_url( self::$args['login_redirect_url'] ? self::$args['login_redirect_url'] : home_url( '/' ) );
+		$logout_url  = esc_url( wp_logout_url( self::$args['logout_redirect_url'] ? self::$args['logout_redirect_url'] : home_url( '/' ) ) );
 
 		ob_start();
 		?>
 		<li class="nav-item dropdown menu-item-login">
 			<a class="nav-link dropdown-toggle" href="#" role="button"
-			   data-bs-toggle="dropdown" aria-expanded="false">
+				data-bs-toggle="dropdown" aria-expanded="false">
 				<?php echo get_avatar( $user->ID, 20 ); ?>
 				<?php echo esc_html( $user->user_login ); ?>
 			</a>
@@ -68,13 +68,13 @@ final class NavMenu {
 					<span class="text-info"><?php echo esc_html( $user->display_name ); ?></span>
 				</li>
 				<li>
-					<a class="dropdown-item" href="<?php echo $account_url; ?>">
+					<a class="dropdown-item" href="<?php echo esc_attr( $account_url ); ?>">
 						<?php esc_html_e( 'Account', 'lerm' ); ?>
 					</a>
 				</li>
 				<li><hr class="dropdown-divider"></li>
 				<li>
-					<a class="dropdown-item" href="<?php echo $logout_url; ?>">
+					<a class="dropdown-item" href="<?php echo esc_attr( $logout_url ); ?>">
 						<?php esc_html_e( 'Log out', 'lerm' ); ?>
 					</a>
 				</li>

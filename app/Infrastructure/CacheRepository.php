@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Infrastructure;
@@ -110,11 +110,14 @@ final class CacheRepository {
 	 * @return string[]
 	 */
 	public static function all_groups(): array {
-		return (array) apply_filters( 'lerm_cache_groups', [
-			self::GROUP_LIKES,
-			self::GROUP_VIEWS,
-			self::GROUP_SEARCH,
-			self::GROUP_TOC,
-		] );
+		return (array) apply_filters(
+			'lerm_cache_groups',
+			array(
+				self::GROUP_LIKES,
+				self::GROUP_VIEWS,
+				self::GROUP_SEARCH,
+				self::GROUP_TOC,
+			)
+		);
 	}
 }

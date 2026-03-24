@@ -200,4 +200,3 @@ class Updater {
 		return $transient;
 	}
 }
-

@@ -16,11 +16,11 @@ class CDN {
 	/** String: the blog's URL ( get_option('siteurl') ) */
 	protected ?string $blog_url = null;
 	/** String: URL of a CDN domain */
-	protected ?string $cdn_url  = null;
+	protected ?string $cdn_url = null;
 	/** String: directories to include in static file matching, comma-delimited list */
-protected ?string $include_dirs = null;
-protected array   $excludes     = [];
-protected bool    $rootrelative = false;
+	protected ?string $include_dirs = null;
+	protected array $excludes       = array();
+	protected bool $rootrelative    = false;
 
 	/** Constructor. */
 	function __construct( $blog_url, $cdn_url, $include_dirs, array $excludes, $root_relative ) {
@@ -55,12 +55,10 @@ protected bool    $rootrelative = false;
 	protected function rewrite_single( &$match ) {
 		if ( $this->exclude_single( $match[0] ) ) {
 			return $match[0];
-		} else {
-			if ( ! $this->rootrelative || strstr( $match[0], $this->blog_url ) ) {
+		} elseif ( ! $this->rootrelative || strstr( $match[0], $this->blog_url ) ) {
 				return str_replace( $this->blog_url, $this->cdn_url, $match[0] );
-			} else { // obviously $this->rootrelative is true and we got a root-relative link - else that case won't happen
-				return $this->cdn_url . $match[0];
-			}
+		} else { // obviously $this->rootrelative is true and we got a root-relative link - else that case won't happen
+			return $this->cdn_url . $match[0];
 		}
 	}
 
@@ -93,7 +91,6 @@ protected bool    $rootrelative = false;
 		$regex .= '/(?:((?:' . $dirs . ')[^\"\')]+)|([^/\"\']+\.[^/\"\')]+))(?=[\"\')])#';
 		return preg_replace_callback( $regex, array( &$this, 'rewrite_single' ), $content );
 	}
-
 }
 
 /**
@@ -111,7 +108,7 @@ class CDNWordpress extends CDN {
 			get_option( 'ossdl_off_cdn_url' ),
 			get_option( 'ossdl_off_include_dirs' ),
 			$excludes,
-			! ! get_option( 'ossdl_off_rootrelative' )
+			(bool) get_option( 'ossdl_off_rootrelative' )
 		);
 	}
 
@@ -125,7 +122,6 @@ class CDNWordpress extends CDN {
 			ob_start( array( $this, 'rewrite' ) );
 		}
 	}
-
 }
 
 /**
@@ -136,4 +132,3 @@ function do_ossdl_off_ob_start() {
 	$rewriter = new CDNWordpress();
 	$rewriter->register_as_output_buffer();
 }
-

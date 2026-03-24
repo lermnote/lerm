@@ -1,6 +1,4 @@
-<?php
-declare( strict_types=1 );
-
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Baidu search engine submission handler.
  *
@@ -9,6 +7,8 @@ declare( strict_types=1 );
  *
  * @package Lerm\SEO
  */
+declare( strict_types=1 );
+
 namespace Lerm\SEO;
 
 use Lerm\Traits\Singleton;
@@ -22,10 +22,10 @@ final class BaiduSubmit {
 	 * @var array Default settings including submission URL, token, and throttle interval.
 	 */
 	protected static array $args = array(
-		'baidu_submit'     => false,
-		'submit_url'       => '',
-		'submit_token'     => '',
-		'submit_interval'  => 300,
+		'baidu_submit'    => false,
+		'submit_url'      => '',
+		'submit_token'    => '',
+		'submit_interval' => 300,
 	);
 
 	/**
@@ -45,8 +45,8 @@ final class BaiduSubmit {
 	 */
 	public function hooks(): void {
 		if ( ! empty( self::$args['baidu_submit'] ) ) {
-			add_action( 'publish_post',         array( __CLASS__, 'on_publish' ) );
-			add_action( 'publish_future_post',  array( __CLASS__, 'on_publish' ) );
+			add_action( 'publish_post', array( __CLASS__, 'on_publish' ) );
+			add_action( 'publish_future_post', array( __CLASS__, 'on_publish' ) );
 		}
 	}
 
@@ -113,8 +113,8 @@ final class BaiduSubmit {
 		$response = wp_remote_post(
 			$api,
 			array(
-				'headers' => array( 'Content-Type' => 'text/plain' ),
-				'body'    => $url,
+				'headers'  => array( 'Content-Type' => 'text/plain' ),
+				'body'     => $url,
 				'timeout'  => 5,
 				'blocking' => false, // Non-blocking: don't wait for response to avoid affecting publish speed
 			)

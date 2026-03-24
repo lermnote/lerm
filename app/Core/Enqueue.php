@@ -39,8 +39,7 @@ class Enqueue {
 		'share'     => 'assets/js/social-share.min.js',
 		'qrcode'    => 'assets/js/qrcode.min.js',
 		'highlight' => 'assets/js/highlight.pack.js',
-		'wow'       => 'assets/js/wow.min.js',
-		
+
 		'main-js'   => 'assets/dist/bundle.js',
 	);
 

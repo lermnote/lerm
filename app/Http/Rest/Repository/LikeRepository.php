@@ -1,7 +1,8 @@
-<?php
+<?php  // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Repository;
+
 use Lerm\Infrastructure\CacheRepository;
 /**
  * 点赞数据层
@@ -16,16 +17,20 @@ use Lerm\Infrastructure\CacheRepository;
  */
 final class LikeRepository {
 
-	const META_COUNT  = '_lerm_like_count';
-	const META_USERS  = '_lerm_like_users';
+	const META_COUNT = '_lerm_like_count';
+	const META_USERS = '_lerm_like_users';
 
 	// -------------------------------------------------------------------------
 	// 查询
 	// -------------------------------------------------------------------------
 
 	public static function get_count( int $post_id ): int {
-			return (int) CacheRepository::remember( CacheRepository::GROUP_LIKES, "count_{$post_id}", 5 * MINUTE_IN_SECONDS, fn() => (int) get_post_meta( $post_id, self::META_COUNT, true )
-		);
+			return (int) CacheRepository::remember(
+				CacheRepository::GROUP_LIKES,
+				"count_{$post_id}",
+				5 * MINUTE_IN_SECONDS,
+				fn() => (int) get_post_meta( $post_id, self::META_COUNT, true )
+			);
 	}
 
 	public static function has_liked( int $post_id, string $user_id ): bool {
@@ -35,14 +40,14 @@ final class LikeRepository {
 	/** @return string[] */
 	public static function get_users( int $post_id ): array {
 			$result = CacheRepository::remember(
-			CacheRepository::GROUP_LIKES,
-			"users_{$post_id}",
-			5 * MINUTE_IN_SECONDS,
-			static function () use ( $post_id ) {
-				$raw = get_post_meta( $post_id, LikeRepository::META_USERS, true );
-				return is_array( $raw ) ? $raw : [];
-			}
-		);
+				CacheRepository::GROUP_LIKES,
+				"users_{$post_id}",
+				5 * MINUTE_IN_SECONDS,
+				static function () use ( $post_id ) {
+					$raw = get_post_meta( $post_id, LikeRepository::META_USERS, true );
+					return is_array( $raw ) ? $raw : array();
+				}
+			);
 		return (array) $result;
 	}
 
@@ -69,7 +74,10 @@ final class LikeRepository {
 		CacheRepository::delete( CacheRepository::GROUP_LIKES, "count_{$post_id}" );
 		CacheRepository::delete( CacheRepository::GROUP_LIKES, "users_{$post_id}" );
 
-		return [ 'liked' => ! $liked, 'count' => max( 0, $count ) ];
+		return array(
+			'liked' => ! $liked,
+			'count' => max( 0, $count ),
+		);
 	}
 
 	// -------------------------------------------------------------------------
@@ -81,23 +89,29 @@ final class LikeRepository {
 		if ( '' === get_post_meta( $post_id, self::META_COUNT, true ) ) {
 			add_post_meta( $post_id, self::META_COUNT, 0, true );
 		}
-		$wpdb->query( $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta}
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta}
 			 SET meta_value = GREATEST(0, CAST(meta_value AS SIGNED) + 1)
 			 WHERE post_id = %d AND meta_key = %s",
-			$post_id, self::META_COUNT
-		) );
+				$post_id,
+				self::META_COUNT
+			)
+		);
 		return (int) get_post_meta( $post_id, self::META_COUNT, true );
 	}
 
 	private static function decrement( int $post_id ): int {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta}
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta}
 			 SET meta_value = GREATEST(0, CAST(meta_value AS SIGNED) - 1)
 			 WHERE post_id = %d AND meta_key = %s",
-			$post_id, self::META_COUNT
-		) );
+				$post_id,
+				self::META_COUNT
+			)
+		);
 		return (int) get_post_meta( $post_id, self::META_COUNT, true );
 	}
 }

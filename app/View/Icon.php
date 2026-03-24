@@ -212,4 +212,3 @@ if ( ! function_exists( 'lerm_social_icons' ) ) {
 		echo wp_kses_post( $output );
 	}
 }
-

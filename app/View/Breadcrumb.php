@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Breadcrumb navigation.
  *
@@ -57,15 +57,18 @@ class Breadcrumb {
 	 * Set default labels.
 	 */
 	protected static function set_labels(): void {
-		$defaults = array(
+		$defaults     = array(
 			'browse'         => esc_html__( 'Browse:', 'lerm' ),
 			'aria_label'     => esc_attr_x( 'breadcrumb', 'breadcrumbs aria label', 'lerm' ),
 			'home'           => esc_html__( 'Home', 'lerm' ),
 			'post'           => esc_html__( 'Article', 'lerm' ),
 			'error_404'      => esc_html__( '404 Not Found', 'lerm' ),
 			'archives'       => esc_html__( 'Archives', 'lerm' ),
+			/* translators: %s is the search query */
 			'search'         => esc_html__( 'Search results for: %s', 'lerm' ),
+			/* translators: %s is the page number */
 			'paged'          => esc_html__( 'Page %s', 'lerm' ),
+			/* translators: %s is the comment page number */
 			'paged_comments' => esc_html__( 'Comment Page %s', 'lerm' ),
 			'archive_day'    => '%s',
 			'archive_month'  => '%s',
@@ -108,7 +111,7 @@ class Breadcrumb {
 			// Add item classes and attributes.
 			$item_class = 'breadcrumb-item' . ( $item_count === $item_position ? ' active' : '' );
 			$attributes = 'itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="' . esc_attr( $item_class ) . '"';
-			$meta = sprintf( '<meta itemprop="position" content="%s" />', absint( $item_position ) );
+			$meta       = sprintf( '<meta itemprop="position" content="%s" />', absint( $item_position ) );
 
 			// Build list item.
 			$breadcrumb .= sprintf( '<%1$s %2$s>%3$s%4$s</%1$s>', tag_escape( self::$args['item_tag'] ), $attributes, $item, $meta );
@@ -140,7 +143,7 @@ class Breadcrumb {
 	 * Set post taxonomy mapping.
 	 */
 	private static function set_post_taxonomy(): void {
-		$defaults = array( 'post' => 'category' );
+		$defaults            = array( 'post' => 'category' );
 		self::$post_taxonomy = (array) apply_filters( 'lerm_breadcrumb_post_taxonomy', wp_parse_args( self::$args['post_taxonomy'], $defaults ) );
 	}
 
@@ -508,4 +511,3 @@ class Breadcrumb {
 		}
 	}
 }
-

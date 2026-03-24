@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
@@ -38,16 +38,16 @@ final class PostsController {
 		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
 
 		if ( ! post_type_exists( $post_type ) ) {
-			return new WP_Error( 'invalid_post_type', __( '无效的文章类型', 'lerm' ), [ 'status' => 400 ] );
+			return new WP_Error( 'invalid_post_type', __( '无效的文章类型', 'lerm' ), array( 'status' => 400 ) );
 		}
 
-		$args = [
+		$args = array(
 			'post_type'           => $post_type,
 			'post_status'         => 'publish',
 			'posts_per_page'      => $per_page,
 			'paged'               => $page,
 			'ignore_sticky_posts' => true,
-		];
+		);
 
 		if ( $category > 0 ) {
 			$args['cat'] = $category;
@@ -70,13 +70,13 @@ final class PostsController {
 		}
 
 		$response = new WP_REST_Response(
-			[
+			array(
 				'items'       => $items,
 				'total'       => (int) $query->found_posts,
 				'total_pages' => (int) $query->max_num_pages,
 				'page'        => $page,
 				'has_more'    => $page < $query->max_num_pages,
-			],
+			),
 			200
 		);
 
@@ -98,7 +98,7 @@ final class PostsController {
 		while ( $query->have_posts() ) {
 			$query->the_post();
 			// 优先使用主题模板，否则降级为内联输出
-			$template = locate_template( [ 'template-parts/content.php', 'template-parts/content-post.php' ] );
+			$template = locate_template( array( 'template-parts/content.php', 'template-parts/content-post.php' ) );
 			if ( $template ) {
 				load_template( $template, false );
 			} else {
@@ -125,12 +125,12 @@ final class PostsController {
 	 * @param \WP_Post[]|int[] $posts
 	 */
 	private static function format_json( array $posts ): array {
-		$items = [];
+		$items = array();
 		foreach ( $posts as $post ) {
 			$post    = get_post( $post );
 			$post_id = (int) $post->ID;
 
-			$items[] = [
+			$items[] = array(
 				'id'        => $post_id,
 				'title'     => esc_html( get_the_title( $post_id ) ),
 				'excerpt'   => esc_html( wp_trim_words( get_the_excerpt( $post ), 30 ) ),
@@ -138,7 +138,7 @@ final class PostsController {
 				'thumbnail' => esc_url( (string) get_the_post_thumbnail_url( $post_id, 'home-thumb' ) ),
 				'date'      => get_the_date( 'c', $post_id ),
 				'author'    => esc_html( get_the_author_meta( 'display_name', $post->post_author ) ),
-			];
+			);
 		}
 		return $items;
 	}

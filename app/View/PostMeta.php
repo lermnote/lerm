@@ -14,8 +14,8 @@ namespace Lerm\View;
 
 use Lerm\Traits\Singleton;
 
-class Tags
-{
+class Tags {
+
 	use Singleton;
 
 	/**
@@ -33,37 +33,36 @@ class Tags
 	 *
 	 * @param array $params Optional parameters.
 	 */
-	public function __construct(array $params = array())
-	{
-		self::$args = (array) apply_filters('lerm_tags_args', wp_parse_args($params, self::$args));
+	public function __construct( array $params = array() ) {
+		self::$args = (array) apply_filters( 'lerm_tags_args', wp_parse_args( $params, self::$args ) );
 	}
 
 	/**
 	 * Output post metadata list.
 	 *
 	 * @param array $metas Metadata to display.
+	 * @param string $css_class Optional CSS classes to add.
 	 * @return void
 	 */
-	public static function post_meta(array $metas = array(), string $class = ''): void
-	{
-		$post_meta = (array) apply_filters('post_meta_show_on_post', $metas);
+	public static function post_meta( array $metas = array(), string $css_class = '' ): void {
+		$post_meta = (array) apply_filters( 'post_meta_show_on_post', $metas );
 
 		// if nothing to show or explicitly disabled, return early
-		if (empty($post_meta) || 'disabled' === ($post_meta[0] ?? '')) {
+		if ( empty( $post_meta ) || 'disabled' === ( $post_meta[0] ?? '' ) ) {
 			return;
 		}
 
-		$classes = trim('list-unstyled d-flex entry-meta small text-muted ' . (string) self::$args['class'] . ' ' . $class);
+		$classes = trim( 'list-unstyled d-flex entry-meta small text-muted ' . (string) self::$args['class'] . ' ' . $css_class );
 
-		echo '<ul class="' . esc_attr($classes) . '">';
+		echo '<ul class="' . esc_attr( $classes ) . '">';
 
-			foreach ($post_meta as $item) {
-				if (is_string($item) && is_callable(array(__CLASS__, $item))) {
-					echo '<li class="meta-item">';
-					call_user_func(array(__CLASS__, $item));
-					echo '</li>';
-				}
+		foreach ( $post_meta as $item ) {
+			if ( is_string( $item ) && is_callable( array( __CLASS__, $item ) ) ) {
+				echo '<li class="meta-item">';
+				call_user_func( array( __CLASS__, $item ) );
+				echo '</li>';
 			}
+		}
 
 		echo '</ul>';
 	}
@@ -73,20 +72,19 @@ class Tags
 	 *
 	 * @return void
 	 */
-	public static function format(): void
-	{
+	public static function format(): void {
 		$format = get_post_format();
-		if ($format && current_theme_supports('post-formats', $format)) {
-			$format_link = get_post_format_link($format);
-			$format_name = get_post_format_string($format);
-?>
+		if ( $format && current_theme_supports( 'post-formats', $format ) ) {
+			$format_link = get_post_format_link( $format );
+			$format_name = get_post_format_string( $format );
+			?>
 			<span>
-				<span class="screen-reader-text"><?php esc_html_e('Format', 'lerm'); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Format', 'lerm' ); ?></span>
 			</span>
 			<span class="meta-text">
-				<a href="<?php echo esc_url($format_link); ?>" class="entry-format-link"><?php echo esc_html($format_name); ?></a>
+				<a href="<?php echo esc_url( $format_link ); ?>" class="entry-format-link"><?php echo esc_html( $format_name ); ?></a>
 			</span>
-		<?php
+			<?php
 		}
 	}
 
@@ -95,16 +93,15 @@ class Tags
 	 *
 	 * @return void
 	 */
-	public static function author(): void
-	{
-		$author_id   = get_the_author_meta('ID');
-		$author_name = get_the_author_meta('display_name');
-		$author_url  = get_author_posts_url($author_id);
+	public static function author(): void {
+		$author_id   = get_the_author_meta( 'ID' );
+		$author_name = get_the_author_meta( 'display_name' );
+		$author_url  = get_author_posts_url( $author_id );
 
-		$author_link = '<a href="' . esc_url($author_url) . '">' . esc_html($author_name) . '</a>';
+		$author_link = '<a href="' . esc_url( $author_url ) . '">' . esc_html( $author_name ) . '</a>';
 		?>
 		<span class="meta-icon">
-			<span class="screen-reader-text"><?php esc_html_e('Post author', 'lerm'); ?></span>
+			<span class="screen-reader-text"><?php esc_html_e( 'Post author', 'lerm' ); ?></span>
 			<i class="li li-user pe-1"></i>
 		</span>
 		<span class="meta-text">
@@ -113,7 +110,7 @@ class Tags
 			// Allow the anchor tag while escaping everything else.
 			echo wp_kses(
 				/* translators: %s: Author link */
-				sprintf(__('By %s', 'lerm'), $author_link),
+				sprintf( __( 'By %s', 'lerm' ), $author_link ),
 				array(
 					'a'    => array(
 						'href'  => array(),
@@ -128,7 +125,7 @@ class Tags
 			);
 			?>
 		</span>
-	<?php
+		<?php
 	}
 
 	/**
@@ -136,15 +133,14 @@ class Tags
 	 *
 	 * @return void
 	 */
-	public static function publish_date(): void
-	{
+	public static function publish_date(): void {
 		$permalink = get_permalink();
 		$date      = get_the_date(); // returns formatted date
-	?>
+		?>
 		<span>
 			<i class="li li-calendar pe-1"></i>
-			<a href="<?php echo esc_url($permalink); ?>">
-				<?php echo esc_html($date); ?>
+			<a href="<?php echo esc_url( $permalink ); ?>">
+				<?php echo esc_html( $date ); ?>
 			</a>
 		</span>
 		<?php
@@ -155,19 +151,18 @@ class Tags
 	 *
 	 * @return void
 	 */
-	public static function categories(): void
-	{
-		$categories = get_the_category_list(', ');
-		if ($categories) {
-		?>
+	public static function categories(): void {
+		$categories = get_the_category_list( ', ' );
+		if ( $categories ) {
+			?>
 			<span class="meta-icon">
-				<span class="screen-reader-text"><?php esc_html_e('Categories', 'lerm'); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Categories', 'lerm' ); ?></span>
 				<i class="li li-hdd pe-1"></i>
 			</span>
 			<span class="meta-text">
-				<?php echo wp_kses_post($categories); ?>
+				<?php echo wp_kses_post( $categories ); ?>
 			</span>
-		<?php
+			<?php
 		}
 	}
 
@@ -178,33 +173,32 @@ class Tags
 	 *
 	 * @return void
 	 */
-	public static function read(): void
-	{
+	public static function read(): void {
 		global $post;
 
-		if (empty($post->ID)) {
+		if ( empty( $post->ID ) ) {
 			return;
 		}
 
 		$post_ID       = (int) $post->ID;
 		$transient_key = 'pageviews_' . $post_ID;
-		$views         = get_transient($transient_key);
+		$views         = get_transient( $transient_key );
 
-		if (false === $views) {
-			$views = (int) get_post_meta($post_ID, 'pageviews', true);
-			$views = max(0, $views);
+		if ( false === $views ) {
+			$views = (int) get_post_meta( $post_ID, 'pageviews', true );
+			$views = max( 0, $views );
 			// cache for 1 hour (adjust as needed)
-			set_transient($transient_key, $views, HOUR_IN_SECONDS);
+			set_transient( $transient_key, $views, HOUR_IN_SECONDS );
 		}
 
-		$formatted_views = number_format_i18n($views);
+		$formatted_views = number_format_i18n( $views );
 
 		// show only when we have a number (can be 0)
-		if ('' !== $formatted_views) {
-		?>
+		if ( '' !== $formatted_views ) {
+			?>
 			<i class="li li-eye pe-1"></i>
-			<span><?php echo esc_html($formatted_views); ?></span>
-		<?php
+			<span><?php echo esc_html( $formatted_views ); ?></span>
+			<?php
 		}
 	}
 
@@ -213,21 +207,20 @@ class Tags
 	 *
 	 * @return void
 	 */
-	public static function responses(): void
-	{
-		if (post_password_required()) {
+	public static function responses(): void {
+		if ( post_password_required() ) {
 			return;
 		}
 
-		if (comments_open() || get_comments_number()) {
+		if ( comments_open() || get_comments_number() ) {
 			$comments_link   = get_comments_link();
-			$comments_number = get_comments_number_text(esc_attr(get_comments_number()));
-		?>
-			<a href="<?php echo esc_url($comments_link); ?>">
+			$comments_number = get_comments_number_text( esc_attr( get_comments_number() ) );
+			?>
+			<a href="<?php echo esc_url( $comments_link ); ?>">
 				<i class="li li-comment pe-1"></i>
-				<?php echo esc_html($comments_number); ?>
+				<?php echo esc_html( $comments_number ); ?>
 			</a>
-<?php
+			<?php
 		}
 	}
 
@@ -236,12 +229,11 @@ class Tags
 	 *
 	 * @return void
 	 */
-	public static function edit_link(): void
-	{
+	public static function edit_link(): void {
 		edit_post_link(
 			sprintf(
 				/* translators: %s: Name of current post */
-				esc_html__('Edit<span class="screen-reader-text"> "%s"</span>', 'lerm'),
+				esc_html__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'lerm' ),
 				get_the_title()
 			),
 			'<span class="edit-link meta-item"><i class="li li-edit pe-1 ps-2"></i>',

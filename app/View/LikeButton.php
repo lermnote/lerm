@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\View;
@@ -55,15 +55,17 @@ final class LikeButton {
 		$like_count = LikeRepository::get_count( $id );
 		$type       = $is_comment ? 'comment' : 'post';
 
-		$classes = array_filter( array(
-			'like-button',
-			"like-{$type}-{$id}",   // 供 JS 批量更新同一文章的多个按钮
-			$args['class'],
-			$liked ? 'btn-outline-danger' : 'btn-outline-secondary',
-		) );
+		$classes = array_filter(
+			array(
+				'like-button',
+				"like-{$type}-{$id}",   // 供 JS 批量更新同一文章的多个按钮
+				$args['class'],
+				$liked ? 'btn-outline-danger' : 'btn-outline-secondary',
+			)
+		);
 
-		$label  = $liked ? __( 'Unlike', 'lerm' ) : __( 'Like', 'lerm' );
-		$nonce  = wp_create_nonce( 'wp_rest' );
+		$label = $liked ? __( 'Unlike', 'lerm' ) : __( 'Like', 'lerm' );
+		$nonce = wp_create_nonce( 'wp_rest' );
 
 		$button = sprintf(
 			'<button type="button" class="%1$s" aria-pressed="%2$s" aria-label="%3$s" title="%3$s" data-id="%4$d" data-type="%5$s" data-nonce="%6$s">'

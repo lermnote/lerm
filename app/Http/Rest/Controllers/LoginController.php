@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
@@ -28,8 +28,8 @@ use Lerm\Support\Utilities;
  */
 final class LoginController {
 
-	private const MAX_ATTEMPTS  = 5;
-	private const LOCKOUT_MINS  = 5;
+	private const MAX_ATTEMPTS = 5;
+	private const LOCKOUT_MINS = 5;
 
 	// -------------------------------------------------------------------------
 	// 路由入口

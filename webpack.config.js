@@ -32,7 +32,7 @@ module.exports = {
               ['@babel/preset-env', {
                 targets:      '> 0.5%, last 2 versions, not dead',
                 useBuiltIns:  'usage',   // 只注入用到的 polyfill
-                corejs:       3,
+                corejs:       { version: 3, proposals: true },
               }],
             ],
             // 缓存提升二次构建速度

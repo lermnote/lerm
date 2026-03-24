@@ -27,7 +27,7 @@ trait Singleton {
 	 * @param mixed ...$args Optional constructor args.
 	 */
 	protected function __construct( ...$args ) {
-		// Intentionally empty â€?concrete class should handle its own initialization.
+		// Intentionally empty ï¿½?concrete class should handle its own initialization.
 	}
 
 	/**
@@ -68,4 +68,3 @@ trait Singleton {
 		return $instance;
 	}
 }
-

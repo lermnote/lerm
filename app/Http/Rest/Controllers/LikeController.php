@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
@@ -42,14 +42,14 @@ final class LikeController {
 		}
 
 		$user_id = get_like_user_id();
-		$liked    = LikeRepository::has_liked( $post_id, $user_id );
+		$liked   = LikeRepository::has_liked( $post_id, $user_id );
 
 		return new WP_REST_Response(
-			[
+			array(
 				'count'  => LikeRepository::get_count( $post_id ),
 				'liked'  => $liked,
 				'status' => $liked ? 'liked' : 'unliked',
-			],
+			),
 			200
 		);
 	}

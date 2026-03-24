@@ -32,7 +32,7 @@ get_header();
                 class="card-img-top rounded bg-success" alt=" " style="min-height: 176px; height: 176px;">
             <div class="card-body">
                 <div class="d-flex gap-3 align-items-start" aria-current="true">
-                    <figure class="figure" class="rounded" style="margin-top:-5rem; cursor: pointer;">
+                    <figure class="figure rounded" style="margin-top:-5rem; cursor: pointer;">
                         <?php echo get_avatar($user_id, 128); ?>
                     </figure>
                     <div>

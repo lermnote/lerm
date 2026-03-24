@@ -42,7 +42,8 @@ final class Optimizer {
 	}
 
 	/**
-	 * 注册所需�?Hook �?Filter�?	 *
+	 * Register hooks based on the configuration.
+	 *
 	 * @param array<string, mixed> $config
 	 *
 	 * @return void
@@ -59,7 +60,7 @@ final class Optimizer {
 			self::filter( 'avatar_defaults', array( __CLASS__, 'add_cravatar_default' ), 100, 1 );
 		}
 
-		// admin 静态资源加速（输出缓冲替换�?		if ( $config['admin_accel'] ) {
+		if ( $config['admin_accel'] ) {
 			self::action( 'init', array( __CLASS__, 'replace_admin_static_urls' ), 100, 1 );
 			self::action( 'shutdown', array( __CLASS__, 'flush_output_buffer' ), 100, 1 );
 		}
@@ -75,15 +76,17 @@ final class Optimizer {
 			self::action( 'pre_ping', array( __CLASS__, 'filter_out_self_pings' ) );
 		}
 
-		// 超级优化�?		if ( is_array( $config['super_optimize'] ) && ! empty( $config['super_optimize'] ) ) {
+		// 超级优化�?
+		if ( is_array( $config['super_optimize'] ) && ! empty( $config['super_optimize'] ) ) {
 			self::apply_optimizations( $config['super_optimize'] );
 		}
 
-		// 清理菜单属�?		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), array( __CLASS__, 'filter_menu_css_classes' ), 100, 1 );
+		// 清理菜单属�?
+		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), array( __CLASS__, 'filter_menu_css_classes' ), 100, 1 );
 	}
 
 	/**
-	 * 根据选项移除不需要的 head / 内置功能�?	 *
+	 * 根据选项移除不需要的 head / 内置功能�?  *
 	 * @param array<int, string> $flags
 	 *
 	 * @return void
@@ -148,7 +151,7 @@ final class Optimizer {
 	}
 
 	/* -----------------------------
-	 * 下列为具体实现方法（snake_case 命名�?	 * ----------------------------*/
+	 * 下列为具体实现方法（snake_case 命名�?     * ----------------------------*/
 
 	public static function disable_emojis(): void {
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
@@ -207,7 +210,7 @@ final class Optimizer {
 	}
 
 	/**
-	 * 当被用作 rest_authentication_errors 过滤器时，返�?WP_Error 以阻止未授权访问�?	 *
+	 * 当被用作 rest_authentication_errors 过滤器时，返�?WP_Error 以阻止未授权访问�?   *
 	 * @return \WP_Error
 	 */
 	public static function rest_authorization_error(): \WP_Error {
@@ -281,7 +284,7 @@ final class Optimizer {
 	}
 
 	/**
-	 * 启动输出缓冲并在回调中执行替换�?	 *
+	 * 启动输出缓冲并在回调中执行替换�?     *
 	 * @param string $callback either 'preg_replace' or 'str_replace' etc.
 	 * @param mixed  $pattern
 	 * @param mixed  $replace
@@ -302,4 +305,3 @@ final class Optimizer {
 		}
 	}
 }
-

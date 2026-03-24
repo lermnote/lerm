@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Handles the theme's login page.
  *
@@ -11,7 +11,6 @@ function lerm_login_style() {
 	$resolution = '1920x1080';
 	$image_url  = '';
 
-	
 	$data = wp_cache_get( 'lerm_login_background' );
 	if ( false === $data ) {
 		$request = wp_remote_get( $url );
@@ -20,7 +19,7 @@ function lerm_login_style() {
 			wp_cache_set( 'lerm_login_background', $data, '', HOUR_IN_SECONDS );
 		}
 	}
- 
+
 	if ( $data ) {
 		$json = json_decode( trim( $data ), true );
 		if ( $json && ! empty( $json['images'] ) ) {

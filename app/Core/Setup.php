@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 /**
  * Lerm theme setup
  *
@@ -58,7 +58,6 @@ class Setup {
 		add_filter( 'excerpt_length', array( __CLASS__, 'excerpt_length' ), 999 );
 		add_filter( 'excerpt_more', array( __CLASS__, 'excerpt_more' ), 999 );
 		add_filter( 'the_content', array( __CLASS__, 'remove_empty_p' ), 20 );
-
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_sidebar' ) );
 
@@ -210,4 +209,3 @@ class Setup {
 		return $args;
 	}
 }
-

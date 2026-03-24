@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest;
@@ -37,7 +37,7 @@ final class Middleware {
 			return new WP_Error(
 				'rate_limited',
 				__( '请求过于频繁，请稍后再试', 'lerm' ),
-				[ 'status' => 429 ]
+				array( 'status' => 429 )
 			);
 		}
 
@@ -70,7 +70,7 @@ final class Middleware {
 			return new WP_Error(
 				'invalid_nonce',
 				__( '安全验证失败，请刷新页面后重试', 'lerm' ),
-				[ 'status' => 403 ]
+				array( 'status' => 403 )
 			);
 		}
 
@@ -87,7 +87,7 @@ final class Middleware {
 			return new WP_Error(
 				'unauthorized',
 				__( '请先登录', 'lerm' ),
-				[ 'status' => 401 ]
+				array( 'status' => 401 )
 			);
 		}
 		return true;
@@ -103,7 +103,7 @@ final class Middleware {
 			return new WP_Error(
 				'forbidden',
 				__( '权限不足', 'lerm' ),
-				[ 'status' => 403 ]
+				array( 'status' => 403 )
 			);
 		}
 		return true;
@@ -121,7 +121,7 @@ final class Middleware {
 			return new WP_Error(
 				'post_not_found',
 				__( '文章不存在', 'lerm' ),
-				[ 'status' => 404 ]
+				array( 'status' => 404 )
 			);
 		}
 

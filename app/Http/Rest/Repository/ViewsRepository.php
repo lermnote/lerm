@@ -1,7 +1,8 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName
 declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Repository;
+
 use Lerm\Infrastructure\CacheRepository;
 /**
  * 浏览数数据层
@@ -30,14 +31,20 @@ final class ViewsRepository {
 		$dedup_key = 'lerm_vw_' . md5( $post_id . $visitor_key );
 
 		if ( get_transient( $dedup_key ) ) {
-			return [ 'count' => self::get_count( $post_id ), 'recorded' => false ];
+			return array(
+				'count'    => self::get_count( $post_id ),
+				'recorded' => false,
+			);
 		}
 
 		set_transient( $dedup_key, 1, self::DEDUP_WINDOW );
 		$count = self::increment( $post_id );
 		CacheRepository::delete( CacheRepository::GROUP_VIEWS, "count_{$post_id}" );
 
-		return [ 'count' => $count, 'recorded' => true ];
+		return array(
+			'count'    => $count,
+			'recorded' => true,
+		);
 	}
 
 	public static function increment( int $post_id ): int {
@@ -45,12 +52,15 @@ final class ViewsRepository {
 		if ( '' === get_post_meta( $post_id, self::META_COUNT, true ) ) {
 			add_post_meta( $post_id, self::META_COUNT, 0, true );
 		}
-		$wpdb->query( $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta}
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta}
 			 SET meta_value = GREATEST(0, CAST(meta_value AS SIGNED) + 1)
 			 WHERE post_id = %d AND meta_key = %s",
-			$post_id, self::META_COUNT
-		) );
+				$post_id,
+				self::META_COUNT
+			)
+		);
 		return (int) get_post_meta( $post_id, self::META_COUNT, true );
 	}
 }

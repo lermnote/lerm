@@ -103,4 +103,3 @@ if ( ! function_exists( 'csf_wp_editor_api' ) ) {
 		return version_compare( $wp_version, '4.8', '>=' );
 	}
 }
-

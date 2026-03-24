@@ -1,6 +1,4 @@
 <?php // phpcs:disable WordPress.Files.FileName
-declare( strict_types=1 );
-
 /**
  * WordPress sitemap configuration and customization.
  *
@@ -9,6 +7,8 @@ declare( strict_types=1 );
  *
  * @package Lerm
  */
+declare( strict_types=1 );
+
 namespace Lerm\SEO;
 
 use Lerm\Traits\Singleton;
@@ -140,7 +140,7 @@ class Sitemap {
 		}
 
 		if ( ! empty( $exclude ) ) {
-			$existing            = isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array();
+			$existing             = isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array();
 			$args['post__not_in'] = array_unique( array_merge( $existing, $exclude ) );
 		}
 
