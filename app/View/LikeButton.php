@@ -4,7 +4,7 @@ declare( strict_types=1 );
 namespace Lerm\View;
 
 use Lerm\Http\Rest\Repository\LikeRepository;
-use Lerm\Support\Utilities;
+use function Lerm\Support\get_like_user_id;
 
 /**
  * 点赞按钮视图助手
@@ -50,7 +50,7 @@ final class LikeButton {
 			)
 		);
 
-		$user_id    = Utilities::get_like_user_id();
+		$user_id    = get_like_user_id();
 		$liked      = LikeRepository::has_liked( $id, $user_id );
 		$like_count = LikeRepository::get_count( $id );
 		$type       = $is_comment ? 'comment' : 'post';
@@ -68,10 +68,10 @@ final class LikeButton {
 		$nonce = wp_create_nonce( 'wp_rest' );
 
 		$button = sprintf(
-			'<button type="button" class="%1$s" aria-pressed="%2$s" aria-label="%3$s" title="%3$s" data-id="%4$d" data-type="%5$s" data-nonce="%6$s">'
-			. '<i class="li li-heart" aria-hidden="true"></i>'
-			. '<span class="count-wrap">%7$s</span>'
-			. '</button>',
+			'<a type="button" class="%1$s" aria-pressed="%2$s" aria-label="%3$s" title="%3$s" data-id="%4$d" data-type="%5$s" data-nonce="%6$s">'
+			. '<i class="fa fa-heart" aria-hidden="true"></i>'
+			. ' <span class="count-wrap">%7$s</span>'
+			. '</a>',
 			esc_attr( implode( ' ', $classes ) ),
 			$liked ? 'true' : 'false',
 			esc_attr( $label ),

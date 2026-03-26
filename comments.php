@@ -13,16 +13,21 @@ global $post_id;
 if ( post_password_required() ) {
 	return;
 }
+
 use Lerm\Core\CommentWalker;
+
 ?>
 <div id="comments" class="comments">
 	<?php if ( comments_open() || pings_open() ) : ?>
 		<?php
 		$commenter = wp_get_current_commenter();
 		sanitize_comment_cookies();
-		$comment_author       = $commenter ['comment_author'];
-		$comment_author_email = $commenter ['comment_author_email'];
-		$comment_author_url   = $commenter ['comment_author_url'];
+
+		// Sanitize and validate commenter data
+		$comment_author       = sanitize_text_field( $commenter['comment_author'] ?? '' );
+		$comment_author_email = sanitize_email( $commenter['comment_author_email'] ?? '' );
+		$comment_author_url   = esc_url_raw( $commenter['comment_author_url'] ?? '' );
+		$commenter_identity   = $commenter['comment_author'] ?? '';
 
 		$args = array(
 			'comment_notes_before' => '<p class="logged-in-as">' . sprintf(
@@ -33,7 +38,7 @@ use Lerm\Core\CommentWalker;
 			) . '</p>',
 
 			'comment_field'        => '<fieldset class="form-group mb-2">
-			<textarea id="comment" class="rq form-control mb-1"  required="required" placeholder="留下评论，天下太平" name="comment"></textarea>',
+			<textarea id="comment" class="rq form-control mb-1" required="required" placeholder="留下评论，天下太平" name="comment" aria-label="评论内容" rows="4"></textarea>',
 
 			'fields'               => array(
 				'author' => '<div class="form-group input-form"><label class="visually-hidden-focusable" for="author">Username</label><div class="input-group mb-1"><span class="input-group-text"><i class="li li-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . __( 'Nickname', 'lerm' ) . '" required></div>',
@@ -47,8 +52,8 @@ use Lerm\Core\CommentWalker;
 				get_avatar( get_current_user_id(), 32 ),
 				get_edit_user_link(),
 				/* translators: %s: user name */
-				esc_html( sprintf( __( 'Logged in as %s. Edit your profile.', 'lerm' ), $user_identity ) ),
-				$user_identity,
+				esc_html( sprintf( __( 'Logged in as %s. Edit your profile.', 'lerm' ), $commenter_identity ) ),
+				$commenter_identity,
 				wp_logout_url( apply_filters( 'the_permalink', get_permalink() ) ),
 				__( 'Log out', 'lerm' )
 			) . '</p>',
@@ -75,27 +80,28 @@ use Lerm\Core\CommentWalker;
 	<?php if ( $comments ) : ?>
 		<?php get_template_part( 'template-parts/components/comment-pagination' ); ?>
 		<div class="card mb-3">
-		<h3 class="comment-title card-header border-bottom-0">
-			<?php
-			printf(
-				/* translators: 1: number of comments, 2: post title */
-				esc_html( _nx( '%1$s comment on &ldquo;%2$s&rdquo;', '%1$s comments on &ldquo;%2$s&rdquo;', get_comments_number(), 'comments title', 'lerm' ) ),
-				esc_html( number_format_i18n( get_comments_number() ) ),
-				esc_html( get_the_title() )
-			);
-			?>
-		</h3>
-		<ol class="comment-list p-0 m-0 list-group list-group-flush">
-			<?php
-			wp_list_comments(
-				array(
-					'walker'      => CommentWalker::instance(),
-					'short_ping'  => true,
-					'avatar_size' => wp_is_mobile() ? 32 : 48,
-				)
-			);
-			?>
-		</ol><!-- .comment-list -->
+			<h3 class="comment-title card-header border-bottom-0">
+				<?php
+				printf(
+					/* translators: 1: number of comments, 2: post title */
+					esc_html( _nx( '%1$s comment on &ldquo;%2$s&rdquo;', '%1$s comments on &ldquo;%2$s&rdquo;', get_comments_number(), 'comments title', 'lerm' ) ),
+					esc_html( number_format_i18n( get_comments_number() ) ),
+					esc_html( get_the_title() )
+				);
+				?>
+			</h3>
+			<ol class="comment-list p-0 m-0 list-group list-group-flush">
+				<?php
+					wp_list_comments(
+						array(
+							'walker'      => new CommentWalker(),
+							'style'       => 'ol',
+							'format'      => 'html5',
+							'avatar_size' => wp_is_mobile() ? 32 : 48,
+						)
+					);
+				?>
+			</ol><!-- .comment-list -->
 		</div>
 		<?php if ( ! comments_open() && get_comments_number() ) : ?>
 			<p class=" alert alert-info mb-3"><?php esc_html_e( 'Comments are closed.', 'lerm' ); ?></p>

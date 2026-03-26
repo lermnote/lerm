@@ -2,7 +2,6 @@
 /**
  * Utilities for Lerm theme improved and hardened.
  *
- * Namespace: Lerm\Helpers\Utilities
  *
  * NOTE: Keep compatibility with WordPress coding practices. Avoid strict_types
  * for broad compatibility with older WP installs.

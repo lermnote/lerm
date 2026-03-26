@@ -5,7 +5,7 @@
  * @package lerm
  * @since  3.5.0
  */
-use Lerm\Core\NavWalker;
+use Lerm\Core\Menu;
 if ( wp_is_mobile() ) {
 	$theme_location = 'mobile';
 } else {
@@ -34,10 +34,10 @@ if ( wp_is_mobile() ) {
 						'container'       => 'div',
 						'container_class' => 'primary-nav',
 						'container_id'    => 'navbar',
-						'fallback_cb'     => 'NavWalker::fallback',
+						'fallback_cb'     => 'Menu::fallback',
 						'menu_class'      => 'navbar-nav',
 						'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
-						'walker'          => new NavWalker(),
+						'walker'          => new Menu(),
 						'depth'           => 2,
 					)
 				);
@@ -63,7 +63,9 @@ if ( wp_is_mobile() ) {
 	</div>
 	<?php
 else :
-	if ( false === wp_cache_get( 'lerm_nav_menu' ) && has_nav_menu( $theme_location ) ) :
+	$found    = false;
+	$nav_menu = wp_cache_get( 'lerm_nav_menu', 'lerm_nav', false, $found );
+	if ( $found && has_nav_menu( $theme_location ) ) :
 		$nav_menu = wp_nav_menu(
 			array(
 				'theme_location'  => $theme_location,
@@ -72,13 +74,16 @@ else :
 				'container_id'    => 'navbar',
 				'menu_class'      => 'navbar-nav',
 				'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
-				'walker'          => new NavWalker(),
+				'walker'          => new Menu(),
 				'depth'           => 2,
+				'echo'            => false,
 			)
 		);
-		wp_cache_set( 'lerm_nav_menu', $nav_menu, '', HOUR_IN_SECONDS );
+		wp_cache_set( 'lerm_nav_menu', (string) $nav_menu, 'lerm_nav', HOUR_IN_SECONDS );
 	endif;
-
+	if ( $nav_menu ) :
+		echo $nav_menu; // phpcs:ignore WordPress.Security.EscapeOutput -- nav menu output is safe
+	endif;
 	if ( lerm_options( 'narbar_search' ) ) :
 		?>
 		<div class="d-none d-lg-block">

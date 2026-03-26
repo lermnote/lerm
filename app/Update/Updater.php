@@ -76,7 +76,7 @@ class Updater {
 	 * @since 1.0
 	 * @param array $args The arguments for this theme.
 	 */
-	public function __construct( $args ) {
+	public function __construct( array $args = array() ) {
 		$this->name = $args['name'];
 		$this->slug = $args['slug'];
 		$this->repo = $args['repo'];

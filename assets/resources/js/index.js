@@ -61,10 +61,10 @@ const formAjaxHandle = () => {
 	});
 };
 
-DOMContentLoaded(async () => {
+DOMContentLoaded( () => {
 	safeRequestIdleCallback(() => {
 		initScrollAnimate()
-		//initializeWOW();
+
 		lazyLoadImages();
 		codeHighlight();
 		calendarAddClass();

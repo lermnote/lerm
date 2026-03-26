@@ -30,7 +30,7 @@ class Enqueue {
 
 	private static $styles = array(
 		'main_style' => 'assets/dist/main.css',
-		'solarized'  => 'assets/css/solarized-dark.min.css',
+		'solarized'  => 'assets/resources/css/solarized-dark.min.css',
 	);
 
 	private static array $scripts = array(
@@ -55,6 +55,9 @@ class Enqueue {
 	public static function hooks() {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
+
+		// 告诉浏览器 bundle.js 是 ES Module
+		add_filter( 'script_loader_tag', array( __CLASS__, 'add_module_type' ), 10, 2 );
 	}
 
 	/**
@@ -137,5 +140,11 @@ class Enqueue {
 	private static function should_enqueue_social_share(): bool {
 		$should = is_singular( 'post' ) || is_page_template( 'templates/account.php' );
 		return (bool) apply_filters( 'lerm_enqueue_social_share', $should );
+	}
+	public static function add_module_type( string $tag, string $handle ): string {
+		if ( 'main-js' === $handle ) {
+			return str_replace( '<script ', '<script type="module" ', $tag );
+		}
+		return $tag;
 	}
 }

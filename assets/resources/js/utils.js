@@ -68,28 +68,26 @@ export const initScrollAnimate = () => {
   document.querySelectorAll('.loading-animate').forEach(el => observer.observe(el));
 };
 
-export const codeHighlight = async () => {
-   if (!blocks.length) return;
- 
-  const { default: hljs } = await import('highlight.js/lib/core');
-  const [js, php, bash, css, html, json] = await Promise.all([
-    import('highlight.js/lib/languages/javascript'),
-    import('highlight.js/lib/languages/php'),
-    import('highlight.js/lib/languages/bash'),
-    import('highlight.js/lib/languages/css'),
-    import('highlight.js/lib/languages/xml'),
-    import('highlight.js/lib/languages/json'),
-  ]);
- 
-  hljs.registerLanguage('javascript', js.default);
-  hljs.registerLanguage('php',        php.default);
-  hljs.registerLanguage('bash',       bash.default);
-  hljs.registerLanguage('css',        css.default);
-  hljs.registerLanguage('html',       html.default);
-  hljs.registerLanguage('xml',        html.default);
-  hljs.registerLanguage('json',       json.default);
- 
-  blocks.forEach(block => hljs.highlightElement(block));
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import php from 'highlight.js/lib/languages/php';
+import bash from 'highlight.js/lib/languages/bash';
+import css from 'highlight.js/lib/languages/css';
+import xml from 'highlight.js/lib/languages/xml';
+import json from 'highlight.js/lib/languages/json';
+
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('php', php);
+hljs.registerLanguage('bash', bash);
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('html', xml);
+hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('json', json);
+
+export const codeHighlight = () => {
+  document.querySelectorAll('pre code').forEach(block => {
+    hljs.highlightElement(block);
+  });
 };
 
 
@@ -135,9 +133,9 @@ export const navigationToggle = () => {
 
 // utils.js 新增
 const SHARE_URLS = {
-  twitter:  (url, title) => `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
-  facebook: (url)        => `https://www.facebook.com/sharer/sharer.php?u=${url}`,
-  weibo:    (url, title) => `https://service.weibo.com/share/share.php?url=${url}&title=${title}`,
+  twitter: (url, title) => `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+  facebook: (url) => `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+  weibo: (url, title) => `https://service.weibo.com/share/share.php?url=${url}&title=${title}`,
   telegram: (url, title) => `https://t.me/share/url?url=${url}&text=${title}`,
 };
 
@@ -147,7 +145,7 @@ export const initSocialShare = () => {
     const platform = el.dataset.share;
     const builder = SHARE_URLS[platform];
     if (!builder) return;
-    const url   = encodeURIComponent(el.dataset.url  || location.href);
+    const url = encodeURIComponent(el.dataset.url || location.href);
     const title = encodeURIComponent(el.dataset.title || document.title);
     window.open(builder(url, title), '_blank', 'width=600,height=400');
   });

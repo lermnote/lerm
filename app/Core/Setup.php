@@ -145,7 +145,7 @@ class Setup {
 	 * @return int New excerpt length.
 	 */
 	public static function excerpt_length( int $length ): int {
-		return (int) self::$args['excerpt_length'];
+		return (int) self::$args['excerpt_length'] ?? $length;
 	}
 
 	/**

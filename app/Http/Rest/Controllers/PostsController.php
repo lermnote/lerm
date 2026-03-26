@@ -26,6 +26,7 @@ final class PostsController {
 	 * 频率限制：每 IP 每分钟最多 60 次
 	 */
 	public static function handle( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+
 		$check = Middleware::rate_limit( 'posts_list', 60 );
 		if ( is_wp_error( $check ) ) {
 			return $check;

@@ -33,7 +33,7 @@ trait Singleton {
 	/**
 	 * Prevent cloning.
 	 */
-	final private function __clone() {}
+	private function __clone() {}
 
 	/**
 	 * Prevent unserialization.

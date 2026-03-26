@@ -5,7 +5,7 @@
  * @package Lerm
  */
 use Lerm\View\LikeButton;
-
+use function Lerm\View\lerm_social_icons;
 global $post;
 
 ?>
@@ -20,8 +20,8 @@ global $post;
 				array( 'class' => 'btn btn-sm' )
 			);
 			?>
-			<a href="<?php comments_link(); ?>"  class="btn btn-custom entry-comment-btn">
-				<i class="li li-comment"></i>
+			<a href="<?php comments_link(); ?>"  class="btn btn-custom btn-sm entry-comment-btn">
+				<i class="fa fa-comment"></i>
 					<?php
 					/* translators: %s = comment number */
 					printf( esc_html( _nx( '%s comment', '%s comments', get_comments_number(), 'comments title', 'lerm' ) ), esc_html( number_format_i18n( get_comments_number() ) ) );
@@ -29,5 +29,5 @@ global $post;
 			</a>
 		</div><!-- like -->
 	</div><!-- toolbar -->
-	<?php lerm_social_icons( lerm_options( 'social_share' ) ); ?>
+	<?php lerm_social_icons( array( 'social' => lerm_options( 'social_share' ) ) ); ?>
 </footer>

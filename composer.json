@@ -21,6 +21,7 @@
 		},
 		"files": [
 			"app/View/Layout.php",
+			"app/View/Icon.php",
 			"app/Support/Utilities.php"
 		]
 	},

@@ -74,9 +74,11 @@ final class LikeRepository {
 		CacheRepository::delete( CacheRepository::GROUP_LIKES, "count_{$post_id}" );
 		CacheRepository::delete( CacheRepository::GROUP_LIKES, "users_{$post_id}" );
 
+		$new_liked = ! $liked;
 		return array(
-			'liked' => ! $liked,
-			'count' => max( 0, $count ),
+			'liked'  => $new_liked,
+			'count'  => max( 0, $count ),
+			'status' => $new_liked ? 'liked' : 'unliked',
 		);
 	}
 
@@ -98,6 +100,8 @@ final class LikeRepository {
 				self::META_COUNT
 			)
 		);
+
+		wp_cache_delete( $post_id, 'post_meta' );
 		return (int) get_post_meta( $post_id, self::META_COUNT, true );
 	}
 
@@ -112,6 +116,8 @@ final class LikeRepository {
 				self::META_COUNT
 			)
 		);
+
+		wp_cache_delete( $post_id, 'post_meta' );
 		return (int) get_post_meta( $post_id, self::META_COUNT, true );
 	}
 }

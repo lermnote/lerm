@@ -31,7 +31,7 @@ final class Router {
 		// ── 点赞 ──────────────────────────────────────────────
 		register_rest_route(
 			$ns,
-			'/like/(?P<id>\d+)',
+			'/like',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,

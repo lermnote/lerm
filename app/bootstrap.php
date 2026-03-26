@@ -13,7 +13,6 @@ declare( strict_types=1 );
 use Lerm\Core\Setup;
 use Lerm\Core\Enqueue;
 use Lerm\Core\Customizer;
-use Lerm\Core\CommentWalker;
 use Lerm\Runtime\Optimizer;
 use Lerm\SEO\Manager as SeoManager;
 use Lerm\Mail\Smtp;
@@ -120,7 +119,6 @@ $login_options    = apply_filters( 'lerm_login_options', $login_options );
 // Core — 始终加载，无条件
 Setup::instance();
 Enqueue::instance();
-CommentWalker::instance();
 
 // Runtime 优化 — 有配置才启用
 if ( ! empty( $optimize_options ) ) {
