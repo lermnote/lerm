@@ -32,7 +32,7 @@ final class PostsController {
 			return $check;
 		}
 
-		$page      = absint( $request->get_param( 'page' ) );
+		$page      = absint( $request->get_param( 'paged' ) );
 		$per_page  = absint( $request->get_param( 'per_page' ) );
 		$category  = absint( $request->get_param( 'category' ) );
 		$tag       = absint( $request->get_param( 'tag' ) );
@@ -72,10 +72,10 @@ final class PostsController {
 
 		$response = new WP_REST_Response(
 			array(
-				'items'       => $items,
+				'content'     => $items,
 				'total'       => (int) $query->found_posts,
 				'total_pages' => (int) $query->max_num_pages,
-				'page'        => $page,
+				'paged'       => $page,
 				'has_more'    => $page < $query->max_num_pages,
 			),
 			200

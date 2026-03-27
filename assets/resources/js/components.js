@@ -37,8 +37,8 @@ export const likeBtnHandle = () => {
 	});
 	postLike.onSuccess = likeBtnSuccess;
 };
-
-export const appendPostsToDOM = (data) => {
+export const appendPostsToDOM = (data, target) => {
+	console.log(data, target);
 	const loadMoreBtn = document.querySelector(".more-posts");
 	const postsList = document.querySelector(".ajax-posts");
 
@@ -52,10 +52,23 @@ export const appendPostsToDOM = (data) => {
 		}
 		postsList.insertAdjacentHTML('beforeend', data.content)
 	};
-	if (loadMoreBtn && data.currentPage) {
-		const pageNum = parseInt(data.currentPage, 10);
-		if (!isNaN(pageNum) && pageNum >= 1) {
-			loadMoreBtn.dataset.currentPage = pageNum;
+	// if (loadMoreBtn && data.currentPage) {
+
+	// 	const pageNum = parseInt(data.currentPage, 10);
+	// 	if (!isNaN(pageNum) && pageNum >= 1) {
+	// 		loadMoreBtn.dataset.currentPage = pageNum;
+	// 	}
+	// }
+	if (loadMoreBtn) {
+		// Bug F fix: data.currentPage（原为 data.currentPage，现已与 API 对齐）
+		const nextPage = parseInt(data.paged, 10) + 1;
+		if (!Number.isNaN(nextPage) && nextPage >= 1) {
+			loadMoreBtn.dataset.paged = String(nextPage);
+		}
+
+		// Bug H fix: 没有更多页时隐藏按钮
+		if (!data.has_more) {
+			loadMoreBtn.hidden = true;
 		}
 	}
 };
@@ -70,6 +83,7 @@ export const loadMoreHandle = () => {
 		security: lermData.nonce,
 		isThrottled: true,
 		cacheExpiryTime: 60000,
+		method: 'GET',
 		enableCache: false
 	});
 	loadMore.onSuccess = appendPostsToDOM;
