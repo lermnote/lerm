@@ -60,7 +60,7 @@ export default class ClickService extends BaseService {
 		const cacheKey = `click_action_${this.route}_${payloadFingerprint}`;
 
 		if (this.enableCache && this.isCacheValid(cacheKey)) {
-			this.useCache(cacheKey);
+			this.useCache(cacheKey, target);
 			return;
 		}
 
@@ -68,23 +68,34 @@ export default class ClickService extends BaseService {
 		const buttonEl = target instanceof HTMLElement ? target : (target.closest && target.closest('button, a')) || target;
 		this.toggleButton(buttonEl, true);
 
-		const pathId = target.dataset?.id;
 		const url = [
 			this.apiUrl.replace(/\/$/, ''),
 			this.route.replace(/^\//, '').replace(/\/$/, ''),
-			//   ...(pathId ? [pathId] : []),
 		].join('/');
+		const requestUrl = new URL(url, window.location.origin);
+
+		if (isGet) {
+			Object.entries(payload).forEach(([key, value]) => {
+				if (value === undefined || value === null || value === '') return;
+				requestUrl.searchParams.set(key, String(value));
+			});
+		}
+
+		const requestHeaders = {
+			'X-WP-Nonce': nonce,
+			...this.headers
+		};
+
+		if (!isGet) {
+			requestHeaders['Content-Type'] = 'application/json';
+		}
 
 		try {
 			const response = await this.fetchData({
-				url,
+				url: requestUrl.toString(),
 				method: this.method,
-				body: isGet ? undefined : JSON.stringify(payload),
-				headers: {
-					'Content-Type': 'application/json',
-					'X-WP-Nonce': nonce,
-					...this.headers
-				},
+				body: isGet ? null : JSON.stringify(payload),
+				headers: requestHeaders,
 				fetchOptions: {
 					credentials: 'same-origin'
 				}
@@ -106,10 +117,10 @@ export default class ClickService extends BaseService {
 		return cachedData && !Number.isNaN(cacheTime) && (Date.now() - cacheTime) < this.cacheExpiryTime;
 	}
 
-	useCache = (cacheKey) => {
+	useCache = (cacheKey, target = null) => {
 		const storage = this.cacheStorage === 'local' ? localStorage : sessionStorage;
 		const cachedResponse = JSON.parse(storage.getItem(cacheKey));
-		this.onSuccess(cachedResponse);
+		this.onSuccess(cachedResponse, target);
 	}
 
 	updateCache = (cacheKey, response) => {

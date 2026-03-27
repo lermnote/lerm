@@ -72,7 +72,37 @@ if ( file_exists( $lerm_autoload ) ) {
 
 $lerm_csf = LERM_DIR . 'app/Http/Admin/codestar-framework.php';
 
-if ( file_exists( $lerm_csf ) ) {
+if ( ! function_exists( 'lerm_options' ) ) {
+	/**
+	 * Retrieve theme options without loading the full admin framework on the frontend.
+	 *
+	 * @param string $id            Option ID.
+	 * @param string $tag           Optional nested key.
+	 * @param mixed  $default_value Default value when the option is missing.
+	 * @return mixed
+	 */
+	function lerm_options( string $id, string $tag = '', $default_value = '' ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
+		static $options = null;
+
+		if ( null === $options ) {
+			$options = (array) get_option( 'lerm_theme_options', array() );
+		}
+
+		if ( ! array_key_exists( $id, $options ) ) {
+			return $default_value;
+		}
+
+		$option_value = $options[ $id ];
+
+		if ( is_array( $option_value ) && '' !== $tag ) {
+			return $option_value[ $tag ] ?? $default_value;
+		}
+
+		return $option_value;
+	}
+}
+
+if ( is_admin() && file_exists( $lerm_csf ) ) {
 	require_once $lerm_csf;
 }
 

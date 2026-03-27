@@ -19,10 +19,9 @@ export const likeBtnSuccess = (data, target) => {
 };
 
 /**
- * 初始化文章点赞功能
- * 检测页面是否存在点赞按钮元素，若存在则创建点赞服务实例并配置相关参数
- * @param {void} 无参数
- * @returns {void} 无返回值
+ * Initialize the post like feature when like buttons exist on the page.
+ *
+ * @returns {void}
  */
 export const likeBtnHandle = () => {
 	if (!document.querySelector('.like-button')) return;
@@ -38,8 +37,7 @@ export const likeBtnHandle = () => {
 	postLike.onSuccess = likeBtnSuccess;
 };
 export const appendPostsToDOM = (data, target) => {
-	console.log(data, target);
-	const loadMoreBtn = document.querySelector(".more-posts");
+	const loadMoreBtn = target?.closest?.('.more-posts') ?? document.querySelector('.more-posts');
 	const postsList = document.querySelector(".ajax-posts");
 
 	if (postsList && data.content) {
@@ -50,23 +48,16 @@ export const appendPostsToDOM = (data, target) => {
 			console.warn('Potential XSS threat detected, content rejected.');
 			return;
 		}
-		postsList.insertAdjacentHTML('beforeend', data.content)
-	};
-	// if (loadMoreBtn && data.currentPage) {
-
-	// 	const pageNum = parseInt(data.currentPage, 10);
-	// 	if (!isNaN(pageNum) && pageNum >= 1) {
-	// 		loadMoreBtn.dataset.currentPage = pageNum;
-	// 	}
-	// }
+		postsList.insertAdjacentHTML('beforeend', data.content);
+		document.dispatchEvent(new Event('contentLoaded'));
+	}
 	if (loadMoreBtn) {
-		// Bug F fix: data.currentPage（原为 data.currentPage，现已与 API 对齐）
-		const nextPage = parseInt(data.paged, 10) + 1;
+		// Update the next page number for the following request.
+		const nextPage = parseInt(data.page ?? data.paged, 10) + 1;
 		if (!Number.isNaN(nextPage) && nextPage >= 1) {
-			loadMoreBtn.dataset.paged = String(nextPage);
+			loadMoreBtn.dataset.page = String(nextPage);
 		}
 
-		// Bug H fix: 没有更多页时隐藏按钮
 		if (!data.has_more) {
 			loadMoreBtn.hidden = true;
 		}
@@ -138,7 +129,7 @@ export const handleCommentSuccess = (data) => {
 
 	const bullet = document.createElement('span');
 	bullet.setAttribute('aria-hidden', 'true');
-	bullet.textContent = '•';
+	bullet.textContent = '\u2022';
 
 	const a = document.createElement('a');
 	const postLink = c.comment_post_link || '#';
@@ -161,7 +152,7 @@ export const handleCommentSuccess = (data) => {
 	if (c.comment_approved === '0') {
 		const modBadge = document.createElement('span');
 		modBadge.className = 'comment-awaiting-moderation badge rounded-pill bg-info';
-		modBadge.textContent = '您的评论正在等待审核。';
+		modBadge.textContent = '\u60a8\u7684\u8bc4\u8bba\u6b63\u5728\u7b49\u5f85\u5ba1\u6838\u3002';
 		article.appendChild(modBadge);
 	}
 
@@ -193,11 +184,11 @@ export const handleCommentSuccess = (data) => {
 				previousElement.appendChild(childrenUl);
 			}
 		} else {
-			// top-level — prepend into existing commentList
+			// top-level: prepend into existing commentList
 			commentList.insertAdjacentElement('afterbegin', li);
 		}
 	} else {
-		// No comment list exists yet — build card + ol + append
+		// No comment list exists yet: build card, list, and append it
 		const newCommentCard = document.createElement('div');
 		newCommentCard.className = 'card mb-3';
 

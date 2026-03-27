@@ -108,36 +108,6 @@ final class Router {
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( PostsController::class, 'handle' ),
 				'permission_callback' => '__return_true',
-				'args'                => array(
-					'page'      => array(
-						'type'              => 'integer',
-						'default'           => 1,
-						'minimum'           => 1,
-						'sanitize_callback' => 'absint',
-					),
-					'per_page'  => array(
-						'type'              => 'integer',
-						'default'           => 10,
-						'minimum'           => 1,
-						'maximum'           => 50,
-						'sanitize_callback' => 'absint',
-					),
-					'category'  => array(
-						'type'              => 'integer',
-						'default'           => 0,
-						'sanitize_callback' => 'absint',
-					),
-					'tag'       => array(
-						'type'              => 'integer',
-						'default'           => 0,
-						'sanitize_callback' => 'absint',
-					),
-					'post_type' => array(
-						'type'              => 'string',
-						'default'           => 'post',
-						'sanitize_callback' => 'sanitize_key',
-					),
-				),
 			)
 		);
 

@@ -125,7 +125,7 @@ if ( ! empty( $optimize_options ) ) {
 	Optimizer::instance( $optimize_options );
 }
 
-SeoManager::instance( array_merge( $seo_options, $sitemap_options ) );
+//SeoManager::instance( array_merge( $seo_options, $sitemap_options ) );
 
 // 自定义样式/Logo — 有配置才启用
 if ( ! empty( $custom_options ) ) {
