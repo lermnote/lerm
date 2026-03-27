@@ -51,9 +51,9 @@ final class LikeButton {
 		);
 
 		$user_id    = get_like_user_id();
-		$liked      = LikeRepository::has_liked( $id, $user_id );
-		$like_count = LikeRepository::get_count( $id );
 		$type       = $is_comment ? 'comment' : 'post';
+		$liked      = LikeRepository::has_liked( $id, $user_id, $type );
+		$like_count = LikeRepository::get_count( $id, $type );
 
 		$classes = array_filter(
 			array(

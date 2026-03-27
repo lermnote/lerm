@@ -128,6 +128,19 @@ final class Middleware {
 		return true;
 	}
 
+	public static function require_approved_comment( int $comment_id ): true|WP_Error {
+		$comment = get_comment( $comment_id );
+
+		if ( ! $comment || '1' !== (string) $comment->comment_approved ) {
+			return new WP_Error(
+				'comment_not_found',
+				__( '评论不存在', 'lerm' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return true;
+	}
 	/**
 	 * 组合多个中间件，任意一个失败即中止
 	 *

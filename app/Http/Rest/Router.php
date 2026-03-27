@@ -37,13 +37,13 @@ final class Router {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( LikeController::class, 'get' ),
 					'permission_callback' => '__return_true',
-					'args'                => self::post_id_arg(),
+					'args'                => self::like_args(),
 				),
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( LikeController::class, 'toggle' ),
 					'permission_callback' => '__return_true',
-					'args'                => self::post_id_arg(),
+					'args'                => self::like_args(),
 				),
 			)
 		);
@@ -178,6 +178,25 @@ final class Router {
 				'minimum'           => 1,
 				'validate_callback' => static fn( $v ) => is_numeric( $v ) && (int) $v > 0,
 				'sanitize_callback' => 'absint',
+			),
+		);
+	}
+
+	private static function like_args(): array {
+		return array(
+			'id'   => array(
+				'required'          => true,
+				'type'              => 'integer',
+				'minimum'           => 1,
+				'validate_callback' => static fn( $v ) => is_numeric( $v ) && (int) $v > 0,
+				'sanitize_callback' => 'absint',
+			),
+			'type' => array(
+				'required'          => false,
+				'type'              => 'string',
+				'default'           => 'post',
+				'enum'              => array( 'post', 'comment' ),
+				'sanitize_callback' => 'sanitize_key',
 			),
 		);
 	}
