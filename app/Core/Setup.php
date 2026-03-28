@@ -51,6 +51,7 @@ class Setup {
 	 */
 	public static function hooks(): void {
 		add_action( 'after_setup_theme', array( __CLASS__, 'setup' ), 2 );
+		add_action( 'init', array( __CLASS__, 'setup' ), 2 );
 
 		add_filter( 'frontpage_template', array( __CLASS__, 'front_page_template' ), 15, 1 );
 		add_filter( 'pre_option_link_manager_enabled', '__return_true' );
@@ -123,7 +124,7 @@ class Setup {
 		);
 
 		// Make theme available for translation.
-		load_theme_textdomain( LERM_DOMAIN, LERM_DIR . '/languages' );
+		//load_theme_textdomain( LERM_DOMAIN, LERM_DIR . '/languages' );
 
 		// Define a max content width to allow WordPress to properly resize your images.
 		$GLOBALS['content_width'] = (int) apply_filters( 'content_width', self::$args['content_width'] );

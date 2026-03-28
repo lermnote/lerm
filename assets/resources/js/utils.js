@@ -90,7 +90,6 @@ export const codeHighlight = () => {
   });
 };
 
-
 export const calendarAddClass = () => {
   const calendar = document.querySelector("#wp-calendar");
   if (!calendar) return;

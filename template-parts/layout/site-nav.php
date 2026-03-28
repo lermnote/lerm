@@ -65,13 +65,14 @@ if ( wp_is_mobile() ) {
 else :
 	$found    = false;
 	$nav_menu = wp_cache_get( 'lerm_nav_menu', 'lerm_nav', false, $found );
-	if ( $found && has_nav_menu( $theme_location ) ) :
+	if ( ! $found && has_nav_menu( $theme_location ) ) :
 		$nav_menu = wp_nav_menu(
 			array(
 				'theme_location'  => $theme_location,
 				'container'       => 'div',
 				'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav flex-grow-1 d-none d-lg-flex mx-2',
 				'container_id'    => 'navbar',
+				'fallback_cb'     => 'Menu::fallback',
 				'menu_class'      => 'navbar-nav',
 				'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
 				'walker'          => new Menu(),

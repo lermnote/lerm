@@ -200,7 +200,7 @@ if ( ! function_exists( 'lerm_get_social_link_svg' ) ) {
 // 导航菜单社交图标注入
 // =============================================================================
 
-if ( ! function_exists( 'lerm_nav_menu_social_icons' ) ) {
+if ( ! function_exists( __NAMESPACE__ . '\\lerm_nav_menu_social_icons' ) ) {
 	/**
 	 * 在 social 菜单位置的每个菜单项末尾注入平台图标。
 	 * 挂载到 walker_nav_menu_start_el filter。
@@ -239,7 +239,7 @@ if ( ! function_exists( 'lerm_nav_menu_social_icons' ) ) {
 		return $item_output;
 	}
 }
-add_filter( 'walker_nav_menu_start_el', 'lerm_nav_menu_social_icons', 10, 4 );
+add_filter( 'walker_nav_menu_start_el', __NAMESPACE__ . '\\lerm_nav_menu_social_icons', 10, 4 );
 
 // =============================================================================
 // 社交分享图标组
