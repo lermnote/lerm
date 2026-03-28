@@ -82,123 +82,51 @@ export const loadMoreHandle = () => {
 
 export const handleCommentSuccess = (data) => {
 	const c = data?.comment;
-	if (!c) return;
+	const commentHtml = data?.comment_html?.trim();
+	if (!c || !commentHtml) return;
 
 	const respond = document.getElementById('respond');
 	const commentList = document.querySelector('.comment-list');
+	const template = document.createElement('template');
+	template.innerHTML = commentHtml;
 
+	const commentNode = template.content.firstElementChild;
+	if (!commentNode) return;
 
-	// Build <li>
-	const li = document.createElement('li');
-	li.id = `comment-${c.comment_ID}`;
-	li.className = [c.comment_type || '', 'list-group-item', c.comment_parent !== '0' ? 'p-0' : ''].filter(Boolean).join(' ');
+	const parentId = Number(c.comment_parent || 0);
 
-	// <article>
-	const article = document.createElement('article');
-	article.id = `div-comment-${c.comment_ID}`;
-	article.className = 'comment-body';
+	if (parentId > 0) {
+		const parentComment = document.getElementById(`comment-${parentId}`);
+		if (parentComment) {
+			let children = Array.from(parentComment.children).find(
+				(child) => child.classList?.contains('children')
+			);
 
-	// footer/meta
-	const footer = document.createElement('footer');
-	footer.className = 'comment-meta mb-1';
-
-	// author vcard
-	const spanAuthor = document.createElement('span');
-	spanAuthor.className = 'comment-author vcard';
-
-	const img = document.createElement('img');
-	img.src = c.avatar_url || '';
-	img.alt = c.comment_author || '';
-	img.className = `avatar avatar-${c.avatar_size || 48} photo`;
-	img.height = c.avatar_size || 48;
-	img.width = c.avatar_size || 48;
-	img.loading = 'lazy';
-	img.decoding = 'async';
-	if (c.avatar_url) img.srcset = `${c.avatar_url} 2x`;
-
-	const b = document.createElement('b');
-	b.className = 'fn';
-	b.textContent = c.comment_author || '';
-
-	spanAuthor.appendChild(img);
-	spanAuthor.appendChild(b);
-
-	// metadata (time + link)
-	const spanMeta = document.createElement('span');
-	spanMeta.className = 'comment-metadata';
-
-	const bullet = document.createElement('span');
-	bullet.setAttribute('aria-hidden', 'true');
-	bullet.textContent = '\u2022';
-
-	const a = document.createElement('a');
-	const postLink = c.comment_post_link || '#';
-	a.href = `${postLink}#comment-${c.comment_ID}`;
-
-	const timeEl = document.createElement('time');
-	if (c.comment_date_gmt) timeEl.setAttribute('datetime', c.comment_date_gmt);
-	timeEl.textContent = c.comment_date || '';
-
-	a.appendChild(timeEl);
-	spanMeta.appendChild(bullet);
-	spanMeta.appendChild(a);
-
-	footer.appendChild(spanAuthor);
-	footer.appendChild(spanMeta);
-
-	article.appendChild(footer);
-
-	// moderation badge if awaiting moderation
-	if (c.comment_approved === '0') {
-		const modBadge = document.createElement('span');
-		modBadge.className = 'comment-awaiting-moderation badge rounded-pill bg-info';
-		modBadge.textContent = '\u60a8\u7684\u8bc4\u8bba\u6b63\u5728\u7b49\u5f85\u5ba1\u6838\u3002';
-		article.appendChild(modBadge);
-	}
-
-	// content section (server is expected to sanitize HTML)
-	const section = document.createElement('section');
-	section.className = 'comment-content';
-	section.style.marginLeft = '56px';
-
-	const p = document.createElement('p');
-	// NOTE: using innerHTML because server returns sanitized HTML (wp_kses_post).
-	// If server returns plain text or you want extra safety, use: p.textContent = c.comment_content;
-	p.innerHTML = c.comment_content || '';
-	section.appendChild(p);
-	article.appendChild(section);
-
-	li.appendChild(article);
-
-	// Insert into DOM (preserve original placement logic)
-	if (commentList) {
-		const previousElement = respond.previousElementSibling;
-		if (previousElement) {
-			const lastChild = previousElement.lastElementChild;
-			if (lastChild?.classList.contains('children')) {
-				lastChild.appendChild(li);
-			} else {
-				const childrenUl = document.createElement('ul');
-				childrenUl.className = 'children';
-				childrenUl.appendChild(li);
-				previousElement.appendChild(childrenUl);
+			if (!children) {
+				children = document.createElement('ul');
+				children.className = 'children';
+				parentComment.appendChild(children);
 			}
-		} else {
-			// top-level: prepend into existing commentList
-			commentList.insertAdjacentElement('afterbegin', li);
+
+			children.appendChild(commentNode);
+		} else if (commentList) {
+			commentList.insertAdjacentElement('afterbegin', commentNode);
 		}
-	} else {
-		// No comment list exists yet: build card, list, and append it
+	} else if (commentList) {
+		commentList.insertAdjacentElement('afterbegin', commentNode);
+	} else if (respond?.parentNode) {
 		const newCommentCard = document.createElement('div');
 		newCommentCard.className = 'card mb-3';
 
 		const ol = document.createElement('ol');
 		ol.className = 'comment-list p-0 m-0 list-group list-group-flush';
-		ol.appendChild(li);
+		ol.appendChild(commentNode);
 		newCommentCard.appendChild(ol);
-
-		// append after respond wrapper
 		respond.parentNode.appendChild(newCommentCard);
+	}
+
+	if (window.addComment?.cancelForm) {
+		window.addComment.cancelForm();
 	}
 };
 export const handleLoginSuccess = () => {

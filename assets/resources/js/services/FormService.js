@@ -78,11 +78,15 @@ export default class FormService extends BaseService {
     if (submitButton.disabled) return;
     this.toggleButton(submitButton, true);
     const formData = new FormData(form);
+    const requestUrl = [
+      this.apiUrl.replace(/\/$/, ''),
+      this.action.replace(/^\//, '')
+    ].join('/');
 
     this.beforeSubmit();
     try {
       const response = await this.fetchData({
-        url: this.apiUrl + '/' + this.action,
+        url: requestUrl,
         method: 'POST',
         body: formData,
         headers: {
@@ -125,7 +129,7 @@ export default class FormService extends BaseService {
   onSuccess = (response, form) => {
     form.reset();
     this.afterSubmitSuccess(response);
-    this.displayMessage('Form submitted successfully!', 'success');
+    this.displayMessage(response?.message || 'Form submitted successfully!', 'success');
   }
 
   afterSubmitSuccess = (_response) => {}

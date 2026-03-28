@@ -10,6 +10,7 @@ use Lerm\Http\Rest\Controllers\PostsController;
 use Lerm\Http\Rest\Controllers\TocController;
 use Lerm\Http\Rest\Controllers\LoginController;
 use Lerm\Http\Rest\Controllers\ProfileController;
+use Lerm\Http\Rest\Controllers\CommentController;
 
 /**
  * REST API 路由注册中心
@@ -165,6 +166,16 @@ final class Router {
 					'callback'            => array( ProfileController::class, 'update' ),
 					'permission_callback' => '__return_true',
 				),
+			)
+		);
+
+		register_rest_route(
+			$ns,
+			'/comment',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( CommentController::class, 'create' ),
+				'permission_callback' => '__return_true',
 			)
 		);
 	}
