@@ -68,7 +68,7 @@ $forms = array(
 	<hr class="my-3">
 	<div class="text-center ">
 		<span><?php echo esc_html__( 'Have already an account?', 'lerm' ); ?> </span>
-		<a  href="http://localhost/lerm/login/" id="login-btn" type="submit" name='btn_submit' class="change-form my-4" type="submit" data-form="login">
+		<a  href="<?php echo esc_url( home_url( '/login/' ) ); ?>" id="login-btn" type="submit" name='btn_submit' class="change-form my-4" type="submit" data-form="login">
 			<?php echo esc_html__( 'Login', 'lerm' ); ?>
 		</a>
 	</div>

@@ -102,7 +102,6 @@
 							"fontStyle": "normal",
 							"fontDisplay": "swap",
 							"src": [
-								"file:./assets/fonts/lerm.woff2",
 								"file:./assets/fonts/lerm.woff"
 							]
 						}

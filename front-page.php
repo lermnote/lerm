@@ -57,7 +57,7 @@ $recent_posts = new WP_Query(
 				<?php endif; ?>
 			</div><!-- row row-cols-1 row-cols-md-3 -->
 			<div class="card mb-3">
-				<div class="row no-gutters">
+				<div class="row g-0">
 					<div class="col-md-4">
 						<svg class="bd-placeholder-img" width="100%" height="250" xmlns="http://www.w3.org/2000/svg"
 							preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
@@ -288,7 +288,7 @@ $recent_posts = new WP_Query(
 	<div class="row row-cols-1 row-cols-md-2">
 		<div class="col mb-4">
 			<div class="card mb-3">
-				<div class="row no-gutters">
+				<div class="row g-0">
 					<div class="col-md-4">
 						<svg class="bd-placeholder-img" width="100%" height="250" xmlns="http://www.w3.org/2000/svg"
 							preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
@@ -311,7 +311,7 @@ $recent_posts = new WP_Query(
 		</div>
 		<div class="col mb-4">
 			<div class="card mb-3">
-				<div class="row no-gutters">
+				<div class="row g-0">
 					<div class="col-md-4">
 						<svg class="bd-placeholder-img" width="100%" height="250" xmlns="http://www.w3.org/2000/svg"
 							preserveAspectRatio="xMidYMid slice" focusable="false" role="img"

@@ -8,15 +8,15 @@
  */
 
 $default_posts_per_page = (int) get_option( 'posts_per_page', 10 );
-$posts_per_page         = absint( $wp_query->get( 'posts_per_page' ) ) ?: $default_posts_per_page;
+$posts_per_page         = absint( $wp_query->get( 'posts_per_page' ) ) ? absint( $wp_query->get( 'posts_per_page' ) ) : $default_posts_per_page;
 $archive_data           = array(
-	'cat'         => absint( $wp_query->get( 'cat' ) ) ?: null,
-	'tag_id'      => absint( $wp_query->get( 'tag_id' ) ) ?: null,
-	'author'      => absint( $wp_query->get( 'author' ) ) ?: null,
-	'post_parent' => absint( $wp_query->get( 'post_parent' ) ) ?: null,
-	'year'        => absint( $wp_query->get( 'year' ) ) ?: null,
-	'monthnum'    => absint( $wp_query->get( 'monthnum' ) ) ?: null,
-	'day'         => absint( $wp_query->get( 'day' ) ) ?: null,
+	'cat'         => absint( $wp_query->get( 'cat' ) ) ? absint( $wp_query->get( 'cat' ) ) : null,
+	'tag_id'      => absint( $wp_query->get( 'tag_id' ) ) ? absint( $wp_query->get( 'tag_id' ) ) : null,
+	'author'      => absint( $wp_query->get( 'author' ) ) ? absint( $wp_query->get( 'author' ) ) : null,
+	'post_parent' => absint( $wp_query->get( 'post_parent' ) ) ? absint( $wp_query->get( 'post_parent' ) ) : null,
+	'year'        => absint( $wp_query->get( 'year' ) ) ? absint( $wp_query->get( 'year' ) ) : null,
+	'monthnum'    => absint( $wp_query->get( 'monthnum' ) ) ? absint( $wp_query->get( 'monthnum' ) ) : null,
+	'day'         => absint( $wp_query->get( 'day' ) ) ? absint( $wp_query->get( 'day' ) ) : null,
 );
 
 foreach ( array( 'category_name', 'tag', 'taxonomy', 'term', 'author_name', 'name', 's' ) as $key ) {
@@ -26,19 +26,19 @@ foreach ( array( 'category_name', 'tag', 'taxonomy', 'term', 'author_name', 'nam
 	}
 }
 
-$post_type = $wp_query->get( 'post_type' );
-if ( is_scalar( $post_type ) && '' !== (string) $post_type && 'post' !== $post_type ) {
-	$archive_data['post_type'] = (string) $post_type;
+$_post_type = $wp_query->get( 'post_type' );
+if ( is_scalar( $_post_type ) && '' !== (string) $_post_type && 'post' !== $_post_type ) {
+	$archive_data['post_type'] = (string) $_post_type;
 }
 
-$orderby = $wp_query->get( 'orderby' );
-if ( is_scalar( $orderby ) && '' !== (string) $orderby && 'date' !== $orderby ) {
-	$archive_data['orderby'] = (string) $orderby;
+$_orderby = $wp_query->get( 'orderby' );
+if ( is_scalar( $_orderby ) && '' !== (string) $_orderby && 'date' !== $_orderby ) {
+	$archive_data['orderby'] = (string) $_orderby;
 }
 
-$order = strtoupper( (string) $wp_query->get( 'order' ) );
-if ( in_array( $order, array( 'ASC', 'DESC' ), true ) && 'DESC' !== $order ) {
-	$archive_data['order'] = $order;
+$_order = strtoupper( (string) $wp_query->get( 'order' ) );
+if ( in_array( $_order, array( 'ASC', 'DESC' ), true ) && 'DESC' !== $_order ) {
+	$archive_data['order'] = $_order;
 }
 
 if ( $posts_per_page !== $default_posts_per_page ) {

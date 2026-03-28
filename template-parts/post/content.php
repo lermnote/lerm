@@ -82,7 +82,7 @@ $card_classes    = 'card';
 		$has_image         = ! empty( $image->attachment_id );
 		$content_col_class = $has_image ? 'col-md-9' : 'col-md-12';
 		?>
-		<div class="row no-gutters align-items-md-center">
+		<div class="row g-0 align-items-md-center">
 			<?php if ( $has_image ) : ?>
 				<div class="col-md-3">
 					<?php get_template_part( 'template-parts/components/featured-image' ); ?>

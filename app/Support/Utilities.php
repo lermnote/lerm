@@ -297,3 +297,15 @@ function social_link_icon_classes( $block_content, $block ) {
 add_filter( 'render_block_core/social-link', __NAMESPACE__ . '\social_link_icon_classes', 10, 2 );
 
 // End of file
+
+add_action(
+	'wp_head',
+	function () {
+		$code = lerm_options( 'baidu_tongji' );
+		if ( $code ) {
+			// 只允许纯文本 JS 内容，不允许外部 src
+			echo '<script>' . wp_kses_post( $code ) . '</script>';
+		}
+	},
+	99
+);

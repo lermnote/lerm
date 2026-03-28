@@ -14,27 +14,14 @@
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color' ) ); ?>">
 	<?php wp_head(); ?>
-	<?php
-	add_action(
-		'wp_head',
-		function () {
-			$code = lerm_options( 'baidu_tongji' );
-			if ( $code ) {
-				// 只允许纯文本 JS 内容，不允许外部 src
-				echo '';
-			}
-		},
-		99
-	);
-	?>
 </head>
 <body <?php body_class(); ?>>
 	<?php wp_body_open(); ?>
 	<div id="page" class="site">
-		<header id="site-header" class="card site-header" itemscope="" itemtype="http://schema.org/WPHeader">
+		<header id="site-header" class="card site-header" itemscope="" itemtype="https://schema.org/WPHeader">
 			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
 				<div class="container">
 					<!-- .navbar-brand  begin -->

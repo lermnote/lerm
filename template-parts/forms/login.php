@@ -47,7 +47,7 @@ $urememberme = array(
 	?>
 	<div class="d-flex justify-content-between align-items-center mb-3 ">
 		<?php echo float_form_input( $urememberme ); // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: has been escaped. ?>
-		<a href="http://localhost/lerm/reset/" class="change-form" id="forget-btn" type="button" title="forget password" data-form="reset" ><?php echo esc_html__( 'Forget password?', 'lerm' ); ?></a>
+		<a href="<?php echo esc_url( home_url( '/reset/' ) ); ?>" class="change-form" id="forget-btn" type="button" title="forget password" data-form="reset" ><?php echo esc_html__( 'Forget password?', 'lerm' ); ?></a>
 	</div>
 	<button id="login-submit" type="submit" name='btn_submit' class="btn btn-primary w-100 mb-3" type="submit"><?php echo esc_html__( 'LOGIN', 'lerm' ); ?></button>
 	<small id="login-msg" class="user-msg text-danger wow invisible">#</small>
@@ -56,7 +56,7 @@ $urememberme = array(
 	<hr class="my-3">
 	<div class="text-center ">
 		<span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span>
-		<a  class="change-form" href="http://localhost/lerm/regist" id="regist-btn" class="my-4" data-form="regist">
+		<a  class="change-form my-4" href="<?php echo esc_url( home_url( '/register/' ) ); ?>" id="regist-btn" data-form="regist">
 			<?php echo esc_html__( 'Register', 'lerm' ); ?>
 		</a>
 	</div>

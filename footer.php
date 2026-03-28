@@ -41,8 +41,8 @@ use function Lerm\Support\copyright_text;
 	</div>
 </footer>
 <div class="position-fixed d-grid gap-1 btn-group-sm" style="bottom: 4rem;right: 1rem">
-	<a class="btn btn-custom" target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=825641026&site=qq&menu=yes" data-toggle="tooltip" data-placement="left" title="QQ 在线咨询"  role="button"><i class="li li-qq"></i></a>
-	<a class="btn btn-custom" id="scroll-up" href="javascript:void(0);"  data-toggle="tooltip" data-placement="left" title="飞回顶部"  role="button"><i class="li li-chevron-up" ></i></a>
+	<a class="btn btn-custom" target="_blank" rel="noopener noreferrer" href="http://wpa.qq.com/msgrd?v=3&uin=825641026&site=qq&menu=yes" data-bs-toggle="tooltip" data-bs-placement="left" title="QQ 在线咨询"  role="button"><i class="fa fa-qq"></i></a>
+	<button class="btn btn-custom" id="scroll-up" data-bs-toggle="tooltip" data-bs-placement="left" title="飞回顶部"  role="button"><i class="fa fa-chevron-up" ></i></button>
 </div>
 </div><!-- #page -->
 <?php wp_footer(); ?>

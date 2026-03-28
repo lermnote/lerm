@@ -56,14 +56,13 @@ class Lazyload {
 	 * 开始输出缓冲，回调 lazyload_content 处理 buffer
 	 */
 	public function start_buffer() {
+		if ( is_admin() || wp_doing_ajax() || is_feed() || is_embed() || is_preview() ) {
+			return;
+		}
 		ob_start( array( $this, 'lazyload_content' ) );
 	}
 
-	/**
-	 * 对整个页面内容进行替换：查找 <img> 标签并处�?   *
-	 * @param string $content HTML 内容
-	 * @return string 处理后的内容
-	 */
+
 	public function lazyload_content( string $content ): string {
 		if ( empty( $content ) ) {
 			return $content;
@@ -159,7 +158,7 @@ class Lazyload {
 			$fragment->appendXML( $img_html );
 			$noscript->appendChild( $fragment );
 			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
-			$img->parentNode->insertBefore( $noscript, $img->nextSibling );
+			$img->parentNode->insertBefore( $noscript, $img->nextSibling ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
 		}
 	}
 

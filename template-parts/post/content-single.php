@@ -8,7 +8,7 @@
 global $post;
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'card' ); ?>>
-	<div class="row no-gutters">
+	<div class="row g-0">
 		<?php if ( null !== lerm_post_image() ) : ?>
 			<div class="col-md-3">
 				<?php get_template_part( 'template-parts/components/featured-image' ); ?>

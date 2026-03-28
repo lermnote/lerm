@@ -20,5 +20,5 @@
 </form>
 <hr class="my-3">
 <div class="text-center"><span><?php echo esc_html__( 'Return to login', 'lerm' ); ?> </span> 
-<a  href="http://localhost/lerm/login/" id="login-btn2"  class="change-form my-4" type="submit" data-form="login"><?php echo esc_html__( 'Login', 'lerm' ); ?></a></div>
+<a  href="<?php echo esc_url( home_url( '/login/' ) ); ?>" id="login-btn2"  class="change-form my-4" type="submit" data-form="login"><?php echo esc_html__( 'Login', 'lerm' ); ?></a></div>
 <!--end reset-->
