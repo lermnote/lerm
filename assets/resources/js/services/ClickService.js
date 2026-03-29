@@ -1,6 +1,6 @@
 // services/ClickService.js
 import BaseService from './BaseService.js';
-import { delegate } from '../utils.js';
+import { delegate } from '../utils/dom.js';
 
 export default class ClickService extends BaseService {
 	/**
@@ -31,8 +31,6 @@ export default class ClickService extends BaseService {
 	}
 
 	handleClick = async (event, target) => {
-		// compatibility: if delegate passed only event, try to find target
-		if (!target) target = event && event.currentTarget ? event.currentTarget : event.target;
 		if (!target) return;
 
 		event.preventDefault();

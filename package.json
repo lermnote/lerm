@@ -1,7 +1,7 @@
 {
   "name": "lerm-wp-frontend",
   "version": "1.0.0",
-  "description": "Frontend services for WordPress REST API (ClickService, FormService, LoadPageService)",
+  "description": "Frontend services for the theme REST API",
   "scripts": {
     "dev":   "vite build --watch",
     "build": "vite build",
@@ -10,7 +10,6 @@
   "author": "lerm",
   "license": "MIT",
   "devDependencies": {
-    "@vitejs/plugin-legacy": "^6.1.1",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "terser": "^5.40.0",
