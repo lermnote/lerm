@@ -61,6 +61,12 @@ final class ViewsRepository {
 				self::META_COUNT
 			)
 		);
+
+		// The counter is updated with direct SQL, so we need to purge WP's meta cache
+		// before reading it again in this or the next request.
+		wp_cache_delete( $post_id, 'post_meta' );
+		clean_post_cache( $post_id );
+
 		return (int) get_post_meta( $post_id, self::META_COUNT, true );
 	}
 }

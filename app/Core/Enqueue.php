@@ -112,6 +112,8 @@ class Enqueue {
 					'post_id'        => is_singular() ? get_the_ID() : 0,
 
 					'route_like'     => 'like',
+					'route_views'    => 'views',
+					'route_search'   => 'search',
 					'route_loadmore' => 'posts',
 					'route_comment'  => 'comment',
 					'route_profile'  => 'profile',

@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Lerm\View;
 
+use Lerm\Http\Rest\Repository\ViewsRepository;
 use Lerm\Traits\Singleton;
 
 class PostMeta {
@@ -101,7 +102,7 @@ class PostMeta {
 		?>
 		<span class="meta-icon">
 			<span class="screen-reader-text"><?php esc_html_e( 'Post author', 'lerm' ); ?></span>
-			<i class="li li-user pe-1"></i>
+			<i class="fa fa-user pe-1"></i>
 		</span>
 		<span class="meta-text">
 			<?php
@@ -137,7 +138,7 @@ class PostMeta {
 		$date      = get_the_date(); // returns formatted date
 		?>
 		<span>
-			<i class="li li-calendar pe-1"></i>
+			<i class="fa fa-calendar pe-1"></i>
 			<a href="<?php echo esc_url( $permalink ); ?>">
 				<?php echo esc_html( $date ); ?>
 			</a>
@@ -156,7 +157,7 @@ class PostMeta {
 			?>
 			<span class="meta-icon">
 				<span class="screen-reader-text"><?php esc_html_e( 'Categories', 'lerm' ); ?></span>
-				<i class="li li-hdd pe-1"></i>
+				<i class="fa fa-hdd pe-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php echo wp_kses_post( $categories ); ?>
@@ -168,8 +169,6 @@ class PostMeta {
 	/**
 	 * Display the page views of the current post.
 	 *
-	 * Uses a transient cache to avoid repeated meta reads.
-	 *
 	 * @return void
 	 */
 	public static function read(): void {
@@ -179,24 +178,18 @@ class PostMeta {
 			return;
 		}
 
-		$post_ID       = (int) $post->ID;
-		$transient_key = 'pageviews_' . $post_ID;
-		$views         = get_transient( $transient_key );
-
-		if ( false === $views ) {
-			$views = (int) get_post_meta( $post_ID, 'pageviews', true );
-			$views = max( 0, $views );
-			// cache for 1 hour (adjust as needed)
-			set_transient( $transient_key, $views, HOUR_IN_SECONDS );
-		}
+		$post_ID = (int) $post->ID;
+		$views   = max( 0, ViewsRepository::get_count( $post_ID ) );
 
 		$formatted_views = number_format_i18n( $views );
 
 		// show only when we have a number (can be 0)
 		if ( '' !== $formatted_views ) {
 			?>
-			<i class="li li-eye pe-1"></i>
-			<span><?php echo esc_html( $formatted_views ); ?></span>
+			<i class="fa fa-eye pe-1"></i>
+			<span class="js-post-views-count" data-post-id="<?php echo esc_attr( (string) $post_ID ); ?>">
+				<?php echo esc_html( $formatted_views ); ?>
+			</span>
 			<?php
 		}
 	}
@@ -216,7 +209,7 @@ class PostMeta {
 			$comments_number = get_comments_number_text( esc_attr( get_comments_number() ) );
 			?>
 			<a href="<?php echo esc_url( $comments_link ); ?>">
-				<i class="li li-comment pe-1"></i>
+				<i class="fa fa-comment pe-1"></i>
 				<?php echo esc_html( $comments_number ); ?>
 			</a>
 			<?php
@@ -235,7 +228,7 @@ class PostMeta {
 				esc_html__( 'Edit<span class="screen-reader-text"> "%s"</span>', 'lerm' ),
 				get_the_title()
 			),
-			'<span class="edit-link meta-item"><i class="li li-edit pe-1 ps-2"></i>',
+			'<span class="edit-link meta-item"><i class="fa fa-edit pe-1 ps-2"></i>',
 			'</span>'
 		);
 	}

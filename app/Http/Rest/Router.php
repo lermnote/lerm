@@ -52,7 +52,7 @@ final class Router {
 		// ── 浏览数 ────────────────────────────────────────────
 		register_rest_route(
 			$ns,
-			'/views/(?P<id>\d+)',
+			'/views',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,

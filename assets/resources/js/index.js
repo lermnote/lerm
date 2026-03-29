@@ -18,6 +18,7 @@ import {
 import {
 	likeBtnHandle,
 	loadMoreHandle,
+	viewCountHandle,
 	handleCommentSuccess,
 	handleLoginSuccess,
 	handleUpdateProfileSuccess
@@ -75,6 +76,7 @@ DOMContentLoaded( () => {
 	scrollTop();
 	formAjaxHandle();
 	likeBtnHandle();
+	viewCountHandle();
 	loadMoreHandle();
 	// Ajax 翻页（可选，取消注释以启用）
 	// try {
@@ -91,4 +93,5 @@ document.addEventListener('contentLoaded', () => {
 	scrollTop();
 	formAjaxHandle();
 	lazyLoadImages();
+	viewCountHandle();
 });

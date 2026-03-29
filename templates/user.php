@@ -37,7 +37,7 @@ get_header();
 					</figure>
 					<div>
 						<h2 class="card-title">
-							<i class="li li-heart"></i>
+							<i class="fa fa-heart"></i>
 							<?php echo esc_html( $profile_data['nickname'] ); ?>
 							<small class="badge text-bg-light opacity-50 text-nowrap">学前班</small>
 							<span role="tablist">
@@ -54,7 +54,7 @@ get_header();
 							<?php endif; ?>
 							<a class="btn-sm" data-bs-toggle="collapse" href="#collapseExample" role="button"
 								aria-expanded="false" aria-controls="collapseExample">
-								<i class="li li-chevron-down"></i>
+								<i class="fa fa-chevron-down"></i>
 							</a>
 						</p>
 						<div class="collapse" id="collapseExample">

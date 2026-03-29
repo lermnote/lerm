@@ -17,7 +17,7 @@ if ( wp_is_mobile() ) {
 
 <?php if ( wp_is_mobile() ) : ?>
 	<div class="d-flex align-items-center">
-		<button type="button" class="navbar-search d-lg-none" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="li li-search"></i></button>
+		<button type="button" class="navbar-search d-lg-none" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fa fa-search"></i></button>
 		<button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
 			<span></span>
 			<span></span>
