@@ -31,8 +31,6 @@ export default class ClickService extends BaseService {
 	}
 
 	handleClick = async (event, target) => {
-		// compatibility: if delegate passed only event, try to find target
-		if (!target) target = event && event.currentTarget ? event.currentTarget : event.target;
 		if (!target) return;
 
 		event.preventDefault();

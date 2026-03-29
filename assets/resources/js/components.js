@@ -187,20 +187,8 @@ export const handleCommentSuccess = (data) => {
 		window.addComment.cancelForm();
 	}
 };
-export const handleLoginSuccess = () => {
-	const target = lermData.front_door || window.location.origin + '/';
-	if (window.lermLoadPage?.loadPage) {
-		window.lermLoadPage.loadPage(target);
-	} else {
-		window.location.href = target;
-	}
-};
 
 export const handleUpdateProfileSuccess = () => {
 	const target = lermData.redirect || window.location.href;
-	if (window.lermLoadPage?.loadPage) {
-		window.lermLoadPage.loadPage(target);
-	} else {
-		window.location.href = target;
-	}
+	window.location.href = target;
 };
