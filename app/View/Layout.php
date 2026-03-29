@@ -68,7 +68,7 @@ function lerm_post_class( array $classes ): array {
 	}
 
 	if ( $loading_animate ) {
-		$classes = array_merge( $classes, array( 'loading-animate', 'fadeIn' ) );
+		$classes = array_merge( $classes, array( 'loading-animate', 'animate__fadeIn' ) );
 	}
 
 	return array_unique( apply_filters( 'lerm_post_class', $classes ) );

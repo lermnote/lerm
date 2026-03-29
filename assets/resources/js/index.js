@@ -87,6 +87,7 @@ DOMContentLoaded( () => {
 
 // Re-run some init on dynamic content loads
 document.addEventListener('contentLoaded', () => {
+	initScrollAnimate();
 	scrollTop();
 	formAjaxHandle();
 	lazyLoadImages();

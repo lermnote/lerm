@@ -54,18 +54,41 @@ export const lazyLoadImages = (() => {
 })();
 
 // utils.js — 替换 initializeWOW，删除 index.js 顶部的 import WOW
-export const initScrollAnimate = () => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        el.classList.add('animated');
-        observer.unobserve(el);
-      }
-    });
-  }, { threshold: 0.1 });
+let scrollAnimateObserver;
 
-  document.querySelectorAll('.loading-animate').forEach(el => observer.observe(el));
+const revealScrollAnimate = (element) => {
+  const hasAnimationClass = Array.from(element.classList).some(
+    (className) => className.startsWith('animate__') && className !== 'animate__animated'
+  );
+
+  if (!hasAnimationClass) {
+    element.classList.add('animate__fadeIn');
+  }
+
+  element.classList.add('animate__animated');
+};
+
+export const initScrollAnimate = () => {
+  const elements = document.querySelectorAll('.loading-animate:not(.animate__animated)');
+  if (!elements.length) return;
+
+  if (!('IntersectionObserver' in window)) {
+    elements.forEach(revealScrollAnimate);
+    return;
+  }
+
+  if (!scrollAnimateObserver) {
+    scrollAnimateObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+
+        revealScrollAnimate(entry.target);
+        scrollAnimateObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0.1 });
+  }
+
+  elements.forEach(element => scrollAnimateObserver.observe(element));
 };
 
 import hljs from 'highlight.js/lib/core';

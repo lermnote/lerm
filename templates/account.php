@@ -34,7 +34,7 @@ get_header();
 		</div>
 
 		<div class="col-lg-4">
-			<section class="tab-content card loading-animate p-3" id="myTabContent">
+			<section class="tab-content card loading-animate animate__fadeIn p-3" id="myTabContent">
 				<div id="myTab" role="tablist">
 					<button class="active visually-hidden" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-tab-pane" type="hidden" role="tab" aria-controls="login-tab-pane" aria-selected="true">Login</button>
 					<button class="visually-hidden" id="forget-tab" data-bs-toggle="tab" data-bs-target="#forget-tab-pane" type="hidden" role="tab" aria-controls="forget-tab-pane" aria-selected="false">Forget</button>
