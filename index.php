@@ -12,18 +12,20 @@
 
 get_header();
 
+$template_options = lerm_get_template_options();
+
 ?>
 	<?php
 	get_template_part( 'template-parts/components/breadcrumb' );
 
-	if ( lerm_options( 'slide_position' ) === 'under_navbar' ) {
+	if ( 'under_navbar' === $template_options['slide_position'] ) {
 		get_template_part( 'template-parts/components/carousel' );
 	}
 	?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<?php
-			if ( lerm_options( 'slide_position' ) === 'under_primary' ) {
+			if ( 'under_primary' === $template_options['slide_position'] ) {
 				get_template_part( 'template-parts/components/carousel' );
 			}
 			?>

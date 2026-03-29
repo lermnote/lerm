@@ -13,12 +13,30 @@
 declare (strict_types=1);
 
 /**
+ * Get layout-related theme options prepared by bootstrap.
+ *
+ * @return array<string, mixed>
+ */
+function lerm_get_layout_options(): array {
+	return apply_filters(
+		'lerm_layout_options',
+		array(
+			'global_layout'   => 'layout-2c-r',
+			'layout_style'    => '',
+			'loading_animate' => false,
+		)
+	);
+}
+
+/**
  * Adds custom classes to the array of body classes.
  *
  * @param string[] $classes Classes for the body element.
  * @return string[] Filtered classes.
  */
 function lerm_body_classes( array $classes ): array {
+	$layout_options = lerm_get_layout_options();
+
 	$classes[] = 'body-bg';
 
 	// Check singular (pages, posts, attachments).
@@ -39,7 +57,7 @@ function lerm_body_classes( array $classes ): array {
 
 	// Output layout
 	$classes[]    = lerm_site_layout();
-	$layout_style = lerm_options( 'layout_style' );
+	$layout_style = $layout_options['layout_style'] ?? '';
 	if ( ! empty( $layout_style ) ) {
 		$classes[] = (string) $layout_style;
 	}
@@ -59,7 +77,8 @@ add_filter( 'body_class', 'lerm_body_classes' );
  * @return string[] Modified classes.
  */
 function lerm_post_class( array $classes ): array {
-	$loading_animate = lerm_options( 'loading-animate' );
+	$layout_options   = lerm_get_layout_options();
+	$loading_animate = ! empty( $layout_options['loading_animate'] );
 
 	if ( is_singular() ) {
 		$classes = array_merge( $classes, array( 'entry', 'p-3', 'mb-2' ) );
@@ -82,7 +101,8 @@ add_filter( 'post_class', 'lerm_post_class' );
  * @return string Layout slug.
  */
 function lerm_site_layout( ?string $fallback = null ): string {
-	$global = (string) lerm_options( 'global_layout' );
+	$layout_options = lerm_get_layout_options();
+	$global         = (string) ( $layout_options['global_layout'] ?? 'layout-2c-r' );
 
 	// Allow a caller fallback, but prefer global option if provided.
 	$base_layout = $fallback ?? $global;

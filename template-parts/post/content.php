@@ -12,6 +12,8 @@ use function Lerm\Support\link_pagination;
 
 $current_post_id = get_the_ID(); // 缓存 ID，避免多次调用
 $card_classes    = 'card';
+$card_classes     = 'card';
+$template_options = lerm_get_template_options();
 ?>
 <article id="post-<?php echo esc_attr( $current_post_id ); ?>" <?php post_class( $card_classes ); ?>>
 
@@ -41,7 +43,7 @@ $card_classes    = 'card';
 
 			<?php
 			if ( is_singular( 'post' ) ) {
-				PostMeta::post_meta( array_keys( (array) lerm_options( 'single_bottom', 'enabled' ) ), 'justify-content-between mb-1' );
+				PostMeta::post_meta( array_keys( (array) ( $template_options['single_bottom']['enabled'] ?? array() ) ), 'justify-content-between mb-1' );
 			}
 
 			$tag_list = get_the_tag_list(
@@ -76,7 +78,7 @@ $card_classes    = 'card';
 				'size'    => 'thumbnail',
 				'lazy'    => 'lazy',
 				'order'   => array( 'featured', 'block', 'scan', 'default' ),
-				'default' => function_exists( 'lerm_options' ) ? lerm_options( 'thumbnail_gallery' ) : '',
+				'default' => $template_options['thumbnail_gallery'],
 			)
 		);
 		$has_image         = ! empty( $image->attachment_id );

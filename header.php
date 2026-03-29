@@ -9,13 +9,14 @@
  * @since  1.0
  */
 ?>
+<?php $template_options = lerm_get_template_options(); ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="theme-color" content="<?php echo esc_attr( lerm_options( 'header_bg_color' ) ); ?>">
+	<meta name="theme-color" content="<?php echo esc_attr( $template_options['header_bg_color'] ); ?>">
 	<?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
@@ -32,7 +33,7 @@
 			</nav>
 		</header>
 		<?php
-		if ( lerm_options( 'slide_position' ) === 'full_width' ) {
+		if ( 'full_width' === $template_options['slide_position'] ) {
 			get_template_part( 'template-parts/components/carousel' );
 		}
 		?>

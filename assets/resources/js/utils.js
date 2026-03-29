@@ -56,18 +56,6 @@ export const lazyLoadImages = (() => {
 // utils.js — 替换 initializeWOW，删除 index.js 顶部的 import WOW
 let scrollAnimateObserver;
 
-const revealScrollAnimate = (element) => {
-  const hasAnimationClass = Array.from(element.classList).some(
-    (className) => className.startsWith('animate__') && className !== 'animate__animated'
-  );
-
-  if (!hasAnimationClass) {
-    element.classList.add('animate__fadeIn');
-  }
-
-  element.classList.add('animate__animated');
-};
-
 export const initScrollAnimate = () => {
   const elements = document.querySelectorAll('.loading-animate:not(.animate__animated)');
   if (!elements.length) return;

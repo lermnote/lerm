@@ -14,6 +14,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Get tracking-related theme options prepared by bootstrap.
+ *
+ * @return array<string, mixed>
+ */
+function get_tracking_options(): array {
+	return apply_filters(
+		'lerm_tracking_options',
+		array(
+			'baidu_tongji' => '',
+		)
+	);
+}
+
+/**
  * Get the client's IP address.
  *
  * Tries several server headers and prefers the first public IP found in
@@ -276,7 +290,8 @@ add_filter( 'render_block_core/social-link', __NAMESPACE__ . '\social_link_icon_
 add_action(
 	'wp_head',
 	function () {
-		$code = lerm_options( 'baidu_tongji' );
+		$tracking_options = get_tracking_options();
+		$code             = $tracking_options['baidu_tongji'] ?? '';
 		if ( $code ) {
 			// 只允许纯文本 JS 内容，不允许外部 src
 			echo '<script>' . wp_kses_post( $code ) . '</script>';

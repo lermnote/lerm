@@ -441,21 +441,6 @@ body {
   text-transform: uppercase;
 }
 
-/*article*/
-.loading-animate {
-  visibility: hidden;
-}
-
-.loading-animate.animate__animated {
-  visibility: visible;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .loading-animate {
-    visibility: visible;
-  }
-}
-
 .btn-custom:hover a,
 #comments a,
 .colophon a,

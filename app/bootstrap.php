@@ -41,6 +41,9 @@ $sitemap_options  = array();
 $custom_options   = array();
 $updater_options  = array();
 $login_options    = array();
+$layout_options   = array();
+$tracking_options = array();
+$template_options = array();
 
 if ( ! empty( $options ) ) {
 
@@ -102,6 +105,52 @@ if ( ! empty( $options ) ) {
 		'login_redirect_url'  => (bool) ( $options['login_redirect_url'] ?? false ) ? home_url( '/' ) : '',
 		'logout_redirect_url' => $options['logout_redirect_url'] ?? home_url(),
 	);
+
+	$layout_options = array(
+		'global_layout'   => (string) ( $options['global_layout'] ?? 'layout-2c-r' ),
+		'layout_style'    => (string) ( $options['layout_style'] ?? '' ),
+		'loading_animate' => (bool) ( $options['loading-animate'] ?? false ),
+	);
+
+	$tracking_options = array(
+		'baidu_tongji' => (string) ( $options['baidu_tongji'] ?? '' ),
+	);
+
+	$template_options = array(
+		'header_bg_color'       => (string) ( $options['header_bg_color'] ?? '#fff' ),
+		'slide_position'        => (string) ( $options['slide_position'] ?? '' ),
+		'slide_enable'          => (bool) ( $options['slide_enable'] ?? false ),
+		'slide_images'          => (array) ( $options['slide_images'] ?? array() ),
+		'slide_indicators'      => (bool) ( $options['slide_indicators'] ?? false ),
+		'slide_control'         => (bool) ( $options['slide_control'] ?? false ),
+		'icp_num'               => (string) ( $options['icp_num'] ?? '' ),
+		'copyright'             => (string) ( $options['copyright'] ?? '' ),
+		'author_bio'            => (bool) ( $options['author_bio'] ?? false ),
+		'single_sidebar_select' => (string) ( $options['single_sidebar_select'] ?? 'home-sidebar' ),
+		'blog_sidebar_select'   => (string) ( $options['blog_sidebar_select'] ?? 'home-sidebar' ),
+		'front_page_sidebar'    => (string) ( $options['front_page_sidebar'] ?? 'home-sidebar' ),
+		'page_sidebar'          => (string) ( $options['page_sidebar'] ?? 'home-sidebar' ),
+		'breadcrumb_container'  => (string) ( $options['breadcrumb_container'] ?? 'nav' ),
+		'breadcrumb_before'     => (string) ( $options['breadcrumb_before'] ?? '' ),
+		'breadcrumb_after'      => (string) ( $options['breadcrumb_after'] ?? '' ),
+		'breadcrumb_list_tag'   => (string) ( $options['breadcrumb_list_tag'] ?? 'ol' ),
+		'breadcrumb_item_tag'   => (string) ( $options['breadcrumb_item_tag'] ?? 'li' ),
+		'breadcrumb_separator'  => (string) ( $options['breadcrumb_separator'] ?? '/' ),
+		'breadcrumb_front_show' => (bool) ( $options['breadcrumb_front_show'] ?? false ),
+		'breadcrumb_show_title' => ! array_key_exists( 'breadcrumb_show_title', $options ) ? true : (bool) $options['breadcrumb_show_title'],
+		'thumbnail_gallery'     => $options['thumbnail_gallery'] ?? '',
+		'load_more'             => (bool) ( $options['load_more'] ?? false ),
+		'related_posts'         => (bool) ( $options['related_posts'] ?? false ),
+		'related_number'        => max( 1, (int) ( $options['related_number'] ?? 5 ) ),
+		'single_top'            => (array) ( $options['single_top'] ?? array() ),
+		'single_bottom'         => (array) ( $options['single_bottom'] ?? array() ),
+		'summary_meta'          => (array) ( $options['summary_meta'] ?? array() ),
+		'social_share'          => array_keys( array_filter( (array) ( $options['social_share'] ?? array() ) ) ),
+		'blogname'              => (string) ( $options['blogname'] ?? '' ),
+		'blogdesc'              => (string) ( $options['blogdesc'] ?? '' ),
+		'narbar_align'          => (string) ( $options['narbar_align'] ?? 'justify-content-md-start' ),
+		'narbar_search'         => (bool) ( $options['narbar_search'] ?? false ),
+	);
 }
 
 // ---------------------------------------------------------------------------
@@ -115,6 +164,27 @@ $sitemap_options  = apply_filters( 'lerm_sitemap_options', $sitemap_options );
 $custom_options   = apply_filters( 'lerm_custom_options', $custom_options );
 $updater_options  = apply_filters( 'lerm_updater_options', $updater_options );
 $login_options    = apply_filters( 'lerm_login_options', $login_options );
+
+add_filter(
+	'lerm_layout_options',
+	static function ( $defaults ) use ( $layout_options ) {
+		return wp_parse_args( $layout_options, (array) $defaults );
+	}
+);
+
+add_filter(
+	'lerm_tracking_options',
+	static function ( $defaults ) use ( $tracking_options ) {
+		return wp_parse_args( $tracking_options, (array) $defaults );
+	}
+);
+
+add_filter(
+	'lerm_template_options',
+	static function ( $defaults ) use ( $template_options ) {
+		return wp_parse_args( $template_options, (array) $defaults );
+	}
+);
 
 // ---------------------------------------------------------------------------
 // 4. 初始化各模块

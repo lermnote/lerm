@@ -116,6 +116,54 @@ if ( ! function_exists( 'lerm_options' ) ) {
 		return $option_value;
 	}
 }
+
+if ( ! function_exists( 'lerm_get_template_options' ) ) {
+	/**
+	 * Get template-facing theme options prepared by bootstrap.
+	 *
+	 * @return array<string, mixed>
+	 */
+	function lerm_get_template_options(): array {
+		return apply_filters(
+			'lerm_template_options',
+			array(
+				'header_bg_color'       => '#fff',
+				'slide_position'        => '',
+				'slide_enable'          => false,
+				'slide_images'          => array(),
+				'slide_indicators'      => false,
+				'slide_control'         => false,
+				'icp_num'               => '',
+				'copyright'             => '',
+				'author_bio'            => false,
+				'single_sidebar_select' => 'home-sidebar',
+				'blog_sidebar_select'   => 'home-sidebar',
+				'front_page_sidebar'    => 'home-sidebar',
+				'page_sidebar'          => 'home-sidebar',
+				'breadcrumb_container'  => 'nav',
+				'breadcrumb_before'     => '',
+				'breadcrumb_after'      => '',
+				'breadcrumb_list_tag'   => 'ol',
+				'breadcrumb_item_tag'   => 'li',
+				'breadcrumb_separator'  => '/',
+				'breadcrumb_front_show' => false,
+				'breadcrumb_show_title' => true,
+				'thumbnail_gallery'     => '',
+				'load_more'             => false,
+				'related_posts'         => false,
+				'related_number'        => 5,
+				'single_top'            => array(),
+				'single_bottom'         => array(),
+				'summary_meta'          => array(),
+				'social_share'          => array(),
+				'blogname'              => '',
+				'blogdesc'              => '',
+				'narbar_align'          => 'justify-content-md-start',
+				'narbar_search'         => false,
+			)
+		);
+	}
+}
 // -----------------------------------------------------------------------------
 // 5. 主题启动（bootstrap）
 //    挂载到 after_setup_theme，确保 WP 核心函数全部可用
