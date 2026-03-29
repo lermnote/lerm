@@ -1,4 +1,5 @@
 import ClickService from '../services/ClickService.js';
+import { translate } from '../utils/i18n.js';
 
 export const likeBtnSuccess = (data, target) => {
 	const { id, type } = target.dataset;
@@ -8,7 +9,7 @@ export const likeBtnSuccess = (data, target) => {
 	buttons.forEach((button) => {
 		button.classList.toggle('btn-outline-danger', isLiked);
 		button.classList.toggle('btn-outline-secondary', !isLiked);
-		button.setAttribute('title', isLiked ? 'Unlike' : 'Like');
+		button.setAttribute('title', isLiked ? translate('unlike') : translate('like'));
 		button.setAttribute('aria-pressed', isLiked ? 'true' : 'false');
 
 		const countEl = button.querySelector('.count-wrap');

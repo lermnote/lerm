@@ -1,10 +1,8 @@
 <?php
 /**
- * The template for displaying archive pages
+ * The template for displaying search results.
  *
- * @package Lerm https://lerm.net
- *
- * @since  1.0
+ * @package Lerm
  */
 
 get_header();
@@ -15,7 +13,15 @@ get_header();
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
 				<header class="archive-header card mb-2 p-3">
 					<?php if ( have_posts() ) : ?>
-						<h1 class="page-title p-3 bg-white "><?php printf( esc_html_e( 'Search results for: ', 'lerm' ) . ' "%1$s" ', '<span>' . get_search_query() . '</span>' ); ?></h1>
+						<h1 class="page-title p-3 bg-white ">
+							<?php
+							printf(
+								'%1$s <span>%2$s</span>',
+								esc_html__( 'Search results for:', 'lerm' ),
+								esc_html( get_search_query() )
+							);
+							?>
+						</h1>
 					<?php else : ?>
 						<h1 class="page-title p-3 bg-white "><?php esc_html_e( 'Nothing Found', 'lerm' ); ?></h1>
 					<?php endif; ?>
@@ -38,7 +44,7 @@ get_header();
 			<?php get_template_part( 'template-parts/components/pagination' ); ?>
 		</div>
 		<?php get_sidebar(); ?>
-		</div><!--.row-->
+	</div><!--.row-->
 </main><!--.container-->
 <?php
 get_footer();

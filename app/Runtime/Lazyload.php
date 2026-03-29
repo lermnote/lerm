@@ -1,18 +1,17 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
- * Lazyload images via DOMDocument output buffering.
+ * Lazy-load images via DOMDocument output buffering.
  *
- * 修复记录：
- *  - lazyload_match() 删除：该方法是新旧方案混合时留下的残骸，
- *    有效逻辑全部 dead code（在 return 之后），且 should_skip()
- *    被错误地嵌套定义在其花括号内，导致 Parse Error。
- *  - process_img_node() 新增：从 lazyload_match() 中提取有效逻辑，
- *    接收 DOMElement，直接修改节点，与 lazyload_content() 配合。
- *  - should_skip() 修复：移出嵌套，成为独立私有方法；
- *    foreach 和两个 if 补全缺失的结束花括号。
+ * Notes:
+ * - The old `lazyload_match()` implementation has been removed. It contained
+ *   dead code after `return` statements and nested method definitions that
+ *   could trigger parse errors.
+ * - `process_img_node()` now contains the active DOM-based mutation logic.
+ * - `should_skip()` is a dedicated private method with complete guard checks.
  *
  * @package Lerm\Runtime
  */
+
 namespace Lerm\Runtime;
 
 use Lerm\Traits\Singleton;
@@ -23,22 +22,23 @@ class Lazyload {
 	/**
 	 * Default arguments for lazy loading.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected $default_args = array(
-		// �?HTML 中包含以下字符串时跳�?lazyload（可按需添加�?
+		// Skip lazy loading when the rendered HTML contains any of these markers.
 		'skip_list'    => array( 'skip_lazyload', 'custom-logo', 'slider', 'avatar', 'qrcode' ),
-		// 是否在输出中附加 <noscript> 回退
+		// Append a <noscript> fallback copy of the original image.
 		'add_noscript' => true,
 	);
 
 	private const PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
 	private const ALLOWED_EXT = array( 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'avif' );
+
 	/**
-	 * 实例化并应用参数
+	 * Constructor.
 	 *
-	 * @param array $params Optional parameters for lazy loading.
+	 * @param array<string, mixed> $params Optional parameters for lazy loading.
 	 */
 	public function __construct( $params = array() ) {
 		$this->default_args = apply_filters( 'lerm_lazyload_args', wp_parse_args( $params, $this->default_args ) );
@@ -46,23 +46,28 @@ class Lazyload {
 	}
 
 	/**
-	 * 绑定 hook
+	 * Register hooks.
 	 */
 	public function hooks() {
 		add_action( 'template_redirect', array( $this, 'start_buffer' ) );
 	}
 
 	/**
-	 * 开始输出缓冲，回调 lazyload_content 处理 buffer
+	 * Start output buffering and process the response HTML.
 	 */
 	public function start_buffer() {
 		if ( is_admin() || wp_doing_ajax() || is_feed() || is_embed() || is_preview() ) {
 			return;
 		}
+
 		ob_start( array( $this, 'lazyload_content' ) );
 	}
 
-
+	/**
+	 * Add lazy-loading attributes to matching `<img>` tags in the HTML buffer.
+	 *
+	 * @param string $content Buffered HTML content.
+	 */
 	public function lazyload_content( string $content ): string {
 		if ( empty( $content ) ) {
 			return $content;
@@ -86,24 +91,17 @@ class Lazyload {
 	}
 
 	/**
-	 * 处理匹配到的单个 <img> 标签
+	 * Process a single `<img>` DOM node.
 	 *
-	 * @param array $matches preg 回调传入
-	 * @return string 替换后的 HTML（通常�?lazyload �?+ 可�?<noscript> 回退�?  */
-	/**
-	 * 处理单个 <img> DOMElement 节点。
+	 * For images that should be lazy-loaded, this method:
+	 * - adds `loading="lazy"` when it is missing
+	 * - appends the `lazy` CSS class
+	 * - moves `src` to `data-src`
+	 * - moves `srcset` to `data-srcset`
+	 * - replaces `src` with a transparent placeholder
+	 * - optionally appends a `<noscript>` fallback
 	 *
-	 * 对需要 lazyload 的图片：
-	 *   - 添加 loading="lazy" 属性
-	 *   - 追加 lazy CSS class
-	 *   - src  → data-src
-	 *   - srcset → data-srcset
-	 *   - src 替换为 1×1 透明占位图
-	 *
-	 * 若节点应跳过（在 skip_list 中、已有 loading="eager" 等），
-	 * 则不做任何修改。
-	 *
-	 * @param \DOMElement $img
+	 * @param \DOMElement $img Image node.
 	 */
 	private function process_img_node( \DOMElement $img ): void {
 		$src = $img->getAttribute( 'src' );
@@ -118,19 +116,19 @@ class Lazyload {
 			return;
 		}
 
-		// 只处理常见位图格式，SVG/未知格式跳过
+		// Only process common bitmap formats; skip SVG and unknown formats.
 		$path      = wp_parse_url( $src, PHP_URL_PATH );
 		$extension = $path ? strtolower( pathinfo( $path, PATHINFO_EXTENSION ) ) : '';
 		if ( ! in_array( $extension, self::ALLOWED_EXT, true ) ) {
 			return;
 		}
 
-		// 添加 loading="lazy"（已有时不覆盖）
+		// Add loading="lazy" when it is not already set.
 		if ( ! $img->hasAttribute( 'loading' ) ) {
 			$img->setAttribute( 'loading', 'lazy' );
 		}
 
-		// 追加 lazy class
+		// Append the lazy class once.
 		$existing = $img->getAttribute( 'class' );
 		$classes  = array_filter( preg_split( '/\s+/', trim( $existing ) ) );
 		if ( ! in_array( 'lazy', $classes, true ) ) {
@@ -138,23 +136,22 @@ class Lazyload {
 		}
 		$img->setAttribute( 'class', implode( ' ', $classes ) );
 
-		// srcset → data-srcset
+		// Move srcset to data-srcset.
 		if ( $img->hasAttribute( 'srcset' ) ) {
 			$img->setAttribute( 'data-srcset', $img->getAttribute( 'srcset' ) );
 			$img->removeAttribute( 'srcset' );
 		}
 
-		// src → data-src，占位图放 src
+		// Move src to data-src and replace src with the placeholder.
 		$img->setAttribute( 'data-src', $src );
 		$img->setAttribute( 'src', self::PLACEHOLDER );
 
-		// <noscript> 回退（使用原始 img_html，保留原 src）
 		if ( ! empty( $this->default_args['add_noscript'] ) ) {
 			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
 			$noscript = $img->ownerDocument->createElement( 'noscript' );
 			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
 			$fragment = $img->ownerDocument->createDocumentFragment();
-			// appendXML 要求有效 XML；img_html 已由 DOMDocument 生成，是合法的
+			// appendXML requires valid XML, and $img_html comes from DOMDocument.
 			$fragment->appendXML( $img_html );
 			$noscript->appendChild( $fragment );
 			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
@@ -162,12 +159,11 @@ class Lazyload {
 		}
 	}
 
-		/**
-		 * 判断单张 img 是否应跳�?lazyload
-		 *
-		 * @param string $img_html 图片标签 HTML
-		 * @return bool
-		 */
+	/**
+	 * Determine whether a single image should skip lazy loading.
+	 *
+	 * @param string $img_html Image tag HTML.
+	 */
 	private function should_skip( $img_html ): bool {
 		$skips = (array) $this->default_args['skip_list'];
 

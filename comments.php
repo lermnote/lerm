@@ -29,7 +29,7 @@ $args = array(
 		'<cite class="fn">%1$s<strong class="ps-2">%2$s</strong></cite><span class="ms-2">%3$s</span>',
 		get_avatar( $comment_author_email, 32 ),
 		$comment_author ? $comment_author : __( 'Visitor', 'lerm' ),
-		$comment_author_email ? __( 'Welcome Back', 'lerm' ) : __( 'Welcome ', 'lerm' )
+		$comment_author_email ? __( 'Welcome back', 'lerm' ) : __( 'Welcome', 'lerm' )
 	) . '</p>',
 	'comment_field'        => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="comment">' . esc_html__( 'Comment', 'lerm' ) . '</label><textarea id="comment" class="rq form-control mb-1" name="comment" required="required" placeholder="' . esc_attr__( 'Leave a comment...', 'lerm' ) . '" aria-label="' . esc_attr__( 'Comment content', 'lerm' ) . '" rows="4"></textarea></div>',
 	'fields'               => array(

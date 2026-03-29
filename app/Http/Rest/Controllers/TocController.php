@@ -3,27 +3,28 @@ declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
 
+use Lerm\Http\Rest\Middleware;
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
-use WP_Error;
-use Lerm\Http\Rest\Middleware;
 
 /**
- * 文章目录（TOC）接口控制器
+ * Table of contents (TOC) REST controller.
  *
  * GET /lerm/v1/toc/{id}
  *
- * 解析文章内容中的 H2/H3 标题，返回树形结构供前端渲染目录导航。
+ * Parses H2 and H3 headings from post content and returns a nested structure
+ * for front-end TOC navigation.
  *
- * 返回格式：
+ * Response shape:
  * {
  *   "toc": [
  *     {
  *       "id": "heading-slug",
- *       "text": "标题文字",
+ *       "text": "Heading text",
  *       "level": 2,
  *       "children": [
- *         { "id": "sub-heading", "text": "子标题", "level": 3, "children": [] }
+ *         { "id": "sub-heading", "text": "Subheading text", "level": 3, "children": [] }
  *       ]
  *     }
  *   ]
@@ -36,6 +37,9 @@ final class TocController {
 	private const CACHE_GROUP = 'lerm_toc';
 	private const CACHE_TTL   = HOUR_IN_SECONDS;
 
+	/**
+	 * Handle TOC requests for a published post.
+	 */
 	public static function handle( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$post_id = absint( $request->get_param( 'id' ) );
 
@@ -57,10 +61,10 @@ final class TocController {
 
 		wp_cache_set( $cache_key, $toc, self::CACHE_GROUP, self::CACHE_TTL );
 
-		// 文章更新时清除缓存
+		// Clear the cached TOC whenever the post is saved again.
 		add_action(
 			'save_post_' . $post_id,
-			static function () use ( $post_id, $cache_key ) {
+			static function () use ( $cache_key ) {
 				wp_cache_delete( $cache_key, self::CACHE_GROUP );
 			}
 		);
@@ -69,7 +73,7 @@ final class TocController {
 	}
 
 	/**
-	 * 解析 HTML 中的标题节点，构建嵌套树
+	 * Parse heading nodes from HTML and build a nested tree.
 	 *
 	 * @return array<int, array{id: string, text: string, level: int, children: array}>
 	 */
@@ -78,7 +82,7 @@ final class TocController {
 			return array();
 		}
 
-		// 匹配 H2/H3，捕获已有 id 属性或将从文字生成
+		// Match H2/H3 headings and capture an existing id attribute when present.
 		if ( ! preg_match_all(
 			'/<h([23])[^>]*(?:id=["\']([^"\']*)["\'])?[^>]*>(.*?)<\/h[23]>/is',
 			$content,
@@ -97,14 +101,14 @@ final class TocController {
 			$raw_text = wp_strip_all_tags( $match[3] );
 			$text     = html_entity_decode( $raw_text, ENT_QUOTES, 'UTF-8' );
 
-			// 生成唯一 slug
+			// Build a stable slug from the existing id or from the heading text.
 			if ( $id_attr ) {
 				$slug = sanitize_title( $id_attr );
 			} else {
 				$slug = sanitize_title( $text );
 			}
 
-			// 防止重复 slug
+			// Ensure slugs stay unique within the current document.
 			if ( isset( $slug_count[ $slug ] ) ) {
 				++$slug_count[ $slug ];
 				$slug .= '-' . $slug_count[ $slug ];
@@ -124,10 +128,13 @@ final class TocController {
 	}
 
 	/**
-	 * 将扁平数组转换为嵌套树（H2 为根，H3 为子节点）
+	 * Convert a flat heading list into a nested tree.
 	 *
-	 * @param array<int, array{id: string, text: string, level: int, children: array}> $flat
-	 * @return array
+	 * H2 nodes become roots, and subsequent H3 nodes are attached to the most
+	 * recent H2 node. If no parent H2 exists, the H3 node is promoted to root.
+	 *
+	 * @param array<int, array{id: string, text: string, level: int, children: array}> $flat Flat heading list.
+	 * @return array<int, array{id: string, text: string, level: int, children: array}>
 	 */
 	private static function build_tree( array $flat ): array {
 		$tree             = array();
@@ -138,10 +145,8 @@ final class TocController {
 				$tree[]           = $item;
 				$current_h2_index = count( $tree ) - 1;
 			} elseif ( $current_h2_index >= 0 ) {
-				// H3 挂在最近的 H2 下
 				$tree[ $current_h2_index ]['children'][] = $item;
 			} else {
-				// 没有父级 H2，提升为根节点
 				$tree[] = $item;
 			}
 		}
