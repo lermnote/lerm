@@ -6,6 +6,8 @@
  * @since  3.5.0
  */
 use Lerm\Core\Menu;
+
+$template_options = lerm_get_template_options();
 if ( wp_is_mobile() ) {
 	$theme_location = 'mobile';
 } else {
@@ -70,7 +72,7 @@ else :
 			array(
 				'theme_location'  => $theme_location,
 				'container'       => 'div',
-				'container_class' => lerm_options( 'narbar_align' ) . ' primary-nav flex-grow-1 d-none d-lg-flex mx-2',
+				'container_class' => $template_options['narbar_align'] . ' primary-nav flex-grow-1 d-none d-lg-flex mx-2',
 				'container_id'    => 'navbar',
 				'fallback_cb'     => 'Menu::fallback',
 				'menu_class'      => 'navbar-nav',
@@ -85,7 +87,7 @@ else :
 	if ( $nav_menu ) :
 		echo $nav_menu; // phpcs:ignore WordPress.Security.EscapeOutput -- nav menu output is safe
 	endif;
-	if ( lerm_options( 'narbar_search' ) ) :
+	if ( ! empty( $template_options['narbar_search'] ) ) :
 		?>
 		<div class="d-none d-lg-block">
 			<?php get_search_form(); ?>

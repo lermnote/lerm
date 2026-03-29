@@ -8,6 +8,8 @@
  * @since 1.0
  */
 get_header();
+
+$template_options = lerm_get_template_options();
 ?>
 <main role="main" class="container"><!--.container-->
 	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
@@ -39,7 +41,7 @@ get_header();
 								</li>
 							</ul>
 
-							<?php if ( lerm_options( 'related_posts' ) ) : ?>
+							<?php if ( ! empty( $template_options['related_posts'] ) ) : ?>
 								<?php get_template_part( 'template-parts/components/related-posts' ); ?>
 							<?php endif; ?>
 

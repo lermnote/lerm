@@ -7,6 +7,8 @@
  * @since  1.00
  */
 use function Lerm\Support\copyright_text;
+
+$template_options = lerm_get_template_options();
 ?>
 </main>
 <footer class="card footer" itemscope="" itemtype="http://schema.org/WPFooter">
@@ -18,8 +20,8 @@ use function Lerm\Support\copyright_text;
 	<div class="colophon py-3 text-center">
 		<div class="container">
 			<span><?php copyright_text( 'long' ); ?></span>
-			<?php if ( lerm_options( 'icp_num' ) ) : ?>
-				<span><a href="https://beian.miit.gov.cn"><?php echo esc_html( lerm_options( 'icp_num' ) ); ?></a></span>
+			<?php if ( ! empty( $template_options['icp_num'] ) ) : ?>
+				<span><a href="https://beian.miit.gov.cn"><?php echo esc_html( $template_options['icp_num'] ); ?></a></span>
 			<?php endif; ?>
 			<!--尊重原创，请保留作者链接，谢谢 -->
 			<br>
@@ -34,8 +36,8 @@ use function Lerm\Support\copyright_text;
 				)
 			);
 			?>
-			<?php if ( lerm_options( 'copyright' ) ) : ?>
-				<div class="d-block"><?php echo esc_html( lerm_options( 'copyright' ) ); ?></div>
+			<?php if ( ! empty( $template_options['copyright'] ) ) : ?>
+				<div class="d-block"><?php echo esc_html( $template_options['copyright'] ); ?></div>
 			<?php endif; ?>
 		</div>
 	</div>

@@ -252,10 +252,6 @@ if ( ! function_exists( 'lerm_social_icons' ) ) {
 	 * 接受后台 social_share 选项返回的数组（已勾选项的 slug 列表），
 	 * 也接受 slug => url 关联数组。
 	 *
-	 * 用法：
-	 *   lerm_social_icons( lerm_options('social_share') );
-	 *   lerm_social_icons( array('weibo' => 'https://weibo.com/share/...', 'qq') );
-	 *
 	 * @param array $icons slug 列表或 slug => url 关联数组
 	 */
 	function lerm_social_icons( array $icons = array( 'weibo', 'wechat', 'qq' ) ): void {

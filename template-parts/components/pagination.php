@@ -55,12 +55,13 @@ foreach ( $archive_data as $key => $value ) {
 }
 
 $_lm_next_page = ( get_query_var( 'paged' ) ? (int) get_query_var( 'paged' ) : 1 ) + 1;
+$template_options = lerm_get_template_options();
 
 if ( $wp_query->max_num_pages > 1 ) :
 	?>
 	<div class="d-grid col-12 navigation mb-3">
 		<?php
-		if ( lerm_options( 'load_more' ) || wp_is_mobile() ) :
+		if ( ! empty( $template_options['load_more'] ) || wp_is_mobile() ) :
 			?>
 			<button
 				type="button"

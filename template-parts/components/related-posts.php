@@ -11,8 +11,9 @@ if ( ! $tags ) {
 	return;
 }
 
+$template_options = lerm_get_template_options();
 $tag_ids = wp_list_pluck( $tags, 'term_id' );
-$number  = lerm_options( 'related_number' ) ? lerm_options( 'related_number' ) : 5;
+$number  = ! empty( $template_options['related_number'] ) ? (int) $template_options['related_number'] : 5;
 
 $args = array(
 	'post_status'            => 'publish',

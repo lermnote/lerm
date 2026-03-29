@@ -8,6 +8,7 @@ use Lerm\View\LikeButton;
 use function Lerm\View\lerm_social_icons;
 global $post;
 
+$template_options = lerm_get_template_options();
 ?>
 <footer class="mt-5">
 	<div class="line-text d-flex justify-content-center align-items-center">如果您觉得有用就请点赞和分享</div>
@@ -29,5 +30,5 @@ global $post;
 			</a>
 		</div><!-- like -->
 	</div><!-- toolbar -->
-	<?php lerm_social_icons( array( 'social' => lerm_options( 'social_share' ) ) ); ?>
+	<?php lerm_social_icons( (array) $template_options['social_share'] ); ?>
 </footer>
