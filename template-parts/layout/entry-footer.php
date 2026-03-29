@@ -25,12 +25,9 @@ $template_options = lerm_get_template_options();
 				array( 'class' => 'btn btn-sm' )
 			);
 			?>
-			<a href="<?php comments_link(); ?>" class="btn btn-custom btn-sm entry-comment-btn">
+			<a href="<?php comments_link(); ?>" class="btn btn-custom btn-sm entry-comment-btn btn-outline-secondary">
 				<i class="fa fa-comment"></i>
-				<?php
-				/* translators: %s = comment number */
-				printf( esc_html( _nx( '%s comment', '%s comments', get_comments_number(), 'comments title', 'lerm' ) ), esc_html( number_format_i18n( get_comments_number() ) ) );
-				?>
+				<?php echo esc_html( number_format_i18n( get_comments_number() ) ); ?>
 			</a>
 		</div><!-- like -->
 	</div><!-- toolbar -->

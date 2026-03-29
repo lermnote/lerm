@@ -18,7 +18,7 @@ $template_options = lerm_get_template_options();
 	<?php endif; ?>
 	<div class="colophon py-3 text-center">
 		<div class="container">
-			<span><?php copyright_text( 'long' ); ?></span>
+			<span><?php copyright_text( 'short' ); ?></span>
 			<?php if ( ! empty( $template_options['icp_num'] ) ) : ?>
 				<span><a href="https://beian.miit.gov.cn"><?php echo esc_html( $template_options['icp_num'] ); ?></a></span>
 			<?php endif; ?>
