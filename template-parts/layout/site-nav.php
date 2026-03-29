@@ -38,7 +38,7 @@ if ( wp_is_mobile() ) {
 						'menu_class'      => 'navbar-nav',
 						'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
 						'walker'          => new Menu(),
-						'depth'           => 2,
+						'depth'           => 4,
 					)
 				);
 			endif;
@@ -76,7 +76,7 @@ else :
 				'menu_class'      => 'navbar-nav',
 				'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
 				'walker'          => new Menu(),
-				'depth'           => 2,
+				'depth'           => 4,
 				'echo'            => false,
 			)
 		);

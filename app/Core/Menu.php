@@ -1,4 +1,4 @@
-<?php // phpcs:disable WordPress.Files.FileName
+<?php  // phpcs:disable WordPress.Files.FileName
 /**
  * A custom WordPress nav walker class to implement the Bootstrap 5 navigation style in a custom theme using the WordPress built-in menu manager.
  *
@@ -9,29 +9,49 @@
  * License URI: http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
+declare( strict_types = 1 );
+
 namespace Lerm\Core;
 
 use Walker_Nav_Menu;
 
-
 class Menu extends Walker_Nav_Menu {
-
 
 	public function __construct() {
 		if ( ! has_filter( 'wp_nav_menu_args', array( $this, 'add_schema_to_navbar_ul' ) ) ) {
 			add_filter( 'wp_nav_menu_args', array( $this, 'add_schema_to_navbar_ul' ) );
 		}
 	}
-	public function start_lvl( &$output, $depth = 0, $args = null ) {
+
+	/**
+	 * Start the sub-menu level (ul).
+	 *
+	 * @param string $output The HTML output.
+	 * @param int $depth The depth of the menu.
+	 * @param object|null $args The arguments passed to wp_nav_menu.
+	 *
+	 * @return void
+	 */
+	public function start_lvl( &$output, $depth = 0, $args = null ): void {
 		$indent = str_repeat( "\t", $depth );
 
-		// Add class for sub-menu.
+		// Ensure that dropdown menus are added correctly for sub-levels.
 		$output .= "\n$indent<ul class=\"dropdown-menu\">\n";
 	}
 
-	// Start menu item.
-	public function start_el( &$output, $data_object, $depth = 0, $args = null, $id = 0 ) {
-		// Restores the more descriptive, specific name for use within this method.
+
+	/**
+	 * Start menu item.
+	 *
+	 * @param string $output The HTML output.
+	 * @param object $data_object The menu item data.
+	 * @param int $depth The depth of the menu.
+	 * @param object|null $args The arguments passed to wp_nav_menu.
+	 * @param int $id The ID of the menu item.
+	 *
+	 * @return void
+	 */
+	public function start_el( &$output, $data_object, $depth = 0, $args = null, $id = 0 ): void {
 		$item = $data_object;
 
 		$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
@@ -41,7 +61,7 @@ class Menu extends Walker_Nav_Menu {
 		$classes[] = 'nav-item';// Add class for menu item.
 
 		// Add dropdown class for menu item with children.
-		$classes[] = ( $args->has_children ) ? 'dropdown' : '';
+		$classes[] = ( isset( $args->has_children ) && $args->has_children ) ? 'dropdown' : '';
 
 		$class_names = implode( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args, $depth ) );
 
@@ -63,10 +83,9 @@ class Menu extends Walker_Nav_Menu {
 		$atts['href']   = ! empty( $item->url ) ? $item->url : '#';
 
 		$atts['aria-current'] = $item->current ? 'page' : '';
+		$atts['class']        = $item->current ? 'nav-link active' : 'nav-link';
 
-		$atts['class'] = $item->current ? 'nav-link active' : 'nav-link';
-
-		if ( $args->has_children ) {
+		if ( isset( $args->has_children ) && $args->has_children ) {
 			$atts['role']           = 'button';
 			$atts['data-bs-toggle'] = 'dropdown';
 			$atts['aria-expanded']  = 'false';
@@ -88,21 +107,41 @@ class Menu extends Walker_Nav_Menu {
 		$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
 	}
 
-	public function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
+	/**
+	 * Display menu element.
+	 *
+	 * @param object $element The menu item.
+	 * @param array $children_elements The child elements of the current menu item.
+	 * @param int $max_depth The maximum depth of the menu.
+	 * @param int $depth The current depth level of the menu.
+	 * @param object $args The arguments passed to wp_nav_menu.
+	 * @param string $output The HTML output.
+	 *
+	 * @return void
+	 */
+	public function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ): void {
 		if ( ! $element ) {
 			return;
 		}
 
 		$id_field = $this->db_fields['id'];
 
-		if ( is_object( $args[0] ) ) {
+		if ( isset( $args[0] ) && is_object( $args[0] ) ) {
 			// Add has_children attribute.
 			$args[0]->has_children = ! empty( $children_elements[ $element->$id_field ] );
 		}
 
 		parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
 	}
-	public function add_schema_to_navbar_ul( $args ) {
+
+	/**
+	 * Adds schema markup to the navbar UL element.
+	 *
+	 * @param array $args The arguments passed to wp_nav_menu.
+	 *
+	 * @return array The modified arguments.
+	 */
+	public function add_schema_to_navbar_ul( $args ): array {
 		if ( isset( $args['items_wrap'] ) ) {
 			$wrap = $args['items_wrap'];
 			if ( strpos( $wrap, 'SiteNavigationElement' ) === false ) {
@@ -111,13 +150,13 @@ class Menu extends Walker_Nav_Menu {
 		}
 		return $args;
 	}
+
 	/**
 	 * Builds a string of HTML attributes from an array of key/value pairs.
 	 * Empty values are ignored.
 	 *
-	 * @since 6.3.0
+	 * @param array $atts Optional. An array of HTML attribute key/value pairs. Default empty array.
 	 *
-	 * @param  array $atts Optional. An array of HTML attribute key/value pairs. Default empty array.
 	 * @return string A string of HTML attributes.
 	 */
 	protected function build_atts( $atts = array() ) {

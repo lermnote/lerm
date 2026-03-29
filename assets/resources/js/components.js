@@ -29,7 +29,7 @@ export const likeBtnHandle = () => {
 	const postLike = new ClickService({
 		apiUrl: lermData.rest_url,
 		selector: '.like-button',
-		route: lermData.route,          // 'like'
+		route: lermData.route_like,          // 'like'
 		security: lermData.nonce,
 		isThrottled: true,
 		enableCache: false,
@@ -70,7 +70,7 @@ export const loadMoreHandle = () => {
 	const loadMore = new ClickService({
 		apiUrl: lermData.rest_url,
 		selector: '.more-posts',
-		route: lermData.loadmore_action,
+		route: lermData.route_loadmore,
 		security: lermData.nonce,
 		isThrottled: true,
 		cacheExpiryTime: 60000,

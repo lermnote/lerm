@@ -129,6 +129,23 @@ export const navigationToggle = () => {
     toggler.classList.toggle("active");
   });
 };
+	const dropdowns = document.querySelectorAll(".dropdown");
+	if (dropdowns.length > 0) {
+		dropdowns.forEach((dropdown) => {
+			const menu = dropdown.querySelector(".dropdown-menu");
+			if (!menu) return;
+
+			dropdown.addEventListener("mouseover", () => {
+				menu.classList.add("show");
+				dropdown.setAttribute("aria-expanded", "true");
+			});
+
+			dropdown.addEventListener("mouseout", () => {
+				menu.classList.remove("show");
+				dropdown.setAttribute("aria-expanded", "false");
+			});
+		});
+	}
 
 // utils.js 新增
 const SHARE_URLS = {

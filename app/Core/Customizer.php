@@ -4,7 +4,7 @@
  *
  * @package lerm http://lerm.net
  */
-
+declare( strict_types = 1 );
 namespace Lerm\Core;
 
 use Lerm\Traits\Singleton;
@@ -47,8 +47,8 @@ class Customizer {
 	 * @return string|null HTML for the custom logo or null if not available.
 	 */
 	public static function custom_logo() {
-		$large_logo     = lerm_options( 'large_logo', 'id' );
-		$mobile_logo    = lerm_options( 'mobile_logo', 'id' );
+		$large_logo     = self::$args['large_logo'];
+		$mobile_logo    = self::$args['mobile_logo'];
 		$custom_logo_id = get_theme_mod( 'custom_logo' );
 
 		if ( ! empty( $large_logo ) ) {

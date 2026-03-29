@@ -41,10 +41,10 @@ const formAjaxHandle = () => {
 		// { formId: 'login', action: lermData.login_action, security: lermData.login_nonce },
 		// { formId: 'reset', action: lermData.reset_action, security: lermData.reset_nonce },
 		// { formId: 'regist', action: lermData.regist_action, security: lermData.regist_nonce, passwordToggle: true },
-		{ formId: 'commentform', action: lermData.comment_action, security: lermData.nonce }
+		{ formId: 'commentform', action: lermData.route_comment, security: lermData.nonce }
 	];
 	if (lermData.loggedin) {
-		formConfigs.push({ formId: 'update-profile', action: lermData.profile_action, security: lermData.profile_nonce });
+		formConfigs.push({ formId: 'update-profile', action: lermData.route_profile, security: lermData.profile_nonce });
 	}
 
 	formConfigs.forEach(config => {

@@ -123,9 +123,6 @@ class Setup {
 			)
 		);
 
-		// Make theme available for translation.
-		//load_theme_textdomain( LERM_DOMAIN, LERM_DIR . '/languages' );
-
 		// Define a max content width to allow WordPress to properly resize your images.
 		$GLOBALS['content_width'] = (int) apply_filters( 'content_width', self::$args['content_width'] );
 	}
