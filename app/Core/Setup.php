@@ -123,9 +123,6 @@ class Setup {
 			)
 		);
 
-		// Make theme available for translation.
-		//load_theme_textdomain( LERM_DOMAIN, LERM_DIR . '/languages' );
-
 		// Define a max content width to allow WordPress to properly resize your images.
 		$GLOBALS['content_width'] = (int) apply_filters( 'content_width', self::$args['content_width'] );
 	}
@@ -178,7 +175,7 @@ class Setup {
 				'name'          => __( 'Home Sidebar', 'lerm' ),
 				'id'            => 'home-sidebar',
 				'description'   => __( 'Add widgets here to appear in your sidebar.', 'lerm' ),
-				'before_widget' => '<section id="%1$s" class="card widget mb-3 %2$s loading-animate fadeIn">',
+				'before_widget' => '<section id="%1$s" class="card widget mb-3 %2$s loading-animate animate__fadeIn">',
 				'after_widget'  => '</section>',
 				'before_title'  => '<h4 class="widget-title card-header border-bottom-0"><span class="wrap d-inline-block fa">',
 				'after_title'   => '</span></h4>',
@@ -190,7 +187,7 @@ class Setup {
 				'name'          => __( 'Footer Sidebar', 'lerm' ),
 				'id'            => 'footer-sidebar',
 				'description'   => __( 'Add widgets here to appear in footer area.', 'lerm' ),
-				'before_widget' => '<section id="%1$s" class="footer-widget %2$s loading-animate fadeIn">',
+				'before_widget' => '<section id="%1$s" class="footer-widget %2$s loading-animate animate__fadeIn">',
 				'after_widget'  => '</section>',
 				'before_title'  => '<h4 class="footer-widget-title"><span class="wrap d-inline-block fa">',
 				'after_title'   => '</span></h4>',

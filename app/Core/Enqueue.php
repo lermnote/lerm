@@ -4,7 +4,7 @@
  *
  * @package Lerm
  */
-
+declare( strict_types = 1 );
 namespace Lerm\Core;
 
 use Lerm\Traits\Singleton;
@@ -99,27 +99,26 @@ class Enqueue {
 				'lerm_l10n_data',
 				array(
 					// API 地址
-					'rest_url'        => esc_url_raw( rest_url( 'lerm/v1/' ) ),
-					'ajax_url'        => admin_url( 'admin-ajax.php' ),
+					'rest_url'       => esc_url_raw( rest_url( 'lerm/v1/' ) ),
+					'ajax_url'       => admin_url( 'admin-ajax.php' ),
 
 					// Nonce
-					'nonce'           => wp_create_nonce( 'wp_rest' ),
-					'ajax_nonce'      => wp_create_nonce( 'lerm_admin_ajax' ),
-					'profile_nonce'   => wp_create_nonce( 'lerm_profile' ),
+					'nonce'          => wp_create_nonce( 'wp_rest' ),
+					'ajax_nonce'     => wp_create_nonce( 'lerm_admin_ajax' ),
+					'profile_nonce'  => wp_create_nonce( 'lerm_profile' ),
 
 					// 用户状态
-					'loggedin'        => is_user_logged_in(),
-					'post_id'         => is_singular() ? get_the_ID() : 0,
+					'loggedin'       => is_user_logged_in(),
+					'post_id'        => is_singular() ? get_the_ID() : 0,
 
-					// REST 路由名（对应 Router::boot() 中注册的路径片段）
-					'route'           => 'like',
-					'loadmore_action' => 'posts',
-					'comment_action'  => 'comment',
-					'profile_action'  => 'profile',
+					'route_like'     => 'like',
+					'route_loadmore' => 'posts',
+					'route_comment'  => 'comment',
+					'route_profile'  => 'profile',
 
 					// 登录/更新后跳转地址
-					'front_door'      => esc_url( home_url( '/' ) ),
-					'redirect'        => esc_url(
+					'front_door'     => esc_url( home_url( '/' ) ),
+					'redirect'       => esc_url(
 						is_user_logged_in()
 							? ( get_edit_profile_url() !== false ? get_edit_profile_url() : home_url( '/' ) )
 							: home_url( '/' )

@@ -79,8 +79,8 @@ if ( ! empty( $options ) ) {
 	);
 
 	$custom_options = array(
-		'large_logo'    => $options['large_logo'] ?? '',
-		'mobile_logo'   => $options['mobile_logo'] ?? '',
+		'large_logo'    => $options['large_logo']['id'] ?? '',
+		'mobile_logo'   => $options['mobile_logo']['id'] ?? '',
 		'content_width' => $options['content_width'] ?? '',
 		'sidebar_width' => $options['sidebar_width'] ?? '',
 		'custom_css'    => $options['custom_css'] ?? '',

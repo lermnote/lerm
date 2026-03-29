@@ -4,7 +4,7 @@
  *
  * @package Lerm
  */
-
+declare( strict_types = 1 );
 namespace Lerm\Core;
 
 use Walker_Comment;
