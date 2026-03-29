@@ -33,9 +33,9 @@ $args = array(
 	) . '</p>',
 	'comment_field'        => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="comment">' . esc_html__( 'Comment', 'lerm' ) . '</label><textarea id="comment" class="rq form-control mb-1" name="comment" required="required" placeholder="' . esc_attr__( 'Leave a comment...', 'lerm' ) . '" aria-label="' . esc_attr__( 'Comment content', 'lerm' ) . '" rows="4"></textarea></div>',
 	'fields'               => array(
-		'author' => '<div class="form-group input-form mb-2"><label class="visually-hidden-focusable" for="author">' . esc_html__( 'Username', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="li li-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . esc_attr__( 'Nickname', 'lerm' ) . '"' . ( $require_identity ? ' required' : '' ) . '></div></div>',
-		'email'  => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="email">' . esc_html__( 'Email', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="li li-envelope"></i></span><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . esc_attr__( 'E-mail', 'lerm' ) . '"' . ( $require_identity ? ' required' : '' ) . '></div></div>',
-		'url'    => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="url">' . esc_html__( 'Url', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="li li-link"></i></span><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . esc_attr__( 'Website', 'lerm' ) . '"></div></div>',
+		'author' => '<div class="form-group input-form mb-2"><label class="visually-hidden-focusable" for="author">' . esc_html__( 'Username', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . esc_attr__( 'Nickname', 'lerm' ) . '"' . ( $require_identity ? ' required' : '' ) . '></div></div>',
+		'email'  => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="email">' . esc_html__( 'Email', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-envelope"></i></span><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . esc_attr__( 'E-mail', 'lerm' ) . '"' . ( $require_identity ? ' required' : '' ) . '></div></div>',
+		'url'    => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="url">' . esc_html__( 'Url', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-link"></i></span><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . esc_attr__( 'Website', 'lerm' ) . '"></div></div>',
 	),
 	'logged_in_as'         => '<p class="logged-in-as">' . sprintf(
 		/* translators: 1: edit user link, 2: accessibility text, 3: user name, 4: logout URL */
@@ -60,7 +60,7 @@ $args = array(
 	'class_form'           => 'card-body comment-form',
 	'id_submit'            => 'commentform-submit',
 	'submit_button'        => '<button type="submit" class="btn btn-sm btn-custom" id="%1$s">%4$s</button>',
-	'title_reply'          => '<i class="li li-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
+	'title_reply'          => '<i class="fa fa-comments"></i><span>' . esc_html__( 'Leave a Reply', 'lerm' ) . '</span>',
 	'title_reply_before'   => '<h3 id="reply-title" class="comment-reply-title card-header border-bottom-0">',
 );
 ?>

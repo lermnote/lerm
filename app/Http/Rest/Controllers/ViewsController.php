@@ -10,19 +10,6 @@ use Lerm\Http\Rest\Middleware;
 use Lerm\Http\Rest\Repository\ViewsRepository;
 use function Lerm\Support\client_ip;
 
-/**
- * 浏览数接口控制器
- *
- * GET  /lerm/v1/views/{id}  — 查询浏览数
- * POST /lerm/v1/views/{id}  — 异步递增浏览数（替换原 Setup::add_post_views 同步写入）
- *
- * 迁移说明：
- *   原 Setup.php 中 add_post_views() 在 template_redirect 同步写 meta，
- *   对 TTFB 有影响。新方案改为前端页面加载后异步 POST。
- *   Setup.php 中对应的 add_action('template_redirect', ...) 可移除。
- *
- * @package Lerm\Http\Rest\Controllers
- */
 final class ViewsController {
 
 	/**
