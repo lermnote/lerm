@@ -115,11 +115,28 @@ class Updater {
 		if ( $cache ) {
 			return $cache;
 		}
-		$response = wp_remote_get( $this->get_releases_url() );
-		if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
-			$response = json_decode( wp_remote_retrieve_body( $response ), true );
-			set_site_transient( md5( $this->get_releases_url() ), $response, 12 * HOUR_IN_SECONDS );
+		$response = wp_remote_get(
+			$this->get_releases_url(),
+			array(
+				'headers' => array(
+					'Accept'     => 'application/vnd.github+json',
+					'User-Agent' => sprintf( '%1$s/%2$s; %3$s', $this->slug, $this->ver, home_url( '/' ) ),
+				),
+				'timeout' => 15,
+			)
+		);
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return array();
 		}
+
+		$response = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! is_array( $response ) ) {
+			return array();
+		}
+
+		set_site_transient( md5( $this->get_releases_url() ), $response, 12 * HOUR_IN_SECONDS );
+
+		return $response;
 	}
 
 	/**
@@ -131,13 +148,15 @@ class Updater {
 	 */
 	private function get_latest_package() {
 		if ( ! $this->response ) {
-			return;
+			return '';
 		}
 		foreach ( $this->response as $release ) {
 			if ( isset( $release['assets'] ) && isset( $release['assets'][0] ) && isset( $release['assets'][0]['browser_download_url'] ) ) {
 				return $release['assets'][0]['browser_download_url'];
 			}
 		}
+
+		return '';
 	}
 
 	/**
@@ -149,13 +168,15 @@ class Updater {
 	 */
 	private function get_latest_version() {
 		if ( ! $this->response ) {
-			return;
+			return '';
 		}
 		foreach ( $this->response as $release ) {
 			if ( isset( $release['tag_name'] ) ) {
 				return str_replace( 'v', '', $release['tag_name'] );
 			}
 		}
+
+		return '';
 	}
 
 	/**
@@ -185,18 +206,31 @@ class Updater {
 	 * @return object
 	 */
 	public function update_themes( $transient ) {
-		if ( isset( $transient->checked ) ) {
-			$current_version = $this->ver;
-
-			if ( version_compare( $current_version, $this->get_latest_version(), '<' ) ) {
-				$transient->response[ $this->name ] = array(
-					'theme'       => $this->name,
-					'new_version' => $this->get_latest_version(),
-					'url'         => 'https://github.com/' . $this->repo . '/releases',
-					'package'     => $this->get_latest_package(),
-				);
-			}
+		if ( ! is_object( $transient ) ) {
+			$transient = new \stdClass();
 		}
+
+		if ( ! isset( $transient->checked ) || ! is_array( $transient->checked ) ) {
+			return $transient;
+		}
+
+		$current_version = $this->ver;
+		$latest_version  = $this->get_latest_version();
+		$latest_package  = $this->get_latest_package();
+
+		if ( '' === $latest_version || '' === $latest_package ) {
+			return $transient;
+		}
+
+		if ( version_compare( $current_version, $latest_version, '<' ) ) {
+			$transient->response[ $this->slug ] = array(
+				'theme'       => $this->slug,
+				'new_version' => $latest_version,
+				'url'         => 'https://github.com/' . $this->repo . '/releases',
+				'package'     => $latest_package,
+			);
+		}
+
 		return $transient;
 	}
 }
