@@ -6,7 +6,7 @@
 // METABOX OPTIONS
 // -----------------------------------------------------------------------------------------------
 // ===============================================================================================
-$theme_options  = (array) get_option( 'lerm_theme_options', array() );
+$theme_options = (array) get_option( 'lerm_theme_options', array() );
 $global_layout = (string) ( $theme_options['global_layout'] ?? 'layout-2c-r' );
 $imagepath     = LERM_URI . 'assets/img/';
 $layout        = array(

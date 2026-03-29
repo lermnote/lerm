@@ -1,1329 +1,717 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Lerm\n"
-"POT-Creation-Date: 2020-08-18 20:55+0800\n"
-"PO-Revision-Date: 2020-08-18 20:56+0800\n"
+"POT-Creation-Date: 2026-03-29 11:15+0800\n"
+"PO-Revision-Date: 2026-03-29 11:15+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.3\n"
-"X-Poedit-Basepath: ..\n"
-"X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
-"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: archive.php:48 index.php:53 search.php:52
-msgid "Load More"
-msgstr "加载更多"
+#: app/Core/CommentWalker.php:94
+msgid "%s ago"
+msgstr "%s 之前"
 
-#: comments.php:28
-msgid "Visitor"
-msgstr "游客"
+#: app/Support/Validator.php:21
+msgid "%s cannot be empty."
+msgstr "%s 不能为空。"
 
-#: comments.php:29
-msgid "Welcome Back"
-msgstr "欢迎回来"
+#: template-parts/forms/profile.php:72
+msgid "1234 Main St"
+msgstr "1234 Main St"
 
-#: comments.php:29
-msgid "Welcome "
-msgstr "欢迎您"
+#: app/View/Breadcrumb.php:65
+msgid "404 Not Found"
+msgstr "404 未找到"
 
-#: comments.php:36
-msgid "Nickname"
-msgstr "昵称"
+#: app/View/NavMenu.php:72
+msgid "Account"
+msgstr "账户"
+
+#: app/Core/Enqueue.php:134
+msgid "Action completed successfully."
+msgstr "操作已成功完成。"
+
+#: app/Core/Setup.php:189
+msgid "Add widgets here to appear in footer area."
+msgstr "在此添加小工具以显示在页脚区域。"
+
+#: app/Core/Setup.php:177
+msgid "Add widgets here to appear in your sidebar."
+msgstr "在此添加小工具以显示在侧边栏。"
+
+#: template-parts/forms/profile.php:73
+msgid "Address"
+msgstr "地址"
+
+#: template-parts/forms/regist.php:70
+msgid "Already have an account?"
+msgstr "已有账户？"
+
+#: app/Http/Rest/Controllers/LoginController.php:44
+msgid "Already logged in."
+msgstr "您已登录。"
+
+#: app/Core/Enqueue.php:137
+msgid "An error occurred: {message}"
+msgstr "发生错误：{message}"
+
+#: app/Support/Response.php:111
+msgid "An internal server error occurred."
+msgstr "发生了内部服务器错误。"
+
+#: app/View/Breadcrumb.php:66
+msgid "Archives"
+msgstr "归档"
+
+#: app/View/Breadcrumb.php:64
+msgid "Article"
+msgstr "文章"
+
+#: template-parts/components/biography.php:27
+msgid "Author"
+msgstr "作者"
+
+#: 404.php:49
+msgid "Back to home"
+msgstr "返回首页"
+
+#: footer.php:45
+msgid "Back to top"
+msgstr "返回顶部"
+
+#: templates/user.php:39
+msgid "Beginner"
+msgstr "新手"
+
+#: app/View/Breadcrumb.php:61
+msgid "Browse:"
+msgstr "浏览："
+
+#: app/View/PostMeta.php:113
+msgid "By %s"
+msgstr "作者：%s"
+
+#: template-parts/forms/profile.php:78
+msgid "Cancel"
+msgstr "取消"
+
+#: app/Http/Rest/Controllers/LikeController.php:35 app/Http/Rest/Controllers/LikeController.php:72
+msgid "Cannot set like tracking cookie. Response headers already sent."
+msgstr "无法设置点赞追踪 Cookie，响应头已发送。"
+
+#: app/View/PostMeta.php:159
+msgid "Categories"
+msgstr "分类"
+
+#: template-parts/forms/regist.php:15
+msgid "Choose a username"
+msgstr "选择用户名"
+
+#: comments.php:34
+msgid "Comment"
+msgstr "评论"
+
+#: app/View/Breadcrumb.php:72
+msgid "Comment Page %s"
+msgstr "评论第 %s 页"
+
+#: comments.php:34
+msgid "Comment content"
+msgstr "评论内容"
+
+#: app/Core/Enqueue.php:147
+msgid "Comment must be at least {minLength} characters long."
+msgstr "评论内容至少需要 {minLength} 个字符。"
+
+#: app/Http/Rest/Middleware.php:114
+msgid "Comment not found."
+msgstr "评论不存在。"
+
+#: app/Http/Rest/Controllers/CommentController.php:66
+msgid "Comment submitted successfully."
+msgstr "评论提交成功。"
+
+#: app/Http/Rest/Controllers/CommentController.php:58
+msgid "Comment was created, but could not be loaded."
+msgstr "评论已创建，但无法加载。"
+
+#: comments.php:99 app/Http/Rest/Controllers/CommentController.php:39
+msgid "Comments are closed."
+msgstr "评论已关闭。"
+
+#: functions.php:59
+msgid "Composer autoload not found: %s. Please run `composer install`."
+msgstr "找不到 Composer autoload 文件：%s。请运行 `composer install`。"
+
+#: template-parts/forms/regist.php:38
+msgid "Confirm password"
+msgstr "确认密码"
+
+#: template-parts/forms/regist.php:37
+msgid "Confirm your password"
+msgstr "请确认您的密码"
+
+#: templates/links.php:36
+msgid "Continue reading"
+msgstr "继续阅读"
+
+#: template-parts/post/content-page.php:21 template-parts/post/content.php:28
+msgid "Continue reading<span class=\"screen-reader-text\">\"%s\"</span>"
+msgstr "继续阅读<span class=\"screen-reader-text\">\"%s\"</span>"
+
+#: app/Support/Utilities.php:180
+msgid "Copyright &copy; %1$s %2$s. All rights reserved."
+msgstr "版权所有 &copy; %1$s %2$s。保留所有权利。"
+
+#: singular.php:35
+msgid "Copyright notice:"
+msgstr "版权声明："
+
+#: template-parts/forms/regist.php:30
+msgid "Create a strong password"
+msgstr "创建强密码"
+
+#: template-parts/forms/profile.php:15 template-parts/forms/profile.php:67
+msgid "Description"
+msgstr "描述"
+
+#: template-parts/forms/login.php:59
+msgid "Don't have an account?"
+msgstr "没有账户？"
 
 #: comments.php:37
 msgid "E-mail"
 msgstr "E-mail"
 
-#: comments.php:38
-msgid "Website"
-msgstr "网站"
-
-#. translators: %s: user name
-#: comments.php:47
-#, php-format
-msgid "Logged in as %s. Edit your profile."
-msgstr ""
-
-#: comments.php:50
-msgid "Log out"
-msgstr "注销"
-
-#: comments.php:54
-msgid "Leave a Reply"
-msgstr "发表评论"
-
-#. translators: 1: number of comments, 2: post title
-#: comments.php:71
-#, php-format
-msgctxt "comments title"
-msgid "%1$s comment on &ldquo;%2$s&rdquo;"
-msgid_plural "%1$s comments on &ldquo;%2$s&rdquo;"
-msgstr[0] "“%2$s” 有 %1$s条评论"
-
-#: comments.php:92
-msgid "Comments are closed."
-msgstr "评论已关闭。"
-
-#: footer.php:49
-msgid "Theme By Lerm"
-msgstr " %s制作"
-
-#: functions.php:75
-msgid "Primary"
-msgstr "主菜单"
-
-#: functions.php:76
-msgid "Mobile"
-msgstr "移动菜单"
-
-#: functions.php:77
-msgid "Social Links Menu"
-msgstr "社交菜单"
-
-#: functions.php:185
-msgid "No older posts found"
-msgstr "暂无更多"
-
-#: functions.php:186
-msgid "Load more"
-msgstr "加载更多"
-
-#: functions.php:187
-msgid "Loading..."
-msgstr "加载中..."
-
-#: functions.php:319
-msgid "Next Post"
-msgstr "下一篇"
-
-#: functions.php:320
-msgid "Next post:"
-msgstr "下一篇："
-
-#: functions.php:322
-msgid "Previous Post"
-msgstr "上一篇"
-
-#: functions.php:323
-msgid "Previous post:"
-msgstr "上一篇："
-
-#: functions.php:340 functions.php:352
-msgid "Previous page"
-msgstr "上一页"
-
-#: functions.php:341 functions.php:353
-msgid "Next page"
-msgstr "下一页"
-
-#: functions.php:342 functions.php:354
-msgid "The"
-msgstr "第"
-
-#: functions.php:343 functions.php:355
-msgid " Page"
-msgstr "页"
-
-#: functions.php:371
-msgid "Older Comments"
-msgstr "上一页"
-
-#: functions.php:374
-msgid "Newer Comments"
-msgstr "下一页"
-
-#: functions.php:416
-msgid "Tags"
-msgstr "标签"
-
-#: inc/admin/class-breadcrumb-trail.php:83
-msgid "Home"
-msgstr "首页"
-
-#: inc/admin/class-breadcrumb-trail.php:84
-#, php-format
-msgid "Page %s"
-msgstr "第 %s 页"
-
-#: inc/admin/class-breadcrumb-trail.php:85
-msgid "Article"
-msgstr "文章"
-
-#: inc/admin/class-breadcrumb-trail.php:184
-#: inc/admin/class-breadcrumb-trail.php:194
-#: inc/admin/class-breadcrumb-trail.php:210
-#: inc/admin/function-archives.php:25
-msgctxt "yearly archives date format"
-msgid "Y"
-msgstr ""
-
-#: inc/admin/class-breadcrumb-trail.php:195
-#: inc/admin/class-breadcrumb-trail.php:211
-msgctxt "monthly archives date format"
-msgid "F"
-msgstr ""
-
-#: inc/admin/class-breadcrumb-trail.php:212
-msgctxt "daily archives date format"
-msgid "j"
-msgstr ""
-
-#: inc/admin/class-lerm-walker-comment.php:70
-msgid "says:"
-msgstr "说"
-
-#: inc/admin/class-lerm-walker-comment.php:82 inc/widgets.php:125
-#, php-format
-msgid "%1$s at %2$s"
-msgstr ""
-
-#: inc/admin/class-lerm-walker-comment.php:86
-msgid "ago"
-msgstr "之前"
-
-#: inc/admin/class-lerm-walker-comment.php:91
+#: app/Core/CommentWalker.php:102
 msgid "Edit"
 msgstr "编辑"
 
-#: inc/admin/class-lerm-walker-comment.php:111
-msgid "Your comment is awaiting moderation."
-msgstr "您的评论正在等待审核。"
+#: templates/user.php:43
+msgid "Edit profile"
+msgstr "编辑个人资料"
 
-#: inc/admin/class-lerm-walker-nav-menu.php:148
-#: inc/admin/class-lerm-walker-nav-menu.php:150
-msgctxt "label"
-msgid "Search for:"
-msgstr ""
+#: app/View/PostMeta.php:228
+msgid "Edit<span class=\"screen-reader-text\"> \"%s\"</span>"
+msgstr "编辑<span class=\"screen-reader-text\"> \"%s\"</span>"
 
-#: inc/admin/class-lerm-walker-nav-menu.php:150
-msgctxt "placeholder"
-msgid "Search …"
-msgstr ""
+#: comments.php:37 template-parts/forms/regist.php:23 template-parts/forms/reset.php:15
+msgid "Email"
+msgstr "邮箱"
 
-#: inc/admin/function-archives.php:26
-msgctxt "monthly archives date format"
-msgid "m"
-msgstr ""
+#: template-parts/forms/profile.php:13
+msgid "Email address"
+msgstr "电子邮件地址"
 
-#: inc/admin/function-archives.php:27
-msgctxt "daily archives date format"
-msgid "d"
-msgstr ""
+#: template-parts/forms/reset.php:12
+msgid "Enter your email address and we'll send you an email with instructions to reset your password."
+msgstr "输入您的电子邮件地址，我们将向您发送重置密码的说明。"
 
-#: inc/admin/function-like.php:31 inc/admin/function-like.php:52
-msgid "Like"
-msgstr ""
+#: template-parts/forms/login.php:22
+msgid "Enter your password"
+msgstr "输入密码"
 
-#: inc/admin/function-like.php:58
-msgid "Post Like Count "
-msgstr "点赞次数"
+#: template-parts/forms/login.php:15
+msgid "Enter your username"
+msgstr "输入用户名"
 
-#: inc/admin/function-login.php:72
+#: templates/archives.php:37
+msgid "Expand/Collapse All"
+msgstr "展开/折叠全部"
+
+#: template-parts/forms/profile.php:53
+msgid "Female"
+msgstr "女"
+
+#: template-parts/forms/profile.php:10
+msgid "First name"
+msgstr "名字"
+
+#: app/Core/Setup.php:122
+msgid "Footer Menu"
+msgstr "页脚菜单"
+
+#: app/Core/Setup.php:187
+msgid "Footer Sidebar"
+msgstr "页脚侧边栏"
+
+#: template-parts/forms/login.php:51
+msgid "Forgot password"
+msgstr "忘记密码"
+
+#: template-parts/forms/login.php:51
+msgid "Forgot password?"
+msgstr "忘记密码？"
+
+#: app/Core/Enqueue.php:136
+msgid "Form submitted successfully!"
+msgstr "表单提交成功！"
+
+#: app/View/PostMeta.php:82
+msgid "Format"
+msgstr "格式"
+
+#: template-parts/forms/profile.php:51
+msgid "Gender options"
+msgstr "性别选项"
+
+#: app/Core/Enqueue.php:149
+msgid "Hide"
+msgstr "隐藏"
+
+#: app/Core/Enqueue.php:151
+msgid "Hide password"
+msgstr "隐藏密码"
+
+#: app/View/Breadcrumb.php:63
+msgid "Home"
+msgstr "首页"
+
+#: app/Core/Setup.php:175
+msgid "Home Sidebar"
+msgstr "首页侧边栏"
+
+#: template-parts/layout/entry-footer.php:17
+msgid "If this post helped you, please like and share it."
+msgstr "如果这篇文章对您有帮助，请点赞并分享。"
+
+#: app/Http/Auth/Login.php:103
 msgid "Incorrect username or password"
 msgstr "用户名或密码不正确"
 
-#: inc/admin/functions.opengraph.php:121
-msgid "Visit the post for more."
-msgstr "查看文章"
-
-#: inc/admin/functions.opengraph.php:185
-msgid "(no title)"
-msgstr ""
-
-#: inc/options/classes/metabox.class.php:248
-#: inc/options/classes/options.class.php:650
-msgid "No option provided by developer."
-msgstr "开发人员没有提供选项。"
-
-#: inc/options/classes/metabox.class.php:266
-msgid "Restore"
-msgstr "重置"
-
-#: inc/options/classes/metabox.class.php:267
-msgid "update post for restore "
-msgstr "更新文章以还原"
-
-#: inc/options/classes/metabox.class.php:267
-msgid "Cancel"
-msgstr "取消"
-
-#: inc/options/classes/options.class.php:238
-#: inc/options/functions/actions.php:36 inc/options/functions/actions.php:89
-#: inc/options/functions/actions.php:110
-msgid "Error while saving."
-msgstr "保存时出错。"
-
-#: inc/options/classes/options.class.php:285
-msgid "Success. Imported backup options."
-msgstr "导入备份选项成功！"
-
-#: inc/options/classes/options.class.php:295
-msgid "Default options restored."
-msgstr "默认选项已恢复."
-
-#: inc/options/classes/options.class.php:309
-msgid "Default options restored for only this section."
-msgstr "仅将此章节重置为默认值。"
-
-#: inc/options/classes/options.class.php:367
-msgid "Settings saved."
-msgstr "设置已保存。"
-
-#: inc/options/classes/options.class.php:548
-msgid "Settings have changed, you should save them!"
-msgstr ""
-
-#: inc/options/classes/options.class.php:550
-msgid "show all options"
-msgstr "显示所有选项"
-
-#: inc/options/classes/options.class.php:552
-msgid "Search option(s)"
-msgstr "搜索选项"
-
-#: inc/options/classes/options.class.php:555
-#: inc/options/classes/options.class.php:674
-msgid "Save"
-msgstr "保存"
-
-#: inc/options/classes/options.class.php:555
-#: inc/options/classes/options.class.php:674
-msgid "Saving..."
-msgstr "正在保存……"
-
-#: inc/options/classes/options.class.php:556
-#: inc/options/classes/options.class.php:675
-msgid "Reset Section"
-msgstr "重置章节"
-
-#: inc/options/classes/options.class.php:556
-#: inc/options/classes/options.class.php:675
-msgid "Are you sure to reset this section options?"
-msgstr "您确定要重置此部分选项吗？"
-
-#: inc/options/classes/options.class.php:557
-#: inc/options/classes/options.class.php:676
-#: inc/options/fields/backup/backup.php:37
-msgid "Reset All"
-msgstr "全部重置"
-
-#: inc/options/classes/options.class.php:557
-#: inc/options/classes/options.class.php:676
-msgid "Are you sure to reset all options?"
-msgstr "确定要重置所有选项吗？"
-
-#: inc/options/classes/setup.class.php:432
-msgid "Are you sure?"
-msgstr "你确定吗？"
-
-#: inc/options/classes/setup.class.php:433
-msgid "Restoring options."
-msgstr ""
-
-#: inc/options/classes/setup.class.php:434
-msgid "Importing options."
-msgstr ""
-
-#: inc/options/classes/setup.class.php:437
-#, php-format
-msgid "Please enter %s or more characters"
-msgstr ""
-
-#: inc/options/classes/setup.class.php:438
-msgid "Searching..."
-msgstr ""
-
-#: inc/options/classes/setup.class.php:439
-msgid "No results match"
-msgstr ""
-
-#: inc/options/classes/setup.class.php:510
-#, php-format
-msgid "Ooops! This field type (%s) can not be used here, yet."
-msgstr ""
-
-#: inc/options/classes/setup.class.php:573
-msgid "This field class is not available!"
-msgstr "此字段的类不可用！"
-
-#: inc/options/classes/setup.class.php:577
-msgid "This type is not found!"
-msgstr "未找到此类型！"
-
-#: inc/options/config/metabox.config.php:30
-msgid "Post Options"
-msgstr "文章选项"
-
-#: inc/options/config/metabox.config.php:42
-#: inc/options/config/options.config.php:97
-msgid "Layout"
-msgstr "布局"
-
-#: inc/options/config/options.config.php:22
-msgid "Theme Options"
-msgstr "主题选项"
-
-#: inc/options/config/options.config.php:24
-msgid "Theme Options <small>by O'conner</small>"
-msgstr ""
-
-#: inc/options/config/options.config.php:25
-msgid ""
-"Thank you for creating with <a href=\"https://www.hanost.com/\" target="
-"\"_blank\">Lerm</a>"
-msgstr ""
-
-#: inc/options/config/options.config.php:35
-msgid "Basic Settings"
-msgstr "基础设置"
-
-#: inc/options/config/options.config.php:42
-msgid "Logo large"
-msgstr "手机端LOGO"
-
-#: inc/options/config/options.config.php:43
-msgid "Logo Blink"
-msgstr "徽标闪烁"
-
-#: inc/options/config/options.config.php:51
-#: inc/options/config/options.config.php:52
-msgid "Logo mobile"
-msgstr "手机端LOGO"
-
-#: inc/options/config/options.config.php:58
-msgid "Website Title"
-msgstr "网站名称"
-
-#: inc/options/config/options.config.php:66
-msgid "Website description"
-msgstr "网站描述"
-
-#: inc/options/config/options.config.php:74
-msgid "Title Separator"
-msgstr "标题分隔符"
-
-#: inc/options/config/options.config.php:81
-msgid ""
-"Select the Title Separator of your Website. Default \"|\", eg: My Website|"
-"Just another WordPress site"
-msgstr ""
-
-#: inc/options/config/options.config.php:87
-msgid "Site Width"
-msgstr "页面宽度"
-
-#: inc/options/config/options.config.php:110
-#: inc/options/config/options.config.php:111
-msgid "Sidebar Affix"
-msgstr "侧边栏"
-
-#: inc/options/config/options.config.php:116
-msgid "Copyright"
-msgstr "版权信息"
-
-#: inc/options/config/options.config.php:117
-msgid "This copyright information will appear in the footer."
-msgstr "该版权信息将在页脚显示."
-
-#: inc/options/config/options.config.php:133
-msgid "Design"
-msgstr "设计"
-
-#: inc/options/config/options.config.php:138
-msgid "Gobal Options"
-msgstr "全局选项"
-
-#: inc/options/config/options.config.php:143
-msgid "Coler Schemes"
-msgstr "颜色结构"
-
-#: inc/options/config/options.config.php:160
-msgid "Link Color"
-msgstr "链接颜色"
-
-#: inc/options/config/options.config.php:204
-msgid "Content Background Color"
-msgstr "内容背景颜色"
-
-#: inc/options/config/options.config.php:226
-msgid "Widget title wrap"
-msgstr ""
-
-#: inc/options/config/options.config.php:237
-msgid "Header and Footer"
-msgstr "头部和页脚"
-
-#: inc/options/config/options.config.php:242
-msgid "Header style"
-msgstr "头部颜色"
-
-#: inc/options/config/options.config.php:251
-msgid "Link color"
-msgstr "链接颜色"
-
-#: inc/options/config/options.config.php:266
-msgid "Menu coler schemes"
-msgstr ""
-
-#: inc/options/config/options.config.php:321
-msgid "Navbar align"
-msgstr ""
-
-#: inc/options/config/options.config.php:332
-msgid "Navbar search form"
-msgstr ""
-
-#: inc/options/config/options.config.php:334
-msgid "Show navbar search form"
-msgstr ""
-
-#: inc/options/config/options.config.php:335
-msgid "Do NOT show navbar search form"
-msgstr ""
-
-#: inc/options/config/options.config.php:342
-msgid "Footer style"
-msgstr ""
-
-#: inc/options/config/options.config.php:352
-msgid "Footer widget style"
-msgstr ""
-
-#: inc/options/config/options.config.php:361
-msgid "Buttons"
-msgstr ""
-
-#: inc/options/config/options.config.php:370
-msgid "Like button"
-msgstr ""
-
-#: inc/options/config/options.config.php:383
-msgid "Custom button"
-msgstr ""
-
-#: inc/options/config/options.config.php:400
-msgid "Custom Button hover"
-msgstr ""
-
-#: inc/options/config/options.config.php:414
-msgid "Custom CSS"
-msgstr ""
-
-#: inc/options/config/options.config.php:440
-msgid "Mailing"
-msgstr ""
-
-#: inc/options/config/options.config.php:446
-msgid "Email Notification"
-msgstr ""
-
-#: inc/options/config/options.config.php:447
-msgid "Enable notification email for comments"
-msgstr ""
-
-#: inc/options/config/options.config.php:457
-msgid "From Mail"
-msgstr ""
-
-#: inc/options/config/options.config.php:462
-msgid "From Email"
-msgstr ""
-
-#: inc/options/config/options.config.php:467
-msgid "From Name"
-msgstr ""
-
-#: inc/options/config/options.config.php:479
-msgid "SMTP Options"
-msgstr ""
-
-#: inc/options/config/options.config.php:484
-msgid "SMTP Host"
-msgstr ""
-
-#: inc/options/config/options.config.php:489
-msgid "SMTP Port"
-msgstr ""
-
-#: inc/options/config/options.config.php:494
-msgid "SSL Encryption"
-msgstr ""
-
-#: inc/options/config/options.config.php:499
-msgid "SMTP Authentication"
-msgstr ""
-
-#: inc/options/config/options.config.php:500
-msgid "If Your Email open the smtp authentication"
-msgstr ""
-
-#: inc/options/config/options.config.php:502
-msgid "Use SMTP authentication"
-msgstr ""
-
-#: inc/options/config/options.config.php:503
-msgid "Do NOT use SMTP authentication"
-msgstr ""
-
-#: inc/options/config/options.config.php:509
-msgid "Username"
-msgstr "用户名"
-
-#: inc/options/config/options.config.php:514
-msgid "Password"
-msgstr "密码"
-
-#: inc/options/config/options.config.php:528
-msgid "SEO Optimize"
-msgstr ""
-
-#: inc/options/config/options.config.php:533
-#: inc/options/config/options.config.php:534
-msgid "Images Lazyload"
-msgstr ""
-
-#: inc/options/config/options.config.php:540
-msgid "Keywords"
-msgstr ""
-
-#: inc/options/config/options.config.php:541
-msgid "Separate with commas"
-msgstr ""
-
-#: inc/options/config/options.config.php:544
-msgid "eg: WordPress,Theme..."
-msgstr ""
-
-#: inc/options/config/options.config.php:550
-#: inc/options/config/options.config.php:552
-#: inc/options/config/options.config.php:984
-msgid "Description"
-msgstr ""
-
-#: inc/options/config/options.config.php:559
-msgid "Baidu Submit"
-msgstr ""
-
-#: inc/options/config/options.config.php:566
-msgid "Submit Token"
-msgstr ""
-
-#: inc/options/config/options.config.php:571
-msgid "Baidu Tongji"
-msgstr ""
-
-#: inc/options/config/options.config.php:572
-msgid "baidu tongji code in before <\\/head\\>"
-msgstr ""
-
-#: inc/options/config/options.config.php:589
-msgid "Blog Optimize"
-msgstr ""
-
-#: inc/options/config/options.config.php:594
-msgid "Summary Meta"
-msgstr ""
-
-#: inc/options/config/options.config.php:612
-msgid "Show post content on page"
-msgstr ""
-
-#: inc/options/config/options.config.php:613
-msgid "show post content on blog page"
-msgstr ""
-
-#: inc/options/config/options.config.php:615
-msgid "Full"
-msgstr ""
-
-#: inc/options/config/options.config.php:616
-msgid "Summary"
-msgstr ""
-
-#: inc/options/config/options.config.php:629
-msgid "Show thumbnail on posts list"
-msgstr ""
-
-#: inc/options/config/options.config.php:630
-msgid "Switcher on to show posts thumbnial"
-msgstr ""
-
-#: inc/options/config/options.config.php:651
-msgid "Ajax load more post"
-msgstr ""
-
-#: inc/options/config/options.config.php:652
-msgid "Switcher on to Ajax load more post, off to show pagenation"
-msgstr ""
-
-#: inc/options/config/options.config.php:658
-msgid "Loading animate"
-msgstr ""
-
-#: inc/options/config/options.config.php:659
-msgid "Switcher on to Enable posts loading animate"
-msgstr ""
-
-#: inc/options/config/options.config.php:665
-#: inc/options/config/options.config.php:666
-msgid "jQuery CDN"
-msgstr ""
-
-#: inc/options/config/options.config.php:674
-msgid "Replace Avatar"
-msgstr ""
-
-#: inc/options/config/options.config.php:682
-msgid "Avatar Cache"
-msgstr ""
-
-#: inc/options/config/options.config.php:688
-msgid "Post Excerpt length on posts list page"
-msgstr ""
-
-#: inc/options/config/options.config.php:704
-msgid "Page Optimize"
-msgstr ""
-
-#: inc/options/config/options.config.php:709
-msgid "Search Filter"
-msgstr ""
-
-#: inc/options/config/options.config.php:710
-msgid "Search results exclude all pages"
-msgstr ""
-
-#: inc/options/config/options.config.php:716
-msgid "HTML Slug"
-msgstr ""
-
-#: inc/options/config/options.config.php:717
-msgid ""
-"Shows .html slug for pages (please re-save the permalink options after "
-"changed slug)"
-msgstr ""
-
-#: inc/options/config/options.config.php:730
-msgid "Post Optimize"
-msgstr ""
-
-#: inc/options/config/options.config.php:734
-msgid "Single page optimize"
-msgstr ""
-
-#: inc/options/config/options.config.php:739
-msgid "Post Meta"
-msgstr ""
-
-#: inc/options/config/options.config.php:757
-msgid "Disable Embeds"
-msgstr ""
-
-#: inc/options/config/options.config.php:763
-msgid "Disable pingback"
-msgstr ""
-
-#: inc/options/config/options.config.php:769
-msgid "Posts Navigation"
-msgstr ""
-
-#: inc/options/config/options.config.php:775
-msgid "Enable Code Cighlight"
-msgstr ""
-
-#: inc/options/config/options.config.php:776
-msgid "If your posts contain some code, then enable it"
-msgstr ""
-
-#: inc/options/config/options.config.php:781
-msgid "Author Biography"
-msgstr ""
-
-#: inc/options/config/options.config.php:782
-msgid "Show author biography in sidebar (if have sidebar)"
-msgstr ""
-
-#: inc/options/config/options.config.php:786
-msgid "Related posts"
-msgstr ""
-
-#: inc/options/config/options.config.php:791
-msgid "Related Posts"
-msgstr ""
-
-#: inc/options/config/options.config.php:792
-msgid "Show related posts under single bottom"
-msgstr ""
-
-#: inc/options/config/options.config.php:798
-msgid "Related posts number"
-msgstr ""
-
-#: inc/options/config/options.config.php:811
-msgid "Sidebar"
-msgstr ""
-
-#: inc/options/config/options.config.php:816
-msgid "Register Sidebars"
-msgstr ""
-
-#: inc/options/config/options.config.php:821
-msgid "Sidebar Title"
-msgstr ""
-
-#: inc/options/config/options.config.php:828
-msgid "Single sidebar"
-msgstr ""
-
-#: inc/options/config/options.config.php:835
-msgid "Blog sidebar"
-msgstr ""
-
-#: inc/options/config/options.config.php:842
-msgid "Front page sidebar"
-msgstr ""
-
-#: inc/options/config/options.config.php:849
-msgid "Page sidebar"
-msgstr ""
-
-#: inc/options/config/options.config.php:856
-msgid "Footer sidebars count"
-msgstr ""
-
-#: inc/options/config/options.config.php:871
-msgid "Social"
-msgstr ""
-
-#: inc/options/config/options.config.php:876
-msgid "Weixin Qrcode"
-msgstr ""
-
-#: inc/options/config/options.config.php:884
-msgid "Show Qrcode mouse hover"
-msgstr ""
-
-#: inc/options/config/options.config.php:890
-msgid "Donate Qrcode"
-msgstr ""
-
-#: inc/options/config/options.config.php:892
-msgid "Show related posts  in sidebar (if have sidebar)"
-msgstr ""
-
-#: inc/options/config/options.config.php:921
-msgid "Carousel Options"
-msgstr ""
-
-#: inc/options/config/options.config.php:926
-msgid "Enable Slides"
-msgstr ""
-
-#: inc/options/config/options.config.php:927
-msgid "Enable to show slides on frontpage"
-msgstr ""
-
-#: inc/options/config/options.config.php:932
-msgid "Slides Position"
-msgstr ""
-
-#: inc/options/config/options.config.php:933
-msgid "Select Slides Position On frontpage"
-msgstr ""
-
-#: inc/options/config/options.config.php:936
-msgid "Under navbar"
-msgstr ""
-
-#: inc/options/config/options.config.php:937
-msgid "Above entry list"
-msgstr ""
-
-#: inc/options/config/options.config.php:938
-msgid "Under navbar(Full width)"
-msgstr ""
-
-#: inc/options/config/options.config.php:944
-msgid "Slides indicators"
-msgstr ""
-
-#: inc/options/config/options.config.php:945
-msgid "Enable to show slides indicators"
-msgstr ""
-
-#: inc/options/config/options.config.php:951
-msgid "Slides control arrows"
-msgstr ""
-
-#: inc/options/config/options.config.php:952
-msgid "Enable to show slides control arrows"
-msgstr ""
-
-#: inc/options/config/options.config.php:959
-msgid "Slides"
-msgstr ""
-
-#: inc/options/config/options.config.php:960
-msgid "Add Slide"
-msgstr ""
-
-#: inc/options/config/options.config.php:961
-msgid "New Slide"
-msgstr ""
-
-#: inc/options/config/options.config.php:968
-msgid "Slide"
-msgstr ""
-
-#: inc/options/config/options.config.php:974
-msgid "Title"
-msgstr ""
-
-#: inc/options/config/options.config.php:979
-msgid "URL"
-msgstr ""
-
-#: inc/options/config/options.config.php:999
-msgid "AD"
-msgstr ""
-
-#: inc/options/config/options.config.php:1004
-#: inc/options/config/options.config.php:1023
-msgid "Disable Rest API"
-msgstr ""
-
-#: inc/options/config/options.config.php:1005
-#: inc/options/config/options.config.php:1024
-msgid "If use GutenBerg editor, must enable rest_api"
-msgstr ""
-
-#: inc/options/config/options.config.php:1018
-msgid "Other"
-msgstr ""
-
-#: inc/options/config/taxonomy.options.php:17
-msgid "Background"
-msgstr ""
-
-#: inc/options/config/taxonomy.options.php:18
-msgid "Font"
-msgstr ""
-
-#: inc/options/fields/background/background.php:38
-msgid "No background selected"
-msgstr ""
-
-#: inc/options/fields/backup/backup.php:29
-msgid "Import"
-msgstr ""
-
-#: inc/options/fields/backup/backup.php:30
-msgid "copy-paste your backup string here"
-msgstr ""
-
-#: inc/options/fields/backup/backup.php:34
-msgid "Export and Download Backup"
-msgstr ""
-
-#: inc/options/fields/backup/backup.php:38
-msgid "Please be sure for reset all of options."
-msgstr ""
-
-#: inc/options/fields/checkbox/checkbox.php:43
-#: inc/options/fields/radio/radio.php:42
-#: inc/options/fields/select/select.php:69
-msgid "No data provided for this option type."
-msgstr ""
-
-#: inc/options/fields/gallery/gallery.php:23
-msgid "Add Gallery"
-msgstr ""
-
-#: inc/options/fields/gallery/gallery.php:24
-msgid "Edit Gallery"
-msgstr ""
-
-#: inc/options/fields/gallery/gallery.php:25
-msgid "Clear"
-msgstr ""
-
-#: inc/options/fields/group/group.php:26
-msgid "Add New"
-msgstr ""
-
-#: inc/options/fields/group/group.php:37
-#: inc/options/fields/repeater/repeater.php:32
-msgid "Error: Nested field id can not be same with another nested field id."
-msgstr ""
-
-#: inc/options/fields/group/group.php:46
-#: inc/options/fields/group/group.php:82
-#: inc/options/fields/repeater/repeater.php:49
-#: inc/options/fields/repeater/repeater.php:76
-msgid "Are you sure to delete this item?"
-msgstr ""
-
-#: inc/options/fields/group/group.php:113
-#: inc/options/fields/repeater/repeater.php:88
-msgid "You can not add more than"
-msgstr ""
-
-#: inc/options/fields/group/group.php:114
-#: inc/options/fields/repeater/repeater.php:89
-msgid "You can not remove less than"
-msgstr ""
-
-#: inc/options/fields/icon/icon.php:23 inc/options/functions/actions.php:133
-msgid "Add Icon"
-msgstr ""
-
-#: inc/options/fields/icon/icon.php:24
-msgid "Remove Icon"
-msgstr ""
-
-#: inc/options/fields/media/media.php:25
-#: inc/options/fields/upload/upload.php:24
-msgid "Upload"
-msgstr ""
-
-#: inc/options/fields/media/media.php:26
-#: inc/options/fields/upload/upload.php:25
-msgid "Remove"
-msgstr ""
-
-#: inc/options/fields/media/media.php:49
-msgid "No media selected"
-msgstr ""
-
-#: inc/options/fields/sorter/sorter.php:24
-msgid "Enabled"
-msgstr ""
-
-#: inc/options/fields/sorter/sorter.php:25
-msgid "Disabled"
-msgstr ""
-
-#: inc/options/fields/textarea/textarea.php:36
-msgid "Add Shortcode"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:85
-msgid "Font Family"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:86
-msgid "Select a font"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:94
-msgid "Backup Font Family"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:108
-#: inc/options/fields/typography/typography.php:121
-#: inc/options/fields/typography/typography.php:134
-#: inc/options/fields/typography/typography.php:148
-#: inc/options/fields/typography/typography.php:164
-#: inc/options/fields/typography/typography.php:177
-#: inc/options/fields/typography/typography.php:191
-#: inc/options/fields/typography/typography.php:209
-msgid "Default"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:119
-msgid "Font Style"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:133
-#: inc/options/fields/typography/typography.php:134
-msgid "Load Extra Styles"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:146
-msgid "Subset"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:156
-msgid "Text Align"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:172
-msgid "Font Variant"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:185
-msgid "Text Transform"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:199
-msgid "Text Decoration"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:221
-msgid "Font Size"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:233
-msgid "Line Height"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:245
-msgid "Letter Spacing"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:257
-msgid "Word Spacing"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:271
-msgid "Font Color"
-msgstr ""
-
-#: inc/options/fields/typography/typography.php:282
-msgid "Custom Style"
-msgstr ""
-
-#: inc/options/functions/actions.php:31
-msgid "No data provided by developer"
-msgstr ""
-
-#: inc/options/functions/actions.php:137
-msgid "Search a Icon..."
-msgstr ""
-
-#: inc/options/functions/validate.php:16
-#: inc/options/functions/validate.php:84
-msgid "Please write a valid email address!"
-msgstr ""
-
-#: inc/options/functions/validate.php:33
-#: inc/options/functions/validate.php:103
-msgid "Please write a numeric data!"
-msgstr ""
-
-#: inc/options/functions/validate.php:50
-#: inc/options/functions/validate.php:122
-msgid "Error! This field is required!"
-msgstr ""
-
-#: inc/options/functions/validate.php:67
-#: inc/options/functions/validate.php:141
-msgid "Please write a valid url!"
-msgstr ""
-
-#: inc/template-tags.php:64
-msgctxt "Used before post format."
-msgid "Format"
-msgstr ""
-
-#: inc/template-tags.php:78
-msgid "Post author"
-msgstr ""
-
-#. translators: %s: Author name
-#: inc/template-tags.php:85
-#, php-format
-msgid "By %s"
-msgstr ""
-
-#: inc/template-tags.php:112
-msgid "Categories"
-msgstr "分类"
-
-#. translators: %s: number of comments
-#. translators: %s = comment number
-#: inc/template-tags.php:142 template/content/content-single.php:54
-#, php-format
-msgctxt "comments title"
-msgid "%s comment"
-msgid_plural "%s comments"
-msgstr[0] "%s"
-
-#. translators: %s: Name of current post
-#: inc/template-tags.php:154
-#, php-format
-msgid "Edit<span class=\"screen-reader-text\"> \"%s\"</span>"
-msgstr ""
-
-#: inc/widgets.php:6
-msgid "HomePage Sidebar"
-msgstr ""
-
-#: inc/widgets.php:8
-msgid "Add widgets here to appear in your sidebar."
-msgstr ""
-
-#: inc/widgets.php:24
-msgid "Cutsom register sidebar"
-msgstr ""
-
-#. translators: %d: number of sidebar
-#: inc/widgets.php:39
-#, php-format
-msgid "Sidebar %d"
-msgstr ""
-
-#: inc/widgets.php:78
-msgid "Your site&#8217;s most recent comments."
-msgstr ""
-
-#: inc/widgets.php:81 inc/widgets.php:90
-msgid "Recent Comments"
-msgstr "最近评论"
-
-#: inc/widgets.php:119
-#, php-format
-msgid "%s ago"
-msgstr "%s 之前"
-
-#: inc/widgets.php:147 inc/widgets.php:273 inc/widgets.php:397
-msgid "Title:"
-msgstr ""
-
-#: inc/widgets.php:153
-msgid "Number of comments to show:"
-msgstr "要显示的评论数。"
-
-#: inc/widgets.php:179
-msgid "Your site&#8217;s most recent Posts."
-msgstr ""
-
-#: inc/widgets.php:182 inc/widgets.php:190
-msgid "Recent Posts"
-msgstr "最新文章"
-
-#: inc/widgets.php:280 inc/widgets.php:404
-msgid "Number of posts to show:"
-msgstr ""
-
-#: inc/widgets.php:291 inc/widgets.php:414
-msgid "Display post date?"
-msgstr ""
-
-#: inc/widgets.php:313
-msgid "Display the popular posts on your website."
-msgstr ""
-
-#: inc/widgets.php:315 inc/widgets.php:320
-msgid "Popular Post"
-msgstr ""
-
-#: links.php:30
-msgid "Continue reading"
-msgstr "继续阅读"
-
-#: links.php:62 template/content/content-dd.php:64
-msgid "Pages:"
-msgstr "页："
-
-#: links.php:66 template/content/content-dd.php:68
-msgid "Page"
-msgstr "页"
-
-#: search.php:25
-msgid "Search results for: "
-msgstr "搜索结果："
-
-#: search.php:27
+#: app/Http/Rest/Controllers/ProfileController.php:112
+msgid "Invalid email address."
+msgstr "无效的电子邮件地址。"
+
+#: app/Support/Validator.php:56 app/Core/Enqueue.php:138
+msgid "Invalid format."
+msgstr "格式无效。"
+
+#: app/Http/Rest/Controllers/SearchController.php:35 app/Http/Rest/Controllers/PostsController.php:203
+msgid "Invalid post type."
+msgstr "无效的文章类型。"
+
+#: app/Http/Rest/Controllers/LoginController.php:104
+msgid "Invalid username or password."
+msgstr "用户名或密码错误。"
+
+#: template-parts/forms/profile.php:11
+msgid "Last name"
+msgstr "姓氏"
+
+#: comments.php:63
+msgid "Leave a Reply"
+msgstr "发表评论"
+
+#: comments.php:34
+msgid "Leave a comment..."
+msgstr "发表评论…"
+
+#: app/View/LikeButton.php:67 app/Core/Enqueue.php:131
+msgid "Like"
+msgstr "点赞"
+
+#: template-parts/components/pagination.php:72
+msgid "Load More"
+msgstr "加载更多"
+
+#: template-parts/forms/login.php:53
+msgid "Log in"
+msgstr "登录"
+
+#: comments.php:49 app/View/NavMenu.php:78
+msgid "Log out"
+msgstr "注销"
+
+#: comments.php:46
+msgid "Logged in as %s. Edit your profile."
+msgstr "您已登录为 %s。<a href=\"%s\">编辑您的个人资料</a>。"
+
+#: template-parts/forms/regist.php:72 template-parts/forms/reset.php:23 template-parts/forms/login.php:43
+msgid "Login"
+msgstr "登录"
+
+#: app/Http/Rest/Controllers/LoginController.php:115
+msgid "Login successful."
+msgstr "登录成功。"
+
+#: template-parts/forms/profile.php:55
+msgid "Male"
+msgstr "男"
+
+#: app/Core/Setup.php:120
+msgid "Mobile"
+msgstr "移动菜单"
+
+#: app/Support/Validator.php:91
+msgid "Must be a positive integer."
+msgstr "必须是正整数。"
+
+#: app/Support/Validator.php:33
+msgid "Must be at least %d characters long."
+msgstr "长度不能少于 %d 个字符。"
+
+#: app/Support/Validator.php:68
+msgid "Must be greater than or equal to %s."
+msgstr "不能小于 %s。"
+
+#: app/Support/Validator.php:80
+msgid "Must be less than or equal to %s."
+msgstr "不能大于 %s。"
+
+#: app/Support/Validator.php:130
+msgid "Must be one of the following values: %s"
+msgstr "必须是以下值之一：%s"
+
+#: app/Support/Validator.php:45
+msgid "Must not exceed %d characters."
+msgstr "长度不能超过 %d 个字符。"
+
+#: app/Core/Enqueue.php:141
+msgid "Name must be at least {minLength} characters long."
+msgstr "姓名至少需要 {minLength} 个字符。"
+
+#: template-parts/components/comment-pagination.php:16
+msgid "Newer Comments"
+msgstr "下一页"
+
+#: app/View/Carousel.php:149
+msgid "Next"
+msgstr "下一页"
+
+#: template-parts/components/post-navigation.php:16
+msgid "Next Post"
+msgstr "下一篇"
+
+#: app/Support/Utilities.php:202
+msgid "Next page"
+msgstr "下一页"
+
+#: comments.php:36 template-parts/forms/profile.php:12
+msgid "Nickname"
+msgstr "昵称"
+
+#: search.php:26
 msgid "Nothing Found"
 msgstr "额，什么都没找到"
 
-#: search.php:41 template/content/content-none.php:29
-msgid ""
-"Sorry, but nothing matched your search terms. Please try again with some "
-"different keywords."
-msgstr ""
+#: template-parts/components/comment-pagination.php:13
+msgid "Older Comments"
+msgstr "上一页"
+
+#: app/Http/Rest/Controllers/ProfileController.php:176
+msgid "Only JPEG, PNG, GIF and WebP images are allowed."
+msgstr "仅允许上传 JPEG、PNG、GIF 和 WebP 图片。"
+
+#: template-parts/forms/login.php:67
+msgid "Or continue with"
+msgstr "或通过以下方式继续"
+
+#: template-parts/forms/reset.php:11
+msgid "PASSWORD RESET"
+msgstr "密码重置"
+
+#: app/Support/Utilities.php:203
+msgid "Page %"
+msgstr "第 % 页"
+
+#: app/View/Breadcrumb.php:70
+msgid "Page %s"
+msgstr "第 %s 页"
+
+#: template-parts/forms/regist.php:31 template-parts/forms/login.php:23
+msgid "Password"
+msgstr "密码"
+
+#: app/Http/Rest/Controllers/ProfileController.php:75
+msgid "Password must be at least 8 characters long."
+msgstr "密码长度至少为 8 个字符。"
+
+#: app/Core/Enqueue.php:142
+msgid "Password must be at least {minLength} characters long."
+msgstr "密码长度至少为 {minLength} 个字符。"
+
+#: app/Core/Enqueue.php:144
+msgid "Password must contain at least one number."
+msgstr "密码必须包含至少一个数字。"
+
+#: app/Core/Enqueue.php:145
+msgid "Password must contain at least one special character."
+msgstr "密码必须包含至少一个特殊字符。"
+
+#: app/Core/Enqueue.php:143
+msgid "Password must contain at least one uppercase letter."
+msgstr "密码必须包含至少一个大写字母。"
+
+#: app/Core/Enqueue.php:146
+msgid "Passwords do not match."
+msgstr "两次输入的密码不一致。"
+
+#: singular.php:29
+msgid "Permalink to %s"
+msgstr "固定链接：%s"
+
+#: singular.php:49
+msgid "Permalink:"
+msgstr "固定链接："
+
+#: app/Support/Validator.php:115
+msgid "Please enter a valid URL."
+msgstr "请输入有效的 URL。"
+
+#: app/Support/Validator.php:102 app/Core/Enqueue.php:139
+msgid "Please enter a valid email address."
+msgstr "请输入有效的电子邮件地址。"
+
+#: app/Http/Rest/Middleware.php:65 app/Support/Response.php:60
+msgid "Please log in first."
+msgstr "请先登录。"
+
+#: app/View/PostMeta.php:104
+msgid "Post author"
+msgstr "文章作者"
+
+#: app/Http/Rest/Middleware.php:97
+msgid "Post not found."
+msgstr "文章不存在。"
+
+#: app/View/Carousel.php:144
+msgid "Previous"
+msgstr "上一页"
+
+#: template-parts/components/post-navigation.php:13
+msgid "Previous Post"
+msgstr "上一篇"
+
+#: app/Support/Utilities.php:201
+msgid "Previous page"
+msgstr "上一页"
+
+#: app/Core/Setup.php:119
+msgid "Primary"
+msgstr "主菜单"
+
+#: app/Http/Rest/Controllers/ProfileController.php:149
+msgid "Profile updated successfully."
+msgstr "个人资料更新成功。"
+
+#: footer.php:44
+msgid "QQ live chat"
+msgstr "QQ 在线客服"
+
+#: template-parts/forms/reset.php:18
+msgid "RESET PASSWORD"
+msgstr "重置密码"
+
+#: app/Runtime/Optimizer.php:244
+msgid "REST API forbidden"
+msgstr "REST API 已禁用"
+
+#: template-parts/forms/regist.php:45 template-parts/forms/regist.php:65 template-parts/forms/login.php:61
+msgid "Register"
+msgstr "注册"
+
+#: template-parts/forms/login.php:34
+msgid "Remember me"
+msgstr "记住我"
+
+#: app/Support/Response.php:82
+msgid "Resource not found."
+msgstr "资源不存在。"
+
+#: app/Core/CommentWalker.php:118
+msgid "Respond"
+msgstr "回复"
+
+#: template-parts/forms/reset.php:22
+msgid "Return to login"
+msgstr "返回登录"
+
+#: templates/user.php:79 templates/user.php:86
+msgid "Sample message heading"
+msgstr "示例邮件标题"
+
+#: templates/user.php:82 templates/user.php:89
+msgid "Sample message preview text appears here."
+msgstr "示例邮件预览文本显示在此处。"
+
+#: template-parts/forms/profile.php:77
+msgid "Save changes"
+msgstr "保存更改"
+
+#: search.php:20
+msgid "Search results for:"
+msgstr "搜索结果："
+
+#: app/View/Breadcrumb.php:68
+msgid "Search results for: %s"
+msgstr "\"%s\" 的搜索结果"
 
 #: searchform.php:14
 msgid "Search…"
 msgstr "搜索…"
 
-#: template-parts/content-dd.php:24 template-parts/content.php:25
-#: template/content/content-dd.php:37 template/content/content.php:35
+#: app/Core/Enqueue.php:133
+msgid "Security token is missing."
+msgstr "安全令牌缺失。"
+
+#: app/Http/Rest/Middleware.php:50
+msgid "Security verification failed. Please refresh the page and try again."
+msgstr "安全验证失败，请刷新页面后重试。"
+
+#: app/View/Icon.php:280
+msgid "Share on %s"
+msgstr "分享至 %s"
+
+#: template-parts/forms/regist.php:54 app/Core/Enqueue.php:148
+msgid "Show"
+msgstr "显示"
+
+#: template-parts/forms/regist.php:54 app/Core/Enqueue.php:150
+msgid "Show password"
+msgstr "显示密码"
+
+#: app/View/Carousel.php:76
+msgid "Slide %d"
+msgstr "幻灯片 %d"
+
+#: app/Core/Setup.php:121
+msgid "Social Links Menu"
+msgstr "社交菜单"
+
+#: search.php:38
+msgid "Sorry, but nothing matched your search terms. Please try again with some different keywords."
+msgstr "抱歉，没有找到与您的搜索词匹配的内容，请尝试其他关键词。"
+
+#: 404.php:46
+msgid "Sorry, the page you are looking for could not be found."
+msgstr "抱歉，您访问的页面不存在。"
+
+#: template-parts/post/content-single.php:22 template-parts/post/content-excerpt.php:24 template-parts/post/content-card.php:33
 msgid "Sticky"
 msgstr "推荐"
 
-#. translators: %s = post title
-#: template/content/content-dd.php:56 template/content/content-page.php:26
-#, php-format
-msgid "Continue reading<span class=\"screen-reader-text\">\"%s\"</span>"
-msgstr ""
+#: app/Http/Rest/Controllers/ProfileController.php:72
+msgid "The passwords you entered do not match."
+msgstr "两次输入的密码不一致。"
 
-#. translators: 1: link to WP admin new post page.
-#: template/content/content-none.php:16
-#, php-format
-msgid ""
-"Ready to publish your first post? <a href=\"%1$s\">Get started here</a>."
-msgstr ""
+#: footer.php:26
+msgid "Theme by"
+msgstr "主题："
 
-#: template/content/content-none.php:36
-msgid ""
-"It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps "
-"searching can help."
-msgstr ""
+#: singular.php:40
+msgid "This article was published by %1$s%2$s%3$s. Please credit the original source when reposting."
+msgstr "本文由 %1$s%2$s%3$s 发布，转载请注明原文出处。"
 
-#. translators: %s is the title
-#: template/content/content-single.php:30
-#, php-format
-msgid "Continue reading <span class=\"screen-reader-text\">\"%s\"</span>"
-msgstr ""
+#: app/Http/Rest/Controllers/ProfileController.php:116
+msgid "This email is already used by another account."
+msgstr "该邮箱已被其他账户使用。"
 
-#: template/post/biography.php:27
-msgid "Author"
-msgstr "作者"
+#: app/Support/Validator.php:18
+msgid "This field"
+msgstr "该字段"
 
-#~ msgctxt "comments title"
-#~ msgid "One comment on &ldquo;%2$s&rdquo;"
-#~ msgid_plural "%1$s comments on &ldquo;%2$s&rdquo;"
-#~ msgstr[0] " &ldquo;%2$s&rdquo; 有%1$s条评论"
+#: templates/archives.php:30
+msgid "Tip: click a month to expand it."
+msgstr "提示：点击月份可展开查看。"
 
-#~ msgid "Previous"
-#~ msgstr "上一页"
+#: app/Http/Rest/Controllers/LoginController.php:80
+msgid "Too many login attempts. Please try again in %d minutes."
+msgstr "登录尝试次数过多，请 %d 分钟后重试。"
 
-#~ msgid "Next"
-#~ msgstr "下一页"
+#: app/Http/Rest/Middleware.php:29 app/Support/Response.php:100
+msgid "Too many requests. Please try again later."
+msgstr "请求过于频繁，请稍后再试。"
 
-#~ msgid "Original"
-#~ msgstr "原创"
+#: templates/user.php:87
+msgid "Tue"
+msgstr "周二"
 
-#~ msgid "Post in"
-#~ msgstr "发表于"
+#: app/Core/Enqueue.php:135
+msgid "Unable to complete the requested action."
+msgstr "无法完成请求的操作。"
 
-#~ msgid "More asides"
-#~ msgstr "更多日志"
+#: app/View/LikeButton.php:67 app/Core/Enqueue.php:132
+msgid "Unlike"
+msgstr "取消点赞"
 
-#~ msgid "Leave a comment"
-#~ msgstr "发表评论"
+#: template-parts/forms/profile.php:24
+msgid "Update profile for \"%s\""
+msgstr "更新 \"%s\" 的个人资料"
 
-#~ msgid "1 Comment"
-#~ msgstr "1条评论"
+#: template-parts/forms/profile.php:34
+msgid "Upload avatar"
+msgstr "上传头像"
 
-#~ msgid "% Comments"
-#~ msgstr "%条评论"
+#: app/Http/Rest/Controllers/ProfileController.php:181
+msgid "Upload failed."
+msgstr "上传失败。"
 
-#~ msgid "Post format to show:"
-#~ msgstr "文章格式："
+#: comments.php:38
+msgid "Url"
+msgstr "网址"
 
-#~ msgid " Author"
-#~ msgstr "作者"
+#: comments.php:36 template-parts/forms/regist.php:16 template-parts/forms/login.php:16
+msgid "Username"
+msgstr "用户名"
 
-#~ msgid "Logo Desktop"
-#~ msgstr "桌面LOGO"
+#: app/Core/Enqueue.php:140
+msgid "Username must be at least {minLength} characters long."
+msgstr "用户名至少需要 {minLength} 个字符。"
 
-#~ msgid "Logo Mobile"
-#~ msgstr "手机端LOGO"
+#: app/Http/Rest/Controllers/LoginController.php:65
+msgid "Username or password cannot be empty."
+msgstr "用户名或密码不能为空。"
 
-#~ msgid "Website Description"
-#~ msgstr "网站描述"
+#: template-parts/forms/regist.php:61 template-parts/forms/regist.php:62
+msgid "Verification code"
+msgstr "验证码"
 
-#~ msgid "Menu Coler Schemes"
-#~ msgstr "菜单颜色结构"
+#: comments.php:31
+msgid "Visitor"
+msgstr "游客"
+
+#: comments.php:38 template-parts/forms/profile.php:14 template-parts/forms/profile.php:61
+msgid "Website"
+msgstr "网站"
+
+#: templates/user.php:80
+msgid "Wed"
+msgstr "周三"
+
+#: comments.php:32
+msgid "Welcome"
+msgstr "欢迎"
+
+#: comments.php:32
+msgid "Welcome back"
+msgstr "欢迎回来"
+
+#: app/Http/Rest/Controllers/ProfileController.php:63
+msgid "You are not allowed to edit this profile."
+msgstr "您无权编辑此个人资料。"
+
+#: app/Runtime/Optimizer.php:327
+msgid "You can update your profile picture on Cravatar."
+msgstr "您可以在 Cravatar 上更新您的头像。"
+
+#: app/Http/Rest/Middleware.php:80 app/Support/Response.php:71
+msgid "You do not have permission to perform this action."
+msgstr "您没有权限执行此操作。"
+
+#: comments.php:55
+msgid "You must be <a class=\"badge rounded-pill bg-primary text-light\" href=\"%s\">logged in</a> to post a comment."
+msgstr "您必须<a class=\"badge rounded-pill bg-primary text-light\" href=\"%s\">登录</a>后才能发表评论。"
+
+#: app/Http/Rest/Controllers/CommentController.php:67 app/Core/CommentWalker.php:129
+msgid "Your comment is awaiting moderation."
+msgstr "您的评论正在等待审核。"
+
+#: template-parts/forms/profile.php:60
+msgid "Your homepage"
+msgstr "您的主页"
+

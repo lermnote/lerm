@@ -42,8 +42,8 @@ $args = array(
 		'%1$s<cite class="fn"><a href="%2$s" aria-label="%3$s" class="px-2">%4$s</a></cite><a href="%5$s">%6$s</a>',
 		get_avatar( get_current_user_id(), 32 ),
 		get_edit_user_link(),
-		/* translators: %s: user name */
-		esc_html( sprintf( __( 'Logged in as %s. Edit your profile.', 'lerm' ), $commenter_identity ) ),
+		/* translators: %1$s: user name */
+		esc_html( sprintf( __( 'Logged in as %1$s. Edit your profile.', 'lerm' ), $commenter_identity ) ),
 		$commenter_identity,
 		wp_logout_url( apply_filters( 'the_permalink', get_permalink() ) ),
 		__( 'Log out', 'lerm' )
@@ -51,8 +51,8 @@ $args = array(
 	'must_log_in'          => sprintf(
 		'<div class="must-log-in card-body">%s</div>',
 		sprintf(
-			/* translators: %s: Login URL. */
-			__( 'You must be <a class="badge rounded-pill bg-primary text-light" href="%s">logged in</a> to post a comment.', 'lerm' ),
+			/* translators: %1$s: Login URL. */
+			__( 'You must be <a class="badge rounded-pill bg-primary text-light" href="%1$s">logged in</a> to post a comment.', 'lerm' ),
 			wp_login_url( apply_filters( 'the_permalink', get_permalink( $comment_post_id ), $comment_post_id ) )
 		)
 	),
