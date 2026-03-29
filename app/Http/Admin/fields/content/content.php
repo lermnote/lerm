@@ -8,21 +8,21 @@
  *
  */
 if ( ! class_exists( 'CSF_Field_content' ) ) {
-  class CSF_Field_content extends CSF_Fields {
+	class CSF_Field_content extends CSF_Fields {
 
-    public function __construct( $field, $value = '', $unique = '', $where = '', $parent = '' ) {
-      parent::__construct( $field, $value, $unique, $where, $parent );
-    }
+		public function __construct( $field, $value = '', $unique = '', $where = '', $parent = '' ) {
+			parent::__construct( $field, $value, $unique, $where, $parent );
+		}
 
-    public function render() {
+		public function render() {
 
-      if ( ! empty( $this->field['content'] ) ) {
+			if ( ! empty( $this->field['content'] ) ) {
 
-        echo $this->field['content'];
+				echo wp_kses_post( $this->field['content'] );
 
-      }
+			}
 
-    }
+		}
 
-  }
+	}
 }

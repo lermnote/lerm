@@ -10,7 +10,7 @@
 namespace Lerm\Support;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
 }
 
 /**
@@ -19,39 +19,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Tries several server headers and prefers the first public IP found in
  * X_FORWARDED_FOR. Falls back to REMOTE_ADDR. Returns empty string on failure.
  */
-function client_ip() {
-	$ip_keys = array( 'HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'REMOTE_ADDR' );
+function client_ip(): string {
+	$trusted_header = apply_filters( 'lerm_trusted_ip_header', null );
 
-	$first_valid = '';
-	foreach ( $ip_keys as $key ) {
-		if ( empty( $_SERVER[ $key ] ) ) {
-			continue;
-		}
-
-		$raw = $_SERVER[ $key ];
-
-		// X-Forwarded-For may contain a comma-separated list of IPs
-		$candidates = ( false !== strpos( $raw, ',' ) ) ? array_map( 'trim', explode( ',', $raw ) ) : array( trim( $raw ) );
-
-		foreach ( $candidates as $ip ) {
-			// Basic validation
-			if ( false === filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-				continue;
-			}
-
-			// Prefer public addresses but remember the first valid one as a fallback
-			$is_public = (bool) filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
-			if ( $is_public ) {
-				return $ip;
-			}
-
-			if ( empty( $first_valid ) ) {
-				$first_valid = $ip;
-			}
-		}
+	$raw = '';
+	if ( $trusted_header && ! empty( $_SERVER[ $trusted_header ] ) ) {
+		// X-Forwarded-For may be a comma-separated list; take the first (client) IP.
+		$raw = trim( explode( ',', sanitize_text_field( wp_unslash( $_SERVER[ $trusted_header ] ) ) )[0] );
 	}
 
-	return $first_valid;
+	if ( '' === $raw && ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+		$raw = trim( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) );
+	}
+
+	return filter_var( $raw, FILTER_VALIDATE_IP ) ? $raw : '';
 }
 
 /**
@@ -70,21 +51,23 @@ function get_like_user_id(): string {
 	$cookie_name = 'lerm_like_id';
 	$token       = isset( $_COOKIE[ $cookie_name ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ $cookie_name ] ) ) : '';
 
-	if ( empty( $token ) ) {
-		if ( function_exists( 'wp_generate_uuid4' ) ) {
-			$token = wp_generate_uuid4();
-		} else {
-			$token = hash( 'sha256', wp_rand() . wp_rand() . microtime( true ) . wp_generate_password( 12 ) );
-		}
-
-		$secure = is_ssl();
-		$path   = defined( 'COOKIEPATH' ) ? COOKIEPATH : '/';
-		$domain = defined( 'COOKIE_DOMAIN' ) ? COOKIE_DOMAIN : '';
+	if ( '' === $token ) {
+		$token = function_exists( 'wp_generate_uuid4' )
+		? wp_generate_uuid4()
+		: hash( 'sha256', wp_rand() . wp_rand() . microtime( true ) . wp_generate_password( 12 ) );
 
 		if ( ! headers_sent() ) {
-			setcookie( $cookie_name, $token, time() + YEAR_IN_SECONDS, $path, $domain, $secure, true );
+			setcookie(
+				$cookie_name,
+				$token,
+				time() + YEAR_IN_SECONDS,
+				defined( 'COOKIEPATH' ) ? COOKIEPATH : '/',
+				defined( 'COOKIE_DOMAIN' ) ? COOKIE_DOMAIN : '',
+				is_ssl(),
+				true   // HttpOnly
+			);
 		}
-		// Ensure the value is available during the current request.
+
 		$_COOKIE[ $cookie_name ] = $token;
 	}
 
@@ -97,7 +80,7 @@ function get_like_user_id(): string {
  * @param array $args
  * @return string HTML markup for the form control
  */
-function float_form_input( $args = array() ) {
+function float_form_input( $args = array() ): string {
 	$defaults = array(
 		'container_class' => 'form-floating mb-3',
 		'class'           => 'form-control',
@@ -125,8 +108,6 @@ function float_form_input( $args = array() ) {
 		}
 	}
 
-	$required_attr = $args['required'] ? ' required' : '';
-
 	$html = sprintf(
 		'<div class="%1$s">' .
 		'<input type="%2$s" name="%3$s" id="%4$s" class="%5$s" placeholder="%6$s"%7$s%8$s>' .
@@ -138,7 +119,7 @@ function float_form_input( $args = array() ) {
 		esc_attr( $args['id'] ),
 		esc_attr( $args['class'] ),
 		esc_attr( $args['placeholder'] ),
-		$required_attr,
+		$args['required'] ? ' required' : '',
 		$additional_attrs,
 		esc_html( $args['label_text'] )
 	);
@@ -153,7 +134,7 @@ function float_form_input( $args = array() ) {
  * @param bool   $echo_output Whether to echo the result (default true). Returns string either way.
  * @return string
  */
-function copyright_text( $type = 'short', $echo_output = true ) {
+function copyright_text( string $type = 'short', bool $echo_output = true ): string {
 	$type = ( 'long' === $type ) ? 'long' : 'short';
 
 	$blogname = sprintf( '<strong>%s</strong>', esc_html( get_bloginfo( 'name' ) ) );
@@ -161,19 +142,15 @@ function copyright_text( $type = 'short', $echo_output = true ) {
 	// Use a lightweight query to fetch the earliest published post
 	$year = get_transient( 'lerm_first_post_year' );
 	if ( false === $year ) {
-		$first_post_date = get_posts(
-			array(
-				'post_status'    => 'publish',
-				'posts_per_page' => 1,
-				'orderby'        => 'date',
-				'order'          => 'ASC',
-				'fields'         => 'post_date_gmt',
-			)
+		global $wpdb;
+		$first_date = $wpdb->get_var(
+			"SELECT post_date_gmt FROM {$wpdb->posts}
+			 WHERE post_status = 'publish'
+			 ORDER BY post_date_gmt ASC
+			 LIMIT 1"
 		);
 
-		$year = ! empty( $first_post_date )
-			? substr( $first_post_date[0]->post_date_gmt, 0, 4 )
-			: gmdate( 'Y' );
+		$year = $first_date ? substr( $first_date, 0, 4 ) : gmdate( 'Y' );
 		set_transient( 'lerm_first_post_year', $year, MONTH_IN_SECONDS );
 	}
 
@@ -191,7 +168,6 @@ function copyright_text( $type = 'short', $echo_output = true ) {
 	$output = apply_filters( 'lerm_copyright_text', $output, $type );
 
 	if ( $echo_output ) {
-		// $output is safe (we assembled and escaped components above).
 		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped above
 	}
 
@@ -201,7 +177,7 @@ function copyright_text( $type = 'short', $echo_output = true ) {
 /**
  * Render link pagination for paginated posts.
  */
-function link_pagination() {
+function link_pagination(): void {
 	wp_link_pages(
 		array(
 			'previouspagelink' => '<span class="screen-reader-text">' . esc_html__( 'Previous page', 'lerm' ) . '</span>',
@@ -214,16 +190,14 @@ function link_pagination() {
 /**
  * Apply search/replace bootstrap classes to block content.
  */
-function apply_bootstrap_classes( $block_content, $block, $search_replace = array() ) {
-	if ( empty( $block ) || ! isset( $block['blockName'] ) ) {
+function apply_bootstrap_classes( string $block_content, array $block, array $search_replace = array() ): string {
+	if ( empty( $block['blockName'] ) ) {
 		return $block_content;
 	}
 
-	if ( isset( $search_replace['search'], $search_replace['replace'] ) ) {
-		// Only allow array-to-array replacements
-		if ( is_array( $search_replace['search'] ) && is_array( $search_replace['replace'] ) ) {
-			$block_content = str_replace( $search_replace['search'], $search_replace['replace'], $block_content );
-		}
+	if ( isset( $search_replace['search'], $search_replace['replace'] ) && is_array( $search_replace['search'] ) && is_array( $search_replace['replace'] ) ) {
+
+		$block_content = str_replace( $search_replace['search'], $search_replace['replace'], $block_content );
 	}
 
 	return apply_filters( "lerm/block/{$block['blockName']}/content", $block_content, $block );
@@ -232,7 +206,7 @@ function apply_bootstrap_classes( $block_content, $block, $search_replace = arra
 /**
  * Social link block: replace link content with custom SVGs for known platforms.
  */
-function social_link_icon_classes( $block_content, $block ) {
+function social_link_icon_classes( string $block_content, array $block ): string {
 	if ( strpos( $block_content, 'wp-social-link' ) === false ) {
 		return $block_content;
 	}
@@ -257,22 +231,23 @@ function social_link_icon_classes( $block_content, $block ) {
 		),
 	);
 
-	$callback = function ( $matches ) use ( $custom_svgs ) {
+	$callback = static function ( array $matches ) use ( $custom_svgs ): string {
 		$href    = isset( $matches[1] ) ? $matches[1] : '';
 		$content = isset( $matches[2] ) ? $matches[2] : $matches[0];
 
 		// Try to parse host for robust matching
-		$host       = wp_parse_url( $href, PHP_URL_HOST );
+		$host       = (string) wp_parse_url( $href, PHP_URL_HOST );
 		$lower_href = strtolower( $href );
-		$lower_host = $host ? strtolower( $host ) : '';
+		$lower_host = strtolower( $host );
 
 		foreach ( $custom_svgs as $platform ) {
-			foreach ( $platform['match'] as $m ) {
-				$m = strtolower( $m );
+			foreach ( $platform['match'] as $pattern ) {
+				$pattern = strtolower( $pattern );
 				// Exact host match or contains (for keywords like 'wechat')
-				if ( $m === $lower_host || false !== strpos( $lower_href, $m ) ) {
+				if ( $pattern === $lower_host || false !== strpos( $lower_href, $pattern ) ) {
 					// Replace inner content with svg
-					return str_replace( $content, $platform['svg'], $matches[0] );
+					$safe_svg = Security::kses_svg( $platform['svg'] );
+					return str_replace( $content, $safe_svg, $matches[0] );
 				}
 			}
 		}
@@ -284,9 +259,9 @@ function social_link_icon_classes( $block_content, $block ) {
 	$pattern       = '#<a[^>]*href="([^"]+)"[^>]*>(.*?)</a>#is';
 	$block_content = preg_replace_callback( $pattern, $callback, $block_content );
 
-	return apply_bootstrap_classes( $block_content, $block );
+	return apply_bootstrap_classes( (string) $block_content, $block );
 }
-
+add_filter( 'render_block_core/social-link', __NAMESPACE__ . '\social_link_icon_classes', 10, 2 );
 // Register filters for core blocks
 // add_filter( 'render_block_core/archives', __NAMESPACE__ . '\archives_classes', 10, 2 );
 // add_filter( 'render_block_core/calendar', __NAMESPACE__ . '\calendar_classes', 10, 2 );
@@ -294,7 +269,7 @@ function social_link_icon_classes( $block_content, $block ) {
 // add_filter( 'render_block_core/latest-comments', __NAMESPACE__ . '\latest_comments_classes', 10, 2 );
 // add_filter( 'render_block_core/latest-posts', __NAMESPACE__ . '\latest_posts_classes', 10, 2 );
 // add_filter( 'render_block_core/search', __NAMESPACE__ . '\search_classes', 10, 2 );
-add_filter( 'render_block_core/social-link', __NAMESPACE__ . '\social_link_icon_classes', 10, 2 );
+
 
 // End of file
 

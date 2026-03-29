@@ -66,48 +66,7 @@ if ( file_exists( $lerm_autoload ) ) {
 }
 
 // -----------------------------------------------------------------------------
-// 3. Admin 框架（Codestar Framework）
-//    定义 lerm_options() 及后台选项面板，必须在 bootstrap 之前加载
-// -----------------------------------------------------------------------------
-
-$lerm_csf = LERM_DIR . 'app/Http/Admin/codestar-framework.php';
-
-if ( ! function_exists( 'lerm_options' ) ) {
-	/**
-	 * Retrieve theme options without loading the full admin framework on the frontend.
-	 *
-	 * @param string $id            Option ID.
-	 * @param string $tag           Optional nested key.
-	 * @param mixed  $default_value Default value when the option is missing.
-	 * @return mixed
-	 */
-	function lerm_options( string $id, string $tag = '', $default_value = '' ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
-		static $options = null;
-
-		if ( null === $options ) {
-			$options = (array) get_option( 'lerm_theme_options', array() );
-		}
-
-		if ( ! array_key_exists( $id, $options ) ) {
-			return $default_value;
-		}
-
-		$option_value = $options[ $id ];
-
-		if ( is_array( $option_value ) && '' !== $tag ) {
-			return $option_value[ $tag ] ?? $default_value;
-		}
-
-		return $option_value;
-	}
-}
-
-if ( is_admin() && file_exists( $lerm_csf ) ) {
-	require_once $lerm_csf;
-}
-
-// -----------------------------------------------------------------------------
-// 4. 翻译
+// 3. 翻译
 // -----------------------------------------------------------------------------
 
 add_action(
@@ -119,10 +78,48 @@ add_action(
 );
 
 // -----------------------------------------------------------------------------
+// 4. Admin 框架（Codestar Framework）
+//    定义 lerm_options() 及后台选项面板，必须在 bootstrap 之前加载
+// -----------------------------------------------------------------------------
+
+$lerm_csf = LERM_DIR . 'app/Http/Admin/codestar-framework.php';
+add_action(
+	'after_setup_theme',
+	function () use ( $lerm_csf ) {
+		if ( is_admin() && file_exists( $lerm_csf ) ) {
+			require_once $lerm_csf;  // options.config.php 里的 __('lerm') 现在安全
+		}
+	},
+	2
+);
+if ( ! function_exists( 'lerm_options' ) ) {
+	function lerm_options( string $id, string $tag = '', $default_value = '' ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
+		// Fetch the theme options array from the database
+		static $options = null;
+		if ( null === $options ) {
+			$options = (array) get_option( 'lerm_theme_options', array() );
+		}
+
+		// Check if the main option ID exists in the options array
+		if ( ! array_key_exists( $id, $options ) ) {
+			return $default_value;
+		}
+
+		$option_value = $options[ $id ];
+
+		// If the option value is an array and a tag is specified, return the tagged value or default
+		if ( is_array( $option_value ) && '' !== $tag ) {
+			return $options[ $id ][ $tag ] ?? $default_value;
+		}
+
+		// Return the option value (either array or single value)
+		return $option_value;
+	}
+}
+// -----------------------------------------------------------------------------
 // 5. 主题启动（bootstrap）
 //    挂载到 after_setup_theme，确保 WP 核心函数全部可用
 // -----------------------------------------------------------------------------
-
 add_action(
 	'after_setup_theme',
 	static function () {

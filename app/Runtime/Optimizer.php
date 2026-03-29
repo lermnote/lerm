@@ -21,9 +21,9 @@ final class Optimizer {
 	 * @var array<string, mixed>
 	 */
 	protected static array $default_config = array(
-		'gravatar_accel'   => 'disable',
-		'admin_accel'      => false,
-		'google_replace'   => 'disable',
+		'super_gravatar'   => 'disable',
+		'super_admin'      => false,
+		'super_googleapis'   => 'disable',
 		'disable_pingback' => false,
 		'super_optimize'   => array(),
 	);
@@ -50,23 +50,23 @@ final class Optimizer {
 	 */
 	protected static function register_hooks( array $config = array() ): void {
 		// gravatar 替换
-		if ( ! in_array( $config['gravatar_accel'], array( 'disable', '' ), true ) ) {
+		if ( ! in_array( $config['super_gravatar'], array( 'disable', '' ), true ) ) {
 			self::filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), array( __CLASS__, 'replace_gravatar_url' ), 100, 1 );
 		}
 
 		// cravatar 特殊处理
-		if ( 'https://cravatar.cn/avatar/' === $config['gravatar_accel'] ) {
+		if ( 'https://cravatar.cn/avatar/' === $config['super_gravatar'] ) {
 			self::filter( 'user_profile_picture_description', array( __CLASS__, 'get_cravatar_profile_link' ), 100, 1 );
 			self::filter( 'avatar_defaults', array( __CLASS__, 'add_cravatar_default' ), 100, 1 );
 		}
 
-		if ( $config['admin_accel'] ) {
+		if ( $config['super_admin'] ) {
 			self::action( 'init', array( __CLASS__, 'replace_admin_static_urls' ), 100, 1 );
 			self::action( 'shutdown', array( __CLASS__, 'flush_output_buffer' ), 100, 1 );
 		}
 
 		// Google 服务替换
-		if ( ! in_array( $config['google_replace'], array( 'disable', '' ), true ) ) {
+		if ( ! in_array( $config['super_googleapis'], array( 'disable', '' ), true ) ) {
 			self::action( 'init', array( __CLASS__, 'replace_google_services' ), 100, 1 );
 			self::action( 'shutdown', array( __CLASS__, 'flush_output_buffer' ), 100, 1 );
 		}
@@ -249,7 +249,7 @@ final class Optimizer {
 
 	public static function replace_gravatar_url( string $subject ): string {
 		$pattern = '/https?.*?\/avatar\//i';
-		$replace = self::$config['gravatar_accel'] ?? self::$default_config['gravatar_accel'];
+		$replace = self::$config['super_gravatar'] ?? self::$default_config['super_gravatar'];
 		return preg_replace( $pattern, $replace, $subject );
 	}
 
@@ -276,7 +276,7 @@ final class Optimizer {
 		);
 
 		$search  = array( '//fonts.googleapis.com', '//ajax.googleapis.com', '//fonts.gstatic.com', '//themes.googleusercontent.com' );
-		$replace = $services[ self::$config['google_replace'] ] ?? null;
+		$replace = $services[ self::$config['super_googleapis'] ] ?? null;
 
 		if ( is_array( $replace ) ) {
 			self::start_output_buffer_replace( 'str_replace', $search, $replace );

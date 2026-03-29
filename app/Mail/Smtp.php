@@ -28,7 +28,7 @@ final class Smtp {
 			'ssl_enable' => 'tls',
 			'smtp_auth'  => false,
 			'username'   => '',
-			'pwd'        => '',
+			'pswd'       => '',
 		),
 	);
 
@@ -113,7 +113,7 @@ final class Smtp {
 
 		$opts['smtp_auth'] = ! empty( $opts['smtp_auth'] );
 		$opts['username']  = is_string( $opts['username'] ) ? sanitize_text_field( $opts['username'] ) : '';
-		$opts['pwd']       = isset( $opts['pwd'] ) ? (string) $opts['pwd'] : '';
+		$opts['pswd']      = isset( $opts['pswd'] ) ? (string) $opts['pswd'] : '';
 
 		$opts['timeout'] = isset( $opts['timeout'] ) ? (int) $opts['timeout'] : 30;
 

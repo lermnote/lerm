@@ -58,7 +58,6 @@ if ( ! class_exists( 'CSF' ) ) {
 			}
 
 			return self::$instance;
-
 		}
 
 		// Initalize
@@ -71,13 +70,12 @@ if ( ! class_exists( 'CSF' ) ) {
 			self::textdomain();
 
 			add_action( 'after_setup_theme', array( 'CSF', 'setup' ) );
-			add_action( 'init', array( 'CSF', 'setup' ) );
+			//add_action( 'init', array( 'CSF', 'setup' ) );
 			add_action( 'switch_theme', array( 'CSF', 'setup' ) );
 			add_action( 'admin_enqueue_scripts', array( 'CSF', 'add_admin_enqueue_scripts' ) );
 			add_action( 'wp_enqueue_scripts', array( 'CSF', 'add_typography_enqueue_styles' ), 80 );
 			add_action( 'wp_head', array( 'CSF', 'add_custom_css' ), 80 );
 			add_filter( 'admin_body_class', array( 'CSF', 'add_admin_body_class' ) );
-
 		}
 
 		// Setup frameworks
@@ -139,7 +137,6 @@ if ( ! class_exists( 'CSF' ) ) {
 			}
 
 			do_action( 'csf_loaded' );
-
 		}
 
 		// Create options
@@ -180,7 +177,6 @@ if ( ! class_exists( 'CSF' ) ) {
 
 			self::$dir = $dirname;
 			self::$url = $directory_uri . $foldername;
-
 		}
 
 		// Include file helper
@@ -218,7 +214,6 @@ if ( ! class_exists( 'CSF' ) ) {
 				return self::$dir . '/' . $file;
 
 			}
-
 		}
 
 		// Is active plugin helper
@@ -228,7 +223,7 @@ if ( ! class_exists( 'CSF' ) ) {
 
 		// Sanitize dirname
 		public static function sanitize_dirname( $dirname ) {
-			return preg_replace( '/[^A-Za-z]/', '', $dirname );
+			return preg_replace( '/[^A-Za-z0-9\/]/', '', $dirname );
 		}
 
 		// Set url constant
@@ -311,12 +306,11 @@ if ( ! class_exists( 'CSF' ) ) {
 					}
 				}
 			}
-
 		}
 
 		// Setup textdomain
 		public static function textdomain() {
-			load_textdomain( 'csf', self::$dir . '/languages/' . get_locale() . '.mo' );
+			load_plugin_textdomain( 'csf', false, self::$dir . '/languages/' );
 		}
 
 		// Set all of used fields
@@ -347,7 +341,6 @@ if ( ! class_exists( 'CSF' ) ) {
 					}
 				}
 			}
-
 		}
 
 		// Enqueue admin and fields styles and scripts
@@ -463,7 +456,6 @@ if ( ! class_exists( 'CSF' ) ) {
 			}
 
 			do_action( 'csf_enqueue' );
-
 		}
 
 		// Add typography enqueue styles to front page
@@ -508,7 +500,6 @@ if ( ! class_exists( 'CSF' ) ) {
 
 				}
 			}
-
 		}
 
 		// Add admin body class
@@ -519,16 +510,13 @@ if ( ! class_exists( 'CSF' ) ) {
 			}
 
 			return $classes;
-
 		}
 
 		// Add custom css to front page
 		public static function add_custom_css() {
-
 			if ( ! empty( self::$css ) ) {
-				echo '<style type="text/css">' . wp_strip_all_tags( self::$css ) . '</style>';
+				echo '<style type="text/css">' . wp_kses_post( wp_strip_all_tags( self::$css ) ) . '</style>';
 			}
-
 		}
 
 		// Add a new framework field
@@ -617,7 +605,6 @@ if ( ! class_exists( 'CSF' ) ) {
 			echo ( ! empty( $field['title'] ) ) ? '</div>' : '';
 			echo '<div class="clear"></div>';
 			echo '</div>';
-
 		}
 	}
 }

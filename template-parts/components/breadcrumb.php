@@ -14,7 +14,7 @@ Breadcrumb::instance(
 		'list_tag'      => lerm_options( 'breadcrumb_list_tag' ),
 		'item_tag'      => lerm_options( 'breadcrumb_item_tag' ),
 		'separator'     => lerm_options( 'breadcrumb_separator' ),
-		'show_on_front' => lerm_options( 'breadcrumb_show_on_front' ),
+		'show_on_front' => lerm_options( 'breadcrumb_front_show' ),
 		'network'       => false,
 		'show_title'    => lerm_options( 'breadcrumb_show_title' ) ? true : false,
 		'labels'        => array(),

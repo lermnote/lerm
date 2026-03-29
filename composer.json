@@ -27,8 +27,7 @@
 	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "*",
-		"wp-coding-standards/wpcs": "*",
-		"friendsofphp/php-cs-fixer": "*"
+		"wp-coding-standards/wpcs": "*"
 	},
 	"config": {
 		"allow-plugins": {

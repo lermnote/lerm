@@ -11,8 +11,8 @@ namespace Lerm\Support;
 
 use Lerm\Traits\Singleton;
 
-class ChineseToPinyin {
-	private static $maps = array(
+final class PinyinConverter {
+	private static array $maps = array(
 		'a'      => -20319,
 		'ai'     => -20317,
 		'an'     => -20304,
@@ -410,35 +410,53 @@ class ChineseToPinyin {
 		'zun'    => -10256,
 		'zuo'    => -10254,
 	);
-	public static function zh_to_pinyin( $str ) {
-		$str     = iconv( 'UTF-8', 'GBK//IGNORE', $str );
-		$results = array();
-		$length  = strlen( $str ); // Store the length of the string in a variable
+	public static function zh_to_pinyin( string $str ): string {
+		if ( '' === $str ) {
+			return '';
+		}
 
+		$gbk = @iconv( 'UTF-8', 'GBK//IGNORE', $str );
+		if ( false === $gbk ) {
+			trigger_error(
+				'ChineseToPinyin: iconv UTF-8 → GBK failed. Returning original string.',
+				E_USER_NOTICE
+			);
+			return $str;
+		}
+
+		$results = array();
+		$length  = strlen( $gbk );
 		for ( $i = 0; $i < $length; $i++ ) {
-			$ord = ord( $str[ $i ] );
+			$ord = ord( $gbk[ $i ] );
 
 			if ( $ord > 160 ) {
-				$ord = $ord * 256 + ord( $str[ ++$i ] ) - 65536;
+				if ( $i + 1 >= $length ) {
+					break; // 防止越界
+				}
+				$ord = $ord * 256 + ord( $gbk[ ++$i ] ) - 65536;
 			}
 
-			$results[] = self::get_pinyin( $ord );
+			$py = self::get_pinyin( $ord );
+			if ( $py ) {
+				$results[] = $py;
+			}
 		}
 
 		return implode( ' ', $results );
 	}
 
-	private static function get_pinyin( $num ) {
+	private static function get_pinyin( int $num ): string {
 		if ( $num > 0 && $num < 160 ) {
 			return chr( $num );
 		}
 
+		$result = '';
 		foreach ( self::$maps as $pinyin => $code ) {
 			if ( $code <= $num ) {
 				return $pinyin;
 			}
 		}
 
-		return '';
+		return $result;
 	}
 }

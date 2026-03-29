@@ -114,7 +114,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 
 			// wp enqeueu for typography and output css
 			parent::__construct();
-
 		}
 
 		// instance
@@ -161,7 +160,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 					}
 				}
 			}
-
 		}
 
 		public function ajax_save() {
@@ -178,7 +176,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 					)
 				);
 			}
-
 		}
 
 		// get default value
@@ -188,7 +185,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			$default = ( isset( $this->args['defaults'][ $field['id'] ] ) ) ? $this->args['defaults'][ $field['id'] ] : $default;
 
 			return $default;
-
 		}
 
 		// save defaults and set new fields value to main options
@@ -205,7 +201,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			if ( $this->args['save_defaults'] && empty( $tmp_options ) ) {
 				$this->save_options( $this->options );
 			}
-
 		}
 
 		// set options
@@ -335,7 +330,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			}
 
 			return false;
-
 		}
 
 		// save options database
@@ -352,7 +346,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			}
 
 			do_action( "csf_{$this->unique}_saved", $data, $this );
-
 		}
 
 		// get options from database
@@ -373,7 +366,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			}
 
 			return $this->options;
-
 		}
 
 		// admin menu
@@ -410,7 +402,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			}
 
 			add_action( 'load-' . $menu_page, array( $this, 'add_page_on_load' ) );
-
 		}
 
 		public function add_page_on_load() {
@@ -431,7 +422,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			if ( ! empty( $this->args['footer_credit'] ) ) {
 				add_filter( 'admin_footer_text', array( $this, 'add_admin_footer_text' ) );
 			}
-
 		}
 
 		public function add_admin_footer_text() {
@@ -503,7 +493,7 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			$notice_class = ( ! empty( $this->notice ) ) ? 'csf-form-show' : '';
 			$notice_text  = ( ! empty( $this->notice ) ) ? $this->notice : '';
 
-			echo '<div class="csf-form-result csf-form-success ' . esc_attr( $notice_class ) . '">' . $notice_text . '</div>';
+			echo '<div class="csf-form-result csf-form-success ' . esc_attr( $notice_class ) . '">' . wp_kses_post( $notice_text ) . '</div>';
 
 			echo ( $this->args['show_form_warning'] ) ? '<div class="csf-form-result csf-form-warning">' . esc_html__( 'You have unsaved changes, save your changes!', 'csf' ) . '</div>' : '';
 
@@ -656,7 +646,6 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			echo '</div>';
 
 			do_action( 'csf_options_after' );
-
 		}
 	}
 }

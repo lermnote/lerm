@@ -100,15 +100,15 @@ class CDNWordpress extends CDN {
 
 	/** Initializes all options calling WordPress functions. */
 	function __construct() {
-		$excl_tmp = get_option( 'ossdl_off_exclude' );
-		$excludes = array_map( 'trim', explode( ',', $excl_tmp ) );
+		$opts     = get_option( 'lerm_theme_options', array() );
+		$excludes = array_map( 'trim', explode( ',', $opts['exclude_if_substring'] ?? '.php' ) );
 
 		parent::__construct(
 			get_option( 'siteurl' ),
-			get_option( 'ossdl_off_cdn_url' ),
-			get_option( 'ossdl_off_include_dirs' ),
+			$opts['off_new_url'] ?? '',
+			$opts['include_dir'] ?? 'wp-content, wp-includes',
 			$excludes,
-			(bool) get_option( 'ossdl_off_rootrelative' )
+			false
 		);
 	}
 

@@ -176,7 +176,7 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 		// add metabox content
 		public function add_meta_box_content( $post, $callback ) {
 
-			global $post;
+			// global $post;
 
 			$has_nav  = ( count( $this->sections ) > 1 && $this->args['context'] !== 'side' ) ? true : false;
 			$show_all = ( ! $has_nav ) ? ' csf-show-all' : '';

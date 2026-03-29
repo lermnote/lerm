@@ -380,18 +380,18 @@ if ( class_exists( 'CSF' ) ) {
 					),
 				),
 				// array(
-				// 	'id'           => 'like_button',
-				// 	'type'         => 'color_pair',
-				// 	'title'        => __( 'Like Button Color', 'lerm' ),
-				// 	'border_color' => true,
-				// 	'default'      => array(
-				// 		'color'            => '#fff',
-				// 		'background_color' => '#c82333',
-				// 	),
-				// 	'output'       => array(
-				// 		'.like-button,.like-button:hover',
-				// 		'.like-button.done',
-				// 	),
+				//  'id'           => 'like_button',
+				//  'type'         => 'color_pair',
+				//  'title'        => __( 'Like Button Color', 'lerm' ),
+				//  'border_color' => true,
+				//  'default'      => array(
+				//      'color'            => '#fff',
+				//      'background_color' => '#c82333',
+				//  ),
+				//  'output'       => array(
+				//      '.like-button,.like-button:hover',
+				//      '.like-button.done',
+				//  ),
 				// ),
 				array(
 					'type'    => 'heading',
@@ -1196,7 +1196,7 @@ if ( class_exists( 'CSF' ) ) {
 					'label' => __( 'Show related posts under single bottom', 'lerm' ),
 				),
 				array(
-					'id'         => 'raleted_number',
+					'id'         => 'related_number',
 					'type'       => 'spinner',
 					'dependency' => array( 'related_posts', '==', 'true' ),
 					'title'      => __( 'Related posts number', 'lerm' ),
@@ -1553,13 +1553,13 @@ if ( class_exists( 'CSF' ) ) {
 					'title' => __( 'Basic Setting', 'lerm' ),
 				),
 				array(
-					'id'    => 'frontend_lgoin',
+					'id'    => 'frontend_login',
 					'type'  => 'switcher',
 					'title' => __( 'Frontend Login', 'lerm' ),
 				),
 				array(
-					'id'          => 'frontend_lgoin_page',
-					'dependency'  => array( 'frontend_lgoin', '==', 'true' ),
+					'id'          => 'frontend_login_page',
+					'dependency'  => array( 'frontend_login', '==', 'true' ),
 					'type'        => 'select',
 					'title'       => __( 'Select Frontend Login Page', 'lerm' ),
 					'placeholder' => 'Select login page',
@@ -1570,19 +1570,25 @@ if ( class_exists( 'CSF' ) ) {
 				),
 				array(
 					'id'         => 'menu_login_item',
-					'dependency' => array( 'frontend_lgoin', '==', 'true' ),
+					'dependency' => array( 'frontend_login', '==', 'true' ),
 					'type'       => 'switcher',
 					'title'      => __( 'Show menu login item', 'lerm' ),
 				),
 				array(
-					'id'         => 'login_redirect',
+					'id'         => 'login_redirect_url',
 					'type'       => 'switcher',
 					'title'      => __( 'Login Redirect to Homepage', 'lerm' ),
 					'dependency' => array( 'frontend_regist', '==', 'true' ),
 				),
 				array(
+					'id'         => 'logout_redirect_url',
+					'type'       => 'switcher',
+					'title'      => __( 'Logout Redirect to Homepage', 'lerm' ),
+					'dependency' => array( 'frontend_regist', '==', 'true' ),
+				),
+				array(
 					'id'         => 'front_user_center',
-					'dependency' => array( 'frontend_lgoin', '==', 'true' ),
+					'dependency' => array( 'frontend_login', '==', 'true' ),
 					'type'       => 'switcher',
 					'title'      => __( 'Enable frontend user center', 'lerm' ),
 				),
@@ -1601,11 +1607,11 @@ if ( class_exists( 'CSF' ) ) {
 				array(
 					'type'       => 'heading',
 					'title'      => __( 'Front Regist', 'lerm' ),
-					'dependency' => array( 'frontend_lgoin', '==', 'true' ),
+					'dependency' => array( 'frontend_login', '==', 'true' ),
 				),
 				array(
 					'id'         => 'frontend_regist',
-					'dependency' => array( 'frontend_lgoin', '==', 'true' ),
+					'dependency' => array( 'frontend_login', '==', 'true' ),
 					'type'       => 'switcher',
 					'title'      => __( 'Frontend regist', 'lerm' ),
 				),
@@ -1625,12 +1631,6 @@ if ( class_exists( 'CSF' ) ) {
 					'id'         => 'my_posts',
 					'type'       => 'switcher',
 					'title'      => __( 'My Own Posts', 'lerm' ),
-					'dependency' => array( 'frontend_regist', '==', 'true' ),
-				),
-				array(
-					'id'         => 'favorite_post',
-					'type'       => 'switcher',
-					'title'      => __( 'Favorite Post', 'lerm' ),
 					'dependency' => array( 'frontend_regist', '==', 'true' ),
 				),
 				array(
@@ -1658,7 +1658,7 @@ if ( class_exists( 'CSF' ) ) {
 					'type'       => 'select',
 					'title'      => __( 'Default Role', 'lerm' ),
 					'label'      => __( 'Select default WordPress register roles', 'lerm' ),
-					'options'    => $wp_roles->get_names(),
+					'options'    => wp_roles()->get_names(),
 					'dependency' => array( 'frontend_regist', '==', 'true' ),
 				),
 			),

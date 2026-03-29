@@ -18,7 +18,7 @@ use Lerm\SEO\Manager as SeoManager;
 use Lerm\Mail\Smtp;
 use Lerm\Update\Updater;
 use Lerm\Http\Rest\Router;
-
+use Lerm\Runtime\Lazyload;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -44,10 +44,14 @@ $login_options    = array();
 
 if ( ! empty( $options ) ) {
 
+	$enqueue_options = array(
+		'enable_code_highlight' => (bool) ( $options['enable_code_highlight'] ?? true ),
+	);
+
 	$optimize_options = array(
-		'gravatar_accel'   => $options['super_gravatar'] ?? '',
-		'admin_accel'      => (bool) ( $options['super_admin'] ?? false ),
-		'google_replace'   => $options['super_googleapis'] ?? '',
+		'super_gravatar'   => $options['super_gravatar'] ?? '',
+		'super_admin'      => (bool) ( $options['super_admin'] ?? false ),
+		'super_googleapis' => $options['super_googleapis'] ?? '',
 		'super_optimize'   => (array) ( $options['super_optimize'] ?? array() ),
 		'disable_pingback' => (bool) ( $options['disable_pingback'] ?? false ),
 	);
@@ -68,10 +72,10 @@ if ( ! empty( $options ) ) {
 	);
 
 	$sitemap_options = array(
-		'sitemap_enable' => (bool) ( $options['sitemap_enable'] ?? false ),
-		'post_type'      => (array) ( $options['exclude_post_types'] ?? array() ),
-		'post_exclude'   => (array) ( $options['exclude_post'] ?? array() ),
-		'page_exclude'   => (array) ( $options['exclude_page'] ?? array() ),
+		'sitemap_enable'     => (bool) ( $options['sitemap_enable'] ?? false ),
+		'exclude_post_types' => (array) ( $options['exclude_post_types'] ?? array() ),
+		'exclude_page'       => (array) ( $options['exclude_post'] ?? array() ),
+		'exclude_post'       => (array) ( $options['exclude_page'] ?? array() ),
 	);
 
 	$custom_options = array(
@@ -90,12 +94,12 @@ if ( ! empty( $options ) ) {
 		'ver'  => wp_get_theme()->get( 'Version' ),
 	);
 
-	// 修正原拼写错误：frontend_lgoin → frontend_login
+	// 修正原拼写错误：frontend_login → frontend_login
 	$login_options = array(
 		'front_login_enable'  => (bool) ( $options['frontend_login'] ?? false ),
 		'login_page_id'       => (int) ( $options['frontend_login_page'] ?? 0 ),
 		'menu_login_item'     => $options['menu_login_item'] ?? '',
-		'login_redirect_url'  => $options['login_redirect_url'] ?? '',
+		'login_redirect_url'  => (bool) ( $options['login_redirect_url'] ?? false ) ? home_url( '/' ) : '',
 		'logout_redirect_url' => $options['logout_redirect_url'] ?? home_url(),
 	);
 }
@@ -103,7 +107,7 @@ if ( ! empty( $options ) ) {
 // ---------------------------------------------------------------------------
 // 3. 允许外部通过 filter 覆盖任意模块参数
 // ---------------------------------------------------------------------------
-
+$enqueue_options  = apply_filters( 'lerm_enqueue_options', $enqueue_options );
 $optimize_options = apply_filters( 'lerm_optimize_options', $optimize_options );
 $mail_options     = apply_filters( 'lerm_mail_options', $mail_options );
 $seo_options      = apply_filters( 'lerm_seo_options', $seo_options );
@@ -115,10 +119,15 @@ $login_options    = apply_filters( 'lerm_login_options', $login_options );
 // ---------------------------------------------------------------------------
 // 4. 初始化各模块
 // ---------------------------------------------------------------------------
+Setup::instance(
+	array(
+		'excerpt_length'         => (int) ( $options['excerpt_length'] ?? 100 ),
+		'comment_excerpt_length' => (int) ( $options['comment_excerpt_length'] ?? 100 ),
+	)
+);
 
-// Core — 始终加载，无条件
-Setup::instance();
-Enqueue::instance();
+Enqueue::instance( $enqueue_options );
+
 
 // Runtime 优化 — 有配置才启用
 if ( ! empty( $optimize_options ) ) {
@@ -187,7 +196,12 @@ add_filter(
 	10,
 	3
 );
-
+if ( ! empty( $options['enable_cdn'] ) && ! empty( $options['off_new_url'] ) ) {
+	add_action( 'template_redirect', 'Lerm\Runtime\do_ossdl_off_ob_start' );
+}
+if ( ! empty( $options['lazyload'] ) ) {
+	Lazyload::instance();
+}
 // ---------------------------------------------------------------------------
 // 6. 前台登录模块（可选）
 // ---------------------------------------------------------------------------

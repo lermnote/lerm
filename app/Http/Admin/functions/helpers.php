@@ -8,22 +8,21 @@
  * @version 1.0.0
  */
 if ( ! function_exists( 'csf_array_search' ) ) {
-	function csf_array_search( $array, $key, $value ) {
+	function csf_array_search( $data, $key, $value ) {
 
 		$results = array();
 
-		if ( is_array( $array ) ) {
-			if ( isset( $array[ $key ] ) && $array[ $key ] === $value ) {
-				$results[] = $array;
+		if ( is_array( $data ) ) {
+			if ( isset( $data[ $key ] ) && $data[ $key ] === $value ) {
+				$results[] = $data;
 			}
 
-			foreach ( $array as $sub_array ) {
+			foreach ( $data as $sub_array ) {
 				$results = array_merge( $results, csf_array_search( $sub_array, $key, $value ) );
 			}
 		}
 
 		return $results;
-
 	}
 }
 /**
@@ -34,16 +33,19 @@ if ( ! function_exists( 'csf_array_search' ) ) {
  * @version 1.0.0
  */
 if ( ! function_exists( 'csf_get_var' ) ) {
-	function csf_get_var( $var, $default = '' ) {
-		if ( isset( $_POST[ $var ] ) ) {
-				return $_POST[ $var ];
+	function csf_get_var( $variable, $default_value = '' ) {
+		if ( isset( $_POST[ $variable ] ) ) {
+			if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'csf_nonce' ) ) {
+				return $default_value;
+			}
+			return $_POST[ $variable ];
 		}
 
-		if ( isset( $_GET[ $var ] ) ) {
-				return $_GET[ $var ];
+		if ( isset( $_GET[ $variable ] ) ) {
+				return $_GET[ $variable ];
 		}
 
-			return $default;
+			return $default_value;
 	}
 }
 
@@ -55,16 +57,19 @@ if ( ! function_exists( 'csf_get_var' ) ) {
 * @version 1.0.0
 */
 if ( ! function_exists( 'csf_get_vars' ) ) {
-	function csf_get_vars( $var, $depth, $default = '' ) {
-		if ( isset( $_POST[ $var ][ $depth ] ) ) {
-				return $_POST[ $var ][ $depth ];
+	function csf_get_vars( $variable, $depth, $default_value = '' ) {
+		if ( isset( $_POST[ $variable ][ $depth ] ) ) {
+			if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'csf_nonce' ) ) {
+				return $default_value;
+			}
+			return $_POST[ $variable ][ $depth ];
 		}
 
-		if ( isset( $_GET[ $var ][ $depth ] ) ) {
-				return $_GET[ $var ][ $depth ];
+		if ( isset( $_GET[ $variable ][ $depth ] ) ) {
+				return $_GET[ $variable ][ $depth ];
 		}
 
-			return $default;
+			return $default_value;
 	}
 }
 /**

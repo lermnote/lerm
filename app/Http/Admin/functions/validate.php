@@ -57,8 +57,8 @@ if ( ! function_exists( 'csf_validate_required' ) ) {
  */
 if ( ! function_exists( 'csf_validate_url' ) ) {
 	function csf_validate_url( $value ) {
-
-		if ( ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
+		$allowed = array( 'http', 'https' );
+		if ( ! in_array( wp_parse_url( $value, PHP_URL_SCHEME ), $allowed, true ) ) {
 			return esc_html__( 'Please enter a valid URL.', 'csf' );
 		}
 	}
