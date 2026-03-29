@@ -1,11 +1,12 @@
 <?php
 /**
- * Template Name: 归档模板
+ * Template Name: Archives
  *
-* @package Lerm https://lerm.net
  * @package Lerm
  */
+
 get_header();
+
 $args  = array(
 	'post_type'           => 'post',
 	'posts_per_page'      => -1,
@@ -26,19 +27,17 @@ $query = new WP_Query( $args );
 							<header class="entry-header d-flex flex-column text-center mb-md-2">
 								<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 								<small class="entry-meta">
-									【注: 点击月份可以展开】
+									<?php esc_html_e( 'Tip: click a month to expand it.', 'lerm' ); ?>
 								</small>
 							</header>
 
 							<?php the_content(); ?>
 							<div id="archives" class="archives-page">
 								<button type="button" class="btn btn-success" id="al_expand_collapse" style="margin-bottom:1rem">
-									全部展开/收缩
+									<?php esc_html_e( 'Expand/Collapse All', 'lerm' ); ?>
 								</button>
 								<?php
 								$posts_rebuild = array();
-								$year          = 0;
-								$mon           = 0;
 
 								while ( $query->have_posts() ) :
 									$query->the_post();
@@ -48,7 +47,7 @@ $query = new WP_Query( $args );
 									$day   = get_the_date( _x( 'd', 'daily archives date format', 'lerm' ) );
 
 									$posts_rebuild[ $year ][ $month ][ $day ] = sprintf(
-										'<span class="entry-published">%s</span><a href="%s" >%s <span class="badge bg-primary">%s</span></a>',
+										'<span class="entry-published">%s</span><a href="%s">%s <span class="badge bg-primary">%s</span></a>',
 										$day,
 										get_permalink(),
 										get_the_title(),
@@ -59,7 +58,7 @@ $query = new WP_Query( $args );
 								foreach ( $posts_rebuild as $key_y => $y ) {
 									?>
 									<h2 class="year-list">
-										<?php echo $key_y; ?>
+										<?php echo esc_html( $key_y ); ?>
 									</h2>
 									<ul class="list-unstyled month-list">
 										<?php
@@ -73,13 +72,13 @@ $query = new WP_Query( $args );
 											?>
 											<li class="list-item">
 												<span class="month-post-list">
-												<?php echo $key_m; ?>
+													<?php echo esc_html( $key_m ); ?>
 													<label class="badge bg-danger">
-													<?php echo $i; ?>
+														<?php echo esc_html( (string) $i ); ?>
 													</label>
 												</span>
 												<ul class="list-group post-list">
-												<?php echo $items; ?>
+													<?php echo wp_kses_post( $items ); ?>
 												</ul>
 											</li>
 											<?php
@@ -93,7 +92,6 @@ $query = new WP_Query( $args );
 
 						</article><!-- #post-## -->
 						<?php
-						// If comments are open or we have at least one comment, load up the comment template.
 						if ( comments_open() || get_comments_number() ) {
 							comments_template();
 						}

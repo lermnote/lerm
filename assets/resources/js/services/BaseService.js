@@ -1,4 +1,6 @@
 // services/BaseService.js
+import { translate } from '../utils/i18n.js';
+
 export default class BaseService {
   constructor(apiUrl) {
     this.apiUrl = apiUrl;
@@ -44,7 +46,7 @@ export default class BaseService {
     console.error("An error occurred:", error?.message || error);
     // graceful fallback: if no UI message area, just console
     if (this.messageId) {
-      this.displayMessage(`An error occurred: ${error?.message || error}`, 'danger', 7000);
+      this.displayMessage(translate('error_occurred', { message: error?.message || error }), 'danger', 7000);
     }
   }
 

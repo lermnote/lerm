@@ -1,12 +1,10 @@
 <?php
 /**
- * Singular template for posts and pages
+ * Singular template for posts and pages.
  *
- * Put this file in your theme root as singular.php.
- *
- * @package Lerm https://lerm.net
- * @since 1.0
+ * @package Lerm
  */
+
 get_header();
 
 $template_options = lerm_get_template_options();
@@ -21,23 +19,39 @@ $template_options = lerm_get_template_options();
 					while ( have_posts() ) :
 						the_post();
 
-						/*
-						 * 加载不同 post type 的 content template：
-						 * - 页面会加载 template-parts/content/content-page.php（如果存在）
-						 * - 文章会加载 template-parts/content/content-post.php（如果存在）
-						 * - 或者统一使用 content.php 作为兜底
-						 */
 						get_template_part( 'template-parts/post/content', get_post_type() );
 
-						// 下面为仅在文章（post）显示的部分
 						if ( is_singular( 'post' ) ) :
+							$permalink       = get_permalink();
+							$site_name       = get_bloginfo( 'name' );
+							$permalink_title = sprintf(
+								/* translators: %s: post title */
+								__( 'Permalink to %s', 'lerm' ),
+								get_the_title()
+							);
 							?>
 							<ul class="card entry-copyright p-3 mb-2 list-unstyled">
-								<li><strong>版权声明：</strong>
-									<span>本文由<a href="<?php the_permalink(); ?>" rel="bookmark" title="本文固定链接 <?php the_permalink(); ?>"> <?php bloginfo( 'name' ); ?> </a> 整理发表，转载请注明出处</span>
+								<li>
+									<strong><?php esc_html_e( 'Copyright notice:', 'lerm' ); ?></strong>
+									<span>
+										<?php
+										printf(
+											/* translators: 1: opening link tag, 2: site name, 3: closing link tag */
+											wp_kses_post( __( 'This article was published by %1$s%2$s%3$s. Please credit the original source when reposting.', 'lerm' ) ),
+											'<a href="' . esc_url( $permalink ) . '" rel="bookmark" title="' . esc_attr( $permalink_title ) . '">',
+											esc_html( $site_name ),
+											'</a>'
+										);
+										?>
+									</span>
 								</li>
-								<li><strong>转载信息：</strong>
-									<span><a href="<?php the_permalink(); ?>" rel="bookmark" title="本文固定链接 <?php the_permalink(); ?>"> <?php the_title(); ?> | <?php bloginfo( 'name' ); ?></a></span>
+								<li>
+									<strong><?php esc_html_e( 'Permalink:', 'lerm' ); ?></strong>
+									<span>
+										<a href="<?php echo esc_url( $permalink ); ?>" rel="bookmark" title="<?php echo esc_attr( $permalink_title ); ?>">
+											<?php the_title(); ?> | <?php echo esc_html( $site_name ); ?>
+										</a>
+									</span>
 								</li>
 							</ul>
 
@@ -46,11 +60,9 @@ $template_options = lerm_get_template_options();
 							<?php endif; ?>
 
 							<?php get_template_part( 'template-parts/components/post-navigation' ); ?>
-
 							<?php
 						endif;
 
-						// comments 对 page & post 通用（如果开启）
 						if ( comments_open() || get_comments_number() ) {
 							comments_template();
 						}

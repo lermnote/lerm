@@ -1,6 +1,6 @@
 {
   "name": "lerm-wp-frontend",
-  "version": "1.0.0",
+  "version": "5.0.0",
   "description": "Frontend services for the theme REST API",
   "scripts": {
     "dev":   "vite build --watch",

@@ -1,30 +1,31 @@
 // services/FormService.js
 import BaseService from './BaseService.js';
 import { delegate } from '../utils/dom.js';
+import { translate } from '../utils/i18n.js';
 
 // reuse the validationRules and validateField from the original script
 const validationRules = {
   email: {
     pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    message: 'Invalid email format',
+    message: translate('invalid_email_format'),
   },
-  username: { minLength: 3, errorMessage: { minLength: 'Register must be at least {minLength} characters long.' } },
-  author: { minLength: 3, errorMessage: { minLength: 'Comment username must be at least {minLength} characters long.' } },
+  username: { minLength: 3, errorMessage: { minLength: translate('register_username_min') } },
+  author: { minLength: 3, errorMessage: { minLength: translate('comment_username_min') } },
   regist_password: {
     minLength: 8,
     hasUppercase: /[A-Z]/,
     hasNumber: /\d/,
     hasSpecialChar: /[!@#$%^&*]/,
-    message: 'Password must be at least 8 characters long, include one uppercase letter, one number, and one special character.',
+    message: translate('password_min', { minLength: 8 }),
     errorMessage: {
-      minLength: 'Password must be at least {minLength} characters long.',
-      hasUppercase: 'Password must contain at least one uppercase letter.',
-      hasNumber: 'Password must contain at least one number.',
-      hasSpecialChar: 'Password must contain at least one special character.',
+      minLength: translate('password_min'),
+      hasUppercase: translate('password_uppercase'),
+      hasNumber: translate('password_number'),
+      hasSpecialChar: translate('password_special'),
     }
   },
-  confirm_password: { match: 'regist_password', message: 'Passwords do not match' },
-  comment: { minLength: 6, message: 'Textarea must be at least 10 characters long', errorMessage: { minLength: 'Comment textarea must be at least {minLength} characters long.' } }
+  confirm_password: { match: 'regist_password', message: translate('password_mismatch') },
+  comment: { minLength: 6, message: translate('comment_min', { minLength: 6 }), errorMessage: { minLength: translate('comment_min') } }
 };
 
 const validateField = (field, rules, formValues = {}) => {
@@ -33,7 +34,7 @@ const validateField = (field, rules, formValues = {}) => {
   if (!rule) return { valid: true };
   const { pattern, minLength, hasUppercase, hasNumber, hasSpecialChar, match, errorMessage } = rule;
 
-  if (pattern && !pattern.test(value)) return { valid: false, message: errorMessage?.pattern || 'Invalid format' };
+  if (pattern && !pattern.test(value)) return { valid: false, message: errorMessage?.pattern || translate('invalid_format') };
   if (minLength && value.length < minLength) return { valid: false, message: errorMessage?.minLength.replace('{minLength}', minLength) };
   if (hasUppercase && !hasUppercase.test(value)) return { valid: false, message: errorMessage.hasUppercase };
   if (hasNumber && !hasNumber.test(value)) return { valid: false, message: errorMessage.hasNumber };
@@ -66,6 +67,8 @@ export default class FormService extends BaseService {
   togglePasswordVisibility(passwordFields, toggleElement) {
     const isVisible = toggleElement.classList.toggle('visible');
     passwordFields.forEach((field) => field.type = isVisible ? 'text' : 'password');
+    toggleElement.textContent = isVisible ? translate('hide') : translate('show');
+    toggleElement.setAttribute('aria-label', isVisible ? translate('hide_password') : translate('show_password'));
   }
 
   handleFormSubmit = async (event, form) => {
@@ -129,7 +132,7 @@ export default class FormService extends BaseService {
   onSuccess = (response, form) => {
     form.reset();
     this.afterSubmitSuccess(response);
-    this.displayMessage(response?.message || 'Form submitted successfully!', 'success');
+    this.displayMessage(response?.message || translate('form_submitted'), 'success');
   }
 
   afterSubmitSuccess = (_response) => {}

@@ -1,6 +1,7 @@
 // services/ClickService.js
 import BaseService from './BaseService.js';
 import { delegate } from '../utils/dom.js';
+import { translate } from '../utils/i18n.js';
 
 export default class ClickService extends BaseService {
 	/**
@@ -39,7 +40,7 @@ export default class ClickService extends BaseService {
 		// validate nonce
 		const nonce = this.security ?? target.dataset.nonce;
 		if (!nonce) {
-			this.onError(new Error('Missing nonce'), target);
+			this.onError(new Error(translate('missing_nonce')), target);
 			return;
 		}
 
@@ -130,12 +131,12 @@ export default class ClickService extends BaseService {
 	beforeClick = () => { /* hook */ }
 
 	onSuccess = (response, target) => {
-		this.displayMessage && this.displayMessage('Click action was successful!', 'success');
+		this.displayMessage && this.displayMessage(translate('click_success'), 'success');
 		console.log('Response:', response);
 	}
 
 	onError = (error, target) => {
-		this.displayMessage && this.displayMessage('Failed to process click action.', 'danger');
+		this.displayMessage && this.displayMessage(translate('click_failed'), 'danger');
 		console.error('Error:', error);
 		if (target && (target instanceof HTMLElement)) {
 			target.setAttribute('disabled', 'disabled');

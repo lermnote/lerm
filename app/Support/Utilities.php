@@ -175,8 +175,12 @@ function copyright_text( string $type = 'short', bool $echo_output = true ): str
 		/* translators: 1: year or range, 2: blog name */
 		$output = sprintf( '&copy; %1$s %2$s', esc_html( $date ), $blogname );
 	} else {
-		/* translators: 1: year or range, 2: blog name */
-		$output = sprintf( 'Copyright &copy; %1$s %2$s All rights reserved', esc_html( $date ), $blogname );
+		$output = sprintf(
+			/* translators: 1: year or range, 2: blog name */
+			__( 'Copyright &copy; %1$s %2$s. All rights reserved.', 'lerm' ),
+			esc_html( $date ),
+			$blogname
+		);
 	}
 
 	$output = apply_filters( 'lerm_copyright_text', $output, $type );

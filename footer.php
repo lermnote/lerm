@@ -1,11 +1,10 @@
 <?php
 /**
- * The template for displaying the footer
+ * The template for displaying the footer.
  *
- * @package Lerm https://lerm.net
- * @date   2016-08-28 21:57:52
- * @since  1.00
+ * @package Lerm
  */
+
 use function Lerm\Support\copyright_text;
 
 $template_options = lerm_get_template_options();
@@ -23,9 +22,8 @@ $template_options = lerm_get_template_options();
 			<?php if ( ! empty( $template_options['icp_num'] ) ) : ?>
 				<span><a href="https://beian.miit.gov.cn"><?php echo esc_html( $template_options['icp_num'] ); ?></a></span>
 			<?php endif; ?>
-			<!--尊重原创，请保留作者链接，谢谢 -->
 			<br>
-			<span><?php echo esc_html__( 'Theme By', 'lerm' ); ?><a href="<?php echo esc_url( 'https://lerm.net/', 'lerm' ); ?>"> Lerm </a></span>
+			<span><?php echo esc_html__( 'Theme by', 'lerm' ); ?><a href="<?php echo esc_url( 'https://lerm.net/' ); ?>"> Lerm </a></span>
 			<?php
 			wp_nav_menu(
 				array(
@@ -43,8 +41,8 @@ $template_options = lerm_get_template_options();
 	</div>
 </footer>
 <div class="position-fixed d-grid gap-1 btn-group-sm" style="bottom: 4rem;right: 1rem">
-	<a class="btn btn-custom" target="_blank" rel="noopener noreferrer" href="http://wpa.qq.com/msgrd?v=3&uin=825641026&site=qq&menu=yes" data-bs-toggle="tooltip" data-bs-placement="left" title="QQ 在线咨询"  role="button"><i class="fa fa-qq"></i></a>
-	<button class="btn btn-custom" id="scroll-up" data-bs-toggle="tooltip" data-bs-placement="left" title="飞回顶部"  role="button"><i class="fa fa-chevron-up" ></i></button>
+	<a class="btn btn-custom" target="_blank" rel="noopener noreferrer" href="http://wpa.qq.com/msgrd?v=3&uin=825641026&site=qq&menu=yes" data-bs-toggle="tooltip" data-bs-placement="left" title="<?php echo esc_attr__( 'QQ live chat', 'lerm' ); ?>" role="button"><i class="fa fa-qq"></i></a>
+	<button class="btn btn-custom" id="scroll-up" data-bs-toggle="tooltip" data-bs-placement="left" title="<?php echo esc_attr__( 'Back to top', 'lerm' ); ?>" role="button"><i class="fa fa-chevron-up"></i></button>
 </div>
 </div><!-- #page -->
 <?php wp_footer(); ?>

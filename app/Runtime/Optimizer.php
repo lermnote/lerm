@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Lerm\Runtime;
 
-use Lerm\Traits\Singleton;
 use Lerm\Traits\Hooker;
+use Lerm\Traits\Singleton;
 
 /**
- * Class Optimizer
- *
- * 负责清理 WP head、替换外部资源、以及一组“优化”开关�? */
+ * Theme runtime optimizer.
+ */
 final class Optimizer {
 	use Singleton;
 	use Hooker;
@@ -21,11 +20,11 @@ final class Optimizer {
 	 * @var array<string, mixed>
 	 */
 	protected static array $default_config = array(
-		'super_gravatar'   => 'disable',
-		'super_admin'      => false,
-		'super_googleapis'   => 'disable',
-		'disable_pingback' => false,
-		'super_optimize'   => array(),
+		'super_gravatar'    => 'disable',
+		'super_admin'       => false,
+		'super_googleapis'  => 'disable',
+		'disable_pingback'  => false,
+		'super_optimize'    => array(),
 	);
 
 	/** @var array<string, mixed> Current merged config. */
@@ -34,7 +33,7 @@ final class Optimizer {
 	/**
 	 * Constructor.
 	 *
-	 * @param array<string, mixed> $params
+	 * @param array<string, mixed> $params Runtime parameters.
 	 */
 	public function __construct( array $params = array() ) {
 		self::$config = apply_filters( 'lerm_optimize_args', wp_parse_args( $params, self::$default_config ) );
@@ -42,19 +41,17 @@ final class Optimizer {
 	}
 
 	/**
-	 * Register hooks based on the configuration.
+	 * Register hooks based on the active configuration.
 	 *
-	 * @param array<string, mixed> $config
-	 *
-	 * @return void
+	 * @param array<string, mixed> $config Runtime configuration.
 	 */
 	protected static function register_hooks( array $config = array() ): void {
-		// gravatar 替换
+		// Replace Gravatar avatar URLs with the selected mirror.
 		if ( ! in_array( $config['super_gravatar'], array( 'disable', '' ), true ) ) {
 			self::filters( array( 'um_user_avatar_url_filter', 'bp_gravatar_url', 'get_avatar_url' ), array( __CLASS__, 'replace_gravatar_url' ), 100, 1 );
 		}
 
-		// cravatar 特殊处理
+		// Apply Cravatar-specific helpers when that mirror is selected.
 		if ( 'https://cravatar.cn/avatar/' === $config['super_gravatar'] ) {
 			self::filter( 'user_profile_picture_description', array( __CLASS__, 'get_cravatar_profile_link' ), 100, 1 );
 			self::filter( 'avatar_defaults', array( __CLASS__, 'add_cravatar_default' ), 100, 1 );
@@ -65,31 +62,30 @@ final class Optimizer {
 			self::action( 'shutdown', array( __CLASS__, 'flush_output_buffer' ), 100, 1 );
 		}
 
-		// Google 服务替换
+		// Replace Google-hosted assets with the selected mirror.
 		if ( ! in_array( $config['super_googleapis'], array( 'disable', '' ), true ) ) {
 			self::action( 'init', array( __CLASS__, 'replace_google_services' ), 100, 1 );
 			self::action( 'shutdown', array( __CLASS__, 'flush_output_buffer' ), 100, 1 );
 		}
 
-		// 关闭自我 pingback
+		// Disable self pingbacks if requested.
 		if ( $config['disable_pingback'] ) {
 			self::action( 'pre_ping', array( __CLASS__, 'filter_out_self_pings' ) );
 		}
 
-		// 超级优化�?
+		// Apply optional front-end optimizations.
 		if ( is_array( $config['super_optimize'] ) && ! empty( $config['super_optimize'] ) ) {
 			self::apply_optimizations( $config['super_optimize'] );
 		}
 
-		// 清理菜单属�?
+		// Clean up menu classes on every request.
 		self::filters( array( 'nav_menu_css_class', 'nav_menu_item_id', 'page_css_class' ), array( __CLASS__, 'filter_menu_css_classes' ), 100, 1 );
 	}
 
 	/**
-	 * 根据选项移除不需要的 head / 内置功能�?  *
-	 * @param array<int, string> $flags
+	 * Remove optional head tags and built-in features.
 	 *
-	 * @return void
+	 * @param array<int, string> $flags Enabled optimization flags.
 	 */
 	public static function apply_optimizations( array $flags = array() ): void {
 		$head_actions = array(
@@ -150,9 +146,9 @@ final class Optimizer {
 		add_action( 'embed_footer', array( __CLASS__, 'output_embed_footer_style' ) );
 	}
 
-	/* -----------------------------
-	 * 下列为具体实现方法（snake_case 命名�?     * ----------------------------*/
-
+	/**
+	 * Disable emoji-related assets and TinyMCE plugins.
+	 */
 	public static function disable_emojis(): void {
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 		remove_action( 'admin_print_styles', 'print_emoji_styles' );
@@ -166,6 +162,9 @@ final class Optimizer {
 		add_filter( 'tiny_mce_plugins', array( __CLASS__, 'remove_emojis_tinymce_plugins' ) );
 	}
 
+	/**
+	 * Disable oEmbed routes, discovery links, and editor plugins.
+	 */
 	public static function disable_oembed(): void {
 		remove_action( 'rest_api_init', 'wp_oembed_register_route' );
 		remove_filter( 'rest_pre_serve_request', '_oembed_rest_pre_serve_request', 10, 4 );
@@ -178,39 +177,65 @@ final class Optimizer {
 		add_filter( 'tiny_mce_plugins', array( __CLASS__, 'remove_wpembed_tinymce_plugins' ) );
 	}
 
+	/**
+	 * Remove global style SVG filters.
+	 */
 	public static function remove_global_styles_svg(): void {
 		remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
 		remove_filter( 'render_block', 'wp_render_layout_support_flag' );
-		// 如果想彻底移除全局样式，请取消下面注释
-		// remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
-		// remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
+		// Uncomment these lines if you want to remove global styles completely.
+		// remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
+		// remove_action( 'wp_footer', 'wp_enqueue_global_styles', 1 );
 	}
 
+	/**
+	 * Remove REST API links from the document head and headers.
+	 */
 	public static function remove_rest_api_links(): void {
 		remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
 		remove_action( 'xml_rsd_apis', 'rest_output_rsd' );
 		remove_action( 'template_redirect', 'rest_output_linkheader', 11 );
 	}
 
+	/**
+	 * Remove the wpembed TinyMCE plugin.
+	 *
+	 * @param array<int, string> $plugins Registered plugins.
+	 * @return array<int, string>
+	 */
 	public static function remove_wpembed_tinymce_plugins( array $plugins ): array {
 		return array_diff( $plugins, array( 'wpembed' ) );
 	}
 
+	/**
+	 * Remove embed rewrites.
+	 *
+	 * @param array<string, string> $rules Rewrite rules.
+	 * @return array<string, string>
+	 */
 	public static function filter_disable_embeds_rewrites( array $rules ): array {
 		foreach ( $rules as $rule => $rewrite ) {
 			if ( false !== strpos( $rewrite, 'embed=true' ) ) {
 				unset( $rules[ $rule ] );
 			}
 		}
+
 		return $rules;
 	}
 
+	/**
+	 * Remove the wpemoji TinyMCE plugin.
+	 *
+	 * @param array<int, string> $plugins Registered plugins.
+	 * @return array<int, string>
+	 */
 	public static function remove_emojis_tinymce_plugins( array $plugins ): array {
 		return array_diff( $plugins, array( 'wpemoji' ) );
 	}
 
 	/**
-	 * 当被用作 rest_authentication_errors 过滤器时，返�?WP_Error 以阻止未授权访问�?   *
+	 * Block unauthorized REST access when this method is used as a filter.
+	 *
 	 * @return \WP_Error
 	 */
 	public static function rest_authorization_error(): \WP_Error {
@@ -221,22 +246,46 @@ final class Optimizer {
 		);
 	}
 
+	/**
+	 * Remove the `ver` query argument from asset URLs.
+	 *
+	 * @param string $url Asset URL.
+	 */
 	public static function strip_version_query( string $url = '' ): string|false {
 		return $url ? remove_query_arg( 'ver', $url ) : false;
 	}
 
+	/**
+	 * Add theme button classes to comment reply links.
+	 *
+	 * @param string $html Reply button HTML.
+	 */
 	public static function add_reply_button_classes( string $html ): string {
 		return str_replace( "class='", "class='btn btn-sm btn-custom ", $html );
 	}
 
+	/**
+	 * Keep only the menu classes used by the theme.
+	 *
+	 * @param mixed $attr Menu attributes.
+	 * @return array<int, string>
+	 */
 	public static function filter_menu_css_classes( $attr ) {
 		return is_array( $attr ) ? array_intersect( $attr, array( 'nav-item', 'active', 'dropdown', 'open', 'show' ) ) : array();
 	}
 
+	/**
+	 * Hide the default embed share UI.
+	 */
 	public static function output_embed_footer_style(): void {
 		echo '<style>.wp-embed-share{display:none;}</style>';
 	}
 
+	/**
+	 * Remove links that point back to the current site.
+	 *
+	 * @param array<int, string> $links Pingback links.
+	 */
 	public static function filter_out_self_pings( array &$links ): void {
 		$home_url = home_url();
 		$links    = array_filter(
@@ -247,27 +296,50 @@ final class Optimizer {
 		);
 	}
 
+	/**
+	 * Replace Gravatar avatar URLs with the selected mirror.
+	 *
+	 * @param string $subject HTML or URL content.
+	 */
 	public static function replace_gravatar_url( string $subject ): string {
 		$pattern = '/https?.*?\/avatar\//i';
 		$replace = self::$config['super_gravatar'] ?? self::$default_config['super_gravatar'];
 		return preg_replace( $pattern, $replace, $subject );
 	}
 
+	/**
+	 * Register Cravatar as the default avatar label.
+	 *
+	 * @param array<string, string> $avatar_defaults Avatar choices.
+	 * @return array<string, string>
+	 */
 	public static function add_cravatar_default( array $avatar_defaults ): array {
 		$avatar_defaults['gravatar_default'] = 'Cravatar avatar';
 		return $avatar_defaults;
 	}
 
+	/**
+	 * Provide a profile link for users managing avatars on Cravatar.
+	 */
 	public static function get_cravatar_profile_link(): string {
-		return '<a href="https://cravatar.cn" target="_blank">您可以在 Cravatar 修改您的资料图片</a>';
+		return sprintf(
+			'<a href="https://cravatar.cn" target="_blank">%s</a>',
+			esc_html__( 'You can update your profile picture on Cravatar.', 'lerm' )
+		);
 	}
 
+	/**
+	 * Replace WordPress admin static asset URLs with a mirror.
+	 */
 	public static function replace_admin_static_urls(): void {
 		$pattern = '~' . home_url( '/' ) . '(wp-admin|wp-includes)/(css|js)/~';
 		$replace = sprintf( 'https://wpstatic.cdn.haozi.net/%s/$1/$2/', $GLOBALS['wp_version'] );
 		self::start_output_buffer_replace( 'preg_replace', $pattern, $replace );
 	}
 
+	/**
+	 * Replace Google-hosted assets with the selected mirror.
+	 */
 	public static function replace_google_services(): void {
 		$services = array(
 			'geekzu' => array( '//fonts.geekzu.org', '//gapis.geekzu.org/ajax', '//gapis.geekzu.org/g-fonts', '//gapis.geekzu.org/g-themes' ),
@@ -284,12 +356,11 @@ final class Optimizer {
 	}
 
 	/**
-	 * 启动输出缓冲并在回调中执行替换�?     *
-	 * @param string $callback either 'preg_replace' or 'str_replace' etc.
-	 * @param mixed  $pattern
-	 * @param mixed  $replace
+	 * Start an output buffer and apply a replacement callback to the response.
 	 *
-	 * @return void
+	 * @param string $callback Callback name such as `preg_replace` or `str_replace`.
+	 * @param mixed  $pattern Pattern or search value.
+	 * @param mixed  $replace Replacement value.
 	 */
 	public static function start_output_buffer_replace( string $callback, $pattern, $replace ): void {
 		ob_start(
@@ -299,6 +370,9 @@ final class Optimizer {
 		);
 	}
 
+	/**
+	 * Flush the output buffer when one is active.
+	 */
 	public static function flush_output_buffer(): void {
 		if ( ob_get_level() > 0 ) {
 			ob_end_flush();
