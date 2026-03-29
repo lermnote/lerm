@@ -69,7 +69,7 @@ if ( $wp_query->max_num_pages > 1 ) :
 				data-page="<?php echo esc_attr( $_lm_next_page ); ?>"
 				<?php echo $archive_data_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				aria-controls="main"
-			><?php esc_html_e( 'Load More', 'lerm' ); ?></button>
+			><?php esc_html_e( ' Load More', 'lerm' ); ?></button>
 			<?php
 		else :
 			the_posts_pagination(

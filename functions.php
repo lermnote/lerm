@@ -86,7 +86,7 @@ $lerm_csf = LERM_DIR . 'app/Http/Admin/codestar-framework.php';
 add_action(
 	'after_setup_theme',
 	function () use ( $lerm_csf ) {
-		if ( is_admin() && file_exists( $lerm_csf ) ) {
+		if ( file_exists( $lerm_csf ) ) {
 			require_once $lerm_csf;  // options.config.php 里的 __('lerm') 现在安全
 		}
 	},
