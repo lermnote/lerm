@@ -1,6 +1,6 @@
 // services/FormService.js
 import BaseService from './BaseService.js';
-import { delegate } from '../utils.js';
+import { delegate } from '../utils/dom.js';
 
 // reuse the validationRules and validateField from the original script
 const validationRules = {

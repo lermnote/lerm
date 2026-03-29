@@ -1,6 +1,6 @@
 // services/ClickService.js
 import BaseService from './BaseService.js';
-import { delegate } from '../utils.js';
+import { delegate } from '../utils/dom.js';
 
 export default class ClickService extends BaseService {
 	/**
