@@ -8,6 +8,12 @@
 get_header();
 
 $template_options = lerm_get_template_options();
+
+// ── Copyright notice toggle ────────────────────────────────────────────────
+$show_copyright = ! isset( $template_options['post_copyright_enable'] ) || ! empty( $template_options['post_copyright_enable'] );
+$copyright_text = ! empty( $template_options['post_copyright_text'] )
+	? $template_options['post_copyright_text']
+	: '';
 ?>
 <main role="main" class="container"><!--.container-->
 	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
@@ -29,39 +35,48 @@ $template_options = lerm_get_template_options();
 								__( 'Permalink to %s', 'lerm' ),
 								get_the_title()
 							);
-							?>
-							<ul class="card entry-copyright p-3 mb-2 list-unstyled">
-								<li>
-									<strong><?php esc_html_e( 'Copyright notice:', 'lerm' ); ?></strong>
-									<span>
-										<?php
-										printf(
-											/* translators: 1: opening link tag, 2: site name, 3: closing link tag */
-											wp_kses_post( __( 'This article was published by %1$s%2$s%3$s. Please credit the original source when reposting.', 'lerm' ) ),
-											'<a href="' . esc_url( $permalink ) . '" rel="bookmark" title="' . esc_attr( $permalink_title ) . '">',
-											esc_html( $site_name ),
-											'</a>'
-										);
-										?>
-									</span>
-								</li>
-								<li>
-									<strong><?php esc_html_e( 'Permalink:', 'lerm' ); ?></strong>
-									<span>
-										<a href="<?php echo esc_url( $permalink ); ?>" rel="bookmark" title="<?php echo esc_attr( $permalink_title ); ?>">
-											<?php the_title(); ?> | <?php echo esc_html( $site_name ); ?>
-										</a>
-									</span>
-								</li>
-							</ul>
 
-							<?php if ( ! empty( $template_options['related_posts'] ) ) : ?>
-								<?php get_template_part( 'template-parts/components/related-posts' ); ?>
-							<?php endif; ?>
+							// Copyright notice
+							if ( $show_copyright ) :
+								?>
+								<ul class="card entry-copyright p-3 mb-2 list-unstyled">
+									<?php if ( $copyright_text ) : ?>
+										<li><?php echo wp_kses_post( $copyright_text ); ?></li>
+									<?php else : ?>
+										<li>
+											<strong><?php esc_html_e( 'Copyright notice:', 'lerm' ); ?></strong>
+											<span>
+												<?php
+												printf(
+													/* translators: 1: opening link tag, 2: site name, 3: closing link tag */
+													wp_kses_post( __( 'This article was published by %1$s%2$s%3$s. Please credit the original source when reposting.', 'lerm' ) ),
+													'<a href="' . esc_url( $permalink ) . '" rel="bookmark" title="' . esc_attr( $permalink_title ) . '">',
+													esc_html( $site_name ),
+													'</a>'
+												);
+												?>
+											</span>
+										</li>
+									<?php endif; ?>
+									<li>
+										<strong><?php esc_html_e( 'Permalink:', 'lerm' ); ?></strong>
+										<span>
+											<a href="<?php echo esc_url( $permalink ); ?>" rel="bookmark" title="<?php echo esc_attr( $permalink_title ); ?>">
+												<?php the_title(); ?> | <?php echo esc_html( $site_name ); ?>
+											</a>
+										</span>
+									</li>
+								</ul>
+								<?php
+							endif; // show_copyright
 
-							<?php get_template_part( 'template-parts/components/post-navigation' ); ?>
-							<?php
-						endif;
+							if ( ! empty( $template_options['related_posts'] ) ) :
+								get_template_part( 'template-parts/components/related-posts' );
+							endif;
+
+							get_template_part( 'template-parts/components/post-navigation' );
+
+						endif; // is_singular('post')
 
 						if ( comments_open() || get_comments_number() ) {
 							comments_template();
