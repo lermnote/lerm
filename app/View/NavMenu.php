@@ -19,6 +19,7 @@ final class NavMenu {
 
 	private static array $args = array(
 		'login_page_id'       => 0,
+		'account_page_url'    => '',
 		'login_redirect_url'  => '',
 		'logout_redirect_url' => '',
 	);
@@ -51,7 +52,7 @@ final class NavMenu {
 
 	private static function render_user_dropdown(): string {
 		$user        = wp_get_current_user();
-		$account_url = esc_url( self::$args['login_redirect_url'] ? self::$args['login_redirect_url'] : home_url( '/' ) );
+		$account_url = esc_url( self::$args['account_page_url'] ? self::$args['account_page_url'] : home_url( '/' ) );
 		$logout_url  = esc_url( wp_logout_url( self::$args['logout_redirect_url'] ? self::$args['logout_redirect_url'] : home_url( '/' ) ) );
 
 		ob_start();

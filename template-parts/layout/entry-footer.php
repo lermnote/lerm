@@ -31,5 +31,7 @@ $template_options = lerm_get_template_options();
 			</a>
 		</div><!-- like -->
 	</div><!-- toolbar -->
-	<?php lerm_social_icons( (array) $template_options['social_share'] ); ?>
+	<?php if ( in_array( (string) ( $template_options['share_position'] ?? 'bottom' ), array( 'bottom', 'both' ), true ) ) : ?>
+		<?php lerm_social_icons( (array) $template_options['social_share'] ); ?>
+	<?php endif; ?>
 </footer>

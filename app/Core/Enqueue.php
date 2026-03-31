@@ -88,6 +88,7 @@ class Enqueue {
 	 * Enqueue front-end scripts.
 	 */
 	public static function enqueue_scripts(): void {
+		$template_options = function_exists( 'lerm_get_template_options' ) ? \lerm_get_template_options() : array();
 		$scripts = apply_filters( 'lerm_enqueue_scripts', self::$scripts );
 
 		foreach ( $scripts as $handle => $relative_path ) {
@@ -122,10 +123,15 @@ class Enqueue {
 					'route_loadmore' => 'posts',
 					'route_comment'  => 'comment',
 					'route_profile'  => 'profile',
+					'route_auth_login' => 'auth/login',
+					'route_auth_register' => 'auth/register',
+					'route_auth_reset' => 'auth/reset',
+					'search_results_per_page' => max( 1, (int) ( $template_options['search_results_per_page'] ?? 5 ) ),
+					'comment_min_length' => max( 0, (int) ( $template_options['comment_min_length'] ?? 6 ) ),
 					'redirect'       => esc_url(
 						is_user_logged_in()
-							? ( get_edit_profile_url() !== false ? get_edit_profile_url() : home_url( '/' ) )
-							: home_url( '/' )
+							? \lerm_get_frontend_account_page_url()
+							: \lerm_get_frontend_auth_page_url( 'login' )
 					),
 					'i18n'           => array(
 						'like'                   => __( 'Like', 'lerm' ),
@@ -149,6 +155,9 @@ class Enqueue {
 						'hide'                   => __( 'Hide', 'lerm' ),
 						'show_password'          => __( 'Show password', 'lerm' ),
 						'hide_password'          => __( 'Hide password', 'lerm' ),
+						'search_loading'         => __( 'Searching…', 'lerm' ),
+						'search_no_results'      => __( 'No matching results found.', 'lerm' ),
+						'search_view_all'        => __( 'View all results', 'lerm' ),
 					),
 				)
 			)

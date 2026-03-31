@@ -5,6 +5,7 @@ import { initializeLazyImages } from './lazyImages.js';
 import { likeBtnHandle, likeBtnSuccess } from './likes.js';
 import { appendPostsToDOM, loadMoreHandle } from './loadMore.js';
 import { initializeNavigation } from './navigation.js';
+import { initializeSearch } from './search.js';
 import { viewCountHandle, viewCountSuccess } from './views.js';
 import { handleCommentSuccess } from './comments.js';
 import { handleUpdateProfileSuccess } from './profile.js';
@@ -13,6 +14,7 @@ import { initializeScrollTop } from './scrollTop.js';
 
 export const initializePageComponents = () => {
 	initializeNavigation();
+	initializeSearch();
 	initializeScrollTop();
 	initializeForms();
 	likeBtnHandle();
@@ -35,6 +37,7 @@ export {
 	initializeCodeHighlight,
 	initializeLazyImages,
 	initializeNavigation,
+	initializeSearch,
 	initializeScrollAnimate,
 	initializeScrollTop,
 	likeBtnHandle,

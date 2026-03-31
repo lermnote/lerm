@@ -1,4 +1,5 @@
 import FormService from '../services/FormService.js';
+import { handleLoginSuccess, handleRegisterSuccess, handleResetSuccess } from './auth.js';
 import { handleCommentSuccess } from './comments.js';
 import { handleUpdateProfileSuccess } from './profile.js';
 
@@ -12,6 +13,30 @@ const getFormConfigs = () => {
 			formId: 'update-profile',
 			action: lermData.route_profile,
 			security: lermData.profile_nonce,
+		});
+
+		return formConfigs;
+	}
+
+	formConfigs.push(
+		{
+			formId: 'login',
+			action: lermData.route_auth_login,
+			security: lermData.nonce,
+		},
+		{
+			formId: 'reset',
+			action: lermData.route_auth_reset,
+			security: lermData.nonce,
+		}
+	);
+
+	if (document.getElementById('regist')) {
+		formConfigs.push({
+			formId: 'regist',
+			action: lermData.route_auth_register,
+			security: lermData.nonce,
+			passwordToggle: true,
 		});
 	}
 
@@ -35,6 +60,18 @@ export const initializeForms = () => {
 
 		if (config.formId === 'update-profile') {
 			formHandle.afterSubmitSuccess = handleUpdateProfileSuccess;
+		}
+
+		if (config.formId === 'login') {
+			formHandle.afterSubmitSuccess = handleLoginSuccess;
+		}
+
+		if (config.formId === 'regist') {
+			formHandle.afterSubmitSuccess = handleRegisterSuccess;
+		}
+
+		if (config.formId === 'reset') {
+			formHandle.afterSubmitSuccess = handleResetSuccess;
 		}
 	});
 };

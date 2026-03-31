@@ -6,7 +6,7 @@
  */
 
 if ( ! is_user_logged_in() ) {
-	wp_safe_redirect( home_url() );
+	wp_safe_redirect( add_query_arg( 'redirect_to', get_permalink(), lerm_get_frontend_auth_page_url( 'login' ) ) );
 	exit;
 }
 

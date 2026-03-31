@@ -173,8 +173,9 @@ class PostMeta {
 	 */
 	public static function read(): void {
 		global $post;
+		$template_options = function_exists( 'lerm_get_template_options' ) ? \lerm_get_template_options() : array();
 
-		if ( empty( $post->ID ) ) {
+		if ( empty( $post->ID ) || empty( $template_options['post_views_enable'] ) ) {
 			return;
 		}
 

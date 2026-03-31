@@ -133,6 +133,7 @@ if ( ! function_exists( 'lerm_get_template_options' ) ) {
 				'slide_images'          => array(),
 				'slide_indicators'      => false,
 				'slide_control'         => false,
+				'footer_menus'          => 0,
 				'icp_num'               => '',
 				'copyright'             => '',
 				'author_bio'            => false,
@@ -158,10 +159,124 @@ if ( ! function_exists( 'lerm_get_template_options' ) ) {
 				'social_share'          => array(),
 				'blogname'              => '',
 				'blogdesc'              => '',
-				'narbar_align'          => 'justify-content-md-start',
-				'narbar_search'         => false,
+				'navbar_align'          => 'justify-content-md-end',
+				'navbar_search'         => false,
+				'search_results_per_page' => 5,
+				'search_placeholder'    => '',
+				'comment_avatar_size'   => 48,
+				'comment_show_cravatar_tip' => true,
+				'social_profiles_position' => array( 'footer', 'author_bio' ),
+				'social_open_new_tab'   => true,
 			)
 		);
+	}
+}
+
+if ( ! function_exists( 'lerm_get_frontend_auth_page_url' ) ) {
+	/**
+	 * Build the frontend auth page URL for a given tab.
+	 */
+	function lerm_get_frontend_auth_page_url( string $tab = 'login' ): string {
+		$page_id = (int) lerm_options( 'frontend_login_page', '', 0 );
+		$url     = $page_id > 0 ? get_permalink( $page_id ) : wp_login_url();
+
+		if ( ! $url ) {
+			$url = home_url( '/' );
+		}
+
+		if ( ! in_array( $tab, array( 'login', 'regist', 'register', 'reset' ), true ) ) {
+			$tab = 'login';
+		}
+
+		if ( in_array( $tab, array( 'regist', 'register', 'reset' ), true ) ) {
+			$url = add_query_arg( 'tab', 'register' === $tab ? 'regist' : $tab, $url );
+		}
+
+		return esc_url_raw( $url );
+	}
+}
+
+if ( ! function_exists( 'lerm_get_frontend_account_page_url' ) ) {
+	/**
+	 * Get the configured frontend account page URL.
+	 */
+	function lerm_get_frontend_account_page_url(): string {
+		$page_id = (int) lerm_options( 'frontend_user_center_page', '', 0 );
+		$url     = $page_id > 0 ? get_permalink( $page_id ) : home_url( '/' );
+
+		return esc_url_raw( $url ? $url : home_url( '/' ) );
+	}
+}
+
+if ( ! function_exists( 'lerm_social_profile_links' ) ) {
+	/**
+	 * Render configured social profile links.
+	 *
+	 * @param array  $opts Theme options array.
+	 * @param bool   $new_tab Whether links should open in a new tab.
+	 * @param string $container_class CSS classes for the container wrapper.
+	 */
+	function lerm_social_profile_links(
+		array $opts,
+		bool $new_tab = true,
+		string $container_class = 'lerm-social-links d-flex gap-2 justify-content-center flex-wrap'
+	): void {
+		$target = $new_tab ? ' target="_blank" rel="noopener noreferrer"' : '';
+		$links  = array(
+			'social_weibo'     => array( 'fa fa-weibo', 'Weibo' ),
+			'social_wechat'    => array( 'fa fa-weixin', 'WeChat' ),
+			'social_qq'        => array( 'fa fa-qq', 'QQ' ),
+			'social_bilibili'  => array( 'lerm-icon-bilibili', 'Bilibili' ),
+			'social_zhihu'     => array( 'lerm-icon-zhihu', 'Zhihu' ),
+			'social_douban'    => array( 'lerm-icon-douban', 'Douban' ),
+			'social_github'    => array( 'fa fa-github', 'GitHub' ),
+			'social_twitter'   => array( 'fa fa-twitter', 'X / Twitter' ),
+			'social_linkedin'  => array( 'fa fa-linkedin', 'LinkedIn' ),
+			'social_instagram' => array( 'fa fa-instagram', 'Instagram' ),
+			'social_youtube'   => array( 'fa fa-youtube-play', 'YouTube' ),
+			'social_email'     => array( 'fa fa-envelope', 'Email' ),
+		);
+		$html   = '';
+
+		foreach ( $links as $key => $meta ) {
+			$url = trim( (string) ( $opts[ $key ] ?? '' ) );
+			if ( '' === $url ) {
+				continue;
+			}
+
+			if ( 'social_email' === $key && ! str_starts_with( $url, 'mailto:' ) ) {
+				$url = 'mailto:' . $url;
+			}
+
+			$href = esc_url( $url );
+			if ( '' === $href ) {
+				continue;
+			}
+
+			$html .= sprintf(
+				'<a class="social-link" href="%1$s"%2$s aria-label="%3$s"><i class="%4$s" aria-hidden="true"></i></a>',
+				$href,
+				$target,
+				esc_attr( $meta[1] ),
+				esc_attr( $meta[0] )
+			);
+		}
+
+		if ( ! empty( $opts['social_rss'] ) ) {
+			$html .= sprintf(
+				'<a class="social-link" href="%1$s"%2$s aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>',
+				esc_url( get_feed_link() ),
+				$target
+			);
+		}
+
+		if ( $html ) {
+			printf(
+				'<div class="%1$s">%2$s</div>',
+				esc_attr( $container_class ),
+				$html // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- individual links are escaped above.
+			);
+		}
 	}
 }
 // -----------------------------------------------------------------------------

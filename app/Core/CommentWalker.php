@@ -4,13 +4,14 @@
  *
  * @package Lerm
  */
+
 declare( strict_types = 1 );
+
 namespace Lerm\Core;
 
-use Walker_Comment;
-use Lerm\View\LikeButton;
 use Lerm\Traits\Singleton;
-
+use Lerm\View\LikeButton;
+use Walker_Comment;
 
 class CommentWalker extends Walker_Comment {
 	use Singleton;
@@ -42,23 +43,20 @@ class CommentWalker extends Walker_Comment {
 	}
 
 	public function html5_comment( $comment, $depth, $args ) {
-		global $post;
-
-		$tag = ( isset( $args['style'] ) && 'div' === $args['style'] ) ? 'div' : 'li';
-
+		$tag                = ( isset( $args['style'] ) && 'div' === $args['style'] ) ? 'div' : 'li';
 		$commenter          = wp_get_current_commenter();
 		$show_pending_links = ! empty( $commenter['comment_author'] );
-
-		$comment_id_attr = 'comment-' . (int) $comment->comment_ID;
+		$comment_id_attr    = 'comment-' . (int) $comment->comment_ID;
+		$root_avatar_size   = isset( $args['avatar_size'] ) ? max( 1, (int) $args['avatar_size'] ) : 48;
+		$avatar_size        = $comment->comment_parent ? max( 1, (int) round( $root_avatar_size * 2 / 3 ) ) : $root_avatar_size;
+		$content_offset     = $avatar_size + 8;
 		?>
 		<<?php echo esc_html( $tag ); ?> <?php comment_class( ( $depth > 1 ) ? 'list-group-item p-0' : 'list-group-item' ); ?> id="<?php echo esc_attr( $comment_id_attr ); ?>">
 			<article id="div-comment-<?php echo esc_attr( (int) $comment->comment_ID ); ?>" class="comment-body">
 				<footer class="comment-meta mb-1">
 					<span class="comment-author vcard">
 						<?php
-						if ( isset( $args['avatar_size'] ) && 0 !== $args['avatar_size'] ) {
-							$avatar_size = ( $comment->comment_parent ) ? round( $args['avatar_size'] * 2 / 3 ) : $args['avatar_size'];
-							$avatar_size = max( 1, intval( $avatar_size ) );
+						if ( $avatar_size > 0 ) {
 							echo get_avatar( $comment, $avatar_size );
 						}
 
@@ -84,24 +82,25 @@ class CommentWalker extends Walker_Comment {
 						);
 						?>
 					</span>
+
 					<span class="comment-metadata">
-					<?php
-					$comment_timestamp = (int) get_comment_time( 'U', true, $comment );
-					$current_timestamp = (int) current_datetime()->getTimestamp();
-					$time_diff         = human_time_diff( $comment_timestamp, $current_timestamp );
+						<?php
+						$comment_timestamp = (int) get_comment_time( 'U', true, $comment );
+						$current_timestamp = (int) current_datetime()->getTimestamp();
+						$time_diff         = human_time_diff( $comment_timestamp, $current_timestamp );
+						$time_text         = sprintf( __( '%s ago', 'lerm' ), $time_diff );
 
-					/* translators: %s: human-readable time difference. */
-					$time_text = sprintf( __( '%s ago', 'lerm' ), $time_diff );
+						printf(
+							'<span aria-hidden="true">&bull;</span><a href="%s"><time datetime="%s">%s</time></a>',
+							esc_url( get_comment_link( $comment, $args ) ),
+							esc_attr( get_comment_time( 'c', true, $comment ) ),
+							esc_html( $time_text )
+						);
 
-					printf(
-						'<span aria-hidden="true">&bull;</span><a href="%s"><time datetime="%s">%s</time></a>',
-						esc_url( get_comment_link( $comment, $args ) ),
-						esc_attr( get_comment_time( 'c', true, $comment ) ),
-						esc_html( $time_text )
-					);
 						edit_comment_link( __( 'Edit', 'lerm' ), '<span aria-hidden="true">&bull;</span><span class="edit-link">', '</span>' );
-					?>
+						?>
 					</span>
+
 					<div class="reply float-end">
 						<?php
 						if ( '0' !== $comment->comment_approved ) :
@@ -121,19 +120,19 @@ class CommentWalker extends Walker_Comment {
 									)
 								)
 							);
-							endif;
+						endif;
 						?>
 					</div>
 				</footer>
-					<?php if ( '0' === $comment->comment_approved ) : ?>
+
+				<?php if ( '0' === $comment->comment_approved ) : ?>
 					<span class="comment-awaiting-moderation badge rounded-pill bg-info"><?php esc_html_e( 'Your comment is awaiting moderation.', 'lerm' ); ?></span>
 				<?php endif; ?>
-				<section class="comment-content" style="margin-left: <?php echo ( ( ( wp_is_mobile() ? 32 : 48 ) + 8 ) . 'px' ); ?>">
-						<?php
-						comment_text( $comment, $args );
-						?>
+
+				<section class="comment-content" style="margin-left: <?php echo esc_attr( $content_offset . 'px' ); ?>">
+					<?php comment_text( $comment, $args ); ?>
 				</section>
 			</article>
-			<?php
+		<?php
 	}
 }

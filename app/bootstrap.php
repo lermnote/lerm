@@ -34,6 +34,7 @@ $options = get_option( 'lerm_theme_options', array() );
 // ---------------------------------------------------------------------------
 
 $optimize_options = array();
+$enqueue_options  = array();
 $mail_options     = array();
 $seo_options      = array();
 $sitemap_options  = array();
@@ -76,8 +77,8 @@ if ( ! empty( $options ) ) {
 	$sitemap_options = array(
 		'sitemap_enable'     => (bool) ( $options['sitemap_enable'] ?? false ),
 		'exclude_post_types' => (array) ( $options['exclude_post_types'] ?? array() ),
-		'exclude_page'       => (array) ( $options['exclude_post'] ?? array() ),
-		'exclude_post'       => (array) ( $options['exclude_page'] ?? array() ),
+		'exclude_page'       => (array) ( $options['exclude_page'] ?? array() ),
+		'exclude_post'       => (array) ( $options['exclude_post'] ?? array() ),
 	);
 
 	$custom_options = array(
@@ -99,10 +100,16 @@ if ( ! empty( $options ) ) {
 	// 修正原拼写错误：frontend_login → frontend_login
 	$login_options = array(
 		'front_login_enable'  => (bool) ( $options['frontend_login'] ?? false ),
+		'allow_registration'  => (bool) ( $options['frontend_regist'] ?? false ) && (bool) ( $options['users_can_register'] ?? false ),
+		'users_can_register'  => (bool) ( $options['users_can_register'] ?? false ),
+		'default_role'        => (string) ( $options['default_role'] ?? get_option( 'default_role', 'subscriber' ) ),
+		'default_login_page'  => (bool) ( $options['default_login_page'] ?? false ),
+		'front_user_center'   => (bool) ( $options['front_user_center'] ?? false ),
 		'login_page_id'       => (int) ( $options['frontend_login_page'] ?? 0 ),
+		'account_page_url'    => lerm_get_frontend_account_page_url(),
 		'menu_login_item'     => $options['menu_login_item'] ?? '',
-		'login_redirect_url'  => (bool) ( $options['login_redirect_url'] ?? false ) ? home_url( '/' ) : '',
-		'logout_redirect_url' => $options['logout_redirect_url'] ?? home_url(),
+		'login_redirect_url'  => (bool) ( $options['login_redirect_url'] ?? false ) ? home_url( '/' ) : lerm_get_frontend_account_page_url(),
+		'logout_redirect_url' => (bool) ( $options['logout_redirect_url'] ?? false ) ? home_url( '/' ) : lerm_get_frontend_auth_page_url( 'login' ),
 	);
 
 	$layout_options = array(
@@ -122,6 +129,7 @@ if ( ! empty( $options ) ) {
 		'slide_images'              => (array) ( $options['slide_images'] ?? array() ),
 		'slide_indicators'          => (bool) ( $options['slide_indicators'] ?? false ),
 		'slide_control'             => (bool) ( $options['slide_control'] ?? false ),
+		'footer_menus'              => (int) ( $options['footer_menus'] ?? 0 ),
 		'icp_num'                   => (string) ( $options['icp_num'] ?? '' ),
 		'copyright'                 => (string) ( $options['copyright'] ?? '' ),
 		'author_bio'                => (bool) ( $options['author_bio'] ?? false ),
@@ -147,8 +155,8 @@ if ( ! empty( $options ) ) {
 		'social_share'              => array_keys( array_filter( (array) ( $options['social_share'] ?? array() ) ) ),
 		'blogname'                  => (string) ( $options['blogname'] ?? '' ),
 		'blogdesc'                  => (string) ( $options['blogdesc'] ?? '' ),
-		'narbar_align'              => (string) ( $options['narbar_align'] ?? 'justify-content-md-start' ),
-		'narbar_search'             => (bool) ( $options['narbar_search'] ?? false ),
+		'navbar_align'              => (string) ( $options['navbar_align'] ?? 'justify-content-md-end' ),
+		'navbar_search'             => (bool) ( $options['navbar_search'] ?? false ),
 		'sticky_header'             => (bool) ( $options['sticky_header'] ?? false ),
 		'sticky_header_shrink'      => (bool) ( $options['sticky_header_shrink'] ?? false ),
 		'transparent_header'        => (bool) ( $options['transparent_header'] ?? false ),
@@ -276,7 +284,7 @@ if ( ! empty( $optimize_options ) ) {
 	Optimizer::instance( $optimize_options );
 }
 
-//SeoManager::instance( array_merge( $seo_options, $sitemap_options ) );
+SeoManager::instance( array_merge( $seo_options, $sitemap_options ) );
 
 // 自定义样式/Logo — 有配置才启用
 if ( ! empty( $custom_options ) ) {
@@ -298,6 +306,9 @@ if ( ! empty( $updater_options ) ) {
 // ---------------------------------------------------------------------------
 
 Router::register();
+
+// Wire options into WordPress core behaviour (comments, TOC, search, etc.)
+OptionsHooks::instance( $template_options );
 
 // 本地头像替换 Gravatar（原 UserProfile::lerm_get_avatar，与 Ajax 无关，放这里更合适）
 add_filter(
@@ -349,6 +360,90 @@ if ( ! empty( $options['lazyload'] ) ) {
 // ---------------------------------------------------------------------------
 
 if ( ! empty( $login_options['front_login_enable'] ) ) {
+	add_filter(
+		'pre_option_users_can_register',
+		static fn() => ! empty( $login_options['allow_registration'] ) ? '1' : '0'
+	);
+	add_filter(
+		'pre_option_default_role',
+		static fn() => ! empty( $login_options['default_role'] ) ? $login_options['default_role'] : 'subscriber'
+	);
+
+	add_filter(
+		'lerm_login_redirect_url',
+		static fn( $default ) => ! empty( $login_options['login_redirect_url'] ) ? $login_options['login_redirect_url'] : $default
+	);
+
+	add_filter(
+		'login_url',
+		static function ( $login_url, $redirect ) {
+			$url = lerm_get_frontend_auth_page_url( 'login' );
+
+			if ( ! empty( $redirect ) ) {
+				$url = add_query_arg( 'redirect_to', (string) $redirect, $url );
+			}
+
+			return $url;
+		},
+		10,
+		2
+	);
+
+	add_filter(
+		'lostpassword_url',
+		static function ( $lostpassword_url, $redirect ) {
+			$url = lerm_get_frontend_auth_page_url( 'reset' );
+
+			if ( ! empty( $redirect ) ) {
+				$url = add_query_arg( 'redirect_to', (string) $redirect, $url );
+			}
+
+			return $url;
+		},
+		10,
+		2
+	);
+
+	if ( ! empty( $login_options['allow_registration'] ) ) {
+		add_filter(
+			'register_url',
+			static fn() => lerm_get_frontend_auth_page_url( 'regist' )
+		);
+	}
+
+	add_filter(
+		'logout_redirect',
+		static function ( $redirect_to ) use ( $login_options ) {
+			return ! empty( $login_options['logout_redirect_url'] )
+				? $login_options['logout_redirect_url']
+				: $redirect_to;
+		},
+		10
+	);
+
+	if ( ! empty( $login_options['default_login_page'] ) ) {
+		add_action(
+			'login_init',
+			static function () use ( $login_options ) {
+				$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( (string) $_REQUEST['action'] ) ) : 'login';
+
+				if ( in_array( $action, array( 'logout', 'rp', 'resetpass', 'postpass' ), true ) ) {
+					return;
+				}
+
+				$tab = 'login';
+
+				if ( in_array( $action, array( 'lostpassword', 'retrievepassword' ), true ) ) {
+					$tab = 'reset';
+				} elseif ( 'register' === $action && ! empty( $login_options['allow_registration'] ) ) {
+					$tab = 'regist';
+				}
+
+				wp_safe_redirect( lerm_get_frontend_auth_page_url( $tab ) );
+				exit;
+			}
+		);
+	}
 	// 导航栏登录菜单项
 	if ( ! empty( $login_options['menu_login_item'] ) ) {
 		\Lerm\View\NavMenu::init( $login_options );

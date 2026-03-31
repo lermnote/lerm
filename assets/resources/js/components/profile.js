@@ -1,4 +1,4 @@
-export const handleUpdateProfileSuccess = () => {
-	const target = lermData.redirect || window.location.href;
+export const handleUpdateProfileSuccess = (response) => {
+	const target = response?.redirect || lermData.redirect || window.location.href;
 	window.location.href = target;
 };

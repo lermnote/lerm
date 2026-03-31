@@ -245,6 +245,33 @@ add_filter( 'walker_nav_menu_start_el', __NAMESPACE__ . '\\lerm_nav_menu_social_
 // 社交分享图标组
 // =============================================================================
 
+if ( ! function_exists( 'lerm_build_share_url' ) ) {
+	/**
+	 * Build a platform share URL for the current singular object.
+	 */
+	function lerm_build_share_url( string $slug ): string {
+		$permalink       = is_singular() ? get_permalink() : home_url( '/' );
+		$title           = is_singular() ? wp_strip_all_tags( get_the_title() ) : wp_strip_all_tags( get_bloginfo( 'name' ) );
+		$summary         = is_singular() ? wp_strip_all_tags( get_the_excerpt() ) : wp_strip_all_tags( get_bloginfo( 'description' ) );
+		$encoded_url     = rawurlencode( (string) $permalink );
+		$encoded_title   = rawurlencode( (string) $title );
+		$encoded_summary = rawurlencode( (string) $summary );
+
+		return match ( $slug ) {
+			'weibo'       => 'https://service.weibo.com/share/share.php?url=' . $encoded_url . '&title=' . $encoded_title,
+			'wechat'      => 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . $encoded_url,
+			'qq'          => 'https://connect.qq.com/widget/shareqq/index.html?url=' . $encoded_url . '&title=' . $encoded_title,
+			'qzone'       => 'https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=' . $encoded_url . '&title=' . $encoded_title . '&summary=' . $encoded_summary,
+			'douban'      => 'https://www.douban.com/share/service?href=' . $encoded_url . '&name=' . $encoded_title,
+			'linkedin'    => 'https://www.linkedin.com/sharing/share-offsite/?url=' . $encoded_url,
+			'facebook'    => 'https://www.facebook.com/sharer/sharer.php?u=' . $encoded_url,
+			'twitter'     => 'https://twitter.com/intent/tweet?url=' . $encoded_url . '&text=' . $encoded_title,
+			'google_plus' => 'https://plus.google.com/share?url=' . $encoded_url,
+			default       => '',
+		};
+	}
+}
+
 if ( ! function_exists( 'lerm_social_icons' ) ) {
 	/**
 	 * 输出社交分享图标组。
@@ -279,11 +306,11 @@ if ( ! function_exists( 'lerm_social_icons' ) ) {
 			/* translators: %s: social platform name */
 			$aria = esc_attr( sprintf( __( 'Share on %s', 'lerm' ), ucfirst( str_replace( '_', ' ', $slug ) ) ) );
 
-			$href  = '#';
-			$extra = '';
-			if ( ! empty( $url ) ) {
-				$href  = esc_url( $url );
-				$extra = ' target="_blank" rel="noopener noreferrer"';
+			$href  = ! empty( $url ) ? esc_url( $url ) : esc_url( lerm_build_share_url( $slug ) );
+			$extra = '' !== $href ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+			if ( '' === $href ) {
+				continue;
 			}
 
 			$items[] = sprintf(

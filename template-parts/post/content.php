@@ -21,6 +21,12 @@ $template_options = lerm_get_template_options();
 		<div class="content-area">
 			<?php get_template_part( 'template-parts/layout/entry-header' ); ?>
 
+			<?php if ( is_singular( 'post' ) && in_array( (string) ( $template_options['share_position'] ?? 'bottom' ), array( 'top', 'both' ), true ) ) : ?>
+				<div class="mt-3">
+					<?php \Lerm\View\lerm_social_icons( (array) $template_options['social_share'] ); ?>
+				</div>
+			<?php endif; ?>
+
 			<div class="entry-content clearfix mb-3">
 				<?php
 				$continue_text = sprintf(

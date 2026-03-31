@@ -22,6 +22,12 @@ $template_options = lerm_get_template_options();
 				</section>
 			<?php endif; ?>
 
+			<?php if ( ! empty( $template_options['toc_enable'] ) && ( $template_options['toc_position'] ?? 'before_content' ) === 'sidebar' ) : ?>
+				<section class="mb-3">
+					<?php get_template_part( 'template-parts/components/toc' ); ?>
+				</section>
+			<?php endif; ?>
+
 			<?php
 			$single_sidebar = $template_options['single_sidebar_select'] ?: 'home-sidebar';
 			dynamic_sidebar( $single_sidebar );

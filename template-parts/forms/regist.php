@@ -7,33 +7,40 @@
 
 use function Lerm\Support\float_form_input;
 
+$redirect_to = isset( $_GET['redirect_to'] ) ? wp_validate_redirect( wp_unslash( (string) $_GET['redirect_to'] ), '' ) : '';
+$login_url   = lerm_get_frontend_auth_page_url( 'login' );
+
+if ( '' !== $redirect_to ) {
+	$login_url = add_query_arg( 'redirect_to', $redirect_to, $login_url );
+}
+
 $forms = array(
-	'username'  => array(
+	'username'         => array(
 		'type'        => 'text',
 		'name'        => 'username',
-		'id'          => 'username',
+		'id'          => 'register-username',
 		'placeholder' => esc_attr__( 'Choose a username', 'lerm' ),
 		'label_text'  => __( 'Username', 'lerm' ),
 	),
-	'email'     => array(
+	'email'            => array(
 		'type'        => 'email',
 		'name'        => 'email',
-		'id'          => 'regist-email',
+		'id'          => 'register-email',
 		'placeholder' => 'name@example.com',
 		'label_text'  => __( 'Email', 'lerm' ),
 	),
-	'password'  => array(
+	'password'         => array(
 		'container_class' => 'form-floating',
 		'type'            => 'password',
-		'name'            => 'regist_password',
-		'id'              => 'regist-password',
+		'name'            => 'password',
+		'id'              => 'register-password',
 		'placeholder'     => esc_attr__( 'Create a strong password', 'lerm' ),
 		'label_text'      => __( 'Password', 'lerm' ),
 	),
-	'password2' => array(
+	'password_confirm' => array(
 		'type'        => 'password',
-		'name'        => 'confirm_password',
-		'id'          => 'regist-confirm-password',
+		'name'        => 'password_confirm',
+		'id'          => 'register-password-confirm',
 		'placeholder' => esc_attr__( 'Confirm your password', 'lerm' ),
 		'label_text'  => esc_html__( 'Confirm password', 'lerm' ),
 	),
@@ -43,32 +50,31 @@ $forms = array(
 <?php if ( get_option( 'users_can_register' ) ) : ?>
 	<form method="post" id="regist" action="regist">
 		<h2><?php echo esc_html__( 'Register', 'lerm' ); ?></h2>
+
+		<?php if ( '' !== $redirect_to ) : ?>
+			<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_to ); ?>">
+		<?php endif; ?>
+
 		<?php
-		echo float_form_input( $forms['username'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- Escaped in helper.
-		echo float_form_input( $forms['email'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- Escaped in helper.
+		echo float_form_input( $forms['username'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo float_form_input( $forms['email'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		?>
+
 		<div class="input-group mb-3">
-			<?php
-			echo float_form_input( $forms['password'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- Escaped in helper.
-			?>
+			<?php echo float_form_input( $forms['password'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<button class="btn btn-outline-secondary" id="regist-toggle" type="button" role="switch" aria-label="<?php echo esc_attr__( 'Show password', 'lerm' ); ?>" aria-checked="false"><?php echo esc_html__( 'Show', 'lerm' ); ?></button>
 		</div>
-		<?php
-		echo float_form_input( $forms['password2'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- Escaped in helper.
-		?>
-		<div class="input-group mb-3">
-			<div class="form-floating">
-				<input id="captcha2" type="text" name="captcha" required class="form-control" placeholder="<?php echo esc_attr__( 'Verification code', 'lerm' ); ?>">
-				<label for="captcha2"><?php echo esc_html__( 'Verification code', 'lerm' ); ?></label>
-			</div>
-		</div>
+
+		<?php echo float_form_input( $forms['password_confirm'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
 		<button id="regist-submit" type="submit" name="regist_submit" class="w-100 btn btn-primary"><?php echo esc_html__( 'Register', 'lerm' ); ?></button>
 		<small id="regist-msg" class="invisible user-msg text-danger wow">#</small>
 	</form>
+
 	<hr class="my-3">
 	<div class="text-center">
 		<span><?php echo esc_html__( 'Already have an account?', 'lerm' ); ?> </span>
-		<a href="<?php echo esc_url( home_url( '/login/' ) ); ?>" id="login-btn" name="btn_submit" class="change-form my-4" data-form="login">
+		<a href="<?php echo esc_url( $login_url ); ?>" id="login-btn" name="btn_submit" class="change-form my-4" data-form="login">
 			<?php echo esc_html__( 'Login', 'lerm' ); ?>
 		</a>
 	</div>
