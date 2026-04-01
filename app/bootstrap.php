@@ -11,6 +11,8 @@ declare( strict_types=1 );
 use Lerm\Core\Setup;
 use Lerm\Core\Enqueue;
 use Lerm\Core\Customizer;
+use Lerm\Admin\ThemeSettingsPage;
+use Lerm\Options\ThemeOptionsRepository;
 use Lerm\Runtime\Optimizer;
 use Lerm\SEO\Manager as SeoManager;
 use Lerm\Mail\Smtp;
@@ -27,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // 1. 读取主题选项
 // ---------------------------------------------------------------------------
 
-$options = get_option( 'lerm_theme_options', array() );
+$options = ThemeOptionsRepository::instance()->all();
 
 // ---------------------------------------------------------------------------
 // 2. 选项映射：将扁平的 option 数组解析为各模块所需的参数结构
@@ -231,6 +233,10 @@ if ( ! empty( $options ) ) {
 		'social_profiles_position'  => (array) ( $options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) ),
 		'social_open_new_tab'       => ! isset( $options['social_open_new_tab'] ) ? true : (bool) $options['social_open_new_tab'],
 	);
+}
+
+if ( is_admin() ) {
+	ThemeSettingsPage::instance();
 }
 
 // ---------------------------------------------------------------------------

@@ -94,26 +94,7 @@ add_action(
 );
 if ( ! function_exists( 'lerm_options' ) ) {
 	function lerm_options( string $id, string $tag = '', $default_value = '' ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
-		// Fetch the theme options array from the database
-		static $options = null;
-		if ( null === $options ) {
-			$options = (array) get_option( 'lerm_theme_options', array() );
-		}
-
-		// Check if the main option ID exists in the options array
-		if ( ! array_key_exists( $id, $options ) ) {
-			return $default_value;
-		}
-
-		$option_value = $options[ $id ];
-
-		// If the option value is an array and a tag is specified, return the tagged value or default
-		if ( is_array( $option_value ) && '' !== $tag ) {
-			return $options[ $id ][ $tag ] ?? $default_value;
-		}
-
-		// Return the option value (either array or single value)
-		return $option_value;
+		return \Lerm\Options\ThemeOptionsRepository::instance()->get( $id, $tag, $default_value );
 	}
 }
 
