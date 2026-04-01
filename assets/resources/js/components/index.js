@@ -5,16 +5,16 @@ import { initializeLazyImages } from './lazyImages.js';
 import { likeBtnHandle, likeBtnSuccess } from './likes.js';
 import { appendPostsToDOM, loadMoreHandle } from './loadMore.js';
 import { initializeNavigation } from './navigation.js';
-import { initializeSearch } from './search.js';
 import { viewCountHandle, viewCountSuccess } from './views.js';
 import { handleCommentSuccess } from './comments.js';
 import { handleUpdateProfileSuccess } from './profile.js';
 import { initializeScrollAnimate } from './scrollAnimate.js';
 import { initializeScrollTop } from './scrollTop.js';
+import { initializeThemeOptions, setCSSVariable, setCSSVariables } from './themeOptions.js';
 
 export const initializePageComponents = () => {
+	initializeThemeOptions();
 	initializeNavigation();
-	initializeSearch();
 	initializeScrollTop();
 	initializeForms();
 	likeBtnHandle();
@@ -37,12 +37,14 @@ export {
 	initializeCodeHighlight,
 	initializeLazyImages,
 	initializeNavigation,
-	initializeSearch,
 	initializeScrollAnimate,
 	initializeScrollTop,
+	initializeThemeOptions,
 	likeBtnHandle,
 	likeBtnSuccess,
 	loadMoreHandle,
+	setCSSVariable,
+	setCSSVariables,
 	viewCountHandle,
 	viewCountSuccess,
 };

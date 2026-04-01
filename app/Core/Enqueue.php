@@ -23,8 +23,24 @@ class Enqueue {
 	 * @var array<string, mixed>
 	 */
 	private static $args = array(
-		'enable_code_highlight' => true,
-		'cdn_jquery'            => '',
+		'enable_code_highlight'     => true,
+		'cdn_jquery'                => '',
+		// Header behaviour
+		'sticky_header'             => false,
+		'sticky_header_shrink'      => false,
+		'transparent_header'        => false,
+		// Reading progress bar
+		'reading_progress'          => false,
+		// Back-to-top button
+		'back_to_top'               => true,
+		'back_to_top_threshold'     => 400,
+		// Dark mode
+		'dark_mode_enable'          => false,
+		'dark_mode_default'         => 'system',
+		'dark_mode_toggle_position' => 'navbar',
+		// QQ live chat
+		'qq_chat_enable'            => false,
+		'qq_chat_number'            => '',
 	);
 
 	/**
@@ -88,7 +104,6 @@ class Enqueue {
 	 * Enqueue front-end scripts.
 	 */
 	public static function enqueue_scripts(): void {
-		$template_options = function_exists( 'lerm_get_template_options' ) ? \lerm_get_template_options() : array();
 		$scripts = apply_filters( 'lerm_enqueue_scripts', self::$scripts );
 
 		foreach ( $scripts as $handle => $relative_path ) {
@@ -123,16 +138,24 @@ class Enqueue {
 					'route_loadmore' => 'posts',
 					'route_comment'  => 'comment',
 					'route_profile'  => 'profile',
-					'route_auth_login' => 'auth/login',
-					'route_auth_register' => 'auth/register',
-					'route_auth_reset' => 'auth/reset',
-					'search_results_per_page' => max( 1, (int) ( $template_options['search_results_per_page'] ?? 5 ) ),
-					'comment_min_length' => max( 0, (int) ( $template_options['comment_min_length'] ?? 6 ) ),
 					'redirect'       => esc_url(
 						is_user_logged_in()
-							? \lerm_get_frontend_account_page_url()
-							: \lerm_get_frontend_auth_page_url( 'login' )
+							? ( get_edit_profile_url() !== false ? get_edit_profile_url() : home_url( '/' ) )
+							: home_url( '/' )
 					),
+					// ── Behaviour settings ────────────────────────────────────
+					'stickyHeader'         => self::$args['sticky_header'],
+					'stickyHeaderShrink'   => self::$args['sticky_header_shrink'],
+					'transparentHeader'    => self::$args['transparent_header'],
+					'readingProgress'      => self::$args['reading_progress'],
+					'backToTop'            => self::$args['back_to_top'],
+					'backToTopThreshold'   => self::$args['back_to_top_threshold'],
+					'darkMode'             => self::$args['dark_mode_enable'],
+					'darkModeDefault'      => self::$args['dark_mode_default'],
+					'darkModeToggle'       => self::$args['dark_mode_toggle_position'],
+					'qqChatEnable'         => self::$args['qq_chat_enable'],
+					'qqChatNumber'         => self::$args['qq_chat_number'],
+					// ── i18n ─────────────────────────────────────────────────
 					'i18n'           => array(
 						'like'                   => __( 'Like', 'lerm' ),
 						'unlike'                 => __( 'Unlike', 'lerm' ),
@@ -155,17 +178,28 @@ class Enqueue {
 						'hide'                   => __( 'Hide', 'lerm' ),
 						'show_password'          => __( 'Show password', 'lerm' ),
 						'hide_password'          => __( 'Hide password', 'lerm' ),
-						'search_loading'         => __( 'Searching…', 'lerm' ),
-						'search_no_results'      => __( 'No matching results found.', 'lerm' ),
-						'search_view_all'        => __( 'View all results', 'lerm' ),
 					),
 				)
 			)
 		);
 
+		// Reading progress bar element — injected after <body> open when enabled.
+		if ( self::$args['reading_progress'] ) {
+			add_action( 'wp_body_open', array( __CLASS__, 'reading_progress_bar' ) );
+		}
+
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 			wp_enqueue_script( 'comment-reply' );
 		}
+	}
+
+	/**
+	 * Output the reading progress bar element.
+	 * Driven by --lerm-progress-color / --lerm-progress-height CSS vars.
+	 * Width is updated via scroll listener in the JS bundle (reads lermData.readingProgress).
+	 */
+	public static function reading_progress_bar(): void {
+		echo '<div id="reading-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="' . esc_attr__( 'Reading progress', 'lerm' ) . '"></div>' . "\n";
 	}
 
 	/**

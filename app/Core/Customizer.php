@@ -35,7 +35,9 @@ class Customizer {
 	public static function hooks() {
 		add_filter( 'get_custom_logo', array( __CLASS__, 'custom_logo' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'custom_css' ), 21 );
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'site_width' ), 21 );
+		// NOTE: site_width (content/sidebar column vars) is now handled by
+		// CssVariables::output() at priority 22, which reads content_width /
+		// sidebar_width directly from the full $options array.
 	}
 
 	/**
@@ -77,22 +79,29 @@ class Customizer {
 	}
 
 	/**
-	 * custom color
+	 * 输出布局相关的 CSS 变量（content / sidebar 列宽）。
 	 *
-	 * @since  2.0
+	 * 替代原来直接写 width 属性的方式：只要 :root 里的变量改变，
+	 * 所有引用 var(--lerm-content-width) 的规则自动跟着生效，
+	 * 暗色模式或响应式覆盖时也不需要重复 !important 声明。
 	 */
 	public static function site_width() {
-		$custom_width = '
-		@media (min-width:992px) {
-			#primary{
-				width:%1$s%%
-			}
-			#secondary{
-				width:%2$s%%
-			}
+		$content = (float) self::$args['content_width'];
+		$sidebar = (float) self::$args['sidebar_width'];
+
+		if ( ! $content && ! $sidebar ) {
+			return;
 		}
-		';
-		wp_add_inline_style( 'main_style', sprintf( $custom_width, self::$args['content_width'], self::$args['sidebar_width'] ) );
+
+		$vars = array();
+		if ( $content ) {
+			$vars[] = '--lerm-content-width:' . $content . '%';
+		}
+		if ( $sidebar ) {
+			$vars[] = '--lerm-sidebar-width:' . $sidebar . '%';
+		}
+
+		wp_add_inline_style( 'main_style', ':root{' . implode( ';', $vars ) . '}' );
 	}
 
 	/**
