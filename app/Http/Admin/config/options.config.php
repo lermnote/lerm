@@ -57,20 +57,20 @@ CSF::createSection(
 		'fields' => array(
 
 			array(
-				'id'        => 'large_logo',
-				'type'      => 'media',
-				'title'     => __( 'Desktop logo', 'lerm' ),
-				'subtitle'  => __( 'Shown in the desktop header.', 'lerm' ),
-				'library'   => 'image',
-				'url'       => false,
+				'id'       => 'large_logo',
+				'type'     => 'media',
+				'title'    => __( 'Desktop logo', 'lerm' ),
+				'subtitle' => __( 'Shown in the desktop header.', 'lerm' ),
+				'library'  => 'image',
+				'url'      => false,
 			),
 			array(
-				'id'        => 'mobile_logo',
-				'type'      => 'media',
-				'title'     => __( 'Mobile logo', 'lerm' ),
-				'subtitle'  => __( 'Shown on small screens. Falls back to desktop logo if empty.', 'lerm' ),
-				'library'   => 'image',
-				'url'       => false,
+				'id'       => 'mobile_logo',
+				'type'     => 'media',
+				'title'    => __( 'Mobile logo', 'lerm' ),
+				'subtitle' => __( 'Shown on small screens. Falls back to desktop logo if empty.', 'lerm' ),
+				'library'  => 'image',
+				'url'      => false,
 			),
 
 			array(
@@ -78,11 +78,11 @@ CSF::createSection(
 				'content' => __( 'Site identity', 'lerm' ),
 			),
 			array(
-				'id'          => 'blogname',
-				'type'        => 'text',
-				'title'       => __( 'Site title', 'lerm' ),
-				'subtitle'    => __( 'Overrides the WordPress site title in the theme.', 'lerm' ),
-				'attributes'  => array(
+				'id'         => 'blogname',
+				'type'       => 'text',
+				'title'      => __( 'Site title', 'lerm' ),
+				'subtitle'   => __( 'Overrides the WordPress site title in the theme.', 'lerm' ),
+				'attributes' => array(
 					'placeholder' => get_bloginfo( 'name', 'display' ),
 				),
 			),
@@ -109,11 +109,11 @@ CSF::createSection(
 				'options'     => 'menus',
 			),
 			array(
-				'id'            => 'icp_num',
-				'type'          => 'text',
-				'title'         => __( 'ICP registration number', 'lerm' ),
-				'subtitle'      => __( 'Chinese ICP filing number shown in the footer (e.g. 京ICP备12345678号).', 'lerm' ),
-				'attributes'    => array(
+				'id'         => 'icp_num',
+				'type'       => 'text',
+				'title'      => __( 'ICP registration number', 'lerm' ),
+				'subtitle'   => __( 'Chinese ICP filing number shown in the footer (e.g. 京ICP备12345678号).', 'lerm' ),
+				'attributes' => array(
 					'placeholder' => get_option( 'zh_cn_l10n_icp_num' ),
 				),
 			),
@@ -291,11 +291,11 @@ CSF::createSection(
 				'content' => __( 'Brand colors', 'lerm' ),
 			),
 			array(
-				'id'      => 'primary_color',
-				'type'    => 'link_color',
-				'title'   => __( 'Primary color', 'lerm' ),
+				'id'       => 'primary_color',
+				'type'     => 'link_color',
+				'title'    => __( 'Primary color', 'lerm' ),
 				'subtitle' => __( 'Used for buttons, badges, and interactive accents.', 'lerm' ),
-				'default' => array(
+				'default'  => array(
 					'color'  => '#0084ba',
 					'hover'  => '#0063aa',
 					'active' => '#0063aa',
@@ -303,19 +303,18 @@ CSF::createSection(
 				),
 			),
 			array(
-				'id'      => 'link_color',
-				'type'    => 'link_color',
-				'title'   => __( 'Link color', 'lerm' ),
+				'id'       => 'link_color',
+				'type'     => 'link_color',
+				'title'    => __( 'Link color', 'lerm' ),
 				'subtitle' => __( 'Color of all anchor tags in body content.', 'lerm' ),
-				'active'  => true,
-				'focus'   => true,
-				'default' => array(
+				'active'   => true,
+				'focus'    => true,
+				'default'  => array(
 					'color'  => '#0084ba',
 					'hover'  => '#0063aa',
 					'active' => '#0063aa',
 					'focus'  => '#0063aa',
 				),
-				'output'  => array( 'a' ),
 			),
 
 			// ── Page background ───────────────────────────────────────────────
@@ -332,7 +331,6 @@ CSF::createSection(
 				'default'              => array(
 					'background-color' => '#ffffff',
 				),
-				'output'               => 'body',
 			),
 			array(
 				'id'                   => 'content_background',
@@ -343,7 +341,6 @@ CSF::createSection(
 				'default'              => array(
 					'background-color' => '#ffffff',
 				),
-				'output'               => array( '.card' ),
 			),
 
 			// ── Header ────────────────────────────────────────────────────────
@@ -358,14 +355,13 @@ CSF::createSection(
 				'subtitle'    => __( 'Background of the site header, dropdown menus, and off-canvas panel.', 'lerm' ),
 				'default'     => '#ffffff',
 				'output_mode' => 'background-color',
-				'output'      => array( '.site-header', '.dropdown-menu', '.offcanvas' ),
 			),
 			array(
-				'id'      => 'site_header_border',
-				'type'    => 'border',
-				'title'   => __( 'Header border', 'lerm' ),
+				'id'       => 'site_header_border',
+				'type'     => 'border',
+				'title'    => __( 'Header border', 'lerm' ),
 				'subtitle' => __( 'Border drawn around the site header. Typically only the bottom is visible.', 'lerm' ),
-				'default' => array(
+				'default'  => array(
 					'top'    => '0',
 					'bottom' => '1',
 					'left'   => '0',
@@ -373,35 +369,25 @@ CSF::createSection(
 					'style'  => 'solid',
 					'color'  => '#82828244',
 				),
-				'output'  => '.site-header',
 			),
 			array(
 				'id'               => 'navbar_link_color',
 				'type'             => 'link_color',
 				'title'            => __( 'Nav link color', 'lerm' ),
 				'subtitle'         => __( 'Color of navigation links and dropdown items.', 'lerm' ),
-				'output_important' => true,
 				'default'          => array(
 					'color' => '#828282',
 					'hover' => '#0084ba',
 				),
-				'output'           => array( '.navbar-nav .nav-link', '.dropdown-item', '.navbar-btn' ),
 			),
 			array(
 				'id'               => 'navbar_active_color',
 				'type'             => 'color_pair',
 				'title'            => __( 'Nav active item color', 'lerm' ),
 				'subtitle'         => __( 'Text and background color of the currently active nav item.', 'lerm' ),
-				'output_important' => true,
 				'default'          => array(
 					'color'            => '#0084ba',
 					'background_color' => '#ffffff',
-				),
-				'output'           => array(
-					'.navbar-nav .nav-link.active',
-					'.navbar-nav .show > .nav-link',
-					'.dropdown-item.active',
-					'.dropdown-item:active',
 				),
 			),
 			array(
@@ -410,7 +396,6 @@ CSF::createSection(
 				'title'       => __( 'Nav item padding', 'lerm' ),
 				'subtitle'    => __( 'Vertical padding applied to each navigation link.', 'lerm' ),
 				'units'       => array( 'rem', 'em' ),
-				'output_mode' => 'padding',
 				'left'        => false,
 				'right'       => false,
 				'default'     => array(
@@ -418,7 +403,6 @@ CSF::createSection(
 					'bottom' => '1.5',
 					'unit'   => 'rem',
 				),
-				'output'      => array( '.nav-link' ),
 			),
 
 			// ── Widget headers ────────────────────────────────────────────────
@@ -437,7 +421,6 @@ CSF::createSection(
 					'background_color' => '',
 					'border_color'     => '',
 				),
-				'output'       => array( '.card-header', '.navigation .current', '.comment-pager .current' ),
 			),
 
 			// ── Footer ────────────────────────────────────────────────────────
@@ -446,26 +429,24 @@ CSF::createSection(
 				'content' => __( 'Footer', 'lerm' ),
 			),
 			array(
-				'id'      => 'footer_widget_color',
-				'type'    => 'color_pair',
-				'title'   => __( 'Footer widgets area', 'lerm' ),
+				'id'       => 'footer_widget_color',
+				'type'     => 'color_pair',
+				'title'    => __( 'Footer widgets area', 'lerm' ),
 				'subtitle' => __( 'Text and background color of the footer widgets zone.', 'lerm' ),
-				'default' => array(
+				'default'  => array(
 					'color'            => '#dddddd',
 					'background_color' => '#333333',
 				),
-				'output'  => array( '.footer' ),
 			),
 			array(
-				'id'      => 'footer_bar_color',
-				'type'    => 'color_pair',
-				'title'   => __( 'Footer bar (copyright strip)', 'lerm' ),
+				'id'       => 'footer_bar_color',
+				'type'     => 'color_pair',
+				'title'    => __( 'Footer bar (copyright strip)', 'lerm' ),
 				'subtitle' => __( 'Text and background color of the bottom copyright bar.', 'lerm' ),
-				'default' => array(
+				'default'  => array(
 					'color'            => '#dddddd',
 					'background_color' => '#555555',
 				),
-				'output'  => array( '.colophon' ),
 			),
 
 			// ── Buttons ───────────────────────────────────────────────────────
@@ -479,15 +460,10 @@ CSF::createSection(
 				'title'            => __( 'Primary button (default state)', 'lerm' ),
 				'subtitle'         => __( 'Text, background, and border color of primary buttons at rest.', 'lerm' ),
 				'border_color'     => true,
-				'output_important' => true,
 				'default'          => array(
 					'color'            => '#0084ba',
 					'background_color' => '',
 					'border_color'     => '#0084ba',
-				),
-				'output'           => array(
-					'.btn-custom',
-					'a[id="cancel-comment-reply-link"]',
 				),
 			),
 			array(
@@ -496,15 +472,10 @@ CSF::createSection(
 				'title'            => __( 'Primary button (hover state)', 'lerm' ),
 				'subtitle'         => __( 'Text and background color of primary buttons on hover.', 'lerm' ),
 				'border_color'     => true,
-				'output_important' => true,
 				'default'          => array(
 					'color'            => '#ffffff',
 					'background_color' => '#0084ba',
 					'border_color'     => '#0084ba',
-				),
-				'output'           => array(
-					'.btn-custom:hover',
-					'a[id="cancel-comment-reply-link"]:hover',
 				),
 			),
 		),
@@ -533,24 +504,22 @@ CSF::createSection(
 					'font-size'   => '.875',
 					'unit'        => 'rem',
 				),
-				'output'         => 'body',
 			),
 			array(
-				'id'          => 'menu_typography',
-				'type'        => 'typography',
-				'title'       => __( 'Navigation font', 'lerm' ),
-				'subtitle'    => __( 'Font applied to the top navigation bar.', 'lerm' ),
-				'font_family' => '',
+				'id'             => 'menu_typography',
+				'type'           => 'typography',
+				'title'          => __( 'Navigation font', 'lerm' ),
+				'subtitle'       => __( 'Font applied to the top navigation bar.', 'lerm' ),
+				'font_family'    => '',
 				'text_transform' => false,
-				'unit'        => 'rem',
-				'default'     => array(
+				'unit'           => 'rem',
+				'default'        => array(
 					'font-weight' => '400',
 					'color'       => '#5d6777',
 					'font-size'   => '.875',
 					'unit'        => 'rem',
 					'line-height' => '1.5',
 				),
-				'output'      => '.navbar',
 			),
 		),
 	)
@@ -1012,7 +981,7 @@ CSF::createSection(
 				'id'       => 'super_optimize',
 				'type'     => 'checkbox',
 				'title'    => __( 'Remove unnecessary head tags', 'lerm' ),
-				'subtitle'  => __( 'Reduce page source size and avoid leaking information via wp_head.', 'lerm' ),
+				'subtitle' => __( 'Reduce page source size and avoid leaking information via wp_head.', 'lerm' ),
 				'options'  => array(
 					'rsd_link'                        => __( 'RSD link', 'lerm' ),
 					'wlwmanifest_link'                => __( 'Windows Live Writer manifest', 'lerm' ),
@@ -1521,9 +1490,9 @@ CSF::createSection(
 
 			array(
 				'id'                    => 'qrcode_image',
-				'type'                 => 'background',
-				'title'                => __( 'WeChat QR code', 'lerm' ),
-				'subtitle'             => __( 'Shown when the user hovers over the WeChat social link.', 'lerm' ),
+				'type'                  => 'background',
+				'title'                 => __( 'WeChat QR code', 'lerm' ),
+				'subtitle'              => __( 'Shown when the user hovers over the WeChat social link.', 'lerm' ),
 				'background_color'      => false,
 				'background_origin'     => false,
 				'background_repeat'     => false,
@@ -1534,11 +1503,11 @@ CSF::createSection(
 				'output'                => 'a[rel~="weixin"]::after',
 			),
 			array(
-				'id'      => 'donate_qrcode',
-				'type'    => 'media',
-				'title'   => __( 'Donation QR code', 'lerm' ),
+				'id'       => 'donate_qrcode',
+				'type'     => 'media',
+				'title'    => __( 'Donation QR code', 'lerm' ),
 				'subtitle' => __( 'Payment QR code displayed on the donation widget.', 'lerm' ),
-				'url'     => false,
+				'url'      => false,
 			),
 			array(
 				'id'      => 'social_share',
@@ -1739,654 +1708,660 @@ CSF::createSection(
 // ─────────────────────────────────────────────────────────────────────────────
 if ( class_exists( 'CSF' ) ) :
 
-CSF::createSection(
-	$prefix,
-	array(
-		'parent' => 'appearance',
-		'title'  => __( 'Header behavior', 'lerm' ),
-		'icon'   => 'fas fa-window-maximize',
-		'fields' => array(
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'appearance',
+			'title'  => __( 'Header behavior', 'lerm' ),
+			'icon'   => 'fas fa-window-maximize',
+			'fields' => array(
 
-			array(
-				'id'      => 'sticky_header',
-				'type'    => 'switcher',
-				'title'   => __( 'Sticky header', 'lerm' ),
-				'desc'    => __( 'Keep the header fixed at the top while the user scrolls.', 'lerm' ),
-				'default' => false,
-			),
-			array(
-				'id'         => 'sticky_header_shrink',
-				'type'       => 'switcher',
-				'dependency' => array( 'sticky_header', '==', 'true' ),
-				'title'      => __( 'Shrink on scroll', 'lerm' ),
-				'desc'       => __( 'Reduce header height after the user scrolls past a threshold.', 'lerm' ),
-				'default'    => false,
-			),
-			array(
-				'id'      => 'transparent_header',
-				'type'    => 'switcher',
-				'title'   => __( 'Transparent header on hero', 'lerm' ),
-				'desc'    => __( 'Make the header background transparent when the slider or hero image is directly below it.', 'lerm' ),
-				'default' => false,
-			),
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Reading progress bar', 'lerm' ),
-			),
-			array(
-				'id'      => 'reading_progress',
-				'type'    => 'switcher',
-				'title'   => __( 'Show reading progress bar', 'lerm' ),
-				'desc'    => __( 'Thin bar at the very top of the page indicating scroll progress on single posts.', 'lerm' ),
-				'default' => false,
-			),
-			array(
-				'id'         => 'reading_progress_color',
-				'type'       => 'color',
-				'dependency' => array( 'reading_progress', '==', 'true' ),
-				'title'      => __( 'Progress bar color', 'lerm' ),
-				'default'    => '#0084ba',
-			),
-			array(
-				'id'         => 'reading_progress_height',
-				'type'       => 'spinner',
-				'dependency' => array( 'reading_progress', '==', 'true' ),
-				'title'      => __( 'Progress bar height (px)', 'lerm' ),
-				'min'        => 1,
-				'max'        => 10,
-				'default'    => 3,
-			),
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Back-to-top button', 'lerm' ),
-			),
-			array(
-				'id'      => 'back_to_top',
-				'type'    => 'switcher',
-				'title'   => __( 'Show back-to-top button', 'lerm' ),
-				'default' => true,
-			),
-			array(
-				'id'         => 'back_to_top_threshold',
-				'type'       => 'spinner',
-				'dependency' => array( 'back_to_top', '==', 'true' ),
-				'title'      => __( 'Appear after scrolling (px)', 'lerm' ),
-				'subtitle'   => __( 'Button appears after the user scrolls this many pixels.', 'lerm' ),
-				'min'        => 100,
-				'max'        => 2000,
-				'step'       => 50,
-				'default'    => 400,
-			),
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'QQ live chat', 'lerm' ),
-			),
-			array(
-				'id'      => 'qq_chat_enable',
-				'type'    => 'switcher',
-				'title'   => __( 'Show QQ live chat button', 'lerm' ),
-				'default' => false,
-			),
-			array(
-				'id'         => 'qq_chat_number',
-				'type'       => 'text',
-				'dependency' => array( 'qq_chat_enable', '==', 'true' ),
-				'title'      => __( 'QQ number', 'lerm' ),
-				'subtitle'   => __( 'Opens a QQ chat window when clicked.', 'lerm' ),
-				'attributes' => array( 'placeholder' => '825641026' ),
-			),
-		),
-	)
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Appearance › Dark mode
-// ─────────────────────────────────────────────────────────────────────────────
-CSF::createSection(
-	$prefix,
-	array(
-		'parent' => 'appearance',
-		'title'  => __( 'Dark mode', 'lerm' ),
-		'icon'   => 'fas fa-moon',
-		'fields' => array(
-
-			array(
-				'id'      => 'dark_mode_enable',
-				'type'    => 'switcher',
-				'title'   => __( 'Enable dark mode support', 'lerm' ),
-				'desc'    => __( 'Adds a toggle so visitors can switch between light and dark themes.', 'lerm' ),
-				'default' => false,
-			),
-			array(
-				'id'         => 'dark_mode_default',
-				'type'       => 'button_set',
-				'dependency' => array( 'dark_mode_enable', '==', 'true' ),
-				'title'      => __( 'Default color scheme', 'lerm' ),
-				'options'    => array(
-					'light'  => __( 'Light', 'lerm' ),
-					'dark'   => __( 'Dark', 'lerm' ),
-					'system' => __( 'Follow system preference', 'lerm' ),
+				array(
+					'id'      => 'sticky_header',
+					'type'    => 'switcher',
+					'title'   => __( 'Sticky header', 'lerm' ),
+					'desc'    => __( 'Keep the header fixed at the top while the user scrolls.', 'lerm' ),
+					'default' => false,
 				),
-				'default'    => 'system',
-			),
-			array(
-				'id'         => 'dark_mode_toggle_position',
-				'type'       => 'button_set',
-				'dependency' => array( 'dark_mode_enable', '==', 'true' ),
-				'title'      => __( 'Toggle button position', 'lerm' ),
-				'options'    => array(
-					'navbar'  => __( 'In navbar', 'lerm' ),
-					'sidebar' => __( 'Floating button', 'lerm' ),
+				array(
+					'id'         => 'sticky_header_shrink',
+					'type'       => 'switcher',
+					'dependency' => array( 'sticky_header', '==', 'true' ),
+					'title'      => __( 'Shrink on scroll', 'lerm' ),
+					'desc'       => __( 'Reduce header height after the user scrolls past a threshold.', 'lerm' ),
+					'default'    => false,
 				),
-				'default'    => 'navbar',
-			),
-		),
-	)
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// System › Custom scripts
-// ─────────────────────────────────────────────────────────────────────────────
-CSF::createSection(
-	$prefix,
-	array(
-		'parent' => 'system',
-		'title'  => __( 'Custom scripts', 'lerm' ),
-		'icon'   => 'fas fa-code',
-		'fields' => array(
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Head injection', 'lerm' ),
-			),
-			array(
-				'id'       => 'head_scripts',
-				'type'     => 'code_editor',
-				'title'    => __( 'Before </head>', 'lerm' ),
-				'subtitle' => __( 'Code output in the <head> section of every page — analytics, verification meta tags, custom fonts, etc.', 'lerm' ),
-				'sanitize' => false,
-				'settings' => array( 'mode' => 'htmlmixed', 'theme' => 'mbo' ),
-			),
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Footer injection', 'lerm' ),
-			),
-			array(
-				'id'       => 'footer_scripts',
-				'type'     => 'code_editor',
-				'title'    => __( 'Before </body>', 'lerm' ),
-				'subtitle' => __( 'Code output just before the closing </body> tag — chat widgets, deferred scripts, etc.', 'lerm' ),
-				'sanitize' => false,
-				'settings' => array( 'mode' => 'htmlmixed', 'theme' => 'mbo' ),
-			),
-		),
-	)
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Content › Post (single) — supplementary fields appended via a new sub-section
-// These are grouped under a dedicated "Post features" section to keep the
-// existing Post (single) section from growing too long.
-// ─────────────────────────────────────────────────────────────────────────────
-CSF::createSection(
-	$prefix,
-	array(
-		'parent' => 'content',
-		'title'  => __( 'Post features', 'lerm' ),
-		'icon'   => 'fas fa-star',
-		'fields' => array(
-
-			// ── Table of contents ─────────────────────────────────────────────
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Table of contents', 'lerm' ),
-			),
-			array(
-				'id'      => 'toc_enable',
-				'type'    => 'switcher',
-				'title'   => __( 'Enable table of contents', 'lerm' ),
-				'desc'    => __( 'Auto-generate a TOC from H2/H3 headings in post content.', 'lerm' ),
-				'default' => false,
-			),
-			array(
-				'id'         => 'toc_min_headings',
-				'type'       => 'spinner',
-				'dependency' => array( 'toc_enable', '==', 'true' ),
-				'title'      => __( 'Minimum headings required', 'lerm' ),
-				'subtitle'   => __( 'TOC is hidden when the post has fewer headings than this number.', 'lerm' ),
-				'min'        => 1,
-				'max'        => 20,
-				'default'    => 3,
-			),
-			array(
-				'id'         => 'toc_position',
-				'type'       => 'button_set',
-				'dependency' => array( 'toc_enable', '==', 'true' ),
-				'title'      => __( 'TOC position', 'lerm' ),
-				'options'    => array(
-					'before_content' => __( 'Above content', 'lerm' ),
-					'sidebar'        => __( 'In sidebar', 'lerm' ),
-					'floating'       => __( 'Floating panel', 'lerm' ),
+				array(
+					'id'      => 'transparent_header',
+					'type'    => 'switcher',
+					'title'   => __( 'Transparent header on hero', 'lerm' ),
+					'desc'    => __( 'Make the header background transparent when the slider or hero image is directly below it.', 'lerm' ),
+					'default' => false,
 				),
-				'default'    => 'before_content',
-			),
-			array(
-				'id'         => 'toc_collapsed',
-				'type'       => 'switcher',
-				'dependency' => array( 'toc_enable', '==', 'true' ),
-				'title'      => __( 'Collapsed by default', 'lerm' ),
-				'default'    => false,
-			),
 
-			// ── Like & views ──────────────────────────────────────────────────
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Like & view counter', 'lerm' ),
-			),
-			array(
-				'id'      => 'post_likes_enable',
-				'type'    => 'switcher',
-				'title'   => __( 'Show like button on posts', 'lerm' ),
-				'default' => true,
-			),
-			array(
-				'id'      => 'comment_likes_enable',
-				'type'    => 'switcher',
-				'title'   => __( 'Show like button on comments', 'lerm' ),
-				'default' => true,
-			),
-			array(
-				'id'      => 'post_views_enable',
-				'type'    => 'switcher',
-				'title'   => __( 'Show view count on posts', 'lerm' ),
-				'default' => true,
-			),
-			array(
-				'id'         => 'views_unique_only',
-				'type'       => 'switcher',
-				'dependency' => array( 'post_views_enable', '==', 'true' ),
-				'title'      => __( 'Count unique visitors only', 'lerm' ),
-				'desc'       => __( 'Prevents repeated views from the same browser session from inflating the count.', 'lerm' ),
-				'default'    => true,
-			),
-
-			// ── Social share ─────────────────────────────────────────────────
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Share buttons', 'lerm' ),
-			),
-			array(
-				'id'      => 'share_position',
-				'type'    => 'button_set',
-				'title'   => __( 'Share buttons position', 'lerm' ),
-				'options' => array(
-					'top'    => __( 'Above content', 'lerm' ),
-					'bottom' => __( 'Below content', 'lerm' ),
-					'both'   => __( 'Both', 'lerm' ),
-					'none'   => __( 'Hidden', 'lerm' ),
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Reading progress bar', 'lerm' ),
 				),
-				'default' => 'bottom',
-			),
-			array(
-				'id'      => 'share_show_count',
-				'type'    => 'switcher',
-				'title'   => __( 'Show share count', 'lerm' ),
-				'default' => false,
-			),
+				array(
+					'id'      => 'reading_progress',
+					'type'    => 'switcher',
+					'title'   => __( 'Show reading progress bar', 'lerm' ),
+					'desc'    => __( 'Thin bar at the very top of the page indicating scroll progress on single posts.', 'lerm' ),
+					'default' => false,
+				),
+				array(
+					'id'         => 'reading_progress_color',
+					'type'       => 'color',
+					'dependency' => array( 'reading_progress', '==', 'true' ),
+					'title'      => __( 'Progress bar color', 'lerm' ),
+					'default'    => '#0084ba',
+				),
+				array(
+					'id'         => 'reading_progress_height',
+					'type'       => 'spinner',
+					'dependency' => array( 'reading_progress', '==', 'true' ),
+					'title'      => __( 'Progress bar height (px)', 'lerm' ),
+					'min'        => 1,
+					'max'        => 10,
+					'default'    => 3,
+				),
 
-			// ── Copyright notice ──────────────────────────────────────────────
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Copyright notice', 'lerm' ),
-			),
-			array(
-				'id'      => 'post_copyright_enable',
-				'type'    => 'switcher',
-				'title'   => __( 'Show copyright / repost notice', 'lerm' ),
-				'desc'    => __( 'Display a copyright reminder with the post URL at the bottom of each post.', 'lerm' ),
-				'default' => true,
-			),
-			array(
-				'id'         => 'post_copyright_text',
-				'type'       => 'textarea',
-				'dependency' => array( 'post_copyright_enable', '==', 'true' ),
-				'title'      => __( 'Custom copyright text', 'lerm' ),
-				'subtitle'   => __( 'Overrides the default copyright message. Leave empty to use the default.', 'lerm' ),
-				'attributes' => array(
-					'placeholder' => __( 'This article was published by … Please credit the original source when reposting.', 'lerm' ),
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Back-to-top button', 'lerm' ),
+				),
+				array(
+					'id'      => 'back_to_top',
+					'type'    => 'switcher',
+					'title'   => __( 'Show back-to-top button', 'lerm' ),
+					'default' => true,
+				),
+				array(
+					'id'         => 'back_to_top_threshold',
+					'type'       => 'spinner',
+					'dependency' => array( 'back_to_top', '==', 'true' ),
+					'title'      => __( 'Appear after scrolling (px)', 'lerm' ),
+					'subtitle'   => __( 'Button appears after the user scrolls this many pixels.', 'lerm' ),
+					'min'        => 100,
+					'max'        => 2000,
+					'step'       => 50,
+					'default'    => 400,
+				),
+
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'QQ live chat', 'lerm' ),
+				),
+				array(
+					'id'      => 'qq_chat_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Show QQ live chat button', 'lerm' ),
+					'default' => false,
+				),
+				array(
+					'id'         => 'qq_chat_number',
+					'type'       => 'text',
+					'dependency' => array( 'qq_chat_enable', '==', 'true' ),
+					'title'      => __( 'QQ number', 'lerm' ),
+					'subtitle'   => __( 'Opens a QQ chat window when clicked.', 'lerm' ),
+					'attributes' => array( 'placeholder' => '825641026' ),
 				),
 			),
+		)
+	);
 
-			// ── Search ───────────────────────────────────────────────────────
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Instant search', 'lerm' ),
-			),
-			array(
-				'id'      => 'search_results_per_page',
-				'type'    => 'spinner',
-				'title'   => __( 'Instant search results count', 'lerm' ),
-				'subtitle' => __( 'Maximum number of items shown in the search dropdown.', 'lerm' ),
-				'min'     => 1,
-				'max'     => 20,
-				'default' => 5,
-			),
-			array(
-				'id'      => 'search_placeholder',
-				'type'    => 'text',
-				'title'   => __( 'Search box placeholder', 'lerm' ),
-				'default' => '',
-				'attributes' => array( 'placeholder' => __( 'Search…', 'lerm' ) ),
-			),
-		),
-	)
-);
+	// ─────────────────────────────────────────────────────────────────────────────
+	// Appearance › Dark mode
+	// ─────────────────────────────────────────────────────────────────────────────
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'appearance',
+			'title'  => __( 'Dark mode', 'lerm' ),
+			'icon'   => 'fas fa-moon',
+			'fields' => array(
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Content › Comments
-// ─────────────────────────────────────────────────────────────────────────────
-CSF::createSection(
-	$prefix,
-	array(
-		'parent' => 'content',
-		'title'  => __( 'Comments', 'lerm' ),
-		'icon'   => 'fas fa-comments',
-		'fields' => array(
-
-			array(
-				'id'      => 'comments_enable',
-				'type'    => 'switcher',
-				'title'   => __( 'Enable comments globally', 'lerm' ),
-				'desc'    => __( 'When off, comments are closed on all posts regardless of per-post settings.', 'lerm' ),
-				'default' => true,
-			),
-			array(
-				'id'         => 'comments_require_login',
-				'type'       => 'switcher',
-				'dependency' => array( 'comments_enable', '==', 'true' ),
-				'title'      => __( 'Require login to comment', 'lerm' ),
-				'default'    => false,
-			),
-			array(
-				'id'         => 'comment_moderation',
-				'type'       => 'switcher',
-				'dependency' => array( 'comments_enable', '==', 'true' ),
-				'title'      => __( 'Hold all comments for moderation', 'lerm' ),
-				'desc'       => __( 'All new comments must be approved before they appear publicly.', 'lerm' ),
-				'default'    => false,
-			),
-			array(
-				'id'         => 'comments_per_page',
-				'type'       => 'spinner',
-				'dependency' => array( 'comments_enable', '==', 'true' ),
-				'title'      => __( 'Comments per page', 'lerm' ),
-				'min'        => 5,
-				'max'        => 100,
-				'step'       => 5,
-				'default'    => 20,
-			),
-			array(
-				'id'         => 'comment_nesting_depth',
-				'type'       => 'spinner',
-				'dependency' => array( 'comments_enable', '==', 'true' ),
-				'title'      => __( 'Maximum nesting depth', 'lerm' ),
-				'subtitle'   => __( 'How many levels deep threaded replies can go.', 'lerm' ),
-				'min'        => 1,
-				'max'        => 10,
-				'default'    => 3,
-			),
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Comment form', 'lerm' ),
-			),
-			array(
-				'id'         => 'comment_form_fields',
-				'type'       => 'checkbox',
-				'dependency' => array( 'comments_enable', '==', 'true' ),
-				'title'      => __( 'Required form fields', 'lerm' ),
-				'inline'     => true,
-				'options'    => array(
-					'name'    => __( 'Name', 'lerm' ),
-					'email'   => __( 'Email', 'lerm' ),
-					'website' => __( 'Website', 'lerm' ),
+				array(
+					'id'      => 'dark_mode_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Enable dark mode support', 'lerm' ),
+					'desc'    => __( 'Adds a toggle so visitors can switch between light and dark themes.', 'lerm' ),
+					'default' => false,
 				),
-				'default'    => array( 'name', 'email' ),
-			),
-			array(
-				'id'         => 'comment_placeholder',
-				'type'       => 'text',
-				'dependency' => array( 'comments_enable', '==', 'true' ),
-				'title'      => __( 'Comment textarea placeholder', 'lerm' ),
-				'attributes' => array( 'placeholder' => __( 'Leave a comment…', 'lerm' ) ),
-			),
-			array(
-				'id'         => 'comment_min_length',
-				'type'       => 'spinner',
-				'dependency' => array( 'comments_enable', '==', 'true' ),
-				'title'      => __( 'Minimum comment length (characters)', 'lerm' ),
-				'subtitle'   => __( 'Set to 0 to disable the minimum length check.', 'lerm' ),
-				'min'        => 0,
-				'max'        => 500,
-				'default'    => 10,
-			),
-			array(
-				'id'         => 'comment_max_length',
-				'type'       => 'spinner',
-				'dependency' => array( 'comments_enable', '==', 'true' ),
-				'title'      => __( 'Maximum comment length (characters)', 'lerm' ),
-				'subtitle'   => __( 'Set to 0 for no limit.', 'lerm' ),
-				'min'        => 0,
-				'max'        => 10000,
-				'step'       => 100,
-				'default'    => 2000,
-			),
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Avatar', 'lerm' ),
-			),
-			array(
-				'id'      => 'comment_avatar_size',
-				'type'    => 'spinner',
-				'title'   => __( 'Comment avatar size (px)', 'lerm' ),
-				'min'     => 24,
-				'max'     => 128,
-				'step'    => 4,
-				'default' => 48,
-			),
-			array(
-				'id'      => 'comment_show_cravatar_tip',
-				'type'    => 'switcher',
-				'title'   => __( 'Show "Set avatar on Cravatar" tip', 'lerm' ),
-				'desc'    => __( 'Display a hint encouraging users without an avatar to set one on Cravatar.cn.', 'lerm' ),
-				'default' => true,
-			),
-		),
-	)
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Content › 404 page
-// ─────────────────────────────────────────────────────────────────────────────
-CSF::createSection(
-	$prefix,
-	array(
-		'parent' => 'content',
-		'title'  => __( '404 page', 'lerm' ),
-		'icon'   => 'fas fa-exclamation-triangle',
-		'fields' => array(
-
-			array(
-				'id'      => '404_title',
-				'type'    => 'text',
-				'title'   => __( 'Page title', 'lerm' ),
-				'default' => __( '404 Not Found', 'lerm' ),
-			),
-			array(
-				'id'      => '404_message',
-				'type'    => 'textarea',
-				'title'   => __( 'Error message', 'lerm' ),
-				'default' => __( 'Sorry, the page you are looking for could not be found.', 'lerm' ),
-			),
-			array(
-				'id'      => '404_button_text',
-				'type'    => 'text',
-				'title'   => __( 'Button label', 'lerm' ),
-				'default' => __( 'Back to home', 'lerm' ),
-			),
-			array(
-				'id'      => '404_button_url',
-				'type'    => 'text',
-				'title'   => __( 'Button URL', 'lerm' ),
-				'desc'    => __( 'Leave empty to use the site homepage.', 'lerm' ),
-				'attributes' => array( 'placeholder' => home_url( '/' ) ),
-			),
-			array(
-				'id'      => '404_image',
-				'type'    => 'media',
-				'title'   => __( 'Custom illustration', 'lerm' ),
-				'subtitle' => __( 'Replace the default 404 image. Recommended: SVG or PNG, transparent background.', 'lerm' ),
-				'url'     => false,
-			),
-			array(
-				'id'      => '404_show_search',
-				'type'    => 'switcher',
-				'title'   => __( 'Show search box on 404 page', 'lerm' ),
-				'default' => true,
-			),
-		),
-	)
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Community › Social profiles
-// ─────────────────────────────────────────────────────────────────────────────
-CSF::createSection(
-	$prefix,
-	array(
-		'parent' => 'community',
-		'title'  => __( 'Social profiles', 'lerm' ),
-		'icon'   => 'fas fa-link',
-		'fields' => array(
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Chinese platforms', 'lerm' ),
-			),
-			array(
-				'id'         => 'social_weibo',
-				'type'       => 'text',
-				'title'      => 'Weibo',
-				'attributes' => array( 'placeholder' => 'https://weibo.com/yourname' ),
-			),
-			array(
-				'id'         => 'social_wechat',
-				'type'       => 'text',
-				'title'      => 'WeChat (公众号 ID)',
-				'attributes' => array( 'placeholder' => 'your-public-account-id' ),
-			),
-			array(
-				'id'         => 'social_qq',
-				'type'       => 'text',
-				'title'      => 'QQ',
-				'attributes' => array( 'placeholder' => 'https://wpa.qq.com/msgrd?v=3&uin=…' ),
-			),
-			array(
-				'id'         => 'social_bilibili',
-				'type'       => 'text',
-				'title'      => 'Bilibili',
-				'attributes' => array( 'placeholder' => 'https://space.bilibili.com/youruid' ),
-			),
-			array(
-				'id'         => 'social_zhihu',
-				'type'       => 'text',
-				'title'      => '知乎 Zhihu',
-				'attributes' => array( 'placeholder' => 'https://www.zhihu.com/people/yourname' ),
-			),
-			array(
-				'id'         => 'social_douban',
-				'type'       => 'text',
-				'title'      => '豆瓣 Douban',
-				'attributes' => array( 'placeholder' => 'https://www.douban.com/people/yourname' ),
-			),
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'International platforms', 'lerm' ),
-			),
-			array(
-				'id'         => 'social_github',
-				'type'       => 'text',
-				'title'      => 'GitHub',
-				'attributes' => array( 'placeholder' => 'https://github.com/yourname' ),
-			),
-			array(
-				'id'         => 'social_twitter',
-				'type'       => 'text',
-				'title'      => 'X / Twitter',
-				'attributes' => array( 'placeholder' => 'https://x.com/yourhandle' ),
-			),
-			array(
-				'id'         => 'social_linkedin',
-				'type'       => 'text',
-				'title'      => 'LinkedIn',
-				'attributes' => array( 'placeholder' => 'https://linkedin.com/in/yourname' ),
-			),
-			array(
-				'id'         => 'social_instagram',
-				'type'       => 'text',
-				'title'      => 'Instagram',
-				'attributes' => array( 'placeholder' => 'https://instagram.com/yourname' ),
-			),
-			array(
-				'id'         => 'social_youtube',
-				'type'       => 'text',
-				'title'      => 'YouTube',
-				'attributes' => array( 'placeholder' => 'https://youtube.com/@yourchannel' ),
-			),
-			array(
-				'id'         => 'social_email',
-				'type'       => 'text',
-				'title'      => __( 'Email', 'lerm' ),
-				'subtitle'   => __( 'Public contact address shown on the social links bar.', 'lerm' ),
-				'attributes' => array( 'placeholder' => 'hello@example.com' ),
-			),
-			array(
-				'id'         => 'social_rss',
-				'type'       => 'switcher',
-				'title'      => __( 'Show RSS feed link', 'lerm' ),
-				'default'    => true,
-			),
-
-			array(
-				'type'    => 'subheading',
-				'content' => __( 'Display settings', 'lerm' ),
-			),
-			array(
-				'id'      => 'social_profiles_position',
-				'type'    => 'checkbox',
-				'title'   => __( 'Show social links in', 'lerm' ),
-				'inline'  => true,
-				'options' => array(
-					'header'    => __( 'Header', 'lerm' ),
-					'footer'    => __( 'Footer', 'lerm' ),
-					'author_bio' => __( 'Author bio box', 'lerm' ),
+				array(
+					'id'         => 'dark_mode_default',
+					'type'       => 'button_set',
+					'dependency' => array( 'dark_mode_enable', '==', 'true' ),
+					'title'      => __( 'Default color scheme', 'lerm' ),
+					'options'    => array(
+						'light'  => __( 'Light', 'lerm' ),
+						'dark'   => __( 'Dark', 'lerm' ),
+						'system' => __( 'Follow system preference', 'lerm' ),
+					),
+					'default'    => 'system',
 				),
-				'default' => array( 'footer', 'author_bio' ),
+				array(
+					'id'         => 'dark_mode_toggle_position',
+					'type'       => 'button_set',
+					'dependency' => array( 'dark_mode_enable', '==', 'true' ),
+					'title'      => __( 'Toggle button position', 'lerm' ),
+					'options'    => array(
+						'navbar'  => __( 'In navbar', 'lerm' ),
+						'sidebar' => __( 'Floating button', 'lerm' ),
+					),
+					'default'    => 'navbar',
+				),
 			),
-			array(
-				'id'      => 'social_open_new_tab',
-				'type'    => 'switcher',
-				'title'   => __( 'Open links in a new tab', 'lerm' ),
-				'default' => true,
+		)
+	);
+
+	// ─────────────────────────────────────────────────────────────────────────────
+	// System › Custom scripts
+	// ─────────────────────────────────────────────────────────────────────────────
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'system',
+			'title'  => __( 'Custom scripts', 'lerm' ),
+			'icon'   => 'fas fa-code',
+			'fields' => array(
+
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Head injection', 'lerm' ),
+				),
+				array(
+					'id'       => 'head_scripts',
+					'type'     => 'code_editor',
+					'title'    => __( 'Before </head>', 'lerm' ),
+					'subtitle' => __( 'Code output in the <head> section of every page — analytics, verification meta tags, custom fonts, etc.', 'lerm' ),
+					'sanitize' => false,
+					'settings' => array(
+						'mode'  => 'htmlmixed',
+						'theme' => 'mbo',
+					),
+				),
+
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Footer injection', 'lerm' ),
+				),
+				array(
+					'id'       => 'footer_scripts',
+					'type'     => 'code_editor',
+					'title'    => __( 'Before </body>', 'lerm' ),
+					'subtitle' => __( 'Code output just before the closing </body> tag — chat widgets, deferred scripts, etc.', 'lerm' ),
+					'sanitize' => false,
+					'settings' => array(
+						'mode'  => 'htmlmixed',
+						'theme' => 'mbo',
+					),
+				),
 			),
-		),
-	)
-);
+		)
+	);
+
+	// ─────────────────────────────────────────────────────────────────────────────
+	// Content › Post (single) — supplementary fields appended via a new sub-section
+	// These are grouped under a dedicated "Post features" section to keep the
+	// existing Post (single) section from growing too long.
+	// ─────────────────────────────────────────────────────────────────────────────
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'content',
+			'title'  => __( 'Post features', 'lerm' ),
+			'icon'   => 'fas fa-star',
+			'fields' => array(
+
+				// ── Table of contents ─────────────────────────────────────────────
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Table of contents', 'lerm' ),
+				),
+				array(
+					'id'      => 'toc_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Enable table of contents', 'lerm' ),
+					'desc'    => __( 'Auto-generate a TOC from H2/H3 headings in post content.', 'lerm' ),
+					'default' => false,
+				),
+				array(
+					'id'         => 'toc_min_headings',
+					'type'       => 'spinner',
+					'dependency' => array( 'toc_enable', '==', 'true' ),
+					'title'      => __( 'Minimum headings required', 'lerm' ),
+					'subtitle'   => __( 'TOC is hidden when the post has fewer headings than this number.', 'lerm' ),
+					'min'        => 1,
+					'max'        => 20,
+					'default'    => 3,
+				),
+				array(
+					'id'         => 'toc_position',
+					'type'       => 'button_set',
+					'dependency' => array( 'toc_enable', '==', 'true' ),
+					'title'      => __( 'TOC position', 'lerm' ),
+					'options'    => array(
+						'before_content' => __( 'Above content', 'lerm' ),
+						'sidebar'        => __( 'In sidebar', 'lerm' ),
+						'floating'       => __( 'Floating panel', 'lerm' ),
+					),
+					'default'    => 'before_content',
+				),
+				array(
+					'id'         => 'toc_collapsed',
+					'type'       => 'switcher',
+					'dependency' => array( 'toc_enable', '==', 'true' ),
+					'title'      => __( 'Collapsed by default', 'lerm' ),
+					'default'    => false,
+				),
+
+				// ── Like & views ──────────────────────────────────────────────────
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Like & view counter', 'lerm' ),
+				),
+				array(
+					'id'      => 'post_likes_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Show like button on posts', 'lerm' ),
+					'default' => true,
+				),
+				array(
+					'id'      => 'comment_likes_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Show like button on comments', 'lerm' ),
+					'default' => true,
+				),
+				array(
+					'id'      => 'post_views_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Show view count on posts', 'lerm' ),
+					'default' => true,
+				),
+				array(
+					'id'         => 'views_unique_only',
+					'type'       => 'switcher',
+					'dependency' => array( 'post_views_enable', '==', 'true' ),
+					'title'      => __( 'Count unique visitors only', 'lerm' ),
+					'desc'       => __( 'Prevents repeated views from the same browser session from inflating the count.', 'lerm' ),
+					'default'    => true,
+				),
+
+				// ── Social share ─────────────────────────────────────────────────
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Share buttons', 'lerm' ),
+				),
+				array(
+					'id'      => 'share_position',
+					'type'    => 'button_set',
+					'title'   => __( 'Share buttons position', 'lerm' ),
+					'options' => array(
+						'top'    => __( 'Above content', 'lerm' ),
+						'bottom' => __( 'Below content', 'lerm' ),
+						'both'   => __( 'Both', 'lerm' ),
+						'none'   => __( 'Hidden', 'lerm' ),
+					),
+					'default' => 'bottom',
+				),
+				array(
+					'id'      => 'share_show_count',
+					'type'    => 'switcher',
+					'title'   => __( 'Show share count', 'lerm' ),
+					'default' => false,
+				),
+
+				// ── Copyright notice ──────────────────────────────────────────────
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Copyright notice', 'lerm' ),
+				),
+				array(
+					'id'      => 'post_copyright_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Show copyright / repost notice', 'lerm' ),
+					'desc'    => __( 'Display a copyright reminder with the post URL at the bottom of each post.', 'lerm' ),
+					'default' => true,
+				),
+				array(
+					'id'         => 'post_copyright_text',
+					'type'       => 'textarea',
+					'dependency' => array( 'post_copyright_enable', '==', 'true' ),
+					'title'      => __( 'Custom copyright text', 'lerm' ),
+					'subtitle'   => __( 'Overrides the default copyright message. Leave empty to use the default.', 'lerm' ),
+					'attributes' => array(
+						'placeholder' => __( 'This article was published by … Please credit the original source when reposting.', 'lerm' ),
+					),
+				),
+
+				// ── Search ───────────────────────────────────────────────────────
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Instant search', 'lerm' ),
+				),
+				array(
+					'id'       => 'search_results_per_page',
+					'type'     => 'spinner',
+					'title'    => __( 'Instant search results count', 'lerm' ),
+					'subtitle' => __( 'Maximum number of items shown in the search dropdown.', 'lerm' ),
+					'min'      => 1,
+					'max'      => 20,
+					'default'  => 5,
+				),
+				array(
+					'id'         => 'search_placeholder',
+					'type'       => 'text',
+					'title'      => __( 'Search box placeholder', 'lerm' ),
+					'default'    => '',
+					'attributes' => array( 'placeholder' => __( 'Search…', 'lerm' ) ),
+				),
+			),
+		)
+	);
+
+	// ─────────────────────────────────────────────────────────────────────────────
+	// Content › Comments
+	// ─────────────────────────────────────────────────────────────────────────────
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'content',
+			'title'  => __( 'Comments', 'lerm' ),
+			'icon'   => 'fas fa-comments',
+			'fields' => array(
+
+				array(
+					'id'      => 'comments_enable',
+					'type'    => 'switcher',
+					'title'   => __( 'Enable comments globally', 'lerm' ),
+					'desc'    => __( 'When off, comments are closed on all posts regardless of per-post settings.', 'lerm' ),
+					'default' => true,
+				),
+				array(
+					'id'         => 'comments_require_login',
+					'type'       => 'switcher',
+					'dependency' => array( 'comments_enable', '==', 'true' ),
+					'title'      => __( 'Require login to comment', 'lerm' ),
+					'default'    => false,
+				),
+				array(
+					'id'         => 'comment_moderation',
+					'type'       => 'switcher',
+					'dependency' => array( 'comments_enable', '==', 'true' ),
+					'title'      => __( 'Hold all comments for moderation', 'lerm' ),
+					'desc'       => __( 'All new comments must be approved before they appear publicly.', 'lerm' ),
+					'default'    => false,
+				),
+				array(
+					'id'         => 'comments_per_page',
+					'type'       => 'spinner',
+					'dependency' => array( 'comments_enable', '==', 'true' ),
+					'title'      => __( 'Comments per page', 'lerm' ),
+					'min'        => 5,
+					'max'        => 100,
+					'step'       => 5,
+					'default'    => 20,
+				),
+				array(
+					'id'         => 'comment_nesting_depth',
+					'type'       => 'spinner',
+					'dependency' => array( 'comments_enable', '==', 'true' ),
+					'title'      => __( 'Maximum nesting depth', 'lerm' ),
+					'subtitle'   => __( 'How many levels deep threaded replies can go.', 'lerm' ),
+					'min'        => 1,
+					'max'        => 10,
+					'default'    => 3,
+				),
+
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Comment form', 'lerm' ),
+				),
+				array(
+					'id'         => 'comment_form_fields',
+					'type'       => 'checkbox',
+					'dependency' => array( 'comments_enable', '==', 'true' ),
+					'title'      => __( 'Required form fields', 'lerm' ),
+					'inline'     => true,
+					'options'    => array(
+						'name'    => __( 'Name', 'lerm' ),
+						'email'   => __( 'Email', 'lerm' ),
+						'website' => __( 'Website', 'lerm' ),
+					),
+					'default'    => array( 'name', 'email' ),
+				),
+				array(
+					'id'         => 'comment_placeholder',
+					'type'       => 'text',
+					'dependency' => array( 'comments_enable', '==', 'true' ),
+					'title'      => __( 'Comment textarea placeholder', 'lerm' ),
+					'attributes' => array( 'placeholder' => __( 'Leave a comment…', 'lerm' ) ),
+				),
+				array(
+					'id'         => 'comment_min_length',
+					'type'       => 'spinner',
+					'dependency' => array( 'comments_enable', '==', 'true' ),
+					'title'      => __( 'Minimum comment length (characters)', 'lerm' ),
+					'subtitle'   => __( 'Set to 0 to disable the minimum length check.', 'lerm' ),
+					'min'        => 0,
+					'max'        => 500,
+					'default'    => 10,
+				),
+				array(
+					'id'         => 'comment_max_length',
+					'type'       => 'spinner',
+					'dependency' => array( 'comments_enable', '==', 'true' ),
+					'title'      => __( 'Maximum comment length (characters)', 'lerm' ),
+					'subtitle'   => __( 'Set to 0 for no limit.', 'lerm' ),
+					'min'        => 0,
+					'max'        => 10000,
+					'step'       => 100,
+					'default'    => 2000,
+				),
+
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Avatar', 'lerm' ),
+				),
+				array(
+					'id'      => 'comment_avatar_size',
+					'type'    => 'spinner',
+					'title'   => __( 'Comment avatar size (px)', 'lerm' ),
+					'min'     => 24,
+					'max'     => 128,
+					'step'    => 4,
+					'default' => 48,
+				),
+				array(
+					'id'      => 'comment_show_cravatar_tip',
+					'type'    => 'switcher',
+					'title'   => __( 'Show "Set avatar on Cravatar" tip', 'lerm' ),
+					'desc'    => __( 'Display a hint encouraging users without an avatar to set one on Cravatar.cn.', 'lerm' ),
+					'default' => true,
+				),
+			),
+		)
+	);
+
+	// ─────────────────────────────────────────────────────────────────────────────
+	// Content › 404 page
+	// ─────────────────────────────────────────────────────────────────────────────
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'content',
+			'title'  => __( '404 page', 'lerm' ),
+			'icon'   => 'fas fa-exclamation-triangle',
+			'fields' => array(
+
+				array(
+					'id'      => '404_title',
+					'type'    => 'text',
+					'title'   => __( 'Page title', 'lerm' ),
+					'default' => __( '404 Not Found', 'lerm' ),
+				),
+				array(
+					'id'      => '404_message',
+					'type'    => 'textarea',
+					'title'   => __( 'Error message', 'lerm' ),
+					'default' => __( 'Sorry, the page you are looking for could not be found.', 'lerm' ),
+				),
+				array(
+					'id'      => '404_button_text',
+					'type'    => 'text',
+					'title'   => __( 'Button label', 'lerm' ),
+					'default' => __( 'Back to home', 'lerm' ),
+				),
+				array(
+					'id'         => '404_button_url',
+					'type'       => 'text',
+					'title'      => __( 'Button URL', 'lerm' ),
+					'desc'       => __( 'Leave empty to use the site homepage.', 'lerm' ),
+					'attributes' => array( 'placeholder' => home_url( '/' ) ),
+				),
+				array(
+					'id'       => '404_image',
+					'type'     => 'media',
+					'title'    => __( 'Custom illustration', 'lerm' ),
+					'subtitle' => __( 'Replace the default 404 image. Recommended: SVG or PNG, transparent background.', 'lerm' ),
+					'url'      => false,
+				),
+				array(
+					'id'      => '404_show_search',
+					'type'    => 'switcher',
+					'title'   => __( 'Show search box on 404 page', 'lerm' ),
+					'default' => true,
+				),
+			),
+		)
+	);
+
+	// ─────────────────────────────────────────────────────────────────────────────
+	// Community › Social profiles
+	// ─────────────────────────────────────────────────────────────────────────────
+	CSF::createSection(
+		$prefix,
+		array(
+			'parent' => 'community',
+			'title'  => __( 'Social profiles', 'lerm' ),
+			'icon'   => 'fas fa-link',
+			'fields' => array(
+
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Chinese platforms', 'lerm' ),
+				),
+				array(
+					'id'         => 'social_weibo',
+					'type'       => 'text',
+					'title'      => 'Weibo',
+					'attributes' => array( 'placeholder' => 'https://weibo.com/yourname' ),
+				),
+				array(
+					'id'         => 'social_wechat',
+					'type'       => 'text',
+					'title'      => 'WeChat (公众号 ID)',
+					'attributes' => array( 'placeholder' => 'your-public-account-id' ),
+				),
+				array(
+					'id'         => 'social_qq',
+					'type'       => 'text',
+					'title'      => 'QQ',
+					'attributes' => array( 'placeholder' => 'https://wpa.qq.com/msgrd?v=3&uin=…' ),
+				),
+				array(
+					'id'         => 'social_bilibili',
+					'type'       => 'text',
+					'title'      => 'Bilibili',
+					'attributes' => array( 'placeholder' => 'https://space.bilibili.com/youruid' ),
+				),
+				array(
+					'id'         => 'social_zhihu',
+					'type'       => 'text',
+					'title'      => '知乎 Zhihu',
+					'attributes' => array( 'placeholder' => 'https://www.zhihu.com/people/yourname' ),
+				),
+				array(
+					'id'         => 'social_douban',
+					'type'       => 'text',
+					'title'      => '豆瓣 Douban',
+					'attributes' => array( 'placeholder' => 'https://www.douban.com/people/yourname' ),
+				),
+
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'International platforms', 'lerm' ),
+				),
+				array(
+					'id'         => 'social_github',
+					'type'       => 'text',
+					'title'      => 'GitHub',
+					'attributes' => array( 'placeholder' => 'https://github.com/yourname' ),
+				),
+				array(
+					'id'         => 'social_twitter',
+					'type'       => 'text',
+					'title'      => 'X / Twitter',
+					'attributes' => array( 'placeholder' => 'https://x.com/yourhandle' ),
+				),
+				array(
+					'id'         => 'social_linkedin',
+					'type'       => 'text',
+					'title'      => 'LinkedIn',
+					'attributes' => array( 'placeholder' => 'https://linkedin.com/in/yourname' ),
+				),
+				array(
+					'id'         => 'social_instagram',
+					'type'       => 'text',
+					'title'      => 'Instagram',
+					'attributes' => array( 'placeholder' => 'https://instagram.com/yourname' ),
+				),
+				array(
+					'id'         => 'social_youtube',
+					'type'       => 'text',
+					'title'      => 'YouTube',
+					'attributes' => array( 'placeholder' => 'https://youtube.com/@yourchannel' ),
+				),
+				array(
+					'id'         => 'social_email',
+					'type'       => 'text',
+					'title'      => __( 'Email', 'lerm' ),
+					'subtitle'   => __( 'Public contact address shown on the social links bar.', 'lerm' ),
+					'attributes' => array( 'placeholder' => 'hello@example.com' ),
+				),
+				array(
+					'id'      => 'social_rss',
+					'type'    => 'switcher',
+					'title'   => __( 'Show RSS feed link', 'lerm' ),
+					'default' => true,
+				),
+
+				array(
+					'type'    => 'subheading',
+					'content' => __( 'Display settings', 'lerm' ),
+				),
+				array(
+					'id'      => 'social_profiles_position',
+					'type'    => 'checkbox',
+					'title'   => __( 'Show social links in', 'lerm' ),
+					'inline'  => true,
+					'options' => array(
+						'header'     => __( 'Header', 'lerm' ),
+						'footer'     => __( 'Footer', 'lerm' ),
+						'author_bio' => __( 'Author bio box', 'lerm' ),
+					),
+					'default' => array( 'footer', 'author_bio' ),
+				),
+				array(
+					'id'      => 'social_open_new_tab',
+					'type'    => 'switcher',
+					'title'   => __( 'Open links in a new tab', 'lerm' ),
+					'default' => true,
+				),
+			),
+		)
+	);
 
 endif; // class_exists CSF

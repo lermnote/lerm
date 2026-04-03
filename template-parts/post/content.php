@@ -53,7 +53,7 @@ $template_options = lerm_get_template_options();
 			}
 
 			$tag_list = get_the_tag_list(
-				'<ul class="list-unstyled m-0 small text-muted"><li class="d-inline ms-2">#',
+				'<ul class="list-unstyled m-0 small text-muted"><li class="d-inline "><i class="fa fa-tags"> </i>#',
 				'</li><li class="d-inline ms-2">#',
 				'</li></ul>'
 			);
@@ -63,6 +63,7 @@ $template_options = lerm_get_template_options();
 					array(
 						'ul' => array( 'class' => array() ),
 						'li' => array( 'class' => array() ),
+						'i'  => array( 'class' => array() ),
 						'a'  => array(
 							'href'  => array(),
 							'rel'   => array(),

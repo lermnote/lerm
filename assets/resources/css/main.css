@@ -98,6 +98,41 @@
   --lerm-progress-color:       #0084ba;
   --lerm-progress-height:      3px;
 
+  /* ── Bootstrap 5 bridge ─────────────────────────────────────────────── */
+  --bs-body-color:          var(--lerm-color-text);
+  --bs-body-bg:             var(--lerm-bg-body);
+  --bs-body-font-family:    var(--lerm-font-family-base);
+  --bs-body-font-size:      var(--lerm-font-size-base);
+  --bs-body-font-weight:    var(--lerm-font-weight-base);
+  --bs-body-line-height:    var(--lerm-line-height-base);
+  --bs-link-color:          var(--lerm-color-link);
+  --bs-link-hover-color:    var(--lerm-color-link-hover);
+  --bs-primary:             var(--lerm-color-primary);
+  --bs-card-bg:             var(--lerm-bg-card);
+  --bs-border-color:        var(--lerm-color-border);
+  --bs-border-color-translucent: var(--lerm-color-border);
+  --bs-emphasis-color:      var(--lerm-color-text);
+  --bs-navbar-color:        var(--lerm-color-nav);
+  --bs-navbar-hover-color:  var(--lerm-color-nav-hover, var(--lerm-color-primary));
+  --bs-navbar-active-color: var(--lerm-nav-active-color, var(--lerm-color-primary));
+  --bs-dropdown-bg:         var(--lerm-bg-header);
+  --bs-font-sans-serif:     var(--lerm-font-family-base);
+
+  /* ── WordPress / theme.json bridge ──────────────────────────────────── */
+  --wp--preset--color--primary:         var(--lerm-color-primary);
+  --wp--preset--color--primary-dark:    var(--lerm-color-primary-hover, var(--lerm-color-primary));
+  --wp--preset--color--accent:          var(--lerm-color-primary);
+  --wp--preset--color--foreground:      var(--lerm-color-text);
+  --wp--preset--color--foreground-muted:var(--lerm-color-text-muted, var(--lerm-color-text));
+  --wp--preset--color--background:      var(--lerm-bg-body);
+  --wp--preset--color--surface:         var(--lerm-bg-card);
+  --wp--preset--color--background-alt:  var(--lerm-bg-card);
+  --wp--preset--color--header-bg:       var(--lerm-bg-header, var(--lerm-bg-body));
+  --wp--preset--color--border:          var(--lerm-color-border);
+  --wp--preset--color--footer-bg:       var(--lerm-footer-widgets-bg);
+  --wp--preset--color--footer-text:     var(--lerm-footer-widgets-color);
+  --wp--preset--font-family--system:    var(--lerm-font-family-base);
+
 }
 
 /*--------------------------------------------------------------

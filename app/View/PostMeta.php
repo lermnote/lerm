@@ -157,7 +157,7 @@ class PostMeta {
 			?>
 			<span class="meta-icon">
 				<span class="screen-reader-text"><?php esc_html_e( 'Categories', 'lerm' ); ?></span>
-				<i class="fa fa-hdd pe-1"></i>
+				<i class="fa fa-folder pe-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php echo wp_kses_post( $categories ); ?>

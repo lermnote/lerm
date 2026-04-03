@@ -75,7 +75,7 @@ if ( $footer_menu_id > 0 ) {
 	<?php if ( ! empty( $template_options['dark_mode_enable'] ) && ( $template_options['dark_mode_toggle_position'] ?? 'navbar' ) === 'sidebar' ) : ?>
 		<button id="lerm-dark-toggle" class="btn btn-custom"
 			aria-label="<?php esc_attr_e( 'Toggle dark mode', 'lerm' ); ?>">
-			<i class="fa fa-moon-o" aria-hidden="true"></i>
+			<i class="fa fa-moon" aria-hidden="true"></i>
 		</button>
 	<?php endif; ?>
 </div>

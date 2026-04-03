@@ -99,7 +99,7 @@ const buildToggleButton = () => {
 	btn.type        = 'button';
 	btn.className   = 'btn btn-sm btn-custom dark-mode-toggle';
 	btn.setAttribute( 'aria-label', 'Toggle colour scheme' );
-	btn.innerHTML   = '<i class="fas fa-moon" aria-hidden="true"></i>';
+	btn.innerHTML   = '<i class="fa fa-moon" aria-hidden="true"></i>';
 
 	btn.addEventListener( 'click', () => {
 		toggleScheme();
@@ -107,7 +107,7 @@ const buildToggleButton = () => {
 		const icon = btn.querySelector( 'i' );
 		if ( icon ) {
 			const dark = document.documentElement.getAttribute( ATTR ) === 'dark';
-			icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+			icon.className = dark ? 'fa fa-sun' : 'fa fa-moon';
 		}
 	} );
 
@@ -125,7 +125,7 @@ const initDarkMode = () => {
 	const pos = DATA.darkModeToggle || 'navbar';
 	const dark = document.documentElement.getAttribute( ATTR ) === 'dark';
 	const icon = btn.querySelector( 'i' );
-	if ( icon ) icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+	if ( icon ) icon.className = dark ? 'fa fa-sun' : 'fa fa-moon';
 
 	if ( pos === 'navbar' ) {
 		// Append inside .navbar-collapse > .navbar-nav, or fallback to end of .navbar
