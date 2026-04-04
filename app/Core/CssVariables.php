@@ -21,6 +21,8 @@ final class CssVariables {
 	/** @var array<string, mixed> */
 	private static array $opts = array();
 
+	private const CACHE_KEY = 'lerm_css_vars_v1';
+
 	public static function init( array $options ): void {
 		self::$opts = $options;
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'output' ), 22 );
