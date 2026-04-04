@@ -10,8 +10,8 @@ use Lerm\Support\Image;
 use Lerm\View\PostMeta;
 use function Lerm\Support\link_pagination;
 
-$current_post_id = get_the_ID(); // 缓存 ID，避免多次调用
-$card_classes    = 'card';
+$current_post_id  = get_the_ID(); // 缓存 ID，避免多次调用
+$card_classes     = 'card';
 $card_classes     = 'card';
 $template_options = lerm_get_template_options();
 ?>
