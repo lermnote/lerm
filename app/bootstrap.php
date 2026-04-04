@@ -162,7 +162,7 @@ if ( ! empty( $options ) ) {
 		'single_top'                => (array) ( $options['single_top'] ?? array() ),
 		'single_bottom'             => (array) ( $options['single_bottom'] ?? array() ),
 		'summary_meta'              => (array) ( $options['summary_meta'] ?? array() ),
-		'social_share'              => array_keys( array_filter( (array) ( $options['social_share'] ?? array() ) ) ),
+		'social_share'              => (array) ( $options['social_share'] ?? array() ),
 		'blogname'                  => (string) ( $options['blogname'] ?? '' ),
 		'blogdesc'                  => (string) ( $options['blogdesc'] ?? '' ),
 		'navbar_align'              => (string) ( $options['navbar_align'] ?? 'justify-content-md-start' ),

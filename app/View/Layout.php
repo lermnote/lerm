@@ -23,7 +23,7 @@ function lerm_get_layout_options(): array {
 		array(
 			'global_layout'   => 'layout-2c-r',
 			'layout_style'    => '',
-			'loading_animate' => true,
+			'loading_animate' => false,
 		)
 	);
 }

@@ -3,7 +3,7 @@
   src:
     url('../fonts/lerm.ttf?qvr3hr') format('truetype'),
     url('../fonts/lerm.woff?qvr3hr') format('woff'),
-    url('../fonts/lerm.svg?qvr3hr#lerm') format('svg');
+    url('../fonts/lerm.svg?k7g0f#lerm') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -22,6 +22,22 @@
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-douban:before {
+  content: "\ea81";
+}
+
+.fa-qq:before {
+  content: "\ea82";
+}
+
+.fa-qzone:before {
+  content: "\ea83";
+}
+
+.fa-wechat:before {
+  content: "\ea84";
 }
 
 .fa-500px:before {
@@ -988,7 +1004,7 @@
   content: "\e9f0";
 }
 
-.fa-pause2:before {
+.fa-pause:before {
   content: "\e9f1";
 }
 
