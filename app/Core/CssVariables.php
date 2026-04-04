@@ -26,11 +26,26 @@ final class CssVariables {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'output' ), 22 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'output_editor' ), 22 );
 		add_filter( 'wp_theme_json_data_theme', array( __CLASS__, 'filter_theme_json' ) );
+
+		add_action( 'update_option_lerm_theme_options', array( __CLASS__, 'flush_cache' ) );
+	}
+
+	/**
+	 * 清除 CSS 变量缓存。
+	 * 挂在选项保存钩子上，也可由子主题或插件在需要时手动调用。
+	 */
+	public static function flush_cache(): void {
+		delete_transient( self::CACHE_KEY );
 	}
 
 	// ── Public output ─────────────────────────────────────────────────────────
 
 	public static function output(): void {
+		$cached = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? false : get_transient( self::CACHE_KEY );
+		if ( false !== $cached ) {
+			wp_add_inline_style( 'main_style', $cached );
+			return;
+		}
 		$lerm = self::resolve_lerm_tokens();
 		$all  = array_merge( $lerm, self::resolve_bs_bridge( $lerm ), self::resolve_wp_bridge( $lerm ) );
 		$css  = self::build_block( ':root', $all );
@@ -43,6 +58,8 @@ final class CssVariables {
 					self::build_block( ':root:not([data-theme="light"])', $dark ) . '}';
 			}
 		}
+
+		set_transient( self::CACHE_KEY, $css, 12 * HOUR_IN_SECONDS );
 		wp_add_inline_style( 'main_style', $css );
 	}
 
@@ -311,6 +328,32 @@ final class CssVariables {
 				'--lerm-footer-bar-bg'     => '#101113',
 			)
 		);
+
+		$o    = self::$opts;
+		$dark = apply_filters(
+			'lerm_dark_mode_tokens',
+			array(
+				'--lerm-bg-body'           => $o['dark_bg_body'] ?? '#1a1b1e',
+				'--lerm-bg-card'           => $o['dark_bg_card'] ?? '#25262b',
+				'--lerm-bg-header'         => $o['dark_bg_header'] ?? '#1f2023',
+				'--lerm-color-text'        => $o['dark_text'] ?? '#c1c2c5',
+				'--lerm-color-text-muted'  => $o['dark_text_muted'] ?? '#909296',
+				'--lerm-color-border'      => $o['dark_border'] ?? '#373a40',
+				'--lerm-footer-widgets-bg' => $o['dark_footer_bg'] ?? '#141517',
+				'--lerm-footer-bar-bg'     => $o['dark_bar_bg'] ?? '#101113',
+			)
+		);
+
+		// 为暗色背景也生成 RGB 三元组，供 Bootstrap 透明度计算
+		$bg_rgb = self::hex_to_rgb_triplet( $dark['--lerm-bg-body'] );
+		if ( $bg_rgb ) {
+			$dark['--bs-body-bg-rgb'] = $bg_rgb;
+		}
+		$text_rgb = self::hex_to_rgb_triplet( $dark['--lerm-color-text'] );
+		if ( $text_rgb ) {
+			$dark['--bs-body-color-rgb']     = $text_rgb;
+			$dark['--bs-emphasis-color-rgb'] = $text_rgb;
+		}
 
 		// Bootstrap bridge for dark mode
 		$dark['--bs-body-bg']        = 'var(--lerm-bg-body)';

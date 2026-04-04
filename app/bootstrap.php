@@ -114,7 +114,6 @@ if ( ! empty( $options ) ) {
 		'ver'  => wp_get_theme()->get( 'Version' ),
 	);
 
-	// 修正原拼写错误：frontend_login → frontend_login
 	$login_options = array(
 		'front_login_enable'  => (bool) ( $options['frontend_login'] ?? false ),
 		'login_page_id'       => (int) ( $options['frontend_login_page'] ?? 0 ),
@@ -128,7 +127,7 @@ if ( ! empty( $options ) ) {
 		'layout_style'    => (string) ( $options['layout_style'] ?? '' ),
 		'loading_animate' => (bool) ( $options['loading_animate'] ?? false ),
 	);
-	// var_dump( $layout_options );
+
 	$tracking_options = array(
 		'baidu_tongji' => (string) ( $options['baidu_tongji'] ?? '' ),
 	);
