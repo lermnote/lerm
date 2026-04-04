@@ -29,6 +29,7 @@ CSF::createOptions(
 		'menu_slug'       => 'lerm_options',
 		'framework_title' => 'Lerm <small>Theme Options</small>',
 		'footer_credit'   => sprintf(
+			/* translators: 1. Link to the Lerm theme homepage. */
 			__( 'Thank you for creating with <a href="%s" target="_blank">Lerm</a>', 'lerm' ),
 			'https://www.hanost.com/'
 		),
@@ -371,34 +372,34 @@ CSF::createSection(
 				),
 			),
 			array(
-				'id'               => 'navbar_link_color',
-				'type'             => 'link_color',
-				'title'            => __( 'Nav link color', 'lerm' ),
-				'subtitle'         => __( 'Color of navigation links and dropdown items.', 'lerm' ),
-				'default'          => array(
+				'id'       => 'navbar_link_color',
+				'type'     => 'link_color',
+				'title'    => __( 'Nav link color', 'lerm' ),
+				'subtitle' => __( 'Color of navigation links and dropdown items.', 'lerm' ),
+				'default'  => array(
 					'color' => '#828282',
 					'hover' => '#0084ba',
 				),
 			),
 			array(
-				'id'               => 'navbar_active_color',
-				'type'             => 'color_pair',
-				'title'            => __( 'Nav active item color', 'lerm' ),
-				'subtitle'         => __( 'Text and background color of the currently active nav item.', 'lerm' ),
-				'default'          => array(
+				'id'       => 'navbar_active_color',
+				'type'     => 'color_pair',
+				'title'    => __( 'Nav active item color', 'lerm' ),
+				'subtitle' => __( 'Text and background color of the currently active nav item.', 'lerm' ),
+				'default'  => array(
 					'color'            => '#0084ba',
 					'background_color' => '#ffffff',
 				),
 			),
 			array(
-				'id'          => 'navbar_item_padding',
-				'type'        => 'spacing',
-				'title'       => __( 'Nav item padding', 'lerm' ),
-				'subtitle'    => __( 'Vertical padding applied to each navigation link.', 'lerm' ),
-				'units'       => array( 'rem', 'em' ),
-				'left'        => false,
-				'right'       => false,
-				'default'     => array(
+				'id'       => 'navbar_item_padding',
+				'type'     => 'spacing',
+				'title'    => __( 'Nav item padding', 'lerm' ),
+				'subtitle' => __( 'Vertical padding applied to each navigation link.', 'lerm' ),
+				'units'    => array( 'rem', 'em' ),
+				'left'     => false,
+				'right'    => false,
+				'default'  => array(
 					'top'    => '1.5',
 					'bottom' => '1.5',
 					'unit'   => 'rem',
@@ -455,24 +456,24 @@ CSF::createSection(
 				'content' => __( 'Buttons', 'lerm' ),
 			),
 			array(
-				'id'               => 'btn_primary',
-				'type'             => 'color_pair',
-				'title'            => __( 'Primary button (default state)', 'lerm' ),
-				'subtitle'         => __( 'Text, background, and border color of primary buttons at rest.', 'lerm' ),
-				'border_color'     => true,
-				'default'          => array(
+				'id'           => 'btn_primary',
+				'type'         => 'color_pair',
+				'title'        => __( 'Primary button (default state)', 'lerm' ),
+				'subtitle'     => __( 'Text, background, and border color of primary buttons at rest.', 'lerm' ),
+				'border_color' => true,
+				'default'      => array(
 					'color'            => '#0084ba',
 					'background_color' => '',
 					'border_color'     => '#0084ba',
 				),
 			),
 			array(
-				'id'               => 'btn_primary_hover',
-				'type'             => 'color_pair',
-				'title'            => __( 'Primary button (hover state)', 'lerm' ),
-				'subtitle'         => __( 'Text and background color of primary buttons on hover.', 'lerm' ),
-				'border_color'     => true,
-				'default'          => array(
+				'id'           => 'btn_primary_hover',
+				'type'         => 'color_pair',
+				'title'        => __( 'Primary button (hover state)', 'lerm' ),
+				'subtitle'     => __( 'Text and background color of primary buttons on hover.', 'lerm' ),
+				'border_color' => true,
+				'default'      => array(
 					'color'            => '#ffffff',
 					'background_color' => '#0084ba',
 					'border_color'     => '#0084ba',
@@ -1242,12 +1243,12 @@ CSF::createSection(
 				'title'      => __( 'Exclude content types', 'lerm' ),
 				'desc'       => __( 'Selected types will be omitted from the sitemap.', 'lerm' ),
 				'options'    => array(
-					'page'        => __( 'Pages', 'lerm' ),
-					'post'        => __( 'Posts', 'lerm' ),
-					'category'    => __( 'Categories', 'lerm' ),
-					'post_tag'    => __( 'Tags', 'lerm' ),
-					'post_format' => __( 'Formats', 'lerm' ),
-					'users'       => __( 'Authors', 'lerm' ),
+					'page'     => __( 'Pages', 'lerm' ),
+					'post'     => __( 'Posts', 'lerm' ),
+					'category' => __( 'Categories', 'lerm' ),
+					'post_tag' => __( 'Tags', 'lerm' ),
+					'format'   => __( 'Formats', 'lerm' ),
+					'users'    => __( 'Authors', 'lerm' ),
 				),
 			),
 			array(

@@ -11,22 +11,22 @@ if ( post_password_required() ) {
 	return;
 }
 
-$template_options        = lerm_get_template_options();
-$commenter               = wp_get_current_commenter();
-$comment_post_id         = get_the_ID();
-$comment_avatar_size     = max( 24, (int) ( $template_options['comment_avatar_size'] ?? 48 ) );
-$comment_form_avatar     = max( 24, min( $comment_avatar_size, 32 ) );
-$comment_list_avatar     = wp_is_mobile() ? min( $comment_avatar_size, 32 ) : $comment_avatar_size;
-$comment_placeholder     = ! empty( $template_options['comment_placeholder'] ) ? (string) $template_options['comment_placeholder'] : __( 'Leave a comment...', 'lerm' );
-$show_cravatar_tip       = ! isset( $template_options['comment_show_cravatar_tip'] ) || ! empty( $template_options['comment_show_cravatar_tip'] );
-$comment_author          = sanitize_text_field( $commenter['comment_author'] ?? '' );
-$comment_author_email    = sanitize_email( $commenter['comment_author_email'] ?? '' );
-$comment_author_url      = esc_url_raw( $commenter['comment_author_url'] ?? '' );
-$commenter_identity      = is_user_logged_in() ? wp_get_current_user()->display_name : ( $commenter['comment_author'] ?? '' );
-$require_identity        = (bool) get_option( 'require_name_email' );
-$frontend_account_url    = lerm_get_frontend_account_page_url();
-$frontend_login_url      = add_query_arg( 'redirect_to', get_permalink( $comment_post_id ), lerm_get_frontend_auth_page_url( 'login' ) );
-$cravatar_tip_message    = sprintf(
+$template_options     = lerm_get_template_options();
+$commenter            = wp_get_current_commenter();
+$comment_post_id      = get_the_ID();
+$comment_avatar_size  = max( 24, (int) ( $template_options['comment_avatar_size'] ?? 48 ) );
+$comment_form_avatar  = max( 24, min( $comment_avatar_size, 32 ) );
+$comment_list_avatar  = wp_is_mobile() ? min( $comment_avatar_size, 32 ) : $comment_avatar_size;
+$comment_placeholder  = ! empty( $template_options['comment_placeholder'] ) ? (string) $template_options['comment_placeholder'] : __( 'Leave a comment...', 'lerm' );
+$show_cravatar_tip    = ! isset( $template_options['comment_show_cravatar_tip'] ) || ! empty( $template_options['comment_show_cravatar_tip'] );
+$comment_author       = sanitize_text_field( $commenter['comment_author'] ?? '' );
+$comment_author_email = sanitize_email( $commenter['comment_author_email'] ?? '' );
+$comment_author_url   = esc_url_raw( $commenter['comment_author_url'] ?? '' );
+$commenter_identity   = is_user_logged_in() ? wp_get_current_user()->display_name : ( $commenter['comment_author'] ?? '' );
+$require_identity     = (bool) get_option( 'require_name_email' );
+$frontend_account_url = lerm_get_frontend_account_page_url();
+$frontend_login_url   = add_query_arg( 'redirect_to', get_permalink( $comment_post_id ), lerm_get_frontend_auth_page_url( 'login' ) );
+$cravatar_tip_message = sprintf(
 	/* translators: %s: Cravatar URL */
 	__( 'You can update your profile picture on <a href="%s" target="_blank" rel="noopener noreferrer">Cravatar</a>.', 'lerm' ),
 	'https://cravatar.cn'
@@ -64,6 +64,7 @@ $args = array(
 		'%1$s<cite class="fn"><a href="%2$s" aria-label="%3$s" class="px-2">%4$s</a></cite><a href="%5$s">%6$s</a>',
 		get_avatar( get_current_user_id(), $comment_form_avatar ),
 		esc_url( $frontend_account_url ),
+		/* translators: %s: User name */
 		esc_html( sprintf( __( 'Logged in as %1$s. Edit your profile.', 'lerm' ), $commenter_identity ) ),
 		$commenter_identity,
 		wp_logout_url( get_permalink( $comment_post_id ) ),
@@ -87,7 +88,7 @@ $args = array(
 ?>
 
 <div id="comments" class="comments">
-	<?php if ( comments_open() || pings_open() ) : ?>
+	<?php if ( ( comments_open() || pings_open() ) && $template_options['comments_enable'] ) : ?>
 		<?php comment_form( $args ); ?>
 	<?php endif; ?>
 

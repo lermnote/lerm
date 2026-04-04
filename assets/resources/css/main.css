@@ -2131,3 +2131,16 @@ a[id="cancel-comment-reply-link"]:hover {
   line-height: 1;
   padding: 0.25rem 0.5rem;
 }
+.loading-animate {
+  visibility: hidden;
+}
+
+.loading-animate.animate__animated {
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-animate {
+    visibility: visible;
+  }
+}

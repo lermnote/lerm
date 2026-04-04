@@ -23,7 +23,7 @@ function lerm_get_layout_options(): array {
 		array(
 			'global_layout'   => 'layout-2c-r',
 			'layout_style'    => '',
-			'loading_animate' => false,
+			'loading_animate' => true,
 		)
 	);
 }
@@ -77,7 +77,7 @@ add_filter( 'body_class', 'lerm_body_classes' );
  * @return string[] Modified classes.
  */
 function lerm_post_class( array $classes ): array {
-	$layout_options   = lerm_get_layout_options();
+	$layout_options  = lerm_get_layout_options();
 	$loading_animate = ! empty( $layout_options['loading_animate'] );
 
 	if ( is_singular() ) {

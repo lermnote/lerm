@@ -17,7 +17,7 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
 /* 2. Animate.css — npm 管理 */
-@import 'animate.css';
+@import 'animate.css/animate.css';
 
 /* 3. Glightbox — npm 管理 */
 @import 'glightbox/dist/css/glightbox.min.css';

@@ -24,7 +24,7 @@ $btn_url     = ! empty( $template_options['404_button_url'] )
 $show_search = ! isset( $template_options['404_show_search'] ) || ! empty( $template_options['404_show_search'] );
 
 // Custom illustration
-$custom_img_id  = $template_options['404_image']['id'] ?? 0;
+$custom_img_id  = $template_options['404_image_id'] ?? 0;
 $custom_img_url = $custom_img_id ? wp_get_attachment_image_url( (int) $custom_img_id, 'large' ) : '';
 $default_img    = LERM_URI . 'assets/img/notfound.gif';
 $img_url        = $custom_img_url ?: $default_img;
