@@ -29,5 +29,5 @@ $input_id         = wp_unique_id( 'search-form-input-' );
 	<div class="invalid-feedback">
 		<?php esc_html_e( 'Please enter a search keyword.', 'lerm' ); ?>
 	</div>
-	<div class="js-live-search-results list-group position-absolute start-0 top-100 w-100 shadow-sm mt-2 d-none" aria-live="polite"></div>
+	<div class="js-live-search-results list-group position-absolute start-0 top-100 w-100 shadow-sm mt-2 d-none" aria-live="polite" style="z-index:1060;max-height:420px;overflow-y:auto;background:white"></div>
 </form>

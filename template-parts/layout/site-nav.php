@@ -60,7 +60,7 @@ $social_open_new_tab = ! isset( $template_options['social_open_new_tab'] ) || ! 
 					<div class="modal-header">
 						<h1 class="modal-title fs-5" id="searchModalLabel"><?php esc_html_e( 'Search whole site', 'lerm' ); ?></h1>
 					</div>
-					<div class="modal-body">
+					<div class="modal-body" style="overflow:visible">
 						<?php get_search_form(); ?>
 					</div>
 					<div class="d-flex justify-content-center p-3">

@@ -177,7 +177,6 @@ if ( ! empty( $options ) ) {
 		'ladding_animate'           => (bool) ( $options['ladding_animate'] ?? false ),
 		'post_copyright_enable'     => (bool) ( $options['post_copyright_enable'] ?? false ),
 		'post_copyright_text'       => (string) ( $options['post_copyright_text'] ?? '' ),
-		'search_results_per_page'   => max( 1, (int) ( $options['search_results_per_page'] ?? 10 ) ),
 		'search_placeholder'        => (string) ( $options['search_placeholder'] ?? '' ),
 		'share_position'            => (string) ( $options['share_position'] ?? 'bottom' ),
 		'comments_enable'           => (bool) ( $options['comments_enable'] ?? false ),

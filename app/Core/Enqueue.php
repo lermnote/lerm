@@ -151,7 +151,7 @@ class Enqueue {
 					'darkModeToggle'          => self::$args['dark_mode_toggle_position'],
 					'qqChatEnable'            => self::$args['qq_chat_enable'],
 					'qqChatNumber'            => self::$args['qq_chat_number'],
-					'search_results_per_page' => apply_filters( 'lerm_search_results_per_page', 10 ),
+					'search_results_per_page' => self::$args['search_results_per_page'],
 					// ── i18n ─────────────────────────────────────────────────
 					'i18n'                    => array(
 						'like'                  => __( 'Like', 'lerm' ),
@@ -175,6 +175,9 @@ class Enqueue {
 						'hide'                  => __( 'Hide', 'lerm' ),
 						'show_password'         => __( 'Show password', 'lerm' ),
 						'hide_password'         => __( 'Hide password', 'lerm' ),
+						'search_no_results'     => __( 'No results found.', 'lerm' ),
+						'search_loading'        => __( 'Searching…', 'lerm' ),
+						'search_view_all'       => __( 'View all results', 'lerm' ),
 					),
 				)
 			)
