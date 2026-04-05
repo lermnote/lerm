@@ -28,7 +28,11 @@
 当前主题已经作为第一个真实使用方接入，但主题侧只保留“接入定义”，不再在框架里额外挂一层 repository 和 page adapter：
 
 - `app/OptionsFramework/Integrations/LermTheme/OptionsPageDefinition.php`
-  - 提供当前主题的完整 `definition()` 定义
+  - 现在只保留轻量加载器、choices helper 和默认值 helper
+- `app/OptionsFramework/Integrations/LermTheme/config/page.php`
+  - 页面级元信息配置
+- `app/OptionsFramework/Integrations/LermTheme/config/sections/*.php`
+  - 按 section 拆开的可编辑配置文件
 - `functions.php`
   - `lerm_options()` 直接通过框架的 `OptionStore` 读取 `lerm_theme_options`
 - `app/bootstrap.php`

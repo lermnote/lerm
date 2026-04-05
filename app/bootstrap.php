@@ -84,20 +84,43 @@ if ( ! empty( $options ) ) {
 	);
 
 	$seo_options = array(
-		'baidu_submit' => $options['baidu_submit'] ?? '',
-		'submit_url'   => $options['submit_url'] ?? '',
-		'submit_token' => $options['submit_token'] ?? '',
-		'separator'    => $options['title_sep'] ?? '',
-		'html_slug'    => $options['html_slug'] ?? '',
-		'keywords'     => array(),
-		'description'  => '',
+		'baidu_submit'         => $options['baidu_submit'] ?? '',
+		'submit_url'           => $options['submit_url'] ?? '',
+		'submit_token'         => $options['submit_token'] ?? '',
+		'separator'            => $options['title_sep'] ?? '',
+		'html_slug'            => $options['html_slug'] ?? '',
+		'keywords'             => array_values(
+			array_filter(
+				array_map(
+					'trim',
+					explode( ',', (string) ( $options['keywords'] ?? '' ) )
+				)
+			)
+		),
+		'description'          => (string) ( $options['seo_description'] ?? '' ),
+		'title_structure'      => (array) ( $options['title_structure'] ?? array() ),
+		'post_title_structure' => (array) ( $options['post_title_structure'] ?? array() ),
+		'page_title_structure' => (array) ( $options['page_title_structure'] ?? array() ),
 	);
 
 	$sitemap_options = array(
-		'sitemap_enable'     => (bool) ( $options['sitemap_enable'] ?? false ),
-		'exclude_post_types' => (array) ( $options['exclude_post_types'] ?? array() ),
-		'exclude_page'       => (array) ( $options['exclude_post'] ?? array() ),
-		'exclude_post'       => (array) ( $options['exclude_page'] ?? array() ),
+		'sitemap_enable' => ! array_key_exists( 'sitemap_enable', $options ) ? true : (bool) $options['sitemap_enable'],
+		'post_type'      => array_values(
+			array_intersect(
+				(array) ( $options['exclude_post_types'] ?? array() ),
+				array( 'page', 'post', 'users' )
+			)
+		),
+		'taxonomy'       => array_values(
+			array_intersect(
+				(array) ( $options['exclude_post_types'] ?? array() ),
+				array( 'category', 'post_tag', 'format' )
+			)
+		),
+		'page_exclude'   => (array) ( $options['exclude_page'] ?? array() ),
+		'post_exclude'   => (array) ( $options['exclude_post'] ?? array() ),
+		'exclude_categories' => (array) ( $options['exclude_categories'] ?? array() ),
+		'exclude_tags'       => (array) ( $options['exclude_tags'] ?? array() ),
 	);
 
 	$custom_options = array(
@@ -135,6 +158,7 @@ if ( ! empty( $options ) ) {
 	);
 
 	$template_options = array(
+		'footer_menus'              => (int) ( $options['footer_menus'] ?? 0 ),
 		'header_bg_color'           => (string) ( $options['header_bg_color'] ?? '#fff' ),
 		'slide_position'            => (string) ( $options['slide_position'] ?? '' ),
 		'slide_enable'              => (bool) ( $options['slide_enable'] ?? false ),
@@ -198,12 +222,27 @@ if ( ! empty( $options ) ) {
 		'comment_avatar_size'       => max( 24, (int) ( $options['comment_avatar_size'] ?? 48 ) ),
 		'comment_show_cravatar_tip' => ! isset( $options['comment_show_cravatar_tip'] ) || ! empty( $options['comment_show_cravatar_tip'] ),
 		'comment_placeholder'       => (string) ( $options['comment_placeholder'] ?? __( 'Leave a comment...', 'lerm' ) ),
+		'social_weibo'              => (string) ( $options['social_weibo'] ?? '' ),
+		'social_wechat'             => (string) ( $options['social_wechat'] ?? '' ),
+		'social_qq'                 => (string) ( $options['social_qq'] ?? '' ),
+		'social_bilibili'           => (string) ( $options['social_bilibili'] ?? '' ),
+		'social_zhihu'              => (string) ( $options['social_zhihu'] ?? '' ),
+		'social_douban'             => (string) ( $options['social_douban'] ?? '' ),
+		'social_github'             => (string) ( $options['social_github'] ?? '' ),
+		'social_twitter'            => (string) ( $options['social_twitter'] ?? '' ),
+		'social_linkedin'           => (string) ( $options['social_linkedin'] ?? '' ),
+		'social_instagram'          => (string) ( $options['social_instagram'] ?? '' ),
+		'social_youtube'            => (string) ( $options['social_youtube'] ?? '' ),
+		'social_email'              => (string) ( $options['social_email'] ?? '' ),
+		'social_rss'                => ! isset( $options['social_rss'] ) || ! empty( $options['social_rss'] ),
+		'social_profiles_position'  => (array) ( $options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) ),
+		'social_open_new_tab'       => ! isset( $options['social_open_new_tab'] ) || ! empty( $options['social_open_new_tab'] ),
 		'404_title'                 => (string) ( $options['404_title'] ?? '' ),
 		'404_message'               => (string) ( $options['404_message'] ?? '' ),
 		'404_button_text'           => (string) ( $options['404_button_text'] ?? '' ),
 		'404_button_url'            => (string) ( $options['404_button_url'] ?? '' ),
 		'404_image_id'              => (string) ( $options['404_image']['id'] ?? '' ),
-		'404_show_search'           => (bool) ( $options['404_show_search'] ?? false ),
+		'404_show_search'           => ! isset( $options['404_show_search'] ) || ! empty( $options['404_show_search'] ),
 	);
 }
 if ( is_admin() ) {
@@ -260,7 +299,7 @@ if ( ! empty( $optimize_options ) ) {
 	Optimizer::instance( $optimize_options );
 }
 
-//SeoManager::instance( array_merge( $seo_options, $sitemap_options ) );
+SeoManager::instance( array_merge( $seo_options, $sitemap_options ) );
 
 // 自定义样式/Logo — 有配置才启用
 if ( ! empty( $custom_options ) ) {
@@ -330,6 +369,59 @@ if ( ! empty( $options['enable_cdn'] ) && ! empty( $options['off_new_url'] ) ) {
 }
 if ( ! empty( $options['lazyload'] ) ) {
 	Lazyload::instance();
+}
+
+if ( ! empty( $options['register_sidebars'] ) ) {
+	add_action(
+		'widgets_init',
+		static function () use ( $options ) {
+			foreach ( (array) $options['register_sidebars'] as $sidebar ) {
+				if ( ! is_array( $sidebar ) ) {
+					continue;
+				}
+
+				$title = trim( (string) ( $sidebar['sidebar_title'] ?? '' ) );
+
+				if ( '' === $title ) {
+					continue;
+				}
+
+				$sidebar_id = sanitize_title( $title ) . '-sidebar';
+
+				register_sidebar(
+					array(
+						'name'          => $title,
+						'id'            => $sidebar_id,
+						'description'   => sprintf( __( 'Custom sidebar: %s', 'lerm' ), $title ),
+						'before_widget' => '<section id="%1$s" class="card widget mb-3 %2$s loading-animate animate__fadeIn">',
+						'after_widget'  => '</section>',
+						'before_title'  => '<h4 class="widget-title card-header border-bottom-0"><span class="wrap d-inline-block fa">',
+						'after_title'   => '</span></h4>',
+					)
+				);
+			}
+		},
+		20
+	);
+}
+
+if ( ! empty( $options['search_filter'] ) || ! empty( $options['cat_exclude'] ) ) {
+	add_action(
+		'pre_get_posts',
+		static function ( \WP_Query $query ) use ( $options ) {
+			if ( is_admin() || ! $query->is_main_query() ) {
+				return;
+			}
+
+			if ( ! empty( $options['search_filter'] ) && $query->is_search() ) {
+				$query->set( 'post_type', array( 'post' ) );
+			}
+
+			if ( ! empty( $options['cat_exclude'] ) && $query->is_home() ) {
+				$query->set( 'category__not_in', array_map( 'absint', (array) $options['cat_exclude'] ) );
+			}
+		}
+	);
 }
 // ---------------------------------------------------------------------------
 // 6. 前台登录模块（可选）

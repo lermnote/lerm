@@ -98,7 +98,7 @@ final class FieldTypeRegistry {
 	 * Register the MVP built-in field set.
 	 */
 	private function register_defaults(): void {
-		foreach ( array( 'button_set', 'checkbox_list', 'code_editor', 'color', 'gallery', 'media', 'number', 'radio', 'select', 'sorter', 'switcher', 'text', 'textarea', 'url', 'wp_editor' ) as $type ) {
+		foreach ( array( 'backup_tools', 'button_set', 'checkbox_list', 'code_editor', 'color', 'fieldset', 'gallery', 'group', 'media', 'number', 'radio', 'select', 'sorter', 'switcher', 'text', 'textarea', 'url', 'wp_editor' ) as $type ) {
 			$this->register( $type );
 		}
 	}

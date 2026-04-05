@@ -47,6 +47,8 @@ final class OptionsPage {
 		add_action( 'admin_post_' . $this->save_action(), array( $this, 'handle_save' ) );
 		add_action( 'wp_ajax_' . $this->ajax_save_action(), array( $this, 'handle_ajax_save' ) );
 		add_action( 'wp_ajax_' . $this->ajax_reset_action(), array( $this, 'handle_ajax_reset' ) );
+		add_action( 'wp_ajax_' . $this->ajax_export_action(), array( $this, 'handle_ajax_export' ) );
+		add_action( 'wp_ajax_' . $this->ajax_import_action(), array( $this, 'handle_ajax_import' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
@@ -168,6 +170,86 @@ final class OptionsPage {
 	}
 
 	/**
+	 * Export all settings as JSON for backup workflows.
+	 */
+	public function handle_ajax_export(): void {
+		if ( ! current_user_can( $this->capability() ) ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
+				403
+			);
+		}
+
+		$tab = $this->posted_tab();
+		check_ajax_referer( $this->nonce_action( $tab ) );
+
+		$json = wp_json_encode( $this->store->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+
+		if ( ! is_string( $json ) || '' === $json ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'Unable to export the current settings snapshot.', 'lerm' ) ),
+				500
+			);
+		}
+
+		wp_send_json_success(
+			array(
+				'message' => esc_html__( 'Current settings snapshot generated.', 'lerm' ),
+				'json'    => $json,
+			)
+		);
+	}
+
+	/**
+	 * Import a full JSON payload from the backup tools UI.
+	 */
+	public function handle_ajax_import(): void {
+		if ( ! current_user_can( $this->capability() ) ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
+				403
+			);
+		}
+
+		$tab = $this->posted_tab();
+		check_ajax_referer( $this->nonce_action( $tab ) );
+
+		$json = isset( $_POST['backup_json'] ) && is_scalar( $_POST['backup_json'] )
+			? trim( (string) wp_unslash( $_POST['backup_json'] ) )
+			: '';
+
+		if ( '' === $json ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'Paste a JSON snapshot before importing.', 'lerm' ) ),
+				400
+			);
+		}
+
+		$decoded = json_decode( $json, true );
+
+		if ( ! is_array( $decoded ) ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'The backup JSON is invalid.', 'lerm' ) ),
+				400
+			);
+		}
+
+		if ( ! $this->store->import_all( $decoded ) ) {
+			wp_send_json_error(
+				array( 'message' => esc_html__( 'Unable to import the provided settings JSON.', 'lerm' ) ),
+				500
+			);
+		}
+
+		wp_send_json_success(
+			array(
+				'message' => esc_html__( 'Settings imported successfully.', 'lerm' ),
+				'values'  => $this->store->section_values( $tab ),
+			)
+		);
+	}
+
+	/**
 	 * Enqueue page assets.
 	 */
 	public function enqueue_assets( string $hook_suffix ): void {
@@ -205,6 +287,8 @@ final class OptionsPage {
 				'ajaxUrl'             => admin_url( 'admin-ajax.php' ),
 				'saveAction'          => $this->ajax_save_action(),
 				'resetAction'         => $this->ajax_reset_action(),
+				'exportAction'        => $this->ajax_export_action(),
+				'importAction'        => $this->ajax_import_action(),
 				'codeEditor'          => $code_editor_settings,
 				'selectMedia'         => __( 'Choose image', 'lerm' ),
 				'useMedia'            => __( 'Use this image', 'lerm' ),
@@ -231,6 +315,14 @@ final class OptionsPage {
 				'statusResetting'     => __( 'Resetting...', 'lerm' ),
 				'statusSaved'         => __( 'Saved', 'lerm' ),
 				'statusError'         => __( 'Error', 'lerm' ),
+				'groupAdd'            => __( 'Add item', 'lerm' ),
+				'groupRemove'         => __( 'Remove', 'lerm' ),
+				'groupEmpty'          => __( 'No items added yet.', 'lerm' ),
+				'confirmRemoveItem'   => __( 'Remove this item?', 'lerm' ),
+				'exportSuccess'       => __( 'Current settings snapshot generated.', 'lerm' ),
+				'importSuccess'       => __( 'Settings imported successfully.', 'lerm' ),
+				'importError'         => __( 'Unable to import the provided settings JSON.', 'lerm' ),
+				'confirmImport'       => __( 'Importing will overwrite the current saved settings. Continue?', 'lerm' ),
 			)
 		);
 	}
@@ -392,12 +484,24 @@ final class OptionsPage {
 			call_user_func( $custom_render, $field, $field_value, $field_name, $this );
 		} else {
 			switch ( $field_type ) {
+				case 'backup_tools':
+					$this->render_backup_tools_field( $field );
+					break;
+
+				case 'fieldset':
+					$this->render_fieldset_field( $field, $field_value, $field_name );
+					break;
+
+				case 'group':
+					$this->render_group_field( $field, $field_value, $field_name );
+					break;
+
 				case 'media':
-					$this->render_media_field( $field, $field_value );
+					$this->render_media_field( $field, $field_value, $field_name );
 					break;
 
 				case 'gallery':
-					$this->render_gallery_field( $field, $field_value );
+					$this->render_gallery_field( $field, $field_value, $field_name );
 					break;
 
 				case 'color':
@@ -416,16 +520,22 @@ final class OptionsPage {
 
 				case 'select':
 					$choices = PageSchema::choices( $field );
+					$multiple = ! empty( $field['multiple'] );
+					$current_values = $multiple && is_array( $field_value ) ? array_map( 'strval', $field_value ) : array();
 					printf(
-						'<select id="%1$s" name="%2$s" class="regular-text" data-lerm-controller="1">',
+						'<select id="%1$s" name="%2$s" class="regular-text" data-lerm-controller="1" %3$s %4$s>',
 						esc_attr( $field_id ),
-						esc_attr( $field_name )
+						esc_attr( $multiple ? $field_name . '[]' : $field_name ),
+						$multiple ? 'multiple="multiple"' : '',
+						$multiple ? 'size="' . esc_attr( (string) min( max( count( $choices ), 4 ), 10 ) ) . '"' : ''
 					);
 					foreach ( $choices as $value => $label ) {
 						printf(
 							'<option value="%1$s" %2$s>%3$s</option>',
 							esc_attr( $value ),
-							selected( (string) $field_value, (string) $value, false ),
+							$multiple
+								? selected( in_array( (string) $value, $current_values, true ), true, false )
+								: selected( (string) $field_value, (string) $value, false ),
 							esc_html( $label )
 						);
 					}
@@ -519,7 +629,7 @@ final class OptionsPage {
 				default:
 					printf(
 						'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" %5$s placeholder="%6$s">',
-						esc_attr( in_array( $field_type, array( 'url', 'text' ), true ) ? $field_type : 'text' ),
+						esc_attr( (string) ( $field['input_type'] ?? ( in_array( $field_type, array( 'url', 'text' ), true ) ? $field_type : 'text' ) ) ),
 						esc_attr( $field_id ),
 						esc_attr( $field_name ),
 						esc_attr( (string) $field_value ),
@@ -538,27 +648,298 @@ final class OptionsPage {
 	}
 
 	/**
+	 * Render backup export/import controls.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 */
+	private function render_backup_tools_field( array $field ): void {
+		$export_label = (string) ( $field['export_label'] ?? __( 'Export current settings', 'lerm' ) );
+		$import_label = (string) ( $field['import_label'] ?? __( 'Import settings JSON', 'lerm' ) );
+		$placeholder  = (string) ( $field['placeholder'] ?? __( '{ "example": "Paste a backup snapshot here" }', 'lerm' ) );
+
+		echo '<div class="lerm-backup-tools">';
+		echo '<div class="lerm-backup-tools__block">';
+		echo '<div class="lerm-backup-tools__header">';
+		echo '<strong>' . esc_html( $export_label ) . '</strong>';
+		echo '<button type="button" class="button button-secondary" data-lerm-backup-export>' . esc_html__( 'Generate snapshot', 'lerm' ) . '</button>';
+		echo '</div>';
+		echo '<textarea class="large-text code lerm-backup-tools__export" rows="10" readonly data-lerm-backup-export-output></textarea>';
+		echo '</div>';
+		echo '<div class="lerm-backup-tools__block">';
+		echo '<div class="lerm-backup-tools__header">';
+		echo '<strong>' . esc_html( $import_label ) . '</strong>';
+		echo '<button type="button" class="button button-primary" data-lerm-backup-import>' . esc_html__( 'Import snapshot', 'lerm' ) . '</button>';
+		echo '</div>';
+		echo '<textarea class="large-text code lerm-backup-tools__import" rows="10" data-lerm-backup-import-input placeholder="' . esc_attr( $placeholder ) . '"></textarea>';
+		echo '</div>';
+		echo '</div>';
+	}
+
+	/**
+	 * Render fieldsets as a compact grid of nested controls.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Field value.
+	 */
+	private function render_fieldset_field( array $field, $value, string $field_name ): void {
+		$field_id = (string) $field['id'];
+		$values   = is_array( $value ) ? $value : array();
+		$fields   = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
+
+		echo '<div class="lerm-fieldset" data-target="' . esc_attr( $field_id ) . '">';
+		foreach ( $fields as $child ) {
+			if ( ! is_array( $child ) || ! isset( $child['id'] ) ) {
+				continue;
+			}
+
+			$child_id    = (string) $child['id'];
+			$child_name  = $field_name . '[' . $child_id . ']';
+			$child_value = $values[ $child_id ] ?? ( $child['default'] ?? '' );
+
+			echo '<div class="lerm-fieldset__item" data-subfield-id="' . esc_attr( $child_id ) . '" data-field-type="' . esc_attr( sanitize_key( (string) ( $child['type'] ?? 'text' ) ) ) . '">';
+			echo '<label class="lerm-fieldset__label" for="' . esc_attr( $field_id . '__' . $child_id ) . '">' . esc_html( (string) ( $child['label'] ?? $child_id ) ) . '</label>';
+			$this->render_nested_field( $child, $child_value, $child_name, $field_id . '__' . $child_id );
+
+			if ( ! empty( $child['description'] ) ) {
+				echo '<p class="description">' . esc_html( (string) $child['description'] ) . '</p>';
+			}
+
+			echo '</div>';
+		}
+		echo '</div>';
+	}
+
+	/**
+	 * Render repeatable groups.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Field value.
+	 */
+	private function render_group_field( array $field, $value, string $field_name ): void {
+		$field_id    = (string) $field['id'];
+		$items       = is_array( $value ) ? array_values( $value ) : array();
+		$button_text = (string) ( $field['button_text'] ?? __( 'Add item', 'lerm' ) );
+
+		echo '<div class="lerm-group" data-target="' . esc_attr( $field_id ) . '">';
+		echo '<div class="lerm-group__toolbar">';
+		echo '<button type="button" class="button button-secondary" data-lerm-group-add>' . esc_html( $button_text ) . '</button>';
+		echo '</div>';
+		echo '<div class="lerm-group__empty" ' . ( ! empty( $items ) ? 'hidden' : '' ) . '>' . esc_html__( 'No items added yet.', 'lerm' ) . '</div>';
+		echo '<div class="lerm-group-list" data-lerm-group-list>';
+
+		foreach ( $items as $index => $item ) {
+			echo $this->group_item_markup( $field, $field_name, is_array( $item ) ? $item : array(), (string) $index ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+
+		echo '</div>';
+		echo '<script type="text/html" class="lerm-group-template">' . $this->group_item_markup( $field, $field_name, array(), '__INDEX__' ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '</div>';
+	}
+
+	/**
+	 * Build one repeatable group item.
+	 *
+	 * @param array<string, mixed> $field Group definition.
+	 * @param array<string, mixed> $item  Current item values.
+	 */
+	private function group_item_markup( array $field, string $field_name, array $item, string $index ): string {
+		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
+
+		ob_start();
+		?>
+		<div class="lerm-group-item" data-lerm-group-item data-index="<?php echo esc_attr( $index ); ?>">
+			<div class="lerm-group-item__header">
+				<span class="lerm-sorter-handle" aria-hidden="true">&#8645;</span>
+				<strong class="lerm-group-item__title"><?php echo esc_html( sprintf( __( 'Item %s', 'lerm' ), is_numeric( $index ) ? (string) ( (int) $index + 1 ) : '#' ) ); ?></strong>
+				<button type="button" class="button button-secondary button-link-delete" data-lerm-group-remove><?php esc_html_e( 'Remove', 'lerm' ); ?></button>
+			</div>
+			<div class="lerm-group-item__body">
+				<?php foreach ( $fields as $child ) : ?>
+					<?php
+					if ( ! is_array( $child ) || ! isset( $child['id'] ) ) {
+						continue;
+					}
+
+					$child_id      = (string) $child['id'];
+					$current_value = $item[ $child_id ] ?? ( $child['default'] ?? '' );
+					$name          = $field_name . '[' . $index . '][' . $child_id . ']';
+					$id            = (string) $field['id'] . '__' . $index . '__' . $child_id;
+					$name_template = $field_name . '[__INDEX__][' . $child_id . ']';
+					$id_template   = (string) $field['id'] . '__' . '__INDEX__' . '__' . $child_id;
+					?>
+					<div class="lerm-group-item__field" data-subfield-id="<?php echo esc_attr( $child_id ); ?>" data-field-type="<?php echo esc_attr( sanitize_key( (string) ( $child['type'] ?? 'text' ) ) ); ?>">
+						<label class="lerm-fieldset__label" for="<?php echo esc_attr( $id ); ?>" data-for-template="<?php echo esc_attr( $id_template ); ?>"><?php echo esc_html( (string) ( $child['label'] ?? $child_id ) ); ?></label>
+						<?php $this->render_nested_field( $child, $current_value, $name, $id, $name_template, $id_template ); ?>
+						<?php if ( ! empty( $child['description'] ) ) : ?>
+							<p class="description"><?php echo esc_html( (string) $child['description'] ); ?></p>
+						<?php endif; ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render a nested sub-field for fieldsets and repeaters.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Field value.
+	 */
+	private function render_nested_field( array $field, $value, string $field_name, string $input_id, string $name_template = '', string $id_template = '' ): void {
+		$field_type = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+		$name_attr  = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
+		$id_attr    = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
+
+		switch ( $field_type ) {
+			case 'media':
+				$this->render_media_field( $field, $value, $field_name, $input_id, $name_attr, $id_attr );
+				return;
+
+			case 'gallery':
+				$this->render_gallery_field( $field, $value, $field_name, $input_id, $name_attr, $id_attr );
+				return;
+
+			case 'color':
+				printf(
+					'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text lerm-color-field"%4$s%5$s>',
+					esc_attr( $input_id ),
+					esc_attr( $field_name ),
+					esc_attr( (string) $value ),
+					$name_attr,
+					$id_attr
+				);
+				return;
+
+			case 'button_set':
+			case 'radio':
+				$choices = PageSchema::choices( $field );
+				$current = is_scalar( $value ) ? (string) $value : '';
+				$class   = 'button_set' === $field_type ? 'lerm-button-set' : 'lerm-radio-list';
+
+				echo '<fieldset class="' . esc_attr( $class ) . '">';
+				foreach ( $choices as $choice_value => $choice_label ) {
+					printf(
+						'<label><input type="radio" name="%1$s" value="%2$s" %3$s%4$s> <span>%5$s</span></label>',
+						esc_attr( $field_name ),
+						esc_attr( $choice_value ),
+						checked( $current, (string) $choice_value, false ),
+						$name_attr,
+						esc_html( $choice_label )
+					);
+				}
+				echo '</fieldset>';
+				return;
+
+			case 'switcher':
+				printf(
+					'<input type="hidden" name="%1$s" value="0"%4$s><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s%4$s%5$s><span>%6$s</span></label>',
+					esc_attr( $field_name ),
+					esc_attr( $input_id ),
+					checked( ! empty( $value ), true, false ),
+					$name_attr,
+					$id_attr,
+					esc_html__( 'Enabled', 'lerm' )
+				);
+				return;
+
+			case 'select':
+				$choices  = PageSchema::choices( $field );
+				$multiple = ! empty( $field['multiple'] );
+				$current  = $multiple && is_array( $value ) ? array_map( 'strval', $value ) : array();
+				printf(
+					'<select id="%1$s" name="%2$s" class="regular-text"%3$s%4$s%5$s%6$s>',
+					esc_attr( $input_id ),
+					esc_attr( $multiple ? $field_name . '[]' : $field_name ),
+					$multiple ? ' multiple="multiple"' : '',
+					$multiple ? ' size="' . esc_attr( (string) min( max( count( $choices ), 4 ), 10 ) ) . '"' : '',
+					$name_attr,
+					$id_attr
+				);
+				foreach ( $choices as $choice_value => $choice_label ) {
+					printf(
+						'<option value="%1$s" %2$s>%3$s</option>',
+						esc_attr( $choice_value ),
+						$multiple
+							? selected( in_array( (string) $choice_value, $current, true ), true, false )
+							: selected( (string) $value, (string) $choice_value, false ),
+						esc_html( $choice_label )
+					);
+				}
+				echo '</select>';
+				return;
+
+			case 'textarea':
+				printf(
+					'<textarea id="%1$s" name="%2$s" class="large-text" rows="%3$s" placeholder="%4$s"%5$s%6$s>%7$s</textarea>',
+					esc_attr( $input_id ),
+					esc_attr( $field_name ),
+					esc_attr( (string) ( $field['rows'] ?? 4 ) ),
+					esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
+					$name_attr,
+					$id_attr,
+					esc_textarea( (string) $value )
+				);
+				return;
+
+			case 'number':
+				printf(
+					'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text" min="%4$s" max="%5$s" step="%6$s"%7$s%8$s>',
+					esc_attr( $input_id ),
+					esc_attr( $field_name ),
+					esc_attr( (string) $value ),
+					esc_attr( (string) ( $field['min'] ?? '' ) ),
+					esc_attr( (string) ( $field['max'] ?? '' ) ),
+					esc_attr( (string) ( $field['step'] ?? 1 ) ),
+					$name_attr,
+					$id_attr
+				);
+				return;
+
+			case 'url':
+			case 'text':
+			default:
+				printf(
+					'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" placeholder="%5$s"%6$s%7$s>',
+					esc_attr( (string) ( $field['input_type'] ?? ( in_array( $field_type, array( 'url', 'text' ), true ) ? $field_type : 'text' ) ) ),
+					esc_attr( $input_id ),
+					esc_attr( $field_name ),
+					esc_attr( (string) $value ),
+					esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
+					$name_attr,
+					$id_attr
+				);
+				return;
+		}
+	}
+
+	/**
 	 * Render a media picker field.
 	 *
 	 * @param array<string, mixed> $field Field definition.
 	 * @param mixed                $value Field value.
 	 */
-	public function render_media_field( array $field, $value ): void {
+	public function render_media_field( array $field, $value, ?string $field_name = null, ?string $target = null, string $name_attr = '', string $id_attr = '' ): void {
 		$field_id      = (string) $field['id'];
-		$name_prefix   = $this->option_name() . '[' . $field_id . ']';
+		$name_prefix   = $field_name ?? ( $this->option_name() . '[' . $field_id . ']' );
+		$target        = $target ?? $field_id;
 		$attachment_id = is_array( $value ) ? absint( $value['id'] ?? 0 ) : 0;
 		$image_url     = $attachment_id > 0 ? wp_get_attachment_image_url( $attachment_id, 'medium' ) : '';
 		$button_text   = (string) ( $field['button_text'] ?? __( 'Choose image', 'lerm' ) );
 
 		printf(
-			'<div class="lerm-media-field" data-target="%1$s"><input type="hidden" name="%2$s[id]" value="%3$s"><div class="lerm-media-preview">%4$s</div><div class="lerm-media-actions"><button type="button" class="button lerm-media-select">%5$s</button><button type="button" class="button button-secondary button-link-delete lerm-media-remove" %6$s>%7$s</button></div></div>',
-			esc_attr( $field_id ),
+			'<div class="lerm-media-field" data-target="%1$s"><input type="hidden" name="%2$s[id]" value="%3$s"%8$s%9$s><div class="lerm-media-preview">%4$s</div><div class="lerm-media-actions"><button type="button" class="button lerm-media-select">%5$s</button><button type="button" class="button button-secondary button-link-delete lerm-media-remove" %6$s>%7$s</button></div></div>',
+			esc_attr( $target ),
 			esc_attr( $name_prefix ),
 			esc_attr( (string) $attachment_id ),
 			$image_url ? '<img src="' . esc_url( $image_url ) . '" alt="">' : '<span class="lerm-media-placeholder">' . esc_html__( 'No image selected.', 'lerm' ) . '</span>',
 			esc_html( $button_text ),
 			$attachment_id > 0 ? '' : 'hidden',
-			esc_html__( 'Remove', 'lerm' )
+			esc_html__( 'Remove', 'lerm' ),
+			$name_attr,
+			$id_attr
 		);
 	}
 
@@ -594,13 +975,14 @@ final class OptionsPage {
 	 * @param array<string, mixed> $field Field definition.
 	 * @param mixed                $value Field value.
 	 */
-	public function render_gallery_field( array $field, $value ): void {
+	public function render_gallery_field( array $field, $value, ?string $field_name = null, ?string $target = null, string $name_attr = '', string $id_attr = '' ): void {
 		$field_id    = (string) $field['id'];
-		$name_prefix = $this->option_name() . '[' . $field_id . ']';
+		$name_prefix = $field_name ?? ( $this->option_name() . '[' . $field_id . ']' );
+		$target      = $target ?? $field_id;
 		$ids         = is_array( $value ) ? array_values( array_filter( array_map( 'absint', $value ) ) ) : array();
 
-		echo '<div class="lerm-gallery-field" data-target="' . esc_attr( $field_id ) . '">';
-		echo '<input type="hidden" name="' . esc_attr( $name_prefix . '[ids]' ) . '" value="' . esc_attr( implode( ',', $ids ) ) . '">';
+		echo '<div class="lerm-gallery-field" data-target="' . esc_attr( $target ) . '">';
+		echo '<input type="hidden" name="' . esc_attr( $name_prefix . '[ids]' ) . '" value="' . esc_attr( implode( ',', $ids ) ) . '"' . $name_attr . $id_attr . '>';
 		echo '<div class="lerm-gallery-preview">';
 
 		if ( empty( $ids ) ) {
@@ -797,6 +1179,20 @@ final class OptionsPage {
 	 */
 	private function ajax_reset_action(): string {
 		return 'lerm_options_framework_ajax_reset_' . $this->page_slug();
+	}
+
+	/**
+	 * AJAX export action.
+	 */
+	private function ajax_export_action(): string {
+		return 'lerm_options_framework_ajax_export_' . $this->page_slug();
+	}
+
+	/**
+	 * AJAX import action.
+	 */
+	private function ajax_import_action(): string {
+		return 'lerm_options_framework_ajax_import_' . $this->page_slug();
 	}
 
 	/**

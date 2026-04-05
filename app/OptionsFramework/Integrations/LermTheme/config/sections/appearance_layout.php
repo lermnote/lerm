@@ -1,0 +1,117 @@
+<?php // phpcs:disable WordPress.Files.FileName
+
+declare( strict_types=1 );
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+return array(
+	'title'       => __( 'Appearance / Layout', 'lerm' ),
+	'description' => __( 'Container widths, layout mode, and sidebar proportions that were previously managed in the CSF Layout tab.', 'lerm' ),
+	'fields'      => array(
+		array(
+			'id'          => 'layout_style',
+			'type'        => 'button_set',
+			'label'       => __( 'Container style', 'lerm' ),
+			'description' => __( 'Wide uses the full browser width, Boxed centers the whole page, Separate keeps content and sidebar visually detached.', 'lerm' ),
+			'group'       => __( 'Container style', 'lerm' ),
+			'default'     => 'separate-layout',
+			'choices'     => array(
+				'wide-layout'     => __( 'Wide', 'lerm' ),
+				'boxed-layout'    => __( 'Boxed', 'lerm' ),
+				'separate-layout' => __( 'Separate', 'lerm' ),
+			),
+		),
+		array(
+			'id'          => 'site_width',
+			'type'        => 'number',
+			'label'       => __( 'Container width (px)', 'lerm' ),
+			'description' => __( 'Maximum width of the main content container outside boxed mode.', 'lerm' ),
+			'group'       => __( 'Container style', 'lerm' ),
+			'default'     => 1140,
+			'min'         => 600,
+			'max'         => 4096,
+			'step'        => 1,
+		),
+		array(
+			'id'               => 'boxed_width',
+			'type'             => 'number',
+			'label'            => __( 'Box width (px)', 'lerm' ),
+			'description'      => __( 'Width of the centered page box in boxed mode.', 'lerm' ),
+			'group'            => __( 'Container style', 'lerm' ),
+			'default'          => 1140,
+			'min'              => 600,
+			'max'              => 4096,
+			'step'             => 1,
+			'dependency_field' => 'layout_style',
+			'dependency_value' => 'boxed-layout',
+		),
+		array(
+			'id'               => 'outside_bg_color',
+			'type'             => 'color',
+			'label'            => __( 'Box outer background', 'lerm' ),
+			'description'      => __( 'Background colour outside the main box in boxed mode.', 'lerm' ),
+			'group'            => __( 'Container style', 'lerm' ),
+			'default'          => '#ebebeb',
+			'dependency_field' => 'layout_style',
+			'dependency_value' => 'boxed-layout',
+		),
+		array(
+			'id'               => 'inner_bg_color',
+			'type'             => 'color',
+			'label'            => __( 'Box inner background', 'lerm' ),
+			'description'      => __( 'Background colour of the centered page box in boxed mode.', 'lerm' ),
+			'group'            => __( 'Container style', 'lerm' ),
+			'default'          => '#ffffff',
+			'dependency_field' => 'layout_style',
+			'dependency_value' => 'boxed-layout',
+		),
+		array(
+			'id'          => 'global_layout',
+			'type'        => 'button_set',
+			'label'       => __( 'Default sidebar position', 'lerm' ),
+			'description' => __( 'Full-width, narrow full-width, sidebar on the left, or sidebar on the right.', 'lerm' ),
+			'group'       => __( 'Sidebar layout', 'lerm' ),
+			'default'     => 'layout-2c-r',
+			'choices'     => array(
+				'layout-1c'        => __( 'Full width', 'lerm' ),
+				'layout-1c-narrow' => __( 'Narrow full width', 'lerm' ),
+				'layout-2c-l'      => __( 'Sidebar left', 'lerm' ),
+				'layout-2c-r'      => __( 'Sidebar right', 'lerm' ),
+			),
+		),
+		array(
+			'id'          => 'affix',
+			'type'        => 'switcher',
+			'label'       => __( 'Sticky sidebar', 'lerm' ),
+			'description' => __( 'Keeps the sidebar visible while visitors scroll past long content.', 'lerm' ),
+			'group'       => __( 'Sidebar layout', 'lerm' ),
+			'default'     => false,
+		),
+		array(
+			'id'          => 'content_width',
+			'type'        => 'number',
+			'label'       => __( 'Content column width (%)', 'lerm' ),
+			'description' => __( 'Width of the main content column when a sidebar is present.', 'lerm' ),
+			'group'       => __( 'Sidebar layout', 'lerm' ),
+			'default'     => 66.6666666667,
+			'cast'        => 'float',
+			'min'         => 10,
+			'max'         => 90,
+			'step'        => 0.01,
+		),
+		array(
+			'id'          => 'sidebar_width',
+			'type'        => 'number',
+			'label'       => __( 'Sidebar column width (%)', 'lerm' ),
+			'description' => __( 'Width of the sidebar column when the page uses a two-column layout.', 'lerm' ),
+			'group'       => __( 'Sidebar layout', 'lerm' ),
+			'default'     => 33.3333333333,
+			'cast'        => 'float',
+			'min'         => 10,
+			'max'         => 90,
+			'step'        => 0.01,
+		),
+	),
+);

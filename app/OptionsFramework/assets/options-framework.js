@@ -189,6 +189,86 @@
 		});
 	};
 
+	const replaceIndexToken = function (template, index) {
+		return String(template || '').replace(/__INDEX__/g, String(index));
+	};
+
+	const refreshGroupEmptyState = function (group) {
+		const hasItems = group.find('[data-lerm-group-item]').length > 0;
+		group.find('.lerm-group__empty').prop('hidden', hasItems);
+	};
+
+	const renumberGroupItems = function (group) {
+		group.find('[data-lerm-group-item]').each(function (index) {
+			const item = $(this);
+			item.attr('data-index', index);
+			item.find('.lerm-group-item__title').text('Item ' + (index + 1));
+
+			item.find('[data-name-template]').each(function () {
+				const input = $(this);
+				input.attr('name', replaceIndexToken(input.data('name-template'), index));
+			});
+
+			item.find('[data-id-template]').each(function () {
+				const input = $(this);
+				input.attr('id', replaceIndexToken(input.data('id-template'), index));
+			});
+
+			item.find('[data-for-template]').each(function () {
+				const label = $(this);
+				label.attr('for', replaceIndexToken(label.data('for-template'), index));
+			});
+		});
+
+		refreshGroupEmptyState(group);
+	};
+
+	const initGroups = function (scope) {
+		scope.find('.lerm-group').each(function () {
+			const group = $(this);
+			const list = group.find('[data-lerm-group-list]');
+
+			if (group.data('lerm-group-ready') !== '1') {
+				group.data('lerm-group-ready', '1');
+
+				list.sortable({
+					axis: 'y',
+					handle: '.lerm-sorter-handle',
+					placeholder: 'lerm-sorter-placeholder',
+					update: function () {
+						renumberGroupItems(group);
+						group.closest('form').trigger('sortupdate');
+					}
+				});
+
+				group.on('click', '[data-lerm-group-add]', function (event) {
+					event.preventDefault();
+					const template = group.find('.lerm-group-template').html() || '';
+					list.append(template);
+					renumberGroupItems(group);
+					initColorPickers(group);
+					initMediaFields(group);
+					initGalleryFields(group);
+					setDirty(group.closest('form'), true);
+				});
+
+				group.on('click', '[data-lerm-group-remove]', function (event) {
+					event.preventDefault();
+
+					if (!window.confirm(lermOptionsFramework.confirmRemoveItem)) {
+						return;
+					}
+
+					$(this).closest('[data-lerm-group-item]').remove();
+					renumberGroupItems(group);
+					setDirty(group.closest('form'), true);
+				});
+			}
+
+			renumberGroupItems(group);
+		});
+	};
+
 	const initCodeEditors = function (scope) {
 		if (!window.wp || !wp.codeEditor || !lermOptionsFramework.codeEditor) {
 			return;
@@ -394,6 +474,129 @@
 		});
 	};
 
+	const applyScopedFieldValue = function (scope, fieldType, value) {
+		const normalizedType = String(fieldType || 'text');
+
+		switch (normalizedType) {
+			case 'switcher':
+				scope.find('input[type="checkbox"]').first().prop('checked', !!value);
+				break;
+
+			case 'color':
+				try {
+					scope.find('.lerm-color-field').first().wpColorPicker('color', value || '');
+				} catch (error) {
+					scope.find('.lerm-color-field').first().val(value || '');
+				}
+				break;
+
+			case 'button_set':
+			case 'radio':
+				scope.find('input[type="radio"]').prop('checked', false);
+				scope.find('input[type="radio"][value="' + String(value) + '"]').prop('checked', true);
+				break;
+
+			case 'select':
+				scope.find('select').val(value);
+				break;
+
+			case 'textarea':
+				scope.find('textarea').first().val(value || '');
+				break;
+
+			case 'media': {
+				const container = scope.find('.lerm-media-field');
+				const input = container.find('input[type="hidden"]');
+				const preview = container.find('.lerm-media-preview');
+				const removeButton = container.find('.lerm-media-remove');
+				const imageUrl = value && (value.thumbnail || value.url) ? (value.thumbnail || value.url) : '';
+
+				input.val(value && value.id ? value.id : '');
+				preview.html(imageUrl ? '<img src="' + imageUrl + '" alt="">' : '<span class="lerm-media-placeholder">' + lermOptionsFramework.noMedia + '</span>');
+				removeButton.prop('hidden', !imageUrl);
+				break;
+			}
+
+			case 'gallery': {
+				const container = scope.find('.lerm-gallery-field');
+				const ids = Array.isArray(value) ? value.map(function (id) {
+					return parseInt(id, 10);
+				}).filter(Boolean) : [];
+				container.find('input[type="hidden"]').val(ids.join(','));
+				container.find('.lerm-gallery-remove').prop('hidden', ids.length === 0);
+				renderGalleryIds(container.find('.lerm-gallery-preview'), ids);
+				break;
+			}
+
+			case 'number':
+			case 'url':
+			case 'text':
+			default:
+				scope.find('input, textarea').filter(function () {
+					return this.type !== 'hidden';
+				}).first().val(value);
+				break;
+		}
+	};
+
+	const applyFieldsetValue = function (form, fieldId, value) {
+		const container = form.find('.lerm-fieldset[data-target="' + fieldId + '"]');
+
+		if (!container.length || !value || typeof value !== 'object') {
+			return;
+		}
+
+		$.each(value, function (subfieldId, subfieldValue) {
+			const scope = container.find('[data-subfield-id="' + subfieldId + '"]').first();
+
+			if (!scope.length) {
+				return;
+			}
+
+			applyScopedFieldValue(scope, scope.data('field-type'), subfieldValue);
+		});
+	};
+
+	const applyGroupValue = function (form, fieldId, value) {
+		const group = form.find('.lerm-group[data-target="' + fieldId + '"]');
+
+		if (!group.length) {
+			return;
+		}
+
+		const list = group.find('[data-lerm-group-list]');
+		const template = group.find('.lerm-group-template').html() || '';
+		const items = Array.isArray(value) ? value : [];
+
+		list.empty();
+
+		items.forEach(function (itemData) {
+			list.append(template);
+		});
+
+		renumberGroupItems(group);
+		initColorPickers(group);
+		initMediaFields(group);
+		initGalleryFields(group);
+
+		group.find('[data-lerm-group-item]').each(function (index) {
+			const item = $(this);
+			const itemData = items[index] || {};
+
+			$.each(itemData, function (subfieldId, subfieldValue) {
+				const scope = item.find('[data-subfield-id="' + subfieldId + '"]').first();
+
+				if (!scope.length) {
+					return;
+				}
+
+				applyScopedFieldValue(scope, scope.data('field-type'), subfieldValue);
+			});
+		});
+
+		refreshGroupEmptyState(group);
+	};
+
 	const applyFieldValues = function (form, values) {
 		$.each(values || {}, function (fieldId, value) {
 			const row = form.find('[data-field-id="' + fieldId + '"]');
@@ -431,6 +634,17 @@
 
 				case 'sorter':
 					applySorterValue(form, fieldId, value);
+					break;
+
+				case 'fieldset':
+					applyFieldsetValue(form, fieldId, value);
+					break;
+
+				case 'group':
+					applyGroupValue(form, fieldId, value);
+					break;
+
+				case 'backup_tools':
 					break;
 
 				case 'code_editor':
@@ -473,6 +687,59 @@
 			data: formDataForRequest(form, action, extras),
 			processData: false,
 			contentType: false
+		});
+	};
+
+	const bindBackupTools = function (form) {
+		form.on('click', '[data-lerm-backup-export]', function (event) {
+			event.preventDefault();
+			showFlash(form, '', '');
+
+			request(form, lermOptionsFramework.exportAction).done(function (response) {
+				if (!response || !response.success) {
+					const message = response && response.data && response.data.message ? response.data.message : lermOptionsFramework.saveError;
+					showFlash(form, 'error', message);
+					return;
+				}
+
+				form.find('[data-lerm-backup-export-output]').val(response.data.json || '');
+				showFlash(form, 'success', response.data.message || lermOptionsFramework.exportSuccess);
+			}).fail(function () {
+				showFlash(form, 'error', lermOptionsFramework.saveError);
+			});
+		});
+
+		form.on('click', '[data-lerm-backup-import]', function (event) {
+			event.preventDefault();
+
+			if (!window.confirm(lermOptionsFramework.confirmImport)) {
+				return;
+			}
+
+			const backupJson = String(form.find('[data-lerm-backup-import-input]').val() || '');
+			showFlash(form, '', '');
+			setBusy(form, true, lermOptionsFramework.resetting);
+			setStatus(form, 'saving', lermOptionsFramework.statusSaving);
+
+			request(form, lermOptionsFramework.importAction, { backup_json: backupJson }).done(function (response) {
+				if (!response || !response.success) {
+					const message = response && response.data && response.data.message ? response.data.message : lermOptionsFramework.importError;
+					showFlash(form, 'error', message);
+					setStatus(form, 'error', lermOptionsFramework.statusError);
+					return;
+				}
+
+				applyFieldValues(form, response.data.values || {});
+				showFlash(form, 'success', response.data.message || lermOptionsFramework.importSuccess);
+				setDirty(form, false);
+				setStatus(form, 'success', lermOptionsFramework.statusSaved);
+				queueReadyStatus(form);
+			}).fail(function () {
+				showFlash(form, 'error', lermOptionsFramework.importError);
+				setStatus(form, 'error', lermOptionsFramework.statusError);
+			}).always(function () {
+				setBusy(form, false, lermOptionsFramework.saving);
+			});
 		});
 	};
 
@@ -549,6 +816,10 @@
 			setDirty(form, true);
 		});
 
+		form.on('sortupdate', function () {
+			setDirty(form, true);
+		});
+
 		$(document).on('keydown.lermOptionsFramework', function (event) {
 			if (!(event.ctrlKey || event.metaKey)) {
 				return;
@@ -597,10 +868,12 @@
 		initMediaFields(form);
 		initGalleryFields(form);
 		initSorters(form);
+		initGroups(form);
 		initCodeEditors(form);
 		toggleDependencies(form);
 		setDirty(form, false);
 		bindAjaxForm(form);
+		bindBackupTools(form);
 
 		$(document).on('change', '[data-lerm-controller], input[type="radio"]', function () {
 			toggleDependencies(form);

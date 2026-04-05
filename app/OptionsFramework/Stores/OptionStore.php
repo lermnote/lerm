@@ -125,6 +125,30 @@ final class OptionStore {
 		$options = $this->raw();
 
 		foreach ( $section['fields'] as $field ) {
+			if ( ! $this->field_is_saved( $field ) ) {
+				continue;
+			}
+
+			$field_id             = (string) $field['id'];
+			$options[ $field_id ] = $this->sanitize_field( $field, $submitted[ $field_id ] ?? null, true );
+		}
+
+		return $this->persist_options( $options );
+	}
+
+	/**
+	 * Import a full settings payload.
+	 *
+	 * @param array<string, mixed> $submitted Submitted values.
+	 */
+	public function import_all( array $submitted ): bool {
+		$options = $this->raw();
+
+		foreach ( PageSchema::fields( $this->definition ) as $field ) {
+			if ( ! $this->field_is_saved( $field ) ) {
+				continue;
+			}
+
 			$field_id             = (string) $field['id'];
 			$options[ $field_id ] = $this->sanitize_field( $field, $submitted[ $field_id ] ?? null, true );
 		}
@@ -169,6 +193,10 @@ final class OptionStore {
 		$options = $this->raw();
 
 		foreach ( $section['fields'] as $field ) {
+			if ( ! $this->field_is_saved( $field ) ) {
+				continue;
+			}
+
 			$field_id             = (string) $field['id'];
 			$options[ $field_id ] = $this->sanitize_field( $field, $field['default'] ?? '', false );
 		}
@@ -183,6 +211,10 @@ final class OptionStore {
 		$options = $this->raw();
 
 		foreach ( PageSchema::fields( $this->definition ) as $field ) {
+			if ( ! $this->field_is_saved( $field ) ) {
+				continue;
+			}
+
 			$field_id             = (string) $field['id'];
 			$options[ $field_id ] = $this->sanitize_field( $field, $field['default'] ?? '', false );
 		}
@@ -209,6 +241,12 @@ final class OptionStore {
 		switch ( $type ) {
 			case 'switcher':
 				return ! empty( $value );
+
+			case 'fieldset':
+				return $this->sanitize_fieldset_field( $field, $value, $strict );
+
+			case 'group':
+				return $this->sanitize_group_field( $field, $value, $strict );
 
 			case 'media':
 				$attachment_id = 0;
@@ -254,21 +292,7 @@ final class OptionStore {
 			case 'button_set':
 			case 'radio':
 			case 'select':
-				$choice = is_scalar( $value ) ? (string) $value : '';
-
-				if ( $strict ) {
-					$choices = PageSchema::choices( $field );
-
-					if ( ! array_key_exists( $choice, $choices ) ) {
-						return $default;
-					}
-				}
-
-				if ( ( $field['cast'] ?? '' ) === 'int' ) {
-					return (int) $choice;
-				}
-
-				return $choice;
+				return $this->sanitize_select_field( $field, $value, $strict );
 
 			case 'gallery':
 				return $this->sanitize_gallery_field( $value );
@@ -301,19 +325,7 @@ final class OptionStore {
 				return $this->sanitize_sorter_field( $field, $value, $strict );
 
 			case 'number':
-				$number = is_numeric( $value ) ? (int) $value : (int) $default;
-				$min    = isset( $field['min'] ) ? (int) $field['min'] : null;
-				$max    = isset( $field['max'] ) ? (int) $field['max'] : null;
-
-				if ( null !== $min && $number < $min ) {
-					$number = $min;
-				}
-
-				if ( null !== $max && $number > $max ) {
-					$number = $max;
-				}
-
-				return $number;
+				return $this->sanitize_number_field( $field, $value, $default );
 
 			case 'textarea':
 				return sanitize_textarea_field( (string) $value );
@@ -372,6 +384,49 @@ final class OptionStore {
 		}
 
 		return array_values( array_unique( $clean ) );
+	}
+
+	/**
+	 * Sanitize fieldsets into keyed arrays of sanitized child values.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Submitted value.
+	 * @return array<string, mixed>
+	 */
+	private function sanitize_fieldset_field( array $field, $value, bool $strict ): array {
+		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
+		$data   = is_array( $value ) ? $value : array();
+
+		return $this->sanitize_nested_fields( $fields, $data, $strict );
+	}
+
+	/**
+	 * Sanitize repeatable group fields.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Submitted value.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function sanitize_group_field( array $field, $value, bool $strict ): array {
+		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
+		$items  = is_array( $value ) ? array_values( $value ) : array();
+		$clean  = array();
+
+		foreach ( $items as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			$sanitized = $this->sanitize_nested_fields( $fields, $item, $strict );
+
+			if ( $this->nested_values_empty( $sanitized ) ) {
+				continue;
+			}
+
+			$clean[] = $sanitized;
+		}
+
+		return $clean;
 	}
 
 	/**
@@ -462,6 +517,162 @@ final class OptionStore {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Sanitize select-like fields, including multi-select payloads.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Submitted value.
+	 * @return mixed
+	 */
+	private function sanitize_select_field( array $field, $value, bool $strict ) {
+		$default  = $field['default'] ?? '';
+		$cast     = (string) ( $field['cast'] ?? '' );
+		$multiple = ! empty( $field['multiple'] );
+
+		if ( $multiple ) {
+			$values  = is_array( $value ) ? $value : array();
+			$choices = $strict ? PageSchema::choices( $field ) : array();
+			$clean   = array();
+
+			foreach ( $values as $item ) {
+				$item = is_scalar( $item ) ? (string) $item : '';
+
+				if ( '' === $item ) {
+					continue;
+				}
+
+				if ( $strict && ! array_key_exists( $item, $choices ) ) {
+					continue;
+				}
+
+				$clean[] = $this->cast_scalar_value( $item, $cast );
+			}
+
+			return array_values( array_unique( $clean, SORT_REGULAR ) );
+		}
+
+		$choice = is_scalar( $value ) ? (string) $value : '';
+
+		if ( $strict ) {
+			$choices = PageSchema::choices( $field );
+
+			if ( ! array_key_exists( $choice, $choices ) ) {
+				return $default;
+			}
+		}
+
+		return $this->cast_scalar_value( $choice, $cast );
+	}
+
+	/**
+	 * Sanitize numeric fields while preserving optional float support.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Submitted value.
+	 * @param mixed                $default Default value.
+	 * @return int|float
+	 */
+	private function sanitize_number_field( array $field, $value, $default ) {
+		$cast    = (string) ( $field['cast'] ?? 'int' );
+		$number  = is_numeric( $value ) ? (float) $value : (float) $default;
+		$min     = isset( $field['min'] ) && is_numeric( $field['min'] ) ? (float) $field['min'] : null;
+		$max     = isset( $field['max'] ) && is_numeric( $field['max'] ) ? (float) $field['max'] : null;
+
+		if ( null !== $min && $number < $min ) {
+			$number = $min;
+		}
+
+		if ( null !== $max && $number > $max ) {
+			$number = $max;
+		}
+
+		if ( 'float' === $cast ) {
+			return $number;
+		}
+
+		return (int) round( $number );
+	}
+
+	/**
+	 * Sanitize nested child field definitions.
+	 *
+	 * @param array<int, array<string, mixed>> $fields Child fields.
+	 * @param array<string, mixed>             $submitted Submitted child values.
+	 * @return array<string, mixed>
+	 */
+	private function sanitize_nested_fields( array $fields, array $submitted, bool $strict ): array {
+		$clean = array();
+
+		foreach ( $fields as $child ) {
+			if ( ! is_array( $child ) || ! isset( $child['id'] ) ) {
+				continue;
+			}
+
+			$child_id            = (string) $child['id'];
+			$clean[ $child_id ] = $this->sanitize_field( $child, $submitted[ $child_id ] ?? null, $strict );
+		}
+
+		return $clean;
+	}
+
+	/**
+	 * Determine whether a nested group item only contains empty values.
+	 *
+	 * @param array<string, mixed> $values Nested values.
+	 */
+	private function nested_values_empty( array $values ): bool {
+		foreach ( $values as $value ) {
+			if ( is_array( $value ) ) {
+				if ( ! empty( $value ) && ! $this->nested_values_empty( $value ) ) {
+					return false;
+				}
+
+				continue;
+			}
+
+			if ( is_bool( $value ) ) {
+				if ( $value ) {
+					return false;
+				}
+
+				continue;
+			}
+
+			if ( '' !== trim( (string) $value ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Cast scalar values according to field preferences.
+	 *
+	 * @param string $value Scalar value.
+	 * @return string|int|float
+	 */
+	private function cast_scalar_value( string $value, string $cast ) {
+		if ( 'int' === $cast ) {
+			return (int) $value;
+		}
+
+		if ( 'float' === $cast ) {
+			return (float) $value;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Whether a field should be written to the option payload.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 */
+	private function field_is_saved( array $field ): bool {
+		return ! array_key_exists( 'save', $field ) || false !== $field['save'];
 	}
 
 	/**
