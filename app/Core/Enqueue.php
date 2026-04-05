@@ -41,6 +41,8 @@ class Enqueue {
 		// QQ live chat
 		'qq_chat_enable'            => false,
 		'qq_chat_number'            => '',
+		// Search
+		'search_results_per_page'   => 5,
 	);
 
 	/**

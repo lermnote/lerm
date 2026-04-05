@@ -20,6 +20,7 @@ use Lerm\Mail\Smtp;
 use Lerm\Update\Updater;
 use Lerm\Http\Rest\Router;
 use Lerm\Runtime\Lazyload;
+use Lerm\Admin\ThemeSettingsPage;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -193,7 +194,9 @@ if ( ! empty( $options ) ) {
 		'404_show_search'           => (bool) ( $options['404_show_search'] ?? false ),
 	);
 }
-
+if ( is_admin() ) {
+	ThemeSettingsPage::instance();
+}
 // ---------------------------------------------------------------------------
 // 3. 允许外部通过 filter 覆盖任意模块参数
 // ---------------------------------------------------------------------------
