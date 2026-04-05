@@ -20,7 +20,8 @@ use Lerm\Mail\Smtp;
 use Lerm\Update\Updater;
 use Lerm\Http\Rest\Router;
 use Lerm\Runtime\Lazyload;
-use Lerm\Admin\ThemeSettingsPage;
+use Lerm\OptionsFramework\Framework as OptionsFramework;
+use Lerm\OptionsFramework\Integrations\LermTheme\OptionsPageDefinition;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -140,9 +141,12 @@ if ( ! empty( $options ) ) {
 		'slide_images'              => (array) ( $options['slide_images'] ?? array() ),
 		'slide_indicators'          => (bool) ( $options['slide_indicators'] ?? false ),
 		'slide_control'             => (bool) ( $options['slide_control'] ?? false ),
+		'head_scripts'              => (string) ( $options['head_scripts'] ?? '' ),
+		'footer_scripts'            => (string) ( $options['footer_scripts'] ?? '' ),
 		'icp_num'                   => (string) ( $options['icp_num'] ?? '' ),
 		'copyright'                 => (string) ( $options['copyright'] ?? '' ),
 		'author_bio'                => (bool) ( $options['author_bio'] ?? false ),
+		'post_navigation'           => ! array_key_exists( 'post_navigation', $options ) ? true : (bool) $options['post_navigation'],
 		'single_sidebar_select'     => (string) ( $options['single_sidebar_select'] ?? 'home-sidebar' ),
 		'blog_sidebar_select'       => (string) ( $options['blog_sidebar_select'] ?? 'home-sidebar' ),
 		'front_page_sidebar'        => (string) ( $options['front_page_sidebar'] ?? 'home-sidebar' ),
@@ -155,7 +159,9 @@ if ( ! empty( $options ) ) {
 		'breadcrumb_separator'      => (string) ( $options['breadcrumb_separator'] ?? '/' ),
 		'breadcrumb_front_show'     => (bool) ( $options['breadcrumb_front_show'] ?? false ),
 		'breadcrumb_show_title'     => ! array_key_exists( 'breadcrumb_show_title', $options ) ? true : (bool) $options['breadcrumb_show_title'],
-		'thumbnail_gallery'         => $options['thumbnail_gallery'] ?? '',
+		'summary_or_full'           => (string) ( $options['summary_or_full'] ?? 'content_summary' ),
+		'show_thumbnail'            => ! array_key_exists( 'show_thumbnail', $options ) ? true : (bool) $options['show_thumbnail'],
+		'thumbnail_gallery'         => $options['thumbnail_gallery'] ?? array(),
 		'load_more'                 => (bool) ( $options['load_more'] ?? false ),
 		'related_posts'             => (bool) ( $options['related_posts'] ?? false ),
 		'related_number'            => max( 1, (int) ( $options['related_number'] ?? 5 ) ),
@@ -167,22 +173,28 @@ if ( ! empty( $options ) ) {
 		'blogdesc'                  => (string) ( $options['blogdesc'] ?? '' ),
 		'navbar_align'              => (string) ( $options['navbar_align'] ?? 'justify-content-md-start' ),
 		'navbar_search'             => (bool) ( $options['navbar_search'] ?? false ),
+		'dark_mode_enable'          => (bool) ( $options['dark_mode_enable'] ?? false ),
+		'dark_mode_toggle_position' => (string) ( $options['dark_mode_toggle_position'] ?? 'navbar' ),
+		'reading_progress_height'   => max( 1, (int) ( $options['reading_progress_height'] ?? 3 ) ),
+		'back_to_top_threshold'     => max( 100, (int) ( $options['back_to_top_threshold'] ?? 400 ) ),
+		'qq_chat_enable'            => (bool) ( $options['qq_chat_enable'] ?? false ),
+		'qq_chat_number'            => (string) ( $options['qq_chat_number'] ?? '' ),
 		'toc_enable'                => (bool) ( $options['toc_enable'] ?? false ),
 		'toc_min_headings'          => max( 1, (int) ( $options['toc_min_headings'] ?? 3 ) ),
-		'toc_position'              => (string) ( $options['toc_position'] ?? 'left' ),
+		'toc_position'              => (string) ( $options['toc_position'] ?? 'before_content' ),
 		'toc_collapsed'             => (bool) ( $options['toc_collapsed'] ?? false ),
-		'post_likes_enable'         => (bool) ( $options['post_likes_enable'] ?? false ),
-		'comment_likes_enable'      => (bool) ( $options['comment_likes_enable'] ?? false ),
-		'post_views_enable'         => (bool) ( $options['post_views_enable'] ?? false ),
+		'post_likes_enable'         => ! array_key_exists( 'post_likes_enable', $options ) ? true : (bool) $options['post_likes_enable'],
+		'comment_likes_enable'      => ! array_key_exists( 'comment_likes_enable', $options ) ? true : (bool) $options['comment_likes_enable'],
+		'post_views_enable'         => ! array_key_exists( 'post_views_enable', $options ) ? true : (bool) $options['post_views_enable'],
 		'share_show_count'          => (bool) ( $options['share_show_count'] ?? false ),
 		'ladding_animate'           => (bool) ( $options['ladding_animate'] ?? false ),
-		'post_copyright_enable'     => (bool) ( $options['post_copyright_enable'] ?? false ),
+		'post_copyright_enable'     => ! array_key_exists( 'post_copyright_enable', $options ) ? true : (bool) $options['post_copyright_enable'],
 		'post_copyright_text'       => (string) ( $options['post_copyright_text'] ?? '' ),
 		'search_placeholder'        => (string) ( $options['search_placeholder'] ?? '' ),
 		'share_position'            => (string) ( $options['share_position'] ?? 'bottom' ),
-		'comments_enable'           => (bool) ( $options['comments_enable'] ?? false ),
+		'comments_enable'           => ! array_key_exists( 'comments_enable', $options ) ? true : (bool) $options['comments_enable'],
 		'comments_require_login'    => (bool) ( $options['comments_require_login'] ?? false ),
-		'comments_per_page'         => max( 1, (int) ( $options['comments_per_page'] ?? 10 ) ),
+		'comments_per_page'         => max( 1, (int) ( $options['comments_per_page'] ?? 20 ) ),
 		'comment_avatar_size'       => max( 24, (int) ( $options['comment_avatar_size'] ?? 48 ) ),
 		'comment_show_cravatar_tip' => ! isset( $options['comment_show_cravatar_tip'] ) || ! empty( $options['comment_show_cravatar_tip'] ),
 		'comment_placeholder'       => (string) ( $options['comment_placeholder'] ?? __( 'Leave a comment...', 'lerm' ) ),
@@ -195,7 +207,7 @@ if ( ! empty( $options ) ) {
 	);
 }
 if ( is_admin() ) {
-	ThemeSettingsPage::instance();
+	OptionsFramework::instance()->mount_options_page( OptionsPageDefinition::definition() );
 }
 // ---------------------------------------------------------------------------
 // 3. 允许外部通过 filter 覆盖任意模块参数

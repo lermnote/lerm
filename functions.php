@@ -94,7 +94,15 @@ add_action(
 );
 if ( ! function_exists( 'lerm_options' ) ) {
 	function lerm_options( string $id, string $tag = '', $default_value = '' ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
-		return \Lerm\Options\ThemeOptionsRepository::instance()->get( $id, $tag, $default_value );
+		static $store = null;
+
+		if ( ! $store instanceof \Lerm\OptionsFramework\Stores\OptionStore ) {
+			$store = \Lerm\OptionsFramework\Framework::instance()->store(
+				\Lerm\OptionsFramework\Integrations\LermTheme\OptionsPageDefinition::definition()
+			);
+		}
+
+		return $store->get( $id, $tag, $default_value );
 	}
 }
 
@@ -114,10 +122,13 @@ if ( ! function_exists( 'lerm_get_template_options' ) ) {
 				'slide_images'              => array(),
 				'slide_indicators'          => false,
 				'slide_control'             => false,
+				'head_scripts'              => '',
+				'footer_scripts'            => '',
 				'footer_menus'              => 0,
 				'icp_num'                   => '',
 				'copyright'                 => '',
 				'author_bio'                => false,
+				'post_navigation'           => true,
 				'single_sidebar_select'     => 'home-sidebar',
 				'blog_sidebar_select'       => 'home-sidebar',
 				'front_page_sidebar'        => 'home-sidebar',
@@ -130,22 +141,78 @@ if ( ! function_exists( 'lerm_get_template_options' ) ) {
 				'breadcrumb_separator'      => '/',
 				'breadcrumb_front_show'     => false,
 				'breadcrumb_show_title'     => true,
-				'thumbnail_gallery'         => '',
+				'summary_or_full'           => 'content_summary',
+				'show_thumbnail'            => true,
+				'thumbnail_gallery'         => array(),
 				'load_more'                 => false,
 				'related_posts'             => false,
 				'related_number'            => 5,
-				'single_top'                => array(),
-				'single_bottom'             => array(),
-				'summary_meta'              => array(),
+				'single_top'                => array(
+					'enabled'  => array(
+						'publish_date' => __( 'Publish date', 'lerm' ),
+						'categories'   => __( 'Category', 'lerm' ),
+						'read'         => __( 'Reading time', 'lerm' ),
+						'responses'    => __( 'Comments', 'lerm' ),
+					),
+					'disabled' => array(
+						'format' => __( 'Format', 'lerm' ),
+						'author' => __( 'Author', 'lerm' ),
+					),
+				),
+				'single_bottom'             => array(
+					'enabled'  => array(
+						'publish_date' => __( 'Publish date', 'lerm' ),
+						'categories'   => __( 'Category', 'lerm' ),
+					),
+					'disabled' => array(
+						'format'    => __( 'Format', 'lerm' ),
+						'author'    => __( 'Author', 'lerm' ),
+						'read'      => __( 'Reading time', 'lerm' ),
+						'responses' => __( 'Comments', 'lerm' ),
+					),
+				),
+				'summary_meta'              => array(
+					'enabled'  => array(
+						'categories' => __( 'Category', 'lerm' ),
+						'read'       => __( 'Reading time', 'lerm' ),
+					),
+					'disabled' => array(
+						'author'       => __( 'Author', 'lerm' ),
+						'responses'    => __( 'Comments', 'lerm' ),
+						'publish_date' => __( 'Publish date', 'lerm' ),
+						'format'       => __( 'Format', 'lerm' ),
+					),
+				),
 				'social_share'              => array(),
 				'blogname'                  => '',
 				'blogdesc'                  => '',
 				'navbar_align'              => 'justify-content-md-end',
 				'navbar_search'             => false,
+				'dark_mode_enable'          => false,
+				'dark_mode_toggle_position' => 'navbar',
+				'reading_progress_height'   => 3,
+				'back_to_top_threshold'     => 400,
+				'qq_chat_enable'            => false,
+				'qq_chat_number'            => '',
+				'toc_enable'                => false,
+				'toc_min_headings'          => 3,
+				'toc_position'              => 'before_content',
+				'toc_collapsed'             => false,
+				'post_likes_enable'         => true,
+				'comment_likes_enable'      => true,
+				'post_views_enable'         => true,
+				'share_show_count'          => false,
+				'share_position'            => 'bottom',
+				'post_copyright_enable'     => true,
+				'post_copyright_text'       => '',
 				'search_results_per_page'   => 5,
 				'search_placeholder'        => '',
+				'comments_enable'           => true,
+				'comments_require_login'    => false,
+				'comments_per_page'         => 20,
 				'comment_avatar_size'       => 48,
 				'comment_show_cravatar_tip' => true,
+				'comment_placeholder'       => __( 'Leave a comment...', 'lerm' ),
 				'social_profiles_position'  => array( 'footer', 'author_bio' ),
 				'social_open_new_tab'       => true,
 			)

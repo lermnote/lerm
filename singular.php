@@ -74,7 +74,9 @@ $copyright_text = ! empty( $template_options['post_copyright_text'] )
 								get_template_part( 'template-parts/components/related-posts' );
 							endif;
 
-							get_template_part( 'template-parts/components/post-navigation' );
+							if ( ! isset( $template_options['post_navigation'] ) || ! empty( $template_options['post_navigation'] ) ) {
+								get_template_part( 'template-parts/components/post-navigation' );
+							}
 
 						endif; // is_singular('post')
 
