@@ -208,128 +208,156 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 
 			// XSS ok.
 			// No worries, This "POST" requests is sanitizing in the below foreach. see #L337 - #L341
-			$response = ( $ajax && ! empty( $_POST['data'] ) ) ? json_decode( wp_unslash( trim( $_POST['data'] ) ), true ) : $_POST;
+			$response = $_POST;
+
+			if ( $ajax && ! empty( $_POST['data'] ) && is_scalar( $_POST['data'] ) ) {
+				$response = json_decode( wp_unslash( trim( (string) $_POST['data'] ) ), true );
+			}
+
+			if ( ! $this->is_valid_save_request( $response ) ) {
+				return false;
+			}
 
 			// Set variables.
 			$data      = array();
-			$noncekey  = 'csf_options_nonce' . $this->unique;
-			$nonce     = ( ! empty( $response[ $noncekey ] ) ) ? $response[ $noncekey ] : '';
-			$options   = ( ! empty( $response[ $this->unique ] ) ) ? $response[ $this->unique ] : array();
-			$transient = ( ! empty( $response['csf_transient'] ) ) ? $response['csf_transient'] : array();
+			$options   = ( ! empty( $response[ $this->unique ] ) && is_array( $response[ $this->unique ] ) ) ? $response[ $this->unique ] : array();
+			$transient = ( ! empty( $response['csf_transient'] ) && is_array( $response['csf_transient'] ) ) ? $response['csf_transient'] : array();
 
-			if ( wp_verify_nonce( $nonce, 'csf_options_nonce' ) ) {
+			$importing  = false;
+			$section_id = ( ! empty( $transient['section'] ) ) ? absint( $transient['section'] ) : 0;
 
-				$importing  = false;
-				$section_id = ( ! empty( $transient['section'] ) ) ? $transient['section'] : '';
+			$import_data_raw = ( ! empty( $response['csf_import_data'] ) && is_scalar( $response['csf_import_data'] ) ) ? wp_unslash( trim( (string) $response['csf_import_data'] ) ) : '';
 
-				if ( ! $ajax && ! empty( $response['csf_import_data'] ) ) {
+			if ( ! $ajax && '' !== $import_data_raw ) {
 
-					// XSS ok.
-					// No worries, This "POST" requests is sanitizing in the below foreach. see #L337 - #L341
-					$import_data  = json_decode( wp_unslash( trim( $response['csf_import_data'] ) ), true );
-					$options      = ( is_array( $import_data ) && ! empty( $import_data ) ) ? $import_data : array();
-					$importing    = true;
-					$this->notice = esc_html__( 'Settings successfully imported.', 'csf' );
+				// XSS ok.
+				// No worries, This "POST" requests is sanitizing in the below foreach. see #L337 - #L341
+				$import_data  = json_decode( $import_data_raw, true );
+				$options      = ( is_array( $import_data ) && ! empty( $import_data ) ) ? $import_data : array();
+				$importing    = true;
+				$this->notice = esc_html__( 'Settings successfully imported.', 'csf' );
 
+			}
+
+			if ( ! empty( $transient['reset'] ) ) {
+
+				foreach ( $this->pre_fields as $field ) {
+					if ( ! empty( $field['id'] ) ) {
+						$data[ $field['id'] ] = $this->get_default( $field );
+					}
 				}
 
-				if ( ! empty( $transient['reset'] ) ) {
+				$this->notice = esc_html__( 'Default settings restored.', 'csf' );
 
-					foreach ( $this->pre_fields as $field ) {
+			} elseif ( ! empty( $transient['reset_section'] ) && ! empty( $section_id ) ) {
+
+				if ( ! empty( $this->pre_sections[ $section_id - 1 ]['fields'] ) ) {
+
+					foreach ( $this->pre_sections[ $section_id - 1 ]['fields'] as $field ) {
 						if ( ! empty( $field['id'] ) ) {
 							$data[ $field['id'] ] = $this->get_default( $field );
 						}
 					}
+				}
 
-					$this->notice = esc_html__( 'Default settings restored.', 'csf' );
+				$data = wp_parse_args( $data, $this->options );
 
-				} elseif ( ! empty( $transient['reset_section'] ) && ! empty( $section_id ) ) {
+				$this->notice = esc_html__( 'Default settings restored.', 'csf' );
 
-					if ( ! empty( $this->pre_sections[ $section_id - 1 ]['fields'] ) ) {
+			} else {
 
-						foreach ( $this->pre_sections[ $section_id - 1 ]['fields'] as $field ) {
-							if ( ! empty( $field['id'] ) ) {
-								$data[ $field['id'] ] = $this->get_default( $field );
-							}
+				// sanitize and validate
+				foreach ( $this->pre_fields as $field ) {
+
+					if ( ! empty( $field['id'] ) ) {
+
+						$field_id    = $field['id'];
+						$field_value = isset( $options[ $field_id ] ) ? $options[ $field_id ] : '';
+
+						// Ajax and Importing doing wp_unslash already.
+						if ( ! $ajax && ! $importing ) {
+							$field_value = wp_unslash( $field_value );
 						}
-					}
 
-					$data = wp_parse_args( $data, $this->options );
+						// Sanitize "post" request of field.
+						if ( ! isset( $field['sanitize'] ) ) {
 
-					$this->notice = esc_html__( 'Default settings restored.', 'csf' );
+							if ( is_array( $field_value ) ) {
 
-				} else {
-
-					// sanitize and validate
-					foreach ( $this->pre_fields as $field ) {
-
-						if ( ! empty( $field['id'] ) ) {
-
-							$field_id    = $field['id'];
-							$field_value = isset( $options[ $field_id ] ) ? $options[ $field_id ] : '';
-
-							// Ajax and Importing doing wp_unslash already.
-							if ( ! $ajax && ! $importing ) {
-								$field_value = wp_unslash( $field_value );
-							}
-
-							// Sanitize "post" request of field.
-							if ( ! isset( $field['sanitize'] ) ) {
-
-								if ( is_array( $field_value ) ) {
-
-									$data[ $field_id ] = wp_kses_post_deep( $field_value );
-
-								} else {
-
-									$data[ $field_id ] = wp_kses_post( $field_value );
-
-								}
-							} elseif ( isset( $field['sanitize'] ) && is_callable( $field['sanitize'] ) ) {
-
-									$data[ $field_id ] = call_user_func( $field['sanitize'], $field_value );
+								$data[ $field_id ] = wp_kses_post_deep( $field_value );
 
 							} else {
 
-								$data[ $field_id ] = $field_value;
+								$data[ $field_id ] = wp_kses_post( $field_value );
 
 							}
+						} elseif ( isset( $field['sanitize'] ) && is_callable( $field['sanitize'] ) ) {
 
-							// Validate "post" request of field.
-							if ( isset( $field['validate'] ) && is_callable( $field['validate'] ) ) {
+								$data[ $field_id ] = call_user_func( $field['sanitize'], $field_value );
 
-								$has_validated = call_user_func( $field['validate'], $field_value );
+						} else {
 
-								if ( ! empty( $has_validated ) ) {
+							$data[ $field_id ] = $field_value;
 
-									$data[ $field_id ]         = ( isset( $this->options[ $field_id ] ) ) ? $this->options[ $field_id ] : '';
-									$this->errors[ $field_id ] = $has_validated;
+						}
 
-								}
+						// Validate "post" request of field.
+						if ( isset( $field['validate'] ) && is_callable( $field['validate'] ) ) {
+
+							$has_validated = call_user_func( $field['validate'], $field_value );
+
+							if ( ! empty( $has_validated ) ) {
+
+								$data[ $field_id ]         = ( isset( $this->options[ $field_id ] ) ) ? $this->options[ $field_id ] : '';
+								$this->errors[ $field_id ] = $has_validated;
+
 							}
 						}
 					}
 				}
-
-				$data = apply_filters( "csf_{$this->unique}_save", $data, $this );
-
-				do_action( "csf_{$this->unique}_save_before", $data, $this );
-
-				$this->options = $data;
-
-				$this->save_options( $data );
-
-				do_action( "csf_{$this->unique}_save_after", $data, $this );
-
-				if ( empty( $this->notice ) ) {
-					$this->notice = esc_html__( 'Settings saved.', 'csf' );
-				}
-
-				return true;
-
 			}
 
-			return false;
+			$data = apply_filters( "csf_{$this->unique}_save", $data, $this );
+
+			do_action( "csf_{$this->unique}_save_before", $data, $this );
+
+			$this->options = $data;
+
+			$this->save_options( $data );
+
+			do_action( "csf_{$this->unique}_save_after", $data, $this );
+
+			if ( empty( $this->notice ) ) {
+				$this->notice = esc_html__( 'Settings saved.', 'csf' );
+			}
+
+			return true;
+		}
+
+		// validate save request
+		private function is_valid_save_request( $response ) {
+
+			if ( ! is_array( $response ) ) {
+				return false;
+			}
+
+			if ( ! current_user_can( $this->args['menu_capability'] ) ) {
+				return false;
+			}
+
+			$noncekey = 'csf_options_nonce' . $this->unique;
+
+			if ( empty( $response[ $noncekey ] ) || ! is_scalar( $response[ $noncekey ] ) ) {
+				return false;
+			}
+
+			$nonce = sanitize_text_field( wp_unslash( (string) $response[ $noncekey ] ) );
+
+			if ( '' === $nonce ) {
+				return false;
+			}
+
+			return (bool) wp_verify_nonce( $nonce, 'csf_options_nonce' );
 		}
 
 		// save options database
