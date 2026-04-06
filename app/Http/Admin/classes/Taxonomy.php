@@ -51,7 +51,6 @@ if ( ! class_exists( 'CSF_Taxonomy_Options' ) ) {
 
 			add_action( 'created_' . $this->taxonomy, array( &$this, 'save_taxonomy' ) );
 			add_action( 'edited_' . $this->taxonomy, array( &$this, 'save_taxonomy' ) );
-
 		}
 
 		// get default value
@@ -61,7 +60,6 @@ if ( ! class_exists( 'CSF_Taxonomy_Options' ) ) {
 			$default = ( isset( $field['default'] ) ) ? $field['default'] : $default;
 
 			return $default;
-
 		}
 
 		// get default value
@@ -85,7 +83,6 @@ if ( ! class_exists( 'CSF_Taxonomy_Options' ) ) {
 			}
 
 			return $value;
-
 		}
 
 		// render taxonomy add/edit form fields
@@ -131,11 +128,14 @@ if ( ! class_exists( 'CSF_Taxonomy_Options' ) ) {
 			}
 
 			echo '</div>';
-
 		}
 
 		// save taxonomy form fields
 		public function save_taxonomy( $term_id ) {
+
+			if ( ! current_user_can( 'manage_categories' ) ) {
+				return;
+			}
 
 			if ( wp_verify_nonce( csf_get_var( 'csf_taxonomy_nonce' ), 'csf_taxonomy_nonce' ) ) {
 
@@ -227,7 +227,6 @@ if ( ! class_exists( 'CSF_Taxonomy_Options' ) ) {
 					}
 				}
 			}
-
 		}
 	}
 }

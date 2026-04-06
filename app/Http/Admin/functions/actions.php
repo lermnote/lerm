@@ -112,6 +112,10 @@ if ( ! function_exists( 'csf_import_ajax' ) ) {
 		}
 
 		// Success
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'error' => esc_html__( 'Error: You do not have permission to perform this action.', 'csf' ) ) );
+		}
+
 		update_option( $unique, $data );
 
 		wp_send_json_success();
@@ -137,6 +141,10 @@ if ( ! function_exists( 'csf_reset_ajax' ) ) {
 		}
 
 		// Success
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'error' => esc_html__( 'Error: You do not have permission to perform this action.', 'csf' ) ) );
+		}
+
 		delete_option( $unique );
 
 		wp_send_json_success();

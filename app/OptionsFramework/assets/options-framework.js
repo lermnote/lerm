@@ -249,6 +249,7 @@
 					initColorPickers(group);
 					initMediaFields(group);
 					initGalleryFields(group);
+					initCodeEditors(group);
 					setDirty(group.closest('form'), true);
 				});
 
@@ -568,17 +569,31 @@
 		const template = group.find('.lerm-group-template').html() || '';
 		const items = Array.isArray(value) ? value : [];
 
+		// Destroy any existing sortable to avoid double-binding after reinit.
+		try { list.sortable('destroy'); } catch (e) { /* not yet initialised */ }
+
 		list.empty();
 
-		items.forEach(function (itemData) {
+		// Step 1 — append raw template markup for each item.
+		items.forEach(function () {
 			list.append(template);
 		});
 
+		// Step 2 — fix __INDEX__ tokens in name/id attributes BEFORE any
+		// jQuery plugins (color picker, media) read those attributes.
 		renumberGroupItems(group);
+
+		// Step 3 — initialise field widgets now that the DOM is stable.
 		initColorPickers(group);
 		initMediaFields(group);
 		initGalleryFields(group);
+		initCodeEditors(group);
 
+		// Step 4 — re-attach group behaviours (sortable + add/remove buttons)
+		// so the freshly built items are fully interactive.
+		initGroups(group);
+
+		// Step 5 — populate each item's sub-fields with the actual values.
 		group.find('[data-lerm-group-item]').each(function (index) {
 			const item = $(this);
 			const itemData = items[index] || {};

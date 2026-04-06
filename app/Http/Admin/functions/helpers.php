@@ -42,7 +42,7 @@ if ( ! function_exists( 'csf_get_var' ) ) {
 		}
 
 		if ( isset( $_GET[ $variable ] ) ) {
-				return $_GET[ $variable ];
+				return sanitize_text_field( wp_unslash( $_GET[ $variable ] ) );
 		}
 
 			return $default_value;
@@ -66,7 +66,10 @@ if ( ! function_exists( 'csf_get_vars' ) ) {
 		}
 
 		if ( isset( $_GET[ $variable ][ $depth ] ) ) {
-				return $_GET[ $variable ][ $depth ];
+				$raw = $_GET[ $variable ][ $depth ];
+				return is_array( $raw )
+					? array_map( 'sanitize_text_field', array_map( 'wp_unslash', $raw ) )
+					: sanitize_text_field( wp_unslash( (string) $raw ) );
 		}
 
 			return $default_value;

@@ -23,7 +23,7 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 		public $args         = array(
 
 			// framework title
-			'framework_title'         => 'Codestar Framework <small>by Codestar</small>',
+			'framework_title'         => 'Lerm Options <small>by Lerm</small>',
 			'framework_class'         => '',
 
 			// menu settings
@@ -59,7 +59,7 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 			'admin_bar_menu_priority' => 50,
 
 			// footer
-			'footer_text'             => 'Thank you for creating with Codestar Framework',
+			'footer_text'             => 'Thank you for using Lerm',
 			'footer_after'            => '',
 			'footer_credit'           => '',
 
@@ -399,7 +399,17 @@ if ( ! class_exists( 'CSF_Options' ) ) {
 		// admin menu
 		public function add_admin_menu() {
 
-			extract( $this->args );
+			// Explicitly unpack args — avoids extract() polluting local scope.
+			$menu_type       = $this->args['menu_type'] ?? 'menu';
+			$menu_parent     = $this->args['menu_parent'] ?? '';
+			$menu_title      = $this->args['menu_title'] ?? '';
+			$menu_capability = $this->args['menu_capability'] ?? 'manage_options';
+			$menu_slug       = $this->args['menu_slug'] ?? '';
+			$menu_icon       = $this->args['menu_icon'] ?? null;
+			$menu_position   = $this->args['menu_position'] ?? null;
+			$menu_hidden     = $this->args['menu_hidden'] ?? false;
+			$sub_menu_title  = $this->args['sub_menu_title'] ?? '';
+			$show_sub_menu   = $this->args['show_sub_menu'] ?? true;
 
 			if ( $menu_type === 'submenu' ) {
 

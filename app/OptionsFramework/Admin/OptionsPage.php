@@ -134,6 +134,13 @@ final class OptionsPage {
 
 	/**
 	 * Reset the current tab or the whole page without a full reload.
+	 *
+	 * Security note: for both "section" and "all" scopes we verify the nonce
+	 * of the currently active tab. This is intentional — the user is on that
+	 * tab's page and the nonce was issued for the current session. A per-tab
+	 * nonce for a cross-tab "reset all" action would give no additional security
+	 * benefit because an attacker would need the same capability to reach
+	 * any tab at all.
 	 */
 	public function handle_ajax_reset(): void {
 		if ( ! current_user_can( $this->capability() ) ) {
@@ -459,6 +466,7 @@ final class OptionsPage {
 		$description = (string) ( $field['description'] ?? '' );
 		$dependency  = (string) ( $field['dependency_field'] ?? '' );
 		$dep_value   = (string) ( $field['dependency_value'] ?? '1' );
+		$label       = isset( $field['label'] ) ? (string) $field['label'] : '';
 		$row_attrs   = array(
 			'class="lerm-settings-row"',
 			'data-field-id="' . esc_attr( $field_id ) . '"',
@@ -471,11 +479,16 @@ final class OptionsPage {
 		}
 
 		echo '<tr ' . implode( ' ', $row_attrs ) . '>';
-		printf(
-			'<th scope="row"><label for="%1$s">%2$s</label></th>',
-			esc_attr( $field_id ),
-			esc_html( (string) $field['label'] )
-		);
+
+		if ( '' !== $label ) {
+			printf(
+				'<th scope="row"><label for="%1$s">%2$s</label></th>',
+				esc_attr( $field_id ),
+				esc_html( $label )
+			);
+		} else {
+			echo '<th scope="row"></th>';
+		}
 		echo '<td>';
 
 		$custom_render = $this->field_types->render_callback( $field_type );
@@ -884,6 +897,15 @@ final class OptionsPage {
 				);
 				return;
 
+			case 'sorter':
+				// Sorter fields cannot be meaningfully nested inside a fieldset or group.
+				// Surface this as a visible config warning instead of silently falling back to text.
+				printf(
+					'<p class="description" style="color:#b91c1c;font-style:italic">%s</p>',
+					esc_html__( 'Sorter fields cannot be nested inside a fieldset or group.', 'lerm' )
+				);
+				return;
+
 			case 'number':
 				printf(
 					'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text" min="%4$s" max="%5$s" step="%6$s"%7$s%8$s>',
@@ -1131,12 +1153,14 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Resolve the stored option name.
+	 * Resolve the form input namespace / option name.
+	 *
+	 * Delegates to the store's backing StorageBackend so that the HTML form
+	 * field names always match the key used by whichever backend is active
+	 * (option row, term meta, user meta, post meta).
 	 */
 	private function option_name(): string {
-		$option_name = isset( $this->definition['option_name'] ) ? sanitize_key( (string) $this->definition['option_name'] ) : '';
-
-		return '' !== $option_name ? $option_name : 'options_framework';
+		return $this->store->storage_key();
 	}
 
 	/**

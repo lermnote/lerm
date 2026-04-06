@@ -136,6 +136,19 @@ if ( ! class_exists( 'CSF' ) ) {
 				}
 			}
 
+			// Setup user meta (profile) option framework
+			$params = array();
+			if ( class_exists( 'CSF_User_Options' ) && ! empty( self::$args['profile_options'] ) ) {
+				foreach ( self::$args['profile_options'] as $key => $value ) {
+					if ( ! empty( self::$args['sections'][ $key ] ) && ! isset( self::$inited[ $key ] ) ) {
+						$params['args']       = $value;
+						$params['sections']   = self::$args['sections'][ $key ];
+						self::$inited[ $key ] = true;
+						CSF_User_Options::instance( $key, $params );
+					}
+				}
+			}
+
 			do_action( 'csf_loaded' );
 		}
 
@@ -152,6 +165,11 @@ if ( ! class_exists( 'CSF' ) ) {
 		// Create taxonomy options
 		public static function createTaxonomyOptions( $id, $args = array() ) {
 			self::$args['taxonomy_options'][ $id ] = $args;
+		}
+
+		// Create user (profile) options
+		public static function createUserOptions( $id, $args = array() ) {
+			self::$args['profile_options'][ $id ] = $args;
 		}
 
 		// Create section
@@ -246,6 +264,7 @@ if ( ! class_exists( 'CSF' ) ) {
 			self::include_plugin_file( 'classes/Options.php' );
 			self::include_plugin_file( 'classes/Metabox.php' );
 			self::include_plugin_file( 'classes/Taxonomy.php' );
+			self::include_plugin_file( 'classes/UserOptions.php' ); // user meta support
 
 			// Include all framework fields
 			$fields = apply_filters(
@@ -399,12 +418,16 @@ if ( ! class_exists( 'CSF' ) ) {
 			wp_enqueue_style( 'wp-color-picker' );
 			wp_enqueue_script( 'wp-color-picker' );
 
-			// Font awesome 4 and 5 loader
-			if ( apply_filters( 'csf_fa4', false ) ) {
-				wp_enqueue_style( 'csf-fa', 'https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css', array(), '4.7.0', 'all' );
-			} else {
-				wp_enqueue_style( 'csf-fa5', 'https://cdn.staticfile.org/font-awesome/5.13.0/css/all.min.css', array(), '5.15.5', 'all' );
-				wp_enqueue_style( 'csf-fa5-v4-shims', 'https://cdn.staticfile.org/font-awesome/5.13.0/css/v4-shims.min.css', array(), '5.15.5', 'all' );
+			// Icon font — Lerm uses its own bundled icon font (lerm-font) instead of
+			// loading Font Awesome from an external CDN (cdn.staticfile.org is a Chinese CDN
+			// and is unreachable for many international users).
+			// If you need FA in admin, set the 'lerm_admin_load_fa' filter to true and
+			// override 'lerm_admin_fa_url' with a locally-hosted stylesheet URL.
+			if ( apply_filters( 'lerm_admin_load_fa', false ) ) {
+				$fa_url = apply_filters( 'lerm_admin_fa_url', '' );
+				if ( $fa_url ) {
+					wp_enqueue_style( 'csf-fa', esc_url( $fa_url ), array(), null, 'all' );
+				}
 			}
 
 			// Check for developer mode
@@ -482,8 +505,12 @@ if ( ! class_exists( 'CSF' ) ) {
 
 					$query['display'] = 'swap';
 
-					wp_enqueue_style( 'csf-google-web-fonts', esc_url( add_query_arg( $query, '//fonts.googleapis.com/css' ) ), array(), null );
-
+					// Google Fonts is blocked in China and raises GDPR concerns.
+					// Allow the theme to intercept and proxy/disable this request.
+					$gf_url = apply_filters( 'lerm_google_fonts_url', esc_url( add_query_arg( $query, '//fonts.googleapis.com/css' ) ) );
+					if ( $gf_url ) {
+						wp_enqueue_style( 'csf-google-web-fonts', $gf_url, array(), null );
+					}
 				}
 
 				if ( ! empty( self::$webfonts['async'] ) ) {
@@ -580,8 +607,8 @@ if ( ! class_exists( 'CSF' ) ) {
 
 				if ( ! empty( $field['title'] ) ) {
 					echo '<div class="csf-title">';
-					echo '<h4>' . $field['title'] . '</h4>';
-					echo ( ! empty( $field['subtitle'] ) ) ? '<div class="csf-subtitle-text">' . $field['subtitle'] . '</div>' : '';
+					echo '<h4>' . esc_html( $field['title'] ) . '</h4>';
+					echo ( ! empty( $field['subtitle'] ) ) ? '<div class="csf-subtitle-text">' . wp_kses_post( $field['subtitle'] ) . '</div>' : '';
 					echo '</div>';
 				}
 

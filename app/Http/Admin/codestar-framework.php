@@ -2,18 +2,16 @@
 	die; } // Cannot access directly.
 /**
  *
- * @package   Codestar Framework - WordPress Options Framework
- * @author    Codestar <info@codestarthemes.com>
- * @link      http://codestarframework.com
- * @copyright 2015-2022 Codestar
+ * @package   Lerm Options Framework
+ * @author    Lerm Theme
+ * @link      https://github.com/lermnotes/lerm
  *
+ * Based on Codestar Framework 2.3.1 (https://codestarframework.com)
+ * Original copyright 2015-2022 Codestar. Used under their license terms.
  *
- * Plugin Name: Codestar Framework
- * Plugin URI: http://codestarframework.com/
- * Author: Codestar
- * Author URI: http://codestarthemes.com/
- * Version: 2.3.1
- * Description: A Simple and Lightweight WordPress Option Framework for Themes and Plugins
+ * Plugin Name: Lerm Options Framework
+ * Version: 2.3.1-lerm
+ * Description: Theme options framework embedded in Lerm theme.
  * Text Domain: csf
  * Domain Path: /languages
  */

@@ -57,7 +57,6 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 
 			// wp enqeueu for typography and output css
 			parent::__construct();
-
 		}
 
 		// instance
@@ -125,7 +124,6 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 			}
 
 			return $classes;
-
 		}
 
 		// add metabox
@@ -134,7 +132,6 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 			if ( ! in_array( $post_type, $this->args['exclude_post_types'], true ) ) {
 				add_meta_box( $this->unique, $this->args['title'], array( &$this, 'add_meta_box_content' ), $this->post_type, $this->args['context'], $this->args['priority'], $this->args );
 			}
-
 		}
 
 		// get default value
@@ -144,7 +141,6 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 			$default = ( isset( $field['default'] ) ) ? $field['default'] : $default;
 
 			return $default;
-
 		}
 
 		// get meta value
@@ -170,7 +166,6 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 			}
 
 			return $value;
-
 		}
 
 		// add metabox content
@@ -206,7 +201,7 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 
 						echo '<li><a href="#" data-section="' . $this->unique . '_' . $tab_key . '">' . $tab_icon . $section['title'] . $tab_error . '</a></li>';
 
-						$tab_key++;
+						++$tab_key;
 				}
 					echo '</ul>';
 
@@ -250,7 +245,7 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 
 				echo '</div>';
 
-				$section_key++;
+				++$section_key;
 			}
 
 						echo '</div>';
@@ -278,11 +273,20 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 				echo '</div>';
 
 			echo '</div>';
-
 		}
 
 		// save metabox
 		public function save_meta_box( $post_id, $post ) {
+
+			// Bail on autosave — meta should only save on explicit publish/update.
+			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+				return;
+			}
+
+			// Verify the current user can edit this post.
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				return;
+			}
 
 			if ( wp_verify_nonce( csf_get_var( 'csf_metabox_nonce' ), 'csf_metabox_nonce' ) ) {
 
@@ -334,12 +338,17 @@ if ( ! class_exists( 'CSF_Metabox' ) ) {
 									// auto sanitize
 									if ( ! isset( $request[ $field['id'] ] ) || is_null( $request[ $field['id'] ] ) ) {
 										$request[ $field['id'] ] = '';
+									} elseif ( ! isset( $field['sanitize'] ) ) {
+										// No explicit sanitize key: apply wp_kses_post_deep as safe fallback
+										// (matches the Options class behaviour for unsanitized array fields).
+										$fv                      = $request[ $field['id'] ];
+										$request[ $field['id'] ] = is_array( $fv ) ? wp_kses_post_deep( $fv ) : wp_kses_post( (string) $fv );
 									}
 								}
 							}
 						}
 
-						$section_key++;
+						++$section_key;
 					}
 
 					$request = apply_filters( "csf_{$this->unique}_save", $request, $post_id, $this );

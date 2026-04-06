@@ -46,13 +46,18 @@ final class PageSchema {
 	/**
 	 * Flatten all fields into a numeric list.
 	 *
+	 * Fields with duplicate IDs across sections are skipped after the first
+	 * occurrence; a _doing_it_wrong() notice is emitted in debug mode so
+	 * theme/plugin authors catch the problem early.
+	 *
 	 * @param array<string, mixed> $definition Page definition.
 	 * @return array<int, array<string, mixed>>
 	 */
 	public static function fields( array $definition ): array {
 		$fields = array();
+		$seen   = array();
 
-		foreach ( self::sections( $definition ) as $section ) {
+		foreach ( self::sections( $definition ) as $section_id => $section ) {
 			$section_fields = $section['fields'] ?? array();
 
 			if ( ! is_array( $section_fields ) ) {
@@ -60,9 +65,32 @@ final class PageSchema {
 			}
 
 			foreach ( $section_fields as $field ) {
-				if ( is_array( $field ) && isset( $field['id'] ) ) {
-					$fields[] = $field;
+				if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
+					continue;
 				}
+
+				$field_id = (string) $field['id'];
+
+				if ( isset( $seen[ $field_id ] ) ) {
+					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+						_doing_it_wrong(
+							__METHOD__,
+							sprintf(
+								/* translators: 1: field ID, 2: first section, 3: duplicate section */
+								'Options Framework: field ID "%1$s" is declared in both section "%2$s" and "%3$s". The second declaration is ignored.',
+								esc_html( $field_id ),
+								esc_html( $seen[ $field_id ] ),
+								esc_html( (string) $section_id )
+							),
+							'1.0.0'
+						);
+					}
+
+					continue;
+				}
+
+				$seen[ $field_id ] = (string) $section_id;
+				$fields[]          = $field;
 			}
 		}
 

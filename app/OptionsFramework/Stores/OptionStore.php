@@ -1,6 +1,13 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
- * Generic option-backed store for options framework pages.
+ * Generic store for options framework pages.
+ *
+ * Storage is delegated to a StorageBackend implementation, making this class
+ * reusable for option rows, term meta, user meta, and post/CPT meta without
+ * any changes to sanitization, normalization, or section logic.
+ *
+ * Backward-compatible: when no backend is supplied the store falls back to the
+ * OptionBackend (get_option / update_option), preserving existing behaviour.
  *
  * @package Lerm
  */
@@ -9,6 +16,8 @@ declare( strict_types=1 );
 
 namespace Lerm\OptionsFramework\Stores;
 
+use Lerm\OptionsFramework\Backends\OptionBackend;
+use Lerm\OptionsFramework\Contracts\StorageBackend;
 use Lerm\OptionsFramework\Registry\FieldTypeRegistry;
 use Lerm\OptionsFramework\Support\PageSchema;
 
@@ -27,6 +36,8 @@ final class OptionStore {
 
 	private FieldTypeRegistry $field_types;
 
+	private StorageBackend $backend;
+
 	/**
 	 * Cached raw options.
 	 *
@@ -42,11 +53,24 @@ final class OptionStore {
 	private ?array $normalized_options = null;
 
 	/**
-	 * @param array<string, mixed> $definition Page definition.
+	 * @param array<string, mixed>  $definition  Page definition.
+	 * @param FieldTypeRegistry     $field_types Field type registry.
+	 * @param StorageBackend|null   $backend     Storage backend. Defaults to
+	 *                                           OptionBackend using the option
+	 *                                           name resolved from $definition.
 	 */
-	public function __construct( array $definition, FieldTypeRegistry $field_types ) {
+	public function __construct( array $definition, FieldTypeRegistry $field_types, ?StorageBackend $backend = null ) {
 		$this->definition  = $definition;
 		$this->field_types = $field_types;
+		$this->backend     = $backend ?? new OptionBackend( $this->resolve_option_name() );
+	}
+
+	/**
+	 * Expose the backing storage key (option name, meta key, etc.) for
+	 * external consumers that need it (e.g. the admin page form attribute).
+	 */
+	public function storage_key(): string {
+		return $this->backend->key();
 	}
 
 	/**
@@ -72,14 +96,13 @@ final class OptionStore {
 	}
 
 	/**
-	 * Get raw saved options.
+	 * Get raw saved options from the storage backend.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function raw(): array {
 		if ( null === $this->raw_options ) {
-			$options           = get_option( $this->option_name(), array() );
-			$this->raw_options = is_array( $options ) ? $options : array();
+			$this->raw_options = $this->backend->read();
 		}
 
 		return $this->raw_options;
@@ -337,7 +360,11 @@ final class OptionStore {
 	}
 
 	/**
-	 * Persist raw options while treating "no change" as success.
+	 * Persist raw options via the storage backend.
+	 *
+	 * Treats an identical payload as a success (no-op save).
+	 * The StorageBackend implementations are responsible for distinguishing
+	 * a genuine DB failure from a "no change" return value.
 	 *
 	 * @param array<string, mixed> $options New option payload.
 	 */
@@ -347,11 +374,12 @@ final class OptionStore {
 		$this->raw_options        = $options;
 		$this->normalized_options = null;
 
+		// Identical payload — nothing to write, not a failure.
 		if ( $previous === $options ) {
 			return true;
 		}
 
-		return update_option( $this->option_name(), $options );
+		return $this->backend->write( $options );
 	}
 
 	/**
@@ -676,10 +704,13 @@ final class OptionStore {
 	}
 
 	/**
-	 * Resolve the stored option name.
+	 * Resolve the option name from the page definition.
+	 * Used only when no explicit StorageBackend is provided to the constructor.
 	 */
-	private function option_name(): string {
-		$option_name = isset( $this->definition['option_name'] ) ? sanitize_key( (string) $this->definition['option_name'] ) : '';
+	private function resolve_option_name(): string {
+		$option_name = isset( $this->definition['option_name'] )
+			? sanitize_key( (string) $this->definition['option_name'] )
+			: '';
 
 		return '' !== $option_name ? $option_name : 'options_framework';
 	}
