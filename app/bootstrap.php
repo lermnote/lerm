@@ -37,6 +37,7 @@ $options = get_option( 'lerm_theme_options', array() );
 // 2. 选项映射：将扁平的 option 数组解析为各模块所需的参数结构
 // ---------------------------------------------------------------------------
 
+$enqueue_options  = array();
 $optimize_options = array();
 $mail_options     = array();
 $seo_options      = array();
@@ -65,6 +66,10 @@ if ( ! empty( $options ) ) {
 		'dark_mode_enable'          => (bool) ( $options['dark_mode_enable'] ?? false ),
 		'dark_mode_default'         => (string) ( $options['dark_mode_default'] ?? 'system' ),
 		'dark_mode_toggle_position' => (string) ( $options['dark_mode_toggle_position'] ?? 'navbar' ),
+		// Search
+		'search_results_per_page'   => max( 1, (int) ( $options['search_results_per_page'] ?? 5 ) ),
+		'comment_min_length'        => max( 0, (int) ( $options['comment_min_length'] ?? 10 ) ),
+		'comment_max_length'        => max( 0, (int) ( $options['comment_max_length'] ?? 2000 ) ),
 		// QQ live chat
 		'qq_chat_enable'            => (bool) ( $options['qq_chat_enable'] ?? false ),
 		'qq_chat_number'            => (string) ( $options['qq_chat_number'] ?? '' ),
@@ -104,21 +109,21 @@ if ( ! empty( $options ) ) {
 	);
 
 	$sitemap_options = array(
-		'sitemap_enable' => ! array_key_exists( 'sitemap_enable', $options ) ? true : (bool) $options['sitemap_enable'],
-		'post_type'      => array_values(
+		'sitemap_enable'     => ! array_key_exists( 'sitemap_enable', $options ) ? true : (bool) $options['sitemap_enable'],
+		'post_type'          => array_values(
 			array_intersect(
 				(array) ( $options['exclude_post_types'] ?? array() ),
 				array( 'page', 'post', 'users' )
 			)
 		),
-		'taxonomy'       => array_values(
+		'taxonomy'           => array_values(
 			array_intersect(
 				(array) ( $options['exclude_post_types'] ?? array() ),
 				array( 'category', 'post_tag', 'format' )
 			)
 		),
-		'page_exclude'   => (array) ( $options['exclude_page'] ?? array() ),
-		'post_exclude'   => (array) ( $options['exclude_post'] ?? array() ),
+		'page_exclude'       => (array) ( $options['exclude_page'] ?? array() ),
+		'post_exclude'       => (array) ( $options['exclude_post'] ?? array() ),
 		'exclude_categories' => (array) ( $options['exclude_categories'] ?? array() ),
 		'exclude_tags'       => (array) ( $options['exclude_tags'] ?? array() ),
 	);
@@ -142,9 +147,16 @@ if ( ! empty( $options ) ) {
 	$login_options = array(
 		'front_login_enable'  => (bool) ( $options['frontend_login'] ?? false ),
 		'login_page_id'       => (int) ( $options['frontend_login_page'] ?? 0 ),
-		'menu_login_item'     => $options['menu_login_item'] ?? '',
+		'menu_login_item'     => (bool) ( $options['menu_login_item'] ?? false ),
+		'front_user_center'   => (bool) ( $options['front_user_center'] ?? false ),
+		'frontend_profile'    => (bool) ( $options['frontend_profile'] ?? false ),
+		'frontend_regist'     => (bool) ( $options['frontend_regist'] ?? false ),
+		'users_can_register'  => (bool) ( $options['users_can_register'] ?? false ),
+		'default_role'        => sanitize_key( (string) ( $options['default_role'] ?? get_option( 'default_role', 'subscriber' ) ) ),
+		'default_login_page'  => (bool) ( $options['default_login_page'] ?? false ),
+		'account_page_url'    => (bool) ( $options['front_user_center'] ?? false ) ? lerm_get_frontend_account_page_url() : home_url( '/' ),
 		'login_redirect_url'  => (bool) ( $options['login_redirect_url'] ?? false ) ? home_url( '/' ) : '',
-		'logout_redirect_url' => $options['logout_redirect_url'] ?? home_url(),
+		'logout_redirect_url' => (bool) ( $options['logout_redirect_url'] ?? false ) ? home_url( '/' ) : lerm_get_frontend_auth_page_url( 'login' ),
 	);
 
 	$layout_options = array(
@@ -214,11 +226,19 @@ if ( ! empty( $options ) ) {
 		'ladding_animate'           => (bool) ( $options['ladding_animate'] ?? false ),
 		'post_copyright_enable'     => ! array_key_exists( 'post_copyright_enable', $options ) ? true : (bool) $options['post_copyright_enable'],
 		'post_copyright_text'       => (string) ( $options['post_copyright_text'] ?? '' ),
+		'search_results_per_page'   => max( 1, (int) ( $options['search_results_per_page'] ?? 5 ) ),
 		'search_placeholder'        => (string) ( $options['search_placeholder'] ?? '' ),
 		'share_position'            => (string) ( $options['share_position'] ?? 'bottom' ),
+		'ad_switcher'               => (bool) ( $options['ad_switcher'] ?? false ),
+		'ad1'                       => (string) ( $options['ad1'] ?? '' ),
 		'comments_enable'           => ! array_key_exists( 'comments_enable', $options ) ? true : (bool) $options['comments_enable'],
 		'comments_require_login'    => (bool) ( $options['comments_require_login'] ?? false ),
+		'comment_moderation'        => (bool) ( $options['comment_moderation'] ?? false ),
 		'comments_per_page'         => max( 1, (int) ( $options['comments_per_page'] ?? 20 ) ),
+		'comment_nesting_depth'     => max( 1, (int) ( $options['comment_nesting_depth'] ?? 3 ) ),
+		'comment_form_fields'       => (array) ( $options['comment_form_fields'] ?? array( 'name', 'email' ) ),
+		'comment_min_length'        => max( 0, (int) ( $options['comment_min_length'] ?? 10 ) ),
+		'comment_max_length'        => max( 0, (int) ( $options['comment_max_length'] ?? 2000 ) ),
 		'comment_avatar_size'       => max( 24, (int) ( $options['comment_avatar_size'] ?? 48 ) ),
 		'comment_show_cravatar_tip' => ! isset( $options['comment_show_cravatar_tip'] ) || ! empty( $options['comment_show_cravatar_tip'] ),
 		'comment_placeholder'       => (string) ( $options['comment_placeholder'] ?? __( 'Leave a comment...', 'lerm' ) ),
@@ -237,6 +257,8 @@ if ( ! empty( $options ) ) {
 		'social_rss'                => ! isset( $options['social_rss'] ) || ! empty( $options['social_rss'] ),
 		'social_profiles_position'  => (array) ( $options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) ),
 		'social_open_new_tab'       => ! isset( $options['social_open_new_tab'] ) || ! empty( $options['social_open_new_tab'] ),
+		'qrcode_image'              => (array) ( $options['qrcode_image'] ?? array() ),
+		'donate_qrcode'             => (array) ( $options['donate_qrcode'] ?? array() ),
 		'404_title'                 => (string) ( $options['404_title'] ?? '' ),
 		'404_message'               => (string) ( $options['404_message'] ?? '' ),
 		'404_button_text'           => (string) ( $options['404_button_text'] ?? '' ),
@@ -281,9 +303,156 @@ add_filter(
 	}
 );
 
+add_filter(
+	'pre_option_comment_registration',
+	static function () use ( $template_options ) {
+		return ! empty( $template_options['comments_require_login'] ) ? '1' : '0';
+	}
+);
+
+add_filter(
+	'pre_option_comment_moderation',
+	static function () use ( $template_options ) {
+		return ! empty( $template_options['comment_moderation'] ) ? '1' : '0';
+	}
+);
+
+add_filter(
+	'pre_option_comments_per_page',
+	static function () use ( $template_options ) {
+		return (string) max( 1, (int) ( $template_options['comments_per_page'] ?? 20 ) );
+	}
+);
+
+add_filter(
+	'pre_option_page_comments',
+	static function () use ( $template_options ) {
+		return max( 1, (int) ( $template_options['comments_per_page'] ?? 20 ) ) > 0 ? '1' : '0';
+	}
+);
+
+add_filter(
+	'pre_option_thread_comments',
+	static function () use ( $template_options ) {
+		return max( 1, (int) ( $template_options['comment_nesting_depth'] ?? 3 ) ) > 1 ? '1' : '0';
+	}
+);
+
+add_filter(
+	'pre_option_thread_comments_depth',
+	static function () use ( $template_options ) {
+		return (string) max( 1, (int) ( $template_options['comment_nesting_depth'] ?? 3 ) );
+	}
+);
+
+add_filter(
+	'pre_option_require_name_email',
+	static function () use ( $template_options ) {
+		$required = array_map( 'strval', (array) ( $template_options['comment_form_fields'] ?? array( 'name', 'email' ) ) );
+
+		return in_array( 'name', $required, true ) && in_array( 'email', $required, true ) ? '1' : '0';
+	}
+);
+
+add_filter(
+	'comments_open',
+	static function ( $open, $post_id = 0 ) use ( $template_options ) {
+		if ( empty( $template_options['comments_enable'] ) ) {
+			return false;
+		}
+
+		return $open;
+	},
+	10,
+	2
+);
+
 // ---------------------------------------------------------------------------
 // 4. 初始化各模块
 // ---------------------------------------------------------------------------
+add_filter(
+	'pre_option_users_can_register',
+	static function () use ( $login_options ) {
+		if ( empty( $login_options['front_login_enable'] ) || empty( $login_options['frontend_regist'] ) ) {
+			return false;
+		}
+
+		return ! empty( $login_options['users_can_register'] ) ? '1' : '0';
+	}
+);
+
+add_filter(
+	'pre_option_default_role',
+	static function () use ( $login_options ) {
+		if ( empty( $login_options['front_login_enable'] ) || empty( $login_options['frontend_regist'] ) ) {
+			return false;
+		}
+
+		$role = sanitize_key( (string) ( $login_options['default_role'] ?? 'subscriber' ) );
+
+		return '' !== $role ? $role : 'subscriber';
+	}
+);
+
+add_filter(
+	'lerm_login_redirect_url',
+	static function ( $default, $user = null ) use ( $login_options ) {
+		if ( ! empty( $login_options['login_redirect_url'] ) ) {
+			return (string) $login_options['login_redirect_url'];
+		}
+
+		if ( ! empty( $login_options['front_user_center'] ) && ! empty( $login_options['account_page_url'] ) ) {
+			return (string) $login_options['account_page_url'];
+		}
+
+		return (string) $default;
+	},
+	10,
+	2
+);
+
+add_action(
+	'login_init',
+	static function () use ( $login_options ) {
+		if ( empty( $login_options['front_login_enable'] ) || empty( $login_options['default_login_page'] ) ) {
+			return;
+		}
+
+		if ( wp_doing_ajax() ) {
+			return;
+		}
+
+		$action = isset( $_REQUEST['action'] ) && is_scalar( $_REQUEST['action'] )
+			? sanitize_key( wp_unslash( (string) $_REQUEST['action'] ) )
+			: 'login';
+
+		if ( in_array( $action, array( 'logout', 'rp', 'resetpass', 'postpass' ), true ) ) {
+			return;
+		}
+
+		$target = match ( $action ) {
+			'lostpassword', 'retrievepassword' => lerm_get_frontend_auth_page_url( 'reset' ),
+			'register' => lerm_get_frontend_auth_page_url( 'regist' ),
+			default => lerm_get_frontend_auth_page_url( 'login' ),
+		};
+
+		if ( ! $target ) {
+			return;
+		}
+
+		$redirect_to = isset( $_REQUEST['redirect_to'] ) && is_scalar( $_REQUEST['redirect_to'] )
+			? wp_validate_redirect( wp_unslash( (string) $_REQUEST['redirect_to'] ), '' )
+			: '';
+
+		if ( '' !== $redirect_to ) {
+			$target = add_query_arg( 'redirect_to', $redirect_to, $target );
+		}
+
+		wp_safe_redirect( $target );
+		exit;
+	}
+);
+
 Setup::instance(
 	array(
 		'excerpt_length'         => (int) ( $options['excerpt_length'] ?? 100 ),

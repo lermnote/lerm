@@ -47,4 +47,8 @@ final class OptionBackend implements StorageBackend {
 	public function key(): string {
 		return $this->option_name;
 	}
+
+	public function delete(): bool {
+		return delete_option( $this->option_name );
+	}
 }

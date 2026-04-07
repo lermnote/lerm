@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class PostMetaBackend implements StorageBackend {
 
-	private int    $post_id;
+	private int $post_id;
 	private string $meta_key;
 
 	/**
@@ -47,5 +47,9 @@ final class PostMetaBackend implements StorageBackend {
 
 	public function key(): string {
 		return 'post_' . $this->post_id . '_' . $this->meta_key;
+	}
+
+	public function delete(): bool {
+		return delete_post_meta( $this->post_id, $this->meta_key );
 	}
 }

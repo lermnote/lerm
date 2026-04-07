@@ -10,7 +10,13 @@ if ( ! is_user_logged_in() ) {
 	exit;
 }
 
+if ( ! lerm_options( 'front_user_center', '', false ) ) {
+	wp_safe_redirect( home_url( '/' ) );
+	exit;
+}
+
 $user_id = get_current_user_id();
+$allow_profile_edit = (bool) lerm_options( 'frontend_profile', '', false );
 
 $profile_data = array(
 	'nickname'    => get_the_author_meta( 'nickname', $user_id ),
@@ -37,11 +43,13 @@ get_header();
 							<i class="fa fa-heart"></i>
 							<?php echo esc_html( $profile_data['nickname'] ); ?>
 							<small class="badge text-bg-light opacity-50 text-nowrap"><?php esc_html_e( 'Beginner', 'lerm' ); ?></small>
-							<span role="tablist">
-								<a class="btn btn-outline-primary btn-sm" id="v-pills-settings-tab" data-bs-toggle="tab"
-									data-bs-target="#v-pills-settings" type="button" role="tab"
-									aria-controls="v-pills-settings" aria-selected="false"><?php esc_html_e( 'Edit profile', 'lerm' ); ?></a>
-							</span>
+							<?php if ( $allow_profile_edit ) : ?>
+								<span role="tablist">
+									<a class="btn btn-outline-primary btn-sm" id="v-pills-settings-tab" data-bs-toggle="tab"
+										data-bs-target="#v-pills-settings" type="button" role="tab"
+										aria-controls="v-pills-settings" aria-selected="false"><?php esc_html_e( 'Edit profile', 'lerm' ); ?></a>
+								</span>
+							<?php endif; ?>
 						</h2>
 						<p class="card-text opacity-50 text-nowrap">
 							<?php if ( ! empty( $profile_data['user_url'] ) ) : ?>
@@ -66,10 +74,12 @@ get_header();
 				</div>
 
 				<div class="tab-content" id="v-pills-tabContent">
-					<div class="tab-pane fade" id="v-pills-settings" role="tabpanel"
-						aria-labelledby="v-pills-settings-tab" tabindex="0">
-						<?php get_template_part( 'template-parts/forms/profile' ); ?>
-					</div>
+					<?php if ( $allow_profile_edit ) : ?>
+						<div class="tab-pane fade" id="v-pills-settings" role="tabpanel"
+							aria-labelledby="v-pills-settings-tab" tabindex="0">
+							<?php get_template_part( 'template-parts/forms/profile' ); ?>
+						</div>
+					<?php endif; ?>
 
 					<div class="tab-pane fade" id="v-pills-messages">
 						<div class="list-group list-group-flush border-bottom scrollarea">

@@ -17,6 +17,7 @@ declare( strict_types=1 );
 namespace Lerm\OptionsFramework\Stores;
 
 use Lerm\OptionsFramework\Backends\OptionBackend;
+use Lerm\OptionsFramework\Framework;
 use Lerm\OptionsFramework\Contracts\StorageBackend;
 use Lerm\OptionsFramework\Registry\FieldTypeRegistry;
 use Lerm\OptionsFramework\Support\PageSchema;
@@ -39,6 +40,11 @@ final class OptionStore {
 	private StorageBackend $backend;
 
 	/**
+	 * Optional reference to the Framework instance for lifecycle hooks.
+	 */
+	private ?object $framework;
+
+	/**
 	 * Cached raw options.
 	 *
 	 * @var array<string, mixed>|null
@@ -59,10 +65,11 @@ final class OptionStore {
 	 *                                           OptionBackend using the option
 	 *                                           name resolved from $definition.
 	 */
-	public function __construct( array $definition, FieldTypeRegistry $field_types, ?StorageBackend $backend = null ) {
+	public function __construct( array $definition, FieldTypeRegistry $field_types, ?StorageBackend $backend = null, ?object $framework = null ) {
 		$this->definition  = $definition;
 		$this->field_types = $field_types;
 		$this->backend     = $backend ?? new OptionBackend( $this->resolve_option_name() );
+		$this->framework   = $framework;
 	}
 
 	/**
@@ -87,7 +94,7 @@ final class OptionStore {
 
 		foreach ( PageSchema::fields( $this->definition ) as $field ) {
 			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field( $field, $options[ $field_id ] ?? ( $field['default'] ?? '' ), false );
+			$options[ $field_id ] = $this->sanitize_field_internal( $field, $options[ $field_id ] ?? ( $field['default'] ?? '' ), false );
 		}
 
 		$this->normalized_options = $options;
@@ -153,7 +160,7 @@ final class OptionStore {
 			}
 
 			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field( $field, $submitted[ $field_id ] ?? null, true );
+			$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true );
 		}
 
 		return $this->persist_options( $options );
@@ -173,7 +180,7 @@ final class OptionStore {
 			}
 
 			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field( $field, $submitted[ $field_id ] ?? null, true );
+			$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true );
 		}
 
 		return $this->persist_options( $options );
@@ -221,7 +228,7 @@ final class OptionStore {
 			}
 
 			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field( $field, $field['default'] ?? '', false );
+			$options[ $field_id ] = $this->sanitize_field_internal( $field, $field['default'] ?? '', false );
 		}
 
 		return $this->persist_options( $options );
@@ -239,7 +246,7 @@ final class OptionStore {
 			}
 
 			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field( $field, $field['default'] ?? '', false );
+			$options[ $field_id ] = $this->sanitize_field_internal( $field, $field['default'] ?? '', false );
 		}
 
 		return $this->persist_options( $options );
@@ -252,7 +259,7 @@ final class OptionStore {
 	 * @param mixed                $value Submitted value.
 	 * @return mixed
 	 */
-	public function sanitize_field( array $field, $value, bool $strict = true ) {
+	private function sanitize_field_internal( array $field, $value, bool $strict ) {
 		$type     = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
 		$default  = $field['default'] ?? '';
 		$callback = $this->field_types->sanitize_callback( $type );
@@ -300,14 +307,14 @@ final class OptionStore {
 				);
 
 			case 'color':
-				$color = sanitize_hex_color( (string) $value );
+				$color = sanitize_hex_color( $this->string_value( $value ) );
 				return $color ? $color : $default;
 
 			case 'url':
-				return esc_url_raw( trim( (string) $value ) );
+				return esc_url_raw( $this->string_value( $value, '', true ) );
 
 			case 'wp_editor':
-				return wp_kses_post( (string) $value );
+				return wp_kses_post( $this->string_value( $value ) );
 
 			case 'code_editor':
 				return is_scalar( $value ) ? trim( (string) $value ) : '';
@@ -351,12 +358,25 @@ final class OptionStore {
 				return $this->sanitize_number_field( $field, $value, $default );
 
 			case 'textarea':
-				return sanitize_textarea_field( (string) $value );
+				return sanitize_textarea_field( $this->string_value( $value ) );
 
 			case 'text':
 			default:
-				return sanitize_text_field( (string) $value );
+				return sanitize_text_field( $this->string_value( $value ) );
 		}
+	}
+
+	/**
+	 * Public surface for sanitizing a single field value.
+	 * Always enforces strict mode (choice whitelist validation).
+	 * External consumers (custom renderers, import scripts) must use this.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Submitted value.
+	 * @return mixed
+	 */
+	public function sanitize_field( array $field, $value ) {
+		return $this->sanitize_field_internal( $field, $value, true );
 	}
 
 	/**
@@ -371,15 +391,33 @@ final class OptionStore {
 	private function persist_options( array $options ): bool {
 		$previous = $this->raw();
 
-		$this->raw_options        = $options;
-		$this->normalized_options = null;
-
-		// Identical payload — nothing to write, not a failure.
+		// No-op: payload is identical — treat as success, skip the DB write.
 		if ( $previous === $options ) {
+			$this->raw_options        = $options;
+			$this->normalized_options = null;
 			return true;
 		}
 
-		return $this->backend->write( $options );
+		$page_id = $this->backend->key();
+
+		if ( $this->framework && method_exists( $this->framework, 'fire' ) ) {
+			$this->framework->fire( 'before_save', $page_id, $options );
+		}
+
+		$this->raw_options        = $options;
+		$this->normalized_options = null;
+
+		if ( $this->backend->write( $options ) ) {
+			if ( $this->framework && method_exists( $this->framework, 'fire' ) ) {
+				$this->framework->fire( 'after_save', $page_id, $options );
+			}
+			return true;
+		}
+
+		// Write failed — roll back in-memory cache.
+		$this->raw_options        = $previous;
+		$this->normalized_options = null;
+		return false;
 	}
 
 	/**
@@ -466,7 +504,10 @@ final class OptionStore {
 	 */
 	private function sanitize_sorter_field( array $field, $value, bool $strict ): array {
 		$choices = PageSchema::choices( $field );
-		$default = is_array( $field['default'] ?? null ) ? $field['default'] : array( 'enabled' => array(), 'disabled' => array() );
+		$default = is_array( $field['default'] ?? null ) ? $field['default'] : array(
+			'enabled'  => array(),
+			'disabled' => array(),
+		);
 
 		if ( ! is_array( $value ) ) {
 			return $default;
@@ -475,7 +516,7 @@ final class OptionStore {
 		$order   = array();
 		$enabled = array();
 
-		if ( array_key_exists( 'order', $value ) || array_key_exists( 'enabled', $value ) ) {
+		if ( array_key_exists( 'order', $value ) ) {
 			$order   = is_array( $value['order'] ?? null ) ? $value['order'] : array();
 			$enabled = is_array( $value['enabled'] ?? null ) ? $value['enabled'] : array();
 		} else {
@@ -603,10 +644,10 @@ final class OptionStore {
 	 * @return int|float
 	 */
 	private function sanitize_number_field( array $field, $value, $default ) {
-		$cast    = (string) ( $field['cast'] ?? 'int' );
-		$number  = is_numeric( $value ) ? (float) $value : (float) $default;
-		$min     = isset( $field['min'] ) && is_numeric( $field['min'] ) ? (float) $field['min'] : null;
-		$max     = isset( $field['max'] ) && is_numeric( $field['max'] ) ? (float) $field['max'] : null;
+		$cast   = (string) ( $field['cast'] ?? 'int' );
+		$number = is_numeric( $value ) ? (float) $value : (float) $default;
+		$min    = isset( $field['min'] ) && is_numeric( $field['min'] ) ? (float) $field['min'] : null;
+		$max    = isset( $field['max'] ) && is_numeric( $field['max'] ) ? (float) $field['max'] : null;
 
 		if ( null !== $min && $number < $min ) {
 			$number = $min;
@@ -638,8 +679,8 @@ final class OptionStore {
 				continue;
 			}
 
-			$child_id            = (string) $child['id'];
-			$clean[ $child_id ] = $this->sanitize_field( $child, $submitted[ $child_id ] ?? null, $strict );
+			$child_id           = (string) $child['id'];
+			$clean[ $child_id ] = $this->sanitize_field_internal( $child, $submitted[ $child_id ] ?? null, $strict );
 		}
 
 		return $clean;
@@ -668,7 +709,7 @@ final class OptionStore {
 				continue;
 			}
 
-			if ( '' !== trim( (string) $value ) ) {
+			if ( '' !== $this->string_value( $value, '', true ) ) {
 				return false;
 			}
 		}
@@ -701,6 +742,19 @@ final class OptionStore {
 	 */
 	private function field_is_saved( array $field ): bool {
 		return ! array_key_exists( 'save', $field ) || false !== $field['save'];
+	}
+
+	/**
+	 * Safely normalize scalar-like values to strings.
+	 *
+	 * Avoids PHP "Array to string conversion" warnings when imported payloads or
+	 * malformed requests send array/object values into scalar fields.
+	 *
+	 * @param mixed  $value Submitted or stored value.
+	 * @param string $default Fallback value.
+	 */
+	private function string_value( $value, string $default = '', bool $trim = false ): string {
+		return PageSchema::scalar_value( $value, $default, $trim );
 	}
 
 	/**

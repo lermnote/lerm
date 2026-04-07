@@ -8,12 +8,17 @@
 
 $account_url = lerm_get_frontend_account_page_url();
 
+if ( ! lerm_options( 'frontend_login', '', false ) ) {
+	wp_safe_redirect( wp_login_url() );
+	exit;
+}
+
 if ( is_user_logged_in() ) {
 	wp_safe_redirect( $account_url );
 	exit;
 }
 
-$show_register = (bool) get_option( 'users_can_register' );
+$show_register = (bool) lerm_options( 'frontend_regist', '', false ) && (bool) get_option( 'users_can_register' );
 $active_tab    = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : 'login';
 
 if ( ! in_array( $active_tab, array( 'login', 'regist', 'reset' ), true ) ) {

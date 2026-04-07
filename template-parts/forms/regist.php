@@ -47,7 +47,7 @@ $forms = array(
 );
 ?>
 
-<?php if ( get_option( 'users_can_register' ) ) : ?>
+<?php if ( lerm_options( 'frontend_regist', '', false ) && get_option( 'users_can_register' ) ) : ?>
 	<form method="post" id="regist" action="regist">
 		<h2><?php echo esc_html__( 'Register', 'lerm' ); ?></h2>
 

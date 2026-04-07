@@ -12,6 +12,8 @@ namespace Lerm\OptionsFramework;
 use Lerm\OptionsFramework\Admin\OptionsPage;
 use Lerm\OptionsFramework\Contracts\StorageBackend;
 use Lerm\OptionsFramework\Registry\FieldTypeRegistry;
+use Lerm\OptionsFramework\Contracts\AssetResolver;
+use Lerm\OptionsFramework\Resolvers\DefaultAssetResolver;
 use Lerm\OptionsFramework\Stores\OptionStore;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -41,8 +43,15 @@ final class Framework {
 	 */
 	private array $pages = array();
 
-	public function __construct() {
-		$this->field_types = new FieldTypeRegistry();
+	private AssetResolver $asset_resolver;
+
+	public function __construct( ?AssetResolver $resolver = null ) {
+		$this->field_types    = new FieldTypeRegistry();
+		$this->asset_resolver = $resolver ?? new DefaultAssetResolver(
+			// Derive the assets URL from this file's location so the framework
+			// is portable — no dependency on LERM_URI or any host constant.
+			trailingslashit( get_template_directory_uri() . '/app/OptionsFramework/assets' )
+		);
 	}
 
 	/**
@@ -76,12 +85,26 @@ final class Framework {
 	 * @param array<string, mixed>  $definition Page definition.
 	 * @param StorageBackend|null   $backend    Optional custom backend.
 	 */
+	/**
+	 * Fire a framework lifecycle hook.
+	 *
+	 * Used internally by the OptionStore after a successful write.
+	 * External code can hook 'lerm_options_framework_before_save' and
+	 * 'lerm_options_framework_after_save' to observe saves.
+	 *
+	 * @param string               $hook    Short hook name ('before_save' or 'after_save').
+	 * @param string               $page_id The page / store identifier.
+	 * @param array<string, mixed> $data    Data being saved.
+	 */
+	public function fire( string $hook, string $page_id, array $data ): void {
+		do_action( 'lerm_options_framework_' . $hook, $page_id, $data, $this );
+	}
+
 	public function store( array $definition, ?StorageBackend $backend = null ): OptionStore {
-		$page_id     = $this->page_id( $definition );
-		$cache_key   = null !== $backend ? $page_id . '_' . $backend->key() : $page_id;
+		$cache_key = $this->cache_key( $definition, $backend );
 
 		if ( ! isset( $this->stores[ $cache_key ] ) ) {
-			$this->stores[ $cache_key ] = new OptionStore( $definition, $this->field_types, $backend );
+			$this->stores[ $cache_key ] = new OptionStore( $definition, $this->field_types, $backend, $this );
 		}
 
 		return $this->stores[ $cache_key ];
@@ -94,13 +117,28 @@ final class Framework {
 	 * @param StorageBackend|null  $backend    Optional custom backend.
 	 */
 	public function mount_options_page( array $definition, ?StorageBackend $backend = null ): OptionsPage {
-		$page_id = $this->page_id( $definition );
+		$cache_key = $this->cache_key( $definition, $backend );
 
-		if ( ! isset( $this->pages[ $page_id ] ) ) {
-			$this->pages[ $page_id ] = new OptionsPage( $definition, $this->store( $definition, $backend ), $this->field_types );
+		if ( ! isset( $this->pages[ $cache_key ] ) ) {
+			$this->pages[ $cache_key ] = new OptionsPage( $definition, $this->store( $definition, $backend ), $this->field_types, $this->asset_resolver );
 		}
 
-		return $this->pages[ $page_id ];
+		return $this->pages[ $cache_key ];
+	}
+
+	/**
+	 * Resolve the framework cache key for a mounted definition/backend pair.
+	 *
+	 * The page ID alone is not sufficient once the same schema can be reused
+	 * against multiple backends (option row, term meta, user meta, post meta).
+	 *
+	 * @param array<string, mixed> $definition Page definition.
+	 * @param StorageBackend|null  $backend    Optional custom backend.
+	 */
+	private function cache_key( array $definition, ?StorageBackend $backend = null ): string {
+		$page_id = $this->page_id( $definition );
+
+		return null !== $backend ? $page_id . '_' . $backend->key() : $page_id;
 	}
 
 	/**

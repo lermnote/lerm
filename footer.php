@@ -83,16 +83,16 @@ if ( $footer_menu_id > 0 ) {
 
 <?php if ( ! empty( $template_options['dark_mode_enable'] ) ) : ?>
 	<script>
-	(function(){
-		var btn = document.getElementById('lerm-dark-toggle');
-		if (!btn) return;
-		btn.addEventListener('click', function(){
-			var cur  = document.documentElement.getAttribute('data-bs-theme') || 'light';
-			var next = cur === 'dark' ? 'light' : 'dark';
-			document.documentElement.setAttribute('data-bs-theme', next);
-			localStorage.setItem('lerm-color-scheme', next);
-		});
-	})();
+	// (function(){
+	// 	var btn = document.getElementById('lerm-dark-toggle');
+	// 	if (!btn) return;
+	// 	btn.addEventListener('click', function(){
+	// 		var cur  = document.documentElement.getAttribute('data-bs-theme') || 'light';
+	// 		var next = cur === 'dark' ? 'light' : 'dark';
+	// 		document.documentElement.setAttribute('data-bs-theme', next);
+	// 		localStorage.setItem('lerm-color-scheme', next);
+	// 	});
+	// })();
 	</script>
 <?php endif; ?>
 

@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class UserMetaBackend implements StorageBackend {
 
-	private int    $user_id;
+	private int $user_id;
 	private string $meta_key;
 
 	/**
@@ -45,5 +45,9 @@ final class UserMetaBackend implements StorageBackend {
 
 	public function key(): string {
 		return 'user_' . $this->user_id . '_' . $this->meta_key;
+	}
+
+	public function delete(): bool {
+		return delete_user_meta( $this->user_id, $this->meta_key );
 	}
 }

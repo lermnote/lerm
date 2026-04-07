@@ -3,6 +3,7 @@ import { delegate } from '../utils/dom.js';
 import { translate } from '../utils/i18n.js';
 
 const commentMinLength = Math.max(Number.parseInt(window.lermData?.comment_min_length ?? '6', 10) || 0, 0);
+const commentMaxLength = Math.max(Number.parseInt(window.lermData?.comment_max_length ?? '0', 10) || 0, 0);
 const strongPasswordRule = {
 	minLength: 8,
 	hasUppercase: /[A-Z]/,
@@ -52,8 +53,10 @@ const validationRules = {
 	},
 	comment: {
 		minLength: commentMinLength,
+		maxLength: commentMaxLength,
 		errorMessage: {
 			minLength: translate('comment_min', { minLength: commentMinLength }),
+			maxLength: translate('comment_max', { maxLength: commentMaxLength }),
 		},
 	},
 };
@@ -72,6 +75,7 @@ const validateField = (field, rules, formValues = {}) => {
 	const {
 		pattern,
 		minLength,
+		maxLength,
 		hasUppercase,
 		hasNumber,
 		hasSpecialChar,
@@ -89,6 +93,13 @@ const validateField = (field, rules, formValues = {}) => {
 		return {
 			valid: false,
 			message: errorMessage?.minLength || translate('password_min', { minLength }),
+		};
+	}
+
+	if (maxLength && value.length > maxLength) {
+		return {
+			valid: false,
+			message: errorMessage?.maxLength || translate('comment_max', { maxLength }),
 		};
 	}
 

@@ -11,6 +11,7 @@ namespace Lerm\OptionsFramework\Admin;
 
 use Lerm\OptionsFramework\Registry\FieldTypeRegistry;
 use Lerm\OptionsFramework\Stores\OptionStore;
+use Lerm\OptionsFramework\Contracts\AssetResolver;
 use Lerm\OptionsFramework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,14 +36,32 @@ final class OptionsPage {
 	 */
 	private string $page_hook = '';
 
+	private AssetResolver $asset_resolver;
+
+	/**
+	 * Text domain for translatable strings.
+	 * Passed by the host via the definition so it can be overridden.
+	 */
+	private string $textdomain;
+
+	/**
+	 * The JS global variable name for this page instance.
+	 * Namespaced by page slug to avoid collisions on multi-instance pages.
+	 */
+	private string $js_global;
+
 	/**
 	 * @param array<string, mixed> $definition Page definition.
 	 */
-	public function __construct( array $definition, OptionStore $store, FieldTypeRegistry $field_types ) {
-		$this->definition  = $definition;
-		$this->store       = $store;
-		$this->field_types = $field_types;
-
+	public function __construct( array $definition, OptionStore $store, FieldTypeRegistry $field_types, AssetResolver $asset_resolver ) {
+		$this->definition     = $definition;
+		$this->store          = $store;
+		$this->field_types    = $field_types;
+		$this->asset_resolver = $asset_resolver;
+		// Textdomain and JS global can be overridden per-instance via the definition.
+		$this->textdomain = (string) ( $definition['textdomain'] ?? 'lerm' );
+		//$this->js_global  = 'lermOptionsFramework_' . str_replace( '-', '_', sanitize_key( $this->page_slug() ) );
+		$this->js_global = 'lermOptionsFramework';
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_post_' . $this->save_action(), array( $this, 'handle_save' ) );
 		add_action( 'wp_ajax_' . $this->ajax_save_action(), array( $this, 'handle_ajax_save' ) );
@@ -88,8 +107,8 @@ final class OptionsPage {
 
 		$redirect_url = add_query_arg(
 			array(
-				'page'                => $this->page_slug(),
-				'tab'                 => $tab,
+				'page'                 => $this->page_slug(),
+				'tab'                  => $tab,
 				'options_framework_ok' => '1',
 			),
 			$this->admin_parent_url()
@@ -274,22 +293,27 @@ final class OptionsPage {
 		wp_enqueue_style( 'wp-color-picker' );
 		wp_enqueue_style( 'wp-codemirror' );
 		wp_enqueue_script( 'wp-theme-plugin-editor' );
+		// Asset handles are namespaced by page slug so two framework instances
+		// on the same admin screen don't enqueue the same handle twice.
+		$css_handle = 'lerm-options-framework-' . $this->page_slug();
+		$js_handle  = 'lerm-options-framework-js-' . $this->page_slug();
+
 		wp_enqueue_style(
-			'lerm-options-framework',
+			$css_handle,
 			$this->asset_url( 'options-framework.css' ),
 			array( 'wp-color-picker', 'wp-codemirror' ),
 			$this->asset_version()
 		);
 		wp_enqueue_script(
-			'lerm-options-framework',
+			$js_handle,
 			$this->asset_url( 'options-framework.js' ),
 			array( 'jquery', 'jquery-ui-sortable', 'wp-color-picker', 'wp-theme-plugin-editor' ),
 			$this->asset_version(),
 			true
 		);
 		wp_localize_script(
-			'lerm-options-framework',
-			'lermOptionsFramework',
+			$js_handle,
+			$this->js_global,
 			array(
 				'ajaxUrl'             => admin_url( 'admin-ajax.php' ),
 				'saveAction'          => $this->ajax_save_action(),
@@ -360,7 +384,19 @@ final class OptionsPage {
 
 					<nav class="lerm-settings-nav" aria-label="<?php esc_attr_e( 'Settings sections', 'lerm' ); ?>">
 						<?php foreach ( $sections as $section_id => $section ) : ?>
-							<a class="lerm-settings-nav__item <?php echo $section_id === $current_tab ? 'is-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( array( 'page' => $this->page_slug(), 'tab' => $section_id ), $this->admin_parent_url() ) ); ?>">
+							<a class="lerm-settings-nav__item <?php echo $section_id === $current_tab ? 'is-active' : ''; ?>" href="
+							<?php
+							echo esc_url(
+								add_query_arg(
+									array(
+										'page' => $this->page_slug(),
+										'tab'  => $section_id,
+									),
+									$this->admin_parent_url()
+								)
+							);
+							?>
+																">
 								<span class="lerm-settings-nav__title"><?php echo esc_html( (string) $section['title'] ); ?></span>
 								<span class="lerm-settings-nav__meta"><?php echo esc_html( sprintf( _n( '%s field', '%s fields', count( $section['fields'] ), 'lerm' ), number_format_i18n( count( $section['fields'] ) ) ) ); ?></span>
 							</a>
@@ -396,7 +432,7 @@ final class OptionsPage {
 
 						<div class="lerm-settings-flash" data-lerm-flash aria-live="polite"></div>
 
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="lerm-settings-form" data-option-name="<?php echo esc_attr( $this->option_name() ); ?>" novalidate>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="lerm-settings-form" data-option-name="<?php echo esc_attr( $this->option_name() ); ?>" data-js-global="<?php echo esc_attr( $this->js_global ); ?>" novalidate>
 							<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
 							<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $current_tab ); ?>">
 							<?php wp_nonce_field( $this->nonce_action( $current_tab ) ); ?>
@@ -522,7 +558,7 @@ final class OptionsPage {
 						'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text lerm-color-field">',
 						esc_attr( $field_id ),
 						esc_attr( $field_name ),
-						esc_attr( (string) $field_value )
+						esc_attr( $this->scalar_string( $field_value ) )
 					);
 					break;
 
@@ -532,9 +568,10 @@ final class OptionsPage {
 					break;
 
 				case 'select':
-					$choices = PageSchema::choices( $field );
-					$multiple = ! empty( $field['multiple'] );
+					$choices        = PageSchema::choices( $field );
+					$multiple       = ! empty( $field['multiple'] );
 					$current_values = $multiple && is_array( $field_value ) ? array_map( 'strval', $field_value ) : array();
+					$current_value  = $multiple ? '' : $this->scalar_string( $field_value );
 					printf(
 						'<select id="%1$s" name="%2$s" class="regular-text" data-lerm-controller="1" %3$s %4$s>',
 						esc_attr( $field_id ),
@@ -548,7 +585,7 @@ final class OptionsPage {
 							esc_attr( $value ),
 							$multiple
 								? selected( in_array( (string) $value, $current_values, true ), true, false )
-								: selected( (string) $field_value, (string) $value, false ),
+								: selected( $current_value, (string) $value, false ),
 							esc_html( $label )
 						);
 					}
@@ -586,7 +623,7 @@ final class OptionsPage {
 						'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text" min="%4$s" max="%5$s" step="%6$s" %7$s>',
 						esc_attr( $field_id ),
 						esc_attr( $field_name ),
-						esc_attr( (string) $field_value ),
+						esc_attr( $this->scalar_string( $field_value ) ),
 						esc_attr( (string) ( $field['min'] ?? '' ) ),
 						esc_attr( (string) ( $field['max'] ?? '' ) ),
 						esc_attr( (string) ( $field['step'] ?? 1 ) ),
@@ -606,7 +643,7 @@ final class OptionsPage {
 						esc_attr( (string) ( $field['rows'] ?? 4 ) ),
 						$dependency ? 'data-lerm-controller="1"' : '',
 						esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
-						esc_textarea( (string) $field_value )
+						esc_textarea( $this->scalar_string( $field_value ) )
 					);
 					break;
 
@@ -617,7 +654,7 @@ final class OptionsPage {
 						esc_attr( $field_name ),
 						esc_attr( (string) ( $field['rows'] ?? 10 ) ),
 						esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
-						esc_textarea( (string) $field_value )
+						esc_textarea( $this->scalar_string( $field_value ) )
 					);
 					break;
 
@@ -631,7 +668,7 @@ final class OptionsPage {
 					);
 
 					wp_editor(
-						(string) $field_value,
+						$this->scalar_string( $field_value ),
 						sanitize_html_class( 'lerm-' . $field_id ),
 						$editor_args
 					);
@@ -645,7 +682,7 @@ final class OptionsPage {
 						esc_attr( (string) ( $field['input_type'] ?? ( in_array( $field_type, array( 'url', 'text' ), true ) ? $field_type : 'text' ) ) ),
 						esc_attr( $field_id ),
 						esc_attr( $field_name ),
-						esc_attr( (string) $field_value ),
+						esc_attr( $this->scalar_string( $field_value ) ),
 						$dependency ? 'data-lerm-controller="1"' : '',
 						esc_attr( (string) ( $field['placeholder'] ?? '' ) )
 					);
@@ -820,7 +857,7 @@ final class OptionsPage {
 					'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text lerm-color-field"%4$s%5$s>',
 					esc_attr( $input_id ),
 					esc_attr( $field_name ),
-					esc_attr( (string) $value ),
+					esc_attr( $this->scalar_string( $value ) ),
 					$name_attr,
 					$id_attr
 				);
@@ -859,9 +896,10 @@ final class OptionsPage {
 				return;
 
 			case 'select':
-				$choices  = PageSchema::choices( $field );
-				$multiple = ! empty( $field['multiple'] );
-				$current  = $multiple && is_array( $value ) ? array_map( 'strval', $value ) : array();
+				$choices       = PageSchema::choices( $field );
+				$multiple      = ! empty( $field['multiple'] );
+				$current       = $multiple && is_array( $value ) ? array_map( 'strval', $value ) : array();
+				$current_value = $multiple ? '' : $this->scalar_string( $value );
 				printf(
 					'<select id="%1$s" name="%2$s" class="regular-text"%3$s%4$s%5$s%6$s>',
 					esc_attr( $input_id ),
@@ -877,7 +915,7 @@ final class OptionsPage {
 						esc_attr( $choice_value ),
 						$multiple
 							? selected( in_array( (string) $choice_value, $current, true ), true, false )
-							: selected( (string) $value, (string) $choice_value, false ),
+							: selected( $current_value, (string) $choice_value, false ),
 						esc_html( $choice_label )
 					);
 				}
@@ -893,7 +931,7 @@ final class OptionsPage {
 					esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
 					$name_attr,
 					$id_attr,
-					esc_textarea( (string) $value )
+					esc_textarea( $this->scalar_string( $value ) )
 				);
 				return;
 
@@ -911,7 +949,7 @@ final class OptionsPage {
 					'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text" min="%4$s" max="%5$s" step="%6$s"%7$s%8$s>',
 					esc_attr( $input_id ),
 					esc_attr( $field_name ),
-					esc_attr( (string) $value ),
+					esc_attr( $this->scalar_string( $value ) ),
 					esc_attr( (string) ( $field['min'] ?? '' ) ),
 					esc_attr( (string) ( $field['max'] ?? '' ) ),
 					esc_attr( (string) ( $field['step'] ?? 1 ) ),
@@ -928,7 +966,7 @@ final class OptionsPage {
 					esc_attr( (string) ( $field['input_type'] ?? ( in_array( $field_type, array( 'url', 'text' ), true ) ? $field_type : 'text' ) ) ),
 					esc_attr( $input_id ),
 					esc_attr( $field_name ),
-					esc_attr( (string) $value ),
+					esc_attr( $this->scalar_string( $value ) ),
 					esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
 					$name_attr,
 					$id_attr
@@ -947,9 +985,18 @@ final class OptionsPage {
 		$field_id      = (string) $field['id'];
 		$name_prefix   = $field_name ?? ( $this->option_name() . '[' . $field_id . ']' );
 		$target        = $target ?? $field_id;
-		$attachment_id = is_array( $value ) ? absint( $value['id'] ?? 0 ) : 0;
-		$image_url     = $attachment_id > 0 ? wp_get_attachment_image_url( $attachment_id, 'medium' ) : '';
-		$button_text   = (string) ( $field['button_text'] ?? __( 'Choose image', 'lerm' ) );
+		$attachment_id = is_array( $value ) ? absint( $value['id'] ?? 0 ) : absint( $value );
+		$image_url     = '';
+
+		if ( $attachment_id > 0 ) {
+			$image_url = (string) wp_get_attachment_image_url( $attachment_id, 'medium' );
+		}
+
+		if ( '' === $image_url && is_array( $value ) ) {
+			$image_url = $this->scalar_string( $value['thumbnail'] ?? $value['url'] ?? '' );
+		}
+
+		$button_text = (string) ( $field['button_text'] ?? __( 'Choose image', 'lerm' ) );
 
 		printf(
 			'<div class="lerm-media-field" data-target="%1$s"><input type="hidden" name="%2$s[id]" value="%3$s"%8$s%9$s><div class="lerm-media-preview">%4$s</div><div class="lerm-media-actions"><button type="button" class="button lerm-media-select">%5$s</button><button type="button" class="button button-secondary button-link-delete lerm-media-remove" %6$s>%7$s</button></div></div>',
@@ -1001,7 +1048,7 @@ final class OptionsPage {
 		$field_id    = (string) $field['id'];
 		$name_prefix = $field_name ?? ( $this->option_name() . '[' . $field_id . ']' );
 		$target      = $target ?? $field_id;
-		$ids         = is_array( $value ) ? array_values( array_filter( array_map( 'absint', $value ) ) ) : array();
+		$ids         = $this->normalize_gallery_ids( $value );
 
 		echo '<div class="lerm-gallery-field" data-target="' . esc_attr( $target ) . '">';
 		echo '<input type="hidden" name="' . esc_attr( $name_prefix . '[ids]' ) . '" value="' . esc_attr( implode( ',', $ids ) ) . '"' . $name_attr . $id_attr . '>';
@@ -1077,19 +1124,32 @@ final class OptionsPage {
 		$enabled = array();
 
 		if ( is_array( $value ) ) {
-			$enabled_values  = is_array( $value['enabled'] ?? null ) ? $value['enabled'] : array();
-			$disabled_values = is_array( $value['disabled'] ?? null ) ? $value['disabled'] : array();
+			if ( isset( $value['order'] ) && is_array( $value['order'] ) ) {
+				$order_keys = array_map( 'strval', $value['order'] );
+				$enabled    = isset( $value['enabled'] ) && is_array( $value['enabled'] )
+					? array_map( 'strval', $value['enabled'] )
+					: array();
 
-			foreach ( array_keys( $enabled_values ) as $key ) {
-				if ( isset( $choices[ $key ] ) ) {
-					$order[ $key ] = $choices[ $key ];
-					$enabled[]     = $key;
+				foreach ( $order_keys as $key ) {
+					if ( isset( $choices[ $key ] ) ) {
+						$order[ $key ] = $choices[ $key ];
+					}
 				}
-			}
+			} else {
+				$enabled_values  = is_array( $value['enabled'] ?? null ) ? $value['enabled'] : array();
+				$disabled_values = is_array( $value['disabled'] ?? null ) ? $value['disabled'] : array();
 
-			foreach ( array_keys( $disabled_values ) as $key ) {
-				if ( isset( $choices[ $key ] ) && ! isset( $order[ $key ] ) ) {
-					$order[ $key ] = $choices[ $key ];
+				foreach ( array_keys( $enabled_values ) as $key ) {
+					if ( isset( $choices[ $key ] ) ) {
+						$order[ $key ] = $choices[ $key ];
+						$enabled[]     = $key;
+					}
+				}
+
+				foreach ( array_keys( $disabled_values ) as $key ) {
+					if ( isset( $choices[ $key ] ) && ! isset( $order[ $key ] ) ) {
+						$order[ $key ] = $choices[ $key ];
+					}
 				}
 			}
 		}
@@ -1220,16 +1280,62 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Asset base URL for the framework bundle.
+	 * Translation helper that honours the instance textdomain.
+	 *
+	 * @param string $text Source text (identical to the first arg of __()).
 	 */
-	private function asset_url( string $asset ): string {
-		return trailingslashit( LERM_URI . 'app/OptionsFramework/assets' ) . ltrim( $asset, '/' );
+	private function td( string $text ): string {
+		return __( $text, $this->textdomain ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText,WordPress.WP.I18n.NonSingularStringLiteralDomain
 	}
 
 	/**
-	 * Asset version string.
+	 * Normalize scalar-like values to strings for safe rendering.
+	 * Unified with OptionStore::string_value() — both delegate here via PageSchema.
+	 *
+	 * @param mixed  $value Source value.
+	 * @param string $default Fallback string.
+	 */
+	private function scalar_string( $value, string $default = '' ): string {
+		return PageSchema::scalar_value( $value, $default );
+	}
+
+	/**
+	 * Normalize gallery values from stored arrays, legacy strings, or nested ids.
+	 *
+	 * @param mixed $value Gallery field value.
+	 * @return array<int, int>
+	 */
+	private function normalize_gallery_ids( $value ): array {
+		$ids = array();
+
+		if ( is_array( $value ) ) {
+			if ( isset( $value['ids'] ) && is_scalar( $value['ids'] ) ) {
+				$ids = explode( ',', (string) $value['ids'] );
+			} else {
+				$ids = $value;
+			}
+		} elseif ( is_scalar( $value ) ) {
+			$ids = explode( ',', (string) $value );
+		}
+
+		return array_values(
+			array_filter(
+				array_map( 'absint', $ids )
+			)
+		);
+	}
+
+	/**
+	 * Asset URL — delegated to the injected AssetResolver.
+	 */
+	private function asset_url( string $asset ): string {
+		return $this->asset_resolver->url( $asset );
+	}
+
+	/**
+	 * Asset version — delegated to the injected AssetResolver.
 	 */
 	private function asset_version(): string {
-		return defined( 'LERM_VERSION' ) ? (string) LERM_VERSION : '1.0.0';
+		return $this->asset_resolver->version();
 	}
 }

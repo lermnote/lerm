@@ -72,7 +72,7 @@ $remember_me = array(
 	<small id="login-msg" class="user-msg text-danger wow invisible">#</small>
 </form>
 
-<?php if ( get_option( 'users_can_register' ) ) : ?>
+<?php if ( lerm_options( 'frontend_regist', '', false ) && get_option( 'users_can_register' ) ) : ?>
 	<hr class="my-3">
 	<div class="text-center">
 		<span><?php echo esc_html__( 'Don\'t have an account?', 'lerm' ); ?> </span>

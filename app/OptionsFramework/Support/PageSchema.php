@@ -144,6 +144,37 @@ final class PageSchema {
 			return array();
 		}
 
-		return array_map( 'strval', $choices );
+		$normalized = array();
+
+		foreach ( $choices as $key => $label ) {
+			if ( ! is_scalar( $key ) || ! is_scalar( $label ) ) {
+				continue;
+			}
+
+			$normalized[ (string) $key ] = (string) $label;
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Safely normalize any scalar-like value to a string.
+	 *
+	 * Canonical implementation shared by OptionStore and OptionsPage.
+	 * Both classes previously had their own copy under different names
+	 * (string_value / scalar_string); both now delegate here.
+	 *
+	 * @param mixed  $value   Source value (may be array, null, scalar, …).
+	 * @param string $default Fallback when $value is not scalar.
+	 * @param bool   $trim    Whether to trim the result.
+	 */
+	public static function scalar_value( $value, string $default = '', bool $trim = false ): string {
+		if ( ! is_scalar( $value ) ) {
+			return $default;
+		}
+
+		$string = (string) $value;
+
+		return $trim ? trim( $string ) : $string;
 	}
 }

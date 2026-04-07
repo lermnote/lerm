@@ -23,7 +23,12 @@ $comment_author       = sanitize_text_field( $commenter['comment_author'] ?? '' 
 $comment_author_email = sanitize_email( $commenter['comment_author_email'] ?? '' );
 $comment_author_url   = esc_url_raw( $commenter['comment_author_url'] ?? '' );
 $commenter_identity   = is_user_logged_in() ? wp_get_current_user()->display_name : ( $commenter['comment_author'] ?? '' );
-$require_identity     = (bool) get_option( 'require_name_email' );
+$required_fields      = array_map( 'strval', (array) ( $template_options['comment_form_fields'] ?? array( 'name', 'email' ) ) );
+$require_author       = in_array( 'name', $required_fields, true );
+$require_email        = in_array( 'email', $required_fields, true );
+$require_url          = in_array( 'website', $required_fields, true );
+$comment_max_length   = max( 0, (int) ( $template_options['comment_max_length'] ?? 2000 ) );
+$comment_max_attr     = $comment_max_length > 0 ? ' maxlength="' . esc_attr( (string) $comment_max_length ) . '"' : '';
 $frontend_account_url = lerm_get_frontend_account_page_url();
 $frontend_login_url   = add_query_arg( 'redirect_to', get_permalink( $comment_post_id ), lerm_get_frontend_auth_page_url( 'login' ) );
 $cravatar_tip_message = sprintf(
@@ -53,11 +58,11 @@ $args = array(
 			)
 		) . '</p>'
 		: '',
-	'comment_field'        => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="comment">' . esc_html__( 'Comment', 'lerm' ) . '</label><textarea id="comment" class="rq form-control mb-1" name="comment" required="required" placeholder="' . esc_attr( $comment_placeholder ) . '" aria-label="' . esc_attr__( 'Comment content', 'lerm' ) . '" rows="4"></textarea></div>',
+	'comment_field'        => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="comment">' . esc_html__( 'Comment', 'lerm' ) . '</label><textarea id="comment" class="rq form-control mb-1" name="comment" required="required" placeholder="' . esc_attr( $comment_placeholder ) . '" aria-label="' . esc_attr__( 'Comment content', 'lerm' ) . '" rows="4"' . $comment_max_attr . '></textarea></div>',
 	'fields'               => array(
-		'author' => '<div class="form-group input-form mb-2"><label class="visually-hidden-focusable" for="author">' . esc_html__( 'Username', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . esc_attr__( 'Nickname', 'lerm' ) . '"' . ( $require_identity ? ' required' : '' ) . '></div></div>',
-		'email'  => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="email">' . esc_html__( 'Email', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-envelope"></i></span><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . esc_attr__( 'E-mail', 'lerm' ) . '"' . ( $require_identity ? ' required' : '' ) . '></div></div>',
-		'url'    => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="url">' . esc_html__( 'Url', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-link"></i></span><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . esc_attr__( 'Website', 'lerm' ) . '"></div></div>',
+		'author' => '<div class="form-group input-form mb-2"><label class="visually-hidden-focusable" for="author">' . esc_html__( 'Username', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-user"></i></span><input type="text" name="author" class="form-control form-control-sm" id="author" value="' . esc_attr( $comment_author ) . '" placeholder="' . esc_attr__( 'Nickname', 'lerm' ) . '"' . ( $require_author ? ' required' : '' ) . '></div></div>',
+		'email'  => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="email">' . esc_html__( 'Email', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-envelope"></i></span><input type="email" name="email" class="form-control form-control-sm" id="email" value="' . esc_attr( $comment_author_email ) . '" placeholder="' . esc_attr__( 'E-mail', 'lerm' ) . '"' . ( $require_email ? ' required' : '' ) . '></div></div>',
+		'url'    => '<div class="form-group mb-2"><label class="visually-hidden-focusable" for="url">' . esc_html__( 'Url', 'lerm' ) . '</label><div class="input-group mb-1"><span class="input-group-text"><i class="fa fa-link"></i></span><input type="url" name="url" class="form-control form-control-sm" id="url" value="' . esc_attr( $comment_author_url ) . '" placeholder="' . esc_attr__( 'Website', 'lerm' ) . '"' . ( $require_url ? ' required' : '' ) . '></div></div>',
 	),
 	'logged_in_as'         => '<p class="logged-in-as">' . sprintf(
 		/* translators: 1: avatar, 2: account URL, 3: accessibility text, 4: user name, 5: logout URL, 6: logout label */

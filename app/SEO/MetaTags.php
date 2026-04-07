@@ -28,6 +28,7 @@ class MetaTags {
 
 	public function hooks(): void {
 		add_filter( 'document_title_separator', array( __CLASS__, 'title_separator' ), 15, 1 );
+		add_filter( 'pre_get_document_title', array( __CLASS__, 'document_title' ), 15, 1 );
 		add_action( 'wp_head', array( __CLASS__, 'output_meta_tags' ), 1 );
 
 		if ( self::$args['html_slug'] ) {
@@ -120,7 +121,59 @@ class MetaTags {
 	public static function title_separator( string $sep ): string {
 		return self::$args['separator'] ? self::$args['separator'] : $sep;
 	}
+
+	public static function document_title( string $title ): string {
+		$tokens = array();
+
+		if ( is_front_page() || is_home() ) {
+			$tokens = (array) ( self::$args['title_structure'] ?? array() );
+		} elseif ( is_singular( 'post' ) ) {
+			$tokens = (array) ( self::$args['post_title_structure'] ?? array() );
+		} elseif ( is_page() ) {
+			$tokens = (array) ( self::$args['page_title_structure'] ?? array() );
+		}
+
+		if ( empty( $tokens ) ) {
+			return $title;
+		}
+
+		$resolved = array();
+
+		foreach ( $tokens as $token ) {
+			$part = self::title_token_value( (string) $token );
+
+			if ( '' !== $part ) {
+				$resolved[] = $part;
+			}
+		}
+
+		if ( empty( $resolved ) ) {
+			return $title;
+		}
+
+		$built = preg_replace( '/\s+/', ' ', implode( ' ', $resolved ) );
+
+		return trim( is_string( $built ) ? $built : implode( ' ', $resolved ) );
+	}
+
 	public static function get_args(): array {
 		return self::$args;
+	}
+
+	private static function title_token_value( string $token ): string {
+		return match ( $token ) {
+			'title'      => wp_strip_all_tags( get_bloginfo( 'name' ) ),
+			'tagline'    => wp_strip_all_tags( get_bloginfo( 'description' ) ),
+			'post_title' => is_singular() ? wp_strip_all_tags( single_post_title( '', false ) ) : '',
+			'page_title' => is_page() ? wp_strip_all_tags( single_post_title( '', false ) ) : '',
+			'separator'  => self::separator_value(),
+			default      => '',
+		};
+	}
+
+	private static function separator_value(): string {
+		$separator = (string) ( self::$args['separator'] ?? '|' );
+
+		return html_entity_decode( wp_strip_all_tags( $separator ), ENT_QUOTES, 'UTF-8' );
 	}
 }

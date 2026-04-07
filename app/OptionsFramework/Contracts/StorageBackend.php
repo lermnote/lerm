@@ -54,4 +54,12 @@ interface StorageBackend {
 	 * Used for cache busting and diagnostics.
 	 */
 	public function key(): string;
+
+	/**
+	 * Delete the stored payload entirely.
+	 *
+	 * Called on hard-reset or uninstall flows.
+	 * Must return true on success, false on DB failure or when nothing existed.
+	 */
+	public function delete(): bool;
 }

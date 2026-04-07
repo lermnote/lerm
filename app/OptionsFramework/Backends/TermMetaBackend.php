@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class TermMetaBackend implements StorageBackend {
 
-	private int    $term_id;
+	private int $term_id;
 	private string $meta_key;
 
 	/**
@@ -52,5 +52,9 @@ final class TermMetaBackend implements StorageBackend {
 
 	public function key(): string {
 		return 'term_' . $this->term_id . '_' . $this->meta_key;
+	}
+
+	public function delete(): bool {
+		return delete_term_meta( $this->term_id, $this->meta_key );
 	}
 }

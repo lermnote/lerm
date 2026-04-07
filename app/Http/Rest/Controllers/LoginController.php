@@ -21,6 +21,14 @@ final class LoginController {
 	private const LOCKOUT_MINS = 5;
 
 	public static function handle( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		if ( ! self::frontend_login_enabled() ) {
+			return new WP_Error(
+				'frontend_login_disabled',
+				__( 'Frontend login is disabled.', 'lerm' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		if ( is_user_logged_in() ) {
 			return new WP_REST_Response(
 				array(
@@ -100,6 +108,14 @@ final class LoginController {
 	}
 
 	public static function register( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		if ( ! self::frontend_register_enabled() ) {
+			return new WP_Error(
+				'frontend_registration_disabled',
+				__( 'Frontend registration is disabled.', 'lerm' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		if ( ! get_option( 'users_can_register' ) ) {
 			return new WP_Error(
 				'registration_closed',
@@ -215,6 +231,14 @@ final class LoginController {
 	}
 
 	public static function reset( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		if ( ! self::frontend_login_enabled() ) {
+			return new WP_Error(
+				'frontend_login_disabled',
+				__( 'Frontend login is disabled.', 'lerm' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$check = Middleware::chain(
 			fn() => Middleware::verify_nonce( $request ),
 			fn() => Middleware::rate_limit( 'auth_reset', 5, 15 * MINUTE_IN_SECONDS )
@@ -344,6 +368,18 @@ final class LoginController {
 		return function_exists( 'lerm_get_frontend_account_page_url' )
 			? lerm_get_frontend_account_page_url()
 			: home_url( '/' );
+	}
+
+	private static function frontend_login_enabled(): bool {
+		return function_exists( 'lerm_options' )
+			? (bool) lerm_options( 'frontend_login', '', false )
+			: false;
+	}
+
+	private static function frontend_register_enabled(): bool {
+		return self::frontend_login_enabled()
+			&& function_exists( 'lerm_options' )
+			&& (bool) lerm_options( 'frontend_regist', '', false );
 	}
 
 	private static function sanitize_redirect_target( mixed $candidate, string $fallback ): string {

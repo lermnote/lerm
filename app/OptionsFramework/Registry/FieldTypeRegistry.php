@@ -39,11 +39,20 @@ final class FieldTypeRegistry {
 			return;
 		}
 
+		if ( isset( $this->types[ $type ] ) && $this->is_builtin( $type ) ) {
+			// Built-in types can only be extended (callbacks merged in), not fully replaced.
+			// Pass 'override_builtin' => true in $definition to intentionally replace a built-in.
+			if ( empty( $definition['override_builtin'] ) ) {
+				$definition = wp_parse_args( $definition, $this->types[ $type ] );
+			}
+		}
+
 		$this->types[ $type ] = wp_parse_args(
 			$definition,
 			array(
 				'render'   => null,
 				'sanitize' => null,
+				'builtin'  => false,
 			)
 		);
 	}
@@ -95,11 +104,22 @@ final class FieldTypeRegistry {
 	}
 
 	/**
+	 * Whether a type is a framework built-in (registered by register_defaults).
+	 */
+	public function is_builtin( string $type ): bool {
+		return ! empty( $this->types[ sanitize_key( $type ) ]['builtin'] );
+	}
+
+	/**
 	 * Register the MVP built-in field set.
 	 */
 	private function register_defaults(): void {
 		foreach ( array( 'backup_tools', 'button_set', 'checkbox_list', 'code_editor', 'color', 'fieldset', 'gallery', 'group', 'media', 'number', 'radio', 'select', 'sorter', 'switcher', 'text', 'textarea', 'url', 'wp_editor' ) as $type ) {
-			$this->register( $type );
+			$this->types[ $type ] = array(
+				'render'   => null,
+				'sanitize' => null,
+				'builtin'  => true, // prevents accidental full replacement
+			);
 		}
 	}
 }

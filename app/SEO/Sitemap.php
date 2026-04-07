@@ -28,6 +28,8 @@ class Sitemap {
 		'taxonomy'       => array(),
 		'post_exclude'   => array(),
 		'page_exclude'   => array(),
+		'exclude_categories' => array(),
+		'exclude_tags'       => array(),
 	);
 
 	/**
@@ -71,6 +73,10 @@ class Sitemap {
 		// Exclude specific post/page IDs
 		if ( ! empty( self::$args['post_exclude'] ) || ! empty( self::$args['page_exclude'] ) ) {
 			add_filter( 'wp_sitemaps_posts_query_args', array( __CLASS__, 'exclude_post' ), 10, 2 );
+		}
+
+		if ( ! empty( self::$args['exclude_categories'] ) || ! empty( self::$args['exclude_tags'] ) ) {
+			add_filter( 'wp_sitemaps_taxonomies_query_args', array( __CLASS__, 'exclude_terms' ), 10, 2 );
 		}
 	}
 
@@ -143,6 +149,33 @@ class Sitemap {
 			$existing             = isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array();
 			$args['post__not_in'] = array_unique( array_merge( $existing, $exclude ) );
 		}
+
+		return $args;
+	}
+
+	/**
+	 * Exclude configured taxonomy terms from WordPress core sitemap queries.
+	 *
+	 * @param array  $args     Query args for the taxonomy sitemap provider.
+	 * @param string $taxonomy Current taxonomy name.
+	 */
+	public static function exclude_terms( array $args, string $taxonomy ): array {
+		$exclude = array();
+
+		if ( 'category' === $taxonomy && ! empty( self::$args['exclude_categories'] ) ) {
+			$exclude = array_map( 'absint', (array) self::$args['exclude_categories'] );
+		}
+
+		if ( 'post_tag' === $taxonomy && ! empty( self::$args['exclude_tags'] ) ) {
+			$exclude = array_map( 'absint', (array) self::$args['exclude_tags'] );
+		}
+
+		if ( empty( $exclude ) ) {
+			return $args;
+		}
+
+		$existing       = isset( $args['exclude'] ) ? (array) $args['exclude'] : array();
+		$args['exclude'] = array_values( array_unique( array_merge( $existing, $exclude ) ) );
 
 		return $args;
 	}

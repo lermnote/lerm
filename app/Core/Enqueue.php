@@ -43,6 +43,8 @@ class Enqueue {
 		'qq_chat_number'            => '',
 		// Search
 		'search_results_per_page'   => 5,
+		'comment_min_length'        => 10,
+		'comment_max_length'        => 2000,
 	);
 
 	/**
@@ -140,6 +142,9 @@ class Enqueue {
 					'route_loadmore'          => 'posts',
 					'route_comment'           => 'comment',
 					'route_profile'           => 'profile',
+					'route_auth_login'        => 'auth/login',
+					'route_auth_register'     => 'auth/register',
+					'route_auth_reset'        => 'auth/reset',
 					'redirect'                => esc_url( is_user_logged_in() ? ( get_edit_profile_url() !== false ? get_edit_profile_url() : home_url( '/' ) ) : home_url( '/' ) ),
 					// ── Behaviour settings ────────────────────────────────────
 					'stickyHeader'            => self::$args['sticky_header'],
@@ -154,6 +159,8 @@ class Enqueue {
 					'qqChatEnable'            => self::$args['qq_chat_enable'],
 					'qqChatNumber'            => self::$args['qq_chat_number'],
 					'search_results_per_page' => self::$args['search_results_per_page'],
+					'comment_min_length'      => self::$args['comment_min_length'],
+					'comment_max_length'      => self::$args['comment_max_length'],
 					// ── i18n ─────────────────────────────────────────────────
 					'i18n'                    => array(
 						'like'                  => __( 'Like', 'lerm' ),
@@ -173,6 +180,7 @@ class Enqueue {
 						'password_special'      => __( 'Password must contain at least one special character.', 'lerm' ),
 						'password_mismatch'     => __( 'Passwords do not match.', 'lerm' ),
 						'comment_min'           => __( 'Comment must be at least {minLength} characters long.', 'lerm' ),
+						'comment_max'           => __( 'Comment must be no more than {maxLength} characters long.', 'lerm' ),
 						'show'                  => __( 'Show', 'lerm' ),
 						'hide'                  => __( 'Hide', 'lerm' ),
 						'show_password'         => __( 'Show password', 'lerm' ),
@@ -180,6 +188,7 @@ class Enqueue {
 						'search_no_results'     => __( 'No results found.', 'lerm' ),
 						'search_loading'        => __( 'Searching…', 'lerm' ),
 						'search_view_all'       => __( 'View all results', 'lerm' ),
+						'search_loading'        => __( 'Searching...', 'lerm' ),
 					),
 				)
 			)

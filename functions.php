@@ -209,7 +209,12 @@ if ( ! function_exists( 'lerm_get_template_options' ) ) {
 				'search_placeholder'        => '',
 				'comments_enable'           => true,
 				'comments_require_login'    => false,
+				'comment_moderation'        => false,
 				'comments_per_page'         => 20,
+				'comment_nesting_depth'     => 3,
+				'comment_form_fields'       => array( 'name', 'email' ),
+				'comment_min_length'        => 10,
+				'comment_max_length'        => 2000,
 				'comment_avatar_size'       => 48,
 				'comment_show_cravatar_tip' => true,
 				'comment_placeholder'       => __( 'Leave a comment...', 'lerm' ),
@@ -268,6 +273,10 @@ if ( ! function_exists( 'lerm_get_frontend_account_page_url' ) ) {
 	 * Get the configured frontend account page URL.
 	 */
 	function lerm_get_frontend_account_page_url(): string {
+		if ( ! lerm_options( 'front_user_center', '', false ) ) {
+			return esc_url_raw( home_url( '/' ) );
+		}
+
 		$page_id = (int) lerm_options( 'frontend_user_center_page', '', 0 );
 		$url     = $page_id > 0 ? get_permalink( $page_id ) : home_url( '/' );
 

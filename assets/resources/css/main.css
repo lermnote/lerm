@@ -2127,10 +2127,7 @@ a[id="cancel-comment-reply-link"]:hover {
 }
 
 /* Dark mode toggle button */
-.dark-mode-toggle {
-  line-height: 1;
-  padding: 0.25rem 0.5rem;
-}
+ 
 .loading-animate {
   visibility: hidden;
 }

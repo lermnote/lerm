@@ -56,7 +56,8 @@ final class OptionsPageDefinition {
 	 *
 	 * @var array<string, mixed>|null
 	 */
-	private static ?array $definition_cache = null;
+
+	private static $definition_cache = null;
 
 	/**
 	 * Cached section definitions.
@@ -64,6 +65,7 @@ final class OptionsPageDefinition {
 	 * @var array<string, array<string, mixed>>|null
 	 */
 	private static ?array $sections_cache = null;
+
 
 	/**
 	 * Full options framework page definition for this theme.
@@ -215,11 +217,11 @@ final class OptionsPageDefinition {
 		$choices = array();
 		$posts   = get_posts(
 			array(
-				'post_type'      => 'post',
-				'post_status'    => 'publish',
-				'numberposts'    => 200,
-				'orderby'        => 'title',
-				'order'          => 'ASC',
+				'post_type'        => 'post',
+				'post_status'      => 'publish',
+				'numberposts'      => 200,
+				'orderby'          => 'title',
+				'order'            => 'ASC',
 				'suppress_filters' => false,
 			)
 		);
