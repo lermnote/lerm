@@ -10,14 +10,15 @@
 	const $$ = (selector, context = document) => Array.from(context.querySelectorAll(selector));
 
 	const closest = (el, selector) => el.closest(selector);
-	const getData = (el, key) => el.dataset[key];
-	const setData = (el, key, value) => { el.dataset[key] = value; };
+	const getData = (el, key) => el.getAttribute('data-' + key);
+	const setData = (el, key, value) => el.setAttribute('data-' + key, String(value));
 	const hasClass = (el, cls) => el.classList.contains(cls);
 	const addClass = (el, cls) => el.classList.add(cls);
 	const removeClass = (el, cls) => el.classList.remove(cls);
 	const toggleClass = (el, cls, force) => el.classList.toggle(cls, force);
 	const empty = (el) => { while (el.firstChild) el.removeChild(el.firstChild); };
 	const append = (parent, child) => parent.appendChild(child);
+	const codeEditorMap = new WeakMap();
 	const createElement = (tag, props = {}, children = []) => {
 		const el = document.createElement(tag);
 		Object.entries(props).forEach(([k, v]) => {
@@ -33,6 +34,7 @@
 
 	// ------ Event Helper ------
 	const on = (el, event, handler) => {
+		if (!el) return;
 		if (el instanceof NodeList || Array.isArray(el)) {
 			el.forEach(e => on(e, event, handler));
 			return;
@@ -139,8 +141,9 @@
 			return;
 		}
 
+		empty(preview);
 		attachments.forEach(attachment => {
-			const imageUrl = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+			const imageUrl = attachment.sizes?.thumbnail?.url ?? attachment.url;
 			append(preview, createElement('img', { src: imageUrl, alt: '' }));
 		});
 	};
@@ -312,10 +315,11 @@
 		$$('.lerm-code-editor', scope).forEach(textarea => {
 			if (getData(textarea, 'lerm-editor-ready')) return;
 
-			const settings = Object.assign({}, true, {}, cfg.codeEditor);
+			const settings = Object.assign({}, cfg.codeEditor || {});
 			const editor = wp.codeEditor.initialize(textarea, settings);
 
-			setData(textarea, 'lerm-code-editor', editor);
+			// setData(textarea, 'lerm-code-editor', editor);
+			codeEditorMap.set(textarea, editor);
 			setData(textarea, 'lerm-editor-ready', '1');
 
 			if (editor && editor.codemirror) {
@@ -334,8 +338,8 @@
 		}
 
 		$$('.lerm-code-editor', form).forEach(textarea => {
-			const editor = getData(textarea, 'lerm-code-editor');
-			if (editor && editor.codemirror && typeof editor.codemirror.save === 'function') {
+			const editor = codeEditorMap.get(textarea);
+			if (editor?.codemirror) {
 				editor.codemirror.save();
 			}
 		});
@@ -359,7 +363,13 @@
 			return;
 		}
 
-		flash.innerHTML = `<div class="notice notice-${type} inline"><p>${message}</p></div>`;
+		const wrapper = document.createElement('div');
+		wrapper.className = `notice notice-${type} inline`;
+		const p = document.createElement('p');
+		p.textContent = message;   // .textContent escapes HTML
+		wrapper.appendChild(p);
+		empty(flash);
+		append(flash, wrapper);
 		addClass(flash, 'is-visible');
 	};
 
@@ -373,11 +383,15 @@
 		spinners.forEach(spinner => toggleClass(spinner, 'is-active', busy));
 
 		saveButtons.forEach(button => {
-			if (!busy) {
-				const original = getData(button, 'original-label') || button.textContent;
-				setData(button, 'original-label', original);
+			if (busy) {
+				// Capture label before changing it
+				if (!getData(button, 'original-label')) {
+					setData(button, 'original-label', button.textContent);
+				}
+				button.textContent = label;
+			} else {
+				button.textContent = getData(button, 'original-label') || button.textContent;
 			}
-			button.textContent = busy ? label : getData(button, 'original-label');
 		});
 	};
 
@@ -417,9 +431,9 @@
 				method: 'POST',
 				body: formData
 			})
-			.then(response => response.json())
-			.then(data => resolve(data))
-			.catch(error => reject(error));
+				.then(response => response.json())
+				.then(data => resolve(data))
+				.catch(error => reject(error));
 		});
 	};
 
@@ -502,7 +516,7 @@
 			case 'color':
 				try {
 					$('.lerm-color-field', scope).value = value || '';
-				} catch (e) {}
+				} catch (e) { }
 				break;
 			case 'button_set':
 			case 'radio':
@@ -563,7 +577,7 @@
 		const templateHtml = template ? template.innerHTML : '';
 		const items = Array.isArray(value) ? value : [];
 
-		try { jQuery(list).sortable('destroy'); } catch (e) {}
+		try { jQuery(list).sortable('destroy'); } catch (e) { }
 		empty(list);
 
 		items.forEach(() => list.insertAdjacentHTML('beforeend', templateHtml));
@@ -573,6 +587,8 @@
 		initMediaFields(group);
 		initGalleryFields(group);
 		initCodeEditors(group);
+
+		setData(group, 'lerm-group-ready', '0');
 		initGroups(group);
 
 		$$('[data-lerm-group-item]', group).forEach((item, index) => {
@@ -601,7 +617,8 @@
 					break;
 				case 'button_set':
 				case 'radio':
-					$(`input[name="${fieldName(form, fieldId)}"][value="${String(value)}"]`, form).checked = true;
+					const radio = $(`input[name="${fieldName(form, fieldId)}"][value="${String(value)}"]`, form);
+					if (radio) radio.checked = true;
 					break;
 				case 'checkbox_list':
 					$$(`input[name="${fieldName(form, fieldId)}[]"]`, form).forEach(cb => {
@@ -628,8 +645,8 @@
 				case 'code_editor':
 					if (input) {
 						input.value = value || '';
-						const codeEditor = getData(input, 'lerm-code-editor');
-						if (codeEditor && codeEditor.codemirror) {
+						const codeEditor = codeEditorMap.get(input);
+						if (codeEditor?.codemirror) {
 							codeEditor.codemirror.setValue(value || '');
 						}
 					}
@@ -783,17 +800,17 @@
 			jQuery(sorterList).on('sortupdate sortstop', () => setDirty(form, true));
 		}
 
-		document.addEventListener('keydown', function (event) {
+		const ctrl = new AbortController();
+		const handler = function (event) {
 			if (!(event.ctrlKey || event.metaKey)) return;
 			if (String(event.key || '').toLowerCase() !== 's') return;
-
 			event.preventDefault();
 			if (getData(form, 'lerm-busy') === '1') return;
-
 			form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-		});
-
-		$$('.lerm-settings-nav__item').forEach(link => {
+		};
+		document.addEventListener('keydown', handler, { signal: ctrl.signal });
+		const panel = form.closest('.lerm-settings-panel') || document;
+		$$(`.lerm-settings-nav__item`, panel).forEach(link => {
 			link.addEventListener('click', function (event) {
 				if (!isDirty(form) || getData(form, 'lerm-busy') === '1') return;
 				if (!window.confirm(cfg.confirmNavigate)) {
@@ -804,37 +821,34 @@
 
 		window.addEventListener('beforeunload', function (event) {
 			if (!isDirty(form) || getData(form, 'lerm-busy') === '1') return;
-			event.preventDefault();
-			return cfg.confirmLeave;
+			event.preventDefault(); // sufficient for all modern browsers
 		});
 	};
 
 	// ------ Init ------
 	document.addEventListener('DOMContentLoaded', function () {
-		const form = $('.lerm-settings-form');
-		if (!form) return;
+		$$('.lerm-settings-form').forEach(form => {
+			const jsGlobal = getData(form, 'js-global');
+			const formCfg = (jsGlobal && window[jsGlobal]) ? window[jsGlobal] : {};
 
-		// Get config from localized data
-		const jsGlobal = getData(form, 'js-global');
-		if (jsGlobal && window[jsGlobal]) {
-			cfg = window[jsGlobal];
-		}
-
-		initColorPickers(form);
-		initMediaFields(form);
-		initGalleryFields(form);
-		initSorters(form);
-		initGroups(form);
-		initCodeEditors(form);
-		toggleDependencies(form);
-		setDirty(form, false);
-		bindAjaxForm(form);
-		bindBackupTools(form);
-
-		document.addEventListener('change', function (event) {
-			if (getData(event.target, 'lerm-controller') || event.target.type === 'radio') {
-				toggleDependencies(form);
-			}
+			initColorPickers(form);
+			bindAjaxForm(form, formCfg);
+			initMediaFields(form);
+			initGalleryFields(form);
+			initSorters(form);
+			initGroups(form);
+			initCodeEditors(form);
+			toggleDependencies(form);
+			setDirty(form, false);
+			bindBackupTools(form);
+			document.addEventListener('change', function (event) {
+				if (getData(event.target, 'lerm-controller') ||
+					event.target.type === 'radio') {
+					if (form.contains(event.target)) {
+						toggleDependencies(form);
+					}
+				}
+			});
 		});
 	});
 })();
