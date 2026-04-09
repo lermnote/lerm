@@ -1,218 +1,276 @@
-/**
- * Options Framework - Vanilla JS (no jQuery dependency)
- * Uses WordPress native APIs: wp.media, wp.codeEditor, wpColorPicker, jQuery UI sortable
+// @ts-check
+/*!
+ * Lerm Settings Panel
+ * Refactored for clarity, modularity, and maintainability.
  */
+
+// ─── WordPress Global Stubs (typed as any — official typings are incomplete) ──
+/** @type {any} */ const wp = /** @type {any} */ (window['wp']);
+/** @type {any} */ const jQuery = /** @type {any} */ (window['jQuery']);
+
 (function () {
 	'use strict';
 
-	// ------ DOM Helpers ------
-	const $ = (selector, context = document) => context.querySelector(selector);
-	const $$ = (selector, context = document) => Array.from(context.querySelectorAll(selector));
+	// ─── Type Definitions ─────────────────────────────────────────────────────
 
-	const closest = (el, selector) => el.closest(selector);
+	/**
+	 * @typedef {{
+	 *   ajaxUrl: string,
+	 *   saveAction: string, resetAction: string, exportAction: string, importAction: string,
+	 *   codeEditor: object|null,
+	 *   selectMedia: string, useMedia: string, noMedia: string,
+	 *   selectImages: string, useImages: string, noGallery: string,
+	 *   saving: string, resetting: string,
+	 *   saveSuccess: string, saveError: string,
+	 *   resetError: string, resetAllSuccess: string, resetSectionSuccess: string,
+	 *   importSuccess: string, importError: string, exportSuccess: string,
+	 *   statusReady: string, statusDirty: string, statusSaving: string,
+	 *   statusResetting: string, statusSaved: string, statusError: string,
+	 *   confirmResetAll: string, confirmResetSection: string,
+	 *   confirmRemoveItem: string, confirmImport: string
+	 * }} LermConfig
+	 */
+
+	/**
+	 * @typedef {{
+	 *   id: number,
+	 *   url: string,
+	 *   sizes?: { medium?: { url: string }, thumbnail?: { url: string } }
+	 * }} WPAttachment
+	 */
+
+	/**
+	 * @typedef {{
+	 *   success: boolean,
+	 *   data: { values?: Record<string, unknown>, message?: string, json?: string }
+	 * }} AjaxResponse
+	 */
+
+	/**
+	 * @typedef {{ enabled?: Record<string, unknown>, disabled?: Record<string, unknown> }} SorterValue
+	 */
+
+	/**
+	 * @typedef {{ destroy: () => void }} SortableInstance
+	 */
+
+	// ─── DOM Utilities ────────────────────────────────────────────────────────
+
+	const dom = {
+		/**
+		 * @template {Element} T
+		 * @param {string} sel
+		 * @param {Document|Element} [ctx]
+		 * @returns {T|null}
+		 */
+		find: (sel, ctx = document) => /** @type {T|null} */(ctx.querySelector(sel)),
+
+		/**
+		 * @template {Element} T
+		 * @param {string} sel
+		 * @param {Document|Element} [ctx]
+		 * @returns {T[]}
+		 */
+		findAll: (sel, ctx = document) => /** @type {T[]} */(Array.from(ctx.querySelectorAll(sel))),
+
+		/**
+		 * @param {string} tag
+		 * @param {Record<string, string|object|EventListener>} [props]
+		 * @param {(string|Node)[]} [children]
+		 * @returns {HTMLElement}
+		 */
+		create(tag, props = {}, children = []) {
+			const el = document.createElement(tag);
+			for (const [k, v] of Object.entries(props)) {
+				if (k === 'class') el.className = /** @type {string} */ (v);
+				else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+				else if (k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(), /** @type {EventListener} */(v));
+				else el.setAttribute(k, /** @type {string} */(v));
+			}
+			for (const child of children) {
+				el.appendChild(typeof child === 'string' ? document.createTextNode(child) : child);
+			}
+			return el;
+		},
+
+		/** @param {Element} el */
+		empty(el) { while (el.firstChild) el.removeChild(el.firstChild); },
+	};
+
+	/**
+	 * @param {Element} el
+	 * @param {string} key
+	 * @returns {string|null}
+	 */
 	const getData = (el, key) => el.getAttribute('data-' + key);
+
+	/**
+	 * @param {Element} el
+	 * @param {string} key
+	 * @param {string} value
+	 */
 	const setData = (el, key, value) => el.setAttribute('data-' + key, String(value));
-	const hasClass = (el, cls) => el.classList.contains(cls);
-	const addClass = (el, cls) => el.classList.add(cls);
-	const removeClass = (el, cls) => el.classList.remove(cls);
-	const toggleClass = (el, cls, force) => el.classList.toggle(cls, force);
-	const empty = (el) => { while (el.firstChild) el.removeChild(el.firstChild); };
-	const append = (parent, child) => parent.appendChild(child);
-	const codeEditorMap = new WeakMap();
-	const createElement = (tag, props = {}, children = []) => {
-		const el = document.createElement(tag);
-		Object.entries(props).forEach(([k, v]) => {
-			if (k === 'class') el.className = v;
-			else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
-			else if (k.startsWith('data-')) el.dataset[k.replace(/^data-/, '')] = v;
-			else if (k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(), v);
-			else el.setAttribute(k, v);
-		});
-		children.forEach(c => typeof c === 'string' ? el.appendChild(document.createTextNode(c)) : append(el, c));
-		return el;
+
+	// ─── Config ───────────────────────────────────────────────────────────────
+
+	/** @type {LermConfig} */
+	let cfg = /** @type {any} */ ({});
+
+	// ─── Field Name Helpers ───────────────────────────────────────────────────
+
+	/** @param {HTMLFormElement} form */
+	const getOptionName = (form) => getData(form, 'option-name') || 'options_framework';
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} fieldId
+	 */
+	const buildFieldName = (form, fieldId) => `${getOptionName(form)}[${fieldId}]`;
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} fieldId
+	 * @returns {string}
+	 */
+	const getControllerValue = (form, fieldId) => {
+		const el = /** @type {HTMLInputElement|null} */ (dom.find('#' + fieldId, form));
+		if (el) return el.type === 'checkbox' ? (el.checked ? '1' : '0') : String(el.value ?? '');
+		const radio = /** @type {HTMLInputElement|null} */ (dom.find(`input[name="${buildFieldName(form, fieldId)}"]:checked`, form));
+		return radio ? String(radio.value ?? '') : '';
 	};
 
-	// ------ Event Helper ------
-	const on = (el, event, handler) => {
-		if (!el) return;
-		if (el instanceof NodeList || Array.isArray(el)) {
-			el.forEach(e => on(e, event, handler));
-			return;
-		}
-		el.addEventListener(event, handler);
-	};
+	// ─── Dependencies ─────────────────────────────────────────────────────────
 
-	// ------ Config ------
-	let cfg = {};
-
-	// ------ Field Helpers ------
-	const fieldName = function (form, fieldId) {
-		const optionName = getData(form, 'option-name') || 'options_framework';
-		return optionName + '[' + fieldId + ']';
-	};
-
-	const controllerValue = function (form, fieldId) {
-		const idControl = $('#' + fieldId, form);
-		if (idControl) {
-			if (idControl.type === 'checkbox') {
-				return idControl.checked ? '1' : '0';
-			}
-			return String(idControl.value || '');
-		}
-
-		const radioControl = $(`input[name="${fieldName(form, fieldId)}"]:checked`, form);
-		if (radioControl) {
-			return String(radioControl.value || '');
-		}
-
-		return '';
-	};
-
-	// ------ Dependencies ------
-	const toggleDependencies = function (form) {
-		$$('[data-dependency-field]', form).forEach(row => {
-			const dependencyField = getData(row, 'dependency-field');
-			const dependencyValue = getData(row, 'dependency-value');
-			row.hidden = controllerValue(form, dependencyField) !== dependencyValue;
+	/** @param {HTMLFormElement} form */
+	const toggleDependencies = (form) => {
+		dom.findAll('[data-dependency-field]', form).forEach(row => {
+			/** @type {HTMLElement} */ (row).hidden =
+				getControllerValue(form, /** @type {string} */(getData(row, 'dependency-field'))) !== getData(row, 'dependency-value');
 		});
 	};
 
-	// ------ Color Pickers ------
-	const initColorPickers = function (scope) {
-		$$('.lerm-color-field', scope).forEach(input => {
-			if (!hasClass(input, 'wp-color-picker')) {
-				jQuery(input).wpColorPicker();
+	// ─── Color Pickers ────────────────────────────────────────────────────────
+
+	/** @param {Document|Element} scope */
+	const initColorPickers = (scope) => {
+		dom.findAll('.lerm-color-field', scope).forEach(input => {
+			if (!input.classList.contains('wp-color-picker')) {
+				jQuery(input).wpColorPicker(); // wp.wpColorPicker requires jQuery — cannot remove
 			}
 		});
 	};
 
-	// ------ Media Fields ------
-	const initMediaFields = function (scope) {
-		$$('.lerm-media-field', scope).forEach(container => {
-			const input = $('input[type="hidden"]', container);
-			const preview = $('.lerm-media-preview', container);
-			const removeButton = $('.lerm-media-remove', container);
-			let frame = null;
+	// ─── Media Fields ─────────────────────────────────────────────────────────
 
-			const selectBtn = $('.lerm-media-select', container);
-			selectBtn.onclick = function (event) {
-				event.preventDefault();
+	/**
+	 * @param {Element} preview
+	 * @param {HTMLElement} removeButton
+	 * @param {string} imageUrl
+	 */
+	const renderMediaPreview = (preview, removeButton, imageUrl) => {
+		dom.empty(preview);
+		if (imageUrl) {
+			preview.appendChild(dom.create('img', { src: imageUrl, alt: '' }));
+			removeButton.hidden = false;
+		} else {
+			preview.appendChild(dom.create('span', { class: 'lerm-media-placeholder' }, [cfg.noMedia]));
+			removeButton.hidden = true;
+		}
+	};
 
-				if (frame) {
-					frame.open();
-					return;
-				}
+	/** @param {Document|Element} scope */
+	const initMediaFields = (scope) => {
+		dom.findAll('.lerm-media-field', scope).forEach(container => {
+			const input = /** @type {HTMLInputElement} */  (dom.find('input[type="hidden"]', container));
+			const preview = /** @type {HTMLElement} */       (dom.find('.lerm-media-preview', container));
+			const removeButton = /** @type {HTMLElement} */       (dom.find('.lerm-media-remove', container));
+			/** @type {any} */ let frame = null;
 
-				frame = wp.media({
-					title: cfg.selectMedia,
-					button: { text: cfg.useMedia },
-					library: { type: 'image' },
-					multiple: false
-				});
-
-				frame.on('select', function () {
+			/** @type {HTMLElement} */ (dom.find('.lerm-media-select', container)).onclick = (e) => {
+				e.preventDefault();
+				if (frame) { frame.open(); return; }
+				frame = wp.media({ title: cfg.selectMedia, button: { text: cfg.useMedia }, library: { type: 'image' }, multiple: false });
+				frame.on('select', () => {
+					/** @type {WPAttachment} */
 					const attachment = frame.state().get('selection').first().toJSON();
-					const imageUrl = attachment.sizes && attachment.sizes.medium ? attachment.sizes.medium.url : attachment.url;
-
-					input.value = attachment.id;
-					empty(preview);
-					append(preview, createElement('img', { src: imageUrl, alt: '' }));
-					removeButton.hidden = false;
+					const url = attachment.sizes?.medium?.url ?? attachment.url;
+					input.value = String(attachment.id);
+					renderMediaPreview(preview, removeButton, url);
 				});
-
 				frame.open();
 			};
 
-			removeButton.onclick = function (event) {
-				event.preventDefault();
+			removeButton.onclick = (e) => {
+				e.preventDefault();
 				input.value = '';
-				empty(preview);
-				append(preview, createElement('span', { class: 'lerm-media-placeholder', 'data-lerm-i18n': 'noMedia' }, [cfg.noMedia]));
-				removeButton.hidden = true;
+				renderMediaPreview(preview, removeButton, '');
 			};
 		});
 	};
 
-	// ------ Gallery Fields ------
-	const renderGalleryPreview = function (preview, attachments) {
+	// ─── Gallery Fields ───────────────────────────────────────────────────────
+
+	/**
+	 * @param {number} id
+	 * @returns {Promise<WPAttachment|null>}
+	 */
+	const fetchAttachment = (id) => new Promise(resolve => {
+		const model = wp.media.attachment(id);
+		const done = () => resolve(/** @type {WPAttachment} */(model.toJSON()));
+		model.get('url') ? done() : model.fetch({ success: done, error: () => resolve(null) });
+	});
+
+	/**
+	 * @param {Element} preview
+	 * @param {WPAttachment[]} attachments
+	 */
+	const renderGalleryPreview = (preview, attachments) => {
+		dom.empty(preview);
 		if (!attachments.length) {
-			empty(preview);
-			append(preview, createElement('span', { class: 'lerm-media-placeholder' }, [cfg.noGallery]));
+			preview.appendChild(dom.create('span', { class: 'lerm-media-placeholder' }, [cfg.noGallery]));
 			return;
 		}
-
-		empty(preview);
-		attachments.forEach(attachment => {
-			const imageUrl = attachment.sizes?.thumbnail?.url ?? attachment.url;
-			append(preview, createElement('img', { src: imageUrl, alt: '' }));
+		attachments.forEach(a => {
+			preview.appendChild(dom.create('img', { src: a.sizes?.thumbnail?.url ?? a.url, alt: '' }));
 		});
 	};
 
-	const fetchAttachment = function (id) {
-		return new Promise(resolve => {
-			const model = wp.media.attachment(id);
-			const finish = () => resolve(model.toJSON());
-
-			if (model.get('url')) {
-				finish();
-				return;
-			}
-
-			model.fetch({
-				success: finish,
-				error: () => resolve(null)
-			});
-		});
+	/**
+	 * @param {Element} preview
+	 * @param {number[]} ids
+	 */
+	const renderGalleryByIds = (preview, ids) => {
+		if (!ids.length) { renderGalleryPreview(preview, []); return; }
+		Promise.all(ids.map(fetchAttachment)).then(list =>
+			renderGalleryPreview(preview, /** @type {WPAttachment[]} */(list.filter(Boolean)))
+		);
 	};
 
-	const renderGalleryIds = function (preview, ids) {
-		if (!ids.length) {
-			renderGalleryPreview(preview, []);
-			return;
-		}
+	/** @param {Document|Element} scope */
+	const initGalleryFields = (scope) => {
+		dom.findAll('.lerm-gallery-field', scope).forEach(container => {
+			const input = /** @type {HTMLInputElement} */ (dom.find('input[type="hidden"]', container));
+			const preview = /** @type {HTMLElement} */     (dom.find('.lerm-gallery-preview', container));
+			const removeButton = /** @type {HTMLElement} */     (dom.find('.lerm-gallery-remove', container));
+			/** @type {any} */ let frame = null;
 
-		Promise.all(ids.map(fetchAttachment)).then(attachments => {
-			renderGalleryPreview(preview, attachments.filter(Boolean));
-		});
-	};
-
-	const initGalleryFields = function (scope) {
-		$$('.lerm-gallery-field', scope).forEach(container => {
-			const input = $('input[type="hidden"]', container);
-			const preview = $('.lerm-gallery-preview', container);
-			const removeButton = $('.lerm-gallery-remove', container);
-			let frame = null;
-
-			const selectBtn = $('.lerm-gallery-select', container);
-			selectBtn.onclick = function (event) {
-				event.preventDefault();
-
-				if (frame) {
-					frame.open();
-					return;
-				}
-
-				frame = wp.media({
-					title: cfg.selectImages,
-					button: { text: cfg.useImages },
-					library: { type: 'image' },
-					multiple: true
-				});
-
-				frame.on('select', function () {
+			/** @type {HTMLElement} */ (dom.find('.lerm-gallery-select', container)).onclick = (e) => {
+				e.preventDefault();
+				if (frame) { frame.open(); return; }
+				frame = wp.media({ title: cfg.selectImages, button: { text: cfg.useImages }, library: { type: 'image' }, multiple: true });
+				frame.on('select', () => {
+					/** @type {WPAttachment[]} */
 					const attachments = frame.state().get('selection').toJSON();
 					const ids = attachments.map(a => a.id);
-
 					input.value = ids.join(',');
 					renderGalleryPreview(preview, attachments);
 					removeButton.hidden = ids.length === 0;
 				});
-
 				frame.open();
 			};
 
-			removeButton.onclick = function (event) {
-				event.preventDefault();
+			removeButton.onclick = (e) => {
+				e.preventDefault();
 				input.value = '';
 				renderGalleryPreview(preview, []);
 				removeButton.hidden = true;
@@ -220,422 +278,477 @@
 		});
 	};
 
-	// ------ Sorters ------
-	const initSorters = function (scope) {
-		$$('.lerm-sorter-list', scope).forEach(list => {
-			jQuery(list).sortable({
-				axis: 'y',
-				handle: '.lerm-sorter-handle',
-				placeholder: 'lerm-sorter-placeholder'
-			});
+	// ─── Native Drag-and-Drop Sortable ────────────────────────────────────────
+
+	/**
+	 * Minimal native sortable — replaces jQuery UI sortable.
+	 * Fires a custom 'sortupdate' event on the list element after a successful drop.
+	 *
+	 * @param {HTMLElement} list
+	 * @param {{ handle?: string|null }} [options]
+	 * @returns {SortableInstance}
+	 */
+	const makeSortable = (list, { handle: handleSel = null } = {}) => {
+		/** @type {HTMLElement|null} */ let dragging = null;
+		/** @type {HTMLElement|null} */ let placeholder = null;
+
+		/** @param {HTMLElement} ref @returns {HTMLElement} */
+		const createPlaceholder = (ref) => {
+			const ph = document.createElement('div');
+			ph.className = 'lerm-sortable-placeholder';
+			ph.style.height = ref.offsetHeight + 'px';
+			return ph;
+		};
+
+		/**
+		 * @param {EventTarget|null} target
+		 * @param {HTMLElement} item
+		 * @returns {boolean}
+		 */
+		const isHandle = (target, item) => {
+			if (!handleSel || !(target instanceof Element)) return true;
+			return !!target.closest(handleSel) && item.contains(target);
+		};
+
+		list.addEventListener('mousedown', (e) => {
+			const item = /** @type {Element} */ (e.target)?.closest('[draggable], li, [data-lerm-group-item], .lerm-sorter-item');
+			if (!item || !list.contains(item)) return;
+			if (!isHandle(e.target, /** @type {HTMLElement} */(item))) return;
+			item.setAttribute('draggable', 'true');
 		});
-	};
 
-	// ------ Groups ------
-	const replaceIndexToken = (template, index) => String(template || '').replace(/__INDEX__/g, String(index));
-
-	const refreshGroupEmptyState = function (group) {
-		const hasItems = $$('[data-lerm-group-item]', group).length > 0;
-		const emptyEl = $('.lerm-group__empty', group);
-		if (emptyEl) emptyEl.hidden = hasItems;
-	};
-
-	const renumberGroupItems = function (group) {
-		$$('[data-lerm-group-item]', group).forEach((item, index) => {
-			item.dataset.index = index;
-			const title = $('.lerm-group-item__title', item);
-			if (title) title.textContent = 'Item ' + (index + 1);
-
-			$$('[data-name-template]', item).forEach(input => {
-				input.name = replaceIndexToken(getData(input, 'nameTemplate'), index);
-			});
-
-			$$('[data-id-template]', item).forEach(input => {
-				input.id = replaceIndexToken(getData(input, 'idTemplate'), index);
-			});
-
-			$$('[data-for-template]', item).forEach(label => {
-				label.htmlFor = replaceIndexToken(getData(label, 'forTemplate'), index);
-			});
+		list.addEventListener('dragstart', (e) => {
+			const de = /** @type {DragEvent} */ (e);
+			const item = /** @type {HTMLElement|null} */ (/** @type {Element} */ (e.target)?.closest('[draggable]'));
+			if (!item || !list.contains(item)) return;
+			dragging = item;
+			placeholder = createPlaceholder(item);
+			requestAnimationFrame(() => { if (dragging) dragging.classList.add('lerm-sortable-dragging'); });
+			if (de.dataTransfer) de.dataTransfer.effectAllowed = 'move';
 		});
 
-		refreshGroupEmptyState(group);
-	};
+		list.addEventListener('dragover', (e) => {
+			e.preventDefault();
+			const de = /** @type {DragEvent} */ (e);
+			if (de.dataTransfer) de.dataTransfer.dropEffect = 'move';
+			if (!dragging || !placeholder) return;
+			const target = /** @type {Element|null} */ (/** @type {Element} */ (e.target)?.closest('li, [data-lerm-group-item], .lerm-sorter-item'));
+			if (!target || target === dragging || target === placeholder || !list.contains(target)) return;
+			const midY = target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2;
+			list.insertBefore(placeholder, de.clientY < midY ? target : target.nextSibling);
+		});
 
-	const initGroups = function (scope) {
-		$$('.lerm-group', scope).forEach(group => {
-			if (getData(group, 'lerm-group-ready') !== '1') {
-				setData(group, 'lerm-group-ready', '1');
+		list.addEventListener('drop', (e) => {
+			e.preventDefault();
+			if (!dragging || !placeholder) return;
+			list.insertBefore(dragging, placeholder);
+			cleanup();
+			list.dispatchEvent(new CustomEvent('sortupdate', { bubbles: true }));
+		});
 
-				const list = $('[data-lerm-group-list]', group);
-				jQuery(list).sortable({
-					axis: 'y',
-					handle: '.lerm-sorter-handle',
-					placeholder: 'lerm-sorter-placeholder',
-					update: function () {
-						renumberGroupItems(group);
-						closest(group, 'form').dispatchEvent(new Event('sortupdate'));
-					}
-				});
+		list.addEventListener('dragend', () => cleanup());
 
-				const addBtn = $('[data-lerm-group-add]', group);
-				addBtn.onclick = function (event) {
-					event.preventDefault();
-					const template = $('.lerm-group-template', group);
-					const templateHtml = template ? template.innerHTML : '';
-					list.insertAdjacentHTML('beforeend', templateHtml);
-					renumberGroupItems(group);
-					initColorPickers(group);
-					initMediaFields(group);
-					initGalleryFields(group);
-					initCodeEditors(group);
-					setDirty(closest(group, 'form'), true);
-				};
-
-				const removeBtns = $$('[data-lerm-group-remove]', group);
-				removeBtns.forEach(btn => {
-					btn.onclick = function (event) {
-						event.preventDefault();
-						if (!window.confirm(cfg.confirmRemoveItem)) return;
-						closest(btn, '[data-lerm-group-item]').remove();
-						renumberGroupItems(group);
-						setDirty(closest(group, 'form'), true);
-					};
-				});
+		const cleanup = () => {
+			if (dragging) {
+				dragging.classList.remove('lerm-sortable-dragging');
+				dragging.removeAttribute('draggable');
+				dragging = null;
 			}
+			placeholder?.remove();
+			placeholder = null;
+		};
 
-			renumberGroupItems(group);
+		return { destroy() { /* event listeners are on list; caller manages element lifecycle */ } };
+	};
+
+	/** @type {WeakMap<HTMLElement, SortableInstance>} */
+	const sortableMap = new WeakMap();
+
+	// ─── Sorters ──────────────────────────────────────────────────────────────
+
+	/** @param {Document|Element} scope */
+	const initSorters = (scope) => {
+		dom.findAll('.lerm-sorter-list', scope).forEach(list => {
+			if (!sortableMap.has(/** @type {HTMLElement} */(list))) {
+				sortableMap.set(/** @type {HTMLElement} */(list), makeSortable(/** @type {HTMLElement} */(list), { handle: '.lerm-sorter-handle' }));
+			}
 		});
 	};
 
-	// ------ Code Editors ------
-	const initCodeEditors = function (scope) {
-		if (!window.wp || !wp.codeEditor || !cfg.codeEditor) return;
+	// ─── Groups ───────────────────────────────────────────────────────────────
 
-		$$('.lerm-code-editor', scope).forEach(textarea => {
+	/**
+	 * @param {string|null} template
+	 * @param {number} index
+	 * @returns {string}
+	 */
+	const replaceIndex = (template, index) => String(template ?? '').replace(/__INDEX__/g, String(index));
+
+	/** @param {HTMLElement} group */
+	const refreshGroupEmpty = (group) => {
+		const emptyEl = /** @type {HTMLElement|null} */ (dom.find('.lerm-group__empty', group));
+		if (emptyEl) emptyEl.hidden = dom.findAll('[data-lerm-group-item]', group).length > 0;
+	};
+
+	/** @param {HTMLElement} group */
+	const renumberGroupItems = (group) => {
+		dom.findAll('[data-lerm-group-item]', group).forEach((item, i) => {
+			/** @type {HTMLElement} */ (item).dataset['index'] = String(i);
+			const title = dom.find('.lerm-group-item__title', item);
+			if (title) title.textContent = 'Item ' + (i + 1);
+			dom.findAll('[data-name-template]', item).forEach(el => { /** @type {HTMLInputElement}  */ (el).name = replaceIndex(getData(el, 'nameTemplate'), i); });
+			dom.findAll('[data-id-template]', item).forEach(el => { /** @type {HTMLElement}        */ (el).id = replaceIndex(getData(el, 'idTemplate'), i); });
+			dom.findAll('[data-for-template]', item).forEach(el => { /** @type {HTMLLabelElement}   */ (el).htmlFor = replaceIndex(getData(el, 'forTemplate'), i); });
+		});
+		refreshGroupEmpty(group);
+	};
+
+	/** @param {Document|Element} scope */
+	const initGroupChildren = (scope) => {
+		initColorPickers(scope);
+		initMediaFields(scope);
+		initGalleryFields(scope);
+		initCodeEditors(scope);
+	};
+
+	/** @param {Document|Element} scope */
+	const initGroups = (scope) => {
+		dom.findAll('.lerm-group', scope).forEach(group => {
+			const groupEl = /** @type {HTMLElement} */ (group);
+			if (getData(groupEl, 'lerm-group-ready') === '1') { renumberGroupItems(groupEl); return; }
+			setData(groupEl, 'lerm-group-ready', '1');
+
+			const list = /** @type {HTMLElement} */      (dom.find('[data-lerm-group-list]', groupEl));
+			const template = /** @type {HTMLElement|null} */ (dom.find('.lerm-group-template', groupEl));
+
+			sortableMap.set(list, makeSortable(list, { handle: '.lerm-sorter-handle' }));
+			list.addEventListener('sortupdate', () => {
+				renumberGroupItems(groupEl);
+				/** @type {HTMLFormElement} */ (groupEl.closest('form')).dispatchEvent(new Event('sortupdate'));
+			});
+
+			/** @type {HTMLElement} */ (dom.find('[data-lerm-group-add]', groupEl)).onclick = (e) => {
+				e.preventDefault();
+				list.insertAdjacentHTML('beforeend', template?.innerHTML ?? '');
+				renumberGroupItems(groupEl);
+				initGroupChildren(groupEl);
+				setDirty(/** @type {HTMLFormElement} */(groupEl.closest('form')), true);
+			};
+
+			dom.findAll('[data-lerm-group-remove]', groupEl).forEach(btn => {
+				/** @type {HTMLElement} */ (btn).onclick = (e) => {
+					e.preventDefault();
+					if (!window.confirm(cfg.confirmRemoveItem)) return;
+					/** @type {HTMLElement} */ (btn.closest('[data-lerm-group-item]')).remove();
+					renumberGroupItems(groupEl);
+					setDirty(/** @type {HTMLFormElement} */(groupEl.closest('form')), true);
+				};
+			});
+
+			renumberGroupItems(groupEl);
+		});
+	};
+
+	// ─── Code Editors ─────────────────────────────────────────────────────────
+
+	/** @type {WeakMap<HTMLTextAreaElement, any>} */
+	const codeEditorMap = new WeakMap();
+
+	/** @param {Document|Element} scope */
+	const initCodeEditors = (scope) => {
+		if (!window['wp']?.codeEditor || !cfg.codeEditor) return;
+		dom.findAll('.lerm-code-editor', scope).forEach(el => {
+			const textarea = /** @type {HTMLTextAreaElement} */ (el);
 			if (getData(textarea, 'lerm-editor-ready')) return;
-
-			const settings = Object.assign({}, cfg.codeEditor || {});
-			const editor = wp.codeEditor.initialize(textarea, settings);
-
-			// setData(textarea, 'lerm-code-editor', editor);
+			const editor = wp.codeEditor.initialize(textarea, { ...cfg.codeEditor });
 			codeEditorMap.set(textarea, editor);
 			setData(textarea, 'lerm-editor-ready', '1');
-
-			if (editor && editor.codemirror) {
-				editor.codemirror.on('change', () => {
-					textarea.dispatchEvent(new Event('change'));
-				});
-			}
+			editor?.codemirror?.on('change', () => textarea.dispatchEvent(new Event('change')));
 		});
 	};
 
-	const editorId = fieldId => 'lerm-' + fieldId;
-
-	const triggerEditorSave = function (form) {
-		if (window.tinyMCE && typeof window.tinyMCE.triggerSave === 'function') {
-			window.tinyMCE.triggerSave();
-		}
-
-		$$('.lerm-code-editor', form).forEach(textarea => {
-			const editor = codeEditorMap.get(textarea);
-			if (editor?.codemirror) {
-				editor.codemirror.save();
-			}
+	/** @param {HTMLFormElement} form */
+	const triggerEditorSave = (form) => {
+		window['tinyMCE']?.triggerSave?.();
+		dom.findAll('.lerm-code-editor', form).forEach(el => {
+			codeEditorMap.get(/** @type {HTMLTextAreaElement} */(el))?.codemirror?.save();
 		});
 	};
 
-	// ------ Status & Flash ------
-	const setStatus = function (form, state, message) {
-		const panel = closest(form, '.lerm-settings-panel');
-		const pill = $('[data-lerm-status]', panel);
-		pill.dataset.lermStatus = state;
+	// ─── Status & Flash ───────────────────────────────────────────────────────
+
+	/** @param {HTMLFormElement} form @returns {Element|null} */
+	const getPanel = (form) => form.closest('.lerm-settings-panel');
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} state
+	 * @param {string} message
+	 */
+	const setStatus = (form, state, message) => {
+		const pill = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-status]', getPanel(form) ?? form));
+		if (!pill) return;
+		pill.dataset['lermStatus'] = state;
 		pill.textContent = message;
 	};
 
-	const showFlash = function (form, type, message) {
-		const panel = closest(form, '.lerm-settings-panel');
-		const flash = $('[data-lerm-flash]', panel);
-
-		if (!message) {
-			empty(flash);
-			removeClass(flash, 'is-visible');
-			return;
-		}
-
-		const wrapper = document.createElement('div');
-		wrapper.className = `notice notice-${type} inline`;
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} type
+	 * @param {string} message
+	 */
+	const showFlash = (form, type, message) => {
+		const flash = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-flash]', getPanel(form) ?? form));
+		if (!flash) return;
+		dom.empty(flash);
+		if (!message) { flash.classList.remove('is-visible'); return; }
+		const wrapper = dom.create('div', { class: `notice notice-${type} inline` });
 		const p = document.createElement('p');
-		p.textContent = message;   // .textContent escapes HTML
+		p.textContent = message;
 		wrapper.appendChild(p);
-		empty(flash);
-		append(flash, wrapper);
-		addClass(flash, 'is-visible');
+		flash.appendChild(wrapper);
+		flash.classList.add('is-visible');
 	};
 
-	const setBusy = function (form, busy, label) {
-		const buttons = $$('button, input[type="submit"]', form);
-		const spinners = $$('.lerm-settings-spinner', form);
-		const saveButtons = $$('[data-lerm-save]', form);
-
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {boolean} busy
+	 * @param {string} label
+	 */
+	const setBusy = (form, busy, label) => {
 		setData(form, 'lerm-busy', busy ? '1' : '0');
-		buttons.forEach(btn => btn.disabled = busy);
-		spinners.forEach(spinner => toggleClass(spinner, 'is-active', busy));
-
-		saveButtons.forEach(button => {
+		dom.findAll('button, input[type="submit"]', form).forEach(el => { /** @type {HTMLButtonElement} */ (el).disabled = busy; });
+		dom.findAll('.lerm-settings-spinner', form).forEach(el => el.classList.toggle('is-active', busy));
+		dom.findAll('[data-lerm-save]', form).forEach(el => {
+			const btn = /** @type {HTMLElement} */ (el);
 			if (busy) {
-				// Capture label before changing it
-				if (!getData(button, 'original-label')) {
-					setData(button, 'original-label', button.textContent);
-				}
-				button.textContent = label;
+				if (!getData(btn, 'original-label')) setData(btn, 'original-label', btn.textContent ?? '');
+				btn.textContent = label;
 			} else {
-				button.textContent = getData(button, 'original-label') || button.textContent;
+				btn.textContent = getData(btn, 'original-label') || btn.textContent;
 			}
 		});
 	};
 
-	const isDirty = form => getData(form, 'lerm-dirty') === '1';
+	/** @param {HTMLFormElement} form @returns {boolean} */
+	const isDirty = (form) => getData(form, 'lerm-dirty') === '1';
 
+	/** @type {ReturnType<typeof setTimeout>|null} */
 	let statusTimer = null;
-	const clearStatusTimer = () => {
-		if (statusTimer) {
-			window.clearTimeout(statusTimer);
-			statusTimer = null;
-		}
+
+	/** @param {HTMLFormElement} form */
+	const queueReadyStatus = (form) => {
+		if (statusTimer) clearTimeout(statusTimer);
+		statusTimer = setTimeout(() => { if (!isDirty(form)) setStatus(form, 'idle', cfg.statusReady); }, 1800);
 	};
 
-	const queueReadyStatus = function (form) {
-		clearStatusTimer();
-		statusTimer = window.setTimeout(() => {
-			if (!isDirty(form)) {
-				setStatus(form, 'idle', cfg.statusReady);
-			}
-		}, 1800);
-	};
-
-	const setDirty = function (form, dirty) {
-		clearStatusTimer();
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {boolean} dirty
+	 */
+	const setDirty = (form, dirty) => {
+		if (statusTimer) clearTimeout(statusTimer);
 		setData(form, 'lerm-dirty', dirty ? '1' : '0');
 		setStatus(form, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
 	};
 
-	// ------ AJAX ------
-	const request = function (form, action, extras = {}) {
-		return new Promise((resolve, reject) => {
-			const formData = new FormData(form);
-			formData.set('action', action);
-			Object.entries(extras).forEach(([key, value]) => formData.set(key, value));
+	// ─── AJAX ─────────────────────────────────────────────────────────────────
 
-			fetch(cfg.ajaxUrl, {
-				method: 'POST',
-				body: formData
-			})
-				.then(response => response.json())
-				.then(data => resolve(data))
-				.catch(error => reject(error));
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} action
+	 * @param {Record<string, string>} [extras]
+	 * @returns {Promise<AjaxResponse>}
+	 */
+	const request = (form, action, extras = {}) => {
+		const body = new FormData(form);
+		body.set('action', action);
+		for (const [k, v] of Object.entries(extras)) body.set(k, v);
+		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(r => {
+			if (!r.ok) throw new Error('Network error: ' + r.status);
+			return /** @type {Promise<AjaxResponse>} */ (r.json());
 		});
 	};
 
-	// ------ Value Application ------
-	const applyColorValue = function (form, fieldId, value) {
-		const input = $('#' + fieldId, form);
+	// ─── Value Application ────────────────────────────────────────────────────
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} fieldId
+	 * @param {unknown} value
+	 */
+	const applyColorValue = (form, fieldId, value) => {
+		const input = /** @type {HTMLInputElement|null} */ (dom.find('#' + fieldId, form));
 		if (!input) return;
-
-		try {
-			jQuery(input).wpColorPicker('color', value || '');
-		} catch (e) {
-			input.value = value || '';
-		}
+		try { jQuery(input).wpColorPicker('color', value || ''); } catch { input.value = String(value || ''); }
 	};
 
-	const applyMediaValue = function (form, fieldId, value) {
-		const container = $(`.lerm-media-field[data-target="${fieldId}"]`, form);
+	/**
+	 * @param {Element|null} container
+	 * @param {any} value
+	 */
+	const applyMediaContainer = (container, value) => {
 		if (!container) return;
-
-		const input = $('input[type="hidden"]', container);
-		const preview = $('.lerm-media-preview', container);
-		const removeButton = $('.lerm-media-remove', container);
-		const imageUrl = value && (value.thumbnail || value.url) ? (value.thumbnail || value.url) : '';
-
-		input.value = value && value.id ? value.id : '';
-		empty(preview);
-		if (imageUrl) {
-			append(preview, createElement('img', { src: imageUrl, alt: '' }));
-		} else {
-			append(preview, createElement('span', { class: 'lerm-media-placeholder' }, [cfg.noMedia]));
-		}
-		removeButton.hidden = !imageUrl;
+		const input = /** @type {HTMLInputElement} */ (dom.find('input[type="hidden"]', container));
+		const preview = /** @type {HTMLElement} */     (dom.find('.lerm-media-preview', container));
+		const removeButton = /** @type {HTMLElement} */     (dom.find('.lerm-media-remove', container));
+		input.value = String(value?.id ?? '');
+		renderMediaPreview(preview, removeButton, value?.thumbnail ?? value?.url ?? '');
 	};
 
-	const applyGalleryValue = function (form, fieldId, ids) {
-		const container = $(`.lerm-gallery-field[data-target="${fieldId}"]`, form);
+	/**
+	 * @param {Element|null} container
+	 * @param {unknown} ids
+	 */
+	const applyGalleryContainer = (container, ids) => {
 		if (!container) return;
-
-		const cleanIds = Array.isArray(ids) ? ids.map(id => parseInt(id, 10)).filter(Boolean) : [];
-		$('input[type="hidden"]', container).value = cleanIds.join(',');
-		$('.lerm-gallery-remove', container).hidden = cleanIds.length === 0;
-		renderGalleryIds($('.lerm-gallery-preview', container), cleanIds);
+		const clean = (Array.isArray(ids) ? ids : []).map((id) => parseInt(String(id), 10)).filter(Boolean);
+		/** @type {HTMLInputElement} */ (dom.find('input[type="hidden"]', container)).value = clean.join(',');
+		/** @type {HTMLElement} */      (dom.find('.lerm-gallery-remove', container)).hidden = clean.length === 0;
+		renderGalleryByIds(/** @type {Element} */(dom.find('.lerm-gallery-preview', container)), clean);
 	};
 
-	const sorterState = function (value) {
-		const enabled = value && value.enabled ? Object.keys(value.enabled) : [];
-		const disabled = value && value.disabled ? Object.keys(value.disabled) : [];
-		return { order: enabled.concat(disabled), enabled };
-	};
-
-	const applySorterValue = function (form, fieldId, value) {
-		const container = $(`.lerm-sorter[data-target="${fieldId}"]`, form);
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} fieldId
+	 * @param {SorterValue} value
+	 */
+	const applySorterValue = (form, fieldId, value) => {
+		const container = dom.find(`.lerm-sorter[data-target="${fieldId}"]`, form);
 		if (!container) return;
-
-		const list = $('.lerm-sorter-list', container);
-		const state = sorterState(value);
-		const items = {};
-
-		$$('.lerm-sorter-item', container).forEach(item => {
-			const key = $('input[type="hidden"]', item).value;
-			items[String(key)] = item;
+		const list = /** @type {HTMLElement} */ (dom.find('.lerm-sorter-list', container));
+		const enabled = value?.enabled ? Object.keys(value.enabled) : [];
+		const order = enabled.concat(value?.disabled ? Object.keys(value.disabled) : []);
+		/** @type {Record<string, HTMLElement>} */ const items = {};
+		dom.findAll('.lerm-sorter-item', container).forEach(item => {
+			items[/** @type {HTMLInputElement} */ (dom.find('input[type="hidden"]', item)).value] = /** @type {HTMLElement} */ (item);
 		});
-
-		state.order.forEach(key => {
-			if (items[key]) list.appendChild(items[key]);
-		});
-
-		$$('input[type="checkbox"]', list).forEach(checkbox => {
-			checkbox.checked = state.enabled.indexOf(String(checkbox.value)) !== -1;
+		order.forEach(key => { if (items[key]) list.appendChild(items[key]); });
+		dom.findAll('input[type="checkbox"]', list).forEach(el => {
+			/** @type {HTMLInputElement} */ (el).checked = enabled.includes(String(/** @type {HTMLInputElement} */(el).value));
 		});
 	};
 
-	const applyScopedFieldValue = function (scope, fieldType, value) {
-		const normalizedType = String(fieldType || 'text');
-
-		switch (normalizedType) {
+	/**
+	 * Apply a value to a scoped sub-field (inside a fieldset or group item).
+	 * @param {Element} scope
+	 * @param {string|null} fieldType
+	 * @param {unknown} value
+	 */
+	const applyScopedValue = (scope, fieldType, value) => {
+		switch (String(fieldType ?? 'text')) {
 			case 'switcher':
-				$('input[type="checkbox"]', scope).checked = !!value;
+				/** @type {HTMLInputElement} */ (dom.find('input[type="checkbox"]', scope)).checked = !!value;
 				break;
 			case 'color':
-				try {
-					$('.lerm-color-field', scope).value = value || '';
-				} catch (e) { }
+				try { /** @type {HTMLInputElement} */ (dom.find('.lerm-color-field', scope)).value = String(value || ''); } catch { /* noop */ }
 				break;
 			case 'button_set':
 			case 'radio':
-				$$('input[type="radio"]', scope).forEach(r => r.checked = r.value === String(value));
+				dom.findAll('input[type="radio"]', scope).forEach(el => { /** @type {HTMLInputElement} */ (el).checked = /** @type {HTMLInputElement} */ (el).value === String(value); });
 				break;
 			case 'select':
-				$('select', scope).value = value;
+				/** @type {HTMLSelectElement} */ (dom.find('select', scope)).value = String(value);
 				break;
 			case 'textarea':
-				$('textarea', scope).value = value || '';
+				/** @type {HTMLTextAreaElement} */ (dom.find('textarea', scope)).value = String(value || '');
 				break;
-			case 'media': {
-				const container = $('.lerm-media-field', scope);
-				const input = $('input[type="hidden"]', container);
-				const preview = $('.lerm-media-preview', container);
-				const removeButton = $('.lerm-media-remove', container);
-				const imageUrl = value && (value.thumbnail || value.url) ? (value.thumbnail || value.url) : '';
-				input.value = value && value.id ? value.id : '';
-				empty(preview);
-				if (imageUrl) append(preview, createElement('img', { src: imageUrl, alt: '' }));
-				else append(preview, createElement('span', { class: 'lerm-media-placeholder' }, [cfg.noMedia]));
-				removeButton.hidden = !imageUrl;
+			case 'media':
+				applyMediaContainer(dom.find('.lerm-media-field', scope), value);
 				break;
-			}
-			case 'gallery': {
-				const container = $('.lerm-gallery-field', scope);
-				const ids = Array.isArray(value) ? value.map(id => parseInt(id, 10)).filter(Boolean) : [];
-				$('input[type="hidden"]', container).value = ids.join(',');
-				$('.lerm-gallery-remove', container).hidden = ids.length === 0;
-				renderGalleryIds($('.lerm-gallery-preview', container), ids);
+			case 'gallery':
+				applyGalleryContainer(dom.find('.lerm-gallery-field', scope), value);
 				break;
-			}
-			case 'number':
-			case 'url':
-			case 'text':
 			default:
-				$('input, textarea', scope).value = value;
+				/** @type {HTMLInputElement} */ (dom.find('input, textarea', scope)).value = String(value ?? '');
 				break;
 		}
 	};
 
-	const applyFieldsetValue = function (form, fieldId, value) {
-		const container = $(`.lerm-fieldset[data-target="${fieldId}"]`, form);
-		if (!container || !value || typeof value !== 'object') return;
-
-		Object.entries(value).forEach(([subfieldId, subfieldValue]) => {
-			const scope = $(`[data-subfield-id="${subfieldId}"]`, container);
-			if (scope) applyScopedFieldValue(scope, getData(scope, 'fieldType'), subfieldValue);
-		});
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} fieldId
+	 * @param {Record<string, unknown>} value
+	 */
+	const applyFieldsetValue = (form, fieldId, value) => {
+		const container = dom.find(`.lerm-fieldset[data-target="${fieldId}"]`, form);
+		if (!container || typeof value !== 'object' || !value) return;
+		for (const [subfieldId, subfieldValue] of Object.entries(value)) {
+			const scope = dom.find(`[data-subfield-id="${subfieldId}"]`, container);
+			if (scope) applyScopedValue(scope, getData(scope, 'fieldType'), subfieldValue);
+		}
 	};
 
-	const applyGroupValue = function (form, fieldId, value) {
-		const group = $(`.lerm-group[data-target="${fieldId}"]`, form);
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} fieldId
+	 * @param {unknown} items
+	 */
+	const applyGroupValue = (form, fieldId, items) => {
+		const group = /** @type {HTMLElement|null} */ (dom.find(`.lerm-group[data-target="${fieldId}"]`, form));
 		if (!group) return;
+		const list = /** @type {HTMLElement} */      (dom.find('[data-lerm-group-list]', group));
+		const template = /** @type {HTMLElement|null} */ (dom.find('.lerm-group-template', group));
+		const rows = /** @type {Record<string, unknown>[]} */ (Array.isArray(items) ? items : []);
 
-		const list = $('[data-lerm-group-list]', group);
-		const template = $('.lerm-group-template', group);
-		const templateHtml = template ? template.innerHTML : '';
-		const items = Array.isArray(value) ? value : [];
-
-		try { jQuery(list).sortable('destroy'); } catch (e) { }
-		empty(list);
-
-		items.forEach(() => list.insertAdjacentHTML('beforeend', templateHtml));
+		sortableMap.get(list)?.destroy(); sortableMap.delete(list);
+		dom.empty(list);
+		rows.forEach(() => list.insertAdjacentHTML('beforeend', template?.innerHTML ?? ''));
 		renumberGroupItems(group);
-
-		initColorPickers(group);
-		initMediaFields(group);
-		initGalleryFields(group);
-		initCodeEditors(group);
-
+		initGroupChildren(group);
 		setData(group, 'lerm-group-ready', '0');
 		initGroups(group);
 
-		$$('[data-lerm-group-item]', group).forEach((item, index) => {
-			const itemData = items[index] || {};
-			Object.entries(itemData).forEach(([subfieldId, subfieldValue]) => {
-				const scope = $(`[data-subfield-id="${subfieldId}"]`, item);
-				if (scope) applyScopedFieldValue(scope, getData(scope, 'fieldType'), subfieldValue);
-			});
+		dom.findAll('[data-lerm-group-item]', group).forEach((item, i) => {
+			const rowData = rows[i] ?? {};
+			for (const [subfieldId, subfieldValue] of Object.entries(rowData)) {
+				const scope = dom.find(`[data-subfield-id="${subfieldId}"]`, item);
+				if (scope) applyScopedValue(scope, getData(scope, 'fieldType'), subfieldValue);
+			}
 		});
-
-		refreshGroupEmptyState(group);
+		refreshGroupEmpty(group);
 	};
 
-	const applyFieldValues = function (form, values) {
-		Object.entries(values || {}).forEach(([fieldId, value]) => {
-			const row = $(`[data-field-id="${fieldId}"]`, form);
+	/**
+	 * Apply a batch of field values returned from the server back to the form.
+	 * @param {HTMLFormElement} form
+	 * @param {Record<string, unknown>} values
+	 */
+	const applyFieldValues = (form, values = {}) => {
+		for (const [fieldId, value] of Object.entries(values)) {
+			const row = dom.find(`[data-field-id="${fieldId}"]`, form);
 			const fieldType = row ? getData(row, 'fieldType') : '';
-			const input = $('#' + fieldId, form);
+			const input = /** @type {HTMLInputElement|null} */ (dom.find('#' + fieldId, form));
 
 			switch (fieldType) {
 				case 'switcher':
-					input.checked = !!value;
+					if (input) input.checked = !!value;
 					break;
 				case 'color':
 					applyColorValue(form, fieldId, value);
 					break;
 				case 'button_set':
-				case 'radio':
-					const radio = $(`input[name="${fieldName(form, fieldId)}"][value="${String(value)}"]`, form);
+				case 'radio': {
+					const radio = /** @type {HTMLInputElement|null} */ (dom.find(`input[name="${buildFieldName(form, fieldId)}"][value="${String(value)}"]`, form));
 					if (radio) radio.checked = true;
 					break;
+				}
 				case 'checkbox_list':
-					$$(`input[name="${fieldName(form, fieldId)}[]"]`, form).forEach(cb => {
-						cb.checked = Array.isArray(value) && value.indexOf(String(cb.value)) !== -1;
+					dom.findAll(`input[name="${buildFieldName(form, fieldId)}[]"]`, form).forEach(el => {
+						/** @type {HTMLInputElement} */ (el).checked = Array.isArray(value) && value.includes(String(/** @type {HTMLInputElement} */(el).value));
 					});
 					break;
 				case 'media':
-					applyMediaValue(form, fieldId, value);
+					applyMediaContainer(dom.find(`.lerm-media-field[data-target="${fieldId}"]`, form), value);
 					break;
 				case 'gallery':
-					applyGalleryValue(form, fieldId, value);
+					applyGalleryContainer(dom.find(`.lerm-gallery-field[data-target="${fieldId}"]`, form), value);
 					break;
 				case 'sorter':
-					applySorterValue(form, fieldId, value);
+					applySorterValue(form, fieldId, /** @type {SorterValue} */(value));
 					break;
 				case 'fieldset':
-					applyFieldsetValue(form, fieldId, value);
+					applyFieldsetValue(form, fieldId, /** @type {Record<string, unknown>} */(value));
 					break;
 				case 'group':
 					applyGroupValue(form, fieldId, value);
@@ -644,211 +757,247 @@
 					break;
 				case 'code_editor':
 					if (input) {
-						input.value = value || '';
-						const codeEditor = codeEditorMap.get(input);
-						if (codeEditor?.codemirror) {
-							codeEditor.codemirror.setValue(value || '');
-						}
+						input.value = String(value || '');
+						codeEditorMap.get(/** @type {HTMLTextAreaElement} */(input))?.codemirror?.setValue(String(value || ''));
 					}
 					break;
-				case 'wp_editor':
-					$(`textarea[name="${fieldName(form, fieldId)}"]`, form).value = value || '';
-					if (window.tinyMCE) {
-						const editor = window.tinyMCE.get(editorId(fieldId));
-						if (editor) editor.setContent(value || '');
-					}
+				case 'wp_editor': {
+					const ta = /** @type {HTMLTextAreaElement|null} */ (dom.find(`textarea[name="${buildFieldName(form, fieldId)}"]`, form));
+					if (ta) ta.value = String(value || '');
+					window['tinyMCE']?.get('lerm-' + fieldId)?.setContent(String(value || ''));
 					break;
+				}
 				default:
-					if (input) input.value = value;
-					else $(`[name="${fieldName(form, fieldId)}"]`, form).value = value;
+					if (input) input.value = String(value ?? '');
+					else {
+						const el = /** @type {HTMLInputElement|null} */ (dom.find(`[name="${buildFieldName(form, fieldId)}"]`, form));
+						if (el) el.value = String(value);
+					}
 					break;
 			}
-		});
-
+		}
 		toggleDependencies(form);
 	};
 
-	// ------ Backup Tools ------
-	const bindBackupTools = function (form) {
-		const exportBtn = $('[data-lerm-backup-export]', form);
+	// ─── Backup Tools ─────────────────────────────────────────────────────────
+
+	/** @param {HTMLFormElement} form */
+	const bindBackupTools = (form) => {
+		const exportBtn = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-backup-export]', form));
 		if (exportBtn) {
-			exportBtn.onclick = function (event) {
-				event.preventDefault();
+			exportBtn.onclick = (e) => {
+				e.preventDefault();
 				showFlash(form, '', '');
-
 				request(form, cfg.exportAction).then(response => {
-					if (!response || !response.success) {
-						const message = response?.data?.message || cfg.saveError;
-						showFlash(form, 'error', message);
-						return;
-					}
-
-					$('[data-lerm-backup-export-output]', form).value = response.data.json || '';
+					if (!response?.success) { showFlash(form, 'error', response?.data?.message || cfg.saveError); return; }
+					/** @type {HTMLInputElement} */ (dom.find('[data-lerm-backup-export-output]', form)).value = response.data.json || '';
 					showFlash(form, 'success', response.data.message || cfg.exportSuccess);
-				}).catch(() => {
-					showFlash(form, 'error', cfg.saveError);
-				});
+				}).catch(() => showFlash(form, 'error', cfg.saveError));
 			};
 		}
 
-		const importBtn = $('[data-lerm-backup-import]', form);
+		const importBtn = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-backup-import]', form));
 		if (importBtn) {
-			importBtn.onclick = function (event) {
-				event.preventDefault();
-
+			importBtn.onclick = (e) => {
+				e.preventDefault();
 				if (!window.confirm(cfg.confirmImport)) return;
-
-				const backupJson = String($('[data-lerm-backup-import-input]', form).value || '');
+				const json = String(/** @type {HTMLInputElement|null} */(dom.find('[data-lerm-backup-import-input]', form))?.value ?? '');
 				showFlash(form, '', '');
 				setBusy(form, true, cfg.resetting);
 				setStatus(form, 'saving', cfg.statusSaving);
-
-				request(form, cfg.importAction, { backup_json: backupJson }).then(response => {
-					if (!response || !response.success) {
-						const message = response?.data?.message || cfg.importError;
-						showFlash(form, 'error', message);
-						setStatus(form, 'error', cfg.statusError);
-						return;
-					}
-
-					applyFieldValues(form, response.data.values || {});
-					showFlash(form, 'success', response.data.message || cfg.importSuccess);
-					setDirty(form, false);
-					setStatus(form, 'success', cfg.statusSaved);
-					queueReadyStatus(form);
-				}).catch(() => {
-					showFlash(form, 'error', cfg.importError);
-					setStatus(form, 'error', cfg.statusError);
-				}).finally(() => {
-					setBusy(form, false, cfg.saving);
-				});
+				request(form, cfg.importAction, { backup_json: json })
+					.then(response => {
+						if (!response?.success) { showFlash(form, 'error', response?.data?.message || cfg.importError); setStatus(form, 'error', cfg.statusError); return; }
+						applyFieldValues(form, response.data.values ?? {});
+						showFlash(form, 'success', response.data.message || cfg.importSuccess);
+						setDirty(form, false);
+						setStatus(form, 'success', cfg.statusSaved);
+						queueReadyStatus(form);
+					})
+					.catch(() => { showFlash(form, 'error', cfg.importError); setStatus(form, 'error', cfg.statusError); })
+					.finally(() => setBusy(form, false, cfg.saving));
 			};
 		}
 	};
 
-	// ------ AJAX Form ------
-	const bindAjaxForm = function (form) {
-		form.addEventListener('submit', function (event) {
-			event.preventDefault();
+	// ─── AJAX Form ────────────────────────────────────────────────────────────
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {AjaxResponse} response
+	 * @param {string} successMsg
+	 */
+	const handleSaveResponse = (form, response, successMsg) => {
+		if (!response?.success) {
+			showFlash(form, 'error', response?.data?.message || cfg.saveError);
+			setStatus(form, 'error', cfg.statusError);
+			return;
+		}
+		applyFieldValues(form, response.data.values ?? {});
+		showFlash(form, 'success', response.data.message || successMsg);
+		setDirty(form, false);
+		setStatus(form, 'success', cfg.statusSaved);
+		queueReadyStatus(form);
+	};
+
+	/** @param {HTMLFormElement} form */
+	const bindAjaxForm = (form) => {
+		form.addEventListener('submit', (e) => {
+			e.preventDefault();
 			triggerEditorSave(form);
 			showFlash(form, '', '');
 			setBusy(form, true, cfg.saving);
 			setStatus(form, 'saving', cfg.statusSaving);
-
-			request(form, cfg.saveAction).then(response => {
-				if (!response || !response.success) {
-					const message = response?.data?.message || cfg.saveError;
-					showFlash(form, 'error', message);
-					setStatus(form, 'error', cfg.statusError);
-					return;
-				}
-
-				applyFieldValues(form, response.data.values || {});
-				showFlash(form, 'success', response.data.message || cfg.saveSuccess);
-				setDirty(form, false);
-				setStatus(form, 'success', cfg.statusSaved);
-				queueReadyStatus(form);
-			}).catch(() => {
-				showFlash(form, 'error', cfg.saveError);
-				setStatus(form, 'error', cfg.statusError);
-			}).finally(() => {
-				setBusy(form, false, cfg.saving);
-			});
+			request(form, cfg.saveAction)
+				.then(r => handleSaveResponse(form, r, cfg.saveSuccess))
+				.catch(() => { showFlash(form, 'error', cfg.saveError); setStatus(form, 'error', cfg.statusError); })
+				.finally(() => setBusy(form, false, cfg.saving));
 		});
 
-		$$('[data-lerm-reset]', form).forEach(btn => {
-			btn.addEventListener('click', function (event) {
-				event.preventDefault();
-
+		dom.findAll('[data-lerm-reset]', form).forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				e.preventDefault();
 				const scope = getData(btn, 'lerm-reset') === 'all' ? 'all' : 'section';
-				const confirmed = window.confirm(scope === 'all' ? cfg.confirmResetAll : cfg.confirmResetSection);
-
-				if (!confirmed) return;
-
+				if (!window.confirm(scope === 'all' ? cfg.confirmResetAll : cfg.confirmResetSection)) return;
 				triggerEditorSave(form);
 				showFlash(form, '', '');
 				setBusy(form, true, cfg.resetting);
 				setStatus(form, 'resetting', cfg.statusResetting);
-
-				request(form, cfg.resetAction, { reset_scope: scope }).then(response => {
-					if (!response || !response.success) {
-						const message = response?.data?.message || cfg.resetError;
-						showFlash(form, 'error', message);
-						setStatus(form, 'error', cfg.statusError);
-						return;
-					}
-
-					applyFieldValues(form, response.data.values || {});
-					showFlash(form, 'success', response.data.message || (scope === 'all' ? cfg.resetAllSuccess : cfg.resetSectionSuccess));
-					setDirty(form, false);
-					setStatus(form, 'success', cfg.statusSaved);
-					queueReadyStatus(form);
-				}).catch(() => {
-					showFlash(form, 'error', cfg.resetError);
-					setStatus(form, 'error', cfg.statusError);
-				}).finally(() => {
-					setBusy(form, false, cfg.saving);
-				});
+				request(form, cfg.resetAction, { reset_scope: scope })
+					.then(r => handleSaveResponse(form, r, scope === 'all' ? cfg.resetAllSuccess : cfg.resetSectionSuccess))
+					.catch(() => { showFlash(form, 'error', cfg.resetError); setStatus(form, 'error', cfg.statusError); })
+					.finally(() => setBusy(form, false, cfg.saving));
 			});
 		});
 
 		form.addEventListener('input', () => setDirty(form, true));
 		form.addEventListener('change', () => setDirty(form, true));
 
-		const sorterList = $('.lerm-sorter-list', form);
-		if (sorterList) {
-			jQuery(sorterList).on('sortupdate sortstop', () => setDirty(form, true));
-		}
+		const sorterList = /** @type {HTMLElement|null} */ (dom.find('.lerm-sorter-list', form));
+		if (sorterList) sorterList.addEventListener('sortupdate', () => setDirty(form, true));
+	};
 
-		const ctrl = new AbortController();
-		const handler = function (event) {
-			if (!(event.ctrlKey || event.metaKey)) return;
-			if (String(event.key || '').toLowerCase() !== 's') return;
-			event.preventDefault();
-			if (getData(form, 'lerm-busy') === '1') return;
-			form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+	// ─── Tab Switching ────────────────────────────────────────────────────────
+
+	/**
+	 * Wire up JS-driven tab switching:
+	 * - All tab panels are rendered in the DOM (PHP renders every section).
+	 * - Clicking a nav link hides all panels and reveals the target one.
+	 * - The intro title/description is updated to reflect the active panel.
+	 * - The browser URL is updated via history.pushState (no reload).
+	 * - Unsaved changes in any tab are preserved because the fields stay in DOM.
+	 */
+	const initTabSwitching = () => {
+		const navItems  = dom.findAll('[data-tab-target]');
+		const panels    = dom.findAll('[data-tab-panel]');
+		if (!navItems.length || !panels.length) return;
+
+		const panel = /** @type {HTMLElement|null} */ (dom.find('.lerm-settings-panel'));
+
+		/**
+		 * @param {string} tabId
+		 * @param {boolean} [pushState]
+		 */
+		const activateTab = (tabId, pushState = true) => {
+			// Show / hide panels.
+			panels.forEach(p => {
+				const el = /** @type {HTMLElement} */ (p);
+				el.hidden = el.getAttribute('data-tab-panel') !== tabId;
+			});
+
+			// Update nav active state.
+			navItems.forEach(a => {
+				a.classList.toggle('is-active', a.getAttribute('data-tab-target') === tabId);
+			});
+
+			// Update intro title / description.
+			const activePanel = /** @type {HTMLElement|null} */ (
+				dom.find(`[data-tab-panel="${tabId}"]`)
+			);
+			if (activePanel && panel) {
+				const titleEl = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-tab-intro-title]', panel));
+				const descEl  = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-tab-intro-desc]',  panel));
+				if (titleEl) titleEl.textContent = activePanel.getAttribute('data-tab-title')  ?? '';
+				if (descEl)  descEl.textContent  = activePanel.getAttribute('data-tab-description') ?? '';
+			}
+
+			// Keep the URL in sync so the page can be bookmarked / refreshed correctly.
+			if (pushState && window.history?.pushState) {
+				const url = new URL(window.location.href);
+				url.searchParams.set('tab', tabId);
+				window.history.pushState({ tab: tabId }, '', url.toString());
+			}
 		};
-		document.addEventListener('keydown', handler, { signal: ctrl.signal });
-		const panel = form.closest('.lerm-settings-panel') || document;
-		$$(`.lerm-settings-nav__item`, panel).forEach(link => {
-			link.addEventListener('click', function (event) {
-				if (!isDirty(form) || getData(form, 'lerm-busy') === '1') return;
-				if (!window.confirm(cfg.confirmNavigate)) {
-					event.preventDefault();
-				}
+
+		// Intercept nav clicks.
+		navItems.forEach(a => {
+			a.addEventListener('click', (e) => {
+				e.preventDefault();
+				const tabId = a.getAttribute('data-tab-target') ?? '';
+				if (tabId) activateTab(tabId);
 			});
 		});
 
-		window.addEventListener('beforeunload', function (event) {
-			if (!isDirty(form) || getData(form, 'lerm-busy') === '1') return;
-			event.preventDefault(); // sufficient for all modern browsers
+		// Restore tab on browser back/forward.
+		window.addEventListener('popstate', (e) => {
+			const tabId = /** @type {any} */ (e).state?.tab
+				?? new URL(window.location.href).searchParams.get('tab')
+				?? '';
+			if (tabId) activateTab(tabId, false);
 		});
 	};
 
-	// ------ Init ------
-	document.addEventListener('DOMContentLoaded', function () {
-		$$('.lerm-settings-form').forEach(form => {
-			const jsGlobal = getData(form, 'js-global');
-			const formCfg = (jsGlobal && window[jsGlobal]) ? window[jsGlobal] : {};
+	// ─── Init ─────────────────────────────────────────────────────────────────
+
+	document.addEventListener('DOMContentLoaded', () => {
+		// Resolve shared cfg from the first form found (all forms share the same global).
+		const firstForm = /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form'));
+		if (firstForm) {
+			const jsGlobal = getData(firstForm, 'js-global');
+			cfg = /** @type {LermConfig} */ ((jsGlobal && window[jsGlobal]) ? window[jsGlobal] : {});
+		}
+
+		// Register a single Ctrl/Cmd+S shortcut that submits only the visible (active) form.
+		document.addEventListener('keydown', (e) => {
+			if (!(e.ctrlKey || e.metaKey) || e.key?.toLowerCase() !== 's') return;
+			e.preventDefault();
+			// Find the currently visible tab panel and submit its form.
+			const activePanel = /** @type {HTMLElement|null} */ (
+				dom.find('[data-tab-panel]:not([hidden])')
+			);
+			const activeForm = activePanel
+				? /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel))
+				: null;
+			if (activeForm && getData(activeForm, 'lerm-busy') !== '1') {
+				activeForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+			}
+		});
+
+		// Initialise every form (one per tab panel).
+		dom.findAll('.lerm-settings-form').forEach(el => {
+			const form = /** @type {HTMLFormElement} */ (el);
 
 			initColorPickers(form);
-			bindAjaxForm(form, formCfg);
 			initMediaFields(form);
 			initGalleryFields(form);
 			initSorters(form);
 			initGroups(form);
 			initCodeEditors(form);
 			toggleDependencies(form);
-			setDirty(form, false);
+			bindAjaxForm(form);
 			bindBackupTools(form);
-			document.addEventListener('change', function (event) {
-				if (getData(event.target, 'lerm-controller') ||
-					event.target.type === 'radio') {
-					if (form.contains(event.target)) {
-						toggleDependencies(form);
-					}
+			setDirty(form, false);
+
+			document.addEventListener('change', (e) => {
+				const target = /** @type {HTMLElement} */ (e.target);
+				if (form.contains(target) && (getData(target, 'lerm-controller') || target.getAttribute('type') === 'radio')) {
+					toggleDependencies(form);
 				}
 			});
 		});
+
+		// Wire up client-side tab switching (must run after forms are init'd).
+		initTabSwitching();
 	});
+
 })();

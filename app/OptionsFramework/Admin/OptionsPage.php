@@ -369,7 +369,6 @@ final class OptionsPage {
 		$view         = is_array( $this->definition['view'] ?? null ) ? $this->definition['view'] : array();
 		$sections     = PageSchema::sections( $this->definition );
 		$current_tab  = $this->current_tab();
-		$current_page = $sections[ $current_tab ] ?? reset( $sections );
 		$values       = $this->store->all();
 		$legacy_panel = is_array( $view['legacy_panel'] ?? null ) ? $view['legacy_panel'] : array();
 		?>
@@ -384,19 +383,9 @@ final class OptionsPage {
 
 					<nav class="lerm-settings-nav" aria-label="<?php esc_attr_e( 'Settings sections', 'lerm' ); ?>">
 						<?php foreach ( $sections as $section_id => $section ) : ?>
-							<a class="lerm-settings-nav__item <?php echo $section_id === $current_tab ? 'is-active' : ''; ?>" href="
-							<?php
-							echo esc_url(
-								add_query_arg(
-									array(
-										'page' => $this->page_slug(),
-										'tab'  => $section_id,
-									),
-									$this->admin_parent_url()
-								)
-							);
-							?>
-																">
+							<a class="lerm-settings-nav__item <?php echo $section_id === $current_tab ? 'is-active' : ''; ?>"
+							   href="<?php echo esc_url( add_query_arg( array( 'page' => $this->page_slug(), 'tab' => $section_id ), $this->admin_parent_url() ) ); ?>"
+							   data-tab-target="<?php echo esc_attr( $section_id ); ?>">
 								<span class="lerm-settings-nav__title"><?php echo esc_html( (string) $section['title'] ); ?></span>
 								<span class="lerm-settings-nav__meta"><?php echo esc_html( sprintf( _n( '%s field', '%s fields', count( $section['fields'] ), 'lerm' ), number_format_i18n( count( $section['fields'] ) ) ) ); ?></span>
 							</a>
@@ -418,11 +407,16 @@ final class OptionsPage {
 					<?php endif; ?>
 
 					<div class="lerm-settings-panel">
-						<div class="lerm-settings-panel__intro">
+						<?php
+						// Intro header: title/description swapped by JS on tab switch.
+						// PHP seeds the initially-active tab; JS takes over from there.
+						$active_section = $sections[ $current_tab ] ?? reset( $sections );
+						?>
+						<div class="lerm-settings-panel__intro" data-lerm-tab-intro>
 							<div>
 								<p class="lerm-settings-eyebrow"><?php esc_html_e( 'Current section', 'lerm' ); ?></p>
-								<h2><?php echo esc_html( (string) ( $current_page['title'] ?? '' ) ); ?></h2>
-								<p><?php echo esc_html( (string) ( $current_page['description'] ?? '' ) ); ?></p>
+								<h2 data-lerm-tab-intro-title><?php echo esc_html( (string) ( $active_section['title'] ?? '' ) ); ?></h2>
+								<p data-lerm-tab-intro-desc><?php echo esc_html( (string) ( $active_section['description'] ?? '' ) ); ?></p>
 							</div>
 							<div class="lerm-settings-panel__status">
 								<span class="lerm-status-pill" data-lerm-status="idle"><?php esc_html_e( 'Synced', 'lerm' ); ?></span>
@@ -432,31 +426,44 @@ final class OptionsPage {
 
 						<div class="lerm-settings-flash" data-lerm-flash aria-live="polite"></div>
 
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="lerm-settings-form" data-option-name="<?php echo esc_attr( $this->option_name() ); ?>" data-js-global="<?php echo esc_attr( $this->js_global ); ?>" novalidate>
-							<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
-							<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $current_tab ); ?>">
-							<?php wp_nonce_field( $this->nonce_action( $current_tab ) ); ?>
+						<?php foreach ( $sections as $section_id => $section ) : ?>
+						<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
+						     data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
+						     data-tab-description="<?php echo esc_attr( (string) ( $section['description'] ?? '' ) ); ?>"
+						     <?php echo $section_id !== $current_tab ? 'hidden' : ''; ?>>
 
-							<div class="lerm-settings-actions">
-								<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
-								<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset this tab', 'lerm' ); ?></button>
-								<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
-								<span class="spinner lerm-settings-spinner"></span>
-								<span class="lerm-settings-actions__hint"><?php esc_html_e( 'Changes are saved instantly without reloading the page. Use Ctrl/Cmd + S to save faster.', 'lerm' ); ?></span>
-							</div>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+							      class="lerm-settings-form"
+							      data-option-name="<?php echo esc_attr( $this->option_name() ); ?>"
+							      data-js-global="<?php echo esc_attr( $this->js_global ); ?>"
+							      novalidate>
+								<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
+								<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $section_id ); ?>">
+								<?php wp_nonce_field( $this->nonce_action( $section_id ) ); ?>
 
-							<table class="form-table lerm-settings-table" role="presentation">
-								<tbody>
-									<?php $this->render_fields( (array) ( $current_page['fields'] ?? array() ), $values ); ?>
-								</tbody>
-							</table>
+								<div class="lerm-settings-actions">
+									<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
+									<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset this tab', 'lerm' ); ?></button>
+									<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
+									<span class="spinner lerm-settings-spinner"></span>
+									<span class="lerm-settings-actions__hint"><?php esc_html_e( 'Changes are saved instantly without reloading the page. Use Ctrl/Cmd + S to save faster.', 'lerm' ); ?></span>
+								</div>
 
-							<div class="lerm-settings-actions lerm-settings-actions--footer">
-								<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
-								<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset this tab', 'lerm' ); ?></button>
-								<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
-							</div>
-						</form>
+								<table class="form-table lerm-settings-table" role="presentation">
+									<tbody>
+										<?php $this->render_fields( (array) ( $section['fields'] ?? array() ), $values ); ?>
+									</tbody>
+								</table>
+
+								<div class="lerm-settings-actions lerm-settings-actions--footer">
+									<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
+									<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset this tab', 'lerm' ); ?></button>
+									<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
+								</div>
+							</form>
+						</div>
+						<?php endforeach; ?>
+
 					</div>
 				</section>
 			</div>
