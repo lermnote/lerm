@@ -174,6 +174,12 @@ final class OptionsPage {
 
 		check_ajax_referer( $this->nonce_action( $tab ) );
 
+		// 'fetch_only' is a JS-internal scope used to refresh other tab values
+		// after a full reset — it skips the actual reset and just returns current values.
+		if ( 'fetch_only' === $scope ) {
+			wp_send_json_success( array( 'values' => $this->store->section_values( $tab ) ) );
+		}
+
 		$success = ( 'all' === $scope )
 			? $this->store->reset_all_sections()
 			: $this->store->reset_section( $tab );
@@ -384,8 +390,20 @@ final class OptionsPage {
 					<nav class="lerm-settings-nav" aria-label="<?php esc_attr_e( 'Settings sections', 'lerm' ); ?>">
 						<?php foreach ( $sections as $section_id => $section ) : ?>
 							<a class="lerm-settings-nav__item <?php echo $section_id === $current_tab ? 'is-active' : ''; ?>"
-							   href="<?php echo esc_url( add_query_arg( array( 'page' => $this->page_slug(), 'tab' => $section_id ), $this->admin_parent_url() ) ); ?>"
-							   data-tab-target="<?php echo esc_attr( $section_id ); ?>">
+								href="
+								<?php
+								echo esc_url(
+									add_query_arg(
+										array(
+											'page' => $this->page_slug(),
+											'tab'  => $section_id,
+										),
+										$this->admin_parent_url()
+									)
+								);
+								?>
+										"
+								data-tab-target="<?php echo esc_attr( $section_id ); ?>">
 								<span class="lerm-settings-nav__title"><?php echo esc_html( (string) $section['title'] ); ?></span>
 								<span class="lerm-settings-nav__meta"><?php echo esc_html( sprintf( _n( '%s field', '%s fields', count( $section['fields'] ), 'lerm' ), number_format_i18n( count( $section['fields'] ) ) ) ); ?></span>
 							</a>
@@ -428,15 +446,15 @@ final class OptionsPage {
 
 						<?php foreach ( $sections as $section_id => $section ) : ?>
 						<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
-						     data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
-						     data-tab-description="<?php echo esc_attr( (string) ( $section['description'] ?? '' ) ); ?>"
-						     <?php echo $section_id !== $current_tab ? 'hidden' : ''; ?>>
+							data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
+							data-tab-description="<?php echo esc_attr( (string) ( $section['description'] ?? '' ) ); ?>"
+							<?php echo $section_id !== $current_tab ? 'hidden' : ''; ?>>
 
 							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
-							      class="lerm-settings-form"
-							      data-option-name="<?php echo esc_attr( $this->option_name() ); ?>"
-							      data-js-global="<?php echo esc_attr( $this->js_global ); ?>"
-							      novalidate>
+									class="lerm-settings-form"
+									data-option-name="<?php echo esc_attr( $this->option_name() ); ?>"
+									data-js-global="<?php echo esc_attr( $this->js_global ); ?>"
+									novalidate>
 								<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
 								<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $section_id ); ?>">
 								<?php wp_nonce_field( $this->nonce_action( $section_id ) ); ?>

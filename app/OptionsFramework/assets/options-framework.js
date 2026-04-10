@@ -186,7 +186,7 @@
 			const removeButton = /** @type {HTMLElement} */       (dom.find('.lerm-media-remove', container));
 			/** @type {any} */ let frame = null;
 
-			/** @type {HTMLElement} */ (dom.find('.lerm-media-select', container)).onclick = (e) => {
+			/** @type {HTMLElement} */ (dom.find('.lerm-media-select', container)).addEventListener('click', (e) => {
 				e.preventDefault();
 				if (frame) { frame.open(); return; }
 				frame = wp.media({ title: cfg.selectMedia, button: { text: cfg.useMedia }, library: { type: 'image' }, multiple: false });
@@ -198,13 +198,13 @@
 					renderMediaPreview(preview, removeButton, url);
 				});
 				frame.open();
-			};
+			});
 
-			removeButton.onclick = (e) => {
+			removeButton.addEventListener('click', (e) => {
 				e.preventDefault();
 				input.value = '';
 				renderMediaPreview(preview, removeButton, '');
-			};
+			});
 		});
 	};
 
@@ -254,7 +254,7 @@
 			const removeButton = /** @type {HTMLElement} */     (dom.find('.lerm-gallery-remove', container));
 			/** @type {any} */ let frame = null;
 
-			/** @type {HTMLElement} */ (dom.find('.lerm-gallery-select', container)).onclick = (e) => {
+			/** @type {HTMLElement} */ (dom.find('.lerm-gallery-select', container)).addEventListener('click', (e) => {
 				e.preventDefault();
 				if (frame) { frame.open(); return; }
 				frame = wp.media({ title: cfg.selectImages, button: { text: cfg.useImages }, library: { type: 'image' }, multiple: true });
@@ -267,14 +267,14 @@
 					removeButton.hidden = ids.length === 0;
 				});
 				frame.open();
-			};
+			});
 
-			removeButton.onclick = (e) => {
+			removeButton.addEventListener('click', (e) => {
 				e.preventDefault();
 				input.value = '';
 				renderGalleryPreview(preview, []);
 				removeButton.hidden = true;
-			};
+			});
 		});
 	};
 
@@ -427,22 +427,22 @@
 				/** @type {HTMLFormElement} */ (groupEl.closest('form')).dispatchEvent(new Event('sortupdate'));
 			});
 
-			/** @type {HTMLElement} */ (dom.find('[data-lerm-group-add]', groupEl)).onclick = (e) => {
+			/** @type {HTMLElement} */ (dom.find('[data-lerm-group-add]', groupEl)).addEventListener('click', (e) => {
 				e.preventDefault();
 				list.insertAdjacentHTML('beforeend', template?.innerHTML ?? '');
 				renumberGroupItems(groupEl);
 				initGroupChildren(groupEl);
 				setDirty(/** @type {HTMLFormElement} */(groupEl.closest('form')), true);
-			};
+			});
 
-			dom.findAll('[data-lerm-group-remove]', groupEl).forEach(btn => {
-				/** @type {HTMLElement} */ (btn).onclick = (e) => {
-					e.preventDefault();
-					if (!window.confirm(cfg.confirmRemoveItem)) return;
-					/** @type {HTMLElement} */ (btn.closest('[data-lerm-group-item]')).remove();
-					renumberGroupItems(groupEl);
-					setDirty(/** @type {HTMLFormElement} */(groupEl.closest('form')), true);
-				};
+			list.addEventListener('click', (e) => {
+				const btn = /** @type {HTMLElement} */ (e.target)?.closest('[data-lerm-group-remove]');
+				if (!btn || !list.contains(btn)) return;
+				e.preventDefault();
+				if (!window.confirm(cfg.confirmRemoveItem)) return;
+    			/** @type {HTMLElement} */ (btn.closest('[data-lerm-group-item]')).remove();
+				renumberGroupItems(groupEl);
+				setDirty(/** @type {HTMLFormElement} */(groupEl.closest('form')), true);
 			});
 
 			renumberGroupItems(groupEl);
@@ -566,7 +566,13 @@
 		for (const [k, v] of Object.entries(extras)) body.set(k, v);
 		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(r => {
 			if (!r.ok) throw new Error('Network error: ' + r.status);
-			return /** @type {Promise<AjaxResponse>} */ (r.json());
+			return r.text();
+		}).then(text => {
+			try {
+				return /** @type {AjaxResponse} */ (JSON.parse(text));
+			} catch {
+				throw new Error('Invalid JSON response: ' + text.slice(0, 120));
+			}
 		});
 	};
 
@@ -785,7 +791,7 @@
 	const bindBackupTools = (form) => {
 		const exportBtn = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-backup-export]', form));
 		if (exportBtn) {
-			exportBtn.onclick = (e) => {
+			exportBtn.addEventListener('click', (e) => {
 				e.preventDefault();
 				showFlash(form, '', '');
 				request(form, cfg.exportAction).then(response => {
@@ -793,12 +799,12 @@
 					/** @type {HTMLInputElement} */ (dom.find('[data-lerm-backup-export-output]', form)).value = response.data.json || '';
 					showFlash(form, 'success', response.data.message || cfg.exportSuccess);
 				}).catch(() => showFlash(form, 'error', cfg.saveError));
-			};
+			});
 		}
 
 		const importBtn = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-backup-import]', form));
 		if (importBtn) {
-			importBtn.onclick = (e) => {
+			importBtn.addEventListener('click', (e) => {
 				e.preventDefault();
 				if (!window.confirm(cfg.confirmImport)) return;
 				const json = String(/** @type {HTMLInputElement|null} */(dom.find('[data-lerm-backup-import-input]', form))?.value ?? '');
@@ -816,7 +822,7 @@
 					})
 					.catch(() => { showFlash(form, 'error', cfg.importError); setStatus(form, 'error', cfg.statusError); })
 					.finally(() => setBusy(form, false, cfg.saving));
-			};
+			});
 		}
 	};
 
@@ -864,7 +870,20 @@
 				setBusy(form, true, cfg.resetting);
 				setStatus(form, 'resetting', cfg.statusResetting);
 				request(form, cfg.resetAction, { reset_scope: scope })
-					.then(r => handleSaveResponse(form, r, scope === 'all' ? cfg.resetAllSuccess : cfg.resetSectionSuccess))
+					.then(r => {
+						handleSaveResponse(form, r, scope === 'all' ? cfg.resetAllSuccess : cfg.resetSectionSuccess);
+						// After a full reset, reload values for every other tab form too.
+						if (scope === 'all' && r?.success) {
+							dom.findAll('.lerm-settings-form').forEach(otherEl => {
+								const otherForm = /** @type {HTMLFormElement} */ (otherEl);
+								if (otherForm === form) return;
+								// Silently re-fetch defaults for this tab.
+								request(otherForm, cfg.resetAction, { reset_scope: 'fetch_only' })
+									.then(r2 => { if (r2?.success) applyFieldValues(otherForm, r2.data.values ?? {}); })
+									.catch(() => { /* best-effort, ignore */ });
+							});
+						}
+					})
 					.catch(() => { showFlash(form, 'error', cfg.resetError); setStatus(form, 'error', cfg.statusError); })
 					.finally(() => setBusy(form, false, cfg.saving));
 			});
@@ -888,8 +907,8 @@
 	 * - Unsaved changes in any tab are preserved because the fields stay in DOM.
 	 */
 	const initTabSwitching = () => {
-		const navItems  = dom.findAll('[data-tab-target]');
-		const panels    = dom.findAll('[data-tab-panel]');
+		const navItems = dom.findAll('[data-tab-target]');
+		const panels = dom.findAll('[data-tab-panel]');
 		if (!navItems.length || !panels.length) return;
 
 		const panel = /** @type {HTMLElement|null} */ (dom.find('.lerm-settings-panel'));
@@ -910,15 +929,36 @@
 				a.classList.toggle('is-active', a.getAttribute('data-tab-target') === tabId);
 			});
 
+			const activePanel = /** @type {HTMLElement|null} */ (dom.find(`[data-tab-panel="${tabId}"]`));
+
 			// Update intro title / description.
-			const activePanel = /** @type {HTMLElement|null} */ (
-				dom.find(`[data-tab-panel="${tabId}"]`)
-			);
 			if (activePanel && panel) {
 				const titleEl = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-tab-intro-title]', panel));
-				const descEl  = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-tab-intro-desc]',  panel));
-				if (titleEl) titleEl.textContent = activePanel.getAttribute('data-tab-title')  ?? '';
-				if (descEl)  descEl.textContent  = activePanel.getAttribute('data-tab-description') ?? '';
+				const descEl = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-tab-intro-desc]', panel));
+				if (titleEl) titleEl.textContent = activePanel.getAttribute('data-tab-title') ?? '';
+				if (descEl) descEl.textContent = activePanel.getAttribute('data-tab-description') ?? '';
+			}
+
+			// Clear any leftover flash notice from the previous tab.
+			if (panel) {
+				const flash = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-flash]', panel));
+				if (flash) { dom.empty(flash); flash.classList.remove('is-visible'); }
+			}
+
+			// Sync the status pill to the newly-active tab's dirty state.
+			if (activePanel) {
+				const activeForm = /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel));
+				if (activeForm) {
+					const dirty = isDirty(activeForm);
+					setStatus(activeForm, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
+				}
+			}
+
+			// Refresh any CodeMirror editors that were hidden during initialisation.
+			if (activePanel) {
+				dom.findAll('.lerm-code-editor', activePanel).forEach(el => {
+					codeEditorMap.get(/** @type {HTMLTextAreaElement} */(el))?.codemirror?.refresh();
+				});
 			}
 
 			// Keep the URL in sync so the page can be bookmarked / refreshed correctly.
