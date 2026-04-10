@@ -219,7 +219,7 @@ final class OptionsPageDefinition {
 			array(
 				'post_type'        => 'post',
 				'post_status'      => 'publish',
-				'numberposts'      => 200,
+				'numberposts'      => 100,
 				'orderby'          => 'title',
 				'order'            => 'ASC',
 				'suppress_filters' => false,

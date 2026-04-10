@@ -396,7 +396,7 @@ add_filter(
 
 add_filter(
 	'lerm_login_redirect_url',
-	static function ( $default, $user = null ) use ( $login_options ) {
+	static function ( $default_url, $user = null ) use ( $login_options ) {
 		if ( ! empty( $login_options['login_redirect_url'] ) ) {
 			return (string) $login_options['login_redirect_url'];
 		}
@@ -405,7 +405,7 @@ add_filter(
 			return (string) $login_options['account_page_url'];
 		}
 
-		return (string) $default;
+		return (string) $default_url;
 	},
 	10,
 	2
@@ -421,7 +421,7 @@ add_action(
 		if ( wp_doing_ajax() ) {
 			return;
 		}
-
+		check_admin_referer( 'login' );
 		$action = isset( $_REQUEST['action'] ) && is_scalar( $_REQUEST['action'] )
 			? sanitize_key( wp_unslash( (string) $_REQUEST['action'] ) )
 			: 'login';
@@ -480,12 +480,30 @@ CssVariables::init( $options );
 
 // SMTP 邮件 — 有配置才启用
 if ( ! empty( $mail_options ) ) {
-	Smtp::instance( $mail_options );
+	add_action(
+		'phpmailer_init',
+		static function ( \PHPMailer\PHPMailer\PHPMailer $phpmailer ) use ( $mail_options ) {
+			Smtp::instance( $mail_options )->configure_phpmailer( $phpmailer );
+		}
+	);
 }
 
 // 主题更新器 — 有配置才启用
 if ( ! empty( $updater_options ) ) {
-	Updater::instance( $updater_options );
+	add_action(
+		'pre_set_site_transient_update_plugins',
+		static function ( $transient ) use ( $updater_options ) {
+			if ( empty( $transient->checked ) ) {
+				return $transient;
+			}
+
+			$updater = Updater::instance( $updater_options );
+			$updater->check_for_update();
+
+			return $transient;
+		}
+	);
+
 }
 
 // ---------------------------------------------------------------------------
@@ -561,6 +579,7 @@ if ( ! empty( $options['register_sidebars'] ) ) {
 					array(
 						'name'          => $title,
 						'id'            => $sidebar_id,
+						// translators: %s is the sidebar name.
 						'description'   => sprintf( __( 'Custom sidebar: %s', 'lerm' ), $title ),
 						'before_widget' => '<section id="%1$s" class="card widget mb-3 %2$s loading-animate animate__fadeIn">',
 						'after_widget'  => '</section>',
