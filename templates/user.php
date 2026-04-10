@@ -15,7 +15,7 @@ if ( ! lerm_options( 'front_user_center', '', false ) ) {
 	exit;
 }
 
-$user_id = get_current_user_id();
+$user_id            = get_current_user_id();
 $allow_profile_edit = (bool) lerm_options( 'frontend_profile', '', false );
 
 $profile_data = array(

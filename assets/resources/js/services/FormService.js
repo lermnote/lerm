@@ -216,7 +216,7 @@ export default class FormService extends BaseService {
 		return isValid && isFormValid;
 	};
 
-	beforeSubmit = () => {}
+	beforeSubmit = () => { }
 
 	onSuccess = (response, form) => {
 		form.reset();
@@ -224,7 +224,7 @@ export default class FormService extends BaseService {
 		this.displayMessage(response?.message || translate('form_submitted'), 'success');
 	};
 
-	afterSubmitSuccess = (_response) => {}
+	afterSubmitSuccess = (_response) => { }
 
 	onError = (error) => {
 		console.error('Form submission failed:', error);

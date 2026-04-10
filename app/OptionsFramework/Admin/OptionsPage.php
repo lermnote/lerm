@@ -60,8 +60,7 @@ final class OptionsPage {
 		$this->asset_resolver = $asset_resolver;
 		// Textdomain and JS global can be overridden per-instance via the definition.
 		$this->textdomain = (string) ( $definition['textdomain'] ?? 'lerm' );
-		//$this->js_global  = 'lermOptionsFramework_' . str_replace( '-', '_', sanitize_key( $this->page_slug() ) );
-		$this->js_global = 'lermOptionsFramework';
+		$this->js_global  = 'lermOptionsFramework';
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_post_' . $this->save_action(), array( $this, 'handle_save' ) );
 		add_action( 'wp_ajax_' . $this->ajax_save_action(), array( $this, 'handle_ajax_save' ) );
@@ -405,7 +404,14 @@ final class OptionsPage {
 										"
 								data-tab-target="<?php echo esc_attr( $section_id ); ?>">
 								<span class="lerm-settings-nav__title"><?php echo esc_html( (string) $section['title'] ); ?></span>
-								<span class="lerm-settings-nav__meta"><?php echo esc_html( sprintf( _n( '%s field', '%s fields', count( $section['fields'] ), 'lerm' ), number_format_i18n( count( $section['fields'] ) ) ) ); ?></span>
+								<span class="lerm-settings-nav__meta">
+									<?php
+									echo esc_html(
+										// translators: %s is the number of fields in the section, e.g. "5 fields". Do not translate the number itself.
+										sprintf( _n( '%s field', '%s fields', count( $section['fields'] ), 'lerm' ), number_format_i18n( count( $section['fields'] ) ) )
+									);
+									?>
+								</span>
 							</a>
 						<?php endforeach; ?>
 					</nav>
@@ -825,7 +831,12 @@ final class OptionsPage {
 		<div class="lerm-group-item" data-lerm-group-item data-index="<?php echo esc_attr( $index ); ?>">
 			<div class="lerm-group-item__header">
 				<span class="lerm-sorter-handle" aria-hidden="true">&#8645;</span>
-				<strong class="lerm-group-item__title"><?php echo esc_html( sprintf( __( 'Item %s', 'lerm' ), is_numeric( $index ) ? (string) ( (int) $index + 1 ) : '#' ) ); ?></strong>
+				<strong class="lerm-group-item__title">
+				<?php
+				// translators: %s is the item number in the group, starting from 1. For example: "Item 1", "Item 2", etc. Do not translate the number itself.
+				echo esc_html( sprintf( __( 'Item %s', 'lerm' ), is_numeric( $index ) ? (string) ( (int) $index + 1 ) : '#' ) );
+				?>
+				</strong>
 				<button type="button" class="button button-secondary button-link-delete" data-lerm-group-remove><?php esc_html_e( 'Remove', 'lerm' ); ?></button>
 			</div>
 			<div class="lerm-group-item__body">
@@ -1318,10 +1329,10 @@ final class OptionsPage {
 	 * Unified with OptionStore::string_value() — both delegate here via PageSchema.
 	 *
 	 * @param mixed  $value Source value.
-	 * @param string $default Fallback string.
+	 * @param string $default_value Fallback string.
 	 */
-	private function scalar_string( $value, string $default = '' ): string {
-		return PageSchema::scalar_value( $value, $default );
+	private function scalar_string( $value, string $default_value = '' ): string {
+		return PageSchema::scalar_value( $value, $default_value );
 	}
 
 	/**
