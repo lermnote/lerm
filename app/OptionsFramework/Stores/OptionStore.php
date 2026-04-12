@@ -211,6 +211,31 @@ final class OptionStore {
 	}
 
 	/**
+	 * Get normalized values for one explicit subsection group inside a section.
+	 *
+	 * @param string $section_id Section ID.
+	 * @param string $group_id   Explicit subsection group ID.
+	 * @return array<string, mixed>
+	 */
+	public function section_group_values( string $section_id, string $group_id ): array {
+		$fields = $this->section_group_fields( $section_id, $group_id );
+
+		if ( empty( $fields ) ) {
+			return array();
+		}
+
+		$values = $this->all();
+		$data   = array();
+
+		foreach ( $fields as $field ) {
+			$field_id          = (string) $field['id'];
+			$data[ $field_id ] = $values[ $field_id ] ?? ( $field['default'] ?? '' );
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Reset a single section to defaults.
 	 */
 	public function reset_section( string $section_id ): bool {
@@ -232,6 +257,51 @@ final class OptionStore {
 		}
 
 		return $this->persist_options( $options );
+	}
+
+	/**
+	 * Reset one explicit subsection group inside a section to defaults.
+	 *
+	 * @param string $section_id Section ID.
+	 * @param string $group_id   Explicit subsection group ID.
+	 */
+	public function reset_section_group( string $section_id, string $group_id ): bool {
+		$fields = $this->section_group_fields( $section_id, $group_id );
+
+		if ( empty( $fields ) ) {
+			return false;
+		}
+
+		$options = $this->raw();
+
+		foreach ( $fields as $field ) {
+			if ( ! $this->field_is_saved( $field ) ) {
+				continue;
+			}
+
+			$field_id             = (string) $field['id'];
+			$options[ $field_id ] = $this->sanitize_field_internal( $field, $field['default'] ?? '', false );
+		}
+
+		return $this->persist_options( $options );
+	}
+
+	/**
+	 * Whether the section declares a valid explicit subsection group.
+	 *
+	 * @param string $section_id Section ID.
+	 * @param string $group_id   Group ID.
+	 */
+	public function has_section_group( string $section_id, string $group_id ): bool {
+		$section = PageSchema::section( $this->definition, $section_id );
+
+		if ( null === $section || '' === $group_id ) {
+			return false;
+		}
+
+		$groups = $this->declared_section_groups( $section );
+
+		return isset( $groups[ $group_id ] );
 	}
 
 	/**
@@ -742,6 +812,113 @@ final class OptionStore {
 	 */
 	private function field_is_saved( array $field ): bool {
 		return ! array_key_exists( 'save', $field ) || false !== $field['save'];
+	}
+
+	/**
+	 * Collect fields that belong to one explicit subsection group.
+	 *
+	 * @param string $section_id Section ID.
+	 * @param string $group_id   Group ID.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function section_group_fields( string $section_id, string $group_id ): array {
+		$section = PageSchema::section( $this->definition, $section_id );
+
+		if ( null === $section ) {
+			return array();
+		}
+
+		$groups = $this->declared_section_groups( $section );
+
+		if ( ! isset( $groups[ $group_id ] ) ) {
+			return array();
+		}
+
+		$fallback_group_id = (string) array_key_first( $groups );
+		$fields            = array();
+
+		foreach ( $section['fields'] as $field ) {
+			if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
+				continue;
+			}
+
+			if ( $group_id === $this->resolve_field_group_id( $field, $groups, $fallback_group_id ) ) {
+				$fields[] = $field;
+			}
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * Collect explicitly-declared subsection groups from a section config.
+	 *
+	 * @param array<string, mixed> $section Section definition.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function declared_section_groups( array $section ): array {
+		$declared = is_array( $section['groups'] ?? null ) ? $section['groups'] : array();
+		$groups   = array();
+
+		foreach ( $declared as $index => $group ) {
+			$group_id    = '';
+			$group_label = '';
+
+			if ( is_scalar( $group ) ) {
+				$group_label = trim( (string) $group );
+			} elseif ( is_array( $group ) ) {
+				$group_id    = isset( $group['id'] ) && is_scalar( $group['id'] ) ? sanitize_title( (string) $group['id'] ) : '';
+				$group_label = trim( (string) ( $group['label'] ?? $group['title'] ?? $group['name'] ?? '' ) );
+			}
+
+			if ( '' === $group_label && '' === $group_id ) {
+				continue;
+			}
+
+			$group_id = '' !== $group_id ? $group_id : sanitize_title( $group_label );
+			$group_id = '' !== $group_id ? $group_id : 'group-' . (string) ( (int) $index + 1 );
+
+			while ( isset( $groups[ $group_id ] ) ) {
+				$group_id .= '-2';
+			}
+
+			$groups[ $group_id ] = array(
+				'id'    => $group_id,
+				'label' => '' !== $group_label ? $group_label : (string) __( 'General', 'lerm' ),
+			);
+		}
+
+		return $groups;
+	}
+
+	/**
+	 * Resolve which explicit subsection group a field belongs to.
+	 *
+	 * Field-level `group` values only match an already-declared group label;
+	 * they never create new subsection groups on their own.
+	 *
+	 * @param array<string, mixed>               $field             Field definition.
+	 * @param array<string, array<string, mixed>> $groups           Declared groups.
+	 * @param string                             $fallback_group_id Fallback group ID.
+	 */
+	private function resolve_field_group_id( array $field, array $groups, string $fallback_group_id ): string {
+		$group_id = isset( $field['group_id'] ) && is_scalar( $field['group_id'] ) ? sanitize_title( (string) $field['group_id'] ) : '';
+
+		if ( '' !== $group_id && isset( $groups[ $group_id ] ) ) {
+			return $group_id;
+		}
+
+		$group_label = trim( (string) ( $field['group'] ?? '' ) );
+
+		if ( '' !== $group_label ) {
+			foreach ( $groups as $declared_group_id => $group ) {
+				if ( trim( (string) ( $group['label'] ?? '' ) ) === $group_label ) {
+					return (string) $declared_group_id;
+				}
+			}
+		}
+
+		return $fallback_group_id;
 	}
 
 	/**

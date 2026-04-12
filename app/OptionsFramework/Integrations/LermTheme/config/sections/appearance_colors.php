@@ -10,12 +10,39 @@ return array(
 	'title'       => __( 'Appearance / Colors', 'lerm' ),
 	'description' => __( 'Brand colours, backgrounds, borders, and button styling migrated from the old CSF Colors tab.', 'lerm' ),
 	'use_subsections' => true,
+	'groups'      => array(
+		array(
+			'id'    => 'brand-colors',
+			'label' => __( 'Brand colors', 'lerm' ),
+		),
+		array(
+			'id'    => 'page-background',
+			'label' => __( 'Page background', 'lerm' ),
+		),
+		array(
+			'id'    => 'header-navigation',
+			'label' => __( 'Header & navigation', 'lerm' ),
+		),
+		array(
+			'id'    => 'widget-headers',
+			'label' => __( 'Widget headers', 'lerm' ),
+		),
+		array(
+			'id'    => 'footer',
+			'label' => __( 'Footer', 'lerm' ),
+		),
+		array(
+			'id'    => 'buttons',
+			'label' => __( 'Buttons', 'lerm' ),
+		),
+	),
 	'fields'      => array(
 		array(
 			'id'          => 'primary_color',
 			'type'        => 'fieldset',
 			'label'       => __( 'Primary color', 'lerm' ),
 			'description' => __( 'Used for buttons, badges, and interactive accents.', 'lerm' ),
+			'group_id'    => 'brand-colors',
 			'group'       => __( 'Brand colors', 'lerm' ),
 			'default'     => array(
 				'color'  => '#0084ba',
@@ -35,6 +62,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Link color', 'lerm' ),
 			'description' => __( 'Colour of anchors in article and page content.', 'lerm' ),
+			'group_id'    => 'brand-colors',
 			'group'       => __( 'Brand colors', 'lerm' ),
 			'default'     => array(
 				'color'  => '#0084ba',
@@ -54,6 +82,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Body background', 'lerm' ),
 			'description' => __( 'Page background colour used across the whole site.', 'lerm' ),
+			'group_id'    => 'page-background',
 			'group'       => __( 'Page background', 'lerm' ),
 			'default'     => array(
 				'background-color' => '#ffffff',
@@ -67,6 +96,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Card / content background', 'lerm' ),
 			'description' => __( 'Background colour used by article cards and content surfaces.', 'lerm' ),
+			'group_id'    => 'page-background',
 			'group'       => __( 'Page background', 'lerm' ),
 			'default'     => array(
 				'background-color' => '#ffffff',
@@ -80,6 +110,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Header border', 'lerm' ),
 			'description' => __( 'Border drawn around the site header. Most themes only use the bottom edge.', 'lerm' ),
+			'group_id'    => 'header-navigation',
 			'group'       => __( 'Header & navigation', 'lerm' ),
 			'default'     => array(
 				'top'    => '0',
@@ -114,6 +145,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Nav link color', 'lerm' ),
 			'description' => __( 'Colour of navigation links and dropdown items.', 'lerm' ),
+			'group_id'    => 'header-navigation',
 			'group'       => __( 'Header & navigation', 'lerm' ),
 			'default'     => array(
 				'color' => '#828282',
@@ -129,6 +161,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Nav active item color', 'lerm' ),
 			'description' => __( 'Text and background colours for the active navigation item.', 'lerm' ),
+			'group_id'    => 'header-navigation',
 			'group'       => __( 'Header & navigation', 'lerm' ),
 			'default'     => array(
 				'color'            => '#0084ba',
@@ -144,6 +177,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Nav item padding', 'lerm' ),
 			'description' => __( 'Vertical padding applied to each navigation link.', 'lerm' ),
+			'group_id'    => 'header-navigation',
 			'group'       => __( 'Header & navigation', 'lerm' ),
 			'default'     => array(
 				'top'    => '1.5',
@@ -173,6 +207,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Widget header color', 'lerm' ),
 			'description' => __( 'Text, background, and border colours of widget and card headers.', 'lerm' ),
+			'group_id'    => 'widget-headers',
 			'group'       => __( 'Widget headers', 'lerm' ),
 			'default'     => array(
 				'color'            => '',
@@ -190,6 +225,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Footer widgets area', 'lerm' ),
 			'description' => __( 'Text and background colours of the footer widgets zone.', 'lerm' ),
+			'group_id'    => 'footer',
 			'group'       => __( 'Footer', 'lerm' ),
 			'default'     => array(
 				'color'            => '#dddddd',
@@ -205,6 +241,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Footer bar', 'lerm' ),
 			'description' => __( 'Text and background colours of the copyright strip.', 'lerm' ),
+			'group_id'    => 'footer',
 			'group'       => __( 'Footer', 'lerm' ),
 			'default'     => array(
 				'color'            => '#dddddd',
@@ -220,6 +257,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Primary button (default state)', 'lerm' ),
 			'description' => __( 'Text, background, and border colours for primary buttons at rest.', 'lerm' ),
+			'group_id'    => 'buttons',
 			'group'       => __( 'Buttons', 'lerm' ),
 			'default'     => array(
 				'color'            => '#0084ba',
@@ -237,6 +275,7 @@ return array(
 			'type'        => 'fieldset',
 			'label'       => __( 'Primary button (hover state)', 'lerm' ),
 			'description' => __( 'Text, background, and border colours for primary buttons on hover.', 'lerm' ),
+			'group_id'    => 'buttons',
 			'group'       => __( 'Buttons', 'lerm' ),
 			'default'     => array(
 				'color'            => '#ffffff',

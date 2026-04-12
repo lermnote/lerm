@@ -170,6 +170,7 @@ final class OptionsPage {
 
 		$tab   = $this->posted_tab();
 		$scope = isset( $_POST['reset_scope'] ) ? sanitize_key( wp_unslash( $_POST['reset_scope'] ) ) : 'section';
+		$subsection = $this->posted_subsection();
 
 		check_ajax_referer( $this->nonce_action( $tab ) );
 
@@ -179,9 +180,27 @@ final class OptionsPage {
 			wp_send_json_success( array( 'values' => $this->store->section_values( $tab ) ) );
 		}
 
-		$success = ( 'all' === $scope )
-			? $this->store->reset_all_sections()
-			: $this->store->reset_section( $tab );
+		$response_scope = 'all';
+		$success        = false;
+		$values         = array();
+		$message        = '';
+
+		if ( 'all' === $scope ) {
+			$response_scope = 'all';
+			$success        = $this->store->reset_all_sections();
+			$values         = $this->store->section_values( $tab );
+			$message        = esc_html__( 'All sections have been reset to defaults.', 'lerm' );
+		} elseif ( '' !== $subsection && $this->store->has_section_group( $tab, $subsection ) ) {
+			$response_scope = 'subsection';
+			$success        = $this->store->reset_section_group( $tab, $subsection );
+			$values         = $this->store->section_group_values( $tab, $subsection );
+			$message        = esc_html__( 'The current page has been reset to defaults.', 'lerm' );
+		} else {
+			$response_scope = 'section';
+			$success        = $this->store->reset_section( $tab );
+			$values         = $this->store->section_values( $tab );
+			$message        = esc_html__( 'This section has been reset to defaults.', 'lerm' );
+		}
 
 		if ( ! $success ) {
 			wp_send_json_error(
@@ -192,10 +211,9 @@ final class OptionsPage {
 
 		wp_send_json_success(
 			array(
-				'message' => ( 'all' === $scope )
-					? esc_html__( 'All sections have been reset to defaults.', 'lerm' )
-					: esc_html__( 'This section has been reset to defaults.', 'lerm' ),
-				'values'  => $this->store->section_values( $tab ),
+				'message' => $message,
+				'scope'   => $response_scope,
+				'values'  => $values,
 			)
 		);
 	}
@@ -338,10 +356,10 @@ final class OptionsPage {
 				'saveSuccess'         => __( 'Settings saved.', 'lerm' ),
 				'saveError'           => __( 'Unable to save the settings right now.', 'lerm' ),
 				'resetting'           => __( 'Resetting...', 'lerm' ),
-				'resetSectionSuccess' => __( 'This section has been reset to defaults.', 'lerm' ),
+				'resetSectionSuccess' => __( 'The current page has been reset to defaults.', 'lerm' ),
 				'resetAllSuccess'     => __( 'All sections have been reset to defaults.', 'lerm' ),
 				'resetError'          => __( 'Unable to reset the settings right now.', 'lerm' ),
-				'confirmResetSection' => __( 'Reset the current tab back to its default values?', 'lerm' ),
+				'confirmResetSection' => __( 'Reset the current page back to its default values?', 'lerm' ),
 				'confirmResetAll'     => __( 'Reset every section on this page back to default values?', 'lerm' ),
 				'confirmNavigate'     => __( 'You have unsaved changes in this tab. Leave without saving?', 'lerm' ),
 				'confirmLeave'        => __( 'You have unsaved changes that have not been saved yet.', 'lerm' ),
@@ -426,10 +444,6 @@ final class OptionsPage {
 				</aside>
 
 				<section class="lerm-settings-main">
-					<?php if ( isset( $_GET['options_framework_ok'] ) ) : ?>
-						<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'lerm' ); ?></p></div>
-					<?php endif; ?>
-
 					<div class="lerm-settings-panel">
 						<?php
 						// Intro header: title/description swapped by JS on tab switch.
@@ -442,20 +456,13 @@ final class OptionsPage {
 								<h2 data-lerm-tab-intro-title><?php echo esc_html( (string) ( $active_section['title'] ?? '' ) ); ?></h2>
 								<p data-lerm-tab-intro-desc><?php echo esc_html( (string) ( $active_section['description'] ?? '' ) ); ?></p>
 							</div>
-							<div class="lerm-settings-panel__status">
-								<span class="lerm-status-pill" data-lerm-status="idle"><?php esc_html_e( 'Synced', 'lerm' ); ?></span>
-								<span class="lerm-settings-panel__hint"><?php esc_html_e( 'Saving and reset actions happen without leaving this page.', 'lerm' ); ?></span>
-							</div>
 						</div>
-
-						<div class="lerm-settings-flash" data-lerm-flash aria-live="polite"></div>
 
 						<?php foreach ( $sections as $section_id => $section ) : ?>
 						<?php
 						$section_fields   = is_array( $section['fields'] ?? null ) ? $section['fields'] : array();
-						$section_groups   = $this->group_fields( $section_fields );
+						$section_groups   = $this->group_fields( $section, $section_fields );
 						$use_subsections  = $this->section_uses_subsections( $section, $section_groups );
-						$table_classes    = 'form-table lerm-settings-table';
 						?>
 						<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
 							data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
@@ -469,15 +476,18 @@ final class OptionsPage {
 									novalidate>
 								<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
 								<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $section_id ); ?>">
+								<input type="hidden" name="lerm_settings_subsection" value="">
 								<?php wp_nonce_field( $this->nonce_action( $section_id ) ); ?>
 
 								<div class="lerm-settings-sticky-wrap" data-lerm-sticky-wrap>
 									<div class="lerm-settings-actions lerm-settings-actions--sticky" data-lerm-sticky-bar>
 										<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
-										<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset this tab', 'lerm' ); ?></button>
+										<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset current page', 'lerm' ); ?></button>
 										<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
 										<span class="spinner lerm-settings-spinner"></span>
 										<span class="lerm-settings-actions__hint"><?php esc_html_e( 'Changes are saved instantly without reloading the page. Use Ctrl/Cmd + S to save faster.', 'lerm' ); ?></span>
+										<span class="lerm-settings-actions__spacer" aria-hidden="true"></span>
+										<span class="lerm-status-pill lerm-settings-actions__status" data-lerm-status="idle"><?php esc_html_e( 'Synced', 'lerm' ); ?></span>
 									</div>
 								</div>
 
@@ -499,22 +509,24 @@ final class OptionsPage {
 												data-subsection-panel="<?php echo esc_attr( (string) $group['id'] ); ?>"
 												<?php echo 0 !== $group_index ? 'hidden' : ''; ?>>
 												<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) $group['label'] ); ?>">
-													<?php $this->render_fields( (array) $group['fields'], $values, (string) $section_id, false, 'stack' ); ?>
+													<?php if ( ! empty( $group['fields'] ) ) : ?>
+														<?php $this->render_fields( (array) $group['fields'], $values, (string) $section_id, $this->subsection_uses_group_headings( (array) $group['fields'], (string) $group['label'] ), 'stack' ); ?>
+													<?php else : ?>
+														<div class="lerm-settings-empty-group"><?php esc_html_e( 'No settings in this group yet.', 'lerm' ); ?></div>
+													<?php endif; ?>
 												</div>
 											</section>
 										<?php endforeach; ?>
 									</div>
 								<?php else : ?>
-									<table class="<?php echo esc_attr( $table_classes ); ?>" role="presentation">
-										<tbody>
-											<?php $this->render_fields( $section_fields, $values, (string) $section_id, true ); ?>
-										</tbody>
-									</table>
+									<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ); ?>">
+										<?php $this->render_fields( $section_fields, $values, (string) $section_id, true, 'stack' ); ?>
+									</div>
 								<?php endif; ?>
 
 								<div class="lerm-settings-actions lerm-settings-actions--footer">
 									<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
-									<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset this tab', 'lerm' ); ?></button>
+									<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset current page', 'lerm' ); ?></button>
 									<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
 								</div>
 							</form>
@@ -531,44 +543,128 @@ final class OptionsPage {
 	/**
 	 * Group fields by their configured heading.
 	 *
-	 * @param array<int, array<string, mixed>> $fields Field definitions.
+	 * @param array<string, mixed>             $section Section definition.
+	 * @param array<int, array<string, mixed>> $fields  Field definitions.
 	 * @return array<int, array<string, mixed>>
 	 */
-	private function group_fields( array $fields ): array {
-		$groups = array();
+	private function group_fields( array $section, array $fields ): array {
+		$groups = $this->declared_groups( $section );
+
+		if ( empty( $groups ) ) {
+			return array(
+				array(
+					'id'     => 'general',
+					'label'  => (string) __( 'General', 'lerm' ),
+					'fields' => $fields,
+				),
+			);
+		}
+
+		$fallback_group_id = (string) array_key_first( $groups );
 
 		foreach ( $fields as $field ) {
 			if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
 				continue;
 			}
 
-			$label    = trim( (string) ( $field['group'] ?? '' ) );
-			$label    = '' !== $label ? $label : (string) __( 'General', 'lerm' );
-			$base_id  = sanitize_title( $label );
-			$group_id = '' !== $base_id ? $base_id : 'general';
+			$group_id   = isset( $field['group_id'] ) && is_scalar( $field['group_id'] ) ? sanitize_title( (string) $field['group_id'] ) : '';
+			$group_id   = isset( $groups[ $group_id ] ) ? $group_id : '';
+			$group_name = trim( (string) ( $field['group'] ?? '' ) );
 
-			if ( isset( $groups[ $group_id ] ) && (string) $groups[ $group_id ]['label'] !== $label ) {
-				$suffix = 2;
+			if ( '' === $group_id && '' !== $group_name ) {
+				$matched_group_id = $this->find_group_id_by_label( $groups, $group_name );
 
-				while ( isset( $groups[ $group_id . '-' . $suffix ] ) ) {
-					++$suffix;
+				if ( '' !== $matched_group_id ) {
+					$group_id = $matched_group_id;
 				}
-
-				$group_id .= '-' . $suffix;
 			}
 
-			if ( ! isset( $groups[ $group_id ] ) ) {
-				$groups[ $group_id ] = array(
-					'id'     => $group_id,
-					'label'  => $label,
-					'fields' => array(),
-				);
-			}
+			$group_id = '' !== $group_id ? $group_id : $fallback_group_id;
 
 			$groups[ $group_id ]['fields'][] = $field;
 		}
 
 		return array_values( $groups );
+	}
+
+	/**
+	 * Collect any groups declared explicitly in the section config.
+	 *
+	 * @param array<string, mixed> $section Section definition.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function declared_groups( array $section ): array {
+		$declared = is_array( $section['groups'] ?? null ) ? $section['groups'] : array();
+		$groups   = array();
+
+		foreach ( $declared as $index => $group ) {
+			$group_id    = '';
+			$group_label = '';
+
+			if ( is_scalar( $group ) ) {
+				$group_label = trim( (string) $group );
+			} elseif ( is_array( $group ) ) {
+				$group_id    = isset( $group['id'] ) && is_scalar( $group['id'] ) ? sanitize_title( (string) $group['id'] ) : '';
+				$group_label = trim( (string) ( $group['label'] ?? $group['title'] ?? $group['name'] ?? '' ) );
+			}
+
+			if ( '' === $group_label && '' === $group_id ) {
+				continue;
+			}
+
+			$group_id = '' !== $group_id ? $group_id : $this->group_id_from_label( $group_label );
+			$group_id = '' !== $group_id ? $group_id : 'group-' . (string) ( (int) $index + 1 );
+
+			while ( isset( $groups[ $group_id ] ) ) {
+				$group_id .= '-2';
+			}
+
+			$groups[ $group_id ] = $this->make_group_definition( $group_id, $group_label );
+		}
+
+		return $groups;
+	}
+
+	/**
+	 * Create a normalized group definition.
+	 *
+	 * @param string $group_id Group ID.
+	 * @param string $label    Group label.
+	 * @return array<string, mixed>
+	 */
+	private function make_group_definition( string $group_id, string $label ): array {
+		$normalized_label = '' !== trim( $label ) ? trim( $label ) : (string) __( 'General', 'lerm' );
+
+		return array(
+			'id'     => $group_id,
+			'label'  => $normalized_label,
+			'fields' => array(),
+		);
+	}
+
+	/**
+	 * Resolve a stable group ID from a label.
+	 */
+	private function group_id_from_label( string $label ): string {
+		$normalized = sanitize_title( $label );
+
+		return '' !== $normalized ? $normalized : '';
+	}
+
+	/**
+	 * Find an existing group by its label.
+	 *
+	 * @param array<string, array<string, mixed>> $groups Existing groups.
+	 * @param string                              $label  Desired label.
+	 */
+	private function find_group_id_by_label( array $groups, string $label ): string {
+		foreach ( $groups as $group_id => $group ) {
+			if ( trim( (string) ( $group['label'] ?? '' ) ) === trim( $label ) ) {
+				return (string) $group_id;
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -578,13 +674,47 @@ final class OptionsPage {
 	 * @param array<int, array<string, mixed>>   $groups  Section groups.
 	 */
 	private function section_uses_subsections( array $section, array $groups ): bool {
+		$declared_groups = $this->declared_groups( $section );
+
 		if ( array_key_exists( 'use_subsections', $section ) ) {
-			return ! empty( $section['use_subsections'] );
+			return ! empty( $section['use_subsections'] ) && count( $declared_groups ) > 1;
 		}
 
-		$fields = is_array( $section['fields'] ?? null ) ? $section['fields'] : array();
+		return count( $declared_groups ) > 1;
+	}
 
-		return count( $groups ) > 1 && count( $fields ) >= 8;
+	/**
+	 * Determine whether subsection panels should still render field group headings.
+	 *
+	 * @param array<int, array<string, mixed>> $fields          Subsection fields.
+	 * @param string                           $subsection_label Current subsection label.
+	 */
+	private function subsection_uses_group_headings( array $fields, string $subsection_label ): bool {
+		$labels = array();
+
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+
+			$group = trim( (string) ( $field['group'] ?? '' ) );
+
+			if ( '' === $group || in_array( $group, $labels, true ) ) {
+				continue;
+			}
+
+			$labels[] = $group;
+		}
+
+		if ( count( $labels ) > 1 ) {
+			return true;
+		}
+
+		if ( empty( $labels ) ) {
+			return false;
+		}
+
+		return trim( $labels[0] ) !== trim( $subsection_label );
 	}
 
 	/**
@@ -1067,11 +1197,13 @@ final class OptionsPage {
 
 		switch ( $field_type ) {
 			case 'media':
-				$this->render_media_field( $field, $value, $field_name, $input_id, $name_attr, $id_attr );
+				$media_name_attr = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template . '[id]' ) . '"' : '';
+				$this->render_media_field( $field, $value, $field_name, $input_id, $media_name_attr, $id_attr );
 				return;
 
 			case 'gallery':
-				$this->render_gallery_field( $field, $value, $field_name, $input_id, $name_attr, $id_attr );
+				$gallery_name_attr = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template . '[ids]' ) . '"' : '';
+				$this->render_gallery_field( $field, $value, $field_name, $input_id, $gallery_name_attr, $id_attr );
 				return;
 
 			case 'color':
@@ -1122,13 +1254,16 @@ final class OptionsPage {
 				$multiple      = ! empty( $field['multiple'] );
 				$current       = $multiple && is_array( $value ) ? array_map( 'strval', $value ) : array();
 				$current_value = $multiple ? '' : $this->scalar_string( $value );
+				$select_name_attr = $multiple && '' !== $name_template
+					? ' data-name-template="' . esc_attr( $name_template . '[]' ) . '"'
+					: $name_attr;
 				printf(
 					'<select id="%1$s" name="%2$s" class="regular-text"%3$s%4$s%5$s%6$s>',
 					esc_attr( $input_id ),
 					esc_attr( $multiple ? $field_name . '[]' : $field_name ),
 					$multiple ? ' multiple="multiple"' : '',
 					$multiple ? ' size="' . esc_attr( (string) min( max( count( $choices ), 4 ), 10 ) ) . '"' : '',
-					$name_attr,
+					$select_name_attr,
 					$id_attr
 				);
 				foreach ( $choices as $choice_value => $choice_label ) {
@@ -1275,11 +1410,9 @@ final class OptionsPage {
 
 		echo '<div class="lerm-gallery-field" data-target="' . esc_attr( $target ) . '">';
 		echo '<input type="hidden" name="' . esc_attr( $name_prefix . '[ids]' ) . '" value="' . esc_attr( implode( ',', $ids ) ) . '"' . $name_attr . $id_attr . '>';
-		echo '<div class="lerm-gallery-preview">';
+		echo '<div class="lerm-gallery-preview" ' . ( empty( $ids ) ? 'hidden' : '' ) . '>';
 
-		if ( empty( $ids ) ) {
-			echo '<span class="lerm-media-placeholder">' . esc_html__( 'No gallery images selected.', 'lerm' ) . '</span>';
-		} else {
+		if ( ! empty( $ids ) ) {
 			foreach ( $ids as $attachment_id ) {
 				$thumbnail = wp_get_attachment_image_url( $attachment_id, 'thumbnail' );
 
@@ -1401,6 +1534,13 @@ final class OptionsPage {
 		}
 
 		return $tab;
+	}
+
+	/**
+	 * Resolve the posted subsection from AJAX reset requests.
+	 */
+	private function posted_subsection(): string {
+		return isset( $_POST['lerm_settings_subsection'] ) ? sanitize_key( wp_unslash( $_POST['lerm_settings_subsection'] ) ) : '';
 	}
 
 	/**

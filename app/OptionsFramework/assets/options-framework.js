@@ -231,7 +231,10 @@
 			const input = /** @type {HTMLInputElement} */  (dom.find('input[type="hidden"]', container));
 			const preview = /** @type {HTMLElement} */       (dom.find('.lerm-media-preview', container));
 			const removeButton = /** @type {HTMLElement} */       (dom.find('.lerm-media-remove', container));
+			const existingImage = /** @type {HTMLImageElement|null} */ (dom.find('img', preview));
 			/** @type {any} */ let frame = null;
+
+			renderMediaPreview(preview, removeButton, input.value ? (existingImage?.getAttribute('src') ?? '') : '');
 
 			/** @type {HTMLElement} */ (dom.find('.lerm-media-select', container)).addEventListener('click', (e) => {
 				e.preventDefault();
@@ -243,6 +246,7 @@
 					const url = attachment.sizes?.medium?.url ?? attachment.url;
 					input.value = String(attachment.id);
 					renderMediaPreview(preview, removeButton, url);
+					input.dispatchEvent(new Event('change', { bubbles: true }));
 				});
 				frame.open();
 			});
@@ -251,6 +255,7 @@
 				e.preventDefault();
 				input.value = '';
 				renderMediaPreview(preview, removeButton, '');
+				input.dispatchEvent(new Event('change', { bubbles: true }));
 			});
 		});
 	};
@@ -273,10 +278,8 @@
 	 */
 	const renderGalleryPreview = (preview, attachments) => {
 		dom.empty(preview);
-		if (!attachments.length) {
-			preview.appendChild(dom.create('span', { class: 'lerm-media-placeholder' }, [cfg.noGallery]));
-			return;
-		}
+		preview.hidden = attachments.length === 0;
+		if (!attachments.length) return;
 		attachments.forEach(a => {
 			preview.appendChild(dom.create('img', { src: a.sizes?.thumbnail?.url ?? a.url, alt: '' }));
 		});
@@ -302,7 +305,11 @@
 			const input = /** @type {HTMLInputElement} */ (dom.find('input[type="hidden"]', container));
 			const preview = /** @type {HTMLElement} */     (dom.find('.lerm-gallery-preview', container));
 			const removeButton = /** @type {HTMLElement} */     (dom.find('.lerm-gallery-remove', container));
+			const hasImages = input.value.split(',').map((id) => parseInt(id, 10)).filter(Boolean).length > 0;
 			/** @type {any} */ let frame = null;
+
+			preview.hidden = !hasImages;
+			removeButton.hidden = !hasImages;
 
 			/** @type {HTMLElement} */ (dom.find('.lerm-gallery-select', container)).addEventListener('click', (e) => {
 				e.preventDefault();
@@ -315,6 +322,7 @@
 					input.value = ids.join(',');
 					renderGalleryPreview(preview, attachments);
 					removeButton.hidden = ids.length === 0;
+					input.dispatchEvent(new Event('change', { bubbles: true }));
 				});
 				frame.open();
 			});
@@ -324,6 +332,7 @@
 				input.value = '';
 				renderGalleryPreview(preview, []);
 				removeButton.hidden = true;
+				input.dispatchEvent(new Event('change', { bubbles: true }));
 			});
 		});
 	};
@@ -483,7 +492,9 @@
 			sortableMap.set(list, makeSortable(list, { handle: '.lerm-sorter-handle' }));
 			list.addEventListener('sortupdate', () => {
 				renumberGroupItems(groupEl);
-				/** @type {HTMLFormElement} */ (groupEl.closest('form')).dispatchEvent(new Event('sortupdate'));
+				const form = /** @type {HTMLFormElement} */ (groupEl.closest('form'));
+				form.dispatchEvent(new Event('sortupdate'));
+				syncDirtyState(form);
 			});
 
 			/** @type {HTMLElement} */ (dom.find('[data-lerm-group-add]', groupEl)).addEventListener('click', (e) => {
@@ -491,7 +502,7 @@
 				list.insertAdjacentHTML('beforeend', template?.innerHTML ?? '');
 				renumberGroupItems(groupEl);
 				initGroupChildren(groupEl);
-				setDirty(/** @type {HTMLFormElement} */(groupEl.closest('form')), true);
+				syncDirtyState(/** @type {HTMLFormElement} */(groupEl.closest('form')));
 			});
 
 			list.addEventListener('click', (e) => {
@@ -501,7 +512,7 @@
 				if (!window.confirm(cfg.confirmRemoveItem)) return;
     			/** @type {HTMLElement} */ (btn.closest('[data-lerm-group-item]')).remove();
 				renumberGroupItems(groupEl);
-				setDirty(/** @type {HTMLFormElement} */(groupEl.closest('form')), true);
+				syncDirtyState(/** @type {HTMLFormElement} */(groupEl.closest('form')));
 			});
 
 			renumberGroupItems(groupEl);
@@ -522,7 +533,10 @@
 			const editor = wp.codeEditor.initialize(textarea, { ...cfg.codeEditor });
 			codeEditorMap.set(textarea, editor);
 			setData(textarea, 'lerm-editor-ready', '1');
-			editor?.codemirror?.on('change', () => textarea.dispatchEvent(new Event('change')));
+			editor?.codemirror?.on('change', () => {
+				editor.codemirror.save();
+				textarea.dispatchEvent(new Event('change'));
+			});
 		});
 	};
 
@@ -545,7 +559,10 @@
 	 * @param {string} message
 	 */
 	const setStatus = (form, state, message) => {
-		const pill = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-status]', getPanel(form) ?? form));
+		const pill = /** @type {HTMLElement|null} */ (
+			dom.find('[data-lerm-status]', form)
+			|| dom.find('[data-lerm-status]', getPanel(form) ?? form)
+		);
 		if (!pill) return;
 		pill.dataset['lermStatus'] = state;
 		pill.textContent = message;
@@ -557,16 +574,8 @@
 	 * @param {string} message
 	 */
 	const showFlash = (form, type, message) => {
-		const flash = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-flash]', getPanel(form) ?? form));
-		if (!flash) return;
-		dom.empty(flash);
-		if (!message) { flash.classList.remove('is-visible'); return; }
-		const wrapper = dom.create('div', { class: `notice notice-${type} inline` });
-		const p = document.createElement('p');
-		p.textContent = message;
-		wrapper.appendChild(p);
-		flash.appendChild(wrapper);
-		flash.classList.add('is-visible');
+		if (!message) return;
+		setStatus(form, type === 'error' ? 'error' : type === 'success' ? 'success' : 'idle', message);
 	};
 
 	/**
@@ -592,6 +601,137 @@
 	/** @param {HTMLFormElement} form @returns {boolean} */
 	const isDirty = (form) => getData(form, 'lerm-dirty') === '1';
 
+	/** @type {WeakMap<HTMLFormElement, Record<string, unknown>>} */
+	const formSnapshotMap = new WeakMap();
+
+	/**
+	 * @param {string} token
+	 * @returns {boolean}
+	 */
+	const isArrayToken = (token) => token === '' || /^\d+$/.test(String(token));
+
+	/**
+	 * @param {string|null|undefined} nextToken
+	 * @returns {unknown[]|Record<string, unknown>}
+	 */
+	const createStateContainer = (nextToken) => isArrayToken(String(nextToken ?? '')) ? [] : {};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} name
+	 * @returns {string[]}
+	 */
+	const optionFieldTokens = (form, name) => {
+		const prefix = `${getOptionName(form)}[`;
+		if (!String(name).startsWith(prefix)) return [];
+		return Array.from(String(name).matchAll(/\[([^\]]*)\]/g)).map((match) => match[1] ?? '');
+	};
+
+	/**
+	 * @param {Record<string, unknown>} state
+	 * @param {string[]} tokens
+	 * @param {string} value
+	 */
+	const assignStateValue = (state, tokens, value) => {
+		/** @type {unknown} */
+		let cursor = state;
+
+		tokens.forEach((token, index) => {
+			const isLast = index === tokens.length - 1;
+			const nextToken = tokens[index + 1] ?? '';
+
+			if (token === '') {
+				if (!Array.isArray(cursor)) return;
+				if (isLast) {
+					cursor.push(value);
+					return;
+				}
+				const nextContainer = createStateContainer(nextToken);
+				cursor.push(nextContainer);
+				cursor = nextContainer;
+				return;
+			}
+
+			if (!cursor || typeof cursor !== 'object') return;
+
+			const key = Array.isArray(cursor) && /^\d+$/.test(token) ? Number(token) : token;
+
+			if (isLast) {
+				cursor[key] = value;
+				return;
+			}
+
+			if (!Object.prototype.hasOwnProperty.call(cursor, key) || !cursor[key] || typeof cursor[key] !== 'object') {
+				cursor[key] = createStateContainer(nextToken);
+			}
+
+			cursor = cursor[key];
+		});
+	};
+
+	/**
+	 * @param {unknown} value
+	 * @returns {string}
+	 */
+	const stableStateString = (value) => {
+		if (Array.isArray(value)) return `[${value.map((item) => stableStateString(item)).join(',')}]`;
+		if (value && typeof value === 'object') {
+			return `{${Object.keys(/** @type {Record<string, unknown>} */ (value)).sort().map((key) => (
+				`${JSON.stringify(key)}:${stableStateString(/** @type {Record<string, unknown>} */ (value)[key])}`
+			)).join(',')}}`;
+		}
+		return JSON.stringify(value ?? null);
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @returns {Record<string, unknown>}
+	 */
+	const readFormState = (form) => {
+		/** @type {Record<string, unknown>} */
+		const state = {};
+		const formData = new FormData(form);
+
+		for (const [name, rawValue] of formData.entries()) {
+			const tokens = optionFieldTokens(form, String(name));
+			if (!tokens.length) continue;
+			assignStateValue(state, tokens, String(rawValue));
+		}
+
+		return state;
+	};
+
+	/**
+	 * @param {unknown} value
+	 * @returns {Record<string, unknown>}
+	 */
+	const cloneState = (value) => /** @type {Record<string, unknown>} */ (JSON.parse(JSON.stringify(value ?? {})));
+
+	/** @param {HTMLFormElement} form */
+	const saveFormSnapshot = (form) => {
+		formSnapshotMap.set(form, cloneState(readFormState(form)));
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string[]} fieldIds
+	 */
+	const mergeFormSnapshot = (form, fieldIds) => {
+		const currentState = readFormState(form);
+		const savedState = cloneState(formSnapshotMap.get(form) ?? {});
+
+		fieldIds.forEach((fieldId) => {
+			if (Object.prototype.hasOwnProperty.call(currentState, fieldId)) {
+				savedState[fieldId] = currentState[fieldId];
+				return;
+			}
+
+			delete savedState[fieldId];
+		});
+
+		formSnapshotMap.set(form, savedState);
+	};
+
 	/** @type {ReturnType<typeof setTimeout>|null} */
 	let statusTimer = null;
 
@@ -609,6 +749,13 @@
 		if (statusTimer) clearTimeout(statusTimer);
 		setData(form, 'lerm-dirty', dirty ? '1' : '0');
 		setStatus(form, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
+	};
+
+	/** @param {HTMLFormElement} form */
+	const syncDirtyState = (form) => {
+		const savedState = formSnapshotMap.get(form) ?? {};
+		const dirty = stableStateString(readFormState(form)) !== stableStateString(savedState);
+		setDirty(form, dirty);
 	};
 
 	// ─── AJAX ─────────────────────────────────────────────────────────────────
@@ -885,12 +1032,15 @@
 		if (exportBtn) {
 			exportBtn.addEventListener('click', (e) => {
 				e.preventDefault();
-				showFlash(form, '', '');
 				request(form, cfg.exportAction).then(response => {
-					if (!response?.success) { showFlash(form, 'error', response?.data?.message || cfg.saveError); return; }
+					if (!response?.success) {
+						setStatus(form, 'error', response?.data?.message || cfg.saveError);
+						return;
+					}
 					/** @type {HTMLInputElement} */ (dom.find('[data-lerm-backup-export-output]', form)).value = response.data.json || '';
-					showFlash(form, 'success', response.data.message || cfg.exportSuccess);
-				}).catch(() => showFlash(form, 'error', cfg.saveError));
+					setStatus(form, 'success', response.data.message || cfg.exportSuccess);
+					queueReadyStatus(form);
+				}).catch(() => setStatus(form, 'error', cfg.saveError));
 			});
 		}
 
@@ -900,19 +1050,21 @@
 				e.preventDefault();
 				if (!window.confirm(cfg.confirmImport)) return;
 				const json = String(/** @type {HTMLInputElement|null} */(dom.find('[data-lerm-backup-import-input]', form))?.value ?? '');
-				showFlash(form, '', '');
 				setBusy(form, true, cfg.resetting);
 				setStatus(form, 'saving', cfg.statusSaving);
 				request(form, cfg.importAction, { backup_json: json })
 					.then(response => {
-						if (!response?.success) { showFlash(form, 'error', response?.data?.message || cfg.importError); setStatus(form, 'error', cfg.statusError); return; }
+						if (!response?.success) {
+							setStatus(form, 'error', response?.data?.message || cfg.importError);
+							return;
+						}
 						applyFieldValues(form, response.data.values ?? {});
-						showFlash(form, 'success', response.data.message || cfg.importSuccess);
-						setDirty(form, false);
-						setStatus(form, 'success', cfg.statusSaved);
+						saveFormSnapshot(form);
+						syncDirtyState(form);
+						setStatus(form, 'success', response.data.message || cfg.importSuccess);
 						queueReadyStatus(form);
 					})
-					.catch(() => { showFlash(form, 'error', cfg.importError); setStatus(form, 'error', cfg.statusError); })
+					.catch(() => setStatus(form, 'error', cfg.importError))
 					.finally(() => setBusy(form, false, cfg.saving));
 			});
 		}
@@ -925,16 +1077,19 @@
 	 * @param {AjaxResponse} response
 	 * @param {string} successMsg
 	 */
-	const handleSaveResponse = (form, response, successMsg) => {
+	const handleSaveResponse = (form, response, successMsg, partialFieldIds = null) => {
 		if (!response?.success) {
-			showFlash(form, 'error', response?.data?.message || cfg.saveError);
-			setStatus(form, 'error', cfg.statusError);
+			setStatus(form, 'error', response?.data?.message || cfg.saveError);
 			return;
 		}
 		applyFieldValues(form, response.data.values ?? {});
-		showFlash(form, 'success', response.data.message || successMsg);
-		setDirty(form, false);
-		setStatus(form, 'success', cfg.statusSaved);
+		if (Array.isArray(partialFieldIds) && partialFieldIds.length) {
+			mergeFormSnapshot(form, partialFieldIds);
+		} else {
+			saveFormSnapshot(form);
+		}
+		syncDirtyState(form);
+		setStatus(form, 'success', response.data.message || successMsg);
 		queueReadyStatus(form);
 	};
 
@@ -943,12 +1098,11 @@
 		form.addEventListener('submit', (e) => {
 			e.preventDefault();
 			triggerEditorSave(form);
-			showFlash(form, '', '');
 			setBusy(form, true, cfg.saving);
 			setStatus(form, 'saving', cfg.statusSaving);
 			request(form, cfg.saveAction)
 				.then(r => handleSaveResponse(form, r, cfg.saveSuccess))
-				.catch(() => { showFlash(form, 'error', cfg.saveError); setStatus(form, 'error', cfg.statusError); })
+				.catch(() => setStatus(form, 'error', cfg.saveError))
 				.finally(() => setBusy(form, false, cfg.saving));
 		});
 
@@ -958,12 +1112,14 @@
 				const scope = getData(btn, 'lerm-reset') === 'all' ? 'all' : 'section';
 				if (!window.confirm(scope === 'all' ? cfg.confirmResetAll : cfg.confirmResetSection)) return;
 				triggerEditorSave(form);
-				showFlash(form, '', '');
 				setBusy(form, true, cfg.resetting);
 				setStatus(form, 'resetting', cfg.statusResetting);
 				request(form, cfg.resetAction, { reset_scope: scope })
 					.then(r => {
-						handleSaveResponse(form, r, scope === 'all' ? cfg.resetAllSuccess : cfg.resetSectionSuccess);
+						const partialFieldIds = r?.data?.scope === 'subsection'
+							? Object.keys(/** @type {Record<string, unknown>} */ (r.data.values ?? {}))
+							: null;
+						handleSaveResponse(form, r, scope === 'all' ? cfg.resetAllSuccess : cfg.resetSectionSuccess, partialFieldIds);
 						// After a full reset, reload values for every other tab form too.
 						if (scope === 'all' && r?.success) {
 							dom.findAll('.lerm-settings-form').forEach(otherEl => {
@@ -971,21 +1127,26 @@
 								if (otherForm === form) return;
 								// Silently re-fetch defaults for this tab.
 								request(otherForm, cfg.resetAction, { reset_scope: 'fetch_only' })
-									.then(r2 => { if (r2?.success) applyFieldValues(otherForm, r2.data.values ?? {}); })
+									.then(r2 => {
+										if (!r2?.success) return;
+										applyFieldValues(otherForm, r2.data.values ?? {});
+										saveFormSnapshot(otherForm);
+										syncDirtyState(otherForm);
+									})
 									.catch(() => { /* best-effort, ignore */ });
 							});
 						}
 					})
-					.catch(() => { showFlash(form, 'error', cfg.resetError); setStatus(form, 'error', cfg.statusError); })
+					.catch(() => setStatus(form, 'error', cfg.resetError))
 					.finally(() => setBusy(form, false, cfg.saving));
 			});
 		});
 
-		form.addEventListener('input', () => setDirty(form, true));
-		form.addEventListener('change', () => setDirty(form, true));
+		form.addEventListener('input', () => syncDirtyState(form));
+		form.addEventListener('change', () => syncDirtyState(form));
 
 		const sorterList = /** @type {HTMLElement|null} */ (dom.find('.lerm-sorter-list', form));
-		if (sorterList) sorterList.addEventListener('sortupdate', () => setDirty(form, true));
+		if (sorterList) sorterList.addEventListener('sortupdate', () => syncDirtyState(form));
 	};
 
 	const initSubsectionSwitching = () => {
@@ -999,6 +1160,7 @@
 			 * @param {string} subsectionId
 			 */
 			const activateSubsection = (subsectionId) => {
+				const subsectionInput = /** @type {HTMLInputElement|null} */ (dom.find('input[name="lerm_settings_subsection"]', form));
 				panels.forEach(panelEl => {
 					const panel = /** @type {HTMLElement} */ (panelEl);
 					panel.hidden = panel.getAttribute('data-subsection-panel') !== subsectionId;
@@ -1016,6 +1178,8 @@
 						codeEditorMap.get(/** @type {HTMLTextAreaElement} */ (editor))?.codemirror?.refresh();
 					});
 				}
+
+				if (subsectionInput) subsectionInput.value = subsectionId;
 
 				queueStickyActionsSync();
 			};
@@ -1149,12 +1313,6 @@
 				if (descEl) descEl.textContent = activePanel.getAttribute('data-tab-description') ?? '';
 			}
 
-			// Clear any leftover flash notice from the previous tab.
-			if (panel) {
-				const flash = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-flash]', panel));
-				if (flash) { dom.empty(flash); flash.classList.remove('is-visible'); }
-			}
-
 			// Sync the status pill to the newly-active tab's dirty state.
 			if (activePanel) {
 				const activeForm = /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel));
@@ -1238,7 +1396,8 @@
 			toggleDependencies(form);
 			bindAjaxForm(form);
 			bindBackupTools(form);
-			setDirty(form, false);
+			saveFormSnapshot(form);
+			syncDirtyState(form);
 
 			document.addEventListener('change', (e) => {
 				const target = /** @type {HTMLElement} */ (e.target);

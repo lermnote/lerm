@@ -11,8 +11,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 return array(
 	'title'       => __( 'Footer', 'lerm' ),
 	'description' => __( 'Footer content and menu settings.', 'lerm' ),
-	'fields'      => array(
+	'groups'      => array(
 		array(
+			'id'    => 'basic',
+			'label' => __( 'Basic', 'lerm' ),
+		),
+		array(
+			'id'    => 'advanced',
+			'label' => __( 'Advanced', 'lerm' ),
+		),
+	),
+	'fields'      => array(
+
+		array(
+			'group_id'    => 'basic',
 			'id'          => 'footer_menus',
 			'type'        => 'select',
 			'label'       => __( 'Footer menu', 'lerm' ),
