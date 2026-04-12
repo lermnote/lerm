@@ -161,11 +161,11 @@ return array(
 			'dependency_value' => '1',
 		),
 		array(
-			'id'          => 'back_to_top',
-			'type'        => 'switcher',
-			'label'       => __( 'Show back-to-top button', 'lerm' ),
-			'group'       => __( 'Utility buttons', 'lerm' ),
-			'default'     => true,
+			'id'      => 'back_to_top',
+			'type'    => 'switcher',
+			'label'   => __( 'Show back-to-top button', 'lerm' ),
+			'group'   => __( 'Utility buttons', 'lerm' ),
+			'default' => true,
 		),
 		array(
 			'id'               => 'back_to_top_threshold',
@@ -181,11 +181,11 @@ return array(
 			'dependency_value' => '1',
 		),
 		array(
-			'id'          => 'qq_chat_enable',
-			'type'        => 'switcher',
-			'label'       => __( 'Show QQ live chat button', 'lerm' ),
-			'group'       => __( 'Utility buttons', 'lerm' ),
-			'default'     => false,
+			'id'      => 'qq_chat_enable',
+			'type'    => 'switcher',
+			'label'   => __( 'Show QQ live chat button', 'lerm' ),
+			'group'   => __( 'Utility buttons', 'lerm' ),
+			'default' => false,
 		),
 		array(
 			'id'               => 'qq_chat_number',

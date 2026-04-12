@@ -7,11 +7,11 @@
 
 use function Lerm\Support\copyright_text;
 
-$template_options  = lerm_get_template_options();
-$social_positions  = (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) );
-$social_new_tab    = ! isset( $template_options['social_open_new_tab'] ) || ! empty( $template_options['social_open_new_tab'] );
-$footer_menu_id    = (int) ( $template_options['footer_menus'] ?? 0 );
-$footer_menu_args  = array(
+$template_options = lerm_get_template_options();
+$social_positions = (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) );
+$social_new_tab   = ! isset( $template_options['social_open_new_tab'] ) || ! empty( $template_options['social_open_new_tab'] );
+$footer_menu_id   = (int) ( $template_options['footer_menus'] ?? 0 );
+$footer_menu_args = array(
 	'depth'       => 1,
 	'menu_class'  => 'footer-menu d-flex justify-content-center list-unstyled mb-0',
 	'fallback_cb' => false,
@@ -71,31 +71,8 @@ if ( $footer_menu_id > 0 ) {
 			title="<?php echo esc_attr__( 'Back to top', 'lerm' ); ?>"
 			role="button" style="display:none;"><i class="fa fa-chevron-up"></i></button>
 	<?php endif; ?>
-
-	<?php if ( ! empty( $template_options['dark_mode_enable'] ) && ( $template_options['dark_mode_toggle_position'] ?? 'navbar' ) === 'sidebar' ) : ?>
-		<button id="lerm-dark-toggle" class="btn btn-custom"
-			aria-label="<?php esc_attr_e( 'Toggle dark mode', 'lerm' ); ?>">
-			<i class="fa fa-moon" aria-hidden="true"></i>
-		</button>
-	<?php endif; ?>
 </div>
 </div><!-- #page -->
-
-<?php if ( ! empty( $template_options['dark_mode_enable'] ) ) : ?>
-	<script>
-	// (function(){
-	// 	var btn = document.getElementById('lerm-dark-toggle');
-	// 	if (!btn) return;
-	// 	btn.addEventListener('click', function(){
-	// 		var cur  = document.documentElement.getAttribute('data-bs-theme') || 'light';
-	// 		var next = cur === 'dark' ? 'light' : 'dark';
-	// 		document.documentElement.setAttribute('data-bs-theme', next);
-	// 		localStorage.setItem('lerm-color-scheme', next);
-	// 	});
-	// })();
-	</script>
-<?php endif; ?>
-
 <?php wp_footer(); ?>
 
 <?php if ( ! empty( $template_options['footer_scripts'] ) ) : ?>

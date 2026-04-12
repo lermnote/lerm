@@ -51,7 +51,8 @@ const SOCIAL_ICON_MAP = array(
 	'google_plus' => 'fa fa-google-plus',
 	'github'      => 'fa fa-github',
 	'rss'         => 'fa fa-rss',
-	'envelope'    => 'fa fa-envelope',
+	'email'       => 'fa fa-mail',
+	'instagram'   => 'fa fa-instagram',
 );
 
 /**
@@ -183,6 +184,8 @@ if ( ! function_exists( 'lerm_get_social_link_svg' ) ) {
 			'x.com'           => 'twitter',
 			'plus.google.com' => 'google_plus',
 			'github.com'      => 'github',
+			'mailto:'         => 'email',
+			'instagram.com'   => 'instagram',
 		);
 
 		foreach ( $url_map as $pattern => $slug ) {
@@ -212,7 +215,7 @@ if ( ! function_exists( __NAMESPACE__ . '\\lerm_nav_menu_social_icons' ) ) {
 	 * @return string
 	 */
 	function lerm_nav_menu_social_icons( string $item_output, \WP_Post $item, int $depth, object $args ): string {
-		if ( empty( $args->theme_location ) || 'social' !== $args->theme_location ) {
+		if ( empty( $args->theme_location ) || ! in_array( $args->theme_location, array( 'social', 'secondary' ), true ) ) {
 			return $item_output;
 		}
 

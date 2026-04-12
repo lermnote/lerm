@@ -12,13 +12,18 @@ class MetaTags {
 	use Singleton;
 
 	protected static array $args = array(
-		'separator'        => '|',
-		'keywords'         => array(),
-		'description'      => '',
-		'html_slug'        => false,
-		'default_og_image' => 'https://s0.wp.com/i/blank.jpg',
-		'og_image_width'   => 1200,
-		'og_image_height'  => 630,
+		'separator'            => '|',
+		'keywords'             => array(),
+		'description'          => '',
+		'html_slug'            => false,
+		'default_og_image'     => 'https://s0.wp.com/i/blank.jpg',
+		'og_image_width'       => 1200,
+		'og_image_height'      => 630,
+		'title_structure'      => array( 'title', 'separator', 'tagline' ),
+		'post_title_structure' => array( 'post_title', 'separator', 'title' ),
+		'page_title_structure' => array( 'page_title', 'separator', 'title' ),
+		'tagline'              => '',
+		'title'                => '',
 	);
 
 	public function __construct( array $params = array() ) {
@@ -54,7 +59,7 @@ class MetaTags {
 		global $post;
 
 		if ( ! empty( $keywords ) ) {
-			$keywords = array_merge( $keywords, (array) self::$args['keywords'] );
+			$keywords = array_merge( (array) self::$args['keywords'], $keywords );
 		} elseif ( is_singular() && isset( $post->ID ) ) {
 			$tags = get_the_tags( $post->ID );
 			if ( $tags && ! is_wp_error( $tags ) ) {
@@ -94,7 +99,7 @@ class MetaTags {
 			$archive_desc = get_the_archive_description();
 			$description  = $archive_desc ? wp_strip_all_tags( $archive_desc ) : get_bloginfo( 'name' ) . ' - ' . single_term_title( '', false );
 		} else {
-			$description = get_bloginfo( 'description' );
+			$description = self::$args['description'] ?? get_bloginfo( 'description' );
 		}
 
 		return mb_substr( trim( $description ), 0, 200, 'UTF-8' );
@@ -136,7 +141,6 @@ class MetaTags {
 		if ( empty( $tokens ) ) {
 			return $title;
 		}
-
 		$resolved = array();
 
 		foreach ( $tokens as $token ) {
@@ -162,8 +166,8 @@ class MetaTags {
 
 	private static function title_token_value( string $token ): string {
 		return match ( $token ) {
-			'title'      => wp_strip_all_tags( get_bloginfo( 'name' ) ),
-			'tagline'    => wp_strip_all_tags( get_bloginfo( 'description' ) ),
+			'title'      => self::$args['blogname'] ?? wp_strip_all_tags( get_bloginfo( 'name' ) ),
+			'tagline'    => self::$args['tagline'] ?? wp_strip_all_tags( get_bloginfo( 'description' ) ),
 			'post_title' => is_singular() ? wp_strip_all_tags( single_post_title( '', false ) ) : '',
 			'page_title' => is_page() ? wp_strip_all_tags( single_post_title( '', false ) ) : '',
 			'separator'  => self::separator_value(),

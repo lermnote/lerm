@@ -38,7 +38,7 @@ return array(
 			'placeholder' => get_bloginfo( 'name', 'display' ),
 		),
 		array(
-			'id'          => 'blogdesc',
+			'id'          => 'tagline',
 			'type'        => 'text',
 			'label'       => __( 'Site tagline override', 'lerm' ),
 			'description' => __( 'Overrides the WordPress tagline inside the theme.', 'lerm' ),

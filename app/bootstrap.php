@@ -89,6 +89,8 @@ if ( ! empty( $options ) ) {
 	);
 
 	$seo_options = array(
+		'blogname'             => $options['blogname'] ?? '',
+		'tagline'              => $options['tagline'] ?? '',
 		'baidu_submit'         => $options['baidu_submit'] ?? '',
 		'submit_url'           => $options['submit_url'] ?? '',
 		'submit_token'         => $options['submit_token'] ?? '',
@@ -206,12 +208,13 @@ if ( ! empty( $options ) ) {
 		'summary_meta'              => (array) ( $options['summary_meta'] ?? array() ),
 		'social_share'              => (array) ( $options['social_share'] ?? array() ),
 		'blogname'                  => (string) ( $options['blogname'] ?? '' ),
-		'blogdesc'                  => (string) ( $options['blogdesc'] ?? '' ),
+		'tagline'                   => (string) ( $options['tagline'] ?? '' ),
 		'navbar_align'              => (string) ( $options['navbar_align'] ?? 'justify-content-md-start' ),
 		'navbar_search'             => (bool) ( $options['navbar_search'] ?? false ),
 		'dark_mode_enable'          => (bool) ( $options['dark_mode_enable'] ?? false ),
 		'dark_mode_toggle_position' => (string) ( $options['dark_mode_toggle_position'] ?? 'navbar' ),
 		'reading_progress_height'   => max( 1, (int) ( $options['reading_progress_height'] ?? 3 ) ),
+		'back_to_top'               => (bool) ( $options['back_to_top'] ?? false ),
 		'back_to_top_threshold'     => max( 100, (int) ( $options['back_to_top_threshold'] ?? 400 ) ),
 		'qq_chat_enable'            => (bool) ( $options['qq_chat_enable'] ?? false ),
 		'qq_chat_number'            => (string) ( $options['qq_chat_number'] ?? '' ),
@@ -491,7 +494,7 @@ if ( ! empty( $mail_options ) ) {
 // 主题更新器 — 有配置才启用
 if ( ! empty( $updater_options ) ) {
 	add_action(
-		'pre_set_site_transient_update_plugins',
+		'admin_init',
 		static function ( $transient ) use ( $updater_options ) {
 			if ( empty( $transient->checked ) ) {
 				return $transient;

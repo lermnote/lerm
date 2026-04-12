@@ -116,10 +116,11 @@ class Setup {
 		// Registers nav menu locations.
 		register_nav_menus(
 			array(
-				'primary' => __( 'Primary', 'lerm' ),
-				'mobile'  => __( 'Mobile', 'lerm' ),
-				'social'  => __( 'Social Links Menu', 'lerm' ),
-				'footer'  => __( 'Footer Menu', 'lerm' ),
+				'primary'   => __( 'Primary menu in Header', 'lerm' ),
+				'secondary' => __( 'Secondary menu in Header', 'lerm' ),
+				'mobile'    => __( 'Mobile', 'lerm' ),
+				'social'    => __( 'Social Links Menu', 'lerm' ),
+				'footer'    => __( 'Footer Menu', 'lerm' ),
 			)
 		);
 

@@ -185,7 +185,7 @@ if ( ! function_exists( 'lerm_get_template_options' ) ) {
 				),
 				'social_share'              => array(),
 				'blogname'                  => '',
-				'blogdesc'                  => '',
+				'tagline'                   => '',
 				'navbar_align'              => 'justify-content-md-end',
 				'navbar_search'             => false,
 				'dark_mode_enable'          => false,

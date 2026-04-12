@@ -72,14 +72,6 @@
 					<?php get_template_part( 'template-parts/layout/site-brand' ); ?>
 					<!-- .navbar-brand end -->
 					<?php get_template_part( 'template-parts/layout/site-nav' ); ?>
-					<?php
-					// ── Dark mode toggle – navbar position ─────────────────
-					if ( ! empty( $template_options['dark_mode_enable'] ) && ( $template_options['dark_mode_toggle_position'] ?? 'navbar' ) === 'navbar' ) :
-						?>
-						<button id="lerm-dark-toggle" class="btn btn-sm btn-outline-secondary ms-2" aria-label="<?php esc_attr_e( 'Toggle dark mode', 'lerm' ); ?>">
-							<i class="fa fa-moon" aria-hidden="true"></i>
-						</button>
-					<?php endif; ?>
 				</div><!-- .container -->
 			</nav>
 		</header>

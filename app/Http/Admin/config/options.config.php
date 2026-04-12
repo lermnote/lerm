@@ -88,7 +88,7 @@ CSF::createSection(
 				),
 			),
 			array(
-				'id'         => 'blogdesc',
+				'id'         => 'tagline',
 				'type'       => 'text',
 				'title'      => __( 'Site tagline', 'lerm' ),
 				'subtitle'   => __( 'Overrides the WordPress tagline in the theme.', 'lerm' ),

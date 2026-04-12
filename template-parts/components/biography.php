@@ -5,7 +5,7 @@
  * @package Lerm https://lerm.net
  * @since Lerm 2.0
  */
-
+use Lerm\Core\Menu;
 $template_options   = lerm_get_template_options();
 $social_positions   = (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) );
 $social_new_tab     = (bool) ( $template_options['social_open_new_tab'] ?? true );
@@ -33,22 +33,20 @@ $show_social_in_bio = in_array( 'author_bio', $social_positions, true );
 		<p class="author-bio text-muted p-3"><?php the_author_meta( 'description' ); ?></p>
 		<?php endif; ?>
 	</div>
-</div><!-- .author-avatar -->
+</div><!-- .author -->
 
-<div class="author-contact pb-3">
-	<?php if ( $show_social_in_bio && function_exists( 'lerm_social_profile_links' ) ) : ?>
-		<?php lerm_social_profile_links( $template_options, $social_new_tab ); ?>
-	<?php elseif ( has_nav_menu( 'social' ) ) : ?>
-		<?php
-		wp_nav_menu(
-			array(
-				'theme_location' => 'social',
-				'menu_class'     => 'social-links-menu d-flex justify-content-around list-unstyled',
-				'link_before'    => '<span class="screen-reader-text">',
-				'link_after'     => '</span>' . lerm_get_icon_svg( 'link' ),
-				'depth'          => 1,
-			)
-		);
-		endif;
-		?>
-</div><!-- .author-description -->
+<?php
+if ( has_nav_menu( 'social' ) && $show_social_in_bio ) :
+	wp_nav_menu(
+		array(
+			'theme_location' => 'social',
+			'menu_class'     => 'navbar-nav flex-row flex-wrap ms-md-auto justify-content-around',
+			'link_before'    => '<span class="screen-reader-text">',
+			'link_after'     => '</span>',
+			'items_wrap'     => '<ul class="%2$s">%3$s</ul>',
+			'walker'         => new Menu(),
+			'depth'          => 1,
+		)
+	);
+	endif;
+?>

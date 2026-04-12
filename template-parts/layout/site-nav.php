@@ -8,12 +8,13 @@
 
 use Lerm\Core\Menu;
 
-$template_options    = lerm_get_template_options();
-$theme_location      = wp_is_mobile() ? 'mobile' : 'primary';
-$show_navbar_search  = ! empty( $template_options['navbar_search'] );
-$social_positions    = (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) );
-$show_header_social  = in_array( 'header', $social_positions, true );
-$social_open_new_tab = ! isset( $template_options['social_open_new_tab'] ) || ! empty( $template_options['social_open_new_tab'] );
+$template_options      = lerm_get_template_options();
+$theme_location        = wp_is_mobile() ? 'mobile' : 'primary';
+$show_navbar_search    = ! empty( $template_options['navbar_search'] );
+$social_positions      = (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) );
+$show_header_social    = in_array( 'header', $social_positions, true );
+$social_open_new_tab   = ! isset( $template_options['social_open_new_tab'] ) || ! empty( $template_options['social_open_new_tab'] );
+$show_social_in_header = in_array( 'header', $social_positions, true );
 ?>
 
 <?php if ( wp_is_mobile() ) : ?>
@@ -96,19 +97,27 @@ $social_open_new_tab = ! isset( $template_options['social_open_new_tab'] ) || ! 
 	if ( $nav_menu ) :
 		echo $nav_menu; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	endif;
+	?>
 
-	if ( $show_header_social && function_exists( 'lerm_social_profile_links' ) ) :
-		lerm_social_profile_links(
-			$template_options,
-			$social_open_new_tab,
-			'lerm-social-links d-none d-lg-flex align-items-center gap-2 me-2 mb-0'
-		);
-	endif;
-
-	if ( $show_navbar_search ) :
-		?>
+	<?php if ( $show_navbar_search ) : ?>
 		<div class="d-none d-lg-block">
 			<?php get_search_form(); ?>
 		</div>
 	<?php endif; ?>
+
+	<?php
+	if ( has_nav_menu( 'secondary' ) && $show_social_in_header ) :
+		wp_nav_menu(
+			array(
+				'theme_location' => 'secondary',
+				'menu_class'     => 'top-social-menus navbar-nav flex-row flex-wrap ms-md-auto justify-content-around',
+				'link_before'    => '<span class="screen-reader-text">',
+				'link_after'     => '</span>',
+				'items_wrap'     => '<ul class="%2$s">%3$s</ul>',
+				'walker'         => new Menu(),
+				'depth'          => 1,
+			)
+		);
+	endif;
+	?>
 <?php endif; ?>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Login Page Template
+ * Template Name: Account Template
  *
  * @package Lerm
  * @since  2.0
