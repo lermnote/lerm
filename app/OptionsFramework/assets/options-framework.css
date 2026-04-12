@@ -282,6 +282,11 @@
 	gap: 18px;
 }
 
+.lerm-settings-stack {
+	display: grid;
+	gap: 14px;
+}
+
 .lerm-settings-subsection[hidden] {
 	display: none !important;
 }
@@ -313,10 +318,55 @@
 	transition: opacity 0.16s ease;
 }
 
+.lerm-settings-stack .lerm-settings-row {
+	display: grid;
+	grid-template-columns: 270px minmax(0, 1fr);
+	border: 1px solid #eef2f7;
+	border-radius: 14px;
+	background: #fff;
+	box-shadow: 0 8px 20px rgba(15, 23, 42, 0.03);
+	overflow: hidden;
+}
+
+.lerm-settings-stack .lerm-settings-row__head {
+	padding: 18px 18px 18px 20px;
+	background: #fff;
+	border-right: 1px solid #eef2f7;
+}
+
+.lerm-settings-stack .lerm-settings-row__head label {
+	display: block;
+	font-weight: 600;
+	color: #0f172a;
+}
+
+.lerm-settings-stack .lerm-settings-row__body {
+	min-width: 0;
+	padding: 18px 20px;
+	background: #fff;
+}
+
+.lerm-settings-stack .lerm-settings-row--nolabel {
+	grid-template-columns: 1fr;
+}
+
+.lerm-settings-stack .lerm-settings-row--nolabel .lerm-settings-row__head {
+	display: none;
+}
+
+.lerm-settings-stack .description {
+	margin-top: 8px;
+	color: #64748b;
+}
+
 .lerm-settings-group td {
 	padding: 8px 4px 0;
 	background: transparent;
 	border: 0;
+}
+
+.lerm-settings-group--stack {
+	padding-top: 8px;
 }
 
 .lerm-settings-group h3 {
@@ -733,6 +783,19 @@
 	min-height: 220px;
 }
 
+.lerm-settings-stack .CodeMirror {
+	max-width: 100%;
+	border: 1px solid #dbe4ee;
+	border-radius: 12px;
+	height: auto;
+	min-height: 220px;
+	background: #fff;
+}
+
+.lerm-settings-stack .CodeMirror-scroll {
+	min-height: 220px;
+}
+
 .lerm-sorter {
 	max-width: 560px;
 }
@@ -835,6 +898,20 @@
 		padding-bottom: 10px;
 	}
 
+	.lerm-settings-stack .lerm-settings-row {
+		grid-template-columns: 1fr;
+	}
+
+	.lerm-settings-stack .lerm-settings-row__head {
+		padding: 16px 16px 10px;
+		border-right: 0;
+		border-bottom: 1px solid #eef2f7;
+	}
+
+	.lerm-settings-stack .lerm-settings-row__body {
+		padding: 16px;
+	}
+
 	.lerm-settings-table--inline > tbody {
 		display: grid;
 		grid-template-columns: 1fr;
@@ -862,6 +939,12 @@
 .lerm-settings-table--inline .lerm-settings-row:hover > th,
 .lerm-settings-table--inline .lerm-settings-row:hover > td {
 	background: transparent;
+}
+
+.lerm-settings-stack .lerm-settings-row:hover .lerm-settings-row__head,
+.lerm-settings-stack .lerm-settings-row:hover .lerm-settings-row__body {
+	background: #f0f9ff;
+	transition: background 0.14s ease;
 }
 
 /* Row th border to visually connect th+td into one card */

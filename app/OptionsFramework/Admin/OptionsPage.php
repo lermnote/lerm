@@ -498,11 +498,9 @@ final class OptionsPage {
 											<section class="lerm-settings-subsection"
 												data-subsection-panel="<?php echo esc_attr( (string) $group['id'] ); ?>"
 												<?php echo 0 !== $group_index ? 'hidden' : ''; ?>>
-												<table class="<?php echo esc_attr( $table_classes ); ?>" role="presentation">
-													<tbody>
-														<?php $this->render_fields( (array) $group['fields'], $values, (string) $section_id, false ); ?>
-													</tbody>
-												</table>
+												<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) $group['label'] ); ?>">
+													<?php $this->render_fields( (array) $group['fields'], $values, (string) $section_id, false, 'stack' ); ?>
+												</div>
 											</section>
 										<?php endforeach; ?>
 									</div>
@@ -609,8 +607,9 @@ final class OptionsPage {
 	 * @param array<string, mixed>             $values     Saved values.
 	 * @param string                           $section_id Current section ID.
 	 * @param bool                             $show_group_headings Whether grouped headings should be rendered.
+	 * @param string                           $layout Layout mode.
 	 */
-	public function render_fields( array $fields, array $values, string $section_id = '', bool $show_group_headings = true ): void {
+	public function render_fields( array $fields, array $values, string $section_id = '', bool $show_group_headings = true, string $layout = 'table' ): void {
 		$current_group = '';
 
 		foreach ( $fields as $field ) {
@@ -618,13 +617,21 @@ final class OptionsPage {
 
 			if ( $show_group_headings && $group && $group !== $current_group ) {
 				$current_group = $group;
-				printf(
-					'<tr class="lerm-settings-group"><td colspan="2"><h3>%s</h3></td></tr>',
-					esc_html( $group )
-				);
+
+				if ( 'stack' === $layout ) {
+					printf(
+						'<div class="lerm-settings-group lerm-settings-group--stack"><h3>%s</h3></div>',
+						esc_html( $group )
+					);
+				} else {
+					printf(
+						'<tr class="lerm-settings-group"><td colspan="2"><h3>%s</h3></td></tr>',
+						esc_html( $group )
+					);
+				}
 			}
 
-			$this->render_field( $field, $values, $section_id );
+			$this->render_field( $field, $values, $section_id, $layout );
 		}
 	}
 
@@ -634,8 +641,9 @@ final class OptionsPage {
 	 * @param array<string, mixed> $field      Field definition.
 	 * @param array<string, mixed> $values     Saved values.
 	 * @param string               $section_id Current section ID.
+	 * @param string               $layout Layout mode.
 	 */
-	public function render_field( array $field, array $values, string $section_id = '' ): void {
+	public function render_field( array $field, array $values, string $section_id = '', string $layout = 'table' ): void {
 		$field_id    = (string) $field['id'];
 		$field_type  = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
 		$field_name  = $this->option_name() . '[' . $field_id . ']';
@@ -655,18 +663,37 @@ final class OptionsPage {
 			$row_attrs[] = 'data-dependency-value="' . esc_attr( $dep_value ) . '"';
 		}
 
-		echo '<tr ' . implode( ' ', $row_attrs ) . '>';
+		if ( 'stack' === $layout ) {
+			if ( '' === $label ) {
+				$row_attrs[0] = 'class="lerm-settings-row lerm-settings-row--nolabel"';
+			}
 
-		if ( '' !== $label ) {
-			printf(
-				'<th scope="row"><label for="%1$s">%2$s</label></th>',
-				esc_attr( $field_id ),
-				esc_html( $label )
-			);
+			echo '<div ' . implode( ' ', $row_attrs ) . '>';
+
+			if ( '' !== $label ) {
+				printf(
+					'<div class="lerm-settings-row__head"><label for="%1$s">%2$s</label></div>',
+					esc_attr( $field_id ),
+					esc_html( $label )
+				);
+			}
+
+			echo '<div class="lerm-settings-row__body">';
 		} else {
-			echo '<th scope="row"></th>';
+			echo '<tr ' . implode( ' ', $row_attrs ) . '>';
+
+			if ( '' !== $label ) {
+				printf(
+					'<th scope="row"><label for="%1$s">%2$s</label></th>',
+					esc_attr( $field_id ),
+					esc_html( $label )
+				);
+			} else {
+				echo '<th scope="row"></th>';
+			}
+
+			echo '<td>';
 		}
-		echo '<td>';
 
 		$custom_render = $this->field_types->render_callback( $field_type );
 
@@ -837,6 +864,11 @@ final class OptionsPage {
 
 		if ( $description ) {
 			printf( '<p class="description">%s</p>', esc_html( $description ) );
+		}
+
+		if ( 'stack' === $layout ) {
+			echo '</div></div>';
+			return;
 		}
 
 		echo '</td></tr>';
