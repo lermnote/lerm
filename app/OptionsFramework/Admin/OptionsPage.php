@@ -39,12 +39,6 @@ final class OptionsPage {
 	private AssetResolver $asset_resolver;
 
 	/**
-	 * Text domain for translatable strings.
-	 * Passed by the host via the definition so it can be overridden.
-	 */
-	private string $textdomain;
-
-	/**
 	 * The JS global variable name for this page instance.
 	 * Namespaced by page slug to avoid collisions on multi-instance pages.
 	 */
@@ -58,9 +52,8 @@ final class OptionsPage {
 		$this->store          = $store;
 		$this->field_types    = $field_types;
 		$this->asset_resolver = $asset_resolver;
-		// Textdomain and JS global can be overridden per-instance via the definition.
-		$this->textdomain = (string) ( $definition['textdomain'] ?? 'lerm' );
-		$this->js_global  = 'lermOptionsFramework';
+		// JS global can be overridden per-instance via the definition.
+		$this->js_global = 'lermOptionsFramework';
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_post_' . $this->save_action(), array( $this, 'handle_save' ) );
 		add_action( 'wp_ajax_' . $this->ajax_save_action(), array( $this, 'handle_ajax_save' ) );
@@ -168,8 +161,8 @@ final class OptionsPage {
 			);
 		}
 
-		$tab   = $this->posted_tab();
-		$scope = isset( $_POST['reset_scope'] ) ? sanitize_key( wp_unslash( $_POST['reset_scope'] ) ) : 'section';
+		$tab        = $this->posted_tab();
+		$scope      = isset( $_POST['reset_scope'] ) ? sanitize_key( wp_unslash( $_POST['reset_scope'] ) ) : 'section';
 		$subsection = $this->posted_subsection();
 
 		check_ajax_referer( $this->nonce_action( $tab ) );
@@ -459,11 +452,12 @@ final class OptionsPage {
 						</div>
 
 						<?php foreach ( $sections as $section_id => $section ) : ?>
-						<?php
-						$section_fields   = is_array( $section['fields'] ?? null ) ? $section['fields'] : array();
-						$section_groups   = $this->group_fields( $section, $section_fields );
-						$use_subsections  = $this->section_uses_subsections( $section, $section_groups );
-						?>
+							<?php
+							$section_fields  = is_array( $section['fields'] ?? null ) ? $section['fields'] : array();
+							$section_groups  = $this->group_fields( $section, $section_fields );
+							$use_subsections = $this->section_uses_subsections( $section, $section_groups );
+							$current_subsection = $use_subsections ? $this->current_subsection_for_section( (string) $section_id, $section_groups ) : '';
+							?>
 						<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
 							data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
 							data-tab-description="<?php echo esc_attr( (string) ( $section['description'] ?? '' ) ); ?>"
@@ -476,7 +470,7 @@ final class OptionsPage {
 									novalidate>
 								<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
 								<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $section_id ); ?>">
-								<input type="hidden" name="lerm_settings_subsection" value="">
+								<input type="hidden" name="lerm_settings_subsection" value="<?php echo esc_attr( $current_subsection ); ?>">
 								<?php wp_nonce_field( $this->nonce_action( $section_id ) ); ?>
 
 								<div class="lerm-settings-sticky-wrap" data-lerm-sticky-wrap>
@@ -495,9 +489,9 @@ final class OptionsPage {
 									<nav class="lerm-settings-subnav" aria-label="<?php echo esc_attr( sprintf( __( '%s groups', 'lerm' ), (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ) ); ?>">
 										<?php foreach ( $section_groups as $group_index => $group ) : ?>
 											<button type="button"
-												class="lerm-settings-subnav__item <?php echo 0 === $group_index ? 'is-active' : ''; ?>"
+												class="lerm-settings-subnav__item <?php echo (string) $group['id'] === $current_subsection ? 'is-active' : ''; ?>"
 												data-subsection-target="<?php echo esc_attr( (string) $group['id'] ); ?>"
-												aria-pressed="<?php echo 0 === $group_index ? 'true' : 'false'; ?>">
+												aria-pressed="<?php echo (string) $group['id'] === $current_subsection ? 'true' : 'false'; ?>">
 												<?php echo esc_html( (string) $group['label'] ); ?>
 											</button>
 										<?php endforeach; ?>
@@ -507,7 +501,7 @@ final class OptionsPage {
 										<?php foreach ( $section_groups as $group_index => $group ) : ?>
 											<section class="lerm-settings-subsection"
 												data-subsection-panel="<?php echo esc_attr( (string) $group['id'] ); ?>"
-												<?php echo 0 !== $group_index ? 'hidden' : ''; ?>>
+												<?php echo (string) $group['id'] !== $current_subsection ? 'hidden' : ''; ?>>
 												<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) $group['label'] ); ?>">
 													<?php if ( ! empty( $group['fields'] ) ) : ?>
 														<?php $this->render_fields( (array) $group['fields'], $values, (string) $section_id, $this->subsection_uses_group_headings( (array) $group['fields'], (string) $group['label'] ), 'stack' ); ?>
@@ -715,6 +709,38 @@ final class OptionsPage {
 		}
 
 		return trim( $labels[0] ) !== trim( $subsection_label );
+	}
+
+	/**
+	 * Resolve which subsection should be rendered initially for a section.
+	 *
+	 * @param string                           $section_id Section ID.
+	 * @param array<int, array<string, mixed>> $groups     Section groups.
+	 */
+	private function current_subsection_for_section( string $section_id, array $groups ): string {
+		if ( empty( $groups ) ) {
+			return '';
+		}
+
+		$fallback_subsection = (string) ( $groups[0]['id'] ?? '' );
+
+		if ( '' === $fallback_subsection || $section_id !== $this->current_tab() ) {
+			return $fallback_subsection;
+		}
+
+		$requested_subsection = isset( $_GET['subsection'] ) ? sanitize_key( wp_unslash( $_GET['subsection'] ) ) : '';
+
+		if ( '' === $requested_subsection ) {
+			return $fallback_subsection;
+		}
+
+		foreach ( $groups as $group ) {
+			if ( $requested_subsection === (string) ( $group['id'] ?? '' ) ) {
+				return $requested_subsection;
+			}
+		}
+
+		return $fallback_subsection;
 	}
 
 	/**
@@ -1250,10 +1276,10 @@ final class OptionsPage {
 				return;
 
 			case 'select':
-				$choices       = PageSchema::choices( $field );
-				$multiple      = ! empty( $field['multiple'] );
-				$current       = $multiple && is_array( $value ) ? array_map( 'strval', $value ) : array();
-				$current_value = $multiple ? '' : $this->scalar_string( $value );
+				$choices          = PageSchema::choices( $field );
+				$multiple         = ! empty( $field['multiple'] );
+				$current          = $multiple && is_array( $value ) ? array_map( 'strval', $value ) : array();
+				$current_value    = $multiple ? '' : $this->scalar_string( $value );
 				$select_name_attr = $multiple && '' !== $name_template
 					? ' data-name-template="' . esc_attr( $name_template . '[]' ) . '"'
 					: $name_attr;
@@ -1643,17 +1669,8 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Translation helper that honours the instance textdomain.
-	 *
-	 * @param string $text Source text (identical to the first arg of __()).
-	 */
-	private function td( string $text ): string {
-		return __( $text, $this->textdomain ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText,WordPress.WP.I18n.NonSingularStringLiteralDomain
-	}
-
-	/**
 	 * Normalize scalar-like values to strings for safe rendering.
-	 * Unified with OptionStore::string_value() — both delegate here via PageSchema.
+	 * Unified with OptionStore::string_value() – both delegate here via PageSchema.
 	 *
 	 * @param mixed  $value Source value.
 	 * @param string $default_value Fallback string.

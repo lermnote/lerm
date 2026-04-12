@@ -11,9 +11,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 return array(
 	'title'       => __( 'System', 'lerm' ),
 	'description' => __( 'Runtime optimization, delivery mirrors, and custom head/footer code.', 'lerm' ),
+	'groups'      => array(
+		array(
+			'id'    => 'asset_mirrors',
+			'label' => __( 'Asset mirrors', 'lerm' ),
+		),
+		array(
+			'id'    => 'frontend_delivery',
+			'label' => __( 'Frontend delivery', 'lerm' ),
+		),
+		array(
+			'id'    => 'custom_injection',
+			'label' => __( 'Custom injection', 'lerm' ),
+		),
+		array(
+			'id'    => 'cdn_rewriting',
+			'label' => __( 'CDN rewriting', 'lerm' ),
+		),
+		array(
+			'id'    => 'mail_delivery',
+			'label' => __( 'Mail delivery', 'lerm' ),
+		),
+	),
 	'fields'      => array(
+
 		array(
 			'id'          => 'super_admin',
+			'group_id'    => 'asset_mirrors',
 			'type'        => 'switcher',
 			'label'       => __( 'Backend asset acceleration', 'lerm' ),
 			'description' => __( 'Load WordPress dashboard static assets from a public mirror for faster admin performance in China.', 'lerm' ),
@@ -22,6 +46,7 @@ return array(
 		),
 		array(
 			'id'          => 'super_gravatar',
+			'group_id'    => 'asset_mirrors',
 			'type'        => 'select',
 			'label'       => __( 'Gravatar mirror', 'lerm' ),
 			'description' => __( 'Replace the default avatar CDN with a faster mirror.', 'lerm' ),
@@ -31,6 +56,7 @@ return array(
 		),
 		array(
 			'id'          => 'super_googleapis',
+			'group_id'    => 'asset_mirrors',
 			'type'        => 'select',
 			'label'       => __( 'Google Fonts mirror', 'lerm' ),
 			'description' => __( 'Only needed when the theme is loading Google-hosted font assets.', 'lerm' ),
@@ -40,6 +66,7 @@ return array(
 		),
 		array(
 			'id'          => 'lazyload',
+			'group_id'    => 'frontend_delivery',
 			'type'        => 'switcher',
 			'label'       => __( 'Lazy-load images', 'lerm' ),
 			'description' => __( 'Defer off-screen image loading until the visitor scrolls near them.', 'lerm' ),
@@ -48,6 +75,7 @@ return array(
 		),
 		array(
 			'id'          => 'super_optimize',
+			'group_id'    => 'frontend_delivery',
 			'type'        => 'checkbox_list',
 			'label'       => __( 'WordPress head cleanup', 'lerm' ),
 			'description' => __( 'Remove optional tags and features from wp_head and related outputs.', 'lerm' ),
@@ -57,6 +85,8 @@ return array(
 		),
 		array(
 			'id'          => 'head_scripts',
+			'group_id'    => 'custom_injection',
+
 			'type'        => 'code_editor',
 			'label'       => __( 'Before </head>', 'lerm' ),
 			'description' => __( 'Code injected into the head of every page: analytics, verification tags, custom fonts, and similar snippets.', 'lerm' ),
@@ -66,6 +96,8 @@ return array(
 		),
 		array(
 			'id'          => 'footer_scripts',
+			'group_id'    => 'custom_injection',
+
 			'type'        => 'code_editor',
 			'label'       => __( 'Before </body>', 'lerm' ),
 			'description' => __( 'Code injected just before the closing body tag: chat widgets, deferred scripts, and similar snippets.', 'lerm' ),
@@ -75,6 +107,7 @@ return array(
 		),
 		array(
 			'id'          => 'enable_cdn',
+			'group_id'    => 'cdn_rewriting',
 			'type'        => 'switcher',
 			'label'       => __( 'Enable CDN URL rewriting', 'lerm' ),
 			'description' => __( 'Rewrites supported static asset URLs so they point at your CDN origin.', 'lerm' ),
@@ -83,6 +116,7 @@ return array(
 		),
 		array(
 			'id'               => 'new_url',
+			'group_id'         => 'cdn_rewriting',
 			'type'             => 'url',
 			'label'            => __( 'CDN URL', 'lerm' ),
 			'description'      => __( 'CDN origin without a trailing slash. Example: https://cdn.example.com', 'lerm' ),
@@ -94,6 +128,7 @@ return array(
 		),
 		array(
 			'id'               => 'off_new_url',
+			'group_id'         => 'cdn_rewriting',
 			'type'             => 'url',
 			'label'            => __( 'Relative URL prefix', 'lerm' ),
 			'description'      => __( 'Prefix used when rewriting relative URLs such as /wp-content/.', 'lerm' ),
@@ -105,6 +140,7 @@ return array(
 		),
 		array(
 			'id'               => 'include_dir',
+			'group_id'         => 'cdn_rewriting',
 			'type'             => 'text',
 			'label'            => __( 'Included directories', 'lerm' ),
 			'description'      => __( 'Comma-separated directory prefixes that should be rewritten.', 'lerm' ),
@@ -115,6 +151,8 @@ return array(
 		),
 		array(
 			'id'               => 'exclude_if_substring',
+			'group_id'         => 'cdn_rewriting',
+
 			'type'             => 'text',
 			'label'            => __( 'Excluded substrings', 'lerm' ),
 			'description'      => __( 'Skip rewriting whenever a URL contains one of these substrings.', 'lerm' ),
@@ -125,6 +163,7 @@ return array(
 		),
 		array(
 			'id'          => 'email_notice',
+			'group_id'    => 'mail_delivery',
 			'type'        => 'switcher',
 			'label'       => __( 'Comment notification emails', 'lerm' ),
 			'description' => __( 'Send emails when new comments are posted and route them through the SMTP settings below.', 'lerm' ),
@@ -133,10 +172,13 @@ return array(
 		),
 		array(
 			'id'               => 'smtp_options',
+			'group_id'         => 'mail_delivery',
 			'type'             => 'fieldset',
 			'label'            => __( 'SMTP settings', 'lerm' ),
 			'description'      => __( 'Sender identity and SMTP server credentials used for outgoing mail.', 'lerm' ),
 			'group'            => __( 'Mail delivery', 'lerm' ),
+			'dependency_field' => 'email_notice',
+			'dependency_value' => '1',
 			'default'          => array(
 				'from_email' => '',
 				'from_name'  => '',
@@ -147,11 +189,10 @@ return array(
 				'username'   => '',
 				'pswd'       => '',
 			),
-			'dependency_field' => 'email_notice',
-			'dependency_value' => '1',
 			'fields'           => array(
 				array(
 					'id'          => 'from_email',
+					'group_id'    => 'mail_delivery',
 					'type'        => 'text',
 					'label'       => __( 'From address', 'lerm' ),
 					'default'     => '',
@@ -159,6 +200,7 @@ return array(
 				),
 				array(
 					'id'          => 'from_name',
+					'group_id'    => 'mail_delivery',
 					'type'        => 'text',
 					'label'       => __( 'From name', 'lerm' ),
 					'default'     => '',
@@ -166,49 +208,55 @@ return array(
 				),
 				array(
 					'id'          => 'smtp_host',
+					'group_id'    => 'mail_delivery',
 					'type'        => 'text',
 					'label'       => __( 'SMTP host', 'lerm' ),
 					'default'     => '',
 					'placeholder' => 'smtp.example.com',
 				),
 				array(
-					'id'      => 'smtp_port',
-					'type'    => 'number',
-					'label'   => __( 'SMTP port', 'lerm' ),
-					'default' => 587,
-					'min'     => 1,
-					'max'     => 65535,
-					'step'    => 1,
+					'id'       => 'smtp_port',
+					'group_id' => 'mail_delivery',
+					'type'     => 'number',
+					'label'    => __( 'SMTP port', 'lerm' ),
+					'default'  => 587,
+					'min'      => 1,
+					'max'      => 65535,
+					'step'     => 1,
 				),
 				array(
-					'id'      => 'ssl_enable',
-					'type'    => 'button_set',
-					'label'   => __( 'Encryption', 'lerm' ),
-					'default' => 'tls',
-					'choices' => array(
+					'id'       => 'ssl_enable',
+					'group_id' => 'mail_delivery',
+					'type'     => 'button_set',
+					'label'    => __( 'Encryption', 'lerm' ),
+					'default'  => 'tls',
+					'choices'  => array(
 						'none' => __( 'None', 'lerm' ),
 						'tls'  => 'TLS',
 						'ssl'  => 'SSL',
 					),
 				),
 				array(
-					'id'      => 'smtp_auth',
-					'type'    => 'radio',
-					'label'   => __( 'SMTP authentication', 'lerm' ),
-					'default' => '0',
-					'choices' => array(
+					'id'       => 'smtp_auth',
+					'group_id' => 'mail_delivery',
+					'type'     => 'radio',
+					'label'    => __( 'SMTP authentication', 'lerm' ),
+					'default'  => '0',
+					'choices'  => array(
 						'1' => __( 'Use username and password', 'lerm' ),
 						'0' => __( 'No authentication', 'lerm' ),
 					),
 				),
 				array(
-					'id'      => 'username',
-					'type'    => 'text',
-					'label'   => __( 'SMTP username', 'lerm' ),
-					'default' => '',
+					'id'       => 'username',
+					'group_id' => 'mail_delivery',
+					'type'     => 'text',
+					'label'    => __( 'SMTP username', 'lerm' ),
+					'default'  => '',
 				),
 				array(
 					'id'         => 'pswd',
+					'group_id'   => 'mail_delivery',
 					'type'       => 'text',
 					'input_type' => 'password',
 					'label'      => __( 'SMTP password', 'lerm' ),

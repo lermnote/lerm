@@ -156,6 +156,40 @@
 	/** @type {LermConfig} */
 	let cfg = /** @type {any} */ ({});
 
+	/**
+	 * @returns {{ tab: string, subsection: string }}
+	 */
+	const readLocationState = () => {
+		const url = new URL(window.location.href);
+		return {
+			tab: url.searchParams.get('tab') ?? '',
+			subsection: url.searchParams.get('subsection') ?? '',
+		};
+	};
+
+	/**
+	 * @param {string} tabId
+	 * @param {string} subsectionId
+	 * @param {boolean} [replace]
+	 */
+	const writeLocationState = (tabId, subsectionId, replace = false) => {
+		if (!window.history?.pushState) return;
+		const url = new URL(window.location.href);
+
+		if (tabId) url.searchParams.set('tab', tabId);
+		else url.searchParams.delete('tab');
+
+		if (subsectionId) url.searchParams.set('subsection', subsectionId);
+		else url.searchParams.delete('subsection');
+
+		const state = {
+			tab: url.searchParams.get('tab') ?? '',
+			subsection: url.searchParams.get('subsection') ?? '',
+		};
+
+		window.history[replace ? 'replaceState' : 'pushState'](state, '', url.toString());
+	};
+
 	// ─── Field Name Helpers ───────────────────────────────────────────────────
 
 	/** @param {HTMLFormElement} form */
@@ -604,6 +638,14 @@
 	/** @type {WeakMap<HTMLFormElement, Record<string, unknown>>} */
 	const formSnapshotMap = new WeakMap();
 
+	/** @type {WeakMap<HTMLFormElement, {
+	 * activateSubsection: (subsectionId: string, pushState?: boolean) => void,
+	 * currentSubsection: () => string,
+	 * defaultSubsection: () => string,
+	 * hasSubsection: (subsectionId: string) => boolean
+	 * }>} */
+	const subsectionControllerMap = new WeakMap();
+
 	/**
 	 * @param {string} token
 	 * @returns {boolean}
@@ -878,7 +920,12 @@
 				/** @type {HTMLInputElement} */ (dom.find('input[type="checkbox"]', scope)).checked = !!value;
 				break;
 			case 'color':
-				try { /** @type {HTMLInputElement} */ (dom.find('.lerm-color-field', scope)).value = String(value || ''); } catch { /* noop */ }
+				try {
+					const input = /** @type {HTMLInputElement|null} */ (dom.find('.lerm-color-field', scope));
+					if (input) {
+						try { jQuery(input).wpColorPicker('color', value || ''); } catch { input.value = String(value || ''); }
+					}
+				} catch { /* noop */ }
 				break;
 			case 'button_set':
 			case 'radio':
@@ -1155,12 +1202,21 @@
 			const navItems = dom.findAll('[data-subsection-target]', form);
 			const panels = dom.findAll('[data-subsection-panel]', form);
 			if (!navItems.length || !panels.length) return;
+			const formPanel = /** @type {HTMLElement|null} */ (form.closest('[data-tab-panel]'));
+			const formTabId = formPanel?.getAttribute('data-tab-panel') ?? '';
+			const subsectionInput = /** @type {HTMLInputElement|null} */ (dom.find('input[name="lerm_settings_subsection"]', form));
 
 			/**
 			 * @param {string} subsectionId
+			 * @returns {boolean}
 			 */
-			const activateSubsection = (subsectionId) => {
-				const subsectionInput = /** @type {HTMLInputElement|null} */ (dom.find('input[name="lerm_settings_subsection"]', form));
+			const hasSubsection = (subsectionId) => navItems.some((item) => item.getAttribute('data-subsection-target') === subsectionId);
+
+			/**
+			 * @param {string} subsectionId
+			 * @param {boolean} [pushState]
+			 */
+			const activateSubsection = (subsectionId, pushState = false) => {
 				panels.forEach(panelEl => {
 					const panel = /** @type {HTMLElement} */ (panelEl);
 					panel.hidden = panel.getAttribute('data-subsection-panel') !== subsectionId;
@@ -1180,23 +1236,41 @@
 				}
 
 				if (subsectionInput) subsectionInput.value = subsectionId;
+				if (pushState && formTabId) writeLocationState(formTabId, subsectionId);
 
 				queueStickyActionsSync();
 			};
+
+			subsectionControllerMap.set(form, {
+				activateSubsection,
+				currentSubsection: () => subsectionInput?.value ?? '',
+				defaultSubsection: () => (
+					navItems[0]?.getAttribute('data-subsection-target')
+					?? panels[0]?.getAttribute('data-subsection-panel')
+					?? ''
+				),
+				hasSubsection,
+			});
 
 			navItems.forEach(item => {
 				item.addEventListener('click', (e) => {
 					e.preventDefault();
 					const subsectionId = item.getAttribute('data-subsection-target') ?? '';
-					if (subsectionId) activateSubsection(subsectionId);
+					if (subsectionId) activateSubsection(subsectionId, true);
 				});
 			});
 
-			const initialSubsection = navItems[0]?.getAttribute('data-subsection-target')
-				?? panels[0]?.getAttribute('data-subsection-panel')
-				?? '';
+			const locationState = readLocationState();
+			const requestedSubsection = locationState.tab === formTabId ? locationState.subsection : '';
+			const initialSubsection = (
+				(requestedSubsection && hasSubsection(requestedSubsection) ? requestedSubsection : '')
+				|| (subsectionInput?.value && hasSubsection(subsectionInput.value) ? subsectionInput.value : '')
+				|| navItems[0]?.getAttribute('data-subsection-target')
+				|| panels[0]?.getAttribute('data-subsection-panel')
+				|| ''
+			);
 
-			if (initialSubsection) activateSubsection(initialSubsection);
+			if (initialSubsection) activateSubsection(initialSubsection, false);
 		});
 	};
 
@@ -1290,8 +1364,9 @@
 		/**
 		 * @param {string} tabId
 		 * @param {boolean} [pushState]
+		 * @param {string} [requestedSubsection]
 		 */
-		const activateTab = (tabId, pushState = true) => {
+		const activateTab = (tabId, pushState = true, requestedSubsection = '') => {
 			// Show / hide panels.
 			panels.forEach(p => {
 				const el = /** @type {HTMLElement} */ (p);
@@ -1317,6 +1392,21 @@
 			if (activePanel) {
 				const activeForm = /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel));
 				if (activeForm) {
+					const subsectionController = subsectionControllerMap.get(activeForm);
+					const locationState = readLocationState();
+					const targetSubsection = subsectionController
+						? (
+							(requestedSubsection && subsectionController.hasSubsection(requestedSubsection) ? requestedSubsection : '')
+							|| (locationState.tab === tabId && locationState.subsection && subsectionController.hasSubsection(locationState.subsection) ? locationState.subsection : '')
+							|| subsectionController.currentSubsection()
+							|| subsectionController.defaultSubsection()
+						)
+						: '';
+
+					if (subsectionController && targetSubsection) {
+						subsectionController.activateSubsection(targetSubsection, false);
+					}
+
 					const dirty = isDirty(activeForm);
 					setStatus(activeForm, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
 				}
@@ -1332,10 +1422,14 @@
 			queueStickyActionsSync();
 
 			// Keep the URL in sync so the page can be bookmarked / refreshed correctly.
-			if (pushState && window.history?.pushState) {
-				const url = new URL(window.location.href);
-				url.searchParams.set('tab', tabId);
-				window.history.pushState({ tab: tabId }, '', url.toString());
+			if (pushState) {
+				const activeForm = activePanel
+					? /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel))
+					: null;
+				const activeSubsection = activeForm
+					? String(/** @type {HTMLInputElement|null} */ (dom.find('input[name="lerm_settings_subsection"]', activeForm))?.value ?? '')
+					: '';
+				writeLocationState(tabId, activeSubsection);
 			}
 		};
 
@@ -1353,8 +1447,21 @@
 			const tabId = /** @type {any} */ (e).state?.tab
 				?? new URL(window.location.href).searchParams.get('tab')
 				?? '';
-			if (tabId) activateTab(tabId, false);
+			const subsectionId = /** @type {any} */ (e).state?.subsection
+				?? new URL(window.location.href).searchParams.get('subsection')
+				?? '';
+			if (tabId) activateTab(tabId, false, subsectionId);
 		});
+
+		const initialState = readLocationState();
+		const initialTab = initialState.tab
+			|| dom.find('.lerm-settings-nav__item.is-active')?.getAttribute('data-tab-target')
+			|| panels[0]?.getAttribute('data-tab-panel')
+			|| '';
+
+		if (initialTab) {
+			activateTab(initialTab, false, initialState.subsection);
+		}
 	};
 
 	// ─── Init ─────────────────────────────────────────────────────────────────
