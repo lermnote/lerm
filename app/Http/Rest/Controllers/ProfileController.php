@@ -30,7 +30,7 @@ final class ProfileController {
 	public static function update( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$check = Middleware::chain(
 			fn() => Middleware::require_login(),
-			fn() => Middleware::verify_nonce( $request, 'lerm_profile' )
+			fn() => Middleware::verify_nonce( $request )
 		);
 		if ( is_wp_error( $check ) ) {
 			return $check;

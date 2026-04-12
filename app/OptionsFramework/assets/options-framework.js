@@ -98,18 +98,58 @@
 	};
 
 	/**
+	 * Normalize a dataset-style key to the actual attribute suffix used in HTML.
+	 * Accepts both `fieldType` and `field-type`.
+	 *
+	 * @param {string} key
+	 * @returns {string}
+	 */
+	const normalizeDataKey = (key) => String(key)
+		.replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+		.replace(/_/g, '-')
+		.toLowerCase();
+
+	/**
 	 * @param {Element} el
 	 * @param {string} key
 	 * @returns {string|null}
 	 */
-	const getData = (el, key) => el.getAttribute('data-' + key);
+	const getData = (el, key) => el.getAttribute('data-' + normalizeDataKey(key));
 
 	/**
 	 * @param {Element} el
 	 * @param {string} key
 	 * @param {string} value
 	 */
-	const setData = (el, key, value) => el.setAttribute('data-' + key, String(value));
+	const setData = (el, key, value) => el.setAttribute('data-' + normalizeDataKey(key), String(value));
+
+	/**
+	 * Resolve a form control by ID without relying on CSS selectors.
+	 * This safely supports IDs that begin with digits, such as `404_title`.
+	 *
+	 * @param {HTMLFormElement} form
+	 * @param {string} fieldId
+	 * @returns {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|null}
+	 */
+	const findFieldById = (form, fieldId) => {
+		const el = document.getElementById(String(fieldId));
+		if (!el || !form.contains(el)) return null;
+		return el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement
+			? el
+			: null;
+	};
+
+	/**
+	 * Resolve all form controls that share the same HTML name attribute.
+	 *
+	 * @param {HTMLFormElement} form
+	 * @param {string} name
+	 * @returns {(HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement)[]}
+	 */
+	const getNamedControls = (form, name) => Array.from(form.elements).filter((el) => (
+		(el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement)
+		&& el.name === name
+	));
 
 	// ─── Config ───────────────────────────────────────────────────────────────
 
@@ -133,9 +173,12 @@
 	 * @returns {string}
 	 */
 	const getControllerValue = (form, fieldId) => {
-		const el = /** @type {HTMLInputElement|null} */ (dom.find('#' + fieldId, form));
-		if (el) return el.type === 'checkbox' ? (el.checked ? '1' : '0') : String(el.value ?? '');
-		const radio = /** @type {HTMLInputElement|null} */ (dom.find(`input[name="${buildFieldName(form, fieldId)}"]:checked`, form));
+		const el = findFieldById(form, fieldId);
+		if (el instanceof HTMLInputElement) return el.type === 'checkbox' ? (el.checked ? '1' : '0') : String(el.value ?? '');
+		if (el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) return String(el.value ?? '');
+		const radio = /** @type {HTMLInputElement|undefined} */ (
+			getNamedControls(form, buildFieldName(form, fieldId)).find((control) => control instanceof HTMLInputElement && control.type === 'radio' && control.checked)
+		);
 		return radio ? String(radio.value ?? '') : '';
 	};
 
@@ -170,10 +213,11 @@
 	const renderMediaPreview = (preview, removeButton, imageUrl) => {
 		dom.empty(preview);
 		if (imageUrl) {
+			preview.hidden = false;
 			preview.appendChild(dom.create('img', { src: imageUrl, alt: '' }));
 			removeButton.hidden = false;
 		} else {
-			preview.appendChild(dom.create('span', { class: 'lerm-media-placeholder' }, [cfg.noMedia]));
+			preview.hidden = true;
 			removeButton.hidden = true;
 		}
 	};
@@ -181,6 +225,9 @@
 	/** @param {Document|Element} scope */
 	const initMediaFields = (scope) => {
 		dom.findAll('.lerm-media-field', scope).forEach(container => {
+			if (getData(container, 'lerm-media-ready') === '1') return;
+			setData(container, 'lerm-media-ready', '1');
+
 			const input = /** @type {HTMLInputElement} */  (dom.find('input[type="hidden"]', container));
 			const preview = /** @type {HTMLElement} */       (dom.find('.lerm-media-preview', container));
 			const removeButton = /** @type {HTMLElement} */       (dom.find('.lerm-media-remove', container));
@@ -249,6 +296,9 @@
 	/** @param {Document|Element} scope */
 	const initGalleryFields = (scope) => {
 		dom.findAll('.lerm-gallery-field', scope).forEach(container => {
+			if (getData(container, 'lerm-gallery-ready') === '1') return;
+			setData(container, 'lerm-gallery-ready', '1');
+
 			const input = /** @type {HTMLInputElement} */ (dom.find('input[type="hidden"]', container));
 			const preview = /** @type {HTMLElement} */     (dom.find('.lerm-gallery-preview', container));
 			const removeButton = /** @type {HTMLElement} */     (dom.find('.lerm-gallery-remove', container));
@@ -396,9 +446,18 @@
 			/** @type {HTMLElement} */ (item).dataset['index'] = String(i);
 			const title = dom.find('.lerm-group-item__title', item);
 			if (title) title.textContent = 'Item ' + (i + 1);
-			dom.findAll('[data-name-template]', item).forEach(el => { /** @type {HTMLInputElement}  */ (el).name = replaceIndex(getData(el, 'nameTemplate'), i); });
-			dom.findAll('[data-id-template]', item).forEach(el => { /** @type {HTMLElement}        */ (el).id = replaceIndex(getData(el, 'idTemplate'), i); });
-			dom.findAll('[data-for-template]', item).forEach(el => { /** @type {HTMLLabelElement}   */ (el).htmlFor = replaceIndex(getData(el, 'forTemplate'), i); });
+			dom.findAll('[data-name-template]', item).forEach(el => {
+				const template = getData(el, 'nameTemplate');
+				if (template) /** @type {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} */ (el).name = replaceIndex(template, i);
+			});
+			dom.findAll('[data-id-template]', item).forEach(el => {
+				const template = getData(el, 'idTemplate');
+				if (template) /** @type {HTMLElement} */ (el).id = replaceIndex(template, i);
+			});
+			dom.findAll('[data-for-template]', item).forEach(el => {
+				const template = getData(el, 'forTemplate');
+				if (template) /** @type {HTMLLabelElement} */ (el).htmlFor = replaceIndex(template, i);
+			});
 		});
 		refreshGroupEmpty(group);
 	};
@@ -584,8 +643,8 @@
 	 * @param {unknown} value
 	 */
 	const applyColorValue = (form, fieldId, value) => {
-		const input = /** @type {HTMLInputElement|null} */ (dom.find('#' + fieldId, form));
-		if (!input) return;
+		const input = findFieldById(form, fieldId);
+		if (!(input instanceof HTMLInputElement)) return;
 		try { jQuery(input).wpColorPicker('color', value || ''); } catch { input.value = String(value || ''); }
 	};
 
@@ -608,10 +667,35 @@
 	 */
 	const applyGalleryContainer = (container, ids) => {
 		if (!container) return;
-		const clean = (Array.isArray(ids) ? ids : []).map((id) => parseInt(String(id), 10)).filter(Boolean);
+		const clean = (
+			Array.isArray(ids)
+				? ids
+				: (typeof ids === 'object' && ids && 'ids' in /** @type {Record<string, unknown>} */ (ids))
+					? String(/** @type {Record<string, unknown>} */ (ids).ids ?? '').split(',')
+					: (typeof ids === 'string' ? ids.split(',') : [])
+		).map((id) => parseInt(String(id), 10)).filter(Boolean);
 		/** @type {HTMLInputElement} */ (dom.find('input[type="hidden"]', container)).value = clean.join(',');
 		/** @type {HTMLElement} */      (dom.find('.lerm-gallery-remove', container)).hidden = clean.length === 0;
 		renderGalleryByIds(/** @type {Element} */(dom.find('.lerm-gallery-preview', container)), clean);
+	};
+
+	/**
+	 * Apply single or multi-select values.
+	 *
+	 * @param {HTMLSelectElement|null} select
+	 * @param {unknown} value
+	 */
+	const applySelectValue = (select, value) => {
+		if (!select) return;
+		if (!select.multiple) {
+			select.value = String(value ?? '');
+			return;
+		}
+
+		const selected = Array.isArray(value) ? value.map((item) => String(item)) : [];
+		Array.from(select.options).forEach((option) => {
+			option.selected = selected.includes(option.value);
+		});
 	};
 
 	/**
@@ -654,7 +738,7 @@
 				dom.findAll('input[type="radio"]', scope).forEach(el => { /** @type {HTMLInputElement} */ (el).checked = /** @type {HTMLInputElement} */ (el).value === String(value); });
 				break;
 			case 'select':
-				/** @type {HTMLSelectElement} */ (dom.find('select', scope)).value = String(value);
+				applySelectValue(/** @type {HTMLSelectElement|null} */ (dom.find('select', scope)), value);
 				break;
 			case 'textarea':
 				/** @type {HTMLTextAreaElement} */ (dom.find('textarea', scope)).value = String(value || '');
@@ -665,9 +749,11 @@
 			case 'gallery':
 				applyGalleryContainer(dom.find('.lerm-gallery-field', scope), value);
 				break;
-			default:
-				/** @type {HTMLInputElement} */ (dom.find('input, textarea', scope)).value = String(value ?? '');
+			default: {
+				const control = /** @type {HTMLInputElement|HTMLTextAreaElement|null} */ (dom.find('input:not([type="hidden"]), textarea', scope));
+				if (control) control.value = String(value ?? '');
 				break;
+			}
 		}
 	};
 
@@ -697,13 +783,10 @@
 		const template = /** @type {HTMLElement|null} */ (dom.find('.lerm-group-template', group));
 		const rows = /** @type {Record<string, unknown>[]} */ (Array.isArray(items) ? items : []);
 
-		sortableMap.get(list)?.destroy(); sortableMap.delete(list);
 		dom.empty(list);
 		rows.forEach(() => list.insertAdjacentHTML('beforeend', template?.innerHTML ?? ''));
 		renumberGroupItems(group);
 		initGroupChildren(group);
-		setData(group, 'lerm-group-ready', '0');
-		initGroups(group);
 
 		dom.findAll('[data-lerm-group-item]', group).forEach((item, i) => {
 			const rowData = rows[i] ?? {};
@@ -724,24 +807,31 @@
 		for (const [fieldId, value] of Object.entries(values)) {
 			const row = dom.find(`[data-field-id="${fieldId}"]`, form);
 			const fieldType = row ? getData(row, 'fieldType') : '';
-			const input = /** @type {HTMLInputElement|null} */ (dom.find('#' + fieldId, form));
+			const input = findFieldById(form, fieldId);
 
 			switch (fieldType) {
 				case 'switcher':
-					if (input) input.checked = !!value;
+					if (input instanceof HTMLInputElement) input.checked = !!value;
 					break;
 				case 'color':
 					applyColorValue(form, fieldId, value);
 					break;
 				case 'button_set':
 				case 'radio': {
-					const radio = /** @type {HTMLInputElement|null} */ (dom.find(`input[name="${buildFieldName(form, fieldId)}"][value="${String(value)}"]`, form));
-					if (radio) radio.checked = true;
+					getNamedControls(form, buildFieldName(form, fieldId)).forEach((control) => {
+						if (control instanceof HTMLInputElement && control.type === 'radio') {
+							control.checked = control.value === String(value ?? '');
+						}
+					});
 					break;
 				}
+				case 'select':
+					applySelectValue(input instanceof HTMLSelectElement ? input : null, value);
+					break;
 				case 'checkbox_list':
-					dom.findAll(`input[name="${buildFieldName(form, fieldId)}[]"]`, form).forEach(el => {
-						/** @type {HTMLInputElement} */ (el).checked = Array.isArray(value) && value.includes(String(/** @type {HTMLInputElement} */(el).value));
+					getNamedControls(form, `${buildFieldName(form, fieldId)}[]`).forEach((control) => {
+						if (!(control instanceof HTMLInputElement)) return;
+						control.checked = Array.isArray(value) && value.map((item) => String(item)).includes(String(control.value));
 					});
 					break;
 				case 'media':
@@ -762,13 +852,15 @@
 				case 'backup_tools':
 					break;
 				case 'code_editor':
-					if (input) {
+					if (input instanceof HTMLTextAreaElement) {
 						input.value = String(value || '');
-						codeEditorMap.get(/** @type {HTMLTextAreaElement} */(input))?.codemirror?.setValue(String(value || ''));
+						codeEditorMap.get(input)?.codemirror?.setValue(String(value || ''));
 					}
 					break;
 				case 'wp_editor': {
-					const ta = /** @type {HTMLTextAreaElement|null} */ (dom.find(`textarea[name="${buildFieldName(form, fieldId)}"]`, form));
+					const ta = /** @type {HTMLTextAreaElement|undefined} */ (
+						getNamedControls(form, buildFieldName(form, fieldId)).find((control) => control instanceof HTMLTextAreaElement)
+					);
 					if (ta) ta.value = String(value || '');
 					window['tinyMCE']?.get('lerm-' + fieldId)?.setContent(String(value || ''));
 					break;
@@ -776,7 +868,7 @@
 				default:
 					if (input) input.value = String(value ?? '');
 					else {
-						const el = /** @type {HTMLInputElement|null} */ (dom.find(`[name="${buildFieldName(form, fieldId)}"]`, form));
+						const el = getNamedControls(form, buildFieldName(form, fieldId))[0];
 						if (el) el.value = String(value);
 					}
 					break;
@@ -896,6 +988,124 @@
 		if (sorterList) sorterList.addEventListener('sortupdate', () => setDirty(form, true));
 	};
 
+	const initSubsectionSwitching = () => {
+		dom.findAll('.lerm-settings-form').forEach(el => {
+			const form = /** @type {HTMLFormElement} */ (el);
+			const navItems = dom.findAll('[data-subsection-target]', form);
+			const panels = dom.findAll('[data-subsection-panel]', form);
+			if (!navItems.length || !panels.length) return;
+
+			/**
+			 * @param {string} subsectionId
+			 */
+			const activateSubsection = (subsectionId) => {
+				panels.forEach(panelEl => {
+					const panel = /** @type {HTMLElement} */ (panelEl);
+					panel.hidden = panel.getAttribute('data-subsection-panel') !== subsectionId;
+				});
+
+				navItems.forEach(item => {
+					const active = item.getAttribute('data-subsection-target') === subsectionId;
+					item.classList.toggle('is-active', active);
+					item.setAttribute('aria-pressed', active ? 'true' : 'false');
+				});
+
+				const activePanel = /** @type {HTMLElement|null} */ (dom.find(`[data-subsection-panel="${subsectionId}"]`, form));
+				if (activePanel) {
+					dom.findAll('.lerm-code-editor', activePanel).forEach(editor => {
+						codeEditorMap.get(/** @type {HTMLTextAreaElement} */ (editor))?.codemirror?.refresh();
+					});
+				}
+
+				queueStickyActionsSync();
+			};
+
+			navItems.forEach(item => {
+				item.addEventListener('click', (e) => {
+					e.preventDefault();
+					const subsectionId = item.getAttribute('data-subsection-target') ?? '';
+					if (subsectionId) activateSubsection(subsectionId);
+				});
+			});
+
+			const initialSubsection = navItems[0]?.getAttribute('data-subsection-target')
+				?? panels[0]?.getAttribute('data-subsection-panel')
+				?? '';
+
+			if (initialSubsection) activateSubsection(initialSubsection);
+		});
+	};
+
+	/** @type {ReturnType<typeof requestAnimationFrame>|null} */
+	let stickyActionFrame = null;
+
+	/** @type {boolean} */
+	let stickyActionsBound = false;
+
+	/**
+	 * @returns {number}
+	 */
+	const getStickyOffset = () => window.matchMedia('(max-width: 782px)').matches ? 46 : 44;
+
+	/**
+	 * @param {HTMLElement} wrap
+	 * @param {HTMLElement} bar
+	 */
+	const releaseStickyAction = (wrap, bar) => {
+		bar.classList.remove('is-fixed');
+		bar.style.removeProperty('--lerm-sticky-left');
+		bar.style.removeProperty('--lerm-sticky-width');
+		wrap.style.minHeight = '';
+	};
+
+	const syncStickyActions = () => {
+		const stickyOffset = getStickyOffset();
+
+		dom.findAll('[data-lerm-sticky-wrap]').forEach(wrapEl => {
+			const wrap = /** @type {HTMLElement} */ (wrapEl);
+			const bar = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-sticky-bar]', wrap));
+			if (!bar) return;
+
+			const panel = /** @type {HTMLElement|null} */ (wrap.closest('[data-tab-panel]'));
+			if (panel?.hidden) {
+				releaseStickyAction(wrap, bar);
+				return;
+			}
+
+			const wrapRect = wrap.getBoundingClientRect();
+			const barHeight = bar.offsetHeight;
+			const shouldFix = wrapRect.top <= stickyOffset;
+
+			if (!shouldFix) {
+				releaseStickyAction(wrap, bar);
+				return;
+			}
+
+			wrap.style.minHeight = `${barHeight}px`;
+			bar.classList.add('is-fixed');
+			bar.style.setProperty('--lerm-sticky-left', `${wrapRect.left}px`);
+			bar.style.setProperty('--lerm-sticky-width', `${wrapRect.width}px`);
+		});
+	};
+
+	const queueStickyActionsSync = () => {
+		if (stickyActionFrame) cancelAnimationFrame(stickyActionFrame);
+		stickyActionFrame = requestAnimationFrame(() => {
+			stickyActionFrame = null;
+			syncStickyActions();
+		});
+	};
+
+	const initStickyActions = () => {
+		queueStickyActionsSync();
+
+		if (stickyActionsBound) return;
+		stickyActionsBound = true;
+
+		window.addEventListener('scroll', queueStickyActionsSync, { passive: true });
+		window.addEventListener('resize', queueStickyActionsSync);
+	};
+
 	// ─── Tab Switching ────────────────────────────────────────────────────────
 
 	/**
@@ -960,6 +1170,8 @@
 					codeEditorMap.get(/** @type {HTMLTextAreaElement} */(el))?.codemirror?.refresh();
 				});
 			}
+
+			queueStickyActionsSync();
 
 			// Keep the URL in sync so the page can be bookmarked / refreshed correctly.
 			if (pushState && window.history?.pushState) {
@@ -1035,6 +1247,12 @@
 				}
 			});
 		});
+
+		// Wire up section-internal subsection switching for longer pages.
+		initSubsectionSwitching();
+
+		// Keep the action bar pinned while scrolling, with a JS fallback for admin layouts.
+		initStickyActions();
 
 		// Wire up client-side tab switching (must run after forms are init'd).
 		initTabSwitching();

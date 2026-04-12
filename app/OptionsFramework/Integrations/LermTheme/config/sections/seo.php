@@ -101,6 +101,20 @@ return array(
 			'default'     => true,
 		),
 		array(
+			'id'               => 'sitemap_link_notice',
+			'type'             => 'notice',
+			'label'            => __( 'Sitemap link', 'lerm' ),
+			'group'            => __( 'Sitemap', 'lerm' ),
+			'save'             => false,
+			'dependency_field' => 'sitemap_enable',
+			'dependency_value' => '1',
+			'html'             => sprintf(
+				'<p><a class="button button-secondary" href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a></p><p><code>%1$s</code></p>',
+				esc_url( home_url( '/wp-sitemap.xml' ) ),
+				esc_html__( 'Open sitemap', 'lerm' )
+			),
+		),
+		array(
 			'id'               => 'exclude_post_types',
 			'type'             => 'checkbox_list',
 			'label'            => __( 'Exclude content types', 'lerm' ),

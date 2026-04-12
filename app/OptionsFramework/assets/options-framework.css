@@ -58,25 +58,31 @@
 	gap: 10px;
 }
 
+.lerm-settings-nav__item,
+.lerm-settings-subnav__item {
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	background: #fff;
+	color: #1f2937;
+	transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
 .lerm-settings-nav__item {
 	display: grid;
 	gap: 4px;
 	padding: 14px 16px;
-	border: 1px solid #dcdcde;
-	border-radius: 14px;
-	background: #fff;
 	text-decoration: none;
-	color: #1f2937;
-	transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
-.lerm-settings-nav__item:hover {
+.lerm-settings-nav__item:hover,
+.lerm-settings-subnav__item:hover {
 	border-color: #94a3b8;
 	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 	transform: translateY(-1px);
 }
 
-.lerm-settings-nav__item.is-active {
+.lerm-settings-nav__item.is-active,
+.lerm-settings-subnav__item.is-active {
 	border-color: #0284c7;
 	background: linear-gradient(180deg, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.02));
 	box-shadow: 0 14px 28px rgba(14, 165, 233, 0.12);
@@ -207,6 +213,32 @@
 	background: linear-gradient(180deg, #fff, #f8fafc);
 }
 
+.lerm-settings-sticky-wrap {
+	position: relative;
+	min-height: 0;
+	margin-bottom: 16px;
+}
+
+.lerm-settings-actions--sticky {
+	position: sticky;
+	top: 44px;
+	z-index: 30;
+	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.lerm-settings-sticky-wrap > .lerm-settings-actions--sticky {
+	margin-bottom: 0;
+}
+
+.lerm-settings-actions--sticky.is-fixed {
+	position: fixed;
+	top: 44px;
+	left: var(--lerm-sticky-left, auto);
+	width: var(--lerm-sticky-width, auto);
+	max-width: var(--lerm-sticky-width, auto);
+	z-index: 100;
+}
+
 .lerm-settings-actions--footer {
 	margin-top: 18px;
 	margin-bottom: 0;
@@ -222,6 +254,38 @@
 	margin: 0 2px;
 }
 
+.lerm-settings-subnav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 18px;
+	padding: 0 0 4px;
+	overflow-x: auto;
+}
+
+.lerm-settings-subnav__item {
+	appearance: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12px 14px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+	cursor: pointer;
+	text-align: center;
+}
+
+.lerm-settings-subsections {
+	display: grid;
+	gap: 18px;
+}
+
+.lerm-settings-subsection[hidden] {
+	display: none !important;
+}
+
 .lerm-settings-table {
 	border-collapse: separate;
 	border-spacing: 0 14px;
@@ -231,7 +295,7 @@
 	width: 270px;
 	padding: 18px 18px 18px 20px;
 	vertical-align: top;
-	background: #f8fafc;
+	background: #fff;
 	border-top-left-radius: 14px;
 	border-bottom-left-radius: 14px;
 }
@@ -268,6 +332,52 @@
 .lerm-settings-table .description {
 	margin-top: 8px;
 	color: #64748b;
+}
+
+.lerm-settings-table--inline {
+	border-spacing: 0;
+}
+
+.lerm-settings-table--inline > tbody {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 16px;
+}
+
+.lerm-settings-table--inline .lerm-settings-row {
+	display: grid;
+	grid-template-columns: 1fr;
+	align-content: start;
+	gap: 10px;
+	padding: 16px;
+	border: 1px solid #e5e7eb;
+	border-radius: 14px;
+	background: linear-gradient(180deg, #fff, #f8fafc);
+	box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+}
+
+.lerm-settings-table--inline .lerm-settings-row > th,
+.lerm-settings-table--inline .lerm-settings-row > td {
+	display: block;
+	width: auto;
+	padding: 0;
+	margin: 0;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+}
+
+.lerm-settings-table--inline .lerm-settings-row > th label {
+	display: block;
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.35;
+}
+
+.lerm-settings-table--inline .regular-text,
+.lerm-settings-table--inline .large-text,
+.lerm-settings-table--inline select {
+	max-width: 100%;
 }
 
 /* ── Toggle switch ─────────────────────────────────────────── */
@@ -355,6 +465,66 @@
 	display: grid;
 	gap: 14px;
 	max-width: 760px;
+}
+
+.lerm-fieldset--single-line {
+	max-width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.lerm-fieldset--single-line .lerm-fieldset__item {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	min-width: 0;
+	padding: 10px 12px;
+	background: #fff;
+}
+
+.lerm-fieldset--single-line .lerm-fieldset__item .description {
+	display: none;
+}
+
+.lerm-fieldset--single-line .lerm-fieldset__label {
+	margin: 0;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.lerm-fieldset--single-line .wp-picker-container {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: 6px;
+}
+
+.lerm-fieldset--single-line .wp-picker-input-wrap {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.lerm-fieldset--single-line .wp-picker-container .wp-color-result.button {
+	margin: 0;
+}
+
+.lerm-fieldset--single-line .wp-picker-container .wp-color-picker {
+	width: 92px !important;
+}
+
+.lerm-fieldset--single-line .regular-text,
+.lerm-fieldset--single-line select.regular-text {
+	width: auto;
+	min-width: 88px;
+	max-width: 140px;
+}
+
+.lerm-fieldset--single-line .small-text {
+	width: 76px;
 }
 
 .lerm-fieldset__item,
@@ -464,6 +634,10 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.lerm-media-preview[hidden] {
+	display: none;
 }
 
 .lerm-media-preview img {
@@ -617,6 +791,14 @@
 		padding: 20px 16px 16px;
 	}
 
+	.lerm-settings-actions--sticky {
+		top: 46px;
+	}
+
+	.lerm-settings-actions--sticky.is-fixed {
+		top: 46px;
+	}
+
 	.lerm-settings-panel__intro {
 		flex-direction: column;
 	}
@@ -647,6 +829,25 @@
 		border-left: 1px solid #eef2f7;
 		border-radius: 0 0 14px 14px;
 	}
+
+	.lerm-settings-subnav {
+		flex-wrap: nowrap;
+		padding-bottom: 10px;
+	}
+
+	.lerm-settings-table--inline > tbody {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.lerm-fieldset--single-line .lerm-fieldset__item {
+		width: 100%;
+	}
+
+	.lerm-fieldset--single-line .regular-text,
+	.lerm-fieldset--single-line select.regular-text {
+		max-width: 100%;
+	}
 }
 
 /* ── UI Polish ─────────────────────────────────────────────── */
@@ -656,6 +857,11 @@
 .lerm-settings-row:hover > td {
 	background: #f0f9ff;
 	transition: background 0.14s ease;
+}
+
+.lerm-settings-table--inline .lerm-settings-row:hover > th,
+.lerm-settings-table--inline .lerm-settings-row:hover > td {
+	background: transparent;
 }
 
 /* Row th border to visually connect th+td into one card */

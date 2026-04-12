@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 return array(
 	'title'       => __( 'Appearance / Colors', 'lerm' ),
 	'description' => __( 'Brand colours, backgrounds, borders, and button styling migrated from the old CSF Colors tab.', 'lerm' ),
+	'use_subsections' => true,
 	'fields'      => array(
 		array(
 			'id'          => 'primary_color',

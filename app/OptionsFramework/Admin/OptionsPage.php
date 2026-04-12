@@ -451,6 +451,12 @@ final class OptionsPage {
 						<div class="lerm-settings-flash" data-lerm-flash aria-live="polite"></div>
 
 						<?php foreach ( $sections as $section_id => $section ) : ?>
+						<?php
+						$section_fields   = is_array( $section['fields'] ?? null ) ? $section['fields'] : array();
+						$section_groups   = $this->group_fields( $section_fields );
+						$use_subsections  = $this->section_uses_subsections( $section, $section_groups );
+						$table_classes    = 'form-table lerm-settings-table';
+						?>
 						<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
 							data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
 							data-tab-description="<?php echo esc_attr( (string) ( $section['description'] ?? '' ) ); ?>"
@@ -465,19 +471,48 @@ final class OptionsPage {
 								<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $section_id ); ?>">
 								<?php wp_nonce_field( $this->nonce_action( $section_id ) ); ?>
 
-								<div class="lerm-settings-actions">
-									<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
-									<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset this tab', 'lerm' ); ?></button>
-									<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
-									<span class="spinner lerm-settings-spinner"></span>
-									<span class="lerm-settings-actions__hint"><?php esc_html_e( 'Changes are saved instantly without reloading the page. Use Ctrl/Cmd + S to save faster.', 'lerm' ); ?></span>
+								<div class="lerm-settings-sticky-wrap" data-lerm-sticky-wrap>
+									<div class="lerm-settings-actions lerm-settings-actions--sticky" data-lerm-sticky-bar>
+										<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
+										<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset this tab', 'lerm' ); ?></button>
+										<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
+										<span class="spinner lerm-settings-spinner"></span>
+										<span class="lerm-settings-actions__hint"><?php esc_html_e( 'Changes are saved instantly without reloading the page. Use Ctrl/Cmd + S to save faster.', 'lerm' ); ?></span>
+									</div>
 								</div>
 
-								<table class="form-table lerm-settings-table" role="presentation">
-									<tbody>
-										<?php $this->render_fields( (array) ( $section['fields'] ?? array() ), $values ); ?>
-									</tbody>
-								</table>
+								<?php if ( $use_subsections ) : ?>
+									<nav class="lerm-settings-subnav" aria-label="<?php echo esc_attr( sprintf( __( '%s groups', 'lerm' ), (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ) ); ?>">
+										<?php foreach ( $section_groups as $group_index => $group ) : ?>
+											<button type="button"
+												class="lerm-settings-subnav__item <?php echo 0 === $group_index ? 'is-active' : ''; ?>"
+												data-subsection-target="<?php echo esc_attr( (string) $group['id'] ); ?>"
+												aria-pressed="<?php echo 0 === $group_index ? 'true' : 'false'; ?>">
+												<?php echo esc_html( (string) $group['label'] ); ?>
+											</button>
+										<?php endforeach; ?>
+									</nav>
+
+									<div class="lerm-settings-subsections">
+										<?php foreach ( $section_groups as $group_index => $group ) : ?>
+											<section class="lerm-settings-subsection"
+												data-subsection-panel="<?php echo esc_attr( (string) $group['id'] ); ?>"
+												<?php echo 0 !== $group_index ? 'hidden' : ''; ?>>
+												<table class="<?php echo esc_attr( $table_classes ); ?>" role="presentation">
+													<tbody>
+														<?php $this->render_fields( (array) $group['fields'], $values, (string) $section_id, false ); ?>
+													</tbody>
+												</table>
+											</section>
+										<?php endforeach; ?>
+									</div>
+								<?php else : ?>
+									<table class="<?php echo esc_attr( $table_classes ); ?>" role="presentation">
+										<tbody>
+											<?php $this->render_fields( $section_fields, $values, (string) $section_id, true ); ?>
+										</tbody>
+									</table>
+								<?php endif; ?>
 
 								<div class="lerm-settings-actions lerm-settings-actions--footer">
 									<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
@@ -496,18 +531,92 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Render all fields for a section.
+	 * Group fields by their configured heading.
 	 *
 	 * @param array<int, array<string, mixed>> $fields Field definitions.
-	 * @param array<string, mixed>             $values Saved values.
+	 * @return array<int, array<string, mixed>>
 	 */
-	public function render_fields( array $fields, array $values ): void {
+	private function group_fields( array $fields ): array {
+		$groups = array();
+
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
+				continue;
+			}
+
+			$label    = trim( (string) ( $field['group'] ?? '' ) );
+			$label    = '' !== $label ? $label : (string) __( 'General', 'lerm' );
+			$base_id  = sanitize_title( $label );
+			$group_id = '' !== $base_id ? $base_id : 'general';
+
+			if ( isset( $groups[ $group_id ] ) && (string) $groups[ $group_id ]['label'] !== $label ) {
+				$suffix = 2;
+
+				while ( isset( $groups[ $group_id . '-' . $suffix ] ) ) {
+					++$suffix;
+				}
+
+				$group_id .= '-' . $suffix;
+			}
+
+			if ( ! isset( $groups[ $group_id ] ) ) {
+				$groups[ $group_id ] = array(
+					'id'     => $group_id,
+					'label'  => $label,
+					'fields' => array(),
+				);
+			}
+
+			$groups[ $group_id ]['fields'][] = $field;
+		}
+
+		return array_values( $groups );
+	}
+
+	/**
+	 * Determine whether a section should render CSF-style secondary navigation.
+	 *
+	 * @param array<string, mixed>               $section Section definition.
+	 * @param array<int, array<string, mixed>>   $groups  Section groups.
+	 */
+	private function section_uses_subsections( array $section, array $groups ): bool {
+		if ( array_key_exists( 'use_subsections', $section ) ) {
+			return ! empty( $section['use_subsections'] );
+		}
+
+		$fields = is_array( $section['fields'] ?? null ) ? $section['fields'] : array();
+
+		return count( $groups ) > 1 && count( $fields ) >= 8;
+	}
+
+	/**
+	 * Determine whether a section should render compact inline rows.
+	 */
+	private function section_uses_inline_rows( string $section_id ): bool {
+		$section = PageSchema::section( $this->definition, $section_id ) ?? array();
+
+		if ( array_key_exists( 'inline_fields', $section ) ) {
+			return ! empty( $section['inline_fields'] );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Render all fields for a section.
+	 *
+	 * @param array<int, array<string, mixed>> $fields     Field definitions.
+	 * @param array<string, mixed>             $values     Saved values.
+	 * @param string                           $section_id Current section ID.
+	 * @param bool                             $show_group_headings Whether grouped headings should be rendered.
+	 */
+	public function render_fields( array $fields, array $values, string $section_id = '', bool $show_group_headings = true ): void {
 		$current_group = '';
 
 		foreach ( $fields as $field ) {
 			$group = (string) ( $field['group'] ?? '' );
 
-			if ( $group && $group !== $current_group ) {
+			if ( $show_group_headings && $group && $group !== $current_group ) {
 				$current_group = $group;
 				printf(
 					'<tr class="lerm-settings-group"><td colspan="2"><h3>%s</h3></td></tr>',
@@ -515,17 +624,18 @@ final class OptionsPage {
 				);
 			}
 
-			$this->render_field( $field, $values );
+			$this->render_field( $field, $values, $section_id );
 		}
 	}
 
 	/**
 	 * Render a single field row.
 	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param array<string, mixed> $values Saved values.
+	 * @param array<string, mixed> $field      Field definition.
+	 * @param array<string, mixed> $values     Saved values.
+	 * @param string               $section_id Current section ID.
 	 */
-	public function render_field( array $field, array $values ): void {
+	public function render_field( array $field, array $values, string $section_id = '' ): void {
 		$field_id    = (string) $field['id'];
 		$field_type  = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
 		$field_name  = $this->option_name() . '[' . $field_id . ']';
@@ -568,8 +678,12 @@ final class OptionsPage {
 					$this->render_backup_tools_field( $field );
 					break;
 
+				case 'notice':
+					$this->render_notice_field( $field );
+					break;
+
 				case 'fieldset':
-					$this->render_fieldset_field( $field, $field_value, $field_name );
+					$this->render_fieldset_field( $field, $field_value, $field_name, $section_id );
 					break;
 
 				case 'group':
@@ -729,6 +843,43 @@ final class OptionsPage {
 	}
 
 	/**
+	 * Render read-only notice / helper HTML.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 */
+	private function render_notice_field( array $field ): void {
+		$html = isset( $field['html'] ) && is_scalar( $field['html'] ) ? (string) $field['html'] : '';
+
+		if ( '' === trim( $html ) ) {
+			return;
+		}
+
+		echo '<div class="lerm-settings-notice">';
+		echo wp_kses(
+			$html,
+			array(
+				'a'      => array(
+					'href'   => true,
+					'target' => true,
+					'rel'    => true,
+					'class'  => true,
+				),
+				'br'     => array(),
+				'code'   => array(),
+				'em'     => array(),
+				'p'      => array(
+					'class' => true,
+				),
+				'span'   => array(
+					'class' => true,
+				),
+				'strong' => array(),
+			)
+		);
+		echo '</div>';
+	}
+
+	/**
 	 * Render backup export/import controls.
 	 *
 	 * @param array<string, mixed> $field Field definition.
@@ -759,15 +910,17 @@ final class OptionsPage {
 	/**
 	 * Render fieldsets as a compact grid of nested controls.
 	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Field value.
+	 * @param array<string, mixed> $field      Field definition.
+	 * @param mixed                $value      Field value.
+	 * @param string               $section_id Current section ID.
 	 */
-	private function render_fieldset_field( array $field, $value, string $field_name ): void {
+	private function render_fieldset_field( array $field, $value, string $field_name, string $section_id ): void {
 		$field_id = (string) $field['id'];
 		$values   = is_array( $value ) ? $value : array();
 		$fields   = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
 
 		echo '<div class="lerm-fieldset" data-target="' . esc_attr( $field_id ) . '">';
+
 		foreach ( $fields as $child ) {
 			if ( ! is_array( $child ) || ! isset( $child['id'] ) ) {
 				continue;
@@ -787,6 +940,7 @@ final class OptionsPage {
 
 			echo '</div>';
 		}
+
 		echo '</div>';
 	}
 
@@ -1035,16 +1189,17 @@ final class OptionsPage {
 		$button_text = (string) ( $field['button_text'] ?? __( 'Choose image', 'lerm' ) );
 
 		printf(
-			'<div class="lerm-media-field" data-target="%1$s"><input type="hidden" name="%2$s[id]" value="%3$s"%8$s%9$s><div class="lerm-media-preview">%4$s</div><div class="lerm-media-actions"><button type="button" class="button lerm-media-select">%5$s</button><button type="button" class="button button-secondary button-link-delete lerm-media-remove" %6$s>%7$s</button></div></div>',
+			'<div class="lerm-media-field" data-target="%1$s"><input type="hidden" name="%2$s[id]" value="%3$s"%8$s%9$s><div class="lerm-media-preview" %10$s>%4$s</div><div class="lerm-media-actions"><button type="button" class="button lerm-media-select">%5$s</button><button type="button" class="button button-secondary button-link-delete lerm-media-remove" %6$s>%7$s</button></div></div>',
 			esc_attr( $target ),
 			esc_attr( $name_prefix ),
 			esc_attr( (string) $attachment_id ),
-			$image_url ? '<img src="' . esc_url( $image_url ) . '" alt="">' : '<span class="lerm-media-placeholder">' . esc_html__( 'No image selected.', 'lerm' ) . '</span>',
+			$image_url ? '<img src="' . esc_url( $image_url ) . '" alt="">' : '',
 			esc_html( $button_text ),
 			$attachment_id > 0 ? '' : 'hidden',
 			esc_html__( 'Remove', 'lerm' ),
 			$name_attr,
-			$id_attr
+			$id_attr,
+			$image_url ? '' : 'hidden'
 		);
 	}
 

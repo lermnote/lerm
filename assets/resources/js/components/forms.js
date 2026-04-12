@@ -12,7 +12,7 @@ const getFormConfigs = () => {
 		formConfigs.push({
 			formId: 'update-profile',
 			action: lermData.route_profile,
-			security: lermData.profile_nonce,
+			security: lermData.nonce,
 		});
 
 		return formConfigs;
