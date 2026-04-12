@@ -58,13 +58,7 @@ final class PageSchema {
 		$seen   = array();
 
 		foreach ( self::sections( $definition ) as $section_id => $section ) {
-			$section_fields = $section['fields'] ?? array();
-
-			if ( ! is_array( $section_fields ) ) {
-				continue;
-			}
-
-			foreach ( $section_fields as $field ) {
+			foreach ( self::section_fields( $section ) as $field ) {
 				if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
 					continue;
 				}
@@ -95,6 +89,70 @@ final class PageSchema {
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * Return all fields declared inside a section.
+	 *
+	 * Sections with explicit subsection groups read fields only from
+	 * `groups[*].fields`. Sections without subsection groups continue to use
+	 * the top-level `fields` list.
+	 *
+	 * @param array<string, mixed> $section Section definition.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function section_fields( array $section ): array {
+		$groups = self::declared_section_groups( $section );
+
+		if ( empty( $groups ) ) {
+			return self::normalize_fields_list( $section['fields'] ?? array() );
+		}
+
+		$fields = array();
+		$seen   = array();
+
+		foreach ( $groups as $group ) {
+			$group_fields = self::normalize_fields_list( $group['fields'] ?? array() );
+
+			foreach ( $group_fields as $field ) {
+				if ( ! isset( $field['id'] ) ) {
+					continue;
+				}
+
+				$field_id = (string) $field['id'];
+
+				if ( isset( $seen[ $field_id ] ) ) {
+					continue;
+				}
+
+				$seen[ $field_id ] = true;
+				$fields[]          = $field;
+			}
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * Return normalized subsection groups for a section.
+	 *
+	 * @param array<string, mixed> $section Section definition.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function section_groups( array $section ): array {
+		$groups = self::declared_section_groups( $section );
+
+		if ( empty( $groups ) ) {
+			return array(
+				array(
+					'id'     => 'general',
+					'label'  => (string) __( 'General', 'lerm' ),
+					'fields' => self::section_fields( $section ),
+				),
+			);
+		}
+
+		return array_values( $groups );
 	}
 
 	/**
@@ -176,5 +234,76 @@ final class PageSchema {
 		$string = (string) $value;
 
 		return $trim ? trim( $string ) : $string;
+	}
+
+	/**
+	 * Normalize a field list to valid field definitions only.
+	 *
+	 * @param mixed $fields Source field list.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function normalize_fields_list( $fields ): array {
+		if ( ! is_array( $fields ) ) {
+			return array();
+		}
+
+		$normalized = array();
+
+		foreach ( $fields as $field ) {
+			if ( is_array( $field ) && isset( $field['id'] ) ) {
+				$normalized[] = $field;
+			}
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Normalize explicit subsection group definitions.
+	 *
+	 * @param array<string, mixed> $section Section definition.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function declared_section_groups( array $section ): array {
+		$declared = $section['groups'] ?? array();
+
+		if ( ! is_array( $declared ) ) {
+			return array();
+		}
+
+		$groups = array();
+
+		foreach ( $declared as $index => $group ) {
+			$group_id     = '';
+			$group_label  = '';
+			$group_fields = array();
+
+			if ( is_scalar( $group ) ) {
+				$group_label = trim( (string) $group );
+			} elseif ( is_array( $group ) ) {
+				$group_id     = isset( $group['id'] ) && is_scalar( $group['id'] ) ? sanitize_title( (string) $group['id'] ) : '';
+				$group_label  = trim( (string) ( $group['label'] ?? $group['title'] ?? $group['name'] ?? '' ) );
+				$group_fields = self::normalize_fields_list( $group['fields'] ?? array() );
+			}
+
+			if ( '' === $group_label && '' === $group_id ) {
+				continue;
+			}
+
+			$group_id = '' !== $group_id ? $group_id : sanitize_title( $group_label );
+			$group_id = '' !== $group_id ? $group_id : 'group-' . (string) ( (int) $index + 1 );
+
+			while ( isset( $groups[ $group_id ] ) ) {
+				$group_id .= '-2';
+			}
+
+			$groups[ $group_id ] = array(
+				'id'     => $group_id,
+				'label'  => '' !== $group_label ? $group_label : (string) __( 'General', 'lerm' ),
+				'fields' => $group_fields,
+			);
+		}
+
+		return $groups;
 	}
 }

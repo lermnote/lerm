@@ -399,6 +399,7 @@ final class OptionsPage {
 
 					<nav class="lerm-settings-nav" aria-label="<?php esc_attr_e( 'Settings sections', 'lerm' ); ?>">
 						<?php foreach ( $sections as $section_id => $section ) : ?>
+							<?php $section_field_count = count( PageSchema::section_fields( $section ) ); ?>
 							<a class="lerm-settings-nav__item <?php echo $section_id === $current_tab ? 'is-active' : ''; ?>"
 								href="
 								<?php
@@ -419,7 +420,7 @@ final class OptionsPage {
 									<?php
 									echo esc_html(
 										// translators: %s is the number of fields in the section, e.g. "5 fields". Do not translate the number itself.
-										sprintf( _n( '%s field', '%s fields', count( $section['fields'] ), 'lerm' ), number_format_i18n( count( $section['fields'] ) ) )
+										sprintf( _n( '%s field', '%s fields', $section_field_count, 'lerm' ), number_format_i18n( $section_field_count ) )
 									);
 									?>
 								</span>
@@ -453,7 +454,7 @@ final class OptionsPage {
 
 						<?php foreach ( $sections as $section_id => $section ) : ?>
 							<?php
-							$section_fields  = is_array( $section['fields'] ?? null ) ? $section['fields'] : array();
+							$section_fields  = PageSchema::section_fields( $section );
 							$section_groups  = $this->group_fields( $section, $section_fields );
 							$use_subsections = $this->section_uses_subsections( $section, $section_groups );
 							$current_subsection = $use_subsections ? $this->current_subsection_for_section( (string) $section_id, $section_groups ) : '';
@@ -535,130 +536,16 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Group fields by their configured heading.
+	 * Group fields by their configured subsection definition.
 	 *
 	 * @param array<string, mixed>             $section Section definition.
 	 * @param array<int, array<string, mixed>> $fields  Field definitions.
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function group_fields( array $section, array $fields ): array {
-		$groups = $this->declared_groups( $section );
+		unset( $fields );
 
-		if ( empty( $groups ) ) {
-			return array(
-				array(
-					'id'     => 'general',
-					'label'  => (string) __( 'General', 'lerm' ),
-					'fields' => $fields,
-				),
-			);
-		}
-
-		$fallback_group_id = (string) array_key_first( $groups );
-
-		foreach ( $fields as $field ) {
-			if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
-				continue;
-			}
-
-			$group_id   = isset( $field['group_id'] ) && is_scalar( $field['group_id'] ) ? sanitize_title( (string) $field['group_id'] ) : '';
-			$group_id   = isset( $groups[ $group_id ] ) ? $group_id : '';
-			$group_name = trim( (string) ( $field['group'] ?? '' ) );
-
-			if ( '' === $group_id && '' !== $group_name ) {
-				$matched_group_id = $this->find_group_id_by_label( $groups, $group_name );
-
-				if ( '' !== $matched_group_id ) {
-					$group_id = $matched_group_id;
-				}
-			}
-
-			$group_id = '' !== $group_id ? $group_id : $fallback_group_id;
-
-			$groups[ $group_id ]['fields'][] = $field;
-		}
-
-		return array_values( $groups );
-	}
-
-	/**
-	 * Collect any groups declared explicitly in the section config.
-	 *
-	 * @param array<string, mixed> $section Section definition.
-	 * @return array<string, array<string, mixed>>
-	 */
-	private function declared_groups( array $section ): array {
-		$declared = is_array( $section['groups'] ?? null ) ? $section['groups'] : array();
-		$groups   = array();
-
-		foreach ( $declared as $index => $group ) {
-			$group_id    = '';
-			$group_label = '';
-
-			if ( is_scalar( $group ) ) {
-				$group_label = trim( (string) $group );
-			} elseif ( is_array( $group ) ) {
-				$group_id    = isset( $group['id'] ) && is_scalar( $group['id'] ) ? sanitize_title( (string) $group['id'] ) : '';
-				$group_label = trim( (string) ( $group['label'] ?? $group['title'] ?? $group['name'] ?? '' ) );
-			}
-
-			if ( '' === $group_label && '' === $group_id ) {
-				continue;
-			}
-
-			$group_id = '' !== $group_id ? $group_id : $this->group_id_from_label( $group_label );
-			$group_id = '' !== $group_id ? $group_id : 'group-' . (string) ( (int) $index + 1 );
-
-			while ( isset( $groups[ $group_id ] ) ) {
-				$group_id .= '-2';
-			}
-
-			$groups[ $group_id ] = $this->make_group_definition( $group_id, $group_label );
-		}
-
-		return $groups;
-	}
-
-	/**
-	 * Create a normalized group definition.
-	 *
-	 * @param string $group_id Group ID.
-	 * @param string $label    Group label.
-	 * @return array<string, mixed>
-	 */
-	private function make_group_definition( string $group_id, string $label ): array {
-		$normalized_label = '' !== trim( $label ) ? trim( $label ) : (string) __( 'General', 'lerm' );
-
-		return array(
-			'id'     => $group_id,
-			'label'  => $normalized_label,
-			'fields' => array(),
-		);
-	}
-
-	/**
-	 * Resolve a stable group ID from a label.
-	 */
-	private function group_id_from_label( string $label ): string {
-		$normalized = sanitize_title( $label );
-
-		return '' !== $normalized ? $normalized : '';
-	}
-
-	/**
-	 * Find an existing group by its label.
-	 *
-	 * @param array<string, array<string, mixed>> $groups Existing groups.
-	 * @param string                              $label  Desired label.
-	 */
-	private function find_group_id_by_label( array $groups, string $label ): string {
-		foreach ( $groups as $group_id => $group ) {
-			if ( trim( (string) ( $group['label'] ?? '' ) ) === trim( $label ) ) {
-				return (string) $group_id;
-			}
-		}
-
-		return '';
+		return PageSchema::section_groups( $section );
 	}
 
 	/**
@@ -668,17 +555,15 @@ final class OptionsPage {
 	 * @param array<int, array<string, mixed>>   $groups  Section groups.
 	 */
 	private function section_uses_subsections( array $section, array $groups ): bool {
-		$declared_groups = $this->declared_groups( $section );
-
 		if ( array_key_exists( 'use_subsections', $section ) ) {
-			return ! empty( $section['use_subsections'] ) && count( $declared_groups ) > 1;
+			return ! empty( $section['use_subsections'] ) && count( $groups ) > 1;
 		}
 
-		return count( $declared_groups ) > 1;
+		return count( $groups ) > 1;
 	}
 
 	/**
-	 * Determine whether subsection panels should still render field group headings.
+	 * Determine whether subsection panels should still render field subtitle headings.
 	 *
 	 * @param array<int, array<string, mixed>> $fields          Subsection fields.
 	 * @param string                           $subsection_label Current subsection label.
@@ -691,13 +576,13 @@ final class OptionsPage {
 				continue;
 			}
 
-			$group = trim( (string) ( $field['group'] ?? '' ) );
+			$subtitle = trim( (string) ( $field['subtitle'] ?? '' ) );
 
-			if ( '' === $group || in_array( $group, $labels, true ) ) {
+			if ( '' === $subtitle || in_array( $subtitle, $labels, true ) ) {
 				continue;
 			}
 
-			$labels[] = $group;
+			$labels[] = $subtitle;
 		}
 
 		if ( count( $labels ) > 1 ) {
@@ -762,27 +647,27 @@ final class OptionsPage {
 	 * @param array<int, array<string, mixed>> $fields     Field definitions.
 	 * @param array<string, mixed>             $values     Saved values.
 	 * @param string                           $section_id Current section ID.
-	 * @param bool                             $show_group_headings Whether grouped headings should be rendered.
+	 * @param bool                             $show_group_headings Whether subtitle headings should be rendered.
 	 * @param string                           $layout Layout mode.
 	 */
 	public function render_fields( array $fields, array $values, string $section_id = '', bool $show_group_headings = true, string $layout = 'table' ): void {
-		$current_group = '';
+		$current_subtitle = '';
 
 		foreach ( $fields as $field ) {
-			$group = (string) ( $field['group'] ?? '' );
+			$subtitle = (string) ( $field['subtitle'] ?? '' );
 
-			if ( $show_group_headings && $group && $group !== $current_group ) {
-				$current_group = $group;
+			if ( $show_group_headings && $subtitle && $subtitle !== $current_subtitle ) {
+				$current_subtitle = $subtitle;
 
 				if ( 'stack' === $layout ) {
 					printf(
 						'<div class="lerm-settings-group lerm-settings-group--stack"><h3>%s</h3></div>',
-						esc_html( $group )
+						esc_html( $subtitle )
 					);
 				} else {
 					printf(
 						'<tr class="lerm-settings-group"><td colspan="2"><h3>%s</h3></td></tr>',
-						esc_html( $group )
+						esc_html( $subtitle )
 					);
 				}
 			}
@@ -938,24 +823,23 @@ final class OptionsPage {
 
 				case 'switcher':
 					printf(
-						'<input type="hidden" name="%1$s" value="0"><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s data-lerm-controller="1"><span>%4$s</span></label>',
+						'<input type="hidden" name="%1$s" value="0"><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s data-lerm-controller="1"><span class="lerm-switch__track" data-on="%4$s" data-off="%5$s" aria-hidden="true"></span><span class="screen-reader-text">%6$s</span></label>',
 						esc_attr( $field_name ),
 						esc_attr( $field_id ),
 						checked( ! empty( $field_value ), true, false ),
+						esc_attr__( 'on', 'lerm' ),
+						esc_attr__( 'off', 'lerm' ),
 						esc_html__( 'Enabled', 'lerm' )
 					);
 					break;
 
 				case 'number':
-					printf(
-						'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text" min="%4$s" max="%5$s" step="%6$s" %7$s>',
-						esc_attr( $field_id ),
-						esc_attr( $field_name ),
-						esc_attr( $this->scalar_string( $field_value ) ),
-						esc_attr( (string) ( $field['min'] ?? '' ) ),
-						esc_attr( (string) ( $field['max'] ?? '' ) ),
-						esc_attr( (string) ( $field['step'] ?? 1 ) ),
-						$dependency ? 'data-lerm-controller="1"' : ''
+					$this->render_number_input(
+						$field_id,
+						$field_name,
+						$field_value,
+						$field,
+						$dependency ? ' data-lerm-controller="1"' : ''
 					);
 					break;
 
@@ -1265,12 +1149,14 @@ final class OptionsPage {
 
 			case 'switcher':
 				printf(
-					'<input type="hidden" name="%1$s" value="0"%4$s><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s%4$s%5$s><span>%6$s</span></label>',
+					'<input type="hidden" name="%1$s" value="0"%4$s><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s%4$s%5$s><span class="lerm-switch__track" data-on="%6$s" data-off="%7$s" aria-hidden="true"></span><span class="screen-reader-text">%8$s</span></label>',
 					esc_attr( $field_name ),
 					esc_attr( $input_id ),
 					checked( ! empty( $value ), true, false ),
 					$name_attr,
 					$id_attr,
+					esc_attr__( 'on', 'lerm' ),
+					esc_attr__( 'off', 'lerm' ),
 					esc_html__( 'Enabled', 'lerm' )
 				);
 				return;
@@ -1328,16 +1214,12 @@ final class OptionsPage {
 				return;
 
 			case 'number':
-				printf(
-					'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text" min="%4$s" max="%5$s" step="%6$s"%7$s%8$s>',
-					esc_attr( $input_id ),
-					esc_attr( $field_name ),
-					esc_attr( $this->scalar_string( $value ) ),
-					esc_attr( (string) ( $field['min'] ?? '' ) ),
-					esc_attr( (string) ( $field['max'] ?? '' ) ),
-					esc_attr( (string) ( $field['step'] ?? 1 ) ),
-					$name_attr,
-					$id_attr
+				$this->render_number_input(
+					$input_id,
+					$field_name,
+					$value,
+					$field,
+					$name_attr . $id_attr
 				);
 				return;
 
@@ -1356,6 +1238,35 @@ final class OptionsPage {
 				);
 				return;
 		}
+	}
+
+	/**
+	 * Render a number input with custom step buttons.
+	 *
+	 * @param string               $input_id   Input ID.
+	 * @param string               $field_name Input name.
+	 * @param mixed                $value      Input value.
+	 * @param array<string, mixed> $field      Field definition.
+	 * @param string               $extra_attrs Additional raw attributes.
+	 */
+	private function render_number_input( string $input_id, string $field_name, $value, array $field, string $extra_attrs = '' ): void {
+		echo '<span class="lerm-number-input">';
+		printf(
+			'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text lerm-number-input__control" min="%4$s" max="%5$s" step="%6$s"%7$s>',
+			esc_attr( $input_id ),
+			esc_attr( $field_name ),
+			esc_attr( $this->scalar_string( $value ) ),
+			esc_attr( (string) ( $field['min'] ?? '' ) ),
+			esc_attr( (string) ( $field['max'] ?? '' ) ),
+			esc_attr( (string) ( $field['step'] ?? 1 ) ),
+			$extra_attrs
+		);
+		printf(
+			'<span class="lerm-number-input__actions"><button type="button" class="lerm-number-input__button" data-lerm-number-step="up" aria-label="%1$s"><span aria-hidden="true">&#9650;</span></button><button type="button" class="lerm-number-input__button" data-lerm-number-step="down" aria-label="%2$s"><span aria-hidden="true">&#9660;</span></button></span>',
+			esc_attr__( 'Increase value', 'lerm' ),
+			esc_attr__( 'Decrease value', 'lerm' )
+		);
+		echo '</span>';
 	}
 
 	/**
@@ -1716,6 +1627,23 @@ final class OptionsPage {
 	 * Asset version — delegated to the injected AssetResolver.
 	 */
 	private function asset_version(): string {
-		return $this->asset_resolver->version();
+		$version = $this->asset_resolver->version();
+		$assets  = array(
+			dirname( __DIR__ ) . '/assets/options-framework.css',
+			dirname( __DIR__ ) . '/assets/options-framework.js',
+		);
+		$mtime   = 0;
+
+		foreach ( $assets as $asset_path ) {
+			if ( is_readable( $asset_path ) ) {
+				$asset_mtime = (int) filemtime( $asset_path );
+
+				if ( $asset_mtime > $mtime ) {
+					$mtime = $asset_mtime;
+				}
+			}
+		}
+
+		return $mtime > 0 ? $version . '.' . (string) $mtime : $version;
 	}
 }

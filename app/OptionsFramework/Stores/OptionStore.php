@@ -154,7 +154,7 @@ final class OptionStore {
 
 		$options = $this->raw();
 
-		foreach ( $section['fields'] as $field ) {
+		foreach ( PageSchema::section_fields( $section ) as $field ) {
 			if ( ! $this->field_is_saved( $field ) ) {
 				continue;
 			}
@@ -202,7 +202,7 @@ final class OptionStore {
 		$values = $this->all();
 		$data   = array();
 
-		foreach ( $section['fields'] as $field ) {
+		foreach ( PageSchema::section_fields( $section ) as $field ) {
 			$field_id          = (string) $field['id'];
 			$data[ $field_id ] = $values[ $field_id ] ?? ( $field['default'] ?? '' );
 		}
@@ -247,7 +247,7 @@ final class OptionStore {
 
 		$options = $this->raw();
 
-		foreach ( $section['fields'] as $field ) {
+		foreach ( PageSchema::section_fields( $section ) as $field ) {
 			if ( ! $this->field_is_saved( $field ) ) {
 				continue;
 			}
@@ -299,9 +299,13 @@ final class OptionStore {
 			return false;
 		}
 
-		$groups = $this->declared_section_groups( $section );
+		foreach ( PageSchema::section_groups( $section ) as $group ) {
+			if ( $group_id === (string) ( $group['id'] ?? '' ) ) {
+				return true;
+			}
+		}
 
-		return isset( $groups[ $group_id ] );
+		return false;
 	}
 
 	/**
@@ -828,97 +832,15 @@ final class OptionStore {
 			return array();
 		}
 
-		$groups = $this->declared_section_groups( $section );
+		foreach ( PageSchema::section_groups( $section ) as $group ) {
+			if ( $group_id === (string) ( $group['id'] ?? '' ) ) {
+				$fields = $group['fields'] ?? array();
 
-		if ( ! isset( $groups[ $group_id ] ) ) {
-			return array();
-		}
-
-		$fallback_group_id = (string) array_key_first( $groups );
-		$fields            = array();
-
-		foreach ( $section['fields'] as $field ) {
-			if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
-				continue;
-			}
-
-			if ( $group_id === $this->resolve_field_group_id( $field, $groups, $fallback_group_id ) ) {
-				$fields[] = $field;
+				return is_array( $fields ) ? array_values( $fields ) : array();
 			}
 		}
 
-		return $fields;
-	}
-
-	/**
-	 * Collect explicitly-declared subsection groups from a section config.
-	 *
-	 * @param array<string, mixed> $section Section definition.
-	 * @return array<string, array<string, mixed>>
-	 */
-	private function declared_section_groups( array $section ): array {
-		$declared = is_array( $section['groups'] ?? null ) ? $section['groups'] : array();
-		$groups   = array();
-
-		foreach ( $declared as $index => $group ) {
-			$group_id    = '';
-			$group_label = '';
-
-			if ( is_scalar( $group ) ) {
-				$group_label = trim( (string) $group );
-			} elseif ( is_array( $group ) ) {
-				$group_id    = isset( $group['id'] ) && is_scalar( $group['id'] ) ? sanitize_title( (string) $group['id'] ) : '';
-				$group_label = trim( (string) ( $group['label'] ?? $group['title'] ?? $group['name'] ?? '' ) );
-			}
-
-			if ( '' === $group_label && '' === $group_id ) {
-				continue;
-			}
-
-			$group_id = '' !== $group_id ? $group_id : sanitize_title( $group_label );
-			$group_id = '' !== $group_id ? $group_id : 'group-' . (string) ( (int) $index + 1 );
-
-			while ( isset( $groups[ $group_id ] ) ) {
-				$group_id .= '-2';
-			}
-
-			$groups[ $group_id ] = array(
-				'id'    => $group_id,
-				'label' => '' !== $group_label ? $group_label : (string) __( 'General', 'lerm' ),
-			);
-		}
-
-		return $groups;
-	}
-
-	/**
-	 * Resolve which explicit subsection group a field belongs to.
-	 *
-	 * Field-level `group` values only match an already-declared group label;
-	 * they never create new subsection groups on their own.
-	 *
-	 * @param array<string, mixed>               $field             Field definition.
-	 * @param array<string, array<string, mixed>> $groups           Declared groups.
-	 * @param string                             $fallback_group_id Fallback group ID.
-	 */
-	private function resolve_field_group_id( array $field, array $groups, string $fallback_group_id ): string {
-		$group_id = isset( $field['group_id'] ) && is_scalar( $field['group_id'] ) ? sanitize_title( (string) $field['group_id'] ) : '';
-
-		if ( '' !== $group_id && isset( $groups[ $group_id ] ) ) {
-			return $group_id;
-		}
-
-		$group_label = trim( (string) ( $field['group'] ?? '' ) );
-
-		if ( '' !== $group_label ) {
-			foreach ( $groups as $declared_group_id => $group ) {
-				if ( trim( (string) ( $group['label'] ?? '' ) ) === $group_label ) {
-					return (string) $declared_group_id;
-				}
-			}
-		}
-
-		return $fallback_group_id;
+		return array();
 	}
 
 	/**

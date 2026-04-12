@@ -237,6 +237,48 @@
 		});
 	};
 
+	/** @param {Document|Element} scope */
+	const initNumberInputs = (scope) => {
+		dom.findAll('.lerm-number-input', scope).forEach(el => {
+			const wrap = /** @type {HTMLElement} */ (el);
+			if (getData(wrap, 'lerm-number-ready') === '1') return;
+			setData(wrap, 'lerm-number-ready', '1');
+
+			const input = /** @type {HTMLInputElement|null} */ (dom.find('.lerm-number-input__control', wrap));
+			if (!input) return;
+
+			dom.findAll('[data-lerm-number-step]', wrap).forEach(buttonEl => {
+				const button = /** @type {HTMLButtonElement} */ (buttonEl);
+				button.addEventListener('click', (e) => {
+					e.preventDefault();
+
+					if (input.disabled || input.readOnly) return;
+
+					const direction = getData(button, 'lerm-number-step');
+
+					try {
+						if (direction === 'down') input.stepDown();
+						else input.stepUp();
+					} catch {
+						const current = Number(input.value || 0);
+						const stepAttr = input.getAttribute('step') ?? '1';
+						const step = stepAttr !== 'any' && Number.isFinite(Number(stepAttr)) ? Number(stepAttr) : 1;
+						let next = current + (direction === 'down' ? -step : step);
+						const min = Number(input.getAttribute('min'));
+						const max = Number(input.getAttribute('max'));
+						if (Number.isFinite(min)) next = Math.max(next, min);
+						if (Number.isFinite(max)) next = Math.min(next, max);
+						input.value = String(next);
+					}
+
+					input.dispatchEvent(new Event('input', { bubbles: true }));
+					input.dispatchEvent(new Event('change', { bubbles: true }));
+					input.focus({ preventScroll: true });
+				});
+			});
+		});
+	};
+
 	// ─── Media Fields ─────────────────────────────────────────────────────────
 
 	/**
@@ -508,6 +550,7 @@
 	/** @param {Document|Element} scope */
 	const initGroupChildren = (scope) => {
 		initColorPickers(scope);
+		initNumberInputs(scope);
 		initMediaFields(scope);
 		initGalleryFields(scope);
 		initCodeEditors(scope);
@@ -1495,6 +1538,7 @@
 			const form = /** @type {HTMLFormElement} */ (el);
 
 			initColorPickers(form);
+			initNumberInputs(form);
 			initMediaFields(form);
 			initGalleryFields(form);
 			initSorters(form);

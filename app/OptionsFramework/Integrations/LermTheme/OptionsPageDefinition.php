@@ -29,10 +29,7 @@ final class OptionsPageDefinition {
 	private const SECTION_ORDER = array(
 		'header',
 		'footer',
-		'appearance_layout',
-		'appearance_colors',
-		'appearance_typography',
-		'appearance_advanced',
+		'appearance',
 		'content',
 		'system',
 		'search',

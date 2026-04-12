@@ -15,7 +15,7 @@ return array(
 			'type'        => 'backup_tools',
 			'label'       => __( 'Backup tools', 'lerm' ),
 			'description' => __( 'Generate a JSON snapshot of the current options or paste one back in to restore it.', 'lerm' ),
-			'group'       => __( 'Backup', 'lerm' ),
+			'subtitle' => __( 'Backup', 'lerm' ),
 			'default'     => '',
 			'save'        => false,
 		),
