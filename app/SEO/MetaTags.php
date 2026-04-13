@@ -166,8 +166,8 @@ class MetaTags {
 
 	private static function title_token_value( string $token ): string {
 		return match ( $token ) {
-			'title'      => self::$args['blogname'] ?? wp_strip_all_tags( get_bloginfo( 'name' ) ),
-			'tagline'    => self::$args['tagline'] ?? wp_strip_all_tags( get_bloginfo( 'description' ) ),
+			'title'      => self::$args['blogname'] ? self::$args['blogname'] : wp_strip_all_tags( get_bloginfo( 'name' ) ),
+			'tagline'    => self::$args['tagline'] ? self::$args['tagline'] : wp_strip_all_tags( get_bloginfo( 'description' ) ),
 			'post_title' => is_singular() ? wp_strip_all_tags( single_post_title( '', false ) ) : '',
 			'page_title' => is_page() ? wp_strip_all_tags( single_post_title( '', false ) ) : '',
 			'separator'  => self::separator_value(),

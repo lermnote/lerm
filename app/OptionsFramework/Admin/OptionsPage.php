@@ -475,7 +475,7 @@ final class OptionsPage {
 								<?php wp_nonce_field( $this->nonce_action( $section_id ) ); ?>
 
 								<div class="lerm-settings-sticky-wrap" data-lerm-sticky-wrap>
-									<div class="lerm-settings-actions lerm-settings-actions--sticky" data-lerm-sticky-bar>
+									<div class="lerm-settings-actions lerm-settings-actions--sticky lerm-settings-sticky-bar" data-lerm-sticky-bar>
 										<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
 										<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset current page', 'lerm' ); ?></button>
 										<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
@@ -487,16 +487,18 @@ final class OptionsPage {
 								</div>
 
 								<?php if ( $use_subsections ) : ?>
-									<nav class="lerm-settings-subnav" aria-label="<?php echo esc_attr( sprintf( __( '%s groups', 'lerm' ), (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ) ); ?>">
-										<?php foreach ( $section_groups as $group_index => $group ) : ?>
-											<button type="button"
-												class="lerm-settings-subnav__item <?php echo (string) $group['id'] === $current_subsection ? 'is-active' : ''; ?>"
-												data-subsection-target="<?php echo esc_attr( (string) $group['id'] ); ?>"
-												aria-pressed="<?php echo (string) $group['id'] === $current_subsection ? 'true' : 'false'; ?>">
-												<?php echo esc_html( (string) $group['label'] ); ?>
-											</button>
-										<?php endforeach; ?>
-									</nav>
+									<div class="lerm-settings-sticky-wrap lerm-settings-sticky-wrap--subnav" data-lerm-sticky-wrap>
+										<nav class="lerm-settings-subnav lerm-settings-subnav--sticky lerm-settings-sticky-bar" data-lerm-sticky-bar aria-label="<?php echo esc_attr( sprintf( __( '%s groups', 'lerm' ), (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ) ); ?>">
+											<?php foreach ( $section_groups as $group_index => $group ) : ?>
+												<button type="button"
+													class="lerm-settings-subnav__item <?php echo (string) $group['id'] === $current_subsection ? 'is-active' : ''; ?>"
+													data-subsection-target="<?php echo esc_attr( (string) $group['id'] ); ?>"
+													aria-pressed="<?php echo (string) $group['id'] === $current_subsection ? 'true' : 'false'; ?>">
+													<?php echo esc_html( (string) $group['label'] ); ?>
+												</button>
+											<?php endforeach; ?>
+										</nav>
+									</div>
 
 									<div class="lerm-settings-subsections">
 										<?php foreach ( $section_groups as $group_index => $group ) : ?>
@@ -702,6 +704,10 @@ final class OptionsPage {
 		if ( '' !== $dependency ) {
 			$row_attrs[] = 'data-dependency-field="' . esc_attr( $dependency ) . '"';
 			$row_attrs[] = 'data-dependency-value="' . esc_attr( $dep_value ) . '"';
+
+			if ( ! $this->dependency_is_satisfied( $field, $values ) ) {
+				$row_attrs[] = 'hidden';
+			}
 		}
 
 		if ( 'stack' === $layout ) {
@@ -1588,6 +1594,61 @@ final class OptionsPage {
 	 */
 	private function scalar_string( $value, string $default_value = '' ): string {
 		return PageSchema::scalar_value( $value, $default_value );
+	}
+
+	/**
+	 * Resolve whether a field's dependency chain is currently satisfied.
+	 *
+	 * @param array<string, mixed> $field  Field definition.
+	 * @param array<string, mixed> $values Current form values.
+	 * @param array<string, bool>  $seen   Recursion guard for malformed cycles.
+	 */
+	private function dependency_is_satisfied( array $field, array $values, array $seen = array() ): bool {
+		$dependency = isset( $field['dependency_field'] ) ? sanitize_key( (string) $field['dependency_field'] ) : '';
+
+		if ( '' === $dependency ) {
+			return true;
+		}
+
+		if ( isset( $seen[ $dependency ] ) ) {
+			return false;
+		}
+
+		$controller = PageSchema::field( $this->definition, $dependency );
+
+		if ( ! is_array( $controller ) ) {
+			return false;
+		}
+
+		$seen[ $dependency ] = true;
+
+		if ( ! $this->dependency_is_satisfied( $controller, $values, $seen ) ) {
+			return false;
+		}
+
+		$expected = (string) ( $field['dependency_value'] ?? '1' );
+		$actual   = array_key_exists( $dependency, $values )
+			? $this->dependency_scalar( $values[ $dependency ] )
+			: $this->dependency_scalar( $controller['default'] ?? '' );
+
+		return $actual === $expected;
+	}
+
+	/**
+	 * Normalize a dependency controller value for reliable string comparisons.
+	 *
+	 * @param mixed $value Controller value.
+	 */
+	private function dependency_scalar( $value ): string {
+		if ( is_bool( $value ) ) {
+			return $value ? '1' : '0';
+		}
+
+		if ( is_numeric( $value ) ) {
+			return (string) $value;
+		}
+
+		return PageSchema::scalar_value( $value );
 	}
 
 	/**

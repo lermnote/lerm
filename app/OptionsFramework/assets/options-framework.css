@@ -194,20 +194,23 @@
 	margin-bottom: 16px;
 }
 
-.lerm-settings-actions--sticky {
+.lerm-settings-sticky-bar {
 	position: sticky;
-	top: 44px;
+	top: var(--lerm-sticky-top, 44px);
 	z-index: 30;
+}
+
+.lerm-settings-actions--sticky {
 	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
-.lerm-settings-sticky-wrap > .lerm-settings-actions--sticky {
+.lerm-settings-sticky-wrap > .lerm-settings-sticky-bar {
 	margin-bottom: 0;
 }
 
-.lerm-settings-actions--sticky.is-fixed {
+.lerm-settings-sticky-bar.is-fixed {
 	position: fixed;
-	top: 44px;
+	top: var(--lerm-sticky-top, 44px);
 	left: var(--lerm-sticky-left, auto);
 	width: var(--lerm-sticky-width, auto);
 	max-width: var(--lerm-sticky-width, auto);
@@ -246,6 +249,16 @@
 	margin-bottom: 18px;
 	padding: 0 0 4px;
 	overflow-x: auto;
+}
+
+.lerm-settings-sticky-wrap--subnav {
+	margin-bottom: 18px;
+}
+
+.lerm-settings-subnav--sticky {
+	margin-bottom: 0;
+	padding-top: 4px;
+	background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(248, 250, 252, 0.9));
 }
 
 .lerm-settings-subnav__item {
@@ -995,12 +1008,12 @@
 		padding: 20px 16px 16px;
 	}
 
-	.lerm-settings-actions--sticky {
-		top: 46px;
+	.lerm-settings-sticky-bar {
+		top: var(--lerm-sticky-top, 46px);
 	}
 
-	.lerm-settings-actions--sticky.is-fixed {
-		top: 46px;
+	.lerm-settings-sticky-bar.is-fixed {
+		top: var(--lerm-sticky-top, 46px);
 	}
 
 	.lerm-settings-panel__intro {
@@ -1105,7 +1118,10 @@
 }
 
 /* Ensure hidden rows are truly invisible (dependency system) */
-.lerm-settings-row[style*="display: none"] { display: none !important; }
+.lerm-settings-row[hidden],
+.lerm-settings-row[style*="display: none"] {
+	display: none !important;
+}
 
 /* Group items — drag handle glow on hover */
 .lerm-group-item:hover .lerm-sorter-handle {

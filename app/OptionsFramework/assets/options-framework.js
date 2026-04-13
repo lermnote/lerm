@@ -220,10 +220,37 @@
 
 	/** @param {HTMLFormElement} form */
 	const toggleDependencies = (form) => {
-		dom.findAll('[data-dependency-field]', form).forEach(row => {
-			/** @type {HTMLElement} */ (row).hidden =
-				getControllerValue(form, /** @type {string} */(getData(row, 'dependency-field'))) !== getData(row, 'dependency-value');
+		/** @type {Map<string, HTMLElement>} */
+		const rowsByFieldId = new Map();
+
+		dom.findAll('[data-field-id]', form).forEach(row => {
+			const fieldId = getData(row, 'field-id');
+			if (fieldId) rowsByFieldId.set(fieldId, /** @type {HTMLElement} */ (row));
 		});
+
+		const dependentRows = dom.findAll('[data-dependency-field]', form).map((row) => /** @type {HTMLElement} */ (row));
+
+		for (let pass = 0; pass < dependentRows.length; pass += 1) {
+			let changed = false;
+
+			dependentRows.forEach((row) => {
+				const dependencyField = getData(row, 'dependency-field') || '';
+				const dependencyValue = getData(row, 'dependency-value');
+				const controllerRow = rowsByFieldId.get(dependencyField);
+				const shouldHide = (
+					!controllerRow
+					|| controllerRow.hidden
+					|| getControllerValue(form, dependencyField) !== dependencyValue
+				);
+
+				if (row.hidden !== shouldHide) {
+					row.hidden = shouldHide;
+					changed = true;
+				}
+			});
+
+			if (!changed) break;
+		}
 	};
 
 	// ─── Color Pickers ────────────────────────────────────────────────────────
@@ -1340,24 +1367,69 @@
 	};
 
 	const syncStickyActions = () => {
+		const syncStickyGroup = (scope, stickyOffset) => {
+			let currentOffset = stickyOffset;
+
+			dom.findAll('[data-lerm-sticky-wrap]', scope).forEach(wrapEl => {
+				const wrap = /** @type {HTMLElement} */ (wrapEl);
+				const bar = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-sticky-bar]', wrap));
+				if (!bar) return;
+
+				const wrapRect = wrap.getBoundingClientRect();
+				const barHeight = bar.offsetHeight;
+				const wrapMarginBottom = Number.parseFloat(window.getComputedStyle(wrap).marginBottom || '0') || 0;
+
+				bar.style.setProperty('--lerm-sticky-top', `${currentOffset}px`);
+
+				if (wrapRect.top > currentOffset) {
+					releaseStickyAction(wrap, bar);
+					currentOffset += barHeight + wrapMarginBottom;
+					return;
+				}
+
+				wrap.style.minHeight = `${barHeight}px`;
+				bar.classList.add('is-fixed');
+				bar.style.setProperty('--lerm-sticky-left', `${wrapRect.left}px`);
+				bar.style.setProperty('--lerm-sticky-width', `${wrapRect.width}px`);
+
+				currentOffset += barHeight + wrapMarginBottom;
+			});
+		};
+
 		const stickyOffset = getStickyOffset();
+		const handledWraps = new Set();
+
+		dom.findAll('[data-tab-panel]').forEach(panelEl => {
+			const panel = /** @type {HTMLElement} */ (panelEl);
+			const wraps = dom.findAll('[data-lerm-sticky-wrap]', panel);
+
+			wraps.forEach(wrap => handledWraps.add(wrap));
+
+			if (panel.hidden) {
+				wraps.forEach(wrapEl => {
+					const wrap = /** @type {HTMLElement} */ (wrapEl);
+					const bar = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-sticky-bar]', wrap));
+					if (bar) releaseStickyAction(wrap, bar);
+				});
+				return;
+			}
+
+			syncStickyGroup(panel, stickyOffset);
+		});
 
 		dom.findAll('[data-lerm-sticky-wrap]').forEach(wrapEl => {
+			if (handledWraps.has(wrapEl)) return;
+
 			const wrap = /** @type {HTMLElement} */ (wrapEl);
 			const bar = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-sticky-bar]', wrap));
 			if (!bar) return;
 
-			const panel = /** @type {HTMLElement|null} */ (wrap.closest('[data-tab-panel]'));
-			if (panel?.hidden) {
-				releaseStickyAction(wrap, bar);
-				return;
-			}
-
 			const wrapRect = wrap.getBoundingClientRect();
 			const barHeight = bar.offsetHeight;
-			const shouldFix = wrapRect.top <= stickyOffset;
 
-			if (!shouldFix) {
+			bar.style.setProperty('--lerm-sticky-top', `${stickyOffset}px`);
+
+			if (wrapRect.top > stickyOffset) {
 				releaseStickyAction(wrap, bar);
 				return;
 			}
