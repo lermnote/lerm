@@ -71,7 +71,7 @@ final class PageSchema {
 							__METHOD__,
 							sprintf(
 								/* translators: 1: field ID, 2: first section, 3: duplicate section */
-								'Options Framework: field ID "%1$s" is declared in both section "%2$s" and "%3$s". The second declaration is ignored.',
+								'Admin Config: field ID "%1$s" is declared in both section "%2$s" and "%3$s". The second declaration is ignored.',
 								esc_html( $field_id ),
 								esc_html( $seen[ $field_id ] ),
 								esc_html( (string) $section_id )

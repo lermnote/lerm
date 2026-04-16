@@ -1,6 +1,6 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
- * Contract for options framework storage backends.
+ * Contract for admin config storage backends.
  *
  * Implement this interface to add support for:
  *   - term meta   (TermMetaBackend)

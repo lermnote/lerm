@@ -56,7 +56,7 @@ final class OptionsPage {
 		$menu                 = is_array( $this->definition['menu'] ?? null ) ? $this->definition['menu'] : array();
 		$this->network_admin  = ! empty( $menu['network_admin'] );
 		// JS global can be overridden per-instance via the definition.
-		$this->js_global = 'lermOptionsFramework';
+		$this->js_global = 'lermAdminConfig';
 
 		if ( $register_hooks ) {
 			add_action( $this->menu_action(), array( $this, 'register_menu' ) );
@@ -77,8 +77,8 @@ final class OptionsPage {
 
 		$this->page_hook = (string) add_submenu_page(
 			(string) ( $menu['parent_slug'] ?? 'themes.php' ),
-			(string) ( $menu['page_title'] ?? __( 'Options Framework', 'lerm' ) ),
-			(string) ( $menu['menu_title'] ?? __( 'Options Framework', 'lerm' ) ),
+			(string) ( $menu['page_title'] ?? __( 'Admin Config', 'lerm' ) ),
+			(string) ( $menu['menu_title'] ?? __( 'Admin Config', 'lerm' ) ),
 			$this->capability(),
 			$this->page_slug(),
 			array( $this, 'render_page' )
@@ -325,18 +325,18 @@ final class OptionsPage {
 		// Asset handles are namespaced by page slug so two framework instances
 		// on the same admin screen don't enqueue the same handle twice.
 		$suffix     = '' !== $handle_suffix ? sanitize_key( $handle_suffix ) : $this->page_slug();
-		$css_handle = 'lerm-options-framework-' . $suffix;
-		$js_handle  = 'lerm-options-framework-js-' . $suffix;
+		$css_handle = 'lerm-admin-config-' . $suffix;
+		$js_handle  = 'lerm-admin-config-js-' . $suffix;
 
 		wp_enqueue_style(
 			$css_handle,
-			$this->asset_url( 'options-framework.css' ),
+			$this->asset_url( 'admin-config.css' ),
 			array( 'wp-color-picker', 'wp-codemirror' ),
 			$this->asset_version()
 		);
 		wp_enqueue_script(
 			$js_handle,
-			$this->asset_url( 'options-framework.js' ),
+			$this->asset_url( 'admin-config.js' ),
 			array( 'jquery', 'jquery-ui-sortable', 'wp-color-picker', 'wp-theme-plugin-editor' ),
 			$this->asset_version(),
 			true
@@ -408,7 +408,7 @@ final class OptionsPage {
 				<aside class="lerm-settings-sidebar">
 					<div class="lerm-settings-sidebar__brand">
 						<p class="lerm-settings-eyebrow"><?php echo esc_html( (string) ( $view['eyebrow'] ?? __( 'Native admin', 'lerm' ) ) ); ?></p>
-						<h1><?php echo esc_html( (string) ( $view['title'] ?? __( 'Options Framework', 'lerm' ) ) ); ?></h1>
+						<h1><?php echo esc_html( (string) ( $view['title'] ?? __( 'Admin Config', 'lerm' ) ) ); ?></h1>
 						<p><?php echo esc_html( (string) ( $view['description'] ?? __( 'A native, extensible settings page built on schema, storage, and reusable field renderers.', 'lerm' ) ) ); ?></p>
 					</div>
 
@@ -1430,7 +1430,7 @@ final class OptionsPage {
 	private function page_slug(): string {
 		$page_id = isset( $this->definition['id'] ) ? sanitize_key( (string) $this->definition['id'] ) : '';
 
-		return '' !== $page_id ? $page_id : 'options-framework';
+		return '' !== $page_id ? $page_id : 'admin-config';
 	}
 
 	/**
@@ -1483,42 +1483,42 @@ final class OptionsPage {
 	 * Nonce action for a section.
 	 */
 	private function nonce_action( string $tab ): string {
-		return 'lerm_options_framework_' . $this->page_slug() . '_' . sanitize_key( $tab );
+		return 'lerm_admin_config_' . $this->page_slug() . '_' . sanitize_key( $tab );
 	}
 
 	/**
 	 * Non-JS admin-post action.
 	 */
 	private function save_action(): string {
-		return 'lerm_options_framework_save_' . $this->page_slug();
+		return 'lerm_admin_config_save_' . $this->page_slug();
 	}
 
 	/**
 	 * AJAX save action.
 	 */
 	private function ajax_save_action(): string {
-		return 'lerm_options_framework_ajax_save_' . $this->page_slug();
+		return 'lerm_admin_config_ajax_save_' . $this->page_slug();
 	}
 
 	/**
 	 * AJAX reset action.
 	 */
 	private function ajax_reset_action(): string {
-		return 'lerm_options_framework_ajax_reset_' . $this->page_slug();
+		return 'lerm_admin_config_ajax_reset_' . $this->page_slug();
 	}
 
 	/**
 	 * AJAX export action.
 	 */
 	private function ajax_export_action(): string {
-		return 'lerm_options_framework_ajax_export_' . $this->page_slug();
+		return 'lerm_admin_config_ajax_export_' . $this->page_slug();
 	}
 
 	/**
 	 * AJAX import action.
 	 */
 	private function ajax_import_action(): string {
-		return 'lerm_options_framework_ajax_import_' . $this->page_slug();
+		return 'lerm_admin_config_ajax_import_' . $this->page_slug();
 	}
 
 	/**
@@ -1655,8 +1655,8 @@ final class OptionsPage {
 	private function asset_version(): string {
 		$version = $this->asset_resolver->version();
 		$assets  = array(
-			dirname( __DIR__, 3 ) . '/assets/options-framework.css',
-			dirname( __DIR__, 3 ) . '/assets/options-framework.js',
+			dirname( __DIR__, 3 ) . '/assets/admin-config.css',
+			dirname( __DIR__, 3 ) . '/assets/admin-config.js',
 		);
 		$mtime   = 0;
 

@@ -387,7 +387,7 @@ final class CssVariables {
 		return $selector . '{' . implode( ';', $lines ) . '}';
 	}
 
-	// ── CSF field → CSS var mappers ───────────────────────────────────────────
+	// AdminConfig field -> CSS var mappers.
 
 	private static function map_link_color( array &$t, array $v, string $prefix ): void {
 		self::set( $t, "--lerm-color-{$prefix}", $v['color'] ?? '' );

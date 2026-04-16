@@ -1,6 +1,6 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
- * Generic store for options framework pages.
+ * Generic store for admin config pages.
  *
  * Storage is delegated to a StorageBackend implementation, making this class
  * reusable for option rows, term meta, user meta, and post/CPT meta without

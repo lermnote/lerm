@@ -1,6 +1,6 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
- * Core entry point for the options framework MVP.
+ * Core entry point for the admin config runtime.
  *
  * @package Lerm
  */
@@ -113,15 +113,15 @@ final class Framework {
 	 * Fire a framework lifecycle hook.
 	 *
 	 * Used internally by the OptionStore after a successful write.
-	 * External code can hook 'lerm_options_framework_before_save' and
-	 * 'lerm_options_framework_after_save' to observe saves.
+	 * External code can hook 'lerm_admin_config_before_save' and
+	 * 'lerm_admin_config_after_save' to observe saves.
 	 *
 	 * @param string               $hook    Short hook name ('before_save' or 'after_save').
 	 * @param string               $page_id The page / store identifier.
 	 * @param array<string, mixed> $data    Data being saved.
 	 */
 	public function fire( string $hook, string $page_id, array $data ): void {
-		do_action( 'lerm_options_framework_' . $hook, $page_id, $data, $this );
+		do_action( 'lerm_admin_config_' . $hook, $page_id, $data, $this );
 	}
 
 	public function store( array $definition, ?StorageBackend $backend = null ): OptionStore {
@@ -181,7 +181,7 @@ final class Framework {
 
 		$option_name = isset( $definition['option_name'] ) ? sanitize_key( (string) $definition['option_name'] ) : '';
 
-		return '' !== $option_name ? $option_name : 'options-framework-page';
+		return '' !== $option_name ? $option_name : 'admin-config-page';
 	}
 
 	/**

@@ -2,7 +2,7 @@
 /**
  * Storage backend backed by WordPress post meta.
  *
- * Suitable for CPT meta boxes rendered through the options framework.
+ * Suitable for CPT meta boxes rendered through the admin config runtime.
  *
  * Usage:
  *   $backend = new PostMetaBackend( $post_id, 'my_cpt_settings' );

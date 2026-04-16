@@ -8,7 +8,7 @@
  *
  *   $framework->mount_options_page( $def, null, new MyPluginAssetResolver() );
  *
- * @package Lerm\OptionsFramework
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

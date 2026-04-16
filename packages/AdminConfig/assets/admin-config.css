@@ -704,13 +704,86 @@
 }
 
 .lerm-typography-field {
-	max-width: 960px;
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	max-width: 1000px;
+	gap: 12px;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 	align-items: start;
 }
 
 .lerm-typography-field .lerm-fieldset__item {
+	display: grid;
+	align-content: start;
+	gap: 8px;
 	height: 100%;
+	padding: 12px;
+	border-color: #dbe4ee;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: none;
+}
+
+.lerm-typography-field .lerm-fieldset__label {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #475569;
+}
+
+.lerm-typography-field .regular-text,
+.lerm-typography-field .large-text,
+.lerm-typography-field select,
+.lerm-typography-field select.regular-text,
+.lerm-typography-field input[type="text"],
+.lerm-typography-field input[type="number"] {
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.lerm-typography-field .lerm-button-set {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+	gap: 6px;
+	width: 100%;
+}
+
+.lerm-typography-field .lerm-button-set label {
+	justify-content: center;
+	width: 100%;
+	min-height: 32px;
+	margin: 0;
+	padding: 6px 10px;
+	border-radius: 8px;
+}
+
+.lerm-typography-field .wp-picker-container {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+}
+
+.lerm-typography-field .wp-picker-input-wrap {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	max-width: 100%;
+}
+
+.lerm-typography-field .wp-picker-container .wp-color-result.button {
+	margin: 0;
+}
+
+.lerm-typography-field .wp-picker-container .wp-color-picker {
+	width: 120px !important;
+	max-width: 100%;
+}
+
+.lerm-typography-field .wp-picker-holder {
+	max-width: 100%;
 }
 
 .lerm-fieldset--single-line {

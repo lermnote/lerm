@@ -2,7 +2,7 @@
 /**
  * Storage backend backed by WordPress options (get_option / update_option).
  *
- * This is the default backend used by the options framework for theme/plugin
+ * This is the default backend used by the admin config runtime for theme/plugin
  * settings pages.
  *
  * @package Lerm

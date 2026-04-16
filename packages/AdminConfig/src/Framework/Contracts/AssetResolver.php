@@ -8,7 +8,7 @@
  * Implement this interface and pass the resolver to Framework::mount_options_page()
  * to override the default behavior.
  *
- * @package Lerm\OptionsFramework
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );
@@ -25,7 +25,7 @@ interface AssetResolver {
 	 * Return the full URL for a framework asset file.
 	 *
 	 * @param string $filename Asset filename relative to the framework assets directory.
-	 *                         E.g. 'options-framework.css'.
+	 *                         E.g. 'admin-config.css'.
 	 */
 	public function url( string $filename ): string;
 

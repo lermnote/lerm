@@ -57,7 +57,7 @@ final class ThemeOptionsDefinition {
 
 
 	/**
-	 * Full options framework page definition for this theme.
+	 * Full admin config page definition for this theme.
 	 *
 	 * @return array<string, mixed>
 	 */
