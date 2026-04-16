@@ -5,7 +5,7 @@
  * 职责：
  *   1. 定义主题常量
  *   2. 加载 Composer autoload
- *   3. 加载 Admin 框架（CSF）
+ *   3. 引导共享 AdminConfig runtime
  *   4. 在 after_setup_theme 钩子内启动 bootstrap
  *
  * 不应放在这里的内容：模块初始化、选项解析、hook 注册 —— 这些全在 bootstrap.php。
@@ -78,31 +78,38 @@ add_action(
 );
 
 // -----------------------------------------------------------------------------
-// 4. Admin 框架（Codestar Framework）
-//    定义 lerm_options() 及后台选项面板，必须在 bootstrap 之前加载
+// 4. AdminConfig runtime
+//    主题只在这里注册 schema，渲染、存储、校验和后台交互由共享包负责
 // -----------------------------------------------------------------------------
 
-$lerm_csf = LERM_DIR . 'app/Http/Admin/codestar-framework.php';
-add_action(
-	'after_setup_theme',
-	function () use ( $lerm_csf ) {
-		if ( file_exists( $lerm_csf ) ) {
-			require_once $lerm_csf;  // options.config.php 里的 __('lerm') 现在安全
+if ( ! function_exists( 'lerm_admin_config_runtime' ) ) {
+	/**
+	 * Boot the embedded admin-config runtime and register the theme schema.
+	 */
+	function lerm_admin_config_runtime(): \Lerm\AdminConfig\WordPress\Runtime {
+		static $runtime = null;
+
+		if ( null === $runtime ) {
+			$runtime = \Lerm\AdminConfig\WordPress\EmbeddedBootstrap::boot(
+				trailingslashit( get_template_directory_uri() ) . 'packages/AdminConfig/assets',
+				'LERM_VERSION'
+			);
+
+			\Lerm\Theme\AdminConfig\Bootstrap::register( $runtime );
 		}
-	},
-	2
-);
+
+		return $runtime;
+	}
+}
+
 if ( ! function_exists( 'lerm_options' ) ) {
 	function lerm_options( string $id, string $tag = '', $default_value = '' ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
-		static $store = null;
-
-		if ( ! $store instanceof \Lerm\OptionsFramework\Stores\OptionStore ) {
-			$store = \Lerm\OptionsFramework\Framework::instance()->store(
-				\Lerm\OptionsFramework\Integrations\LermTheme\OptionsPageDefinition::definition()
-			);
-		}
-
-		return $store->get( $id, $tag, $default_value );
+		return lerm_admin_config_runtime()->get(
+			\Lerm\Theme\AdminConfig\ThemeOptionsSchema::schema_id(),
+			$id,
+			$tag,
+			$default_value
+		);
 	}
 }
 

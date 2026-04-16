@@ -20,8 +20,7 @@ use Lerm\Mail\Smtp;
 use Lerm\Update\Updater;
 use Lerm\Http\Rest\Router;
 use Lerm\Runtime\Lazyload;
-use Lerm\OptionsFramework\Framework as OptionsFramework;
-use Lerm\OptionsFramework\Integrations\LermTheme\OptionsPageDefinition;
+use Lerm\Theme\AdminConfig\ThemeOptionsSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -31,7 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 // 1. 读取主题选项
 // ---------------------------------------------------------------------------
 
-$options = get_option( 'lerm_theme_options', array() );
+$runtime = lerm_admin_config_runtime();
+$options = $runtime->all( ThemeOptionsSchema::schema_id() );
 
 // ---------------------------------------------------------------------------
 // 2. 选项映射：将扁平的 option 数组解析为各模块所需的参数结构
@@ -271,7 +271,7 @@ if ( ! empty( $options ) ) {
 	);
 }
 if ( is_admin() ) {
-	OptionsFramework::instance()->mount_options_page( OptionsPageDefinition::definition() );
+	$runtime->boot();
 }
 // ---------------------------------------------------------------------------
 // 3. 允许外部通过 filter 覆盖任意模块参数

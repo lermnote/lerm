@@ -16,9 +16,6 @@
  * Domain Path: /languages
  */
 require_once plugin_dir_path( __FILE__ ) . 'classes/Setup.php';
-require_once plugin_dir_path( __FILE__ ) . 'config/options.config.php';
-require_once plugin_dir_path( __FILE__ ) . 'config/metabox.config.php';
-require_once plugin_dir_path( __FILE__ ) . 'config/taxonomy.options.php';
 
 /**
  * Retrieve theme options.

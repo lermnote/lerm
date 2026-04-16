@@ -7,14 +7,22 @@
 
 declare( strict_types=1 );
 
-namespace Lerm\OptionsFramework;
+namespace Lerm\AdminConfig\Framework;
 
-use Lerm\OptionsFramework\Admin\OptionsPage;
-use Lerm\OptionsFramework\Contracts\StorageBackend;
-use Lerm\OptionsFramework\Registry\FieldTypeRegistry;
-use Lerm\OptionsFramework\Contracts\AssetResolver;
-use Lerm\OptionsFramework\Resolvers\DefaultAssetResolver;
-use Lerm\OptionsFramework\Stores\OptionStore;
+use Lerm\AdminConfig\Contracts\FieldModule;
+use Lerm\AdminConfig\Framework\Admin\OptionsPage;
+use Lerm\AdminConfig\Framework\Contracts\StorageBackend;
+use Lerm\AdminConfig\Framework\Registry\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
+use Lerm\AdminConfig\Framework\Resolvers\DefaultAssetResolver;
+use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Modules\AdvancedFieldsModule;
+use Lerm\AdminConfig\Modules\CoreFieldsModule;
+use Lerm\AdminConfig\Modules\DesignFieldsModule;
+use Lerm\AdminConfig\Modules\ExtendedFieldsModule;
+use Lerm\AdminConfig\Modules\StructuredFieldsModule;
+use Lerm\AdminConfig\Modules\ToolsFieldsModule;
+use Lerm\AdminConfig\Registry\FieldModuleRegistry;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -28,6 +36,8 @@ final class Framework {
 	private static ?self $instance = null;
 
 	private FieldTypeRegistry $field_types;
+
+	private FieldModuleRegistry $field_modules;
 
 	/**
 	 * Cached option stores keyed by page ID.
@@ -47,10 +57,12 @@ final class Framework {
 
 	public function __construct( ?AssetResolver $resolver = null ) {
 		$this->field_types    = new FieldTypeRegistry();
+		$this->field_modules  = new FieldModuleRegistry( $this->field_types );
+		$this->register_default_field_modules();
 		$this->asset_resolver = $resolver ?? new DefaultAssetResolver(
-			// Derive the assets URL from this file's location so the framework
-			// is portable — no dependency on LERM_URI or any host constant.
-			trailingslashit( get_template_directory_uri() . '/app/OptionsFramework/assets' )
+			// When embedded in a theme/package tree, default to the bundled
+			// AdminConfig assets. Plugin bootstrap injects its own resolver.
+			trailingslashit( get_template_directory_uri() . '/packages/AdminConfig/assets' )
 		);
 	}
 
@@ -70,6 +82,14 @@ final class Framework {
 	 */
 	public function field_types(): FieldTypeRegistry {
 		return $this->field_types;
+	}
+
+	public function field_modules(): FieldModuleRegistry {
+		return $this->field_modules;
+	}
+
+	public function register_field_module( FieldModule $module ): void {
+		$this->field_modules->register( $module );
 	}
 
 	public function asset_resolver(): AssetResolver {
@@ -105,6 +125,7 @@ final class Framework {
 	}
 
 	public function store( array $definition, ?StorageBackend $backend = null ): OptionStore {
+		$this->prepare_definition( $definition );
 		$cache_key = $this->cache_key( $definition, $backend );
 
 		if ( ! isset( $this->stores[ $cache_key ] ) ) {
@@ -121,6 +142,7 @@ final class Framework {
 	 * @param StorageBackend|null  $backend    Optional custom backend.
 	 */
 	public function mount_options_page( array $definition, ?StorageBackend $backend = null ): OptionsPage {
+		$this->prepare_definition( $definition );
 		$cache_key = $this->cache_key( $definition, $backend );
 
 		if ( ! isset( $this->pages[ $cache_key ] ) ) {
@@ -161,4 +183,25 @@ final class Framework {
 
 		return '' !== $option_name ? $option_name : 'options-framework-page';
 	}
+
+	/**
+	 * @param array<string, mixed> $definition
+	 */
+	private function prepare_definition( array $definition ): void {
+		$this->field_modules->enable_for_definition( $definition );
+	}
+
+	private function register_default_field_modules(): void {
+		foreach ( array(
+			new CoreFieldsModule(),
+			new ExtendedFieldsModule(),
+			new DesignFieldsModule(),
+			new AdvancedFieldsModule(),
+			new StructuredFieldsModule(),
+			new ToolsFieldsModule(),
+		) as $module ) {
+			$this->register_field_module( $module );
+		}
+	}
 }
+

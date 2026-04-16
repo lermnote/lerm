@@ -7,12 +7,12 @@
 
 declare( strict_types=1 );
 
-namespace Lerm\OptionsFramework\Admin;
+namespace Lerm\AdminConfig\Framework\Admin;
 
-use Lerm\OptionsFramework\Registry\FieldTypeRegistry;
-use Lerm\OptionsFramework\Stores\OptionStore;
-use Lerm\OptionsFramework\Contracts\AssetResolver;
-use Lerm\OptionsFramework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\Registry\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
+use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -153,7 +153,7 @@ final class OptionsPage {
 	 * Reset the current tab or the whole page without a full reload.
 	 *
 	 * Security note: for both "section" and "all" scopes we verify the nonce
-	 * of the currently active tab. This is intentional — the user is on that
+	 * of the currently active tab. This is intentional 鈥?the user is on that
 	 * tab's page and the nonce was issued for the current session. A per-tab
 	 * nonce for a cross-tab "reset all" action would give no additional security
 	 * benefit because an attacker would need the same capability to reach
@@ -174,7 +174,7 @@ final class OptionsPage {
 		check_ajax_referer( $this->nonce_action( $tab ) );
 
 		// 'fetch_only' is a JS-internal scope used to refresh other tab values
-		// after a full reset — it skips the actual reset and just returns current values.
+		// after a full reset 鈥?it skips the actual reset and just returns current values.
 		if ( 'fetch_only' === $scope ) {
 			wp_send_json_success( array( 'values' => $this->store->section_values( $tab ) ) );
 		}
@@ -353,6 +353,8 @@ final class OptionsPage {
 				'codeEditor'          => $code_editor_settings,
 				'selectMedia'         => __( 'Choose image', 'lerm' ),
 				'useMedia'            => __( 'Use this image', 'lerm' ),
+				'selectFile'          => __( 'Choose file', 'lerm' ),
+				'useFile'             => __( 'Use this file', 'lerm' ),
 				'selectImages'        => __( 'Choose images', 'lerm' ),
 				'useImages'           => __( 'Use these images', 'lerm' ),
 				'removeMedia'         => __( 'Remove image', 'lerm' ),
@@ -400,7 +402,6 @@ final class OptionsPage {
 		$sections     = PageSchema::sections( $this->definition );
 		$current_tab  = $this->current_tab();
 		$values       = $this->store->all();
-		$legacy_panel = is_array( $view['legacy_panel'] ?? null ) ? $view['legacy_panel'] : array();
 		?>
 		<div class="wrap lerm-settings-wrap">
 			<div class="lerm-settings-shell">
@@ -441,14 +442,6 @@ final class OptionsPage {
 							</a>
 						<?php endforeach; ?>
 					</nav>
-
-					<?php if ( ! empty( $legacy_panel['url'] ) ) : ?>
-						<div class="lerm-settings-sidebar__card">
-							<h2><?php echo esc_html( (string) ( $legacy_panel['title'] ?? __( 'Legacy panel', 'lerm' ) ) ); ?></h2>
-							<p><?php echo esc_html( (string) ( $legacy_panel['description'] ?? __( 'Older sections can still live in a separate panel while the framework migration is in progress.', 'lerm' ) ) ); ?></p>
-							<a class="button button-secondary" href="<?php echo esc_url( (string) $legacy_panel['url'] ); ?>"><?php echo esc_html( (string) ( $legacy_panel['button_label'] ?? __( 'Open legacy panel', 'lerm' ) ) ); ?></a>
-						</div>
-					<?php endif; ?>
 				</aside>
 
 				<section class="lerm-settings-main">
@@ -565,7 +558,7 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Determine whether a section should render CSF-style secondary navigation.
+	 * Determine whether a section should render secondary navigation.
 	 *
 	 * @param array<string, mixed>               $section Section definition.
 	 * @param array<int, array<string, mixed>>   $groups  Section groups.
@@ -579,7 +572,7 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Determine whether subsection panels should still render field subtitle headings.
+	 * Determine whether subsection panels should still render field group headings.
 	 *
 	 * @param array<int, array<string, mixed>> $fields          Subsection fields.
 	 * @param string                           $subsection_label Current subsection label.
@@ -592,13 +585,13 @@ final class OptionsPage {
 				continue;
 			}
 
-			$subtitle = trim( (string) ( $field['subtitle'] ?? '' ) );
+			$heading = trim( (string) ( $field['group_heading'] ?? '' ) );
 
-			if ( '' === $subtitle || in_array( $subtitle, $labels, true ) ) {
+			if ( '' === $heading || in_array( $heading, $labels, true ) ) {
 				continue;
 			}
 
-			$labels[] = $subtitle;
+			$labels[] = $heading;
 		}
 
 		if ( count( $labels ) > 1 ) {
@@ -663,27 +656,27 @@ final class OptionsPage {
 	 * @param array<int, array<string, mixed>> $fields     Field definitions.
 	 * @param array<string, mixed>             $values     Saved values.
 	 * @param string                           $section_id Current section ID.
-	 * @param bool                             $show_group_headings Whether subtitle headings should be rendered.
+	 * @param bool                             $show_group_headings Whether group headings should be rendered.
 	 * @param string                           $layout Layout mode.
 	 */
 	public function render_fields( array $fields, array $values, string $section_id = '', bool $show_group_headings = true, string $layout = 'table' ): void {
-		$current_subtitle = '';
+		$current_group_heading = '';
 
 		foreach ( $fields as $field ) {
-			$subtitle = (string) ( $field['subtitle'] ?? '' );
+			$group_heading = (string) ( $field['group_heading'] ?? '' );
 
-			if ( $show_group_headings && $subtitle && $subtitle !== $current_subtitle ) {
-				$current_subtitle = $subtitle;
+			if ( $show_group_headings && $group_heading && $group_heading !== $current_group_heading ) {
+				$current_group_heading = $group_heading;
 
 				if ( 'stack' === $layout ) {
 					printf(
 						'<div class="lerm-settings-group lerm-settings-group--stack"><h3>%s</h3></div>',
-						esc_html( $subtitle )
+						esc_html( $group_heading )
 					);
 				} else {
 					printf(
 						'<tr class="lerm-settings-group"><td colspan="2"><h3>%s</h3></td></tr>',
-						esc_html( $subtitle )
+						esc_html( $group_heading )
 					);
 				}
 			}
@@ -761,165 +754,15 @@ final class OptionsPage {
 		if ( is_callable( $custom_render ) ) {
 			call_user_func( $custom_render, $field, $field_value, $field_name, $this );
 		} else {
-			switch ( $field_type ) {
-				case 'backup_tools':
-					$this->render_backup_tools_field( $field );
-					break;
-
-				case 'notice':
-					$this->render_notice_field( $field );
-					break;
-
-				case 'fieldset':
-					$this->render_fieldset_field( $field, $field_value, $field_name, $section_id );
-					break;
-
-				case 'group':
-					$this->render_group_field( $field, $field_value, $field_name );
-					break;
-
-				case 'media':
-					$this->render_media_field( $field, $field_value, $field_name );
-					break;
-
-				case 'gallery':
-					$this->render_gallery_field( $field, $field_value, $field_name );
-					break;
-
-				case 'color':
-					printf(
-						'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text lerm-color-field">',
-						esc_attr( $field_id ),
-						esc_attr( $field_name ),
-						esc_attr( $this->scalar_string( $field_value ) )
-					);
-					break;
-
-				case 'button_set':
-				case 'radio':
-					$this->render_choice_field( $field, $field_value, $field_name );
-					break;
-
-				case 'select':
-					$choices        = PageSchema::choices( $field );
-					$multiple       = ! empty( $field['multiple'] );
-					$current_values = $multiple && is_array( $field_value ) ? array_map( 'strval', $field_value ) : array();
-					$current_value  = $multiple ? '' : $this->scalar_string( $field_value );
-					printf(
-						'<select id="%1$s" name="%2$s" class="regular-text" data-lerm-controller="1" %3$s %4$s>',
-						esc_attr( $field_id ),
-						esc_attr( $multiple ? $field_name . '[]' : $field_name ),
-						$multiple ? 'multiple="multiple"' : '',
-						$multiple ? 'size="' . esc_attr( (string) min( max( count( $choices ), 4 ), 10 ) ) . '"' : ''
-					);
-					foreach ( $choices as $value => $label ) {
-						printf(
-							'<option value="%1$s" %2$s>%3$s</option>',
-							esc_attr( $value ),
-							$multiple
-								? selected( in_array( (string) $value, $current_values, true ), true, false )
-								: selected( $current_value, (string) $value, false ),
-							esc_html( $label )
-						);
-					}
-					echo '</select>';
-					break;
-
-				case 'checkbox_list':
-					$choices = PageSchema::choices( $field );
-					$current = is_array( $field_value ) ? array_map( 'strval', $field_value ) : array();
-					echo '<fieldset class="lerm-checkbox-list"><legend class="screen-reader-text">' . esc_html( (string) $field['label'] ) . '</legend>';
-					foreach ( $choices as $value => $label ) {
-						printf(
-							'<label><input type="checkbox" name="%1$s[]" value="%2$s" %3$s> <span>%4$s</span></label>',
-							esc_attr( $field_name ),
-							esc_attr( $value ),
-							checked( in_array( (string) $value, $current, true ), true, false ),
-							esc_html( $label )
-						);
-					}
-					echo '</fieldset>';
-					break;
-
-				case 'switcher':
-					printf(
-						'<input type="hidden" name="%1$s" value="0"><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s data-lerm-controller="1"><span class="lerm-switch__track" data-on="%4$s" data-off="%5$s" aria-hidden="true"></span><span class="screen-reader-text">%6$s</span></label>',
-						esc_attr( $field_name ),
-						esc_attr( $field_id ),
-						checked( ! empty( $field_value ), true, false ),
-						esc_attr__( 'on', 'lerm' ),
-						esc_attr__( 'off', 'lerm' ),
-						esc_html__( 'Enabled', 'lerm' )
-					);
-					break;
-
-				case 'number':
-					$this->render_number_input(
-						$field_id,
-						$field_name,
-						$field_value,
-						$field,
-						$dependency ? ' data-lerm-controller="1"' : ''
-					);
-					break;
-
-				case 'sorter':
-					$this->render_sorter_field( $field, $field_value );
-					break;
-
-				case 'textarea':
-					printf(
-						'<textarea id="%1$s" name="%2$s" class="large-text" rows="%3$s" %4$s placeholder="%5$s">%6$s</textarea>',
-						esc_attr( $field_id ),
-						esc_attr( $field_name ),
-						esc_attr( (string) ( $field['rows'] ?? 4 ) ),
-						$dependency ? 'data-lerm-controller="1"' : '',
-						esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
-						esc_textarea( $this->scalar_string( $field_value ) )
-					);
-					break;
-
-				case 'code_editor':
-					printf(
-						'<textarea id="%1$s" name="%2$s" class="large-text lerm-code-editor" rows="%3$s" placeholder="%4$s">%5$s</textarea>',
-						esc_attr( $field_id ),
-						esc_attr( $field_name ),
-						esc_attr( (string) ( $field['rows'] ?? 10 ) ),
-						esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
-						esc_textarea( $this->scalar_string( $field_value ) )
-					);
-					break;
-
-				case 'wp_editor':
-					$editor_args = array_merge(
-						array(
-							'textarea_name' => $field_name,
-							'textarea_rows' => 6,
-						),
-						(array) ( $field['editor_args'] ?? array() )
-					);
-
-					wp_editor(
-						$this->scalar_string( $field_value ),
-						sanitize_html_class( 'lerm-' . $field_id ),
-						$editor_args
-					);
-					break;
-
-				case 'url':
-				case 'text':
-				default:
-					printf(
-						'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" %5$s placeholder="%6$s">',
-						esc_attr( (string) ( $field['input_type'] ?? ( in_array( $field_type, array( 'url', 'text' ), true ) ? $field_type : 'text' ) ) ),
-						esc_attr( $field_id ),
-						esc_attr( $field_name ),
-						esc_attr( $this->scalar_string( $field_value ) ),
-						$dependency ? 'data-lerm-controller="1"' : '',
-						esc_attr( (string) ( $field['placeholder'] ?? '' ) )
-					);
-					break;
-			}
+			printf(
+				'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" %5$s placeholder="%6$s">',
+				esc_attr( (string) ( $field['input_type'] ?? 'text' ) ),
+				esc_attr( $field_id ),
+				esc_attr( $field_name ),
+				esc_attr( $this->scalar_string( $field_value ) ),
+				$dependency ? 'data-lerm-controller="1"' : '',
+				esc_attr( (string) ( $field['placeholder'] ?? '' ) )
+			);
 		}
 
 		if ( $description ) {
@@ -939,7 +782,7 @@ final class OptionsPage {
 	 *
 	 * @param array<string, mixed> $field Field definition.
 	 */
-	private function render_notice_field( array $field ): void {
+	public function render_notice_field( array $field ): void {
 		$html = isset( $field['html'] ) && is_scalar( $field['html'] ) ? (string) $field['html'] : '';
 
 		if ( '' === trim( $html ) ) {
@@ -976,7 +819,7 @@ final class OptionsPage {
 	 *
 	 * @param array<string, mixed> $field Field definition.
 	 */
-	private function render_backup_tools_field( array $field ): void {
+	public function render_backup_tools_field( array $field ): void {
 		$export_label = (string) ( $field['export_label'] ?? __( 'Export current settings', 'lerm' ) );
 		$import_label = (string) ( $field['import_label'] ?? __( 'Import settings JSON', 'lerm' ) );
 		$placeholder  = (string) ( $field['placeholder'] ?? __( '{ "example": "Paste a backup snapshot here" }', 'lerm' ) );
@@ -1006,34 +849,127 @@ final class OptionsPage {
 	 * @param mixed                $value      Field value.
 	 * @param string               $section_id Current section ID.
 	 */
-	private function render_fieldset_field( array $field, $value, string $field_name, string $section_id ): void {
+	public function render_fieldset_field( array $field, $value, string $field_name, string $section_id = '' ): void {
 		$field_id = (string) $field['id'];
 		$values   = is_array( $value ) ? $value : array();
 		$fields   = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
+		$classes  = array_filter(
+			array_map(
+				'trim',
+				explode( ' ', 'lerm-fieldset ' . (string) ( $field['wrapper_class'] ?? '' ) )
+			)
+		);
 
-		echo '<div class="lerm-fieldset" data-target="' . esc_attr( $field_id ) . '">';
+		echo '<div class="' . esc_attr( implode( ' ', array_unique( $classes ) ) ) . '" data-target="' . esc_attr( $field_id ) . '">';
+		$this->render_container_child_fields( $fields, $values, $field_name, $field_id );
+		echo '</div>';
+	}
 
-		foreach ( $fields as $child ) {
-			if ( ! is_array( $child ) || ! isset( $child['id'] ) ) {
-				continue;
+	/**
+	 * Render accordion field panels.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Field value.
+	 */
+	public function render_accordion_field( array $field, $value, string $field_name ): void {
+		$field_id       = (string) $field['id'];
+		$values         = is_array( $value ) ? $value : array();
+		$items          = $this->panel_items( $field );
+		$allow_multiple = ! empty( $field['allow_multiple'] );
+		$open_first     = ! array_key_exists( 'open_first', $field ) || ! empty( $field['open_first'] );
+
+		echo '<div class="lerm-fieldset lerm-accordion-field" data-target="' . esc_attr( $field_id ) . '" data-lerm-accordion data-allow-multiple="' . esc_attr( $allow_multiple ? '1' : '0' ) . '">';
+
+		foreach ( $items as $index => $item ) {
+			$item_id       = (string) $item['id'];
+			$item_title    = (string) $item['title'];
+			$item_desc     = (string) ( $item['description'] ?? '' );
+			$item_fields   = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
+			$item_values   = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
+			$is_open       = ! empty( $item['open'] ) || ( $open_first && 0 === $index );
+			$panel_id      = $field_id . '__' . $item_id;
+			$button_id     = $panel_id . '__button';
+
+			echo '<section class="lerm-accordion__item" data-item-id="' . esc_attr( $item_id ) . '">';
+			echo '<button type="button" id="' . esc_attr( $button_id ) . '" class="lerm-accordion__trigger" data-lerm-accordion-trigger aria-expanded="' . esc_attr( $is_open ? 'true' : 'false' ) . '" aria-controls="' . esc_attr( $panel_id ) . '">';
+			echo '<span>' . esc_html( $item_title ) . '</span>';
+			echo '<span class="lerm-accordion__chevron" aria-hidden="true"></span>';
+			echo '</button>';
+			echo '<div id="' . esc_attr( $panel_id ) . '" class="lerm-accordion__panel" data-lerm-accordion-panel aria-labelledby="' . esc_attr( $button_id ) . '"' . ( $is_open ? '' : ' hidden' ) . '>';
+
+			if ( '' !== $item_desc ) {
+				echo '<p class="description lerm-accordion__description">' . esc_html( $item_desc ) . '</p>';
 			}
 
-			$child_id    = (string) $child['id'];
-			$child_name  = $field_name . '[' . $child_id . ']';
-			$child_value = $values[ $child_id ] ?? ( $child['default'] ?? '' );
-
-			echo '<div class="lerm-fieldset__item" data-subfield-id="' . esc_attr( $child_id ) . '" data-field-type="' . esc_attr( sanitize_key( (string) ( $child['type'] ?? 'text' ) ) ) . '">';
-			echo '<label class="lerm-fieldset__label" for="' . esc_attr( $field_id . '__' . $child_id ) . '">' . esc_html( (string) ( $child['label'] ?? $child_id ) ) . '</label>';
-			$this->render_nested_field( $child, $child_value, $child_name, $field_id . '__' . $child_id );
-
-			if ( ! empty( $child['description'] ) ) {
-				echo '<p class="description">' . esc_html( (string) $child['description'] ) . '</p>';
-			}
-
-			echo '</div>';
+			$this->render_container_child_fields(
+				$item_fields,
+				$item_values,
+				$field_name . '[' . $item_id . ']',
+				$field_id . '__' . $item_id
+			);
+			echo '</div></section>';
 		}
 
 		echo '</div>';
+	}
+
+	/**
+	 * Render tabbed field panels.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Field value.
+	 */
+	public function render_tabbed_field( array $field, $value, string $field_name ): void {
+		$field_id   = (string) $field['id'];
+		$values     = is_array( $value ) ? $value : array();
+		$items      = $this->panel_items( $field );
+		$active_tab = sanitize_key( (string) ( $field['default_tab'] ?? '' ) );
+
+		if ( '' === $active_tab && ! empty( $items[0]['id'] ) ) {
+			$active_tab = (string) $items[0]['id'];
+		}
+
+		echo '<div class="lerm-fieldset lerm-tabbed-field" data-target="' . esc_attr( $field_id ) . '" data-lerm-tabbed data-default-tab="' . esc_attr( $active_tab ) . '">';
+		echo '<div class="lerm-tabbed__nav" role="tablist">';
+
+		foreach ( $items as $index => $item ) {
+			$item_id     = (string) $item['id'];
+			$is_active   = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
+			$panel_id    = $field_id . '__' . $item_id;
+			$trigger_id  = $panel_id . '__tab';
+
+			echo '<button type="button" id="' . esc_attr( $trigger_id ) . '" class="lerm-tabbed__trigger' . ( $is_active ? ' is-active' : '' ) . '" data-lerm-tabbed-trigger data-lerm-tabbed-target="' . esc_attr( $item_id ) . '" role="tab" aria-selected="' . esc_attr( $is_active ? 'true' : 'false' ) . '" aria-controls="' . esc_attr( $panel_id ) . '" tabindex="' . esc_attr( $is_active ? '0' : '-1' ) . '">';
+			echo esc_html( (string) $item['title'] );
+			echo '</button>';
+		}
+
+		echo '</div><div class="lerm-tabbed__panels">';
+
+		foreach ( $items as $index => $item ) {
+			$item_id       = (string) $item['id'];
+			$item_desc     = (string) ( $item['description'] ?? '' );
+			$item_fields   = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
+			$item_values   = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
+			$is_active     = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
+			$panel_id      = $field_id . '__' . $item_id;
+			$trigger_id    = $panel_id . '__tab';
+
+			echo '<section id="' . esc_attr( $panel_id ) . '" class="lerm-tabbed__panel" data-item-id="' . esc_attr( $item_id ) . '" data-lerm-tabbed-panel="' . esc_attr( $item_id ) . '" role="tabpanel" aria-labelledby="' . esc_attr( $trigger_id ) . '"' . ( $is_active ? '' : ' hidden' ) . '>';
+
+			if ( '' !== $item_desc ) {
+				echo '<p class="description lerm-tabbed__description">' . esc_html( $item_desc ) . '</p>';
+			}
+
+			$this->render_container_child_fields(
+				$item_fields,
+				$item_values,
+				$field_name . '[' . $item_id . ']',
+				$field_id . '__' . $item_id
+			);
+			echo '</section>';
+		}
+
+		echo '</div></div>';
 	}
 
 	/**
@@ -1042,7 +978,7 @@ final class OptionsPage {
 	 * @param array<string, mixed> $field Field definition.
 	 * @param mixed                $value Field value.
 	 */
-	private function render_group_field( array $field, $value, string $field_name ): void {
+	public function render_group_field( array $field, $value, string $field_name ): void {
 		$field_id    = (string) $field['id'];
 		$items       = is_array( $value ) ? array_values( $value ) : array();
 		$button_text = (string) ( $field['button_text'] ?? __( 'Add item', 'lerm' ) );
@@ -1124,140 +1060,105 @@ final class OptionsPage {
 		$field_type = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
 		$name_attr  = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
 		$id_attr    = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
+		$custom_render = $this->field_types->nested_render_callback( $field_type );
 
-		switch ( $field_type ) {
-			case 'media':
-				$media_name_attr = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template . '[id]' ) . '"' : '';
-				$this->render_media_field( $field, $value, $field_name, $input_id, $media_name_attr, $id_attr );
-				return;
-
-			case 'gallery':
-				$gallery_name_attr = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template . '[ids]' ) . '"' : '';
-				$this->render_gallery_field( $field, $value, $field_name, $input_id, $gallery_name_attr, $id_attr );
-				return;
-
-			case 'color':
-				printf(
-					'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text lerm-color-field"%4$s%5$s>',
-					esc_attr( $input_id ),
-					esc_attr( $field_name ),
-					esc_attr( $this->scalar_string( $value ) ),
-					$name_attr,
-					$id_attr
-				);
-				return;
-
-			case 'button_set':
-			case 'radio':
-				$choices = PageSchema::choices( $field );
-				$current = is_scalar( $value ) ? (string) $value : '';
-				$class   = 'button_set' === $field_type ? 'lerm-button-set' : 'lerm-radio-list';
-
-				echo '<fieldset class="' . esc_attr( $class ) . '">';
-				foreach ( $choices as $choice_value => $choice_label ) {
-					printf(
-						'<label><input type="radio" name="%1$s" value="%2$s" %3$s%4$s> <span>%5$s</span></label>',
-						esc_attr( $field_name ),
-						esc_attr( $choice_value ),
-						checked( $current, (string) $choice_value, false ),
-						$name_attr,
-						esc_html( $choice_label )
-					);
-				}
-				echo '</fieldset>';
-				return;
-
-			case 'switcher':
-				printf(
-					'<input type="hidden" name="%1$s" value="0"%4$s><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s%4$s%5$s><span class="lerm-switch__track" data-on="%6$s" data-off="%7$s" aria-hidden="true"></span><span class="screen-reader-text">%8$s</span></label>',
-					esc_attr( $field_name ),
-					esc_attr( $input_id ),
-					checked( ! empty( $value ), true, false ),
-					$name_attr,
-					$id_attr,
-					esc_attr__( 'on', 'lerm' ),
-					esc_attr__( 'off', 'lerm' ),
-					esc_html__( 'Enabled', 'lerm' )
-				);
-				return;
-
-			case 'select':
-				$choices          = PageSchema::choices( $field );
-				$multiple         = ! empty( $field['multiple'] );
-				$current          = $multiple && is_array( $value ) ? array_map( 'strval', $value ) : array();
-				$current_value    = $multiple ? '' : $this->scalar_string( $value );
-				$select_name_attr = $multiple && '' !== $name_template
-					? ' data-name-template="' . esc_attr( $name_template . '[]' ) . '"'
-					: $name_attr;
-				printf(
-					'<select id="%1$s" name="%2$s" class="regular-text"%3$s%4$s%5$s%6$s>',
-					esc_attr( $input_id ),
-					esc_attr( $multiple ? $field_name . '[]' : $field_name ),
-					$multiple ? ' multiple="multiple"' : '',
-					$multiple ? ' size="' . esc_attr( (string) min( max( count( $choices ), 4 ), 10 ) ) . '"' : '',
-					$select_name_attr,
-					$id_attr
-				);
-				foreach ( $choices as $choice_value => $choice_label ) {
-					printf(
-						'<option value="%1$s" %2$s>%3$s</option>',
-						esc_attr( $choice_value ),
-						$multiple
-							? selected( in_array( (string) $choice_value, $current, true ), true, false )
-							: selected( $current_value, (string) $choice_value, false ),
-						esc_html( $choice_label )
-					);
-				}
-				echo '</select>';
-				return;
-
-			case 'textarea':
-				printf(
-					'<textarea id="%1$s" name="%2$s" class="large-text" rows="%3$s" placeholder="%4$s"%5$s%6$s>%7$s</textarea>',
-					esc_attr( $input_id ),
-					esc_attr( $field_name ),
-					esc_attr( (string) ( $field['rows'] ?? 4 ) ),
-					esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
-					$name_attr,
-					$id_attr,
-					esc_textarea( $this->scalar_string( $value ) )
-				);
-				return;
-
-			case 'sorter':
-				// Sorter fields cannot be meaningfully nested inside a fieldset or group.
-				// Surface this as a visible config warning instead of silently falling back to text.
-				printf(
-					'<p class="description" style="color:#b91c1c;font-style:italic">%s</p>',
-					esc_html__( 'Sorter fields cannot be nested inside a fieldset or group.', 'lerm' )
-				);
-				return;
-
-			case 'number':
-				$this->render_number_input(
-					$input_id,
-					$field_name,
-					$value,
-					$field,
-					$name_attr . $id_attr
-				);
-				return;
-
-			case 'url':
-			case 'text':
-			default:
-				printf(
-					'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" placeholder="%5$s"%6$s%7$s>',
-					esc_attr( (string) ( $field['input_type'] ?? ( in_array( $field_type, array( 'url', 'text' ), true ) ? $field_type : 'text' ) ) ),
-					esc_attr( $input_id ),
-					esc_attr( $field_name ),
-					esc_attr( $this->scalar_string( $value ) ),
-					esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
-					$name_attr,
-					$id_attr
-				);
-				return;
+		if ( is_callable( $custom_render ) ) {
+			call_user_func( $custom_render, $field, $value, $field_name, $input_id, $this, $name_template, $id_template );
+			return;
 		}
+
+		printf(
+			'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" placeholder="%5$s"%6$s%7$s>',
+			esc_attr( (string) ( $field['input_type'] ?? 'text' ) ),
+			esc_attr( $input_id ),
+			esc_attr( $field_name ),
+			esc_attr( $this->scalar_string( $value ) ),
+			esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
+			$name_attr,
+			$id_attr
+		);
+	}
+
+	/**
+	 * Render a flat set of child controls inside a structured container.
+	 *
+	 * @param array<int, array<string, mixed>> $fields Child field definitions.
+	 * @param array<string, mixed>             $values Child field values.
+	 */
+	private function render_container_child_fields( array $fields, array $values, string $field_name, string $field_id ): void {
+		foreach ( $fields as $child ) {
+			if ( ! is_array( $child ) || ! isset( $child['id'] ) ) {
+				continue;
+			}
+
+			$child_id    = (string) $child['id'];
+			$child_name  = $field_name . '[' . $child_id . ']';
+			$child_value = $values[ $child_id ] ?? ( $child['default'] ?? '' );
+
+			echo '<div class="lerm-fieldset__item" data-subfield-id="' . esc_attr( $child_id ) . '" data-field-type="' . esc_attr( sanitize_key( (string) ( $child['type'] ?? 'text' ) ) ) . '">';
+			echo '<label class="lerm-fieldset__label" for="' . esc_attr( $field_id . '__' . $child_id ) . '">' . esc_html( (string) ( $child['label'] ?? $child_id ) ) . '</label>';
+			$this->render_nested_field( $child, $child_value, $child_name, $field_id . '__' . $child_id );
+
+			if ( ! empty( $child['description'] ) ) {
+				echo '<p class="description">' . esc_html( (string) $child['description'] ) . '</p>';
+			}
+
+			echo '</div>';
+		}
+	}
+
+	/**
+	 * Render a code editor field.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Field value.
+	 */
+	public function render_code_editor_field( array $field, $value, string $field_name, string $input_id, string $name_template = '', string $id_template = '' ): void {
+		printf(
+			'<textarea id="%1$s" name="%2$s" class="large-text lerm-code-editor" rows="%3$s" placeholder="%4$s"%5$s%6$s>%7$s</textarea>',
+			esc_attr( $input_id ),
+			esc_attr( $field_name ),
+			esc_attr( (string) ( $field['rows'] ?? 10 ) ),
+			esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
+			'' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '',
+			'' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '',
+			esc_textarea( $this->scalar_string( $value ) )
+		);
+	}
+
+	/**
+	 * Render a WordPress editor field.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 * @param mixed                $value Field value.
+	 */
+	public function render_wp_editor_field( array $field, $value, string $field_name, string $input_id, bool $rich_editor = true, string $name_template = '', string $id_template = '' ): void {
+		if ( ! $rich_editor ) {
+			printf(
+				'<textarea id="%1$s" name="%2$s" class="large-text" rows="%3$s"%4$s%5$s>%6$s</textarea>',
+				esc_attr( $input_id ),
+				esc_attr( $field_name ),
+				esc_attr( (string) ( $field['rows'] ?? 6 ) ),
+				'' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '',
+				'' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '',
+				esc_textarea( $this->scalar_string( $value ) )
+			);
+			return;
+		}
+
+		$editor_args = array_merge(
+			array(
+				'textarea_name' => $field_name,
+				'textarea_rows' => 6,
+			),
+			(array) ( $field['editor_args'] ?? array() )
+		);
+
+		wp_editor(
+			$this->scalar_string( $value ),
+			sanitize_html_class( 'lerm-' . $input_id ),
+			$editor_args
+		);
 	}
 
 	/**
@@ -1622,7 +1523,7 @@ final class OptionsPage {
 
 	/**
 	 * Normalize scalar-like values to strings for safe rendering.
-	 * Unified with OptionStore::string_value() – both delegate here via PageSchema.
+	 * Unified with OptionStore::string_value() 鈥?both delegate here via PageSchema.
 	 *
 	 * @param mixed  $value Source value.
 	 * @param string $default_value Fallback string.
@@ -1713,20 +1614,49 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Asset URL — delegated to the injected AssetResolver.
+	 * @param array<string, mixed> $field
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function panel_items( array $field ): array {
+		$items      = is_array( $field['items'] ?? null ) ? $field['items'] : array();
+		$normalized = array();
+
+		foreach ( $items as $index => $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			$item_id    = isset( $item['id'] ) && is_scalar( $item['id'] ) ? sanitize_key( (string) $item['id'] ) : '';
+			$item_title = isset( $item['title'] ) && is_scalar( $item['title'] ) ? (string) $item['title'] : '';
+			$item_id    = '' !== $item_id ? $item_id : 'item_' . (string) ( (int) $index + 1 );
+
+			$normalized[] = array(
+				'id'          => $item_id,
+				'title'       => '' !== $item_title ? $item_title : ucfirst( str_replace( '_', ' ', $item_id ) ),
+				'description' => isset( $item['description'] ) && is_scalar( $item['description'] ) ? (string) $item['description'] : '',
+				'fields'      => is_array( $item['fields'] ?? null ) ? $item['fields'] : array(),
+				'open'        => ! empty( $item['open'] ),
+			);
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Asset URL 鈥?delegated to the injected AssetResolver.
 	 */
 	private function asset_url( string $asset ): string {
 		return $this->asset_resolver->url( $asset );
 	}
 
 	/**
-	 * Asset version — delegated to the injected AssetResolver.
+	 * Asset version 鈥?delegated to the injected AssetResolver.
 	 */
 	private function asset_version(): string {
 		$version = $this->asset_resolver->version();
 		$assets  = array(
-			dirname( __DIR__ ) . '/assets/options-framework.css',
-			dirname( __DIR__ ) . '/assets/options-framework.js',
+			dirname( __DIR__, 3 ) . '/assets/options-framework.css',
+			dirname( __DIR__, 3 ) . '/assets/options-framework.js',
 		);
 		$mtime   = 0;
 
@@ -1743,3 +1673,4 @@ final class OptionsPage {
 		return $mtime > 0 ? $version . '.' . (string) $mtime : $version;
 	}
 }
+
