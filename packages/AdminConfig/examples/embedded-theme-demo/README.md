@@ -2,6 +2,8 @@
 
 Reference embedded-mode example for `lerm/admin-config`.
 
+For the smallest copyable setup, start with [docs/quick-start.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/quick-start.md), then use this example when you want a theme-owned reference with multiple containers.
+
 ## What it registers
 
 - a theme-owned options page under `Appearance`

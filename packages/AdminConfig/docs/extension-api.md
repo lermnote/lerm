@@ -2,6 +2,8 @@
 
 `Lerm\AdminConfig\WordPress\Runtime` is the public integration surface for extending Admin Config.
 
+If you are wiring the package into a plugin or theme for the first time, start with [quick-start.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/quick-start.md) and come back here when you need custom field types, stores, containers, or data sources.
+
 ## Runtime methods
 
 - `register_field_type( string $type, array $definition = array() )`
@@ -10,9 +12,11 @@
 - `register_store_factory( string $type, callable $factory )`
 - `register_container( Container $container )`
 - `register_data_source( string $source_id, callable $resolver )`
+- `register_many( array $schemas )`
 - `has_data_source( string $source_id )`
 - `resolve_data_source( string $source_id, array $args = array() )`
 - `defaults( string $schema_id )`
+- `is_booted()`
 - `data_sources()`
 - `containers()`
 

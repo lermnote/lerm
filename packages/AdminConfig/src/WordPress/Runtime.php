@@ -101,6 +101,20 @@ final class Runtime {
 		return $compiled;
 	}
 
+	/**
+	 * @param array<int, array<string, mixed>> $schemas
+	 * @return array<int, CompiledSchema>
+	 */
+	public function register_many( array $schemas ): array {
+		$compiled = array();
+
+		foreach ( $schemas as $schema ) {
+			$compiled[] = $this->register( $schema );
+		}
+
+		return $compiled;
+	}
+
 	public function has( string $schema_id ): bool {
 		return $this->registry->has( $schema_id );
 	}
@@ -204,6 +218,10 @@ final class Runtime {
 		foreach ( $this->registry->all() as $compiled ) {
 			$this->mount_schema( $compiled );
 		}
+	}
+
+	public function is_booted(): bool {
+		return $this->boot_requested;
 	}
 
 	public function store( string $schema_id, array $context = array() ): OptionStore {

@@ -20,12 +20,12 @@ final class PluginBootstrap {
 			new PluginAssetResolver( $plugin_file )
 		);
 
-		if ( is_admin() ) {
-			$runtime->boot();
-		}
-
 		if ( is_callable( $registrar ) ) {
 			call_user_func( $registrar, $runtime );
+		}
+
+		if ( is_admin() ) {
+			$runtime->boot();
 		}
 
 		do_action( 'lerm_admin_config_booted', $runtime, 'plugin' );

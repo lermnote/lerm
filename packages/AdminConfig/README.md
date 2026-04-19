@@ -134,7 +134,7 @@ $runtime->register_validator(
 
 Late registration is supported: if you register a schema after `boot()`, or register a container after some schemas were already compiled, the runtime will mount matching schemas when the needed container becomes available.
 
-See [docs/extension-api.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-api.md) for the first extension guide and [docs/smoke-checklist.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
+See [docs/quick-start.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/quick-start.md) for the copyable onboarding path, [docs/extension-api.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-api.md) for the extension surface, and [docs/smoke-checklist.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
 
 ## Recommended lifecycle
 
@@ -183,6 +183,8 @@ PluginBootstrap::boot(
 	}
 );
 ```
+
+The bootstrap callback runs before auto-mounting, so the runtime sees the full schema set during the initial `boot()`.
 
 Embedded mode follows the same shape through `EmbeddedBootstrap::boot(...)`.
 
@@ -233,6 +235,8 @@ $runtime = PluginBootstrap::boot(
 Both bootstraps automatically call `runtime->boot()` in `wp-admin`, so late schema
 registration still works and host integrations no longer need a separate final
 mount step.
+
+If one integration callback needs to wire several schemas at once, `Runtime::register_many()` accepts a plain array of schema definitions and returns the compiled results.
 
 ## Reading meta-backed schemas
 
