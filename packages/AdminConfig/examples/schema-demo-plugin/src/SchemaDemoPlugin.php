@@ -24,6 +24,10 @@ final class SchemaDemoPlugin {
 			$runtime->register( self::settings_schema( $runtime ) );
 		}
 
+		if ( ! $runtime->has( 'acme-demo-post-metabox' ) ) {
+			$runtime->register( self::post_metabox_schema() );
+		}
+
 		if ( ! $runtime->has( 'acme-demo-comment' ) ) {
 			$runtime->register( self::comment_schema() );
 		}
@@ -315,6 +319,81 @@ final class SchemaDemoPlugin {
 	/**
 	 * @return array<string, mixed>
 	 */
+	private static function post_metabox_schema(): array {
+		return array(
+			'id'        => 'acme-demo-post-metabox',
+			'title'     => __( 'Entry Display Overrides', 'lerm-admin-config-demo' ),
+			'container' => array(
+				'type'       => 'metabox',
+				'title'      => __( 'Entry Display Overrides', 'lerm-admin-config-demo' ),
+				'post_types' => array( 'post', 'page' ),
+				'context'    => 'side',
+				'priority'   => 'default',
+				'capability' => 'edit_post',
+			),
+			'store'     => array(
+				'type' => 'post_meta',
+				'key'  => '_acme_demo_entry_settings',
+			),
+			'sections'  => array(
+				'display' => array(
+					'title'       => __( 'Display', 'lerm-admin-config-demo' ),
+					'description' => __( 'Per-entry overrides stored through the shared post meta adapter.', 'lerm-admin-config-demo' ),
+					'fields'      => array(
+						array(
+							'id'          => 'featured_entry',
+							'type'        => 'switcher',
+							'label'       => __( 'Feature this entry', 'lerm-admin-config-demo' ),
+							'description' => __( 'A simple post-meta flag handled by the metabox container.', 'lerm-admin-config-demo' ),
+							'default'     => 0,
+						),
+						array(
+							'id'          => 'entry_icon',
+							'type'        => 'icon',
+							'label'       => __( 'Entry icon', 'lerm-admin-config-demo' ),
+							'description' => __( 'A post-specific icon override rendered from the advanced field registry.', 'lerm-admin-config-demo' ),
+							'choices'     => array(
+								'dashicons-format-aside'   => __( 'Aside', 'lerm-admin-config-demo' ),
+								'dashicons-star-filled'    => __( 'Featured', 'lerm-admin-config-demo' ),
+								'dashicons-megaphone'      => __( 'Announcement', 'lerm-admin-config-demo' ),
+								'dashicons-admin-site-alt' => __( 'Site', 'lerm-admin-config-demo' ),
+							),
+							'default'     => 'dashicons-format-aside',
+						),
+						array(
+							'id'          => 'entry_badge',
+							'type'        => 'fieldset',
+							'label'       => __( 'Entry badge', 'lerm-admin-config-demo' ),
+							'description' => __( 'Nested post-meta fields used to exercise fieldset rendering and validation inside the metabox flow.', 'lerm-admin-config-demo' ),
+							'fields'      => array(
+								array(
+									'id'      => 'label',
+									'type'    => 'text',
+									'label'   => __( 'Label', 'lerm-admin-config-demo' ),
+									'default' => __( 'Featured', 'lerm-admin-config-demo' ),
+								),
+								array(
+									'id'          => 'slug',
+									'type'        => 'slug_text',
+									'label'       => __( 'Badge slug', 'lerm-admin-config-demo' ),
+									'description' => __( 'Nested validation should still block the metabox save if this value is too short.', 'lerm-admin-config-demo' ),
+									'default'     => 'featured-entry',
+								),
+							),
+							'default'     => array(
+								'label' => __( 'Featured', 'lerm-admin-config-demo' ),
+								'slug'  => 'featured-entry',
+							),
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
 	private static function comment_schema(): array {
 		return array(
 			'id'        => 'acme-demo-comment',
@@ -359,6 +438,31 @@ final class SchemaDemoPlugin {
 							'label'       => __( 'Staff note', 'lerm-admin-config-demo' ),
 							'description' => __( 'Internal note saved into comment meta.', 'lerm-admin-config-demo' ),
 							'default'     => '',
+						),
+						array(
+							'id'          => 'review_badge',
+							'type'        => 'fieldset',
+							'label'       => __( 'Review badge', 'lerm-admin-config-demo' ),
+							'description' => __( 'Nested comment-meta fields that reuse the same schema compiler and validator pipeline.', 'lerm-admin-config-demo' ),
+							'fields'      => array(
+								array(
+									'id'      => 'label',
+									'type'    => 'text',
+									'label'   => __( 'Label', 'lerm-admin-config-demo' ),
+									'default' => __( 'Staff pick', 'lerm-admin-config-demo' ),
+								),
+								array(
+									'id'          => 'slug',
+									'type'        => 'slug_text',
+									'label'       => __( 'Badge slug', 'lerm-admin-config-demo' ),
+									'description' => __( 'Use an invalid short slug to verify nested validation on the comment screen.', 'lerm-admin-config-demo' ),
+									'default'     => 'staff-pick',
+								),
+							),
+							'default'     => array(
+								'label' => __( 'Staff pick', 'lerm-admin-config-demo' ),
+								'slug'  => 'staff-pick',
+							),
 						),
 					),
 				),
@@ -409,6 +513,31 @@ final class SchemaDemoPlugin {
 							'choices'     => $runtime->resolve_data_source( 'tone_presets' ),
 							'default'     => 'clean',
 						),
+						array(
+							'id'          => 'profile_badge',
+							'type'        => 'fieldset',
+							'label'       => __( 'Profile badge', 'lerm-admin-config-demo' ),
+							'description' => __( 'Nested user-meta fields saved through the same profile container.', 'lerm-admin-config-demo' ),
+							'fields'      => array(
+								array(
+									'id'      => 'label',
+									'type'    => 'text',
+									'label'   => __( 'Label', 'lerm-admin-config-demo' ),
+									'default' => __( 'Core team', 'lerm-admin-config-demo' ),
+								),
+								array(
+									'id'          => 'slug',
+									'type'        => 'slug_text',
+									'label'       => __( 'Badge slug', 'lerm-admin-config-demo' ),
+									'description' => __( 'Nested validation should block user-meta writes until the slug is fixed.', 'lerm-admin-config-demo' ),
+									'default'     => 'core-team',
+								),
+							),
+							'default'     => array(
+								'label' => __( 'Core team', 'lerm-admin-config-demo' ),
+								'slug'  => 'core-team',
+							),
+						),
 					),
 				),
 			),
@@ -457,6 +586,44 @@ final class SchemaDemoPlugin {
 							'description' => __( 'Resolved from the runtime data-source registry.', 'lerm-admin-config-demo' ),
 							'choices'     => $runtime->resolve_data_source( 'tone_presets' ),
 							'default'     => 'bold',
+						),
+						array(
+							'id'          => 'category_badge',
+							'type'        => 'fieldset',
+							'label'       => __( 'Category badge', 'lerm-admin-config-demo' ),
+							'description' => __( 'Nested term-meta fields that show the same validation and error replay on taxonomy forms.', 'lerm-admin-config-demo' ),
+							'fields'      => array(
+								array(
+									'id'      => 'label',
+									'type'    => 'text',
+									'label'   => __( 'Label', 'lerm-admin-config-demo' ),
+									'default' => __( 'Featured', 'lerm-admin-config-demo' ),
+								),
+								array(
+									'id'          => 'slug',
+									'type'        => 'slug_text',
+									'label'       => __( 'Badge slug', 'lerm-admin-config-demo' ),
+									'description' => __( 'Use a short slug to confirm nested validation on category create and edit screens.', 'lerm-admin-config-demo' ),
+									'default'     => 'featured-category',
+								),
+								array(
+									'id'      => 'icon',
+									'type'    => 'icon',
+									'label'   => __( 'Badge icon', 'lerm-admin-config-demo' ),
+									'choices' => array(
+										'dashicons-tag'         => __( 'Tag', 'lerm-admin-config-demo' ),
+										'dashicons-category'    => __( 'Category', 'lerm-admin-config-demo' ),
+										'dashicons-star-filled' => __( 'Featured', 'lerm-admin-config-demo' ),
+										'dashicons-flag'        => __( 'Flag', 'lerm-admin-config-demo' ),
+									),
+									'default' => 'dashicons-category',
+								),
+							),
+							'default'     => array(
+								'label' => __( 'Featured', 'lerm-admin-config-demo' ),
+								'slug'  => 'featured-category',
+								'icon'  => 'dashicons-category',
+							),
 						),
 					),
 				),
@@ -507,6 +674,31 @@ final class SchemaDemoPlugin {
 							'label'       => __( 'Template endpoint', 'lerm-admin-config-demo' ),
 							'description' => __( 'Example remote URL for a shared template feed.', 'lerm-admin-config-demo' ),
 							'default'     => 'https://example.com/templates.json',
+						),
+						array(
+							'id'          => 'shared_library',
+							'type'        => 'fieldset',
+							'label'       => __( 'Shared library', 'lerm-admin-config-demo' ),
+							'description' => __( 'Nested network defaults stored in the same site-option payload.', 'lerm-admin-config-demo' ),
+							'fields'      => array(
+								array(
+									'id'          => 'feed_slug',
+									'type'        => 'slug_text',
+									'label'       => __( 'Feed slug', 'lerm-admin-config-demo' ),
+									'description' => __( 'Use this field to verify nested validation on the multisite network screen.', 'lerm-admin-config-demo' ),
+									'default'     => 'shared-library',
+								),
+								array(
+									'id'      => 'landing_path',
+									'type'    => 'text',
+									'label'   => __( 'Landing path', 'lerm-admin-config-demo' ),
+									'default' => '/library',
+								),
+							),
+							'default'     => array(
+								'feed_slug'    => 'shared-library',
+								'landing_path' => '/library',
+							),
 						),
 					),
 				),

@@ -245,6 +245,7 @@ $runtime->register(
 See `examples/schema-demo-plugin/` for a runnable reference plugin that registers:
 
 - one site-level options page
+- one post/page metabox
 - one comment meta box
 - one user profile screen
 - one taxonomy term settings screen
@@ -261,6 +262,6 @@ See `examples/embedded-theme-demo/` for an embedded-mode reference that boots th
 ## Next milestones
 
 1. Expand the extension guides for custom field types, validators, stores, and container adapters.
-2. Expand examples and smoke coverage for profile, taxonomy, comment, and network workflows.
+2. Add automated smoke helpers around the example plugin and embedded demo so container regressions are easier to catch before release.
 3. Introduce async data-source hooks and richer validation pipelines for AJAX-backed fields.
 4. Keep commerce concerns such as licensing and updates in a separate layer on top of the runtime.

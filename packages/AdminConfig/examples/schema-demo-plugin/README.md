@@ -5,6 +5,7 @@ Reference plugin demonstrating how to consume `lerm/admin-config` as a WordPress
 ## What it registers
 
 - a regular admin options page
+- a post/page metabox
 - a comment edit-screen meta box
 - a user profile section
 - a category term settings screen
@@ -33,6 +34,8 @@ The site options page includes:
 - an `accordion` schema with per-panel nested fields
 - a `tabbed` schema with alternate content recipes
 
+The plugin example as a whole now covers every built-in container adapter shipped in the package: site options, post meta, comment meta, user meta, term meta, and multisite network options.
+
 ## Extension API coverage
 
 The example plugin also demonstrates:
@@ -40,4 +43,4 @@ The example plugin also demonstrates:
 - `register_field_type()` with a minimal custom slug input
 - `register_validator()` for custom field-level validation
 - `register_data_source()` and `resolve_data_source()` for reusable choices
-- the same custom field type reused across options, profile, and taxonomy containers
+- the same custom field type reused across options, metabox, comment, profile, taxonomy, and network workflows
