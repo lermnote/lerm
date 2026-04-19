@@ -11,6 +11,7 @@ Example: `examples/schema-demo-plugin`
 - Save a normal field change and confirm the success notice and status pill update.
 - Enter an invalid `release_slug` value such as `a` and save.
 - Confirm the save is blocked, the field row is highlighted, and the inline error renders.
+- Enter an invalid nested value inside `typography`, `accordion`, `tabbed`, or `group`, and confirm the exact nested control is highlighted while its containing panel/group opens automatically.
 - Fix the slug and save again.
 - Use reset for the current page and for all tabs.
 - Export a snapshot, then import it back.

@@ -160,7 +160,7 @@ final class ProfileContainer implements Container {
 					array(
 						'class'     => 'notice-error',
 						'message'   => __( 'Please review the highlighted profile fields before saving again.', 'lerm' ),
-						'errors'    => ValidationFlash::collapse_errors( $store->validation_errors() ),
+						'errors'    => $store->validation_errors(),
 						'submitted' => $submitted,
 					)
 				);

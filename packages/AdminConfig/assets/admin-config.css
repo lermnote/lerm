@@ -382,6 +382,31 @@
 	color: #b91c1c;
 }
 
+.lerm-fieldset__item.is-invalid,
+.lerm-group-item__field.is-invalid,
+.lerm-group-item.is-invalid,
+.lerm-accordion__item.is-invalid,
+.lerm-tabbed__panel.is-invalid {
+	border-color: #fca5a5;
+	box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.12);
+}
+
+.lerm-fieldset__item.is-invalid,
+.lerm-group-item__field.is-invalid {
+	background: rgba(254, 242, 242, 0.95);
+}
+
+.lerm-accordion__item.is-invalid .lerm-accordion__trigger {
+	background: linear-gradient(180deg, #fff7f7, #fef2f2);
+	color: #b91c1c;
+}
+
+.lerm-tabbed__trigger.is-invalid {
+	border-color: #fca5a5;
+	background: rgba(254, 242, 242, 0.9);
+	color: #b91c1c;
+}
+
 .lerm-settings-stack .lerm-settings-row--nolabel {
 	grid-template-columns: 1fr;
 }

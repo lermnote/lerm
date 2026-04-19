@@ -178,7 +178,7 @@ final class MetaboxContainer implements Container {
 					array(
 						'class'     => 'notice-error',
 						'message'   => __( 'Please review the highlighted metabox fields before saving again.', 'lerm' ),
-						'errors'    => ValidationFlash::collapse_errors( $store->validation_errors() ),
+						'errors'    => $store->validation_errors(),
 						'submitted' => $submitted,
 					)
 				);

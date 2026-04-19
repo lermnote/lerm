@@ -486,8 +486,8 @@ final class OptionStore {
 	/**
 	 * Run an optional field-level validator after sanitization.
 	 *
-	 * Validators should return the validated value. Returning WP_Error falls
-	 * back to the field default until a richer error-reporting layer lands.
+	 * Validators should return the validated value. Returning WP_Error records
+	 * the message in the validation bag and aborts the current save/import flow.
 	 *
 	 * @param array<string, mixed> $field Field definition.
 	 * @param mixed                $value Sanitized value.

@@ -226,7 +226,7 @@ final class TaxonomyContainer implements Container {
 					array(
 						'class'     => 'notice-error',
 						'message'   => __( 'Please review the highlighted term fields before saving again.', 'lerm' ),
-						'errors'    => ValidationFlash::collapse_errors( $store->validation_errors() ),
+						'errors'    => $store->validation_errors(),
 						'submitted' => $submitted,
 					)
 				);

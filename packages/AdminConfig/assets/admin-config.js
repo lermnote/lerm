@@ -670,6 +670,10 @@
 			/** @type {HTMLElement} */ (item).dataset['index'] = String(i);
 			const title = dom.find('.lerm-group-item__title', item);
 			if (title) title.textContent = 'Item ' + (i + 1);
+			dom.findAll('[data-field-path-template]', item).forEach(el => {
+				const template = getData(el, 'fieldPathTemplate');
+				if (template) setData(/** @type {HTMLElement} */ (el), 'field-path', replaceIndex(template, i));
+			});
 			dom.findAll('[data-name-template]', item).forEach(el => {
 				const template = getData(el, 'nameTemplate');
 				if (template) /** @type {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} */ (el).name = replaceIndex(template, i);
@@ -1545,9 +1549,42 @@
 		dom.findAll('input, select, textarea', row).forEach((el) => el.removeAttribute('aria-invalid'));
 	};
 
+	/**
+	 * @param {HTMLElement} target
+	 */
+	const clearFieldErrorAncestors = (target) => {
+		/** @type {HTMLElement|null} */ (target.closest('.lerm-group-item'))?.classList.remove('is-invalid');
+		/** @type {HTMLElement|null} */ (target.closest('.lerm-accordion__item'))?.classList.remove('is-invalid');
+		/** @type {HTMLElement|null} */ (target.closest('.lerm-tabbed__panel'))?.classList.remove('is-invalid');
+		/** @type {HTMLElement|null} */ (target.closest('.lerm-fieldset'))?.classList.remove('is-invalid');
+		/** @type {HTMLElement|null} */ (target.closest('.lerm-group'))?.classList.remove('is-invalid');
+
+		const tabbedPanel = /** @type {HTMLElement|null} */ (target.closest('.lerm-tabbed__panel'));
+		if (tabbedPanel) {
+			const tabbed = /** @type {HTMLElement|null} */ (tabbedPanel.closest('[data-lerm-tabbed]'));
+			const tabId = getData(tabbedPanel, 'lermTabbedPanel');
+			if (tabbed && tabId) {
+				const trigger = /** @type {HTMLElement|null} */ (dom.find(`[data-lerm-tabbed-target="${tabId}"]`, tabbed));
+				trigger?.classList.remove('is-invalid');
+			}
+		}
+	};
+
+	/**
+	 * @param {HTMLElement} target
+	 * @returns {HTMLElement}
+	 */
+	const fieldErrorHost = (target) => /** @type {HTMLElement} */ (
+		dom.find('.lerm-settings-row__body', target)
+		|| dom.find('td', target)
+		|| target
+	);
+
 	/** @param {HTMLFormElement} form */
 	const clearFieldErrors = (form) => {
-		dom.findAll('[data-field-id]', form).forEach((row) => clearFieldErrorRow(/** @type {HTMLElement} */ (row)));
+		dom.findAll('[data-field-path]', form).forEach((row) => clearFieldErrorRow(/** @type {HTMLElement} */ (row)));
+		dom.findAll('.lerm-group-item.is-invalid, .lerm-accordion__item.is-invalid, .lerm-tabbed__panel.is-invalid, .lerm-tabbed__trigger.is-invalid, .lerm-fieldset.is-invalid, .lerm-group.is-invalid', form)
+			.forEach((el) => el.classList.remove('is-invalid'));
 	};
 
 	/**
@@ -1565,6 +1602,43 @@
 
 	/**
 	 * @param {HTMLFormElement} form
+	 * @param {string} fieldPath
+	 * @returns {HTMLElement|null}
+	 */
+	const findFieldPathTarget = (form, fieldPath) => {
+		for (const row of dom.findAll('[data-field-path]', form)) {
+			if (getData(row, 'fieldPath') === fieldPath) return /** @type {HTMLElement} */ (row);
+		}
+
+		const fallbackFieldId = String(fieldPath || '').split('.')[0] || '';
+		return fallbackFieldId ? findFieldRow(form, fallbackFieldId) : null;
+	};
+
+	/**
+	 * @param {HTMLElement} target
+	 */
+	const revealErrorTarget = (target) => {
+		const accordionItem = /** @type {HTMLElement|null} */ (target.closest('.lerm-accordion__item'));
+		if (accordionItem) setAccordionItemState(accordionItem, true);
+
+		const tabbedPanel = /** @type {HTMLElement|null} */ (target.closest('.lerm-tabbed__panel'));
+		if (tabbedPanel) {
+			const tabbed = /** @type {HTMLElement|null} */ (tabbedPanel.closest('[data-lerm-tabbed]'));
+			const tabId = getData(tabbedPanel, 'lermTabbedPanel') || '';
+			if (tabbed && tabId) {
+				activateTabbedField(tabbed, tabId);
+				const trigger = /** @type {HTMLElement|null} */ (dom.find(`[data-lerm-tabbed-target="${tabId}"]`, tabbed));
+				trigger?.classList.add('is-invalid');
+			}
+		}
+
+		/** @type {HTMLElement|null} */ (target.closest('.lerm-group-item'))?.classList.add('is-invalid');
+		/** @type {HTMLElement|null} */ (target.closest('.lerm-fieldset'))?.classList.add('is-invalid');
+		/** @type {HTMLElement|null} */ (target.closest('.lerm-group'))?.classList.add('is-invalid');
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
 	 * @param {Record<string, string|string[]>} fieldErrors
 	 */
 	const applyFieldErrors = (form, fieldErrors = {}) => {
@@ -1572,8 +1646,8 @@
 
 		let firstRow = null;
 
-		for (const [fieldId, rawMessage] of Object.entries(fieldErrors)) {
-			const row = findFieldRow(form, String(fieldId));
+		for (const [fieldPath, rawMessage] of Object.entries(fieldErrors)) {
+			const row = findFieldPathTarget(form, String(fieldPath));
 			if (!row) continue;
 
 			const message = (Array.isArray(rawMessage) ? rawMessage : [rawMessage])
@@ -1583,18 +1657,12 @@
 
 			if (!message) continue;
 
+			revealErrorTarget(row);
 			if (!firstRow) firstRow = row;
 
 			row.classList.add('is-invalid');
 			setData(row, 'lerm-field-error', '1');
-
-			const target = /** @type {HTMLElement|null} */ (
-				dom.find('.lerm-settings-row__body', row)
-				|| dom.find('td', row)
-				|| row
-			);
-
-			target?.appendChild(dom.create('p', {
+			fieldErrorHost(row).appendChild(dom.create('p', {
 				class: 'lerm-field-error',
 				'data-lerm-field-error-message': '1',
 			}, [message]));
@@ -1637,7 +1705,7 @@
 				request(form, cfg.importAction, { backup_json: json })
 					.then(response => {
 						if (!response?.success) {
-							applyFieldErrors(form, /** @type {Record<string, string|string[]>} */ (response?.data?.fieldErrors ?? {}));
+							applyFieldErrors(form, /** @type {Record<string, string|string[]>} */ (response?.data?.errors ?? response?.data?.fieldErrors ?? {}));
 							setStatus(form, 'error', response?.data?.message || cfg.importError);
 							return;
 						}
@@ -1663,7 +1731,7 @@
 	 */
 	const handleSaveResponse = (form, response, successMsg, partialFieldIds = null) => {
 		if (!response?.success) {
-			applyFieldErrors(form, /** @type {Record<string, string|string[]>} */ (response?.data?.fieldErrors ?? {}));
+			applyFieldErrors(form, /** @type {Record<string, string|string[]>} */ (response?.data?.errors ?? response?.data?.fieldErrors ?? {}));
 			setStatus(form, 'error', response?.data?.message || cfg.saveError);
 			return;
 		}
@@ -1732,13 +1800,19 @@
 
 		form.addEventListener('input', (e) => {
 			syncDirtyState(form);
-			const row = /** @type {HTMLElement|null} */ ((/** @type {HTMLElement} */ (e.target))?.closest('[data-field-id]'));
-			if (row) clearFieldErrorRow(row);
+			const row = /** @type {HTMLElement|null} */ ((/** @type {HTMLElement} */ (e.target))?.closest('[data-field-path]'));
+			if (row) {
+				clearFieldErrorRow(row);
+				clearFieldErrorAncestors(row);
+			}
 		});
 		form.addEventListener('change', (e) => {
 			syncDirtyState(form);
-			const row = /** @type {HTMLElement|null} */ ((/** @type {HTMLElement} */ (e.target))?.closest('[data-field-id]'));
-			if (row) clearFieldErrorRow(row);
+			const row = /** @type {HTMLElement|null} */ ((/** @type {HTMLElement} */ (e.target))?.closest('[data-field-path]'));
+			if (row) {
+				clearFieldErrorRow(row);
+				clearFieldErrorAncestors(row);
+			}
 		});
 
 		const sorterList = /** @type {HTMLElement|null} */ (dom.find('.lerm-sorter-list', form));

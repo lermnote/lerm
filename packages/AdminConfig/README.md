@@ -79,7 +79,7 @@ Modules are activated on demand from schema field usage, so a schema that only u
 
 Schemas are expected to use the native `label`, `description`, `group_heading`, `choices`, `groups`, `container`, and `store` keys directly.
 
-Validation now follows the same PHP-first path across containers: validators can return `WP_Error`, `OptionStore` collects field errors, options pages surface them over AJAX/non-JS fallback, and profile/comment/taxonomy/metabox containers replay the same errors after redirect instead of silently partially saving.
+Validation now follows the same PHP-first path across containers: validators can return `WP_Error`, `OptionStore` collects dotted field-path errors, options pages surface them over AJAX/non-JS fallback, and profile/comment/taxonomy/metabox containers replay the same errors after redirect instead of silently partially saving.
 
 ## Public Extension API
 

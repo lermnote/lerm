@@ -81,17 +81,14 @@ final class ValidationFlash {
 
 	/**
 	 * @param array<string, mixed>|null $flash
-	 * @return array<string, string>
+	 * @return array<string, mixed>
 	 */
 	public static function field_errors( ?array $flash ): array {
 		if ( ! is_array( $flash ) || ! is_array( $flash['errors'] ?? null ) ) {
 			return array();
 		}
 
-		return array_filter(
-			$flash['errors'],
-			static fn ( $message ): bool => is_scalar( $message ) && '' !== trim( (string) $message )
-		);
+		return (array) $flash['errors'];
 	}
 
 	/**
