@@ -14,12 +14,12 @@
 
 declare( strict_types=1 );
 
-namespace Lerm\AdminConfig\Framework\Stores;
+namespace Lerm\AdminConfig\Framework\Storage;
 
 use Lerm\AdminConfig\Framework\Backends\OptionBackend;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Contracts\StorageBackend;
-use Lerm\AdminConfig\Framework\Registry\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {

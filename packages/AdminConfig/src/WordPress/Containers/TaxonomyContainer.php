@@ -250,7 +250,7 @@ final class TaxonomyContainer implements Container {
 		}
 	}
 
-	private function renderer( CompiledSchema $schema, ?\Lerm\AdminConfig\Framework\Stores\OptionStore $store ): OptionsPage {
+	private function renderer( CompiledSchema $schema, ?\Lerm\AdminConfig\Framework\Storage\OptionStore $store ): OptionsPage {
 		$resolved_store = $store ?? $this->framework->store(
 			$schema->definition(),
 			new ArrayBackend( 'taxonomy_defaults_' . $schema->id() )

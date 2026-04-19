@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Lerm\AdminConfig\Framework\Registry;
+namespace Lerm\AdminConfig\Framework\FieldTypes;
 
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 

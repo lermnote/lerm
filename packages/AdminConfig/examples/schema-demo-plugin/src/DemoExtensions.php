@@ -10,7 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Examples;
 
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
-use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\WordPress\Runtime;
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -15,7 +15,7 @@ use Lerm\AdminConfig\Stores\StoreResolver;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Backends\ArrayBackend;
 use Lerm\AdminConfig\Framework\Framework;
-use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 

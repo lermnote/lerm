@@ -7,10 +7,10 @@
 
 declare( strict_types=1 );
 
-namespace Lerm\AdminConfig\Framework\Registry;
+namespace Lerm\AdminConfig\Framework\FieldTypes;
 
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
-use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {

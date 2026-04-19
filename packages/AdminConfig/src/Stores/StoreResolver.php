@@ -19,7 +19,7 @@ use Lerm\AdminConfig\Framework\Backends\TermMetaBackend;
 use Lerm\AdminConfig\Framework\Backends\UserMetaBackend;
 use Lerm\AdminConfig\Framework\Contracts\StorageBackend;
 use Lerm\AdminConfig\Framework\Framework;
-use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

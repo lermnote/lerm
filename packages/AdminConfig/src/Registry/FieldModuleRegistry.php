@@ -11,7 +11,7 @@ namespace Lerm\AdminConfig\Registry;
 
 use InvalidArgumentException;
 use Lerm\AdminConfig\Contracts\FieldModule;
-use Lerm\AdminConfig\Framework\Registry\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {

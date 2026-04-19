@@ -25,19 +25,19 @@ This repository now contains the first extraction slice:
 
 ## Architecture layers
 
-The package is split into two layers that happen to reuse a few directory names:
+The package is split into two layers:
 
 - `src/Framework/*`: the low-level reusable engine. This is where field registration, admin rendering, storage backends, and the normalized option store live.
 - `src/Compiler`, `src/Registry`, `src/Stores`, `src/WordPress`: the package/runtime orchestration layer around that engine.
 
-The similarly named directories are related like this:
+The main boundaries look like this:
 
-- `src/Framework/Registry` = field-type registry and field definition catalogs
+- `src/Framework/FieldTypes` = field-type registry and field definition catalogs
 - `src/Registry` = runtime registries for compiled schemas, containers, and field modules
-- `src/Framework/Stores` = the actual normalized store implementation used by pages and containers
+- `src/Framework/Storage` = the actual normalized store implementation used by pages and containers
 - `src/Stores` = the resolver that maps compiled `store.type` config to concrete WordPress backends
 
-So the inner `Framework/*` directories are framework internals, while the outer directories wire those internals into the schema runtime.
+So the `Framework/*` directories are engine internals, while the outer directories wire those internals into the schema runtime.
 
 Supported container types in the current slice:
 
@@ -120,13 +120,13 @@ $runtime->register_field_type(
 				esc_attr( is_scalar( $value ) ? (string) $value : '' )
 			);
 		},
-		'sanitize' => static fn ( array $field, $value, bool $strict, \Lerm\AdminConfig\Framework\Stores\OptionStore $store ) => sanitize_title( (string) $value ),
+		'sanitize' => static fn ( array $field, $value, bool $strict, \Lerm\AdminConfig\Framework\Storage\OptionStore $store ) => sanitize_title( (string) $value ),
 	)
 );
 
 $runtime->register_validator(
 	'slug_text',
-	static function ( array $field, $value, bool $strict, \Lerm\AdminConfig\Framework\Stores\OptionStore $store ) {
+	static function ( array $field, $value, bool $strict, \Lerm\AdminConfig\Framework\Storage\OptionStore $store ) {
 		return strlen( (string) $value ) >= 3 ? $value : new WP_Error( 'slug_too_short' );
 	}
 );

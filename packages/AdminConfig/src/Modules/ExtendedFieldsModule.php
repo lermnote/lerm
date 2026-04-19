@@ -10,7 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Modules;
 
 use Lerm\AdminConfig\Contracts\FieldModule;
-use Lerm\AdminConfig\Framework\Registry\ExtendedPrimitiveFieldTypes;
+use Lerm\AdminConfig\Framework\FieldTypes\ExtendedPrimitiveFieldTypes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

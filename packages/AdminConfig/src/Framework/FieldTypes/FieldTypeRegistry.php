@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Lerm\AdminConfig\Framework\Registry;
+namespace Lerm\AdminConfig\Framework\FieldTypes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

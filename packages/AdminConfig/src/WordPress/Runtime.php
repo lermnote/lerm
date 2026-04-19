@@ -26,8 +26,8 @@ use Lerm\AdminConfig\WordPress\Containers\ProfileContainer;
 use Lerm\AdminConfig\WordPress\Containers\TaxonomyContainer;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Framework;
-use Lerm\AdminConfig\Framework\Registry\FieldTypeRegistry;
-use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

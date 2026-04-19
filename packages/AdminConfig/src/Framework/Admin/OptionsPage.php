@@ -9,8 +9,8 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Framework\Admin;
 
-use Lerm\AdminConfig\Framework\Registry\FieldTypeRegistry;
-use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
