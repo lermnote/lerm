@@ -2,6 +2,9 @@
 
 Reference plugin demonstrating how to consume `lerm/admin-config` as a WordPress plugin.
 
+It follows the recommended package lifecycle: bootstrap once, register schemas in
+the bootstrap callback, and let the runtime auto-mount in `wp-admin`.
+
 ## What it registers
 
 - a regular admin options page

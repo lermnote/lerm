@@ -45,9 +45,9 @@ require_once $autoload;
 require_once __DIR__ . '/src/DemoExtensions.php';
 require_once __DIR__ . '/src/SchemaDemoPlugin.php';
 
-$runtime = \Lerm\AdminConfig\WordPress\PluginBootstrap::boot( __FILE__ );
-\Lerm\AdminConfig\Examples\SchemaDemoPlugin::register( $runtime );
-
-if ( is_admin() ) {
-	$runtime->boot();
-}
+\Lerm\AdminConfig\WordPress\PluginBootstrap::boot(
+	__FILE__,
+	static function ( \Lerm\AdminConfig\WordPress\Runtime $runtime ): void {
+		\Lerm\AdminConfig\Examples\SchemaDemoPlugin::register( $runtime );
+	}
+);

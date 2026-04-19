@@ -17,10 +17,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class EmbeddedBootstrap {
 
-	public static function boot( string $assets_url, string $version_constant = 'LERM_VERSION' ): Runtime {
+	public static function boot( string $assets_url, string $version_constant = 'LERM_VERSION', ?callable $registrar = null ): Runtime {
 		$runtime = Runtime::instance(
 			new DefaultAssetResolver( $assets_url, $version_constant )
 		);
+
+		if ( is_admin() ) {
+			$runtime->boot();
+		}
+
+		if ( is_callable( $registrar ) ) {
+			call_user_func( $registrar, $runtime );
+		}
 
 		do_action( 'lerm_admin_config_booted', $runtime, 'embedded' );
 

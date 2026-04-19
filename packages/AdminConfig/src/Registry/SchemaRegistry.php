@@ -31,7 +31,23 @@ final class SchemaRegistry {
 	}
 
 	public function register( array $schema ): CompiledSchema {
-		$compiled                     = $this->compiler->compile( $schema );
+		$compiled = $this->compiler->compile( $schema );
+
+		if ( isset( $this->schemas[ $compiled->id() ] ) ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						'Admin config schema "%s" is already registered. The first registration is kept and the duplicate is ignored.',
+						$compiled->id()
+					),
+					'0.2.0'
+				);
+			}
+
+			return $this->schemas[ $compiled->id() ];
+		}
+
 		$this->schemas[ $compiled->id() ] = $compiled;
 
 		return $compiled;

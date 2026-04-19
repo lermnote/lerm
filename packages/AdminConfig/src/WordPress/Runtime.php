@@ -53,6 +53,11 @@ final class Runtime {
 	 */
 	private array $missing_container_notice = array();
 
+	/**
+	 * @var array<string, bool>
+	 */
+	private array $mount_issue_notice = array();
+
 	private bool $boot_requested = false;
 
 	public function __construct( ?SchemaRegistry $registry = null, ?Framework $framework = null ) {
@@ -190,6 +195,10 @@ final class Runtime {
 	}
 
 	public function boot(): void {
+		if ( $this->boot_requested ) {
+			return;
+		}
+
 		$this->boot_requested = true;
 
 		foreach ( $this->registry->all() as $compiled ) {
@@ -242,9 +251,15 @@ final class Runtime {
 		$container_type = sanitize_key( (string) ( $compiled->container()['type'] ?? 'options_page' ) );
 
 		if ( $this->containers->has( $container_type ) ) {
-			$this->containers->get( $container_type )->mount( $compiled );
-			$this->mounted[ $compiled->id() ] = $container_type;
-			unset( $this->missing_container_notice[ $compiled->id() ] );
+			try {
+				$this->containers->get( $container_type )->mount( $compiled );
+				$this->mounted[ $compiled->id() ] = $container_type;
+				unset( $this->missing_container_notice[ $compiled->id() ] );
+				unset( $this->mount_issue_notice[ $compiled->id() ] );
+			} catch ( \InvalidArgumentException $exception ) {
+				$this->report_mount_issue( $compiled->id(), $exception->getMessage() );
+			}
+
 			return;
 		}
 
@@ -287,5 +302,23 @@ final class Runtime {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			_doing_it_wrong( $method, $exception->getMessage(), '0.2.0' );
 		}
+	}
+
+	private function report_mount_issue( string $schema_id, string $message ): void {
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG || ! empty( $this->mount_issue_notice[ $schema_id ] ) ) {
+			return;
+		}
+
+		_doing_it_wrong(
+			__METHOD__,
+			sprintf(
+				'Admin config schema "%1$s" was not mounted: %2$s',
+				$schema_id,
+				$message
+			),
+			'0.2.0'
+		);
+
+		$this->mount_issue_notice[ $schema_id ] = true;
 	}
 }

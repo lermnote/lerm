@@ -24,6 +24,6 @@ require_once get_template_directory() . '/packages/AdminConfig/examples/embedded
 
 - boots the runtime with `EmbeddedBootstrap::boot(...)`
 - registers the demo schemas
-- calls `$runtime->boot()` only in wp-admin
+- auto-calls `runtime->boot()` in wp-admin so schemas mount immediately after registration
 
 Use it as the template for a real theme integration: copy the schema class, rename IDs and option keys, then move the fields into your own namespace.

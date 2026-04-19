@@ -136,6 +136,56 @@ Late registration is supported: if you register a schema after `boot()`, or regi
 
 See [docs/extension-api.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-api.md) for the first extension guide and [docs/smoke-checklist.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
 
+## Recommended lifecycle
+
+The recommended integration path is now:
+
+1. bootstrap the runtime
+2. register schemas inside the bootstrap callback
+3. let the bootstrap auto-call `runtime->boot()` in wp-admin
+
+Plugin-install mode:
+
+```php
+use Lerm\AdminConfig\WordPress\PluginBootstrap;
+use Lerm\AdminConfig\WordPress\Runtime;
+
+PluginBootstrap::boot(
+	__FILE__,
+	static function ( Runtime $runtime ): void {
+		$runtime->register(
+			array(
+				'id'        => 'acme-settings',
+				'title'     => 'Acme Settings',
+				'container' => array( 'type' => 'options_page' ),
+				'store'     => array( 'type' => 'option', 'key' => 'acme_settings' ),
+				'menu'      => array(
+					'parent_slug' => 'options-general.php',
+					'page_title'  => 'Acme Settings',
+					'menu_title'  => 'Acme Settings',
+					'capability'  => 'manage_options',
+				),
+				'sections'  => array(
+					'general' => array(
+						'title'  => 'General',
+						'fields' => array(
+							array(
+								'id'      => 'enabled',
+								'type'    => 'switcher',
+								'label'   => 'Enable feature',
+								'default' => 1,
+							),
+						),
+					),
+				),
+			)
+		);
+	}
+);
+```
+
+Embedded mode follows the same shape through `EmbeddedBootstrap::boot(...)`.
+
 ## Boot modes
 
 ### Embedded mode
@@ -144,10 +194,14 @@ Themes or bundled packages boot the runtime with:
 
 ```php
 use Lerm\AdminConfig\WordPress\EmbeddedBootstrap;
+use Lerm\AdminConfig\WordPress\Runtime;
 
 $runtime = EmbeddedBootstrap::boot(
 	trailingslashit( get_template_directory_uri() ) . 'packages/AdminConfig/assets',
-	'LERM_VERSION'
+	'LERM_VERSION',
+	static function ( Runtime $runtime ): void {
+		// Register schemas here.
+	}
 );
 ```
 
@@ -166,9 +220,19 @@ Standalone plugin builds boot the runtime with:
 
 ```php
 use Lerm\AdminConfig\WordPress\PluginBootstrap;
+use Lerm\AdminConfig\WordPress\Runtime;
 
-$runtime = PluginBootstrap::boot( __FILE__ );
+$runtime = PluginBootstrap::boot(
+	__FILE__,
+	static function ( Runtime $runtime ): void {
+		// Register schemas here.
+	}
+);
 ```
+
+Both bootstraps automatically call `runtime->boot()` in `wp-admin`, so late schema
+registration still works and host integrations no longer need a separate final
+mount step.
 
 ## Reading meta-backed schemas
 
@@ -186,6 +250,19 @@ When `Runtime::all()` or `Runtime::get()` is called without the required object
 context, the runtime now falls back to the compiled schema defaults and emits a
 debug notice in `WP_DEBUG`. If you need strict behavior, call `store()` directly,
 which still throws when the context is missing.
+
+## Diagnostics policy
+
+Admin Config now uses a consistent split between debug and production behavior:
+
+- duplicate schema IDs: first registration wins, duplicate is ignored, `_doing_it_wrong()` in `WP_DEBUG`
+- missing container adapters: schema is skipped, `_doing_it_wrong()` in `WP_DEBUG`
+- invalid store configuration during mount: schema is skipped, `_doing_it_wrong()` in `WP_DEBUG`
+- malformed field definitions without an `id`: field is ignored, `_doing_it_wrong()` in `WP_DEBUG`
+
+Direct low-level API calls such as `store()` and registry getters still throw
+exceptions, because those are explicit developer calls rather than passive
+runtime mounting.
 
 ## Schema examples
 

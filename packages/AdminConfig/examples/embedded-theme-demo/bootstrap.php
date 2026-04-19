@@ -44,16 +44,13 @@ require_once __DIR__ . '/src/EmbeddedThemeDemo.php';
 add_action(
 	'after_setup_theme',
 	static function (): void {
-		$runtime = \Lerm\AdminConfig\WordPress\EmbeddedBootstrap::boot(
+		\Lerm\AdminConfig\WordPress\EmbeddedBootstrap::boot(
 			trailingslashit( get_template_directory_uri() ) . 'packages/AdminConfig/assets',
-			'LERM_VERSION'
+			'LERM_VERSION',
+			static function ( \Lerm\AdminConfig\WordPress\Runtime $runtime ): void {
+				\Lerm\AdminConfig\Examples\EmbeddedThemeDemo::register( $runtime );
+			}
 		);
-
-		\Lerm\AdminConfig\Examples\EmbeddedThemeDemo::register( $runtime );
-
-		if ( is_admin() ) {
-			$runtime->boot();
-		}
 	},
 	20
 );

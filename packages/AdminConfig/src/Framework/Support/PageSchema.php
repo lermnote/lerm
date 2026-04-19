@@ -243,6 +243,8 @@ final class PageSchema {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function normalize_fields_list( $fields ): array {
+		static $reported_invalid_field_definition = false;
+
 		if ( ! is_array( $fields ) ) {
 			return array();
 		}
@@ -252,6 +254,16 @@ final class PageSchema {
 		foreach ( $fields as $field ) {
 			if ( is_array( $field ) && isset( $field['id'] ) ) {
 				$normalized[] = $field;
+				continue;
+			}
+
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && ! $reported_invalid_field_definition ) {
+				_doing_it_wrong(
+					__METHOD__,
+					'Admin Config field definitions must be arrays with a non-empty "id". Invalid entries are ignored.',
+					'0.2.0'
+				);
+				$reported_invalid_field_definition = true;
 			}
 		}
 
