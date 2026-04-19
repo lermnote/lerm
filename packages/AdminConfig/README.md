@@ -77,7 +77,7 @@ Field modules in the current slice:
 
 Modules are activated on demand from schema field usage, so a schema that only uses primitive fields does not need to load the structured or tools definitions.
 
-The package intentionally does not ship a Codestar compatibility layer. Schemas are expected to use the native `label`, `description`, `group_heading`, `choices`, `groups`, `container`, and `store` keys directly.
+Schemas are expected to use the native `label`, `description`, `group_heading`, `choices`, `groups`, `container`, and `store` keys directly.
 
 ## Boot modes
 

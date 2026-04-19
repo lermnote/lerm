@@ -45,4 +45,11 @@ final class ContainerRegistry {
 
 		return $this->containers[ $type ];
 	}
+
+	/**
+	 * @return array<string, Container>
+	 */
+	public function all(): array {
+		return $this->containers;
+	}
 }

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 return array(
 	'title'           => __( 'Content', 'lerm' ),
-	'description'     => __( 'Static-page content rules that used to live in the CSF Page tab.', 'lerm' ),
+	'description'     => __( 'Static-page content rules, search behaviour, and archive display settings.', 'lerm' ),
 	'use_subsections' => true,
 	'groups'          => array(
 		array(

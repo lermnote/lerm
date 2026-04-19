@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 return array(
 	'title'       => __( 'SEO', 'lerm' ),
-	'description' => __( 'Meta output, sitemap exclusions, breadcrumb markup, and Baidu integrations migrated from the remaining CSF SEO tabs.', 'lerm' ),
+	'description' => __( 'Meta output, sitemap exclusions, breadcrumb markup, and Baidu integrations.', 'lerm' ),
 	'fields'      => array(
 		array(
 			'id'          => 'keywords',

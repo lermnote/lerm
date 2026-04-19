@@ -88,6 +88,19 @@ final class Framework {
 		return $this->field_modules;
 	}
 
+	/**
+	 * Register or extend a field type definition.
+	 *
+	 * @param array<string, mixed> $definition
+	 */
+	public function register_field_type( string $type, array $definition = array() ): void {
+		$this->field_types->register( $type, $definition );
+	}
+
+	public function register_validator( string $type, callable $validator ): void {
+		$this->field_types->register_validator( $type, $validator );
+	}
+
 	public function register_field_module( FieldModule $module ): void {
 		$this->field_modules->register( $module );
 	}

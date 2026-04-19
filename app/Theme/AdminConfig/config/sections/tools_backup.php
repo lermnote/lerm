@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 return array(
 	'title'       => __( 'Tools / Backup', 'lerm' ),
-	'description' => __( 'Export and import the full theme options snapshot without relying on the legacy CSF backup tab.', 'lerm' ),
+	'description' => __( 'Export and import the full theme options snapshot from the current admin config runtime.', 'lerm' ),
 	'fields'      => array(
 		array(
 			'id'          => 'backup_tools',

@@ -35,11 +35,18 @@ final class FieldTypeRegistry {
 			return;
 		}
 
-		if ( isset( $this->types[ $type ] ) && $this->is_builtin( $type ) ) {
-			// Built-in types can only be extended (callbacks merged in), not fully replaced.
-			// Pass 'override_builtin' => true in $definition to intentionally replace a built-in.
-			if ( empty( $definition['override_builtin'] ) ) {
-				$definition = wp_parse_args( $definition, $this->types[ $type ] );
+		$current = $this->types[ $type ] ?? array();
+		$replace = ! empty( $definition['replace'] );
+
+		if ( ! empty( $current ) && ! $replace ) {
+			// Existing field types are extended by default so public extension APIs
+			// can add validators, serializers, or client metadata incrementally.
+			// Pass `replace => true` to fully replace a custom type definition, or
+			// `override_builtin => true` to intentionally replace a built-in type.
+			if ( $this->is_builtin( $type ) && empty( $definition['override_builtin'] ) ) {
+				$definition = wp_parse_args( $definition, $current );
+			} elseif ( empty( $definition['override_builtin'] ) ) {
+				$definition = wp_parse_args( $definition, $current );
 			}
 		}
 
@@ -54,6 +61,20 @@ final class FieldTypeRegistry {
 				'client'        => array(),
 				'persist'       => true,
 				'builtin'       => false,
+			)
+		);
+	}
+
+	/**
+	 * Register or extend a field validator.
+	 *
+	 * @param callable $validator Signature: (array $field, mixed $value, bool $strict, OptionStore $store): mixed
+	 */
+	public function register_validator( string $type, callable $validator ): void {
+		$this->register(
+			$type,
+			array(
+				'validate' => $validator,
 			)
 		);
 	}

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 return array(
 	'title'           => __( 'Community', 'lerm' ),
-	'description'     => __( 'Share-platform controls, WeChat QR data, and donation media moved out of the legacy CSF social tab.', 'lerm' ),
+	'description'     => __( 'Share-platform controls, WeChat QR data, and donation media settings for community features.', 'lerm' ),
 	'use_subsections' => true,
 	'groups'          => array(
 		array(
