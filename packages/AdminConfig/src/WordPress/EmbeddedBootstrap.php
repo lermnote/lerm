@@ -18,8 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class EmbeddedBootstrap {
 
 	public static function boot( string $assets_url, string $version_constant = 'LERM_VERSION' ): Runtime {
-		return Runtime::instance(
+		$runtime = Runtime::instance(
 			new DefaultAssetResolver( $assets_url, $version_constant )
 		);
+
+		do_action( 'lerm_admin_config_booted', $runtime, 'embedded' );
+
+		return $runtime;
 	}
 }

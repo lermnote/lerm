@@ -76,10 +76,10 @@ final class StoreResolver {
 
 		return match ( $type ) {
 			'option' => new OptionBackend( $key ),
-			'post_meta' => new PostMetaBackend( $this->resolve_object_id( $store, $context, array( 'post_id', 'object_id' ), $type ), $key ),
-			'term_meta' => new TermMetaBackend( $this->resolve_object_id( $store, $context, array( 'term_id', 'object_id' ), $type ), $key ),
-			'user_meta' => new UserMetaBackend( $this->resolve_object_id( $store, $context, array( 'user_id', 'object_id' ), $type ), $key ),
-			'comment_meta' => new CommentMetaBackend( $this->resolve_object_id( $store, $context, array( 'comment_id', 'object_id' ), $type ), $key ),
+			'post_meta' => new PostMetaBackend( $this->resolve_object_id( $schema, $store, $context, array( 'post_id', 'object_id' ), $type ), $key ),
+			'term_meta' => new TermMetaBackend( $this->resolve_object_id( $schema, $store, $context, array( 'term_id', 'object_id' ), $type ), $key ),
+			'user_meta' => new UserMetaBackend( $this->resolve_object_id( $schema, $store, $context, array( 'user_id', 'object_id' ), $type ), $key ),
+			'comment_meta' => new CommentMetaBackend( $this->resolve_object_id( $schema, $store, $context, array( 'comment_id', 'object_id' ), $type ), $key ),
 			'site_option', 'network_option' => new SiteOptionBackend( $key ),
 			default => throw new InvalidArgumentException(
 				sprintf(
@@ -92,11 +92,12 @@ final class StoreResolver {
 	}
 
 	/**
+	 * @param CompiledSchema       $schema
 	 * @param array<string, mixed> $store
 	 * @param array<string, mixed> $context
 	 * @param array<int, string>   $keys
 	 */
-	private function resolve_object_id( array $store, array $context, array $keys, string $type ): int {
+	private function resolve_object_id( CompiledSchema $schema, array $store, array $context, array $keys, string $type ): int {
 		foreach ( $keys as $key ) {
 			$value = $context[ $key ] ?? $store[ $key ] ?? null;
 
@@ -111,11 +112,6 @@ final class StoreResolver {
 			}
 		}
 
-		throw new InvalidArgumentException(
-			sprintf(
-				'Store type "%s" requires an object ID in the schema or runtime context.',
-				$type
-			)
-		);
+		throw new MissingStoreContextException( $schema->id(), $type, $keys );
 	}
 }

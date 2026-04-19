@@ -151,6 +151,15 @@ $runtime = EmbeddedBootstrap::boot(
 );
 ```
 
+Both embedded mode and plugin-install mode fire:
+
+```php
+do_action( 'lerm_admin_config_booted', $runtime, 'embedded' );
+do_action( 'lerm_admin_config_booted', $runtime, 'plugin' );
+```
+
+So third-party extensions can wait for a ready runtime in either boot path.
+
 ### Plugin-install mode
 
 Standalone plugin builds boot the runtime with:
@@ -160,6 +169,23 @@ use Lerm\AdminConfig\WordPress\PluginBootstrap;
 
 $runtime = PluginBootstrap::boot( __FILE__ );
 ```
+
+## Reading meta-backed schemas
+
+Meta-backed stores such as `post_meta`, `term_meta`, `user_meta`, and `comment_meta`
+need an object context when you want persisted data:
+
+```php
+$values = $runtime->all(
+	'acme-entry-overrides',
+	array( 'post_id' => get_the_ID() )
+);
+```
+
+When `Runtime::all()` or `Runtime::get()` is called without the required object
+context, the runtime now falls back to the compiled schema defaults and emits a
+debug notice in `WP_DEBUG`. If you need strict behavior, call `store()` directly,
+which still throws when the context is missing.
 
 ## Schema examples
 

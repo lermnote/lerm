@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Framework {
 
 	/**
-	 * Shared framework instance.
+	 * Deprecated shared framework instance retained for backward compatibility.
 	 */
 	private static ?self $instance = null;
 
@@ -67,14 +67,23 @@ final class Framework {
 	}
 
 	/**
-	 * Get the shared framework instance.
+	 * Get the deprecated shared framework singleton.
+	 *
+	 * Prefer `new Framework()` or injecting a Framework into `Runtime` so tests
+	 * and multi-runtime setups do not accidentally share mutable state.
 	 */
 	public static function instance(): self {
+		_deprecated_function( __METHOD__, '0.2.0', 'new ' . __CLASS__ . '()' );
+
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
 		return self::$instance;
+	}
+
+	public static function reset_instance(): void {
+		self::$instance = null;
 	}
 
 	/**

@@ -222,7 +222,7 @@ final class PageSchema {
 	 * Both classes previously had their own copy under different names
 	 * (string_value / scalar_string); both now delegate here.
 	 *
-	 * @param mixed  $value   Source value (may be array, null, scalar, 鈥?.
+	 * @param mixed  $value   Source value (may be array, null, scalar, etc.).
 	 * @param string $default Fallback when $value is not scalar.
 	 * @param bool   $trim    Whether to trim the result.
 	 */

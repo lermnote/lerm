@@ -104,10 +104,85 @@ final class FieldModuleRegistry {
 	 * @param array<string, mixed> $definition Schema definition.
 	 */
 	public function enable_for_definition( array $definition ): void {
-		foreach ( $this->definition_field_types( $definition ) as $field_type ) {
-			if ( isset( $this->field_type_map[ $field_type ] ) ) {
-				$this->enable( $this->field_type_map[ $field_type ] );
+		$this->enable_for_field_types( $this->field_types_for_definition( $definition ) );
+	}
+
+	/**
+	 * Return the field types referenced by a schema definition.
+	 *
+	 * This only inspects the schema array available at registration time. If
+	 * field types are assembled later from external data, call
+	 * `enable_for_field_types()` or `enable_all()` explicitly.
+	 *
+	 * @param array<string, mixed> $definition
+	 * @return array<int, string>
+	 */
+	public function field_types_for_definition( array $definition ): array {
+		return $this->definition_field_types( $definition );
+	}
+
+	/**
+	 * Return the registered module IDs required by a schema definition.
+	 *
+	 * @param array<string, mixed> $definition
+	 * @return array<int, string>
+	 */
+	public function modules_for_definition( array $definition ): array {
+		return $this->modules_for_field_types( $this->field_types_for_definition( $definition ) );
+	}
+
+	/**
+	 * Return the registered module ID for a field type, when known.
+	 */
+	public function module_for_field_type( string $field_type ): ?string {
+		$field_type = sanitize_key( $field_type );
+
+		if ( '' === $field_type ) {
+			return null;
+		}
+
+		return $this->field_type_map[ $field_type ] ?? null;
+	}
+
+	/**
+	 * Return the registered module IDs required by a field-type list.
+	 *
+	 * @param array<int, string> $field_types
+	 * @return array<int, string>
+	 */
+	public function modules_for_field_types( array $field_types ): array {
+		$modules = array();
+
+		foreach ( $field_types as $field_type ) {
+			$module_id = $this->module_for_field_type( (string) $field_type );
+
+			if ( null === $module_id ) {
+				continue;
 			}
+
+			$modules[ $module_id ] = $module_id;
+		}
+
+		return array_values( $modules );
+	}
+
+	/**
+	 * Enable modules for a known list of field types.
+	 *
+	 * @param array<int, string> $field_types
+	 */
+	public function enable_for_field_types( array $field_types ): void {
+		foreach ( $this->modules_for_field_types( $field_types ) as $module_id ) {
+			$this->enable( $module_id );
+		}
+	}
+
+	/**
+	 * Enable every registered module.
+	 */
+	public function enable_all(): void {
+		foreach ( array_keys( $this->modules ) as $module_id ) {
+			$this->enable( $module_id );
 		}
 	}
 

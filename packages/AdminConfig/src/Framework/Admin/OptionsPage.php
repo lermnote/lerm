@@ -206,7 +206,7 @@ final class OptionsPage {
 	 * Reset the current tab or the whole page without a full reload.
 	 *
 	 * Security note: for both "section" and "all" scopes we verify the nonce
-	 * of the currently active tab. This is intentional 鈥?the user is on that
+	 * of the currently active tab. This is intentional: the user is on that
 	 * tab's page and the nonce was issued for the current session. A per-tab
 	 * nonce for a cross-tab "reset all" action would give no additional security
 	 * benefit because an attacker would need the same capability to reach
@@ -227,7 +227,7 @@ final class OptionsPage {
 		check_ajax_referer( $this->nonce_action( $tab ) );
 
 		// 'fetch_only' is a JS-internal scope used to refresh other tab values
-		// after a full reset 鈥?it skips the actual reset and just returns current values.
+		// after a full reset: it skips the actual reset and just returns current values.
 		if ( 'fetch_only' === $scope ) {
 			wp_send_json_success( array( 'values' => $this->store->section_values( $tab ) ) );
 		}
@@ -480,7 +480,7 @@ final class OptionsPage {
 					<nav class="lerm-settings-nav" aria-label="<?php esc_attr_e( 'Settings sections', 'lerm' ); ?>">
 						<?php foreach ( $sections as $section_id => $section ) : ?>
 							<?php $section_field_count = count( PageSchema::section_fields( $section ) ); ?>
-							<a class="lerm-settings-nav__item <?php echo $section_id === $current_tab ? 'is-active' : ''; ?>"
+									<a class="lerm-settings-nav__item <?php echo esc_attr( $section_id === $current_tab ? 'is-active' : '' ); ?>"
 								href="
 								<?php
 								echo esc_url(
@@ -537,7 +537,7 @@ final class OptionsPage {
 						<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
 							data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
 							data-tab-description="<?php echo esc_attr( (string) ( $section['description'] ?? '' ) ); ?>"
-							<?php echo $section_id !== $current_tab ? 'hidden' : ''; ?>>
+							<?php echo esc_attr( $section_id !== $current_tab ? 'hidden' : '' ); ?>>
 
 							<form method="post" action="<?php echo esc_url( $this->admin_post_url() ); ?>"
 									class="lerm-settings-form"
@@ -572,9 +572,9 @@ final class OptionsPage {
 										<nav class="lerm-settings-subnav lerm-settings-subnav--sticky lerm-settings-sticky-bar" data-lerm-sticky-bar aria-label="<?php echo esc_attr( sprintf( __( '%s groups', 'lerm' ), (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ) ); ?>">
 											<?php foreach ( $section_groups as $group_index => $group ) : ?>
 												<button type="button"
-													class="lerm-settings-subnav__item <?php echo (string) $group['id'] === $current_subsection ? 'is-active' : ''; ?>"
+													class="lerm-settings-subnav__item <?php echo esc_attr( (string) $group['id'] === $current_subsection ? 'is-active' : '' ); ?>"
 													data-subsection-target="<?php echo esc_attr( (string) $group['id'] ); ?>"
-													aria-pressed="<?php echo (string) $group['id'] === $current_subsection ? 'true' : 'false'; ?>">
+													aria-pressed="<?php echo esc_attr( (string) $group['id'] === $current_subsection ? 'true' : 'false' ); ?>">
 													<?php echo esc_html( (string) $group['label'] ); ?>
 												</button>
 											<?php endforeach; ?>
@@ -585,7 +585,7 @@ final class OptionsPage {
 										<?php foreach ( $section_groups as $group_index => $group ) : ?>
 											<section class="lerm-settings-subsection"
 												data-subsection-panel="<?php echo esc_attr( (string) $group['id'] ); ?>"
-												<?php echo (string) $group['id'] !== $current_subsection ? 'hidden' : ''; ?>>
+												<?php echo esc_attr( (string) $group['id'] !== $current_subsection ? 'hidden' : '' ); ?>>
 												<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) $group['label'] ); ?>">
 													<?php if ( ! empty( $group['fields'] ) ) : ?>
 														<?php $this->render_fields( (array) $group['fields'], $section_values, (string) $section_id, $this->subsection_uses_group_headings( (array) $group['fields'], (string) $group['label'] ), 'stack', $section_errors ); ?>
@@ -1130,7 +1130,7 @@ final class OptionsPage {
 
 		ob_start();
 		?>
-		<div class="lerm-group-item<?php echo $item_has_errors ? ' is-invalid' : ''; ?>" data-lerm-group-item data-index="<?php echo esc_attr( $index ); ?>" data-field-path="<?php echo esc_attr( $item_path ); ?>" data-field-path-template="<?php echo esc_attr( $path_template ); ?>">
+		<div class="lerm-group-item<?php echo esc_attr( $item_has_errors ? ' is-invalid' : '' ); ?>" data-lerm-group-item data-index="<?php echo esc_attr( $index ); ?>" data-field-path="<?php echo esc_attr( $item_path ); ?>" data-field-path-template="<?php echo esc_attr( $path_template ); ?>">
 			<div class="lerm-group-item__header">
 				<span class="lerm-sorter-handle" aria-hidden="true">&#8645;</span>
 				<strong class="lerm-group-item__title">
@@ -1849,7 +1849,7 @@ final class OptionsPage {
 
 	/**
 	 * Normalize scalar-like values to strings for safe rendering.
-	 * Unified with OptionStore::string_value() 鈥?both delegate here via PageSchema.
+	 * Unified with OptionStore::string_value(); both delegate here via PageSchema.
 	 *
 	 * @param mixed  $value Source value.
 	 * @param string $default_value Fallback string.
@@ -1969,14 +1969,14 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Asset URL 鈥?delegated to the injected AssetResolver.
+	 * Asset URL, delegated to the injected AssetResolver.
 	 */
 	private function asset_url( string $asset ): string {
 		return $this->asset_resolver->url( $asset );
 	}
 
 	/**
-	 * Asset version 鈥?delegated to the injected AssetResolver.
+	 * Asset version, delegated to the injected AssetResolver.
 	 */
 	private function asset_version(): string {
 		$version = $this->asset_resolver->version();

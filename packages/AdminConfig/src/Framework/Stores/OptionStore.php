@@ -541,7 +541,7 @@ final class OptionStore {
 	private function persist_options( array $options ): bool {
 		$previous = $this->raw();
 
-		// No-op: payload is identical 鈥?treat as success, skip the DB write.
+		// No-op: payload is identical, treat it as success and skip the DB write.
 		if ( $previous === $options ) {
 			$this->raw_options        = $options;
 			$this->normalized_options = null;
@@ -564,7 +564,7 @@ final class OptionStore {
 			return true;
 		}
 
-		// Write failed 鈥?roll back in-memory cache.
+		// Write failed, so roll back the in-memory cache.
 		$this->raw_options        = $previous;
 		$this->normalized_options = null;
 		return false;

@@ -16,6 +16,7 @@ use Lerm\AdminConfig\Registry\ContainerRegistry;
 use Lerm\AdminConfig\Registry\DataSourceRegistry;
 use Lerm\AdminConfig\Registry\FieldModuleRegistry;
 use Lerm\AdminConfig\Registry\SchemaRegistry;
+use Lerm\AdminConfig\Stores\MissingStoreContextException;
 use Lerm\AdminConfig\Stores\StoreResolver;
 use Lerm\AdminConfig\WordPress\Containers\CommentContainer;
 use Lerm\AdminConfig\WordPress\Containers\MetaboxContainer;
@@ -79,6 +80,10 @@ final class Runtime {
 		return self::$instance;
 	}
 
+	public static function reset_instance(): void {
+		self::$instance = null;
+	}
+
 	public function register( array $schema ): CompiledSchema {
 		$this->framework->field_modules()->enable_for_definition( $schema );
 
@@ -112,6 +117,10 @@ final class Runtime {
 
 	public function field_modules(): FieldModuleRegistry {
 		return $this->framework->field_modules();
+	}
+
+	public function framework(): Framework {
+		return $this->framework;
 	}
 
 	public function data_sources(): DataSourceRegistry {
@@ -193,17 +202,36 @@ final class Runtime {
 	}
 
 	/**
+	 * Return compiled defaults without touching the storage layer.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function defaults( string $schema_id ): array {
+		return $this->compiled( $schema_id )->defaults();
+	}
+
+	/**
 	 * @return array<string, mixed>
 	 */
 	public function all( string $schema_id, array $context = array() ): array {
-		return $this->store( $schema_id, $context )->all();
+		try {
+			return $this->store( $schema_id, $context )->all();
+		} catch ( MissingStoreContextException $exception ) {
+			$this->report_missing_store_context( __METHOD__, $exception );
+			return $this->defaults( $schema_id );
+		}
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function get( string $schema_id, string $field_id, string $tag = '', $default = '', array $context = array() ) {
-		return $this->store( $schema_id, $context )->get( $field_id, $tag, $default );
+		try {
+			return $this->store( $schema_id, $context )->get( $field_id, $tag, $default );
+		} catch ( MissingStoreContextException $exception ) {
+			$this->report_missing_store_context( __METHOD__, $exception );
+			return $this->default_value( $schema_id, $field_id, $tag, $default );
+		}
 	}
 
 	private function mount_schema( CompiledSchema $compiled, bool $force = false ): void {
@@ -233,5 +261,31 @@ final class Runtime {
 		}
 
 		$this->missing_container_notice[ $compiled->id() ] = true;
+	}
+
+	/**
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	private function default_value( string $schema_id, string $field_id, string $tag = '', $default = '' ) {
+		$defaults = $this->defaults( $schema_id );
+
+		if ( ! array_key_exists( $field_id, $defaults ) ) {
+			return $default;
+		}
+
+		$value = $defaults[ $field_id ];
+
+		if ( is_array( $value ) && '' !== $tag ) {
+			return $value[ $tag ] ?? $default;
+		}
+
+		return $value;
+	}
+
+	private function report_missing_store_context( string $method, MissingStoreContextException $exception ): void {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			_doing_it_wrong( $method, $exception->getMessage(), '0.2.0' );
+		}
 	}
 }

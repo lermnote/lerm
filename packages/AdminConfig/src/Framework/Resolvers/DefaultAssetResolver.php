@@ -1,12 +1,12 @@
 <?php // phpcs:disable WordPress.Files.FileName
 /**
- * Default asset resolver implementation 鈥?resolves relative to the framework's
+ * Default asset resolver implementation, resolving relative to the framework's
  * own directory, reading the host's version constant when available.
  *
  * Replace with a custom implementation to host assets outside the framework
  * directory or to use a different versioning strategy:
  *
- *   $framework->mount_options_page( $def, null, new MyPluginAssetResolver() );
+ *   $framework = new Framework( new MyPluginAssetResolver() );
  *
  * @package Lerm\AdminConfig
  */
