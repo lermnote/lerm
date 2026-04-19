@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Admin Config Schema Demo
- * Description: Demonstrates site options, comment meta, and network options with Lerm Admin Config.
+ * Description: Demonstrates options pages, comment/profile/taxonomy meta, network settings, and extension APIs with Lerm Admin Config.
  * Version: 0.1.0
  * Author: Lerm
  * License: GPL-2.0-or-later
@@ -42,6 +42,7 @@ if ( '' === $autoload ) {
 
 require_once $autoload;
 
+require_once __DIR__ . '/src/DemoExtensions.php';
 require_once __DIR__ . '/src/SchemaDemoPlugin.php';
 
 $runtime = \Lerm\AdminConfig\WordPress\PluginBootstrap::boot( __FILE__ );

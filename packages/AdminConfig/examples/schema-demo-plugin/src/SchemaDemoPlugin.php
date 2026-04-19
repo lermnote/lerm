@@ -18,12 +18,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class SchemaDemoPlugin {
 
 	public static function register( Runtime $runtime ): void {
+		DemoExtensions::register( $runtime );
+
 		if ( ! $runtime->has( 'acme-demo-settings' ) ) {
-			$runtime->register( self::settings_schema() );
+			$runtime->register( self::settings_schema( $runtime ) );
 		}
 
 		if ( ! $runtime->has( 'acme-demo-comment' ) ) {
 			$runtime->register( self::comment_schema() );
+		}
+
+		if ( ! $runtime->has( 'acme-demo-profile' ) ) {
+			$runtime->register( self::profile_schema( $runtime ) );
+		}
+
+		if ( ! $runtime->has( 'acme-demo-taxonomy' ) ) {
+			$runtime->register( self::taxonomy_schema( $runtime ) );
 		}
 
 		if ( is_multisite() && ! $runtime->has( 'acme-demo-network-settings' ) ) {
@@ -34,7 +44,7 @@ final class SchemaDemoPlugin {
 	/**
 	 * @return array<string, mixed>
 	 */
-	private static function settings_schema(): array {
+	private static function settings_schema( Runtime $runtime ): array {
 		return array(
 			'id'        => 'acme-demo-settings',
 			'title'     => __( 'Admin Config Demo', 'lerm-admin-config-demo' ),
@@ -86,6 +96,28 @@ final class SchemaDemoPlugin {
 								'split'   => __( 'Split', 'lerm-admin-config-demo' ),
 							),
 							'default'     => 'compact',
+						),
+						array(
+							'id'          => 'tone_preset',
+							'type'        => 'select',
+							'label'       => __( 'Tone preset', 'lerm-admin-config-demo' ),
+							'description' => __( 'Choices resolved from a runtime data source before schema registration.', 'lerm-admin-config-demo' ),
+							'choices'     => $runtime->resolve_data_source( 'tone_presets', array( 'experimental' => true ) ),
+							'default'     => 'calm',
+						),
+					),
+				),
+				'extensions' => array(
+					'title'       => __( 'Extension API', 'lerm-admin-config-demo' ),
+					'description' => __( 'This section is wired through the public runtime extension methods.', 'lerm-admin-config-demo' ),
+					'fields'      => array(
+						array(
+							'id'          => 'release_slug',
+							'type'        => 'slug_text',
+							'label'       => __( 'Release slug', 'lerm-admin-config-demo' ),
+							'description' => __( 'Custom field type registered by the demo plugin. Values are sanitized into slugs and validated for length.', 'lerm-admin-config-demo' ),
+							'default'     => 'spring-launch',
+							'placeholder' => 'spring-launch',
 						),
 					),
 				),
@@ -327,6 +359,104 @@ final class SchemaDemoPlugin {
 							'label'       => __( 'Staff note', 'lerm-admin-config-demo' ),
 							'description' => __( 'Internal note saved into comment meta.', 'lerm-admin-config-demo' ),
 							'default'     => '',
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function profile_schema( Runtime $runtime ): array {
+		return array(
+			'id'        => 'acme-demo-profile',
+			'title'     => __( 'Profile Demo Settings', 'lerm-admin-config-demo' ),
+			'container' => array(
+				'type'       => 'profile',
+				'title'      => __( 'Profile Demo Settings', 'lerm-admin-config-demo' ),
+				'capability' => 'edit_user',
+			),
+			'store'     => array(
+				'type' => 'user_meta',
+				'key'  => 'acme_demo_profile_settings',
+			),
+			'sections'  => array(
+				'preferences' => array(
+					'title'       => __( 'Preferences', 'lerm-admin-config-demo' ),
+					'description' => __( 'User-level settings stored through the same compiled schema pipeline.', 'lerm-admin-config-demo' ),
+					'fields'      => array(
+						array(
+							'id'          => 'public_badge',
+							'type'        => 'switcher',
+							'label'       => __( 'Show public badge', 'lerm-admin-config-demo' ),
+							'description' => __( 'Example user-meta switch stored by the profile container.', 'lerm-admin-config-demo' ),
+							'default'     => 0,
+						),
+						array(
+							'id'          => 'profile_slug',
+							'type'        => 'slug_text',
+							'label'       => __( 'Profile slug', 'lerm-admin-config-demo' ),
+							'description' => __( 'Same custom field type reused inside a different container.', 'lerm-admin-config-demo' ),
+							'default'     => 'team-member',
+						),
+						array(
+							'id'          => 'profile_tone',
+							'type'        => 'select',
+							'label'       => __( 'Profile tone', 'lerm-admin-config-demo' ),
+							'description' => __( 'Select choices resolved through the demo data source registry.', 'lerm-admin-config-demo' ),
+							'choices'     => $runtime->resolve_data_source( 'tone_presets' ),
+							'default'     => 'clean',
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function taxonomy_schema( Runtime $runtime ): array {
+		return array(
+			'id'        => 'acme-demo-taxonomy',
+			'title'     => __( 'Category Demo Settings', 'lerm-admin-config-demo' ),
+			'container' => array(
+				'type'       => 'taxonomy',
+				'taxonomy'   => array( 'category' ),
+				'capability' => 'manage_categories',
+			),
+			'store'     => array(
+				'type' => 'term_meta',
+				'key'  => 'acme_demo_category_settings',
+			),
+			'sections'  => array(
+				'presentation' => array(
+					'title'       => __( 'Presentation', 'lerm-admin-config-demo' ),
+					'description' => __( 'Taxonomy term meta rendered on category create and edit screens.', 'lerm-admin-config-demo' ),
+					'fields'      => array(
+						array(
+							'id'          => 'featured_category',
+							'type'        => 'switcher',
+							'label'       => __( 'Featured category', 'lerm-admin-config-demo' ),
+							'description' => __( 'Marks a category as featured in downstream templates.', 'lerm-admin-config-demo' ),
+							'default'     => 0,
+						),
+						array(
+							'id'          => 'category_slug',
+							'type'        => 'slug_text',
+							'label'       => __( 'Custom category slug', 'lerm-admin-config-demo' ),
+							'description' => __( 'Demonstrates custom field type reuse in taxonomy term meta.', 'lerm-admin-config-demo' ),
+							'default'     => 'featured-category',
+						),
+						array(
+							'id'          => 'category_tone',
+							'type'        => 'select',
+							'label'       => __( 'Category tone', 'lerm-admin-config-demo' ),
+							'description' => __( 'Resolved from the runtime data-source registry.', 'lerm-admin-config-demo' ),
+							'choices'     => $runtime->resolve_data_source( 'tone_presets' ),
+							'default'     => 'bold',
 						),
 					),
 				),

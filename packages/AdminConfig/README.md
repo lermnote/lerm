@@ -79,6 +79,61 @@ Modules are activated on demand from schema field usage, so a schema that only u
 
 Schemas are expected to use the native `label`, `description`, `group_heading`, `choices`, `groups`, `container`, and `store` keys directly.
 
+## Public Extension API
+
+The shared runtime now exposes explicit extension methods for third-party integrations:
+
+- `register_field_type( $type, $definition )`
+- `register_validator( $type, $validator )`
+- `register_field_module( $module )`
+- `register_store_factory( $type, $factory )`
+- `register_container( $container )`
+- `register_data_source( $source_id, $resolver )`
+- `resolve_data_source( $source_id, $args = array() )`
+
+These methods live on `Lerm\AdminConfig\WordPress\Runtime`, so plugin authors and embedded themes can stay on the package boundary instead of reaching into internals.
+
+```php
+use Lerm\AdminConfig\WordPress\Runtime;
+
+$runtime->register_data_source(
+	'tone_presets',
+	static function (): array {
+		return array(
+			'calm'  => 'Calm',
+			'bold'  => 'Bold',
+			'clean' => 'Clean',
+		);
+	}
+);
+
+$runtime->register_field_type(
+	'slug_text',
+	array(
+		'render' => static function ( array $field, $value, string $field_name, \Lerm\AdminConfig\Framework\Admin\OptionsPage $page ): void {
+			printf(
+				'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text">',
+				esc_attr( (string) ( $field['id'] ?? '' ) ),
+				esc_attr( $field_name ),
+				esc_attr( is_scalar( $value ) ? (string) $value : '' )
+			);
+		},
+		'sanitize' => static fn ( array $field, $value, bool $strict, \Lerm\AdminConfig\Framework\Stores\OptionStore $store ) => sanitize_title( (string) $value ),
+	)
+);
+
+$runtime->register_validator(
+	'slug_text',
+	static function ( array $field, $value, bool $strict, \Lerm\AdminConfig\Framework\Stores\OptionStore $store ) {
+		return strlen( (string) $value ) >= 3 ? $value : new WP_Error( 'slug_too_short' );
+	}
+);
+```
+
+Late registration is supported: if you register a schema after `boot()`, or register a container after some schemas were already compiled, the runtime will mount matching schemas when the needed container becomes available.
+
+See [docs/extension-api.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-api.md) for the first extension guide.
+
 ## Boot modes
 
 ### Embedded mode
@@ -189,8 +244,11 @@ See `examples/schema-demo-plugin/` for a runnable reference plugin that register
 
 - one site-level options page
 - one comment meta box
+- one user profile screen
+- one taxonomy term settings screen
 - one multisite network settings page
 - advanced field examples driven by the same runtime
+- a custom field type, validator, and named data source through the public runtime API
 
 It is useful as the starting point for plugin authors consuming this package directly.
 
@@ -200,7 +258,7 @@ See `examples/embedded-theme-demo/` for an embedded-mode reference that boots th
 
 ## Next milestones
 
-1. Add first-class extension guides for custom field types, validators, stores, and container adapters.
+1. Expand the extension guides for custom field types, validators, stores, and container adapters.
 2. Expand examples and smoke coverage for profile, taxonomy, comment, and network workflows.
 3. Introduce async data-source hooks and richer validation pipelines for AJAX-backed fields.
 4. Keep commerce concerns such as licensing and updates in a separate layer on top of the runtime.

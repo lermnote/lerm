@@ -6,8 +6,13 @@ Reference plugin demonstrating how to consume `lerm/admin-config` as a WordPress
 
 - a regular admin options page
 - a comment edit-screen meta box
+- a user profile section
+- a category term settings screen
 - a multisite network options page
 - advanced field examples for `typography`, `icon`, `accordion`, and `tabbed`
+- a custom `slug_text` field type registered through the runtime
+- a field validator registered through the runtime
+- a named data source used to resolve select choices before schema registration
 
 ## Autoload resolution
 
@@ -27,3 +32,12 @@ The site options page includes:
 - an `icon` schema using curated Dashicons choices
 - an `accordion` schema with per-panel nested fields
 - a `tabbed` schema with alternate content recipes
+
+## Extension API coverage
+
+The example plugin also demonstrates:
+
+- `register_field_type()` with a minimal custom slug input
+- `register_validator()` for custom field-level validation
+- `register_data_source()` and `resolve_data_source()` for reusable choices
+- the same custom field type reused across options, profile, and taxonomy containers
