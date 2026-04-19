@@ -222,6 +222,10 @@
 	margin-bottom: 0;
 }
 
+.lerm-settings-form-notice {
+	margin: 0 0 16px;
+}
+
 .lerm-settings-actions__hint {
 	font-size: 12px;
 	color: #64748b;
@@ -350,6 +354,32 @@
 	min-width: 0;
 	padding: 18px 20px;
 	background: #fff;
+}
+
+.lerm-settings-row.is-invalid > th,
+.lerm-settings-row.is-invalid > td,
+.lerm-settings-stack .lerm-settings-row.is-invalid .lerm-settings-row__head,
+.lerm-settings-stack .lerm-settings-row.is-invalid .lerm-settings-row__body {
+	background: #fff7f7;
+}
+
+.lerm-settings-row.is-invalid > th,
+.lerm-settings-table .lerm-settings-row.is-invalid > th {
+	border-color: #fca5a5;
+}
+
+.lerm-settings-row.is-invalid > td,
+.lerm-settings-table .lerm-settings-row.is-invalid > td,
+.lerm-settings-stack .lerm-settings-row.is-invalid {
+	border-color: #fca5a5;
+}
+
+.lerm-field-error {
+	margin: 10px 0 0;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.45;
+	color: #b91c1c;
 }
 
 .lerm-settings-stack .lerm-settings-row--nolabel {

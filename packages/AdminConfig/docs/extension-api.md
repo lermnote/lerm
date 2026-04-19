@@ -37,7 +37,7 @@ Validators receive:
 function ( array $field, $value, bool $strict, OptionStore $store )
 ```
 
-Return the validated value on success. Returning `WP_Error` currently falls back to the field default until a richer field-level error bag lands.
+Return the validated value on success. Returning `WP_Error` records the message in the store validation bag, aborts the current save/import request, and surfaces the error back to the active admin container.
 
 ## Data sources
 

@@ -15,6 +15,7 @@ use Lerm\AdminConfig\Stores\StoreResolver;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -77,11 +78,23 @@ final class ProfileContainer implements Container {
 		foreach ( $this->schemas as $schema ) {
 			$container = $schema->container();
 			$title     = isset( $container['title'] ) && is_scalar( $container['title'] ) ? (string) $container['title'] : __( 'Profile Settings', 'lerm' );
-			$store      = $this->stores->store( $schema, array( 'user_id' => $user->ID ) );
-			$renderer   = $this->renderer( $schema, $user->ID );
+			$store     = $this->stores->store( $schema, array( 'user_id' => $user->ID ) );
+			$renderer  = $this->renderer( $schema, $user->ID );
+			$flash     = ValidationFlash::consume( 'profile', $schema->id(), (string) $user->ID );
+			$values    = ValidationFlash::render_values( $store->all(), $flash );
+			$errors    = ValidationFlash::field_errors( $flash );
+			$notice    = ValidationFlash::notice( $flash );
 
 			echo '<h2>' . esc_html( $title ) . '</h2>';
 			echo '<table class="form-table" role="presentation">';
+
+			if ( null !== $notice ) {
+				printf(
+					'<tr class="user-admin-config-notice"><td colspan="2"><div class="notice %1$s inline"><p>%2$s</p></div></td></tr>',
+					esc_attr( $notice['class'] ),
+					esc_html( $notice['message'] )
+				);
+			}
 
 			foreach ( PageSchema::sections( $schema->definition() ) as $section_id => $section ) {
 				$section_title = isset( $section['title'] ) && is_scalar( $section['title'] ) ? (string) $section['title'] : '';
@@ -95,10 +108,11 @@ final class ProfileContainer implements Container {
 
 				$renderer->render_fields(
 					PageSchema::section_fields( $section ),
-					$store->all(),
+					$values,
 					(string) $section_id,
 					false,
-					'table'
+					'table',
+					$errors
 				);
 			}
 
@@ -136,10 +150,37 @@ final class ProfileContainer implements Container {
 			$submitted   = isset( $_POST[ $storage_key ] ) && is_array( $_POST[ $storage_key ] )
 				? wp_unslash( $_POST[ $storage_key ] )
 				: array();
+			$success     = $store->import_all( $submitted );
 
-			foreach ( array_keys( PageSchema::sections( $schema->definition() ) ) as $section_id ) {
-				$store->save_section( (string) $section_id, $submitted );
+			if ( $store->has_validation_errors() ) {
+				ValidationFlash::store(
+					'profile',
+					$schema->id(),
+					(string) $user_id,
+					array(
+						'class'     => 'notice-error',
+						'message'   => __( 'Please review the highlighted profile fields before saving again.', 'lerm' ),
+						'errors'    => ValidationFlash::collapse_errors( $store->validation_errors() ),
+						'submitted' => $submitted,
+					)
+				);
+				continue;
 			}
+
+			if ( ! $success ) {
+				ValidationFlash::store(
+					'profile',
+					$schema->id(),
+					(string) $user_id,
+					array(
+						'class'   => 'notice-warning',
+						'message' => __( 'Unable to save these profile settings right now.', 'lerm' ),
+					)
+				);
+				continue;
+			}
+
+			ValidationFlash::clear( 'profile', $schema->id(), (string) $user_id );
 		}
 	}
 

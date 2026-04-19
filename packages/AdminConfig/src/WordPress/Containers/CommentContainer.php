@@ -17,6 +17,7 @@ use Lerm\AdminConfig\Framework\Backends\ArrayBackend;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Stores\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -102,10 +103,21 @@ final class CommentContainer implements Container {
 		$store        = $this->stores->store( $schema, array( 'comment_id' => $comment->comment_ID ) );
 		$renderer     = $this->renderer( $schema, $store );
 		$sections     = PageSchema::sections( $schema->definition() );
-		$values       = $store->all();
+		$flash        = ValidationFlash::consume( 'comment', $schema->id(), (string) $comment->comment_ID );
+		$values       = ValidationFlash::render_values( $store->all(), $flash );
+		$errors       = ValidationFlash::field_errors( $flash );
+		$notice       = ValidationFlash::notice( $flash );
 		$show_titles  = count( $sections ) > 1;
 
 		echo '<div class="lerm-comment-metabox lerm-metabox--stack">';
+
+		if ( null !== $notice ) {
+			printf(
+				'<div class="notice %1$s inline"><p>%2$s</p></div>',
+				esc_attr( $notice['class'] ),
+				esc_html( $notice['message'] )
+			);
+		}
 
 		foreach ( $sections as $section_id => $section ) {
 			$title       = isset( $section['title'] ) && is_scalar( $section['title'] ) ? (string) $section['title'] : '';
@@ -124,7 +136,8 @@ final class CommentContainer implements Container {
 				$values,
 				(string) $section_id,
 				false,
-				'stack'
+				'stack',
+				$errors
 			);
 		}
 
@@ -158,10 +171,37 @@ final class CommentContainer implements Container {
 			$submitted   = isset( $_POST[ $storage_key ] ) && is_array( $_POST[ $storage_key ] )
 				? wp_unslash( $_POST[ $storage_key ] )
 				: array();
+			$success     = $store->import_all( $submitted );
 
-			foreach ( array_keys( PageSchema::sections( $schema->definition() ) ) as $section_id ) {
-				$store->save_section( (string) $section_id, $submitted );
+			if ( $store->has_validation_errors() ) {
+				ValidationFlash::store(
+					'comment',
+					$schema->id(),
+					(string) $comment_id,
+					array(
+						'class'     => 'notice-error',
+						'message'   => __( 'Please review the highlighted comment fields before saving again.', 'lerm' ),
+						'errors'    => ValidationFlash::collapse_errors( $store->validation_errors() ),
+						'submitted' => $submitted,
+					)
+				);
+				continue;
 			}
+
+			if ( ! $success ) {
+				ValidationFlash::store(
+					'comment',
+					$schema->id(),
+					(string) $comment_id,
+					array(
+						'class'   => 'notice-warning',
+						'message' => __( 'Unable to save these comment settings right now.', 'lerm' ),
+					)
+				);
+				continue;
+			}
+
+			ValidationFlash::clear( 'comment', $schema->id(), (string) $comment_id );
 		}
 	}
 

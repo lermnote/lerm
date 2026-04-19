@@ -42,7 +42,7 @@
 	/**
 	 * @typedef {{
 	 *   success: boolean,
-	 *   data: { values?: Record<string, unknown>, message?: string, json?: string }
+	 *   data: { values?: Record<string, unknown>, message?: string, json?: string, fieldErrors?: Record<string, string|string[]> }
 	 * }} AjaxResponse
 	 */
 
@@ -1219,13 +1219,13 @@
 		const body = new FormData(form);
 		body.set('action', action);
 		for (const [k, v] of Object.entries(extras)) body.set(k, v);
-		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(r => {
-			if (!r.ok) throw new Error('Network error: ' + r.status);
-			return r.text();
-		}).then(text => {
+		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(async (r) => {
+			const text = await r.text();
+
 			try {
 				return /** @type {AjaxResponse} */ (JSON.parse(text));
 			} catch {
+				if (!r.ok) throw new Error('Network error: ' + r.status);
 				throw new Error('Invalid JSON response: ' + text.slice(0, 120));
 			}
 		});
@@ -1535,6 +1535,76 @@
 		toggleDependencies(form);
 	};
 
+	/**
+	 * @param {HTMLElement} row
+	 */
+	const clearFieldErrorRow = (row) => {
+		row.classList.remove('is-invalid');
+		row.removeAttribute('data-lerm-field-error');
+		dom.findAll('[data-lerm-field-error-message]', row).forEach((el) => el.remove());
+		dom.findAll('input, select, textarea', row).forEach((el) => el.removeAttribute('aria-invalid'));
+	};
+
+	/** @param {HTMLFormElement} form */
+	const clearFieldErrors = (form) => {
+		dom.findAll('[data-field-id]', form).forEach((row) => clearFieldErrorRow(/** @type {HTMLElement} */ (row)));
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {string} fieldId
+	 * @returns {HTMLElement|null}
+	 */
+	const findFieldRow = (form, fieldId) => {
+		for (const row of dom.findAll('[data-field-id]', form)) {
+			if (getData(row, 'field-id') === fieldId) return /** @type {HTMLElement} */ (row);
+		}
+
+		return null;
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {Record<string, string|string[]>} fieldErrors
+	 */
+	const applyFieldErrors = (form, fieldErrors = {}) => {
+		clearFieldErrors(form);
+
+		let firstRow = null;
+
+		for (const [fieldId, rawMessage] of Object.entries(fieldErrors)) {
+			const row = findFieldRow(form, String(fieldId));
+			if (!row) continue;
+
+			const message = (Array.isArray(rawMessage) ? rawMessage : [rawMessage])
+				.map((item) => String(item || '').trim())
+				.filter(Boolean)
+				.join(' ');
+
+			if (!message) continue;
+
+			if (!firstRow) firstRow = row;
+
+			row.classList.add('is-invalid');
+			setData(row, 'lerm-field-error', '1');
+
+			const target = /** @type {HTMLElement|null} */ (
+				dom.find('.lerm-settings-row__body', row)
+				|| dom.find('td', row)
+				|| row
+			);
+
+			target?.appendChild(dom.create('p', {
+				class: 'lerm-field-error',
+				'data-lerm-field-error-message': '1',
+			}, [message]));
+
+			dom.findAll('input, select, textarea', row).forEach((el) => el.setAttribute('aria-invalid', 'true'));
+		}
+
+		firstRow?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+	};
+
 	// ─── Backup Tools ─────────────────────────────────────────────────────────
 
 	/** @param {HTMLFormElement} form */
@@ -1561,14 +1631,17 @@
 				e.preventDefault();
 				if (!window.confirm(cfg.confirmImport)) return;
 				const json = String(/** @type {HTMLInputElement|null} */(dom.find('[data-lerm-backup-import-input]', form))?.value ?? '');
+				clearFieldErrors(form);
 				setBusy(form, true, cfg.resetting);
 				setStatus(form, 'saving', cfg.statusSaving);
 				request(form, cfg.importAction, { backup_json: json })
 					.then(response => {
 						if (!response?.success) {
+							applyFieldErrors(form, /** @type {Record<string, string|string[]>} */ (response?.data?.fieldErrors ?? {}));
 							setStatus(form, 'error', response?.data?.message || cfg.importError);
 							return;
 						}
+						clearFieldErrors(form);
 						applyFieldValues(form, response.data.values ?? {});
 						saveFormSnapshot(form);
 						syncDirtyState(form);
@@ -1590,9 +1663,11 @@
 	 */
 	const handleSaveResponse = (form, response, successMsg, partialFieldIds = null) => {
 		if (!response?.success) {
+			applyFieldErrors(form, /** @type {Record<string, string|string[]>} */ (response?.data?.fieldErrors ?? {}));
 			setStatus(form, 'error', response?.data?.message || cfg.saveError);
 			return;
 		}
+		clearFieldErrors(form);
 		applyFieldValues(form, response.data.values ?? {});
 		if (Array.isArray(partialFieldIds) && partialFieldIds.length) {
 			mergeFormSnapshot(form, partialFieldIds);
@@ -1609,6 +1684,7 @@
 		form.addEventListener('submit', (e) => {
 			e.preventDefault();
 			triggerEditorSave(form);
+			clearFieldErrors(form);
 			setBusy(form, true, cfg.saving);
 			setStatus(form, 'saving', cfg.statusSaving);
 			request(form, cfg.saveAction)
@@ -1623,6 +1699,7 @@
 				const scope = getData(btn, 'lerm-reset') === 'all' ? 'all' : 'section';
 				if (!window.confirm(scope === 'all' ? cfg.confirmResetAll : cfg.confirmResetSection)) return;
 				triggerEditorSave(form);
+				clearFieldErrors(form);
 				setBusy(form, true, cfg.resetting);
 				setStatus(form, 'resetting', cfg.statusResetting);
 				request(form, cfg.resetAction, { reset_scope: scope })
@@ -1653,8 +1730,16 @@
 			});
 		});
 
-		form.addEventListener('input', () => syncDirtyState(form));
-		form.addEventListener('change', () => syncDirtyState(form));
+		form.addEventListener('input', (e) => {
+			syncDirtyState(form);
+			const row = /** @type {HTMLElement|null} */ ((/** @type {HTMLElement} */ (e.target))?.closest('[data-field-id]'));
+			if (row) clearFieldErrorRow(row);
+		});
+		form.addEventListener('change', (e) => {
+			syncDirtyState(form);
+			const row = /** @type {HTMLElement|null} */ ((/** @type {HTMLElement} */ (e.target))?.closest('[data-field-id]'));
+			if (row) clearFieldErrorRow(row);
+		});
 
 		const sorterList = /** @type {HTMLElement|null} */ (dom.find('.lerm-sorter-list', form));
 		if (sorterList) sorterList.addEventListener('sortupdate', () => syncDirtyState(form));

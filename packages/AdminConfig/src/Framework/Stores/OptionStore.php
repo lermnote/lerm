@@ -59,6 +59,25 @@ final class OptionStore {
 	private ?array $normalized_options = null;
 
 	/**
+	 * Field-level validation errors keyed by dotted field path.
+	 *
+	 * @var array<string, array<int, string>>
+	 */
+	private array $validation_errors = array();
+
+	/**
+	 * Whether validation/sanitize callbacks should be captured into the error bag.
+	 */
+	private bool $capture_validation_errors = false;
+
+	/**
+	 * Current field path stack used while sanitizing nested structures.
+	 *
+	 * @var array<int, string>
+	 */
+	private array $field_path_stack = array();
+
+	/**
 	 * @param array<string, mixed>  $definition  Page definition.
 	 * @param FieldTypeRegistry     $field_types Field type registry.
 	 * @param StorageBackend|null   $backend     Storage backend. Defaults to
@@ -78,6 +97,17 @@ final class OptionStore {
 	 */
 	public function storage_key(): string {
 		return $this->backend->key();
+	}
+
+	/**
+	 * @return array<string, array<int, string>>
+	 */
+	public function validation_errors(): array {
+		return $this->validation_errors;
+	}
+
+	public function has_validation_errors(): bool {
+		return ! empty( $this->validation_errors );
 	}
 
 	/**
@@ -152,18 +182,27 @@ final class OptionStore {
 			return false;
 		}
 
+		$this->begin_validation_capture();
 		$options = $this->raw();
 
-		foreach ( PageSchema::section_fields( $section ) as $field ) {
-			if ( ! $this->field_is_saved( $field ) ) {
-				continue;
+		try {
+			foreach ( PageSchema::section_fields( $section ) as $field ) {
+				if ( ! $this->field_is_saved( $field ) ) {
+					continue;
+				}
+
+				$field_id             = (string) $field['id'];
+				$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true, $field_id );
 			}
 
-			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true );
-		}
+			if ( $this->has_validation_errors() ) {
+				return false;
+			}
 
-		return $this->persist_options( $options );
+			return $this->persist_options( $options );
+		} finally {
+			$this->end_validation_capture();
+		}
 	}
 
 	/**
@@ -172,18 +211,27 @@ final class OptionStore {
 	 * @param array<string, mixed> $submitted Submitted values.
 	 */
 	public function import_all( array $submitted ): bool {
+		$this->begin_validation_capture();
 		$options = $this->raw();
 
-		foreach ( PageSchema::fields( $this->definition ) as $field ) {
-			if ( ! $this->field_is_saved( $field ) ) {
-				continue;
+		try {
+			foreach ( PageSchema::fields( $this->definition ) as $field ) {
+				if ( ! $this->field_is_saved( $field ) ) {
+					continue;
+				}
+
+				$field_id             = (string) $field['id'];
+				$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true, $field_id );
 			}
 
-			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true );
-		}
+			if ( $this->has_validation_errors() ) {
+				return false;
+			}
 
-		return $this->persist_options( $options );
+			return $this->persist_options( $options );
+		} finally {
+			$this->end_validation_capture();
+		}
 	}
 
 	/**
@@ -245,6 +293,7 @@ final class OptionStore {
 			return false;
 		}
 
+		$this->clear_validation_errors();
 		$options = $this->raw();
 
 		foreach ( PageSchema::section_fields( $section ) as $field ) {
@@ -272,6 +321,7 @@ final class OptionStore {
 			return false;
 		}
 
+		$this->clear_validation_errors();
 		$options = $this->raw();
 
 		foreach ( $fields as $field ) {
@@ -312,6 +362,7 @@ final class OptionStore {
 	 * Reset every field in the page to defaults.
 	 */
 	public function reset_all_sections(): bool {
+		$this->clear_validation_errors();
 		$options = $this->raw();
 
 		foreach ( PageSchema::fields( $this->definition ) as $field ) {
@@ -333,77 +384,90 @@ final class OptionStore {
 	 * @param mixed                $value Submitted value.
 	 * @return mixed
 	 */
-	private function sanitize_field_internal( array $field, $value, bool $strict ) {
+	private function sanitize_field_internal( array $field, $value, bool $strict, string $path = '' ) {
 		$type     = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
 		$default  = $field['default'] ?? '';
 		$callback = $this->field_types->sanitize_callback( $type );
+		$field_id  = isset( $field['id'] ) && is_scalar( $field['id'] ) ? (string) $field['id'] : '';
+		$path      = '' !== $path ? $path : $this->resolve_field_path( $field_id );
 
-		if ( is_callable( $callback ) ) {
-			$value = call_user_func( $callback, $field, $value, $strict, $this );
-		} else {
-			switch ( $type ) {
-				case 'switcher':
-					$value = ! empty( $value );
-					break;
+		$this->field_path_stack[] = $path;
 
-				case 'color':
-					$color = sanitize_hex_color( $this->string_value( $value ) );
-					$value = $color ? $color : $default;
-					break;
+		try {
+			if ( is_callable( $callback ) ) {
+				$value = call_user_func( $callback, $field, $value, $strict, $this );
 
-				case 'url':
-					$value = esc_url_raw( $this->string_value( $value, '', true ) );
-					break;
+				if ( is_wp_error( $value ) ) {
+					$this->record_error( $field, $value );
+					$value = $default;
+				}
+			} else {
+				switch ( $type ) {
+					case 'switcher':
+						$value = ! empty( $value );
+						break;
 
-				case 'button_set':
-				case 'radio':
-				case 'select':
-					$value = $this->sanitize_select_field( $field, $value, $strict );
-					break;
+					case 'color':
+						$color = sanitize_hex_color( $this->string_value( $value ) );
+						$value = $color ? $color : $default;
+						break;
 
-				case 'checkbox_list':
-					$choices = $strict ? PageSchema::choices( $field ) : array();
-					$values  = is_array( $value ) ? $value : array();
-					$clean   = array();
+					case 'url':
+						$value = esc_url_raw( $this->string_value( $value, '', true ) );
+						break;
 
-					foreach ( $values as $item ) {
-						$item = is_scalar( $item ) ? (string) $item : '';
+					case 'button_set':
+					case 'radio':
+					case 'select':
+						$value = $this->sanitize_select_field( $field, $value, $strict );
+						break;
 
-						if ( '' === $item ) {
-							continue;
+					case 'checkbox_list':
+						$choices = $strict ? PageSchema::choices( $field ) : array();
+						$values  = is_array( $value ) ? $value : array();
+						$clean   = array();
+
+						foreach ( $values as $item ) {
+							$item = is_scalar( $item ) ? (string) $item : '';
+
+							if ( '' === $item ) {
+								continue;
+							}
+
+							if ( ! $strict ) {
+								$clean[] = $item;
+								continue;
+							}
+
+							if ( array_key_exists( $item, $choices ) ) {
+								$clean[] = $item;
+							}
 						}
 
-						if ( ! $strict ) {
-							$clean[] = $item;
-							continue;
-						}
+						$value = array_values( array_unique( $clean ) );
+						break;
 
-						if ( array_key_exists( $item, $choices ) ) {
-							$clean[] = $item;
-						}
-					}
+					case 'number':
+						$value = $this->sanitize_number_field( $field, $value, $default );
+						break;
 
-					$value = array_values( array_unique( $clean ) );
-					break;
+					case 'textarea':
+						$value = sanitize_textarea_field( $this->string_value( $value ) );
+						break;
 
-				case 'number':
-					$value = $this->sanitize_number_field( $field, $value, $default );
-					break;
-
-				case 'textarea':
-					$value = sanitize_textarea_field( $this->string_value( $value ) );
-					break;
-
-				case 'text':
-				default:
-					$value = sanitize_text_field( $this->string_value( $value ) );
-					break;
+					case 'text':
+					default:
+						$value = sanitize_text_field( $this->string_value( $value ) );
+						break;
+				}
 			}
+
+			$value = $this->validate_field_value( $field, $value, $strict );
+
+			return $this->serialize_field_value( $field, $value );
+		} finally {
+			array_pop( $this->field_path_stack );
 		}
-
-		$value = $this->validate_field_value( $field, $value, $strict );
-
-		return $this->serialize_field_value( $field, $value );
 	}
 
 	/**
@@ -416,7 +480,7 @@ final class OptionStore {
 	 * @return mixed
 	 */
 	public function sanitize_field( array $field, $value ) {
-		return $this->sanitize_field_internal( $field, $value, true );
+		return $this->sanitize_field_internal( $field, $value, true, (string) ( $field['id'] ?? '' ) );
 	}
 
 	/**
@@ -440,6 +504,7 @@ final class OptionStore {
 		$validated = call_user_func( $callback, $field, $value, $strict, $this );
 
 		if ( is_wp_error( $validated ) ) {
+			$this->record_error( $field, $validated );
 			return $field['default'] ?? '';
 		}
 
@@ -544,11 +609,11 @@ final class OptionStore {
 	 * @param mixed                $value Submitted value.
 	 * @return array<string, mixed>
 	 */
-	public function sanitize_fieldset_field( array $field, $value, bool $strict ): array {
+	public function sanitize_fieldset_field( array $field, $value, bool $strict, string $base_path = '' ): array {
 		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
 		$data   = is_array( $value ) ? $value : array();
 
-		return $this->sanitize_nested_fields( $fields, $data, $strict );
+		return $this->sanitize_nested_fields( $fields, $data, $strict, $this->container_path( $field, $base_path ) );
 	}
 
 	/**
@@ -558,17 +623,18 @@ final class OptionStore {
 	 * @param mixed                $value Submitted value.
 	 * @return array<int, array<string, mixed>>
 	 */
-	public function sanitize_group_field( array $field, $value, bool $strict ): array {
+	public function sanitize_group_field( array $field, $value, bool $strict, string $base_path = '' ): array {
 		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
 		$items  = is_array( $value ) ? array_values( $value ) : array();
 		$clean  = array();
+		$path   = $this->container_path( $field, $base_path );
 
-		foreach ( $items as $item ) {
+		foreach ( $items as $index => $item ) {
 			if ( ! is_array( $item ) ) {
 				continue;
 			}
 
-			$sanitized = $this->sanitize_nested_fields( $fields, $item, $strict );
+			$sanitized = $this->sanitize_nested_fields( $fields, $item, $strict, $this->compose_path( $path, (string) $index ) );
 
 			if ( $this->nested_values_empty( $sanitized ) ) {
 				continue;
@@ -756,7 +822,7 @@ final class OptionStore {
 	 * @param array<string, mixed>             $submitted Submitted child values.
 	 * @return array<string, mixed>
 	 */
-	private function sanitize_nested_fields( array $fields, array $submitted, bool $strict ): array {
+	private function sanitize_nested_fields( array $fields, array $submitted, bool $strict, string $base_path = '' ): array {
 		$clean = array();
 
 		foreach ( $fields as $child ) {
@@ -765,10 +831,105 @@ final class OptionStore {
 			}
 
 			$child_id           = (string) $child['id'];
-			$clean[ $child_id ] = $this->sanitize_field_internal( $child, $submitted[ $child_id ] ?? null, $strict );
+			$clean[ $child_id ] = $this->sanitize_field_internal(
+				$child,
+				$submitted[ $child_id ] ?? null,
+				$strict,
+				$this->compose_path( $base_path, $child_id )
+			);
 		}
 
 		return $clean;
+	}
+
+	private function begin_validation_capture(): void {
+		$this->clear_validation_errors();
+		$this->capture_validation_errors = true;
+		$this->field_path_stack          = array();
+	}
+
+	private function end_validation_capture(): void {
+		$this->capture_validation_errors = false;
+		$this->field_path_stack          = array();
+	}
+
+	private function clear_validation_errors(): void {
+		$this->validation_errors = array();
+	}
+
+	private function resolve_field_path( string $field_id ): string {
+		return $this->compose_path( $this->current_field_path(), $field_id );
+	}
+
+	private function current_field_path(): string {
+		if ( empty( $this->field_path_stack ) ) {
+			return '';
+		}
+
+		return (string) end( $this->field_path_stack );
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 */
+	private function container_path( array $field, string $base_path = '' ): string {
+		$container_path = '' !== $base_path ? $base_path : $this->current_field_path();
+		$field_id       = isset( $field['id'] ) && is_scalar( $field['id'] ) ? (string) $field['id'] : '';
+
+		if ( '' === $container_path ) {
+			return $field_id;
+		}
+
+		if ( '' === $field_id || $container_path === $field_id || str_ends_with( $container_path, '.' . $field_id ) ) {
+			return $container_path;
+		}
+
+		return $this->compose_path( $container_path, $field_id );
+	}
+
+	private function compose_path( string $base_path, string $segment ): string {
+		if ( '' === $segment ) {
+			return $base_path;
+		}
+
+		if ( '' === $base_path ) {
+			return $segment;
+		}
+
+		return $base_path . '.' . $segment;
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 */
+	private function record_error( array $field, \WP_Error $error ): void {
+		if ( ! $this->capture_validation_errors ) {
+			return;
+		}
+
+		$path = $this->current_field_path();
+
+		if ( '' === $path && isset( $field['id'] ) && is_scalar( $field['id'] ) ) {
+			$path = (string) $field['id'];
+		}
+
+		if ( '' === $path ) {
+			return;
+		}
+
+		if ( ! isset( $this->validation_errors[ $path ] ) ) {
+			$this->validation_errors[ $path ] = array();
+		}
+
+		foreach ( $error->get_error_messages() as $message ) {
+			$message = is_scalar( $message ) ? trim( (string) $message ) : '';
+
+			if ( '' === $message || in_array( $message, $this->validation_errors[ $path ], true ) ) {
+				continue;
+			}
+
+			$this->validation_errors[ $path ][] = $message;
+		}
 	}
 
 	/**

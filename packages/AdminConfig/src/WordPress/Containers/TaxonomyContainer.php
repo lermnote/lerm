@@ -16,6 +16,7 @@ use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Backends\ArrayBackend;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -120,6 +121,18 @@ final class TaxonomyContainer implements Container {
 			);
 			$renderer = $this->renderer( $schema, $store );
 			$sections = PageSchema::sections( $schema->definition() );
+			$flash    = ValidationFlash::consume( 'taxonomy', $schema->id(), $this->add_flash_resource( $taxonomy ) );
+			$values   = ValidationFlash::render_values( $store->all(), $flash );
+			$errors   = ValidationFlash::field_errors( $flash );
+			$notice   = ValidationFlash::notice( $flash );
+
+			if ( null !== $notice ) {
+				printf(
+					'<div class="form-field term-admin-config-notice"><div class="notice %1$s inline"><p>%2$s</p></div></div>',
+					esc_attr( $notice['class'] ),
+					esc_html( $notice['message'] )
+				);
+			}
 
 			foreach ( $sections as $section_id => $section ) {
 				$title = isset( $section['title'] ) && is_scalar( $section['title'] ) ? (string) $section['title'] : '';
@@ -129,7 +142,7 @@ final class TaxonomyContainer implements Container {
 
 				foreach ( PageSchema::section_fields( $section ) as $field ) {
 					echo '<div class="form-field term-admin-config-field">';
-					$renderer->render_field( $field, $store->all(), (string) $section_id, 'stack' );
+					$renderer->render_field( $field, $values, (string) $section_id, 'stack', $errors );
 					echo '</div>';
 				}
 			}
@@ -143,6 +156,18 @@ final class TaxonomyContainer implements Container {
 			$store    = $this->stores->store( $schema, array( 'term_id' => $term->term_id ) );
 			$renderer = $this->renderer( $schema, $store );
 			$sections = PageSchema::sections( $schema->definition() );
+			$flash    = ValidationFlash::consume( 'taxonomy', $schema->id(), $this->edit_flash_resource( $term->term_id ) );
+			$values   = ValidationFlash::render_values( $store->all(), $flash );
+			$errors   = ValidationFlash::field_errors( $flash );
+			$notice   = ValidationFlash::notice( $flash );
+
+			if ( null !== $notice ) {
+				printf(
+					'<tr class="form-field term-admin-config-notice"><td colspan="2"><div class="notice %1$s inline"><p>%2$s</p></div></td></tr>',
+					esc_attr( $notice['class'] ),
+					esc_html( $notice['message'] )
+				);
+			}
 
 			foreach ( $sections as $section_id => $section ) {
 				$title = isset( $section['title'] ) && is_scalar( $section['title'] ) ? (string) $section['title'] : '';
@@ -155,10 +180,11 @@ final class TaxonomyContainer implements Container {
 
 				$renderer->render_fields(
 					PageSchema::section_fields( $section ),
-					$store->all(),
+					$values,
 					(string) $section_id,
 					false,
-					'table'
+					'table',
+					$errors
 				);
 			}
 
@@ -189,10 +215,38 @@ final class TaxonomyContainer implements Container {
 			$submitted   = isset( $_POST[ $storage_key ] ) && is_array( $_POST[ $storage_key ] )
 				? wp_unslash( $_POST[ $storage_key ] )
 				: array();
+			$resource    = $this->current_flash_resource( $taxonomy, $term_id );
+			$success     = $store->import_all( $submitted );
 
-			foreach ( array_keys( PageSchema::sections( $schema->definition() ) ) as $section_id ) {
-				$store->save_section( (string) $section_id, $submitted );
+			if ( $store->has_validation_errors() ) {
+				ValidationFlash::store(
+					'taxonomy',
+					$schema->id(),
+					$resource,
+					array(
+						'class'     => 'notice-error',
+						'message'   => __( 'Please review the highlighted term fields before saving again.', 'lerm' ),
+						'errors'    => ValidationFlash::collapse_errors( $store->validation_errors() ),
+						'submitted' => $submitted,
+					)
+				);
+				continue;
 			}
+
+			if ( ! $success ) {
+				ValidationFlash::store(
+					'taxonomy',
+					$schema->id(),
+					$resource,
+					array(
+						'class'   => 'notice-warning',
+						'message' => __( 'Unable to save these term settings right now.', 'lerm' ),
+					)
+				);
+				continue;
+			}
+
+			ValidationFlash::clear( 'taxonomy', $schema->id(), $resource );
 		}
 	}
 
@@ -285,5 +339,23 @@ final class TaxonomyContainer implements Container {
 
 	private function store_key( CompiledSchema $schema ): string {
 		return sanitize_key( (string) ( $schema->store()['key'] ?? $schema->id() ) );
+	}
+
+	private function add_flash_resource( string $taxonomy ): string {
+		return 'add:' . sanitize_key( $taxonomy );
+	}
+
+	private function edit_flash_resource( int $term_id ): string {
+		return 'edit:' . $term_id;
+	}
+
+	private function current_flash_resource( string $taxonomy, int $term_id ): string {
+		$posted_term_id = isset( $_POST['tag_ID'] ) ? absint( wp_unslash( $_POST['tag_ID'] ) ) : 0;
+
+		if ( $posted_term_id > 0 && $posted_term_id === $term_id ) {
+			return $this->edit_flash_resource( $term_id );
+		}
+
+		return $this->add_flash_resource( $taxonomy );
 	}
 }

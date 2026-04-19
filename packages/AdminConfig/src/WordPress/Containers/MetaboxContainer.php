@@ -15,6 +15,7 @@ use Lerm\AdminConfig\Stores\StoreResolver;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -93,6 +94,10 @@ final class MetaboxContainer implements Container {
 		$sections = PageSchema::sections( $schema->definition() );
 		$section_id = (string) array_key_first( $sections );
 		$section = '' !== $section_id ? ( $sections[ $section_id ] ?? null ) : null;
+		$flash   = ValidationFlash::consume( 'metabox', $schema->id(), (string) $post->ID );
+		$values  = ValidationFlash::render_values( $store->all(), $flash );
+		$errors  = ValidationFlash::field_errors( $flash );
+		$notice  = ValidationFlash::notice( $flash );
 
 		if ( ! is_array( $section ) ) {
 			return;
@@ -101,16 +106,24 @@ final class MetaboxContainer implements Container {
 		wp_nonce_field( $this->nonce_action( $schema ), $this->nonce_name( $schema ) );
 
 		echo '<div class="lerm-metabox lerm-metabox--stack">';
+		if ( null !== $notice ) {
+			printf(
+				'<div class="notice %1$s inline"><p>%2$s</p></div>',
+				esc_attr( $notice['class'] ),
+				esc_html( $notice['message'] )
+			);
+		}
 		$description = isset( $section['description'] ) && is_scalar( $section['description'] ) ? (string) $section['description'] : '';
 		if ( '' !== $description ) {
 			printf( '<p class="description">%s</p>', esc_html( $description ) );
 		}
 		$renderer->render_fields(
 			PageSchema::section_fields( $section ),
-			$store->all(),
+			$values,
 			$section_id,
 			false,
-			'stack'
+			'stack',
+			$errors
 		);
 		echo '</div>';
 	}
@@ -155,7 +168,37 @@ final class MetaboxContainer implements Container {
 				continue;
 			}
 
-			$store->save_section( $section_id, $submitted );
+			$success = $store->save_section( $section_id, $submitted );
+
+			if ( $store->has_validation_errors() ) {
+				ValidationFlash::store(
+					'metabox',
+					$schema->id(),
+					(string) $post_id,
+					array(
+						'class'     => 'notice-error',
+						'message'   => __( 'Please review the highlighted metabox fields before saving again.', 'lerm' ),
+						'errors'    => ValidationFlash::collapse_errors( $store->validation_errors() ),
+						'submitted' => $submitted,
+					)
+				);
+				continue;
+			}
+
+			if ( ! $success ) {
+				ValidationFlash::store(
+					'metabox',
+					$schema->id(),
+					(string) $post_id,
+					array(
+						'class'   => 'notice-warning',
+						'message' => __( 'Unable to save these metabox settings right now.', 'lerm' ),
+					)
+				);
+				continue;
+			}
+
+			ValidationFlash::clear( 'metabox', $schema->id(), (string) $post_id );
 		}
 	}
 

@@ -94,6 +94,7 @@ final class OptionsPage {
 		}
 
 		$tab = $this->posted_tab();
+		$subsection = $this->posted_subsection();
 
 		check_admin_referer( $this->nonce_action( $tab ) );
 
@@ -101,16 +102,47 @@ final class OptionsPage {
 			? wp_unslash( $_POST[ $this->option_name() ] )
 			: array();
 
-		$this->store->save_section( $tab, $submitted );
+		$success = $this->store->save_section( $tab, $submitted );
+		$status  = 'success';
+
+		if ( $this->store->has_validation_errors() ) {
+			$status = 'validation_error';
+			$this->store_flash(
+				array(
+					'tab'        => $tab,
+					'subsection' => $subsection,
+					'message'    => __( 'Please review the highlighted fields before saving again.', 'lerm' ),
+					'errors'     => $this->collapse_field_errors( $this->store->validation_errors() ),
+					'submitted'  => $submitted,
+				)
+			);
+		} elseif ( ! $success ) {
+			$status = 'error';
+			$this->store_flash(
+				array(
+					'tab'        => $tab,
+					'subsection' => $subsection,
+					'message'    => __( 'Unable to save this settings tab.', 'lerm' ),
+					'errors'     => array(),
+					'submitted'  => $submitted,
+				)
+			);
+		} else {
+			$this->clear_flash();
+		}
 
 		$redirect_url = add_query_arg(
 			array(
-				'page'                 => $this->page_slug(),
-				'tab'                  => $tab,
-				'options_framework_ok' => '1',
+				'page'                       => $this->page_slug(),
+				'tab'                        => $tab,
+				'lerm_admin_config_status'   => $status,
 			),
 			$this->admin_parent_url()
 		);
+
+		if ( '' !== $subsection ) {
+			$redirect_url = add_query_arg( 'subsection', $subsection, $redirect_url );
+		}
 
 		wp_safe_redirect( $redirect_url );
 		exit;
@@ -135,6 +167,17 @@ final class OptionsPage {
 			: array();
 
 		if ( ! $this->store->save_section( $tab, $submitted ) ) {
+			if ( $this->store->has_validation_errors() ) {
+				wp_send_json_error(
+					array(
+						'message'     => esc_html__( 'Please review the highlighted fields and try again.', 'lerm' ),
+						'fieldErrors' => $this->collapse_field_errors( $this->store->validation_errors() ),
+						'errors'      => $this->store->validation_errors(),
+					),
+					422
+				);
+			}
+
 			wp_send_json_error(
 				array( 'message' => esc_html__( 'Unable to save this settings tab.', 'lerm' ) ),
 				500
@@ -283,6 +326,17 @@ final class OptionsPage {
 		}
 
 		if ( ! $this->store->import_all( $decoded ) ) {
+			if ( $this->store->has_validation_errors() ) {
+				wp_send_json_error(
+					array(
+						'message'     => esc_html__( 'Please review the highlighted fields before importing again.', 'lerm' ),
+						'fieldErrors' => $this->collapse_field_errors( $this->store->validation_errors() ),
+						'errors'      => $this->store->validation_errors(),
+					),
+					422
+				);
+			}
+
 			wp_send_json_error(
 				array( 'message' => esc_html__( 'Unable to import the provided settings JSON.', 'lerm' ) ),
 				500
@@ -402,6 +456,7 @@ final class OptionsPage {
 		$sections     = PageSchema::sections( $this->definition );
 		$current_tab  = $this->current_tab();
 		$values       = $this->store->all();
+		$flash        = $this->consume_flash();
 		?>
 		<div class="wrap lerm-settings-wrap">
 			<div class="lerm-settings-shell">
@@ -465,6 +520,9 @@ final class OptionsPage {
 							$section_groups  = $this->group_fields( $section, $section_fields );
 							$use_subsections = $this->section_uses_subsections( $section, $section_groups );
 							$current_subsection = $use_subsections ? $this->current_subsection_for_section( (string) $section_id, $section_groups ) : '';
+							$section_errors = $this->section_flash_errors( $flash, (string) $section_id );
+							$section_values = $this->section_render_values( $values, $flash, (string) $section_id );
+							$section_notice = $this->section_flash_notice( $flash, (string) $section_id );
 							?>
 						<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
 							data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
@@ -480,6 +538,12 @@ final class OptionsPage {
 								<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $section_id ); ?>">
 								<input type="hidden" name="lerm_settings_subsection" value="<?php echo esc_attr( $current_subsection ); ?>">
 								<?php wp_nonce_field( $this->nonce_action( $section_id ) ); ?>
+
+								<?php if ( null !== $section_notice ) : ?>
+									<div class="lerm-settings-form-notice notice <?php echo esc_attr( $section_notice['class'] ); ?> inline">
+										<p><?php echo esc_html( $section_notice['message'] ); ?></p>
+									</div>
+								<?php endif; ?>
 
 								<div class="lerm-settings-sticky-wrap" data-lerm-sticky-wrap>
 									<div class="lerm-settings-actions lerm-settings-actions--sticky lerm-settings-sticky-bar" data-lerm-sticky-bar>
@@ -514,7 +578,7 @@ final class OptionsPage {
 												<?php echo (string) $group['id'] !== $current_subsection ? 'hidden' : ''; ?>>
 												<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) $group['label'] ); ?>">
 													<?php if ( ! empty( $group['fields'] ) ) : ?>
-														<?php $this->render_fields( (array) $group['fields'], $values, (string) $section_id, $this->subsection_uses_group_headings( (array) $group['fields'], (string) $group['label'] ), 'stack' ); ?>
+														<?php $this->render_fields( (array) $group['fields'], $section_values, (string) $section_id, $this->subsection_uses_group_headings( (array) $group['fields'], (string) $group['label'] ), 'stack', $section_errors ); ?>
 													<?php else : ?>
 														<div class="lerm-settings-empty-group"><?php esc_html_e( 'No settings in this group yet.', 'lerm' ); ?></div>
 													<?php endif; ?>
@@ -524,7 +588,7 @@ final class OptionsPage {
 									</div>
 								<?php else : ?>
 									<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ); ?>">
-										<?php $this->render_fields( $section_fields, $values, (string) $section_id, true, 'stack' ); ?>
+										<?php $this->render_fields( $section_fields, $section_values, (string) $section_id, true, 'stack', $section_errors ); ?>
 									</div>
 								<?php endif; ?>
 
@@ -659,7 +723,7 @@ final class OptionsPage {
 	 * @param bool                             $show_group_headings Whether group headings should be rendered.
 	 * @param string                           $layout Layout mode.
 	 */
-	public function render_fields( array $fields, array $values, string $section_id = '', bool $show_group_headings = true, string $layout = 'table' ): void {
+	public function render_fields( array $fields, array $values, string $section_id = '', bool $show_group_headings = true, string $layout = 'table', array $field_errors = array() ): void {
 		$current_group_heading = '';
 
 		foreach ( $fields as $field ) {
@@ -681,7 +745,7 @@ final class OptionsPage {
 				}
 			}
 
-			$this->render_field( $field, $values, $section_id, $layout );
+			$this->render_field( $field, $values, $section_id, $layout, $field_errors );
 		}
 	}
 
@@ -693,17 +757,18 @@ final class OptionsPage {
 	 * @param string               $section_id Current section ID.
 	 * @param string               $layout Layout mode.
 	 */
-	public function render_field( array $field, array $values, string $section_id = '', string $layout = 'table' ): void {
+	public function render_field( array $field, array $values, string $section_id = '', string $layout = 'table', array $field_errors = array() ): void {
 		$field_id    = (string) $field['id'];
 		$field_type  = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
 		$field_name  = $this->option_name() . '[' . $field_id . ']';
 		$field_value = $values[ $field_id ] ?? ( $field['default'] ?? '' );
 		$description = (string) ( $field['description'] ?? '' );
+		$field_error = $this->field_error_message( $field_errors, $field_id );
 		$dependency  = (string) ( $field['dependency_field'] ?? '' );
 		$dep_value   = (string) ( $field['dependency_value'] ?? '1' );
 		$label       = isset( $field['label'] ) ? (string) $field['label'] : '';
 		$row_attrs   = array(
-			'class="lerm-settings-row"',
+			'class="lerm-settings-row' . ( '' !== $field_error ? ' is-invalid' : '' ) . '"',
 			'data-field-id="' . esc_attr( $field_id ) . '"',
 			'data-field-type="' . esc_attr( $field_type ) . '"',
 		);
@@ -767,6 +832,10 @@ final class OptionsPage {
 
 		if ( $description ) {
 			printf( '<p class="description">%s</p>', esc_html( $description ) );
+		}
+
+		if ( '' !== $field_error ) {
+			printf( '<p class="lerm-field-error" data-lerm-field-error-message>%s</p>', esc_html( $field_error ) );
 		}
 
 		if ( 'stack' === $layout ) {
@@ -1378,6 +1447,134 @@ final class OptionsPage {
 			'order'   => $order,
 			'enabled' => $enabled,
 		);
+	}
+
+	/**
+	 * @param array<string, mixed>               $values
+	 * @param array<string, mixed>|null          $flash
+	 * @return array<string, mixed>
+	 */
+	private function section_render_values( array $values, ?array $flash, string $section_id ): array {
+		if ( ! is_array( $flash ) || (string) ( $flash['tab'] ?? '' ) !== $section_id ) {
+			return $values;
+		}
+
+		$submitted = is_array( $flash['submitted'] ?? null ) ? $flash['submitted'] : array();
+
+		return wp_parse_args( $submitted, $values );
+	}
+
+	/**
+	 * @param array<string, mixed>|null $flash
+	 * @return array<string, string>
+	 */
+	private function section_flash_errors( ?array $flash, string $section_id ): array {
+		if ( ! is_array( $flash ) || (string) ( $flash['tab'] ?? '' ) !== $section_id ) {
+			return array();
+		}
+
+		return is_array( $flash['errors'] ?? null ) ? $flash['errors'] : array();
+	}
+
+	/**
+	 * @param array<string, mixed>|null $flash
+	 * @return array{class: string, message: string}|null
+	 */
+	private function section_flash_notice( ?array $flash, string $section_id ): ?array {
+		if ( ! is_array( $flash ) || (string) ( $flash['tab'] ?? '' ) !== $section_id ) {
+			$status = isset( $_GET['lerm_admin_config_status'] ) ? sanitize_key( wp_unslash( $_GET['lerm_admin_config_status'] ) ) : '';
+
+			if ( 'success' !== $status ) {
+				return null;
+			}
+
+			return array(
+				'class'   => 'notice-success',
+				'message' => __( 'Settings saved.', 'lerm' ),
+			);
+		}
+
+		$message = isset( $flash['message'] ) && is_scalar( $flash['message'] ) ? (string) $flash['message'] : '';
+		$status  = isset( $_GET['lerm_admin_config_status'] ) ? sanitize_key( wp_unslash( $_GET['lerm_admin_config_status'] ) ) : 'error';
+
+		if ( '' === $message ) {
+			return null;
+		}
+
+		return array(
+			'class'   => 'validation_error' === $status ? 'notice-error' : 'notice-warning',
+			'message' => $message,
+		);
+	}
+
+	/**
+	 * @param array<string, string> $field_errors
+	 */
+	private function field_error_message( array $field_errors, string $field_id ): string {
+		return isset( $field_errors[ $field_id ] ) && is_scalar( $field_errors[ $field_id ] )
+			? (string) $field_errors[ $field_id ]
+			: '';
+	}
+
+	/**
+	 * Collapse dotted nested error paths into top-level field messages.
+	 *
+	 * @param array<string, array<int, string>> $errors
+	 * @return array<string, string>
+	 */
+	private function collapse_field_errors( array $errors ): array {
+		$collapsed = array();
+
+		foreach ( $errors as $path => $messages ) {
+			if ( ! is_array( $messages ) || empty( $messages ) ) {
+				continue;
+			}
+
+			$field_id = sanitize_key( (string) strtok( (string) $path, '.' ) );
+			$message  = trim( implode( ' ', array_filter( array_map( 'strval', $messages ) ) ) );
+
+			if ( '' === $field_id || '' === $message ) {
+				continue;
+			}
+
+			if ( isset( $collapsed[ $field_id ] ) ) {
+				continue;
+			}
+
+			$collapsed[ $field_id ] = $message;
+		}
+
+		return $collapsed;
+	}
+
+	/**
+	 * @param array<string, mixed> $payload
+	 */
+	private function store_flash( array $payload ): void {
+		set_transient( $this->flash_key(), $payload, MINUTE_IN_SECONDS );
+	}
+
+	/**
+	 * @return array<string, mixed>|null
+	 */
+	private function consume_flash(): ?array {
+		$flash = get_transient( $this->flash_key() );
+
+		if ( ! is_array( $flash ) ) {
+			return null;
+		}
+
+		delete_transient( $this->flash_key() );
+
+		return $flash;
+	}
+
+	private function clear_flash(): void {
+		delete_transient( $this->flash_key() );
+	}
+
+	private function flash_key(): string {
+		return 'lerm_admin_config_flash_' . md5( $this->page_slug() . ':' . (string) get_current_user_id() );
 	}
 
 	/**
