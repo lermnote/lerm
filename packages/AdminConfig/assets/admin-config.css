@@ -812,15 +812,7 @@
 	border-radius: 8px;
 }
 
-.lerm-typography-field .wp-picker-container {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 6px;
-	width: 100%;
-}
-
-.lerm-typography-field .wp-picker-input-wrap {
+.lerm-color-control {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -828,16 +820,148 @@
 	max-width: 100%;
 }
 
-.lerm-typography-field .wp-picker-container .wp-color-result.button {
+.lerm-color-control__trigger.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	min-width: 36px;
+	height: 36px;
+	margin: 0;
+	padding: 0;
+	border-radius: 8px;
+}
+
+.lerm-color-control__swatch,
+.lerm-color-popover__swatch {
+	--lerm-color-swatch: transparent;
+	width: 18px;
+	height: 18px;
+	border: 1px solid rgba(148, 163, 184, 0.8);
+	border-radius: 6px;
+	background-image:
+		linear-gradient(var(--lerm-color-swatch), var(--lerm-color-swatch)),
+		linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+		linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+		linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+	background-position:
+		0 0,
+		0 0,
+		0 6px,
+		6px -6px,
+		-6px 0;
+	background-size:
+		100% 100%,
+		12px 12px,
+		12px 12px,
+		12px 12px,
+		12px 12px;
+	background-repeat: no-repeat, repeat, repeat, repeat, repeat;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.lerm-color-control__input.regular-text,
+.lerm-color-control__input[type="text"] {
+	flex: 1 1 120px;
+	width: auto;
+	min-width: 0;
 	margin: 0;
 }
 
-.lerm-typography-field .wp-picker-container .wp-color-picker {
-	width: 120px !important;
-	max-width: 100%;
+.lerm-color-control__clear {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #64748b;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.4;
+	cursor: pointer;
 }
 
-.lerm-typography-field .wp-picker-holder {
+.lerm-color-control__clear:hover,
+.lerm-color-control__clear:focus-visible {
+	color: #0f172a;
+}
+
+.lerm-color-control__clear[hidden] {
+	display: none !important;
+}
+
+.lerm-color-popover {
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 160100;
+	display: grid;
+	gap: 10px;
+	width: min(220px, calc(100vw - 24px));
+	padding: 12px;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
+}
+
+.lerm-color-popover[hidden] {
+	display: none !important;
+}
+
+.lerm-color-popover__header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.lerm-color-popover__value {
+	min-width: 0;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #334155;
+	word-break: break-all;
+}
+
+.lerm-color-popover__native {
+	width: 100%;
+	height: 40px;
+	padding: 0;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	background: #fff;
+	cursor: pointer;
+}
+
+.lerm-color-popover__native::-webkit-color-swatch-wrapper {
+	padding: 4px;
+}
+
+.lerm-color-popover__native::-webkit-color-swatch {
+	border: 0;
+	border-radius: 6px;
+}
+
+.lerm-color-popover__native::-moz-color-swatch {
+	border: 0;
+	border-radius: 6px;
+}
+
+.lerm-color-popover__helper {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: #64748b;
+}
+
+.lerm-typography-field .lerm-color-control {
+	width: 100%;
+}
+
+.lerm-typography-field .lerm-color-control__input.regular-text,
+.lerm-typography-field .lerm-color-control__input[type="text"] {
+	flex-basis: 120px;
 	max-width: 100%;
 }
 
@@ -869,25 +993,24 @@
 	white-space: nowrap;
 }
 
-.lerm-fieldset--single-line .wp-picker-container {
+.lerm-fieldset--single-line .lerm-color-control {
 	display: inline-flex;
-	align-items: center;
 	flex-wrap: nowrap;
-	gap: 6px;
+	max-width: 100%;
 }
 
-.lerm-fieldset--single-line .wp-picker-input-wrap {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
+.lerm-fieldset--single-line .lerm-color-control__trigger.button {
+	width: 32px;
+	min-width: 32px;
+	height: 32px;
 }
 
-.lerm-fieldset--single-line .wp-picker-container .wp-color-result.button {
-	margin: 0;
-}
-
-.lerm-fieldset--single-line .wp-picker-container .wp-color-picker {
-	width: 92px !important;
+.lerm-fieldset--single-line .lerm-color-control__input.regular-text,
+.lerm-fieldset--single-line .lerm-color-control__input[type="text"] {
+	flex: 0 0 92px;
+	width: 92px;
+	min-width: 92px;
+	max-width: 92px;
 }
 
 .lerm-fieldset--single-line .regular-text,

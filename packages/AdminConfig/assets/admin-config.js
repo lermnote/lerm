@@ -6,7 +6,6 @@
 
 // ─── WordPress Global Stubs (typed as any — official typings are incomplete) ──
 /** @type {any} */ const wp = /** @type {any} */ (window['wp']);
-/** @type {any} */ const jQuery = /** @type {any} */ (window['jQuery']);
 
 (function () {
 	'use strict';
@@ -255,35 +254,327 @@
 
 	// ─── Color Pickers ────────────────────────────────────────────────────────
 
-	/**
-	 * Color controls are funneled through a tiny adapter so the implementation can
-	 * move away from `wpColorPicker` later without touching every field caller.
-	 */
-	const colorControlAdapter = {
-		/**
-		 * @returns {boolean}
-		 */
-		isAvailable() {
-			return typeof jQuery === 'function' && typeof jQuery.fn?.wpColorPicker === 'function';
-		},
+	/** @typedef {{ input: HTMLInputElement, wrapper: HTMLElement, trigger: HTMLButtonElement, clearButton: HTMLButtonElement, swatch: HTMLElement, syncUi: () => void }} ColorControlInstance */
 
+	/** @type {WeakMap<HTMLInputElement, ColorControlInstance>} */
+	const colorControlMap = new WeakMap();
+
+	/** @type {{ panel: HTMLElement, nativeInput: HTMLInputElement, valueLabel: HTMLElement, swatch: HTMLElement }|null} */
+	let sharedColorPopover = null;
+
+	/** @type {ColorControlInstance|null} */
+	let activeColorControl = null;
+
+	/**
+	 * @param {unknown} value
+	 * @returns {string}
+	 */
+	const normalizeHexColor = (value) => {
+		const raw = String(value ?? '').trim();
+
+		if (!raw) return '';
+
+		const candidate = raw.startsWith('#') ? raw : `#${raw}`;
+
+		return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(candidate)
+			? candidate.toLowerCase()
+			: '';
+	};
+
+	/** @param {HTMLInputElement} input */
+	const dispatchColorInputEvents = (input) => {
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+	};
+
+	/**
+	 * @param {ColorControlInstance} control
+	 */
+	const positionSharedColorPopover = (control) => {
+		const popover = sharedColorPopover;
+
+		if (!popover || popover.panel.hidden) return;
+
+		if (!document.body.contains(control.wrapper)) {
+			activeColorControl = null;
+			popover.panel.hidden = true;
+			return;
+		}
+
+		const rect = control.trigger.getBoundingClientRect();
+		const width = popover.panel.offsetWidth || 220;
+		const height = popover.panel.offsetHeight || 150;
+		const gap = 10;
+		const viewportPadding = 12;
+
+		let left = rect.left;
+		let top = rect.bottom + gap;
+
+		if (left + width > window.innerWidth - viewportPadding) {
+			left = window.innerWidth - width - viewportPadding;
+		}
+
+		if (left < viewportPadding) {
+			left = viewportPadding;
+		}
+
+		if (top + height > window.innerHeight - viewportPadding) {
+			top = rect.top - height - gap;
+		}
+
+		if (top < viewportPadding) {
+			top = viewportPadding;
+		}
+
+		popover.panel.style.left = `${Math.round(left)}px`;
+		popover.panel.style.top = `${Math.round(top)}px`;
+	};
+
+	/**
+	 * @param {ColorControlInstance} control
+	 */
+	const syncSharedColorPopover = (control) => {
+		const popover = sharedColorPopover;
+		if (!popover) return;
+
+		const rawValue = String(control.input.value ?? '').trim();
+		const normalized = normalizeHexColor(rawValue);
+
+		popover.nativeInput.value = normalized || '#000000';
+		popover.valueLabel.textContent = normalized || rawValue || 'No color';
+		popover.swatch.style.setProperty('--lerm-color-swatch', normalized || 'transparent');
+		positionSharedColorPopover(control);
+	};
+
+	const closeSharedColorPopover = () => {
+		if (!sharedColorPopover) return;
+
+		if (activeColorControl) {
+			activeColorControl.trigger.setAttribute('aria-expanded', 'false');
+		}
+
+		sharedColorPopover.panel.hidden = true;
+		sharedColorPopover.panel.style.visibility = '';
+		activeColorControl = null;
+	};
+
+	/**
+	 * @param {ColorControlInstance} control
+	 */
+	const openSharedColorPopover = (control) => {
+		const popover = ensureSharedColorPopover();
+
+		activeColorControl = control;
+		control.trigger.setAttribute('aria-expanded', 'true');
+		popover.panel.hidden = false;
+		popover.panel.style.visibility = 'hidden';
+		syncSharedColorPopover(control);
+		popover.panel.style.visibility = '';
+	};
+
+	/**
+	 * @param {ColorControlInstance} control
+	 */
+	const toggleSharedColorPopover = (control) => {
+		if (activeColorControl?.input === control.input) {
+			closeSharedColorPopover();
+			return;
+		}
+
+		openSharedColorPopover(control);
+	};
+
+	const ensureSharedColorPopover = () => {
+		if (sharedColorPopover) return sharedColorPopover;
+
+		const panel = dom.create('div', {
+			class: 'lerm-color-popover',
+			role: 'dialog',
+			'aria-modal': 'false',
+			hidden: 'hidden',
+		});
+		const swatch = dom.create('span', {
+			class: 'lerm-color-popover__swatch',
+			'aria-hidden': 'true',
+		});
+		const valueLabel = dom.create('span', {
+			class: 'lerm-color-popover__value',
+		}, ['No color']);
+		const nativeInput = /** @type {HTMLInputElement} */ (dom.create('input', {
+			type: 'color',
+			class: 'lerm-color-popover__native',
+			value: '#000000',
+			'aria-label': 'Choose color',
+		}));
+		const helper = dom.create('p', {
+			class: 'lerm-color-popover__helper',
+		}, ['Use the browser color picker or type a hex value directly.']);
+
+		panel.appendChild(dom.create('div', { class: 'lerm-color-popover__header' }, [swatch, valueLabel]));
+		panel.appendChild(nativeInput);
+		panel.appendChild(helper);
+		document.body.appendChild(panel);
+
+		nativeInput.addEventListener('input', () => {
+			if (!activeColorControl) return;
+
+			activeColorControl.input.value = nativeInput.value;
+			activeColorControl.syncUi();
+			dispatchColorInputEvents(activeColorControl.input);
+		});
+
+		document.addEventListener('mousedown', (event) => {
+			const target = event.target;
+
+			if (!(target instanceof Node) || panel.hidden) return;
+			if (panel.contains(target)) return;
+			if (activeColorControl?.wrapper.contains(target)) return;
+
+			closeSharedColorPopover();
+		});
+
+		document.addEventListener('keydown', (event) => {
+			if ('Escape' !== event.key || !activeColorControl) return;
+
+			const trigger = activeColorControl.trigger;
+			closeSharedColorPopover();
+			trigger.focus({ preventScroll: true });
+		});
+
+		window.addEventListener('resize', () => {
+			if (activeColorControl) {
+				positionSharedColorPopover(activeColorControl);
+			}
+		});
+
+		window.addEventListener('scroll', () => {
+			if (activeColorControl) {
+				positionSharedColorPopover(activeColorControl);
+			}
+		}, true);
+
+		sharedColorPopover = {
+			panel,
+			nativeInput,
+			valueLabel,
+			swatch,
+		};
+
+		return sharedColorPopover;
+	};
+
+	/**
+	 * @param {HTMLInputElement} input
+	 * @returns {ColorControlInstance}
+	 */
+	const createColorControl = (input) => {
+		const existing = colorControlMap.get(input);
+
+		if (existing) return existing;
+
+		const wrapper = dom.create('span', { class: 'lerm-color-control' });
+		const trigger = /** @type {HTMLButtonElement} */ (dom.create('button', {
+			type: 'button',
+			class: 'button lerm-color-control__trigger',
+			'aria-haspopup': 'dialog',
+			'aria-expanded': 'false',
+			'aria-label': 'Choose color',
+		}));
+		const swatch = dom.create('span', {
+			class: 'lerm-color-control__swatch',
+			'aria-hidden': 'true',
+		});
+		const clearButton = /** @type {HTMLButtonElement} */ (dom.create('button', {
+			type: 'button',
+			class: 'lerm-color-control__clear',
+			'aria-label': 'Clear color',
+		}, ['Clear']));
+
+		if (input.parentNode) {
+			input.parentNode.insertBefore(wrapper, input);
+		}
+
+		input.classList.add('lerm-color-control__input');
+		input.autocomplete = 'off';
+		input.spellcheck = false;
+		trigger.appendChild(swatch);
+		wrapper.appendChild(trigger);
+		wrapper.appendChild(input);
+		wrapper.appendChild(clearButton);
+
+		/** @type {ColorControlInstance} */
+		const control = {
+			input,
+			wrapper,
+			trigger,
+			clearButton,
+			swatch,
+			syncUi: () => {
+				const rawValue = String(input.value ?? '').trim();
+				const normalized = normalizeHexColor(rawValue);
+				const hasVisibleValue = '' !== rawValue;
+
+				wrapper.classList.toggle('has-value', hasVisibleValue);
+				wrapper.classList.toggle('is-empty', !hasVisibleValue);
+				wrapper.classList.toggle('is-invalid', hasVisibleValue && '' === normalized);
+				trigger.classList.toggle('has-value', '' !== normalized);
+				trigger.setAttribute('aria-expanded', activeColorControl?.input === input ? 'true' : 'false');
+				trigger.disabled = input.disabled;
+				clearButton.hidden = !hasVisibleValue;
+				clearButton.disabled = input.disabled || input.readOnly;
+				swatch.style.setProperty('--lerm-color-swatch', normalized || 'transparent');
+
+				if (activeColorControl?.input === input) {
+					syncSharedColorPopover(control);
+				}
+			},
+		};
+
+		trigger.addEventListener('click', (event) => {
+			event.preventDefault();
+
+			if (input.disabled || input.readOnly) return;
+
+			toggleSharedColorPopover(control);
+		});
+
+		clearButton.addEventListener('click', (event) => {
+			event.preventDefault();
+
+			if (input.disabled || input.readOnly) return;
+
+			input.value = '';
+			control.syncUi();
+			dispatchColorInputEvents(input);
+			closeSharedColorPopover();
+			input.focus({ preventScroll: true });
+		});
+
+		input.addEventListener('input', control.syncUi);
+		input.addEventListener('change', control.syncUi);
+		input.addEventListener('blur', () => {
+			const normalized = normalizeHexColor(input.value);
+
+			if (normalized && normalized !== input.value) {
+				input.value = normalized;
+			}
+
+			control.syncUi();
+		});
+
+		colorControlMap.set(input, control);
+		control.syncUi();
+
+		return control;
+	};
+
+	const colorControlAdapter = {
 		/** @param {HTMLInputElement} input */
 		init(input) {
 			if (getData(input, 'lermColorReady') === '1') return;
+
 			setData(input, 'lerm-color-ready', '1');
-
-			if (!this.isAvailable()) return;
-
-			jQuery(input).wpColorPicker({
-				change: () => {
-					input.dispatchEvent(new Event('input', { bubbles: true }));
-					input.dispatchEvent(new Event('change', { bubbles: true }));
-				},
-				clear: () => {
-					input.dispatchEvent(new Event('input', { bubbles: true }));
-					input.dispatchEvent(new Event('change', { bubbles: true }));
-				},
-			});
+			createColorControl(input);
 		},
 
 		/**
@@ -293,19 +584,9 @@
 		setValue(input, value) {
 			if (!(input instanceof HTMLInputElement)) return;
 
-			const next = String(value || '');
 			this.init(input);
-
-			if (this.isAvailable()) {
-				try {
-					jQuery(input).wpColorPicker('color', next);
-					return;
-				} catch {
-					// Fall through to the raw input assignment so dynamic fields still update.
-				}
-			}
-
-			input.value = next;
+			input.value = normalizeHexColor(value) || String(value ?? '').trim();
+			createColorControl(input).syncUi();
 		},
 	};
 

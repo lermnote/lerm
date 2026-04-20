@@ -404,7 +404,6 @@ final class OptionsPage {
 		);
 
 		wp_enqueue_media();
-		wp_enqueue_style( 'wp-color-picker' );
 		wp_enqueue_style( 'wp-codemirror' );
 		wp_enqueue_script( 'wp-theme-plugin-editor' );
 		// Asset handles are namespaced by page slug so two framework instances
@@ -416,13 +415,13 @@ final class OptionsPage {
 		wp_enqueue_style(
 			$css_handle,
 			$this->asset_url( 'admin-config.css' ),
-			array( 'wp-color-picker', 'wp-codemirror' ),
+			array( 'wp-codemirror' ),
 			$this->asset_version()
 		);
 		wp_enqueue_script(
 			$js_handle,
 			$this->asset_url( 'admin-config.js' ),
-			array( 'jquery', 'wp-color-picker', 'wp-theme-plugin-editor' ),
+			array( 'wp-theme-plugin-editor' ),
 			$this->asset_version(),
 			true
 		);
