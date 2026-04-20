@@ -91,9 +91,10 @@ final class MetaboxContainer implements Container {
 			$this->framework->asset_resolver(),
 			false
 		);
-		$sections = PageSchema::sections( $schema->definition() );
-		$section_id = (string) array_key_first( $sections );
-		$section = '' !== $section_id ? ( $sections[ $section_id ] ?? null ) : null;
+		$sections   = PageSchema::sections( $schema->definition() );
+		$first_key  = array_key_first( $sections );
+		$section_id = ( null !== $first_key ) ? (string) $first_key : '';
+		$section    = '' !== $section_id ? ( $sections[ $section_id ] ?? null ) : null;
 		$flash   = ValidationFlash::consume( 'metabox', $schema->id(), (string) $post->ID );
 		$values  = ValidationFlash::render_values( $store->all(), $flash );
 		$errors  = ValidationFlash::field_errors( $flash );

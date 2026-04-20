@@ -488,7 +488,8 @@ final class DesignFieldTypes {
 		if ( ! is_array( $units ) || empty( $units ) ) {
 			return array( 'px' );
 		}
-		return array_values( array_filter( array_map( static fn( $unit ) => is_scalar( $unit ) ? trim( (string) $unit ) : '', $units ) ) );
+		$filtered = array_values( array_filter( array_map( static fn( $unit ) => is_scalar( $unit ) ? trim( (string) $unit ) : '', $units ) ) );
+		return ! empty( $filtered ) ? $filtered : array( 'px' );
 	}
 
 	private static function show_unit_select( array $field, array $units ): bool {

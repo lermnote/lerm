@@ -33,7 +33,7 @@ final class MissingStoreContextException extends InvalidArgumentException {
 				'Store type "%1$s" for schema "%2$s" requires one of [%3$s] in the schema store config or runtime context. Meta-backed reads should pass context to Runtime::all()/get() or use Runtime::defaults() for compiled fallback values.',
 				$store_type,
 				$schema_id,
-				implode( ', ', $keys )
+				implode( ', ', array_map( 'strval', $keys ) )
 			)
 		);
 	}

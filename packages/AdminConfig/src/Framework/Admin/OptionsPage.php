@@ -511,11 +511,11 @@ final class OptionsPage {
 
 				<section class="lerm-settings-main">
 					<div class="lerm-settings-panel">
-						<?php
-						// Intro header: title/description swapped by JS on tab switch.
-						// PHP seeds the initially-active tab; JS takes over from there.
-						$active_section = $sections[ $current_tab ] ?? reset( $sections );
-						?>
+					<?php
+					// Intro header: title/description swapped by JS on tab switch.
+					// PHP seeds the initially-active tab; JS takes over from there.
+					$active_section = $sections[ $current_tab ] ?? ( ! empty( $sections ) ? reset( $sections ) : array() );
+					?>
 						<div class="lerm-settings-panel__intro" data-lerm-tab-intro>
 							<div>
 								<p class="lerm-settings-eyebrow"><?php esc_html_e( 'Current section', 'lerm' ); ?></p>
@@ -1711,10 +1711,16 @@ final class OptionsPage {
 	 */
 	private function posted_tab(): string {
 		$sections = PageSchema::sections( $this->definition );
-		$tab      = isset( $_POST['lerm_settings_tab'] ) ? sanitize_key( wp_unslash( $_POST['lerm_settings_tab'] ) ) : (string) array_key_first( $sections );
+		if ( isset( $_POST['lerm_settings_tab'] ) ) {
+			$tab = sanitize_key( wp_unslash( $_POST['lerm_settings_tab'] ) );
+		} else {
+			$first_key = array_key_first( $sections );
+			$tab       = ( null !== $first_key ) ? (string) $first_key : '';
+		}
 
 		if ( ! isset( $sections[ $tab ] ) ) {
-			return (string) array_key_first( $sections );
+			$first_key = array_key_first( $sections );
+			return ( null !== $first_key ) ? (string) $first_key : '';
 		}
 
 		return $tab;
@@ -1732,10 +1738,16 @@ final class OptionsPage {
 	 */
 	private function current_tab(): string {
 		$sections = PageSchema::sections( $this->definition );
-		$tab      = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : (string) array_key_first( $sections );
+		if ( isset( $_GET['tab'] ) ) {
+			$tab = sanitize_key( wp_unslash( $_GET['tab'] ) );
+		} else {
+			$first_key = array_key_first( $sections );
+			$tab       = ( null !== $first_key ) ? (string) $first_key : '';
+		}
 
 		if ( ! isset( $sections[ $tab ] ) ) {
-			return (string) array_key_first( $sections );
+			$first_key = array_key_first( $sections );
+			return ( null !== $first_key ) ? (string) $first_key : '';
 		}
 
 		return $tab;
