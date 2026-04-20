@@ -422,7 +422,7 @@ final class OptionsPage {
 		wp_enqueue_script(
 			$js_handle,
 			$this->asset_url( 'admin-config.js' ),
-			array( 'jquery', 'jquery-ui-sortable', 'wp-color-picker', 'wp-theme-plugin-editor' ),
+			array( 'jquery', 'wp-color-picker', 'wp-theme-plugin-editor' ),
 			$this->asset_version(),
 			true
 		);

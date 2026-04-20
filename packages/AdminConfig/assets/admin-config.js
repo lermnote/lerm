@@ -255,11 +255,65 @@
 
 	// ─── Color Pickers ────────────────────────────────────────────────────────
 
+	/**
+	 * Color controls are funneled through a tiny adapter so the implementation can
+	 * move away from `wpColorPicker` later without touching every field caller.
+	 */
+	const colorControlAdapter = {
+		/**
+		 * @returns {boolean}
+		 */
+		isAvailable() {
+			return typeof jQuery === 'function' && typeof jQuery.fn?.wpColorPicker === 'function';
+		},
+
+		/** @param {HTMLInputElement} input */
+		init(input) {
+			if (getData(input, 'lermColorReady') === '1') return;
+			setData(input, 'lerm-color-ready', '1');
+
+			if (!this.isAvailable()) return;
+
+			jQuery(input).wpColorPicker({
+				change: () => {
+					input.dispatchEvent(new Event('input', { bubbles: true }));
+					input.dispatchEvent(new Event('change', { bubbles: true }));
+				},
+				clear: () => {
+					input.dispatchEvent(new Event('input', { bubbles: true }));
+					input.dispatchEvent(new Event('change', { bubbles: true }));
+				},
+			});
+		},
+
+		/**
+		 * @param {HTMLInputElement|null} input
+		 * @param {unknown} value
+		 */
+		setValue(input, value) {
+			if (!(input instanceof HTMLInputElement)) return;
+
+			const next = String(value || '');
+			this.init(input);
+
+			if (this.isAvailable()) {
+				try {
+					jQuery(input).wpColorPicker('color', next);
+					return;
+				} catch {
+					// Fall through to the raw input assignment so dynamic fields still update.
+				}
+			}
+
+			input.value = next;
+		},
+	};
+
 	/** @param {Document|Element} scope */
 	const initColorPickers = (scope) => {
 		dom.findAll('.lerm-color-field', scope).forEach(input => {
-			if (!input.classList.contains('wp-color-picker')) {
-				jQuery(input).wpColorPicker(); // wp.wpColorPicker requires jQuery — cannot remove
+			if (input instanceof HTMLInputElement) {
+				colorControlAdapter.init(input);
 			}
 		});
 	};
@@ -1318,8 +1372,7 @@
 	 */
 	const applyColorValue = (form, fieldId, value) => {
 		const input = findFieldById(form, fieldId);
-		if (!(input instanceof HTMLInputElement)) return;
-		try { jQuery(input).wpColorPicker('color', value || ''); } catch { input.value = String(value || ''); }
+		colorControlAdapter.setValue(input instanceof HTMLInputElement ? input : null, value);
 	};
 
 	/**
@@ -1405,12 +1458,7 @@
 				/** @type {HTMLInputElement} */ (dom.find('input[type="checkbox"]', scope)).checked = !!value;
 				break;
 			case 'color':
-				try {
-					const input = /** @type {HTMLInputElement|null} */ (dom.find('.lerm-color-field', scope));
-					if (input) {
-						try { jQuery(input).wpColorPicker('color', value || ''); } catch { input.value = String(value || ''); }
-					}
-				} catch { /* noop */ }
+				colorControlAdapter.setValue(/** @type {HTMLInputElement|null} */ (dom.find('.lerm-color-field', scope)), value);
 				break;
 			case 'button_set':
 			case 'radio':
