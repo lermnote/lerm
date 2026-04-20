@@ -42,7 +42,7 @@
 	/**
 	 * @typedef {{
 	 *   success: boolean,
-	 *   data: { values?: Record<string, unknown>, message?: string, json?: string, fieldErrors?: Record<string, string|string[]> }
+	 *   data: { values?: Record<string, unknown>, message?: string, json?: string, fieldErrors?: Record<string, string|string[]>, errors?: Record<string, string|string[]>, tab?: string, subsection?: string }
 	 * }} AjaxResponse
 	 */
 
@@ -1049,13 +1049,40 @@
 	/** @type {WeakMap<HTMLFormElement, Record<string, unknown>>} */
 	const formSnapshotMap = new WeakMap();
 
-	/** @type {WeakMap<HTMLFormElement, {
+	/** @type {WeakMap<HTMLElement, {
 	 * activateSubsection: (subsectionId: string, pushState?: boolean) => void,
 	 * currentSubsection: () => string,
 	 * defaultSubsection: () => string,
 	 * hasSubsection: (subsectionId: string) => boolean
 	 * }>} */
 	const subsectionControllerMap = new WeakMap();
+
+	/** @type {((tabId: string, pushState?: boolean, requestedSubsection?: string) => void)|null} */
+	let activateTabController = null;
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @returns {HTMLFormElement[]}
+	 */
+	const pageForms = (form) => {
+		const scope = /** @type {Element|Document} */ (form.closest('.lerm-settings-main') || document);
+		return dom.findAll('.lerm-settings-form', scope);
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @returns {HTMLFormElement|null}
+	 */
+	const activePageForm = (form) => {
+		const scope = /** @type {Element|Document} */ (form.closest('.lerm-settings-main') || document);
+		return /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', scope)) || form;
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @returns {boolean}
+	 */
+	const pageIsDirty = (form) => pageForms(form).some((pageForm) => isDirty(pageForm));
 
 	/**
 	 * @param {string} token
@@ -1191,7 +1218,10 @@
 	/** @param {HTMLFormElement} form */
 	const queueReadyStatus = (form) => {
 		if (statusTimer) clearTimeout(statusTimer);
-		statusTimer = setTimeout(() => { if (!isDirty(form)) setStatus(form, 'idle', cfg.statusReady); }, 1800);
+		statusTimer = setTimeout(() => {
+			const dirty = pageIsDirty(form);
+			setStatus(form, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
+		}, 1800);
 	};
 
 	/**
@@ -1201,7 +1231,8 @@
 	const setDirty = (form, dirty) => {
 		if (statusTimer) clearTimeout(statusTimer);
 		setData(form, 'lerm-dirty', dirty ? '1' : '0');
-		setStatus(form, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
+		const pageDirty = pageIsDirty(form);
+		setStatus(form, pageDirty ? 'dirty' : 'idle', pageDirty ? cfg.statusDirty : cfg.statusReady);
 	};
 
 	/** @param {HTMLFormElement} form */
@@ -1223,6 +1254,49 @@
 		const body = new FormData(form);
 		body.set('action', action);
 		for (const [k, v] of Object.entries(extras)) body.set(k, v);
+		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(async (r) => {
+			const text = await r.text();
+
+			try {
+				return /** @type {AjaxResponse} */ (JSON.parse(text));
+			} catch {
+				if (!r.ok) throw new Error('Network error: ' + r.status);
+				throw new Error('Invalid JSON response: ' + text.slice(0, 120));
+			}
+		});
+	};
+
+	/**
+	 * @param {FormData} body
+	 * @param {HTMLFormElement} sourceForm
+	 */
+	const appendOptionEntries = (body, sourceForm) => {
+		const prefix = `${getOptionName(sourceForm)}[`;
+
+		for (const [name, rawValue] of new FormData(sourceForm).entries()) {
+			if (!String(name).startsWith(prefix)) continue;
+			body.append(String(name), rawValue);
+		}
+	};
+
+	/**
+	 * Build a full-page request body that includes option fields from every tab.
+	 *
+	 * @param {HTMLFormElement} form
+	 * @param {string} action
+	 * @param {Record<string, string>} [extras]
+	 * @returns {Promise<AjaxResponse>}
+	 */
+	const requestPage = (form, action, extras = {}) => {
+		const body = new FormData(form);
+		body.set('action', action);
+		for (const [k, v] of Object.entries(extras)) body.set(k, v);
+
+		pageForms(form).forEach((pageForm) => {
+			if (pageForm === form) return;
+			appendOptionEntries(body, pageForm);
+		});
+
 		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(async (r) => {
 			const text = await r.text();
 
@@ -1640,8 +1714,9 @@
 	/**
 	 * @param {HTMLFormElement} form
 	 * @param {Record<string, string|string[]>} fieldErrors
+	 * @param {boolean} [scrollIntoViewEnabled]
 	 */
-	const applyFieldErrors = (form, fieldErrors = {}) => {
+	const applyFieldErrors = (form, fieldErrors = {}, scrollIntoViewEnabled = true) => {
 		clearFieldErrors(form);
 
 		let firstRow = null;
@@ -1670,7 +1745,56 @@
 			dom.findAll('input, select, textarea', row).forEach((el) => el.setAttribute('aria-invalid', 'true'));
 		}
 
-		firstRow?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		if (scrollIntoViewEnabled) {
+			firstRow?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {boolean} busy
+	 * @param {string} label
+	 */
+	const setBusyAcrossPage = (form, busy, label) => {
+		pageForms(form).forEach((pageForm) => setBusy(pageForm, busy, label));
+	};
+
+	/** @param {HTMLFormElement} form */
+	const triggerEditorSaveAcrossPage = (form) => {
+		pageForms(form).forEach((pageForm) => triggerEditorSave(pageForm));
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {Record<string, unknown>} values
+	 */
+	const applyPageValues = (form, values = {}) => {
+		pageForms(form).forEach((pageForm) => {
+			clearFieldErrors(pageForm);
+			applyFieldValues(pageForm, values);
+			saveFormSnapshot(pageForm);
+			syncDirtyState(pageForm);
+		});
+	};
+
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {Record<string, string|string[]>} fieldErrors
+	 * @param {AjaxResponse} response
+	 */
+	const applyPageErrors = (form, fieldErrors, response) => {
+		pageForms(form).forEach((pageForm) => applyFieldErrors(pageForm, fieldErrors, false));
+
+		const targetTab = String(response?.data?.tab ?? '');
+		const targetSubsection = String(response?.data?.subsection ?? '');
+
+		if (targetTab && activateTabController) {
+			activateTabController(targetTab, true, targetSubsection);
+		}
+
+		const focusForm = activePageForm(form) || form;
+		applyFieldErrors(focusForm, fieldErrors, true);
+		setStatus(focusForm, 'error', response?.data?.message || cfg.saveError);
 	};
 
 	// ─── Backup Tools ─────────────────────────────────────────────────────────
@@ -1699,25 +1823,13 @@
 				e.preventDefault();
 				if (!window.confirm(cfg.confirmImport)) return;
 				const json = String(/** @type {HTMLInputElement|null} */(dom.find('[data-lerm-backup-import-input]', form))?.value ?? '');
-				clearFieldErrors(form);
-				setBusy(form, true, cfg.resetting);
+				pageForms(form).forEach((pageForm) => clearFieldErrors(pageForm));
+				setBusyAcrossPage(form, true, cfg.resetting);
 				setStatus(form, 'saving', cfg.statusSaving);
 				request(form, cfg.importAction, { backup_json: json })
-					.then(response => {
-						if (!response?.success) {
-							applyFieldErrors(form, /** @type {Record<string, string|string[]>} */ (response?.data?.errors ?? response?.data?.fieldErrors ?? {}));
-							setStatus(form, 'error', response?.data?.message || cfg.importError);
-							return;
-						}
-						clearFieldErrors(form);
-						applyFieldValues(form, response.data.values ?? {});
-						saveFormSnapshot(form);
-						syncDirtyState(form);
-						setStatus(form, 'success', response.data.message || cfg.importSuccess);
-						queueReadyStatus(form);
-					})
+					.then(response => handlePageSaveResponse(form, response, cfg.importSuccess))
 					.catch(() => setStatus(form, 'error', cfg.importError))
-					.finally(() => setBusy(form, false, cfg.saving));
+					.finally(() => setBusyAcrossPage(form, false, cfg.resetting));
 			});
 		}
 	};
@@ -1747,18 +1859,38 @@
 		queueReadyStatus(form);
 	};
 
+	/**
+	 * @param {HTMLFormElement} form
+	 * @param {AjaxResponse} response
+	 * @param {string} successMsg
+	 */
+	const handlePageSaveResponse = (form, response, successMsg) => {
+		if (!response?.success) {
+			applyPageErrors(
+				form,
+				/** @type {Record<string, string|string[]>} */ (response?.data?.errors ?? response?.data?.fieldErrors ?? {}),
+				response,
+			);
+			return;
+		}
+
+		applyPageValues(form, response.data.values ?? {});
+		setStatus(form, 'success', response.data.message || successMsg);
+		queueReadyStatus(form);
+	};
+
 	/** @param {HTMLFormElement} form */
 	const bindAjaxForm = (form) => {
 		form.addEventListener('submit', (e) => {
 			e.preventDefault();
-			triggerEditorSave(form);
-			clearFieldErrors(form);
-			setBusy(form, true, cfg.saving);
+			triggerEditorSaveAcrossPage(form);
+			pageForms(form).forEach((pageForm) => clearFieldErrors(pageForm));
+			setBusyAcrossPage(form, true, cfg.saving);
 			setStatus(form, 'saving', cfg.statusSaving);
-			request(form, cfg.saveAction)
-				.then(r => handleSaveResponse(form, r, cfg.saveSuccess))
+			requestPage(form, cfg.saveAction)
+				.then(r => handlePageSaveResponse(form, r, cfg.saveSuccess))
 				.catch(() => setStatus(form, 'error', cfg.saveError))
-				.finally(() => setBusy(form, false, cfg.saving));
+				.finally(() => setBusyAcrossPage(form, false, cfg.saving));
 		});
 
 		dom.findAll('[data-lerm-reset]', form).forEach(btn => {
@@ -1820,14 +1952,16 @@
 	};
 
 	const initSubsectionSwitching = () => {
-		dom.findAll('.lerm-settings-form').forEach(el => {
-			const form = /** @type {HTMLFormElement} */ (el);
-			const navItems = dom.findAll('[data-subsection-target]', form);
-			const panels = dom.findAll('[data-subsection-panel]', form);
+		dom.findAll('[data-tab-panel]').forEach(panelEl => {
+			const tabPanel = /** @type {HTMLElement} */ (panelEl);
+			const navItems = dom.findAll('[data-subsection-target]', tabPanel);
+			const panels = dom.findAll('[data-subsection-panel]', tabPanel);
 			if (!navItems.length || !panels.length) return;
-			const formPanel = /** @type {HTMLElement|null} */ (form.closest('[data-tab-panel]'));
-			const formTabId = formPanel?.getAttribute('data-tab-panel') ?? '';
-			const subsectionInput = /** @type {HTMLInputElement|null} */ (dom.find('input[name="lerm_settings_subsection"]', form));
+			const form = /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', tabPanel.closest('.lerm-settings-main') || document));
+			const formTabId = tabPanel.getAttribute('data-tab-panel') ?? '';
+			const subsectionInput = form
+				? /** @type {HTMLInputElement|null} */ (dom.find('[data-lerm-current-subsection]', form))
+				: null;
 
 			/**
 			 * @param {string} subsectionId
@@ -1851,22 +1985,31 @@
 					item.setAttribute('aria-pressed', active ? 'true' : 'false');
 				});
 
-				const activePanel = /** @type {HTMLElement|null} */ (dom.find(`[data-subsection-panel="${subsectionId}"]`, form));
+				const activePanel = /** @type {HTMLElement|null} */ (dom.find(`[data-subsection-panel="${subsectionId}"]`, tabPanel));
 				if (activePanel) {
 					dom.findAll('.lerm-code-editor', activePanel).forEach(editor => {
 						codeEditorMap.get(/** @type {HTMLTextAreaElement} */ (editor))?.codemirror?.refresh();
 					});
 				}
 
-				if (subsectionInput) subsectionInput.value = subsectionId;
+				setData(tabPanel, 'current-subsection', subsectionId);
+
+				const currentTabInput = form
+					? /** @type {HTMLInputElement|null} */ (dom.find('[data-lerm-current-tab]', form))
+					: null;
+
+				if (subsectionInput && currentTabInput?.value === formTabId) {
+					subsectionInput.value = subsectionId;
+				}
+
 				if (pushState && formTabId) writeLocationState(formTabId, subsectionId);
 
 				queueStickyActionsSync();
 			};
 
-			subsectionControllerMap.set(form, {
+			subsectionControllerMap.set(tabPanel, {
 				activateSubsection,
-				currentSubsection: () => subsectionInput?.value ?? '',
+				currentSubsection: () => getData(tabPanel, 'currentSubsection') || '',
 				defaultSubsection: () => (
 					navItems[0]?.getAttribute('data-subsection-target')
 					?? panels[0]?.getAttribute('data-subsection-panel')
@@ -1887,7 +2030,7 @@
 			const requestedSubsection = locationState.tab === formTabId ? locationState.subsection : '';
 			const initialSubsection = (
 				(requestedSubsection && hasSubsection(requestedSubsection) ? requestedSubsection : '')
-				|| (subsectionInput?.value && hasSubsection(subsectionInput.value) ? subsectionInput.value : '')
+				|| ((getData(tabPanel, 'currentSubsection') || '') && hasSubsection(getData(tabPanel, 'currentSubsection') || '') ? (getData(tabPanel, 'currentSubsection') || '') : '')
 				|| navItems[0]?.getAttribute('data-subsection-target')
 				|| panels[0]?.getAttribute('data-subsection-panel')
 				|| ''
@@ -2056,11 +2199,11 @@
 				if (descEl) descEl.textContent = activePanel.getAttribute('data-tab-description') ?? '';
 			}
 
-			// Sync the status pill to the newly-active tab's dirty state.
+			// Sync the status pill to the newly-active tab's page-level dirty state.
 			if (activePanel) {
-				const activeForm = /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel));
+				const activeForm = /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel.closest('.lerm-settings-main') || document));
 				if (activeForm) {
-					const subsectionController = subsectionControllerMap.get(activeForm);
+					const subsectionController = subsectionControllerMap.get(activePanel);
 					const locationState = readLocationState();
 					const targetSubsection = subsectionController
 						? (
@@ -2075,7 +2218,15 @@
 						subsectionController.activateSubsection(targetSubsection, false);
 					}
 
-					const dirty = isDirty(activeForm);
+					const tabInput = /** @type {HTMLInputElement|null} */ (dom.find('[data-lerm-current-tab]', activeForm));
+					const subsectionInput = /** @type {HTMLInputElement|null} */ (dom.find('[data-lerm-current-subsection]', activeForm));
+					const nonceInput = /** @type {HTMLInputElement|null} */ (dom.find('[data-lerm-current-nonce]', activeForm));
+
+					if (tabInput) tabInput.value = tabId;
+					if (subsectionInput) subsectionInput.value = targetSubsection || '';
+					if (nonceInput) nonceInput.value = activePanel.getAttribute('data-tab-nonce') ?? '';
+
+					const dirty = pageIsDirty(activeForm);
 					setStatus(activeForm, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
 				}
 			}
@@ -2092,14 +2243,16 @@
 			// Keep the URL in sync so the page can be bookmarked / refreshed correctly.
 			if (pushState) {
 				const activeForm = activePanel
-					? /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel))
+					? /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel.closest('.lerm-settings-main') || document))
 					: null;
 				const activeSubsection = activeForm
-					? String(/** @type {HTMLInputElement|null} */ (dom.find('input[name="lerm_settings_subsection"]', activeForm))?.value ?? '')
+					? String(/** @type {HTMLInputElement|null} */ (dom.find('[data-lerm-current-subsection]', activeForm))?.value ?? '')
 					: '';
 				writeLocationState(tabId, activeSubsection);
 			}
 		};
+
+		activateTabController = activateTab;
 
 		// Intercept nav clicks.
 		navItems.forEach(a => {
@@ -2142,7 +2295,8 @@
 			cfg = /** @type {LermConfig} */ ((jsGlobal && window[jsGlobal]) ? window[jsGlobal] : {});
 		}
 
-		// Register a single Ctrl/Cmd+S shortcut that submits only the visible (active) form.
+		// Register a single Ctrl/Cmd+S shortcut that submits the visible form,
+		// which now bundles values from every tab on the page.
 		document.addEventListener('keydown', (e) => {
 			if (!(e.ctrlKey || e.metaKey) || e.key?.toLowerCase() !== 's') return;
 			e.preventDefault();
@@ -2151,14 +2305,14 @@
 				dom.find('[data-tab-panel]:not([hidden])')
 			);
 			const activeForm = activePanel
-				? /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel))
+				? /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form', activePanel.closest('.lerm-settings-main') || document))
 				: null;
 			if (activeForm && getData(activeForm, 'lerm-busy') !== '1') {
 				activeForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 			}
 		});
 
-		// Initialise every form (one per tab panel).
+		// Initialise the settings form.
 		dom.findAll('.lerm-settings-form').forEach(el => {
 			const form = /** @type {HTMLFormElement} */ (el);
 

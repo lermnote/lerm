@@ -206,6 +206,15 @@ final class OptionStore {
 	}
 
 	/**
+	 * Save the full settings payload across every section.
+	 *
+	 * @param array<string, mixed> $submitted Submitted values.
+	 */
+	public function save_all( array $submitted ): bool {
+		return $this->import_all( $submitted );
+	}
+
+	/**
 	 * Import a full settings payload.
 	 *
 	 * @param array<string, mixed> $submitted Submitted values.

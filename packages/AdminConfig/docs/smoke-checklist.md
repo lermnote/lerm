@@ -9,8 +9,10 @@ Example: `examples/schema-demo-plugin`
 - Open the demo options page.
 - Switch between tabs and subsection groups.
 - Save a normal field change and confirm the success notice and status pill update.
+- Change a field in one tab, switch to another tab without saving, save there, and confirm both tabs persist.
 - Enter an invalid `release_slug` value such as `a` and save.
 - Confirm the save is blocked, the field row is highlighted, and the inline error renders.
+- Clear a multi-value field such as a multi-select, checkbox list, or empty `group`, trigger a validation error elsewhere, and confirm the cleared state is preserved after the redirect.
 - Enter an invalid nested value inside `typography`, `accordion`, or `tabbed`, and confirm the exact nested control is highlighted while its containing panel opens automatically.
 - Fix the slug and save again.
 - Use reset for the current page and for all tabs.

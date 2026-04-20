@@ -112,15 +112,22 @@ final class OptionsPage {
 			? wp_unslash( $_POST[ $this->option_name() ] )
 			: array();
 
-		$success = $this->store->save_section( $tab, $submitted );
-		$status  = 'success';
+		$success       = $this->store->save_all( $submitted );
+		$status        = 'success';
+		$redirect_tab  = $tab;
+		$redirect_subsection = $subsection;
 
 		if ( $this->store->has_validation_errors() ) {
+			$error_target = $this->first_validation_target( $this->store->validation_errors() );
+
 			$status = 'validation_error';
+			$redirect_tab = $error_target['tab'];
+			$redirect_subsection = $error_target['subsection'];
 			$this->store_flash(
 				array(
-					'tab'        => $tab,
-					'subsection' => $subsection,
+					'tab'        => $redirect_tab,
+					'subsection' => $redirect_subsection,
+					'global'     => true,
 					'message'    => __( 'Please review the highlighted fields before saving again.', 'lerm' ),
 					'errors'     => $this->store->validation_errors(),
 					'submitted'  => $submitted,
@@ -130,9 +137,10 @@ final class OptionsPage {
 			$status = 'error';
 			$this->store_flash(
 				array(
-					'tab'        => $tab,
-					'subsection' => $subsection,
-					'message'    => __( 'Unable to save this settings tab.', 'lerm' ),
+					'tab'        => $redirect_tab,
+					'subsection' => $redirect_subsection,
+					'global'     => true,
+					'message'    => __( 'Unable to save these settings right now.', 'lerm' ),
 					'errors'     => array(),
 					'submitted'  => $submitted,
 				)
@@ -144,14 +152,14 @@ final class OptionsPage {
 		$redirect_url = add_query_arg(
 			array(
 				'page'                       => $this->page_slug(),
-				'tab'                        => $tab,
+				'tab'                        => $redirect_tab,
 				'lerm_admin_config_status'   => $status,
 			),
 			$this->admin_parent_url()
 		);
 
-		if ( '' !== $subsection ) {
-			$redirect_url = add_query_arg( 'subsection', $subsection, $redirect_url );
+		if ( '' !== $redirect_subsection ) {
+			$redirect_url = add_query_arg( 'subsection', $redirect_subsection, $redirect_url );
 		}
 
 		wp_safe_redirect( $redirect_url );
@@ -159,7 +167,12 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Save the current tab without a full reload.
+	 * Save the full settings page without a full reload.
+	 *
+	 * Security note: the AJAX UI submits values from every rendered tab form but
+	 * still verifies the nonce of the currently active tab. This mirrors the
+	 * reset-all flow: the same capability gates access to every tab on the page,
+	 * so the active-tab nonce is sufficient for a full-page save request.
 	 */
 	public function handle_ajax_save(): void {
 		if ( ! current_user_can( $this->capability() ) ) {
@@ -176,20 +189,24 @@ final class OptionsPage {
 			? wp_unslash( $_POST[ $this->option_name() ] )
 			: array();
 
-		if ( ! $this->store->save_section( $tab, $submitted ) ) {
+		if ( ! $this->store->save_all( $submitted ) ) {
 			if ( $this->store->has_validation_errors() ) {
+				$error_target = $this->first_validation_target( $this->store->validation_errors() );
+
 				wp_send_json_error(
 					array(
 						'message'     => esc_html__( 'Please review the highlighted fields and try again.', 'lerm' ),
 						'fieldErrors' => $this->collapse_field_errors( $this->store->validation_errors() ),
 						'errors'      => $this->store->validation_errors(),
+						'tab'         => $error_target['tab'],
+						'subsection'  => $error_target['subsection'],
 					),
 					422
 				);
 			}
 
 			wp_send_json_error(
-				array( 'message' => esc_html__( 'Unable to save this settings tab.', 'lerm' ) ),
+				array( 'message' => esc_html__( 'Unable to save these settings right now.', 'lerm' ) ),
 				500
 			);
 		}
@@ -197,7 +214,7 @@ final class OptionsPage {
 		wp_send_json_success(
 			array(
 				'message' => esc_html__( 'Settings saved.', 'lerm' ),
-				'values'  => $this->store->section_values( $tab ),
+				'values'  => $this->store->all(),
 			)
 		);
 	}
@@ -240,7 +257,7 @@ final class OptionsPage {
 		if ( 'all' === $scope ) {
 			$response_scope = 'all';
 			$success        = $this->store->reset_all_sections();
-			$values         = $this->store->section_values( $tab );
+			$values         = $this->store->all();
 			$message        = esc_html__( 'All sections have been reset to defaults.', 'lerm' );
 		} elseif ( '' !== $subsection && $this->store->has_section_group( $tab, $subsection ) ) {
 			$response_scope = 'subsection';
@@ -337,11 +354,15 @@ final class OptionsPage {
 
 		if ( ! $this->store->import_all( $decoded ) ) {
 			if ( $this->store->has_validation_errors() ) {
+				$error_target = $this->first_validation_target( $this->store->validation_errors() );
+
 				wp_send_json_error(
 					array(
 						'message'     => esc_html__( 'Please review the highlighted fields before importing again.', 'lerm' ),
 						'fieldErrors' => $this->collapse_field_errors( $this->store->validation_errors() ),
 						'errors'      => $this->store->validation_errors(),
+						'tab'         => $error_target['tab'],
+						'subsection'  => $error_target['subsection'],
 					),
 					422
 				);
@@ -356,7 +377,7 @@ final class OptionsPage {
 		wp_send_json_success(
 			array(
 				'message' => esc_html__( 'Settings imported successfully.', 'lerm' ),
-				'values'  => $this->store->section_values( $tab ),
+				'values'  => $this->store->all(),
 			)
 		);
 	}
@@ -524,30 +545,40 @@ final class OptionsPage {
 							</div>
 						</div>
 
-						<?php foreach ( $sections as $section_id => $section ) : ?>
-							<?php
-							$section_fields  = PageSchema::section_fields( $section );
-							$section_groups  = $this->group_fields( $section, $section_fields );
-							$use_subsections = $this->section_uses_subsections( $section, $section_groups );
-							$current_subsection = $use_subsections ? $this->current_subsection_for_section( (string) $section_id, $section_groups ) : '';
-							$section_errors = $this->section_flash_errors( $flash, (string) $section_id );
-							$section_values = $this->section_render_values( $values, $flash, (string) $section_id );
-							$section_notice = $this->section_flash_notice( $flash, (string) $section_id );
-							?>
-						<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
-							data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
-							data-tab-description="<?php echo esc_attr( (string) ( $section['description'] ?? '' ) ); ?>"
-							<?php echo esc_attr( $section_id !== $current_tab ? 'hidden' : '' ); ?>>
+						<?php
+						$active_section_definition = is_array( $active_section ) ? $active_section : array();
+						$active_section_fields     = PageSchema::section_fields( $active_section_definition );
+						$active_section_groups     = $this->group_fields( $active_section_definition, $active_section_fields );
+						$current_subsection        = $this->section_uses_subsections( $active_section_definition, $active_section_groups )
+							? $this->current_subsection_for_section( (string) $current_tab, $active_section_groups )
+							: '';
+						?>
+						<form method="post" action="<?php echo esc_url( $this->admin_post_url() ); ?>"
+								class="lerm-settings-form"
+								data-option-name="<?php echo esc_attr( $this->option_name() ); ?>"
+								data-js-global="<?php echo esc_attr( $this->js_global ); ?>"
+								novalidate>
+							<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
+							<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $current_tab ); ?>" data-lerm-current-tab="1">
+							<input type="hidden" name="lerm_settings_subsection" value="<?php echo esc_attr( $current_subsection ); ?>" data-lerm-current-subsection="1">
+							<input type="hidden" name="_wpnonce" value="<?php echo esc_attr( wp_create_nonce( $this->nonce_action( $current_tab ) ) ); ?>" data-lerm-current-nonce="1">
 
-							<form method="post" action="<?php echo esc_url( $this->admin_post_url() ); ?>"
-									class="lerm-settings-form"
-									data-option-name="<?php echo esc_attr( $this->option_name() ); ?>"
-									data-js-global="<?php echo esc_attr( $this->js_global ); ?>"
-									novalidate>
-								<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
-								<input type="hidden" name="lerm_settings_tab" value="<?php echo esc_attr( $section_id ); ?>">
-								<input type="hidden" name="lerm_settings_subsection" value="<?php echo esc_attr( $current_subsection ); ?>">
-								<?php wp_nonce_field( $this->nonce_action( $section_id ) ); ?>
+							<?php foreach ( $sections as $section_id => $section ) : ?>
+								<?php
+								$section_fields     = PageSchema::section_fields( $section );
+								$section_groups     = $this->group_fields( $section, $section_fields );
+								$use_subsections    = $this->section_uses_subsections( $section, $section_groups );
+								$current_subsection = $use_subsections ? $this->current_subsection_for_section( (string) $section_id, $section_groups ) : '';
+								$section_errors     = $this->section_flash_errors( $flash, (string) $section_id );
+								$section_values     = $this->section_render_values( $values, $flash, (string) $section_id );
+								$section_notice     = $this->section_flash_notice( $flash, (string) $section_id );
+								?>
+							<div data-tab-panel="<?php echo esc_attr( $section_id ); ?>"
+								data-tab-title="<?php echo esc_attr( (string) ( $section['title'] ?? '' ) ); ?>"
+								data-tab-description="<?php echo esc_attr( (string) ( $section['description'] ?? '' ) ); ?>"
+								data-tab-nonce="<?php echo esc_attr( wp_create_nonce( $this->nonce_action( (string) $section_id ) ) ); ?>"
+								data-current-subsection="<?php echo esc_attr( $current_subsection ); ?>"
+								<?php echo esc_attr( $section_id !== $current_tab ? 'hidden' : '' ); ?>>
 
 								<?php if ( null !== $section_notice ) : ?>
 									<div class="lerm-settings-form-notice notice <?php echo esc_attr( $section_notice['class'] ); ?> inline">
@@ -607,9 +638,9 @@ final class OptionsPage {
 									<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset current page', 'lerm' ); ?></button>
 									<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
 								</div>
-							</form>
-						</div>
-						<?php endforeach; ?>
+							</div>
+							<?php endforeach; ?>
+						</form>
 
 					</div>
 				</section>
@@ -1513,13 +1544,101 @@ final class OptionsPage {
 	 * @return array<string, mixed>
 	 */
 	private function section_render_values( array $values, ?array $flash, string $section_id ): array {
-		if ( ! is_array( $flash ) || (string) ( $flash['tab'] ?? '' ) !== $section_id ) {
+		if ( ! is_array( $flash ) ) {
+			return $values;
+		}
+
+		if ( ! $this->is_global_flash( $flash ) && (string) ( $flash['tab'] ?? '' ) !== $section_id ) {
 			return $values;
 		}
 
 		$submitted = is_array( $flash['submitted'] ?? null ) ? $flash['submitted'] : array();
 
-		return wp_parse_args( $submitted, $values );
+		return $this->merge_section_submitted_values( $section_id, $values, $submitted );
+	}
+
+	/**
+	 * Merge flashed submission data back into one section for non-JS validation retries.
+	 *
+	 * Some controls intentionally submit no key when emptied (for example multi-selects,
+	 * checkbox lists, or an emptied group). A plain `wp_parse_args()` merge would
+	 * resurrect the last saved value after a validation failure, so we replay those
+	 * omissions as their empty state instead.
+	 *
+	 * @param array<string, mixed> $values
+	 * @param array<string, mixed> $submitted
+	 * @return array<string, mixed>
+	 */
+	private function merge_section_submitted_values( string $section_id, array $values, array $submitted ): array {
+		$section = PageSchema::section( $this->definition, $section_id );
+
+		if ( null === $section ) {
+			return $values;
+		}
+
+		foreach ( PageSchema::section_fields( $section ) as $field ) {
+			if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
+				continue;
+			}
+
+			$field_id = (string) $field['id'];
+
+			if ( array_key_exists( $field_id, $submitted ) ) {
+				$values[ $field_id ] = $submitted[ $field_id ];
+				continue;
+			}
+
+			$missing = $this->missing_submission_render_value( $field );
+
+			if ( $missing['apply'] ) {
+				$values[ $field_id ] = $missing['value'];
+			}
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Controls like multi-selects and empty repeaters omit their key entirely.
+	 *
+	 * @param array<string, mixed> $field
+	 * @return array{apply: bool, value: mixed}
+	 */
+	private function missing_submission_render_value( array $field ): array {
+		$type = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+
+		if ( array_key_exists( 'missing_submission_value', $field ) ) {
+			return array(
+				'apply' => true,
+				'value' => $field['missing_submission_value'],
+			);
+		}
+
+		if ( 'select' === $type && ! empty( $field['multiple'] ) ) {
+			return array(
+				'apply' => true,
+				'value' => array(),
+			);
+		}
+
+		if ( 'checkbox_list' === $type || 'group' === $type ) {
+			return array(
+				'apply' => true,
+				'value' => array(),
+			);
+		}
+
+		if ( 'checkbox' === $type && ! empty( PageSchema::choices( $field ) ) ) {
+			return array(
+				'apply' => true,
+				'value' => array(),
+			);
+		}
+
+		return array(
+			'apply' => false,
+			'value' => null,
+		);
 	}
 
 	/**
@@ -1527,7 +1646,17 @@ final class OptionsPage {
 	 * @return array<string, string>
 	 */
 	private function section_flash_errors( ?array $flash, string $section_id ): array {
-		if ( ! is_array( $flash ) || (string) ( $flash['tab'] ?? '' ) !== $section_id ) {
+		if ( ! is_array( $flash ) ) {
+			return array();
+		}
+
+		if ( $this->is_global_flash( $flash ) ) {
+			$errors = is_array( $flash['errors'] ?? null ) ? $flash['errors'] : array();
+
+			return $this->filter_section_errors( $errors, $section_id );
+		}
+
+		if ( (string) ( $flash['tab'] ?? '' ) !== $section_id ) {
 			return array();
 		}
 
@@ -1563,6 +1692,31 @@ final class OptionsPage {
 			'class'   => 'validation_error' === $status ? 'notice-error' : 'notice-warning',
 			'message' => $message,
 		);
+	}
+
+	/**
+	 * @param array<string, mixed> $flash
+	 */
+	private function is_global_flash( array $flash ): bool {
+		return ! empty( $flash['global'] );
+	}
+
+	/**
+	 * @param array<string, array<int, string>> $errors
+	 * @return array<string, array<int, string>>
+	 */
+	private function filter_section_errors( array $errors, string $section_id ): array {
+		$filtered = array();
+
+		foreach ( $errors as $path => $messages ) {
+			if ( $section_id !== $this->field_target( (string) $path )['tab'] ) {
+				continue;
+			}
+
+			$filtered[ (string) $path ] = $messages;
+		}
+
+		return $filtered;
 	}
 
 	/**
@@ -1640,6 +1794,87 @@ final class OptionsPage {
 		}
 
 		return $collapsed;
+	}
+
+	/**
+	 * Resolve the first tab/subsection that contains a validation error.
+	 *
+	 * @param array<string, array<int, string>> $errors
+	 * @return array{tab: string, subsection: string}
+	 */
+	private function first_validation_target( array $errors ): array {
+		$fallback_tab = (string) array_key_first( PageSchema::sections( $this->definition ) );
+
+		foreach ( array_keys( $errors ) as $path ) {
+			$target = $this->field_target( (string) $path );
+
+			if ( '' !== $target['tab'] ) {
+				return $target;
+			}
+		}
+
+		return array(
+			'tab'        => $fallback_tab,
+			'subsection' => '',
+		);
+	}
+
+	/**
+	 * Resolve the owning tab/subsection for a dotted field path.
+	 *
+	 * @return array{tab: string, subsection: string}
+	 */
+	private function field_target( string $field_path ): array {
+		$field_id = sanitize_key( (string) strtok( $field_path, '.' ) );
+
+		if ( '' === $field_id ) {
+			return array(
+				'tab'        => '',
+				'subsection' => '',
+			);
+		}
+
+		foreach ( PageSchema::sections( $this->definition ) as $section_id => $section ) {
+			$section_fields  = PageSchema::section_fields( $section );
+			$section_groups  = $this->group_fields( $section, $section_fields );
+			$use_subsections = $this->section_uses_subsections( $section, $section_groups );
+
+			foreach ( $section_fields as $field ) {
+				if ( ! is_array( $field ) || (string) ( $field['id'] ?? '' ) !== $field_id ) {
+					continue;
+				}
+
+				if ( ! $use_subsections ) {
+					return array(
+						'tab'        => (string) $section_id,
+						'subsection' => '',
+					);
+				}
+
+				foreach ( $section_groups as $group ) {
+					foreach ( (array) ( $group['fields'] ?? array() ) as $group_field ) {
+						if ( ! is_array( $group_field ) || (string) ( $group_field['id'] ?? '' ) !== $field_id ) {
+							continue;
+						}
+
+						return array(
+							'tab'        => (string) $section_id,
+							'subsection' => sanitize_key( (string) ( $group['id'] ?? '' ) ),
+						);
+					}
+				}
+
+				return array(
+					'tab'        => (string) $section_id,
+					'subsection' => '',
+				);
+			}
+		}
+
+		return array(
+			'tab'        => '',
+			'subsection' => '',
+		);
 	}
 
 	/**
