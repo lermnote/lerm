@@ -377,7 +377,7 @@ final class BuiltinFieldTypes {
 	 */
 	private static function render_switcher( array $field, $value, string $field_name, string $input_id, string $extra_attrs = '', string $name_attr = '', string $id_attr = '' ): void {
 		printf(
-			'<input type="hidden" name="%1$s" value="0"%4$s><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s%4$s%5$s%6$s><span class="lerm-switch__track" data-on="%7$s" data-off="%8$s" aria-hidden="true"></span><span class="screen-reader-text">%9$s</span></label>',
+			'<input type="hidden" name="%1$s" value="0"><label class="lerm-switch"><input type="checkbox" id="%2$s" name="%1$s" value="1" %3$s%4$s%5$s%6$s><span class="lerm-switch__track" data-on="%7$s" data-off="%8$s" aria-hidden="true"></span><span class="screen-reader-text">%9$s</span></label>',
 			esc_attr( $field_name ),
 			esc_attr( $input_id ),
 			checked( ! empty( $value ), true, false ),
@@ -405,13 +405,15 @@ final class BuiltinFieldTypes {
 		}
 
 		foreach ( $choices as $choice_value => $choice_label ) {
+			$controller_attr = $is_root ? ' data-lerm-controller="1"' : '';
 			printf(
-				'<label><input type="radio" name="%1$s" value="%2$s" %3$s%4$s%5$s> <span>%6$s</span></label>',
+				'<label><input type="radio" name="%1$s" value="%2$s" %3$s%4$s%5$s%6$s> <span>%7$s</span></label>',
 				esc_attr( $field_name ),
 				esc_attr( $choice_value ),
 				checked( $current, (string) $choice_value, false ),
 				$name_attr,
-				$is_root ? ' data-lerm-controller="1"' : $id_attr,
+				$id_attr,
+				$controller_attr,
 				esc_html( $choice_label )
 			);
 		}
@@ -431,14 +433,17 @@ final class BuiltinFieldTypes {
 			? ' data-name-template="' . esc_attr( $name_template . '[]' ) . '"'
 			: self::name_attr( $name_template );
 
+		$id_attr          = self::id_attr( $id_template );
+		$controller_attr  = $is_root ? ' data-lerm-controller="1"' : '';
 		printf(
-			'<select id="%1$s" name="%2$s" class="regular-text"%3$s%4$s%5$s%6$s>',
+			'<select id="%1$s" name="%2$s" class="regular-text"%3$s%4$s%5$s%6$s%7$s>',
 			esc_attr( $input_id ),
 			esc_attr( $multiple ? $field_name . '[]' : $field_name ),
 			$multiple ? ' multiple="multiple"' : '',
 			$multiple ? ' size="' . esc_attr( (string) min( max( count( $choices ), 4 ), 10 ) ) . '"' : '',
 			$select_name_attr,
-			$is_root ? ' data-lerm-controller="1"' : self::id_attr( $id_template )
+			$id_attr,
+			$controller_attr
 		);
 
 		foreach ( $choices as $choice_value => $choice_label ) {
@@ -556,9 +561,10 @@ final class BuiltinFieldTypes {
 	 * @return int|float
 	 */
 	private static function sanitize_number( array $field, $value ) {
-		$default = $field['default'] ?? 0;
-		$cast    = (string) ( $field['cast'] ?? 'int' );
-		$number  = is_numeric( $value ) ? (float) $value : (float) $default;
+		$default_raw = $field['default'] ?? 0;
+		$cast        = (string) ( $field['cast'] ?? 'int' );
+		$default     = is_numeric( $default_raw ) ? (float) $default_raw : 0;
+		$number      = is_numeric( $value ) ? (float) $value : $default;
 		$min     = isset( $field['min'] ) && is_numeric( $field['min'] ) ? (float) $field['min'] : null;
 		$max     = isset( $field['max'] ) && is_numeric( $field['max'] ) ? (float) $field['max'] : null;
 

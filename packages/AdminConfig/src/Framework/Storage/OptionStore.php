@@ -123,8 +123,9 @@ final class OptionStore {
 		$options = wp_parse_args( $this->raw(), PageSchema::defaults( $this->definition ) );
 
 		foreach ( PageSchema::fields( $this->definition ) as $field ) {
-			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field_internal( $field, $options[ $field_id ] ?? ( $field['default'] ?? '' ), false );
+			$field_id = (string) $field['id'];
+			$default  = $field['default'] ?? '';
+			$options[ $field_id ] = $this->sanitize_field_internal( $field, $options[ $field_id ] ?? $default, false );
 		}
 
 		$this->normalized_options = $options;

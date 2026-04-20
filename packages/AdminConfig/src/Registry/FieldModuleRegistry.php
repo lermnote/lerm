@@ -70,7 +70,7 @@ final class FieldModuleRegistry {
 	public function enable( string $module_id ): void {
 		$module_id = sanitize_key( $module_id );
 
-		if ( isset( $this->enabled[ $module_id ] ) ) {
+		if ( ! empty( $this->enabled[ $module_id ] ) ) {
 			return;
 		}
 

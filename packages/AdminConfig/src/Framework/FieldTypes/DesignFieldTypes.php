@@ -542,9 +542,17 @@ final class DesignFieldTypes {
 				);
 			}
 
-			return array();
+			return array(
+				'id'        => 0,
+				'url'       => '',
+				'thumbnail' => '',
+			);
 		}
-		return array();
+		return array(
+			'id'        => 0,
+			'url'       => '',
+			'thumbnail' => '',
+		);
 	}
 
 	private static function flag( array $field, string $key, bool $default ): bool {
