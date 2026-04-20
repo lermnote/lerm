@@ -254,16 +254,32 @@
 
 	// ─── Color Pickers ────────────────────────────────────────────────────────
 
-	/** @typedef {{ input: HTMLInputElement, wrapper: HTMLElement, trigger: HTMLButtonElement, clearButton: HTMLButtonElement, swatch: HTMLElement, syncUi: () => void }} ColorControlInstance */
+	/** @typedef {{ hue: number, saturation: number, value: number }} HsvColor */
+	/** @typedef {{ input: HTMLInputElement, wrapper: HTMLElement, trigger: HTMLButtonElement, clearButton: HTMLButtonElement, swatch: HTMLElement, pickerState: HsvColor, syncUi: () => void }} ColorControlInstance */
 
 	/** @type {WeakMap<HTMLInputElement, ColorControlInstance>} */
 	const colorControlMap = new WeakMap();
 
-	/** @type {{ panel: HTMLElement, nativeInput: HTMLInputElement, valueLabel: HTMLElement, swatch: HTMLElement }|null} */
+	/** @type {{ panel: HTMLElement, valueLabel: HTMLElement, swatch: HTMLElement, spectrum: HTMLElement, spectrumHandle: HTMLElement, hueStrip: HTMLElement, hueHandle: HTMLElement }|null} */
 	let sharedColorPopover = null;
 
 	/** @type {ColorControlInstance|null} */
 	let activeColorControl = null;
+
+	/** @type {HsvColor} */
+	const defaultColorState = {
+		hue: 205,
+		saturation: 0.78,
+		value: 0.85,
+	};
+
+	/**
+	 * @param {number} value
+	 * @param {number} min
+	 * @param {number} max
+	 * @returns {number}
+	 */
+	const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 	/**
 	 * @param {unknown} value
@@ -280,6 +296,143 @@
 			? candidate.toLowerCase()
 			: '';
 	};
+
+	/**
+	 * @param {HsvColor} color
+	 * @returns {HsvColor}
+	 */
+	const cloneHsv = (color) => ({
+		hue: color.hue,
+		saturation: color.saturation,
+		value: color.value,
+	});
+
+	/**
+	 * @param {number} hue
+	 * @param {number} saturation
+	 * @param {number} value
+	 * @returns {{ r: number, g: number, b: number }}
+	 */
+	const hsvToRgb = (hue, saturation, value) => {
+		const normalizedHue = ((hue % 360) + 360) % 360;
+		const chroma = value * saturation;
+		const section = normalizedHue / 60;
+		const secondary = chroma * (1 - Math.abs((section % 2) - 1));
+		const match = value - chroma;
+
+		let red = 0;
+		let green = 0;
+		let blue = 0;
+
+		if (section >= 0 && section < 1) {
+			red = chroma;
+			green = secondary;
+		} else if (section < 2) {
+			red = secondary;
+			green = chroma;
+		} else if (section < 3) {
+			green = chroma;
+			blue = secondary;
+		} else if (section < 4) {
+			green = secondary;
+			blue = chroma;
+		} else if (section < 5) {
+			red = secondary;
+			blue = chroma;
+		} else {
+			red = chroma;
+			blue = secondary;
+		}
+
+		return {
+			r: Math.round((red + match) * 255),
+			g: Math.round((green + match) * 255),
+			b: Math.round((blue + match) * 255),
+		};
+	};
+
+	/**
+	 * @param {number} red
+	 * @param {number} green
+	 * @param {number} blue
+	 * @returns {HsvColor}
+	 */
+	const rgbToHsv = (red, green, blue) => {
+		const r = red / 255;
+		const g = green / 255;
+		const b = blue / 255;
+		const max = Math.max(r, g, b);
+		const min = Math.min(r, g, b);
+		const delta = max - min;
+
+		let hue = 0;
+
+		if (delta > 0) {
+			if (max === r) {
+				hue = 60 * (((g - b) / delta) % 6);
+			} else if (max === g) {
+				hue = 60 * (((b - r) / delta) + 2);
+			} else {
+				hue = 60 * (((r - g) / delta) + 4);
+			}
+		}
+
+		if (hue < 0) {
+			hue += 360;
+		}
+
+		return {
+			hue,
+			saturation: max === 0 ? 0 : delta / max,
+			value: max,
+		};
+	};
+
+	/**
+	 * @param {string} hex
+	 * @returns {{ r: number, g: number, b: number }|null}
+	 */
+	const hexToRgb = (hex) => {
+		const normalized = normalizeHexColor(hex);
+
+		if (!normalized) return null;
+
+		const expanded = 4 === normalized.length
+			? `#${normalized[1]}${normalized[1]}${normalized[2]}${normalized[2]}${normalized[3]}${normalized[3]}`
+			: normalized;
+
+		return {
+			r: parseInt(expanded.slice(1, 3), 16),
+			g: parseInt(expanded.slice(3, 5), 16),
+			b: parseInt(expanded.slice(5, 7), 16),
+		};
+	};
+
+	/**
+	 * @param {string} hex
+	 * @returns {HsvColor}
+	 */
+	const hexToHsv = (hex) => {
+		const rgb = hexToRgb(hex);
+
+		return rgb
+			? rgbToHsv(rgb.r, rgb.g, rgb.b)
+			: cloneHsv(defaultColorState);
+	};
+
+	/**
+	 * @param {{ r: number, g: number, b: number }} rgb
+	 * @returns {string}
+	 */
+	const rgbToHex = (rgb) => `#${[rgb.r, rgb.g, rgb.b]
+		.map((channel) => clamp(Math.round(channel), 0, 255).toString(16).padStart(2, '0'))
+		.join('')}`;
+
+	/**
+	 * @param {HsvColor} color
+	 * @returns {string}
+	 */
+	const hsvToHex = (color) => rgbToHex(hsvToRgb(color.hue, color.saturation, color.value));
 
 	/** @param {HTMLInputElement} input */
 	const dispatchColorInputEvents = (input) => {
@@ -303,7 +456,7 @@
 
 		const rect = control.trigger.getBoundingClientRect();
 		const width = popover.panel.offsetWidth || 220;
-		const height = popover.panel.offsetHeight || 150;
+		const height = popover.panel.offsetHeight || 250;
 		const gap = 10;
 		const viewportPadding = 12;
 
@@ -339,10 +492,18 @@
 
 		const rawValue = String(control.input.value ?? '').trim();
 		const normalized = normalizeHexColor(rawValue);
+		const previewHex = normalized || '';
 
-		popover.nativeInput.value = normalized || '#000000';
-		popover.valueLabel.textContent = normalized || rawValue || 'No color';
-		popover.swatch.style.setProperty('--lerm-color-swatch', normalized || 'transparent');
+		if (normalized) {
+			control.pickerState = hexToHsv(normalized);
+		}
+
+		popover.valueLabel.textContent = previewHex || rawValue || 'No color';
+		popover.swatch.style.setProperty('--lerm-color-swatch', previewHex || 'transparent');
+		popover.spectrum.style.setProperty('--lerm-hue', String(control.pickerState.hue));
+		popover.spectrumHandle.style.left = `${control.pickerState.saturation * 100}%`;
+		popover.spectrumHandle.style.top = `${(1 - control.pickerState.value) * 100}%`;
+		popover.hueHandle.style.left = `${(control.pickerState.hue / 360) * 100}%`;
 		positionSharedColorPopover(control);
 	};
 
@@ -384,6 +545,21 @@
 		openSharedColorPopover(control);
 	};
 
+	/**
+	 * @param {ColorControlInstance} control
+	 * @param {HsvColor} color
+	 * @param {boolean} [dispatchEvents]
+	 */
+	const applyPopoverColorState = (control, color, dispatchEvents = true) => {
+		control.pickerState = cloneHsv(color);
+		control.input.value = hsvToHex(control.pickerState);
+		control.syncUi();
+
+		if (dispatchEvents) {
+			dispatchColorInputEvents(control.input);
+		}
+	};
+
 	const ensureSharedColorPopover = () => {
 		if (sharedColorPopover) return sharedColorPopover;
 
@@ -400,27 +576,77 @@
 		const valueLabel = dom.create('span', {
 			class: 'lerm-color-popover__value',
 		}, ['No color']);
-		const nativeInput = /** @type {HTMLInputElement} */ (dom.create('input', {
-			type: 'color',
-			class: 'lerm-color-popover__native',
-			value: '#000000',
-			'aria-label': 'Choose color',
-		}));
-		const helper = dom.create('p', {
-			class: 'lerm-color-popover__helper',
-		}, ['Use the browser color picker or type a hex value directly.']);
+		const spectrum = dom.create('div', {
+			class: 'lerm-color-popover__spectrum',
+		});
+		const spectrumHandle = dom.create('span', {
+			class: 'lerm-color-popover__spectrum-handle',
+			'aria-hidden': 'true',
+		});
+		const hueStrip = dom.create('div', {
+			class: 'lerm-color-popover__hue',
+		});
+		const hueHandle = dom.create('span', {
+			class: 'lerm-color-popover__hue-handle',
+			'aria-hidden': 'true',
+		});
 
+		spectrum.appendChild(spectrumHandle);
+		hueStrip.appendChild(hueHandle);
 		panel.appendChild(dom.create('div', { class: 'lerm-color-popover__header' }, [swatch, valueLabel]));
-		panel.appendChild(nativeInput);
-		panel.appendChild(helper);
+		panel.appendChild(spectrum);
+		panel.appendChild(hueStrip);
 		document.body.appendChild(panel);
 
-		nativeInput.addEventListener('input', () => {
-			if (!activeColorControl) return;
+		/**
+		 * @param {HTMLElement} surface
+		 * @param {(event: PointerEvent, control: ColorControlInstance) => void} onMove
+		 */
+		const bindDragSurface = (surface, onMove) => {
+			surface.addEventListener('pointerdown', (event) => {
+				if (!(event instanceof PointerEvent) || !activeColorControl) return;
 
-			activeColorControl.input.value = nativeInput.value;
-			activeColorControl.syncUi();
-			dispatchColorInputEvents(activeColorControl.input);
+				event.preventDefault();
+
+				const control = activeColorControl;
+				const move = (nextEvent) => {
+					if (!(nextEvent instanceof PointerEvent)) return;
+					onMove(nextEvent, control);
+				};
+				const stop = () => {
+					window.removeEventListener('pointermove', move);
+					window.removeEventListener('pointerup', stop);
+					window.removeEventListener('pointercancel', stop);
+				};
+
+				move(event);
+				window.addEventListener('pointermove', move);
+				window.addEventListener('pointerup', stop);
+				window.addEventListener('pointercancel', stop);
+			});
+		};
+
+		bindDragSurface(spectrum, (event, control) => {
+			const rect = spectrum.getBoundingClientRect();
+			const saturation = clamp((event.clientX - rect.left) / Math.max(rect.width, 1), 0, 1);
+			const value = 1 - clamp((event.clientY - rect.top) / Math.max(rect.height, 1), 0, 1);
+
+			applyPopoverColorState(control, {
+				hue: control.pickerState.hue,
+				saturation,
+				value,
+			});
+		});
+
+		bindDragSurface(hueStrip, (event, control) => {
+			const rect = hueStrip.getBoundingClientRect();
+			const ratio = clamp((event.clientX - rect.left) / Math.max(rect.width, 1), 0, 1);
+
+			applyPopoverColorState(control, {
+				hue: ratio >= 1 ? 359.999 : ratio * 360,
+				saturation: control.pickerState.saturation,
+				value: control.pickerState.value,
+			});
 		});
 
 		document.addEventListener('mousedown', (event) => {
@@ -455,9 +681,12 @@
 
 		sharedColorPopover = {
 			panel,
-			nativeInput,
 			valueLabel,
 			swatch,
+			spectrum,
+			spectrumHandle,
+			hueStrip,
+			hueHandle,
 		};
 
 		return sharedColorPopover;
@@ -475,7 +704,7 @@
 		const wrapper = dom.create('span', { class: 'lerm-color-control' });
 		const trigger = /** @type {HTMLButtonElement} */ (dom.create('button', {
 			type: 'button',
-			class: 'button lerm-color-control__trigger',
+			class: 'lerm-color-control__trigger',
 			'aria-haspopup': 'dialog',
 			'aria-expanded': 'false',
 			'aria-label': 'Choose color',
@@ -488,7 +717,8 @@
 			type: 'button',
 			class: 'lerm-color-control__clear',
 			'aria-label': 'Clear color',
-		}, ['Clear']));
+			title: 'Clear color',
+		}, ['×']));
 
 		if (input.parentNode) {
 			input.parentNode.insertBefore(wrapper, input);
@@ -501,6 +731,7 @@
 		wrapper.appendChild(trigger);
 		wrapper.appendChild(input);
 		wrapper.appendChild(clearButton);
+		clearButton.textContent = 'x';
 
 		/** @type {ColorControlInstance} */
 		const control = {
@@ -509,10 +740,15 @@
 			trigger,
 			clearButton,
 			swatch,
+			pickerState: cloneHsv(defaultColorState),
 			syncUi: () => {
 				const rawValue = String(input.value ?? '').trim();
 				const normalized = normalizeHexColor(rawValue);
 				const hasVisibleValue = '' !== rawValue;
+
+				if (normalized) {
+					control.pickerState = hexToHsv(normalized);
+				}
 
 				wrapper.classList.toggle('has-value', hasVisibleValue);
 				wrapper.classList.toggle('is-empty', !hasVisibleValue);
