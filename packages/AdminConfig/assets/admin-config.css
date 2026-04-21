@@ -769,7 +769,6 @@
 	display: grid;
 	align-content: start;
 	gap: 8px;
-	height: 100%;
 	padding: 12px;
 	border-color: #dbe4ee;
 	border-radius: 8px;
@@ -1005,10 +1004,6 @@
 
 .lerm-color-popover__hue-handle {
 	top: 50%;
-}
-
-.lerm-typography-field .lerm-color-control {
-	width: 100%;
 }
 
 .lerm-typography-field .lerm-color-control__input.regular-text,
