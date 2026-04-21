@@ -59,17 +59,18 @@ if ( $footer_menu_id > 0 ) {
 	<?php if ( ! empty( $template_options['qq_chat_enable'] ) && ! empty( $template_options['qq_chat_number'] ) ) : ?>
 		<a class="btn btn-custom" target="_blank" rel="noopener noreferrer"
 			href="<?php echo esc_url( 'http://wpa.qq.com/msgrd?v=3&uin=' . rawurlencode( $template_options['qq_chat_number'] ) . '&site=qq&menu=yes' ); ?>"
+			data-bs-toggle="tooltip"
 			data-bs-placement="left"
 			title="<?php echo esc_attr__( 'QQ live chat', 'lerm' ); ?>"
 			role="button"><i class="fa fa-qq"></i></a>
 	<?php endif; ?>
 
 	<?php if ( ! isset( $template_options['back_to_top'] ) || ! empty( $template_options['back_to_top'] ) ) : ?>
-		<button class="btn btn-custom" id="scroll-up"
-			data-threshold="<?php echo (int) ( $template_options['back_to_top_threshold'] ?? 400 ); ?>"
+		<button class="btn btn-custom d-none" id="scroll-up"
+			data-bs-toggle="tooltip"
 			data-bs-placement="left"
 			title="<?php echo esc_attr__( 'Back to top', 'lerm' ); ?>"
-			role="button" style="display:none;"><i class="fa fa-chevron-up"></i></button>
+			role="button"><i class="fa fa-chevron-up"></i></button>
 	<?php endif; ?>
 </div>
 </div><!-- #page -->

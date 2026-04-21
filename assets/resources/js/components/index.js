@@ -10,11 +10,13 @@ import { handleCommentSuccess } from './comments.js';
 import { handleUpdateProfileSuccess } from './profile.js';
 import { initializeScrollAnimate } from './scrollAnimate.js';
 import { initializeScrollTop } from './scrollTop.js';
-import{initializeSearch} from './search.js';
+import { initializeSearch } from './search.js';
+import { initializeTemplateBehaviors } from './templateBehaviors.js';
 import { initializeThemeOptions, setCSSVariable, setCSSVariables } from './themeOptions.js';
 
 export const initializePageComponents = () => {
 	initializeThemeOptions();
+	initializeTemplateBehaviors();
 	initializeNavigation();
 	initializeSearch();
 	initializeScrollTop();
@@ -25,6 +27,7 @@ export const initializePageComponents = () => {
 };
 
 export const initializeDynamicComponents = () => {
+	initializeTemplateBehaviors();
 	initializeScrollAnimate();
 	initializeLazyImages();
 	initializeCodeHighlight();
@@ -41,6 +44,8 @@ export {
 	initializeNavigation,
 	initializeScrollAnimate,
 	initializeScrollTop,
+	initializeSearch,
+	initializeTemplateBehaviors,
 	initializeThemeOptions,
 	likeBtnHandle,
 	likeBtnSuccess,

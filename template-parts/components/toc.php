@@ -6,10 +6,10 @@
  *
  * Reads headings from the current post content and renders a collapsible TOC.
  * Controlled by:
- *   toc_enable         – master switch
- *   toc_min_headings   – skip TOC if fewer headings than this number
- *   toc_position       – 'before_content' | 'sidebar' | 'floating'
- *   toc_collapsed      – start collapsed
+ *   toc_enable         鈥?master switch
+ *   toc_min_headings   鈥?skip TOC if fewer headings than this number
+ *   toc_position       鈥?'before_content' | 'sidebar' | 'floating'
+ *   toc_collapsed      鈥?start collapsed
  *
  * @package Lerm
  */
@@ -25,7 +25,7 @@ if ( empty( $content ) ) {
 	return;
 }
 
-// ── Extract headings ────────────────────────────────────────────────────────
+// 鈹€鈹€ Extract headings 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 preg_match_all( '/<h([2-6])[^>]*>(.*?)<\/h\1>/is', $content, $matches, PREG_SET_ORDER );
 
 $min_headings = max( 1, (int) ( $template_options['toc_min_headings'] ?? 3 ) );
@@ -37,7 +37,7 @@ $position  = $template_options['toc_position'] ?? 'before_content';
 $collapsed = ! empty( $template_options['toc_collapsed'] );
 
 // The floating position is rendered separately via a fixed-position div
-// appended to body — only render it there, not inline.
+// appended to body 鈥?only render it there, not inline.
 global $lerm_toc_rendered;
 if ( $position === 'floating' && ! empty( $lerm_toc_rendered ) ) {
 	return;
@@ -52,7 +52,7 @@ if ( $collapsed ) {
 	$extra_class .= ' is-collapsed';
 }
 
-// ── Build slug map (avoid duplicates) ───────────────────────────────────────
+// 鈹€鈹€ Build slug map (avoid duplicates) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 $slug_counts = array();
 $items       = array();
 foreach ( $matches as $m ) {
@@ -73,7 +73,7 @@ foreach ( $matches as $m ) {
 <nav class="lerm-toc<?php echo esc_attr( $extra_class ); ?>" aria-label="<?php esc_attr_e( 'Table of contents', 'lerm' ); ?>">
 	<div class="lerm-toc__title" role="button" tabindex="0"
 		aria-expanded="<?php echo $collapsed ? 'false' : 'true'; ?>"
-		onclick="this.closest('.lerm-toc').classList.toggle('is-collapsed');this.setAttribute('aria-expanded',this.closest('.lerm-toc').classList.contains('is-collapsed')?'false':'true');">
+		data-lerm-toc-toggle="true">
 		<?php esc_html_e( 'Contents', 'lerm' ); ?>
 		<span class="lerm-toc__toggle" aria-hidden="true">&#9660;</span>
 	</div>

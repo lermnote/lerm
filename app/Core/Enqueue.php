@@ -82,6 +82,7 @@ class Enqueue {
 	public static function hooks(): void {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
+		add_action( 'wp_head', array( __CLASS__, 'print_head_bootstrap' ), 0 );
 
 		add_filter( 'script_loader_tag', array( __CLASS__, 'add_module_type' ), 10, 2 );
 	}
@@ -211,6 +212,35 @@ class Enqueue {
 	 */
 	public static function reading_progress_bar(): void {
 		echo '<div id="reading-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="' . esc_attr__( 'Reading progress', 'lerm' ) . '"></div>' . "\n";
+	}
+
+	/**
+	 * Print the minimal head bootstrap needed before the main bundle runs.
+	 * Keeps early dark-mode sync out of templates while still preventing a flash.
+	 */
+	public static function print_head_bootstrap(): void {
+		if ( empty( self::$args['dark_mode_enable'] ) ) {
+			return;
+		}
+
+		$default_scheme = (string) ( self::$args['dark_mode_default'] ?? 'system' );
+		if ( ! in_array( $default_scheme, array( 'light', 'dark', 'system' ), true ) ) {
+			$default_scheme = 'system';
+		}
+
+		$config = wp_json_encode(
+			array(
+				'defaultScheme'    => $default_scheme,
+				'storageKey'       => 'lerm-color-scheme',
+				'legacyStorageKey' => 'lerm-theme',
+			)
+		);
+
+		if ( ! is_string( $config ) || '' === $config ) {
+			return;
+		}
+
+		echo '<script>(function(){var c=' . $config . ';try{var s=localStorage.getItem(c.storageKey)||localStorage.getItem(c.legacyStorageKey);var p=s||c.defaultScheme;if(p==="system"){p=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}if(s==="light"||s==="dark"){localStorage.setItem(c.storageKey,s);localStorage.removeItem(c.legacyStorageKey);}document.documentElement.setAttribute("data-bs-theme",p);}catch(e){var f=c.defaultScheme==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":c.defaultScheme==="dark"?"dark":"light";document.documentElement.setAttribute("data-bs-theme",f);}})();</script>' . "\n";
 	}
 
 	/**

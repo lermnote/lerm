@@ -24,48 +24,6 @@
 </head>
 <body <?php body_class(); ?>>
 	<?php wp_body_open(); ?>
-	<?php
-	// ── Reading progress bar ───────────────────────────────────────────────
-	if ( ! empty( $template_options['reading_progress'] ) && is_singular( 'post' ) ) :
-		$bar_color  = esc_attr( $template_options['reading_progress_color'] ?? '#0084ba' );
-		$bar_height = (int) ( $template_options['reading_progress_height'] ?? 3 );
-		?>
-		<div id="reading-progress-bar" style="position:fixed;top:0;left:0;width:0;height:<?php echo $bar_height; ?>px;background:<?php echo $bar_color; ?>;z-index:9999;transition:width .1s linear;" aria-hidden="true"></div>
-		<script>
-		(function(){
-			var bar = document.getElementById('reading-progress-bar');
-			if (!bar) return;
-			function update(){
-				var scrollTop = window.scrollY || document.documentElement.scrollTop;
-				var docH = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-				bar.style.width = docH > 0 ? Math.min(100, (scrollTop / docH) * 100) + '%' : '0';
-			}
-			window.addEventListener('scroll', update, {passive:true});
-			update();
-		})();
-		</script>
-	<?php endif; ?>
- 
-	<?php
-	// ── Dark mode bootstrap ────────────────────────────────────────────────
-	if ( ! empty( $template_options['dark_mode_enable'] ) ) :
-		$dm_default = $template_options['dark_mode_default'] ?? 'system';
-		?>
-		<script>
-		(function(){
-			var stored = localStorage.getItem('lerm-color-scheme') || localStorage.getItem('lerm-theme');
-			var pref   = stored || '<?php echo esc_js( $dm_default ); ?>';
-			if (pref === 'system') {
-				pref = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-			}
-			if (stored === 'light' || stored === 'dark') {
-				localStorage.setItem('lerm-color-scheme', stored);
-				localStorage.removeItem('lerm-theme');
-			}
-			document.documentElement.setAttribute('data-bs-theme', pref);
-		})();
-		</script>
-	<?php endif; ?>
 	<div id="page" class="site">
 		<header id="site-header" class="card site-header mb-3 <?php echo ! empty( $template_options['sticky_header'] ) ? ' site-header--sticky' : ''; ?><?php echo ! empty( $template_options['transparent_header'] ) ? ' site-header--transparent' : ''; ?>"
 		data-shrink="<?php echo ( ! empty( $template_options['sticky_header'] ) && ! empty( $template_options['sticky_header_shrink'] ) ) ? 'true' : 'false'; ?>"
