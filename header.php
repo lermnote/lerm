@@ -53,10 +53,14 @@
 		?>
 		<script>
 		(function(){
-			var stored = localStorage.getItem('lerm-color-scheme');
+			var stored = localStorage.getItem('lerm-color-scheme') || localStorage.getItem('lerm-theme');
 			var pref   = stored || '<?php echo esc_js( $dm_default ); ?>';
 			if (pref === 'system') {
 				pref = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			}
+			if (stored === 'light' || stored === 'dark') {
+				localStorage.setItem('lerm-color-scheme', stored);
+				localStorage.removeItem('lerm-theme');
 			}
 			document.documentElement.setAttribute('data-bs-theme', pref);
 		})();

@@ -491,6 +491,58 @@
 	max-width: 100%;
 }
 
+.lerm-settings-row input.regular-text:not(.lerm-color-control__input),
+.lerm-settings-row input.small-text:not(.lerm-number-input__control),
+.lerm-settings-row textarea.large-text,
+.lerm-settings-row select.regular-text {
+	margin: 0;
+	border: 1px solid #cbd5e1;
+	border-radius: 12px;
+	background: #fff;
+	color: #0f172a;
+	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+	box-sizing: border-box;
+	transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.lerm-settings-row input.regular-text:not(.lerm-color-control__input),
+.lerm-settings-row input.small-text:not(.lerm-number-input__control),
+.lerm-settings-row select.regular-text {
+	min-height: 40px;
+	padding: 0 12px;
+	line-height: 1.4;
+}
+
+.lerm-settings-row textarea.large-text {
+	min-height: 112px;
+	padding: 10px 12px;
+	line-height: 1.5;
+}
+
+.lerm-settings-row input.regular-text:not(.lerm-color-control__input)::placeholder,
+.lerm-settings-row input.small-text:not(.lerm-number-input__control)::placeholder,
+.lerm-settings-row textarea.large-text::placeholder {
+	color: #94a3b8;
+}
+
+.lerm-settings-row input.regular-text:not(.lerm-color-control__input):focus,
+.lerm-settings-row input.small-text:not(.lerm-number-input__control):focus,
+.lerm-settings-row textarea.large-text:focus,
+.lerm-settings-row select.regular-text:focus {
+	border-color: #0284c7;
+	box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
+	outline: 0;
+}
+
+.lerm-settings-row input.regular-text:not(.lerm-color-control__input):disabled,
+.lerm-settings-row input.small-text:not(.lerm-number-input__control):disabled,
+.lerm-settings-row textarea.large-text:disabled,
+.lerm-settings-row select.regular-text:disabled {
+	background: #f8fafc;
+	color: #64748b;
+	cursor: not-allowed;
+}
+
 /* ── Toggle switch ─────────────────────────────────────────── */
 .lerm-switch {
 	display: inline-flex;
@@ -1186,6 +1238,14 @@
 	max-width: 100%;
 	justify-self: start;
 	grid-template-columns: minmax(56px, auto) 28px;
+}
+
+.lerm-fieldset__item .lerm-color-control {
+	display: inline-grid;
+	justify-self: start;
+	width: auto;
+	max-width: 100%;
+	grid-template-columns: 32px minmax(0, 96px) auto;
 }
 
 .lerm-fieldset__item .lerm-number-input__control.small-text {

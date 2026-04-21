@@ -54,10 +54,10 @@ final class CssVariables {
 
 		$dark = self::resolve_dark_tokens();
 		if ( ! empty( $dark ) ) {
-			$css .= self::build_block( '[data-theme="dark"]', $dark );
+			$css .= self::build_block( '[data-bs-theme="dark"]', $dark );
 			if ( 'system' === ( self::$opts['dark_mode_default'] ?? 'system' ) ) {
 				$css .= '@media(prefers-color-scheme:dark){' .
-					self::build_block( ':root:not([data-theme="light"])', $dark ) . '}';
+					self::build_block( ':root:not([data-bs-theme="light"])', $dark ) . '}';
 			}
 		}
 

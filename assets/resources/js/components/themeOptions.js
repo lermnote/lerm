@@ -21,8 +21,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DATA = window.lermData || {};
-const STORAGE = 'lerm-theme';
-const ATTR = 'data-theme';
+const STORAGE_KEY = 'lerm-color-scheme';
+const LEGACY_STORAGE_KEY = 'lerm-theme';
+const ATTR = 'data-bs-theme';
+
+const readStoredScheme = () => {
+	const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+	return stored === 'light' || stored === 'dark' ? stored : null;
+};
+
+const persistScheme = (scheme) => {
+	localStorage.setItem(STORAGE_KEY, scheme);
+	localStorage.removeItem(LEGACY_STORAGE_KEY);
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared scroll dispatcher
@@ -54,7 +65,7 @@ const registerScrollHandler = (fn) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Apply a colour scheme to <html data-theme="light|dark">.
+ * Apply a colour scheme to <html data-bs-theme="light|dark">.
  * @param {'light'|'dark'} scheme
  */
 const applyScheme = (scheme) => {
@@ -68,8 +79,11 @@ const applyScheme = (scheme) => {
  *   3. System preference
  */
 const resolveInitialScheme = () => {
-	const saved = localStorage.getItem(STORAGE);
-	if (saved === 'light' || saved === 'dark') return saved;
+	const saved = readStoredScheme();
+	if (saved) {
+		persistScheme(saved);
+		return saved;
+	}
 
 	const def = DATA.darkModeDefault || 'system';
 	if (def === 'light') return 'light';
@@ -86,7 +100,7 @@ const toggleScheme = () => {
 	const current = document.documentElement.getAttribute(ATTR) || 'light';
 	const next = current === 'dark' ? 'light' : 'dark';
 	applyScheme(next);
-	localStorage.setItem(STORAGE, next);
+	persistScheme(next);
 };
 
 /**
@@ -152,7 +166,7 @@ const initDarkMode = () => {
 
 	// Follow system preference change if user has not explicitly chosen
 	window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-		if (localStorage.getItem(STORAGE)) return; // user has a saved preference
+		if (readStoredScheme()) return; // user has a saved preference
 		applyScheme(e.matches ? 'dark' : 'light');
 	});
 };

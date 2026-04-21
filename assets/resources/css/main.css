@@ -1901,19 +1901,19 @@ Media
 }
 
 /* Carousel */
-.carousel-indicators li {
+.carousel-indicators [data-bs-target] {
   width: 1.25rem;
   transition: all 0.5s ease-in-out;
 }
 
 .carousel-indicators .active {
   width: 1.875rem;
-  color: #dc3545;
+  background-color: #dc3545;
   transition: all 0.5s ease-in-out;
 }
 
 @media (max-width: 991.98px) {
-  .carousel-indicators li {
+  .carousel-indicators [data-bs-target] {
     height: 2px;
   }
 }
@@ -2089,17 +2089,17 @@ a[id="cancel-comment-reply-link"]:hover {
   background-color: var(--lerm-box-outer-bg);
 }
 
-/* ── Dark mode base (toggled by JS setting data-theme="dark") */
-[data-theme="dark"] .card,
-[data-theme="dark"] .comment-respond {
+/* ── Dark mode base (toggled by JS setting data-bs-theme="dark") */
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .comment-respond {
   border-color: var(--lerm-color-border);
 }
 
-[data-theme="dark"] body {
+[data-bs-theme="dark"] body {
   color: var(--lerm-color-text);
 }
 
-[data-theme="dark"] a {
+[data-bs-theme="dark"] a {
   color: var(--lerm-color-primary);
 }
 
