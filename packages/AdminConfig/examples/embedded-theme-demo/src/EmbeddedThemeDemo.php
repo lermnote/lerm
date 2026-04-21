@@ -18,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class EmbeddedThemeDemo {
 
 	public static function register( Runtime $runtime ): void {
+		self::register_data_sources( $runtime );
+
 		if ( ! $runtime->has( 'acme-theme-style-kit' ) ) {
 			$runtime->register( self::options_schema() );
 		}
@@ -51,6 +53,7 @@ final class EmbeddedThemeDemo {
 				'eyebrow'     => __( 'Embedded Mode', 'lerm' ),
 				'title'       => __( 'Theme Style Kit', 'lerm' ),
 				'description' => __( 'A theme-owned example showing advanced fields and reusable storage through the embedded runtime.', 'lerm' ),
+				'debug'       => true,
 			),
 			'sections'  => array(
 				'brand' => array(
@@ -168,6 +171,17 @@ final class EmbeddedThemeDemo {
 					'title'       => __( 'Hero Content', 'lerm' ),
 					'description' => __( 'Panel-based content blocks for the homepage hero.', 'lerm' ),
 					'fields'      => array(
+						array(
+							'id'                => 'featured_story_pack',
+							'type'              => 'ajax_select',
+							'source'            => 'theme_story_packs',
+							'label'             => __( 'Featured Story Pack', 'lerm' ),
+							'description'       => __( 'Search a curated list of story packs through the same embedded AJAX data-source layer.', 'lerm' ),
+							'placeholder'       => __( 'Search story packs...', 'lerm' ),
+							'min_search_length' => 1,
+							'per_page'          => 4,
+							'default'           => 'editorial-weekender',
+						),
 						array(
 							'id'          => 'hero_accordion',
 							'type'        => 'accordion',
@@ -295,6 +309,76 @@ final class EmbeddedThemeDemo {
 						),
 					),
 				),
+			),
+		);
+	}
+
+	private static function register_data_sources( Runtime $runtime ): void {
+		if ( $runtime->has_data_source( 'theme_story_packs' ) ) {
+			return;
+		}
+
+		$runtime->register_data_source(
+			'theme_story_packs',
+			static function ( array $args = array() ): array {
+				$catalog  = EmbeddedThemeDemo::story_pack_items();
+				$search   = strtolower( trim( (string) ( $args['search'] ?? '' ) ) );
+				$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
+				$per_page = max( 1, (int) ( $args['per_page'] ?? 5 ) );
+
+				$filtered = array_values(
+					array_filter(
+						$catalog,
+						static function ( array $item ) use ( $search ): bool {
+							if ( '' === $search ) {
+								return true;
+							}
+
+							$haystack = strtolower( trim( (string) ( $item['label'] ?? '' ) . ' ' . (string) ( $item['value'] ?? '' ) ) );
+
+							return str_contains( $haystack, $search );
+						}
+					)
+				);
+
+				$offset = ( $page - 1 ) * $per_page;
+
+				return array(
+					'items' => array_slice( $filtered, $offset, $per_page ),
+					'more'  => count( $filtered ) > $offset + $per_page,
+				);
+			}
+		);
+	}
+
+	/**
+	 * @return array<int, array<string, string>>
+	 */
+	private static function story_pack_items(): array {
+		return array(
+			array(
+				'value' => 'editorial-weekender',
+				'label' => __( 'Editorial Weekender', 'lerm' ),
+			),
+			array(
+				'value' => 'makers-notebook',
+				'label' => __( 'Makers Notebook', 'lerm' ),
+			),
+			array(
+				'value' => 'culture-briefing',
+				'label' => __( 'Culture Briefing', 'lerm' ),
+			),
+			array(
+				'value' => 'field-report',
+				'label' => __( 'Field Report', 'lerm' ),
+			),
+			array(
+				'value' => 'sound-diary',
+				'label' => __( 'Sound Diary', 'lerm' ),
+			),
+			array(
+				'value' => 'city-notes',
+				'label' => __( 'City Notes', 'lerm' ),
 			),
 		);
 	}

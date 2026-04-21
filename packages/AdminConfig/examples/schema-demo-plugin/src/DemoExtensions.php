@@ -40,6 +40,64 @@ final class DemoExtensions {
 			);
 		}
 
+		if ( ! $runtime->has_data_source( 'campaign_library' ) ) {
+			$runtime->register_data_source(
+				'campaign_library',
+				static function ( array $args = array() ): array {
+					$catalog   = DemoExtensions::campaign_library_items();
+					$search    = strtolower( trim( (string) ( $args['search'] ?? '' ) ) );
+					$page      = max( 1, (int) ( $args['page'] ?? 1 ) );
+					$per_page  = max( 1, (int) ( $args['per_page'] ?? 5 ) );
+					$selected  = is_array( $args['selected'] ?? null ) ? array_values( array_filter( array_map( 'strval', $args['selected'] ) ) ) : array();
+					$filtered  = array_values(
+						array_filter(
+							$catalog,
+							static function ( array $item ) use ( $search ): bool {
+								if ( '' === $search ) {
+									return true;
+								}
+
+								$haystack = strtolower( trim( (string) ( $item['label'] ?? '' ) . ' ' . (string) ( $item['value'] ?? '' ) ) );
+
+								return str_contains( $haystack, $search );
+							}
+						)
+					);
+
+					if ( ! empty( $selected ) && 1 === $page ) {
+						usort(
+							$filtered,
+							static function ( array $left, array $right ) use ( $selected ): int {
+								$left_index  = array_search( (string) ( $left['value'] ?? '' ), $selected, true );
+								$right_index = array_search( (string) ( $right['value'] ?? '' ), $selected, true );
+
+								if ( false !== $left_index && false !== $right_index ) {
+									return $left_index <=> $right_index;
+								}
+
+								if ( false !== $left_index ) {
+									return -1;
+								}
+
+								if ( false !== $right_index ) {
+									return 1;
+								}
+
+								return strcasecmp( (string) ( $left['label'] ?? '' ), (string) ( $right['label'] ?? '' ) );
+							}
+						);
+					}
+
+					$offset = ( $page - 1 ) * $per_page;
+
+					return array(
+						'items' => array_slice( $filtered, $offset, $per_page ),
+						'more'  => count( $filtered ) > $offset + $per_page,
+					);
+				}
+			);
+		}
+
 		$runtime->register_field_type(
 			'slug_text',
 			array(
@@ -85,6 +143,42 @@ final class DemoExtensions {
 
 				return $slug;
 			}
+		);
+	}
+
+	/**
+	 * @return array<int, array<string, string>>
+	 */
+	private static function campaign_library_items(): array {
+		return array(
+			array(
+				'value' => 'spring-launch',
+				'label' => __( 'Spring Launch', 'lerm-admin-config-demo' ),
+			),
+			array(
+				'value' => 'creator-series',
+				'label' => __( 'Creator Series', 'lerm-admin-config-demo' ),
+			),
+			array(
+				'value' => 'audio-week',
+				'label' => __( 'Audio Week', 'lerm-admin-config-demo' ),
+			),
+			array(
+				'value' => 'design-sprint',
+				'label' => __( 'Design Sprint', 'lerm-admin-config-demo' ),
+			),
+			array(
+				'value' => 'community-notes',
+				'label' => __( 'Community Notes', 'lerm-admin-config-demo' ),
+			),
+			array(
+				'value' => 'pro-tools',
+				'label' => __( 'Pro Tools', 'lerm-admin-config-demo' ),
+			),
+			array(
+				'value' => 'studio-preview',
+				'label' => __( 'Studio Preview', 'lerm-admin-config-demo' ),
+			),
 		);
 	}
 }

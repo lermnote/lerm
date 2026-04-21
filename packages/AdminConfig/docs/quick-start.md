@@ -171,6 +171,57 @@ $badge = $runtime->get(
 
 If you call `all()` or `get()` without the required object context, the runtime falls back to compiled defaults and emits a debug notice in `WP_DEBUG`. Use `store()` directly only when you want strict behavior and are ready to handle missing-context exceptions.
 
+## Async select fields
+
+Use `ajax_select` when a field should search a runtime data source without
+reloading the page:
+
+```php
+$runtime->register_data_source(
+	'campaign_library',
+	static function ( array $args = array() ): array {
+		$items = array(
+			array( 'value' => 'spring-launch', 'label' => 'Spring Launch' ),
+			array( 'value' => 'creator-series', 'label' => 'Creator Series' ),
+			array( 'value' => 'audio-week', 'label' => 'Audio Week' ),
+		);
+
+		return array( 'items' => $items, 'more' => false );
+	}
+);
+
+$runtime->register(
+	array(
+		'id'        => 'acme-settings',
+		'title'     => 'Acme Settings',
+		'container' => array( 'type' => 'options_page' ),
+		'store'     => array( 'type' => 'option', 'key' => 'acme_settings' ),
+		'menu'      => array(
+			'parent_slug' => 'options-general.php',
+			'page_title'  => 'Acme Settings',
+			'menu_title'  => 'Acme Settings',
+			'capability'  => 'manage_options',
+		),
+		'sections'  => array(
+			'general' => array(
+				'title'  => 'General',
+				'fields' => array(
+					array(
+						'id'                => 'featured_campaign',
+						'type'              => 'ajax_select',
+						'source'            => 'campaign_library',
+						'label'             => 'Featured campaign',
+						'placeholder'       => 'Search campaigns...',
+						'min_search_length' => 1,
+						'default'           => 'spring-launch',
+					),
+				),
+			),
+		),
+	)
+);
+```
+
 ## Batch registration
 
 If one bootstrap callback needs to register several schemas, use `register_many()`:
@@ -210,6 +261,15 @@ add_action(
 - malformed field definitions without an `id`: field is ignored, `_doing_it_wrong()` in `WP_DEBUG`
 
 Direct developer calls such as `store()` and registry getters still throw, because those are explicit integration-time failures rather than passive runtime mounting.
+
+Options pages also expose a runtime summary panel in debug mode. It is enabled
+automatically in `WP_DEBUG`, or explicitly per schema:
+
+```php
+'view' => array(
+	'debug' => true,
+),
+```
 
 ## Next references
 

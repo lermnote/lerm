@@ -13,6 +13,7 @@ use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Registry\FieldModuleRegistry;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -37,6 +38,7 @@ final class OptionsPage {
 	private string $page_hook = '';
 
 	private AssetResolver $asset_resolver;
+	private ?FieldModuleRegistry $field_modules = null;
 
 	/**
 	 * The JS global variable name for this page instance.
@@ -58,11 +60,12 @@ final class OptionsPage {
 	/**
 	 * @param array<string, mixed> $definition Page definition.
 	 */
-	public function __construct( array $definition, OptionStore $store, FieldTypeRegistry $field_types, AssetResolver $asset_resolver, bool $register_hooks = true ) {
+	public function __construct( array $definition, OptionStore $store, FieldTypeRegistry $field_types, AssetResolver $asset_resolver, bool $register_hooks = true, ?FieldModuleRegistry $field_modules = null ) {
 		$this->definition     = $definition;
 		$this->store          = $store;
 		$this->field_types    = $field_types;
 		$this->asset_resolver = $asset_resolver;
+		$this->field_modules  = $field_modules;
 		$menu                 = is_array( $this->definition['menu'] ?? null ) ? $this->definition['menu'] : array();
 		$this->network_admin  = ! empty( $menu['network_admin'] );
 		// JS global can be overridden per-instance via the definition.
@@ -434,6 +437,8 @@ final class OptionsPage {
 				'resetAction'         => $this->ajax_reset_action(),
 				'exportAction'        => $this->ajax_export_action(),
 				'importAction'        => $this->ajax_import_action(),
+				'dataSourceAction'    => 'lerm_admin_config_data_source',
+				'dataSourceNonce'     => wp_create_nonce( 'lerm_admin_config_data_source' ),
 				'codeEditor'          => $code_editor_settings,
 				'selectMedia'         => __( 'Choose image', 'lerm' ),
 				'useMedia'            => __( 'Use this image', 'lerm' ),
@@ -445,6 +450,13 @@ final class OptionsPage {
 				'clearGallery'        => __( 'Clear gallery', 'lerm' ),
 				'noMedia'             => __( 'No image selected.', 'lerm' ),
 				'noGallery'           => __( 'No gallery images selected.', 'lerm' ),
+				'searchPrompt'        => __( 'Start typing to search.', 'lerm' ),
+				'searchMinPrompt'     => __( 'Type more characters to search.', 'lerm' ),
+				'loadingResults'      => __( 'Loading results...', 'lerm' ),
+				'noResults'           => __( 'No matching results found.', 'lerm' ),
+				'loadMoreResults'     => __( 'Load more', 'lerm' ),
+				'clearSelection'      => __( 'Clear selection', 'lerm' ),
+				'removeSelection'     => __( 'Remove selection', 'lerm' ),
 				'saving'              => __( 'Saving...', 'lerm' ),
 				'saveSuccess'         => __( 'Settings saved.', 'lerm' ),
 				'saveError'           => __( 'Unable to save the settings right now.', 'lerm' ),
@@ -470,6 +482,8 @@ final class OptionsPage {
 				'importSuccess'       => __( 'Settings imported successfully.', 'lerm' ),
 				'importError'         => __( 'Unable to import the provided settings JSON.', 'lerm' ),
 				'confirmImport'       => __( 'Importing will overwrite the current saved settings. Continue?', 'lerm' ),
+				'debugCopy'           => __( 'Copy JSON', 'lerm' ),
+				'debugCopied'         => __( 'Copied', 'lerm' ),
 			)
 		);
 	}
@@ -555,6 +569,7 @@ final class OptionsPage {
 						<form method="post" action="<?php echo esc_url( $this->admin_post_url() ); ?>"
 								class="lerm-settings-form"
 								data-option-name="<?php echo esc_attr( $this->option_name() ); ?>"
+								data-schema-id="<?php echo esc_attr( $this->schema_id() ); ?>"
 								data-js-global="<?php echo esc_attr( $this->js_global ); ?>"
 								novalidate>
 							<input type="hidden" name="action" value="<?php echo esc_attr( $this->save_action() ); ?>">
@@ -641,11 +656,168 @@ final class OptionsPage {
 							<?php endforeach; ?>
 						</form>
 
+						<?php $this->render_debug_panel(); ?>
+
 					</div>
 				</section>
 			</div>
 		</div>
 		<?php
+	}
+
+	public function schema_id(): string {
+		$id = isset( $this->definition['id'] ) && is_scalar( $this->definition['id'] ) ? sanitize_key( (string) $this->definition['id'] ) : '';
+
+		return '' !== $id ? $id : sanitize_key( $this->option_name() );
+	}
+
+	private function debug_panel_enabled(): bool {
+		$view = is_array( $this->definition['view'] ?? null ) ? $this->definition['view'] : array();
+
+		if ( array_key_exists( 'debug', $view ) ) {
+			return ! empty( $view['debug'] );
+		}
+
+		return defined( 'WP_DEBUG' ) && WP_DEBUG;
+	}
+
+	private function render_debug_panel(): void {
+		if ( ! $this->debug_panel_enabled() ) {
+			return;
+		}
+
+		$json = wp_json_encode(
+			$this->debug_payload(),
+			JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+		);
+
+		if ( ! is_string( $json ) || '' === $json ) {
+			return;
+		}
+		?>
+		<section class="lerm-debug-panel" data-lerm-debug-panel>
+			<div class="lerm-debug-panel__header">
+				<div>
+					<h3><?php esc_html_e( 'Runtime Debug', 'lerm' ); ?></h3>
+					<p><?php esc_html_e( 'Schema, storage, module, and data-source summary for this admin screen.', 'lerm' ); ?></p>
+				</div>
+				<button type="button" class="button button-secondary" data-lerm-debug-copy><?php esc_html_e( 'Copy JSON', 'lerm' ); ?></button>
+			</div>
+			<pre class="lerm-debug-panel__json" data-lerm-debug-json><?php echo esc_html( $json ); ?></pre>
+		</section>
+		<?php
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function debug_payload(): array {
+		$container       = is_array( $this->definition['container'] ?? null ) ? $this->definition['container'] : array();
+		$store           = is_array( $this->definition['store'] ?? null ) ? $this->definition['store'] : array();
+		$menu            = is_array( $this->definition['menu'] ?? null ) ? $this->definition['menu'] : array();
+		$sections        = PageSchema::sections( $this->definition );
+		$section_summary = array();
+
+		foreach ( $sections as $section_id => $section ) {
+			$section_summary[ (string) $section_id ] = array(
+				'title'  => (string) ( $section['title'] ?? $section_id ),
+				'fields' => count( PageSchema::section_fields( $section ) ),
+				'groups' => count( PageSchema::section_groups( $section ) ),
+			);
+		}
+
+		return array(
+			'schema_id'    => $this->schema_id(),
+			'page_slug'    => $this->page_slug(),
+			'option_name'  => $this->option_name(),
+			'capability'   => $this->capability(),
+			'network_admin' => $this->network_admin,
+			'container'    => array(
+				'type'       => (string) ( $container['type'] ?? 'options_page' ),
+				'capability' => (string) ( $container['capability'] ?? $menu['capability'] ?? $this->capability() ),
+			),
+			'store'        => array(
+				'type' => (string) ( $store['type'] ?? 'option' ),
+				'key'  => (string) ( $store['key'] ?? $this->option_name() ),
+			),
+			'summary'      => array(
+				'sections' => count( $sections ),
+				'fields'   => count( PageSchema::fields( $this->definition ) ),
+				'defaults' => count( PageSchema::defaults( $this->definition ) ),
+			),
+			'sections'     => $section_summary,
+			'field_types'  => $this->field_types_for_debug(),
+			'modules'      => $this->field_modules ? $this->field_modules->modules_for_definition( $this->definition ) : array(),
+			'data_sources' => $this->schema_data_sources(),
+		);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function field_types_for_debug(): array {
+		if ( $this->field_modules ) {
+			return $this->field_modules->field_types_for_definition( $this->definition );
+		}
+
+		$types = array();
+
+		foreach ( PageSchema::fields( $this->definition ) as $field ) {
+			$type = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+
+			if ( '' !== $type ) {
+				$types[ $type ] = $type;
+			}
+		}
+
+		return array_values( $types );
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function schema_data_sources(): array {
+		$sources = array();
+
+		foreach ( PageSchema::sections( $this->definition ) as $section ) {
+			$this->collect_data_sources_from_fields( PageSchema::section_fields( $section ), $sources );
+		}
+
+		return array_values( $sources );
+	}
+
+	/**
+	 * @param array<int, array<string, mixed>> $fields
+	 * @param array<string, string>            $sources
+	 */
+	private function collect_data_sources_from_fields( array $fields, array &$sources ): void {
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+
+			$source_id = sanitize_key( (string) ( $field['source'] ?? $field['data_source'] ?? '' ) );
+
+			if ( '' !== $source_id ) {
+				$sources[ $source_id ] = $source_id;
+			}
+
+			$child_fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
+
+			if ( ! empty( $child_fields ) ) {
+				$this->collect_data_sources_from_fields( $child_fields, $sources );
+			}
+
+			$items = is_array( $field['items'] ?? null ) ? $field['items'] : array();
+
+			foreach ( $items as $item ) {
+				if ( ! is_array( $item ) || ! is_array( $item['fields'] ?? null ) ) {
+					continue;
+				}
+
+				$this->collect_data_sources_from_fields( $item['fields'], $sources );
+			}
+		}
 	}
 
 	/**

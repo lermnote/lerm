@@ -46,7 +46,7 @@ Return the validated value on success. Returning `WP_Error` records the message 
 
 ## Data sources
 
-Named data sources are small runtime registries for schema helpers and future async fields.
+Named data sources are small runtime registries for schema helpers and AJAX-backed fields.
 
 Typical use today:
 
@@ -87,6 +87,80 @@ result:
 For reusable lists shared across multiple schemas, prefer `register_data_source()`
 plus `resolve_data_source()` so the expensive lookup stays outside the field
 render path.
+
+### AJAX-backed select fields
+
+The built-in `ajax_select` field uses the same data-source registry at request
+time:
+
+```php
+$runtime->register_data_source(
+	'campaign_library',
+	static function ( array $args = array() ): array {
+		$items = array(
+			array( 'value' => 'spring-launch', 'label' => 'Spring Launch' ),
+			array( 'value' => 'creator-series', 'label' => 'Creator Series' ),
+			array( 'value' => 'audio-week', 'label' => 'Audio Week' ),
+		);
+
+		$search = strtolower( trim( (string) ( $args['search'] ?? '' ) ) );
+
+		if ( '' !== $search ) {
+			$items = array_values(
+				array_filter(
+					$items,
+					static fn ( array $item ): bool => str_contains(
+						strtolower( $item['label'] . ' ' . $item['value'] ),
+						$search
+					)
+				)
+			);
+		}
+
+		return array(
+			'items' => $items,
+			'more'  => false,
+		);
+	}
+);
+```
+
+```php
+array(
+	'id'                => 'featured_campaign',
+	'type'              => 'ajax_select',
+	'source'            => 'campaign_library',
+	'label'             => 'Featured campaign',
+	'placeholder'       => 'Search campaigns...',
+	'min_search_length' => 1,
+	'per_page'          => 10,
+	'default'           => 'spring-launch',
+)
+```
+
+Resolver callbacks receive an `$args` array with these keys when the field is
+queried over AJAX:
+
+- `search`
+- `page`
+- `per_page`
+- `selected`
+- `context`
+- `field`
+- `schema`
+- `schema_id`
+
+`context` carries object IDs for meta-backed screens when available, such as
+`post_id`, `term_id`, `user_id`, `comment_id`, or `network_id`.
+
+Resolvers can return any of these shapes:
+
+- associative array of `value => label`
+- list of arrays like `array( 'value' => 'x', 'label' => 'X' )`
+- paginated payload like `array( 'items' => ..., 'more' => true )`
+
+The runtime normalizes all three forms to the same client payload and enforces
+the owning schema/container capability before the request resolves.
 
 ## Containers
 

@@ -16,6 +16,7 @@ use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Resolvers\DefaultAssetResolver;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
+use Lerm\AdminConfig\Modules\AsyncFieldsModule;
 use Lerm\AdminConfig\Modules\AdvancedFieldsModule;
 use Lerm\AdminConfig\Modules\CoreFieldsModule;
 use Lerm\AdminConfig\Modules\DesignFieldsModule;
@@ -168,7 +169,7 @@ final class Framework {
 		$cache_key = $this->cache_key( $definition, $backend );
 
 		if ( ! isset( $this->pages[ $cache_key ] ) ) {
-			$this->pages[ $cache_key ] = new OptionsPage( $definition, $this->store( $definition, $backend ), $this->field_types, $this->asset_resolver );
+			$this->pages[ $cache_key ] = new OptionsPage( $definition, $this->store( $definition, $backend ), $this->field_types, $this->asset_resolver, true, $this->field_modules );
 		}
 
 		return $this->pages[ $cache_key ];
@@ -217,6 +218,7 @@ final class Framework {
 		foreach ( array(
 			new CoreFieldsModule(),
 			new ExtendedFieldsModule(),
+			new AsyncFieldsModule(),
 			new DesignFieldsModule(),
 			new AdvancedFieldsModule(),
 			new StructuredFieldsModule(),

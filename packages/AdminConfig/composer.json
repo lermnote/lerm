@@ -3,12 +3,34 @@
 	"description": "Schema-driven WordPress admin configuration infrastructure.",
 	"type": "library",
 	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"admin",
+		"schema",
+		"options-page",
+		"metabox"
+	],
 	"autoload": {
 		"psr-4": {
 			"Lerm\\AdminConfig\\": "src/"
 		}
 	},
+	"autoload-dev": {
+		"psr-4": {
+			"Lerm\\AdminConfig\\Tests\\": "tests/"
+		}
+	},
 	"require": {
 		"php": ">=8.0"
+	},
+	"scripts": {
+		"lint:php": "@php tools/lint-php.php",
+		"lint:js": "node --check assets/admin-config.js",
+		"test": "@php tests/run.php",
+		"ci": [
+			"@lint:php",
+			"@lint:js",
+			"@test"
+		]
 	}
 }

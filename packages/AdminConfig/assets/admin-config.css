@@ -1919,3 +1919,150 @@
 .lerm-group-item__field:focus-within {
 	box-shadow: 0 0 0 2px #bae6fd, 0 2px 8px rgba(14,165,233,0.12);
 }
+.lerm-ajax-select {
+	position: relative;
+	display: grid;
+	gap: 8px;
+	max-width: min(100%, 520px);
+}
+
+.lerm-ajax-select__selected {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.lerm-ajax-select.is-empty .lerm-ajax-select__selected {
+	display: none;
+}
+
+.lerm-ajax-select__controls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.lerm-ajax-select__search {
+	width: 100%;
+}
+
+.lerm-ajax-select__status {
+	font-size: 12px;
+	color: #64748b;
+}
+
+.lerm-ajax-select__dropdown {
+	position: absolute;
+	top: calc(100% + 6px);
+	left: 0;
+	right: 0;
+	z-index: 40;
+	max-height: 240px;
+	overflow: auto;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.lerm-ajax-select__results {
+	margin: 0;
+	padding: 6px;
+	list-style: none;
+}
+
+.lerm-ajax-select__option,
+.lerm-ajax-select__load-more {
+	display: block;
+	width: 100%;
+	padding: 9px 10px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: #0f172a;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.lerm-ajax-select__option:hover,
+.lerm-ajax-select__option.is-active,
+.lerm-ajax-select__load-more:hover {
+	background: #eff6ff;
+}
+
+.lerm-ajax-select__option.is-selected {
+	color: #0369a1;
+	font-weight: 600;
+}
+
+.lerm-ajax-select__pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	background: #f8fafc;
+	line-height: 1.3;
+}
+
+.lerm-ajax-select__pill-remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	background: #e2e8f0;
+	color: #334155;
+	cursor: pointer;
+	font: inherit;
+	line-height: 1;
+}
+
+.lerm-ajax-select__pill-remove:hover {
+	background: #cbd5e1;
+}
+
+.lerm-debug-panel {
+	display: grid;
+	gap: 14px;
+	margin-top: 22px;
+	padding: 18px;
+	border: 1px solid #dbe4ee;
+	border-radius: 14px;
+	background: linear-gradient(180deg, #fff, #f8fafc);
+}
+
+.lerm-debug-panel__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.lerm-debug-panel__header h3 {
+	margin: 0 0 6px;
+	font-size: 14px;
+	line-height: 1.35;
+}
+
+.lerm-debug-panel__header p {
+	margin: 0;
+	color: #64748b;
+}
+
+.lerm-debug-panel__json {
+	margin: 0;
+	padding: 14px;
+	overflow: auto;
+	border-radius: 12px;
+	background: #0f172a;
+	color: #e2e8f0;
+	font-size: 12px;
+	line-height: 1.55;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}

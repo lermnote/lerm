@@ -10,6 +10,8 @@ Example: `examples/schema-demo-plugin`
 - Switch between tabs and subsection groups.
 - Save a normal field change and confirm the success notice and status pill update.
 - Change a field in one tab, switch to another tab without saving, save there, and confirm both tabs persist.
+- Search and save an `ajax_select` field, then re-open the page and confirm its hydrated label still renders correctly.
+- Open the runtime debug panel and confirm the schema ID, store type, field modules, and data sources match the current page.
 - Enter an invalid `release_slug` value such as `a` and save.
 - Confirm the save is blocked, the field row is highlighted, and the inline error renders.
 - Clear a multi-value field such as a multi-select, checkbox list, or empty `group`, trigger a validation error elsewhere, and confirm the cleared state is preserved after the redirect.
@@ -60,6 +62,7 @@ Example: `examples/embedded-theme-demo`
 
 - Open the embedded theme options page.
 - Save advanced fields such as `typography`, `icon`, `accordion`, and `tabbed`.
+- Search and save the embedded `ajax_select` demo field and confirm the selected label rehydrates after reload.
 - Open the demo metabox and confirm post meta persists.
 - Enter an invalid metabox value and confirm the post edit screen re-renders the metabox with a validation notice.
 

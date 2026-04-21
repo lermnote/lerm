@@ -16,9 +16,13 @@
 	 * @typedef {{
 	 *   ajaxUrl: string,
 	 *   saveAction: string, resetAction: string, exportAction: string, importAction: string,
+	 *   dataSourceAction: string, dataSourceNonce: string,
 	 *   codeEditor: object|null,
 	 *   selectMedia: string, useMedia: string, noMedia: string,
 	 *   selectImages: string, useImages: string, noGallery: string,
+	 *   searchPrompt: string, searchMinPrompt: string, loadingResults: string,
+	 *   noResults: string, loadMoreResults: string,
+	 *   clearSelection: string, removeSelection: string,
 	 *   saving: string, resetting: string,
 	 *   saveSuccess: string, saveError: string,
 	 *   resetError: string, resetAllSuccess: string, resetSectionSuccess: string,
@@ -26,7 +30,8 @@
 	 *   statusReady: string, statusDirty: string, statusSaving: string,
 	 *   statusResetting: string, statusSaved: string, statusError: string,
 	 *   confirmResetAll: string, confirmResetSection: string,
-	 *   confirmRemoveItem: string, confirmImport: string
+	 *   confirmRemoveItem: string, confirmImport: string,
+	 *   debugCopy: string, debugCopied: string
 	 * }} LermConfig
 	 */
 
@@ -209,6 +214,13 @@
 		const el = findFieldById(form, fieldId);
 		if (el instanceof HTMLInputElement) return el.type === 'checkbox' ? (el.checked ? '1' : '0') : String(el.value ?? '');
 		if (el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) return String(el.value ?? '');
+		const ajaxSelect = /** @type {HTMLElement|null} */ (dom.find(`.lerm-ajax-select[data-target="${fieldId}"]`, form));
+		if (ajaxSelect) {
+			const values = /** @type {HTMLInputElement[]} */ (dom.findAll('input[type="hidden"]', ajaxSelect))
+				.map((input) => String(input.value ?? '').trim())
+				.filter(Boolean);
+			return values[0] ?? '';
+		}
 		const radio = /** @type {HTMLInputElement|undefined} */ (
 			getNamedControls(form, buildFieldName(form, fieldId)).find((control) => control instanceof HTMLInputElement && control.type === 'radio' && control.checked)
 		);
@@ -835,6 +847,585 @@
 		});
 	};
 
+	/** @typedef {{ value: string, label: string }} AjaxSelectOption */
+	/** @typedef {{
+	 *   container: HTMLElement,
+	 *   form: HTMLFormElement|null,
+	 *   fieldId: string,
+	 *   schemaId: string,
+	 *   source: string,
+	 *   multiple: boolean,
+	 *   allowClear: boolean,
+	 *   perPage: number,
+	 *   minSearchLength: number,
+	 *   search: HTMLInputElement,
+	 *   selectedWrap: HTMLElement,
+	 *   status: HTMLElement,
+	 *   dropdown: HTMLElement,
+	 *   results: HTMLElement,
+	 *   values: HTMLElement,
+	 *   selections: AjaxSelectOption[],
+	 *   options: AjaxSelectOption[],
+	 *   activeIndex: number,
+	 *   more: boolean,
+	 *   searchTimer: ReturnType<typeof setTimeout>|null,
+	 *   currentQuery: string,
+	 *   inputName: string,
+	 *   inputNameTemplate: string,
+	 *   syncUi: () => void
+	 * }} AjaxSelectInstance */
+
+	/** @type {WeakMap<HTMLElement, AjaxSelectInstance>} */
+	const ajaxSelectMap = new WeakMap();
+
+	/** @type {AjaxSelectInstance|null} */
+	let activeAjaxSelect = null;
+
+	let ajaxSelectGlobalsBound = false;
+
+	/**
+	 * @param {unknown} option
+	 * @returns {AjaxSelectOption|null}
+	 */
+	const normalizeAjaxSelectOption = (option) => {
+		if (!option) return null;
+		if (typeof option === 'object' && 'value' in /** @type {Record<string, unknown>} */ (option)) {
+			const value = String(/** @type {Record<string, unknown>} */ (option).value ?? '').trim();
+			const label = String(/** @type {Record<string, unknown>} */ (option).label ?? value).trim();
+			return value ? { value, label: label || value } : null;
+		}
+
+		const value = String(option ?? '').trim();
+		return value ? { value, label: value } : null;
+	};
+
+	/**
+	 * @param {unknown} value
+	 * @returns {AjaxSelectOption[]}
+	 */
+	const normalizeAjaxSelectSelections = (value) => {
+		const raw = Array.isArray(value) ? value : (null == value || '' === value ? [] : [value]);
+		/** @type {AjaxSelectOption[]} */
+		const selections = [];
+
+		raw.forEach((item) => {
+			const normalized = normalizeAjaxSelectOption(item);
+			if (!normalized || selections.some((current) => current.value === normalized.value)) return;
+			selections.push(normalized);
+		});
+
+		return selections;
+	};
+
+	/**
+	 * @param {HTMLFormElement|null} form
+	 * @returns {Record<string, string>}
+	 */
+	const extractContextPayload = (form) => {
+		if (!form) return {};
+
+		/** @type {Record<string, string[]>} */
+		const map = {
+			post_id: ['post_ID'],
+			term_id: ['tag_ID', 'term_id'],
+			user_id: ['user_id', 'user_ID'],
+			comment_id: ['comment_ID'],
+			network_id: ['id'],
+		};
+
+		/** @type {Record<string, string>} */
+		const context = {};
+
+		for (const [contextKey, inputNames] of Object.entries(map)) {
+			for (const inputName of inputNames) {
+				const input = /** @type {HTMLInputElement|null} */ (dom.find(`input[name="${inputName}"]`, form));
+				const value = String(input?.value ?? '').trim();
+				if (!/^\d+$/.test(value) || Number(value) <= 0) continue;
+				context[contextKey] = value;
+				break;
+			}
+		}
+
+		return context;
+	};
+
+	/**
+	 * @param {HTMLFormElement|null} form
+	 * @param {{
+	 *   schemaId: string,
+	 *   fieldId: string,
+	 *   search?: string,
+	 *   page?: number,
+	 *   perPage?: number,
+	 *   selected?: string[]
+	 * }} params
+	 * @returns {Promise<AjaxResponse>}
+	 */
+	const requestDataSource = (form, params) => {
+		const body = new FormData();
+		body.set('action', cfg.dataSourceAction);
+		body.set('nonce', cfg.dataSourceNonce);
+		body.set('schema_id', params.schemaId);
+		body.set('field_id', params.fieldId);
+		body.set('search', params.search ?? '');
+		body.set('page', String(params.page ?? 1));
+		body.set('per_page', String(params.perPage ?? 20));
+
+		(params.selected ?? []).forEach((selected) => body.append('selected[]', selected));
+
+		for (const [contextKey, contextValue] of Object.entries(extractContextPayload(form))) {
+			body.set(`context[${contextKey}]`, contextValue);
+		}
+
+		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(async (response) => {
+			const text = await response.text();
+
+			try {
+				return /** @type {AjaxResponse} */ (JSON.parse(text));
+			} catch {
+				throw new Error('Invalid JSON response: ' + text.slice(0, 120));
+			}
+		});
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 */
+	const closeAjaxSelectDropdown = (instance) => {
+		instance.dropdown.hidden = true;
+		instance.search.setAttribute('aria-expanded', 'false');
+		instance.activeIndex = -1;
+		if (activeAjaxSelect === instance) activeAjaxSelect = null;
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 */
+	const openAjaxSelectDropdown = (instance) => {
+		if (activeAjaxSelect && activeAjaxSelect !== instance) {
+			closeAjaxSelectDropdown(activeAjaxSelect);
+		}
+		instance.dropdown.hidden = false;
+		instance.search.setAttribute('aria-expanded', 'true');
+		activeAjaxSelect = instance;
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 * @param {string} message
+	 */
+	const setAjaxSelectStatus = (instance, message) => {
+		instance.status.textContent = message;
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 */
+	const syncAjaxSelectInputs = (instance) => {
+		dom.empty(instance.values);
+
+		const name = instance.inputName;
+		const nameTemplate = instance.inputNameTemplate;
+		const attachNameTemplate = (input) => {
+			if (nameTemplate) input.setAttribute('data-name-template', nameTemplate);
+		};
+
+		if (instance.multiple) {
+			if (!instance.selections.length) {
+				const input = /** @type {HTMLInputElement} */ (dom.create('input', {
+					type: 'hidden',
+					name: `${name}[]`,
+					value: '',
+					'data-lerm-ajax-select-input': 'empty',
+				}));
+				attachNameTemplate(input);
+				instance.values.appendChild(input);
+				return;
+			}
+
+			instance.selections.forEach((selection) => {
+				const input = /** @type {HTMLInputElement} */ (dom.create('input', {
+					type: 'hidden',
+					name: `${name}[]`,
+					value: selection.value,
+					'data-lerm-ajax-select-input': '1',
+				}));
+				attachNameTemplate(input);
+				instance.values.appendChild(input);
+			});
+			return;
+		}
+
+		const input = /** @type {HTMLInputElement} */ (dom.create('input', {
+			type: 'hidden',
+			id: instance.fieldId,
+			name,
+			value: instance.selections[0]?.value ?? '',
+			'data-lerm-ajax-select-input': '1',
+		}));
+		attachNameTemplate(input);
+		instance.values.appendChild(input);
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 */
+	const dispatchAjaxSelectEvents = (instance) => {
+		instance.container.dispatchEvent(new Event('input', { bubbles: true }));
+		instance.container.dispatchEvent(new Event('change', { bubbles: true }));
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 * @param {number} nextIndex
+	 */
+	const setAjaxSelectActiveIndex = (instance, nextIndex) => {
+		const options = /** @type {HTMLButtonElement[]} */ (dom.findAll('[data-lerm-ajax-select-option]', instance.results));
+
+		instance.activeIndex = nextIndex >= 0 && nextIndex < options.length ? nextIndex : -1;
+
+		options.forEach((option, index) => {
+			const active = index === instance.activeIndex;
+			option.classList.toggle('is-active', active);
+			option.setAttribute('aria-selected', active ? 'true' : 'false');
+		});
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 * @param {boolean} dispatchEvents
+	 */
+	const renderAjaxSelectSelections = (instance, dispatchEvents = false) => {
+		dom.empty(instance.selectedWrap);
+		instance.container.classList.toggle('is-empty', 0 === instance.selections.length);
+		instance.container.classList.toggle('has-value', instance.selections.length > 0);
+
+		if (!instance.selections.length) {
+			syncAjaxSelectInputs(instance);
+			if (dispatchEvents) dispatchAjaxSelectEvents(instance);
+			return;
+		}
+
+		instance.selections.forEach((selection) => {
+			const pill = dom.create('span', { class: 'lerm-ajax-select__pill' }, [
+				dom.create('span', { class: 'lerm-ajax-select__pill-label' }, [selection.label]),
+			]);
+
+			if (instance.allowClear) {
+				pill.appendChild(dom.create('button', {
+					type: 'button',
+					class: 'lerm-ajax-select__pill-remove',
+					'aria-label': cfg.removeSelection,
+					title: cfg.removeSelection,
+					onclick: (event) => {
+						event.preventDefault();
+						instance.selections = instance.selections.filter((current) => current.value !== selection.value);
+						renderAjaxSelectSelections(instance, true);
+					},
+				}, ['x']));
+			}
+
+			instance.selectedWrap.appendChild(pill);
+		});
+
+		syncAjaxSelectInputs(instance);
+		if (dispatchEvents) dispatchAjaxSelectEvents(instance);
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 * @param {AjaxSelectOption[]} options
+	 */
+	const renderAjaxSelectOptions = (instance, options) => {
+		dom.empty(instance.results);
+		instance.options = options;
+
+		if (!options.length) {
+			closeAjaxSelectDropdown(instance);
+			setAjaxSelectStatus(instance, cfg.noResults);
+			return;
+		}
+
+		options.forEach((option, index) => {
+			const isSelected = instance.selections.some((selection) => selection.value === option.value);
+			instance.results.appendChild(dom.create('li', { role: 'presentation' }, [
+				dom.create('button', {
+					type: 'button',
+					class: `lerm-ajax-select__option${isSelected ? ' is-selected' : ''}`,
+					role: 'option',
+					'aria-selected': 'false',
+					'data-lerm-ajax-select-option': String(index),
+					onclick: (event) => {
+						event.preventDefault();
+
+						if (instance.multiple) {
+							if (!instance.selections.some((selection) => selection.value === option.value)) {
+								instance.selections = instance.selections.concat(option);
+							}
+							renderAjaxSelectSelections(instance, true);
+							instance.search.value = '';
+							instance.currentQuery = '';
+							setAjaxSelectStatus(instance, cfg.searchPrompt);
+							closeAjaxSelectDropdown(instance);
+							return;
+						}
+
+						instance.selections = [option];
+						renderAjaxSelectSelections(instance, true);
+						instance.search.value = '';
+						instance.currentQuery = '';
+						setAjaxSelectStatus(instance, cfg.searchPrompt);
+						closeAjaxSelectDropdown(instance);
+					},
+				}, [option.label]),
+			]));
+		});
+
+		if (instance.more) {
+			instance.results.appendChild(dom.create('li', { role: 'presentation' }, [
+				dom.create('button', {
+					type: 'button',
+					class: 'lerm-ajax-select__load-more',
+					onclick: (event) => {
+						event.preventDefault();
+						loadAjaxSelectOptions(instance, instance.currentQuery, Math.max(2, Math.ceil(instance.options.length / Math.max(instance.perPage, 1)) + 1), true);
+					},
+				}, [cfg.loadMoreResults]),
+			]));
+		}
+
+		openAjaxSelectDropdown(instance);
+		setAjaxSelectActiveIndex(instance, 0);
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 * @param {string} query
+	 * @param {number} [page]
+	 * @param {boolean} [append]
+	 */
+	const loadAjaxSelectOptions = (instance, query, page = 1, append = false) => {
+		if (!cfg.ajaxUrl || !cfg.dataSourceAction || !instance.schemaId || !instance.source) return Promise.resolve();
+
+		instance.currentQuery = query;
+		setAjaxSelectStatus(instance, cfg.loadingResults);
+
+		return requestDataSource(instance.form, {
+			schemaId: instance.schemaId,
+			fieldId: instance.fieldId,
+			search: query,
+			page,
+			perPage: instance.perPage,
+			selected: !query && 1 === page ? instance.selections.map((selection) => selection.value) : [],
+		}).then((response) => {
+			if (!response?.success) {
+				setAjaxSelectStatus(instance, response?.data?.message || cfg.saveError);
+				return;
+			}
+
+			const nextOptions = Array.isArray(response?.data?.items)
+				? response.data.items.map((item) => normalizeAjaxSelectOption(item)).filter(Boolean)
+				: [];
+
+			instance.more = !!response?.data?.more;
+			renderAjaxSelectOptions(instance, append ? instance.options.concat(/** @type {AjaxSelectOption[]} */ (nextOptions)) : /** @type {AjaxSelectOption[]} */ (nextOptions));
+			setAjaxSelectStatus(instance, nextOptions.length ? cfg.searchPrompt : cfg.noResults);
+		}).catch(() => {
+			setAjaxSelectStatus(instance, cfg.saveError);
+		});
+	};
+
+	/**
+	 * @param {AjaxSelectInstance} instance
+	 */
+	const hydrateAjaxSelectSelections = (instance) => {
+		if (!instance.selections.length) {
+			renderAjaxSelectSelections(instance, false);
+			return;
+		}
+
+		requestDataSource(instance.form, {
+			schemaId: instance.schemaId,
+			fieldId: instance.fieldId,
+			perPage: Math.max(instance.perPage, instance.selections.length),
+			selected: instance.selections.map((selection) => selection.value),
+		}).then((response) => {
+			if (!response?.success || !Array.isArray(response?.data?.items)) {
+				renderAjaxSelectSelections(instance, false);
+				return;
+			}
+
+			const optionMap = new Map(
+				response.data.items
+					.map((item) => normalizeAjaxSelectOption(item))
+					.filter(Boolean)
+					.map((item) => [/** @type {AjaxSelectOption} */ (item).value, /** @type {AjaxSelectOption} */ (item)])
+			);
+
+			instance.selections = instance.selections.map((selection) => optionMap.get(selection.value) ?? selection);
+			renderAjaxSelectSelections(instance, false);
+		}).catch(() => {
+			renderAjaxSelectSelections(instance, false);
+		});
+	};
+
+	/**
+	 * @param {HTMLElement} container
+	 * @returns {AjaxSelectInstance}
+	 */
+	const createAjaxSelect = (container) => {
+		const existing = ajaxSelectMap.get(container);
+		if (existing) return existing;
+
+		const values = /** @type {HTMLElement} */ (dom.find('[data-lerm-ajax-select-values]', container));
+		const existingInputs = /** @type {HTMLInputElement[]} */ (dom.findAll('input[type="hidden"]', values));
+		const existingName = existingInputs[0]?.name ?? '';
+		const existingTemplate = existingInputs[0]?.getAttribute('data-name-template') ?? '';
+
+		/** @type {AjaxSelectInstance} */
+		const instance = {
+			container,
+			form: /** @type {HTMLFormElement|null} */ (container.closest('form')),
+			fieldId: getData(container, 'target') || '',
+			schemaId: getData(container, 'schemaId') || '',
+			source: getData(container, 'source') || '',
+			multiple: getData(container, 'multiple') === '1',
+			allowClear: getData(container, 'allowClear') !== '0',
+			perPage: Math.max(1, parseInt(getData(container, 'perPage') || '20', 10) || 20),
+			minSearchLength: Math.max(0, parseInt(getData(container, 'minSearchLength') || '0', 10) || 0),
+			search: /** @type {HTMLInputElement} */ (dom.find('.lerm-ajax-select__search', container)),
+			selectedWrap: /** @type {HTMLElement} */ (dom.find('[data-lerm-ajax-select-selected]', container)),
+			status: /** @type {HTMLElement} */ (dom.find('[data-lerm-ajax-select-status]', container)),
+			dropdown: /** @type {HTMLElement} */ (dom.find('[data-lerm-ajax-select-dropdown]', container)),
+			results: /** @type {HTMLElement} */ (dom.find('[data-lerm-ajax-select-results]', container)),
+			values,
+			selections: normalizeAjaxSelectSelections(existingInputs.filter((input) => input.value.trim() !== '').map((input) => input.value)),
+			options: [],
+			activeIndex: -1,
+			more: false,
+			searchTimer: null,
+			currentQuery: '',
+			inputName: existingName.replace(/\[\]$/, ''),
+			inputNameTemplate: existingTemplate,
+			syncUi: () => {
+				renderAjaxSelectSelections(instance, false);
+			},
+		};
+
+		instance.inputName = existingName.replace(/\[\]$/, '');
+		if (instance.fieldId) {
+			instance.results.id = `${instance.fieldId}__results`;
+			instance.search.setAttribute('aria-controls', instance.results.id);
+		}
+		instance.search.setAttribute('role', 'combobox');
+		instance.search.setAttribute('aria-autocomplete', 'list');
+		instance.search.setAttribute('aria-expanded', 'false');
+
+		instance.search.addEventListener('focus', () => {
+			if (instance.currentQuery.length >= instance.minSearchLength || 0 === instance.minSearchLength) {
+				loadAjaxSelectOptions(instance, instance.currentQuery || '');
+			}
+		});
+
+		instance.search.addEventListener('input', () => {
+			const query = String(instance.search.value || '').trim();
+			instance.currentQuery = query;
+
+			if (instance.searchTimer) clearTimeout(instance.searchTimer);
+
+			if (query.length < instance.minSearchLength) {
+				closeAjaxSelectDropdown(instance);
+				setAjaxSelectStatus(
+					instance,
+					instance.minSearchLength > 0 ? cfg.searchMinPrompt : cfg.searchPrompt
+				);
+				return;
+			}
+
+			instance.searchTimer = setTimeout(() => {
+				loadAjaxSelectOptions(instance, query);
+			}, 180);
+		});
+
+		instance.search.addEventListener('keydown', (event) => {
+			const buttons = /** @type {HTMLButtonElement[]} */ (dom.findAll('[data-lerm-ajax-select-option]', instance.results));
+			if (!buttons.length) return;
+
+			switch (event.key) {
+				case 'ArrowDown':
+					event.preventDefault();
+					openAjaxSelectDropdown(instance);
+					setAjaxSelectActiveIndex(instance, Math.min(buttons.length - 1, instance.activeIndex + 1));
+					break;
+				case 'ArrowUp':
+					event.preventDefault();
+					openAjaxSelectDropdown(instance);
+					setAjaxSelectActiveIndex(instance, Math.max(0, instance.activeIndex - 1));
+					break;
+				case 'Enter':
+					if (instance.activeIndex < 0 || instance.activeIndex >= buttons.length) return;
+					event.preventDefault();
+					buttons[instance.activeIndex].click();
+					break;
+				case 'Escape':
+					closeAjaxSelectDropdown(instance);
+					break;
+				default:
+					break;
+			}
+		});
+
+		ajaxSelectMap.set(container, instance);
+		hydrateAjaxSelectSelections(instance);
+
+		if (!ajaxSelectGlobalsBound) {
+			ajaxSelectGlobalsBound = true;
+
+			document.addEventListener('mousedown', (event) => {
+				const target = event.target;
+				if (!(target instanceof Node) || !activeAjaxSelect) return;
+				if (activeAjaxSelect.container.contains(target)) return;
+				closeAjaxSelectDropdown(activeAjaxSelect);
+			});
+
+			document.addEventListener('keydown', (event) => {
+				if ('Escape' !== event.key || !activeAjaxSelect) return;
+				closeAjaxSelectDropdown(activeAjaxSelect);
+			});
+		}
+
+		return instance;
+	};
+
+	const ajaxSelectAdapter = {
+		/** @param {HTMLElement} container */
+		init(container) {
+			if (getData(container, 'lermAjaxSelectReady') === '1') return createAjaxSelect(container);
+			setData(container, 'lerm-ajax-select-ready', '1');
+			return createAjaxSelect(container);
+		},
+
+		/**
+		 * @param {HTMLElement|null} container
+		 * @param {unknown} value
+		 */
+		setValue(container, value) {
+			if (!(container instanceof HTMLElement)) return;
+			const instance = this.init(container);
+			instance.selections = normalizeAjaxSelectSelections(value);
+			hydrateAjaxSelectSelections(instance);
+		},
+	};
+
+	/** @param {Document|Element} scope */
+	const initAjaxSelectFields = (scope) => {
+		dom.findAll('.lerm-ajax-select', scope).forEach((container) => {
+			if (container instanceof HTMLElement) {
+				ajaxSelectAdapter.init(container);
+			}
+		});
+	};
+
 	/** @param {Document|Element} scope */
 	const initNumberInputs = (scope) => {
 		dom.findAll('.lerm-number-input', scope).forEach(el => {
@@ -1264,6 +1855,7 @@
 	/** @param {Document|Element} scope */
 	const initGroupChildren = (scope) => {
 		initColorPickers(scope);
+		initAjaxSelectFields(scope);
 		initNumberInputs(scope);
 		initRangeInputs(scope);
 		initMediaFields(scope);
@@ -1553,6 +2145,69 @@
 			}
 
 			activateTabbedField(tabbed, getData(tabbed, 'defaultTab') || '');
+		});
+	};
+
+	/**
+	 * @param {string} text
+	 * @returns {Promise<void>}
+	 */
+	const copyText = (text) => {
+		if (navigator.clipboard?.writeText) {
+			return navigator.clipboard.writeText(text);
+		}
+
+		return new Promise((resolve, reject) => {
+			const textarea = document.createElement('textarea');
+			textarea.value = text;
+			textarea.setAttribute('readonly', 'true');
+			textarea.style.position = 'fixed';
+			textarea.style.top = '0';
+			textarea.style.left = '-9999px';
+			document.body.appendChild(textarea);
+			textarea.focus();
+			textarea.select();
+
+			try {
+				document.execCommand('copy');
+				resolve();
+			} catch (error) {
+				reject(error);
+			} finally {
+				textarea.remove();
+			}
+		});
+	};
+
+	/** @param {Document|Element} scope */
+	const initDebugPanels = (scope) => {
+		dom.findAll('[data-lerm-debug-panel]', scope).forEach((panelEl) => {
+			const panel = /** @type {HTMLElement} */ (panelEl);
+			if (getData(panel, 'lermDebugReady') === '1') return;
+			setData(panel, 'lerm-debug-ready', '1');
+
+			const button = /** @type {HTMLButtonElement|null} */ (dom.find('[data-lerm-debug-copy]', panel));
+			const json = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-debug-json]', panel));
+
+			if (!button || !json) return;
+
+			button.addEventListener('click', () => {
+				const defaultLabel = button.textContent || cfg.debugCopy || 'Copy JSON';
+
+				copyText(json.textContent || '')
+					.then(() => {
+						button.textContent = cfg.debugCopied || 'Copied';
+						window.setTimeout(() => {
+							button.textContent = cfg.debugCopy || defaultLabel;
+						}, 1400);
+					})
+					.catch(() => {
+						button.textContent = cfg.saveError || defaultLabel;
+						window.setTimeout(() => {
+							button.textContent = cfg.debugCopy || defaultLabel;
+						}, 1400);
+					});
+			});
 		});
 	};
 
@@ -1984,6 +2639,9 @@
 			case 'icon':
 				applyIconValue(dom.find('.lerm-icon-field', scope), value);
 				break;
+			case 'ajax_select':
+				ajaxSelectAdapter.setValue(/** @type {HTMLElement|null} */ (dom.find('.lerm-ajax-select', scope)), value);
+				break;
 			case 'select':
 				applySelectValue(/** @type {HTMLSelectElement|null} */ (dom.find('select', scope)), value);
 				break;
@@ -2118,6 +2776,9 @@
 				}
 				case 'icon':
 					applyIconValue(dom.find(`.lerm-icon-field[data-target="${fieldId}"]`, form), value);
+					break;
+				case 'ajax_select':
+					ajaxSelectAdapter.setValue(/** @type {HTMLElement|null} */ (dom.find(`.lerm-ajax-select[data-target="${fieldId}"]`, form)), value);
 					break;
 				case 'select':
 					applySelectValue(input instanceof HTMLSelectElement ? input : null, value);
@@ -2858,6 +3519,8 @@
 		if (firstForm) {
 			const jsGlobal = getData(firstForm, 'js-global');
 			cfg = /** @type {LermConfig} */ ((jsGlobal && window[jsGlobal]) ? window[jsGlobal] : {});
+		} else {
+			cfg = /** @type {LermConfig} */ (window['lermAdminConfig'] || {});
 		}
 
 		// Register a single Ctrl/Cmd+S shortcut that submits the visible form,
@@ -2877,11 +3540,28 @@
 			}
 		});
 
+		// Initialize shared field widgets on non-options-page screens too.
+		initColorPickers(document);
+		initAjaxSelectFields(document);
+		initNumberInputs(document);
+		initRangeInputs(document);
+		initMediaFields(document);
+		initUploadFields(document);
+		initGalleryFields(document);
+		initSorters(document);
+		initGroups(document);
+		initCodeEditors(document);
+		initIconFields(document);
+		initAccordionFields(document);
+		initTabbedFields(document);
+		initDebugPanels(document);
+
 		// Initialise the settings form.
 		dom.findAll('.lerm-settings-form').forEach(el => {
 			const form = /** @type {HTMLFormElement} */ (el);
 
 			initColorPickers(form);
+			initAjaxSelectFields(form);
 			initNumberInputs(form);
 			initRangeInputs(form);
 			initMediaFields(form);

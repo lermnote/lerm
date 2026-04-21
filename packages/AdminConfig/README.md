@@ -65,6 +65,7 @@ Built-in field coverage in the current slice:
 - Composite/design fields: `dimensions`, `spacing`, `border`, `link_color`, `background`
 - Advanced fields: `typography`, `icon`, `accordion`, `tabbed`
 - Existing structured fields: `fieldset`, `group`, `media`, `gallery`, `sorter`, `code_editor`, `wp_editor`, `backup_tools`
+- Async fields: `ajax_select`
 
 Field modules in the current slice:
 
@@ -74,12 +75,15 @@ Field modules in the current slice:
 - `advanced`: typography, icon, accordion, and tabbed fields
 - `structured`: fieldset/group/media/gallery/editor/sorter fields
 - `tools`: backup/import-export helpers
+- `async`: AJAX-backed select controls
 
 Modules are activated on demand from schema field usage, so a schema that only uses primitive fields does not need to load the structured or tools definitions.
 
 Schemas are expected to use the native `label`, `description`, `group_heading`, `choices`, `groups`, `container`, and `store` keys directly.
 
 Validation now follows the same PHP-first path across containers: validators can return `WP_Error`, `OptionStore` collects dotted field-path errors, options pages surface them over AJAX/non-JS fallback, and profile/comment/taxonomy/metabox containers replay the same errors after redirect instead of silently partially saving.
+
+Options pages also expose an opt-in runtime debug panel. It turns on automatically in `WP_DEBUG`, or per schema with `'view' => array( 'debug' => true )`.
 
 ## Public Extension API
 

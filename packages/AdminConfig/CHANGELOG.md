@@ -1,0 +1,19 @@
+# Changelog
+
+All notable changes to `lerm/admin-config` are documented in this file.
+
+The format follows Keep a Changelog and the package uses Semantic Versioning once the extracted package reaches its first public release.
+
+## [Unreleased]
+
+### Added
+- Package-local test bootstrap, unit coverage, and smoke coverage for the bundled plugin and embedded examples.
+- Portable CI entry points for recursive PHP syntax checks, JavaScript syntax checks, and example registration smoke tests.
+- Contributor-facing release docs, support matrix, and workflow notes for the extracted package.
+- AJAX-backed `ajax_select` fields powered by the runtime data-source registry.
+- Debug-mode runtime panel with schema, store, module, and data-source summaries for options pages.
+- Complete plugin-mode and embedded-mode examples for async data sources.
+
+### Changed
+- The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
+- The extension docs, quick start guide, and smoke checklist now cover async fields and runtime debugging.

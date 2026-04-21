@@ -89,7 +89,8 @@ final class MetaboxContainer implements Container {
 			$store,
 			$this->framework->field_types(),
 			$this->framework->asset_resolver(),
-			false
+			false,
+			$this->framework->field_modules()
 		);
 		$sections = PageSchema::sections( $schema->definition() );
 		$section_id = (string) array_key_first( $sections );

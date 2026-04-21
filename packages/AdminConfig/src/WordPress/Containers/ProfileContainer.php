@@ -190,7 +190,8 @@ final class ProfileContainer implements Container {
 			$this->stores->store( $schema, array( 'user_id' => $user_id ) ),
 			$this->framework->field_types(),
 			$this->framework->asset_resolver(),
-			false
+			false,
+			$this->framework->field_modules()
 		);
 	}
 

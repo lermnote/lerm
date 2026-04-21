@@ -1,0 +1,57 @@
+name: AdminConfig CI
+
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'composer.json'
+      - 'README.md'
+      - 'docs/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'composer.json'
+      - 'README.md'
+      - 'docs/**'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  admin-config:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate composer.json
+        working-directory: .
+        run: composer validate --strict
+
+      - name: Lint PHP
+        working-directory: .
+        run: php tools/lint-php.php
+
+      - name: Lint JavaScript
+        working-directory: .
+        run: node --check assets/admin-config.js
+
+      - name: Run package tests
+        working-directory: .
+        run: php tests/run.php

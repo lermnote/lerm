@@ -261,7 +261,8 @@ final class TaxonomyContainer implements Container {
 			$resolved_store,
 			$this->framework->field_types(),
 			$this->framework->asset_resolver(),
-			false
+			false,
+			$this->framework->field_modules()
 		);
 	}
 
