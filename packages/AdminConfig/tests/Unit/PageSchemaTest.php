@@ -91,4 +91,33 @@ final class PageSchemaTest extends TestCase {
 			PageSchema::defaults( $definition )
 		);
 	}
+
+	public function testInvalidFieldDefinitionsAreIgnoredWithDebugNotice(): void {
+		$definition = array(
+			'sections' => array(
+				'general' => array(
+					'fields' => array(
+						'invalid-string-field',
+						array(
+							'type' => 'text',
+						),
+						array(
+							'id'   => 'valid_field',
+							'type' => 'text',
+						),
+					),
+				),
+			),
+		);
+
+		$fields = PageSchema::fields( $definition );
+
+		$this->assertCount( 1, $fields );
+		$this->assertSame( 'valid_field', $fields[0]['id'] );
+		$this->assertCount( 1, $GLOBALS['lerm_admin_config_doing_it_wrong'] ?? array() );
+		$this->assertStringContains(
+			'must be arrays with a non-empty "id"',
+			(string) ( $GLOBALS['lerm_admin_config_doing_it_wrong'][0]['message'] ?? '' )
+		);
+	}
 }

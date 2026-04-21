@@ -62,12 +62,16 @@ final class AsyncFieldTypes {
 		$per_page          = max( 1, (int) ( $field['per_page'] ?? 20 ) );
 		$allow_clear       = ! array_key_exists( 'allow_clear', $field ) || ! empty( $field['allow_clear'] );
 		$selected_values   = self::normalize_selected_values( $field, $value );
+		$status_id         = $input_id . '__status';
+		$results_id        = $input_id . '__results';
 		$input_name_template = '' !== $name_template ? ( $multiple ? $name_template . '[]' : $name_template ) : '';
 		$name_attr           = '' !== $input_name_template
 			? ' data-name-template="' . esc_attr( $input_name_template ) . '"'
 			: '';
 		$id_attr           = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
 		$search_id_attr    = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__search' ) . '"' : '';
+		$status_id_attr    = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__status' ) . '"' : '';
+		$results_id_attr   = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__results' ) . '"' : '';
 
 		echo '<div class="lerm-ajax-select"';
 		echo ' data-target="' . esc_attr( $input_id ) . '"';
@@ -87,14 +91,20 @@ final class AsyncFieldTypes {
 		echo '<div class="lerm-ajax-select__selected" data-lerm-ajax-select-selected></div>';
 		echo '<div class="lerm-ajax-select__controls">';
 		printf(
-			'<input type="search" id="%1$s__search" class="regular-text lerm-ajax-select__search" placeholder="%2$s" aria-label="%3$s" autocomplete="off" spellcheck="false"%4$s>',
+			'<input type="search" id="%1$s__search" class="regular-text lerm-ajax-select__search" placeholder="%2$s" aria-label="%3$s" aria-haspopup="listbox" aria-controls="%4$s" aria-describedby="%5$s" autocomplete="off" spellcheck="false"%6$s>',
 			esc_attr( $input_id ),
 			esc_attr( $placeholder ),
 			esc_attr( $search_label ),
+			esc_attr( $results_id ),
+			esc_attr( $status_id ),
 			$search_id_attr
 		);
 		echo '</div>';
-		echo '<div class="lerm-ajax-select__status" data-lerm-ajax-select-status>';
+		printf(
+			'<div id="%1$s" class="lerm-ajax-select__status" data-lerm-ajax-select-status role="status" aria-live="polite"%2$s>',
+			esc_attr( $status_id ),
+			$status_id_attr
+		);
 		echo esc_html(
 			$min_search_length > 0
 				? sprintf(
@@ -106,7 +116,11 @@ final class AsyncFieldTypes {
 		);
 		echo '</div>';
 		echo '<div class="lerm-ajax-select__dropdown" data-lerm-ajax-select-dropdown hidden>';
-		echo '<ul class="lerm-ajax-select__results" data-lerm-ajax-select-results role="listbox"></ul>';
+		printf(
+			'<ul id="%1$s" class="lerm-ajax-select__results" data-lerm-ajax-select-results role="listbox"%2$s></ul>',
+			esc_attr( $results_id ),
+			$results_id_attr
+		);
 		echo '</div>';
 		echo '<div class="lerm-ajax-select__values" data-lerm-ajax-select-values>';
 

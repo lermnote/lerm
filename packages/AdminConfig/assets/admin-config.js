@@ -994,6 +994,7 @@
 	const closeAjaxSelectDropdown = (instance) => {
 		instance.dropdown.hidden = true;
 		instance.search.setAttribute('aria-expanded', 'false');
+		instance.search.removeAttribute('aria-activedescendant');
 		instance.activeIndex = -1;
 		if (activeAjaxSelect === instance) activeAjaxSelect = null;
 	};
@@ -1089,6 +1090,13 @@
 			option.classList.toggle('is-active', active);
 			option.setAttribute('aria-selected', active ? 'true' : 'false');
 		});
+
+		if (instance.activeIndex >= 0 && options[instance.activeIndex]?.id) {
+			instance.search.setAttribute('aria-activedescendant', options[instance.activeIndex].id);
+			return;
+		}
+
+		instance.search.removeAttribute('aria-activedescendant');
 	};
 
 	/**
@@ -1148,9 +1156,11 @@
 
 		options.forEach((option, index) => {
 			const isSelected = instance.selections.some((selection) => selection.value === option.value);
+			const optionId = `${instance.results.id || instance.fieldId || 'lerm-ajax-select'}__option__${index}`;
 			instance.results.appendChild(dom.create('li', { role: 'presentation' }, [
 				dom.create('button', {
 					type: 'button',
+					id: optionId,
 					class: `lerm-ajax-select__option${isSelected ? ' is-selected' : ''}`,
 					role: 'option',
 					'aria-selected': 'false',
@@ -1314,11 +1324,12 @@
 
 		instance.inputName = existingName.replace(/\[\]$/, '');
 		if (instance.fieldId) {
-			instance.results.id = `${instance.fieldId}__results`;
-			instance.search.setAttribute('aria-controls', instance.results.id);
+			instance.results.id = instance.results.id || `${instance.fieldId}__results`;
 		}
+		instance.search.setAttribute('aria-controls', instance.results.id);
 		instance.search.setAttribute('role', 'combobox');
 		instance.search.setAttribute('aria-autocomplete', 'list');
+		instance.search.setAttribute('aria-haspopup', 'listbox');
 		instance.search.setAttribute('aria-expanded', 'false');
 
 		instance.search.addEventListener('focus', () => {

@@ -13,14 +13,18 @@ require_once __DIR__ . '/Support/TestCase.php';
 require_once __DIR__ . '/Unit/DataSourceRegistryTest.php';
 require_once __DIR__ . '/Unit/FieldModuleRegistryTest.php';
 require_once __DIR__ . '/Unit/PageSchemaTest.php';
+require_once __DIR__ . '/Unit/SchemaRegistryTest.php';
 require_once __DIR__ . '/Unit/SchemaCompilerTest.php';
+require_once __DIR__ . '/Unit/RuntimeTest.php';
 require_once __DIR__ . '/Smoke/ExamplesSmokeTest.php';
 
 $tests = array(
 	new \Lerm\AdminConfig\Tests\Unit\DataSourceRegistryTest(),
 	new \Lerm\AdminConfig\Tests\Unit\FieldModuleRegistryTest(),
 	new \Lerm\AdminConfig\Tests\Unit\PageSchemaTest(),
+	new \Lerm\AdminConfig\Tests\Unit\SchemaRegistryTest(),
 	new \Lerm\AdminConfig\Tests\Unit\SchemaCompilerTest(),
+	new \Lerm\AdminConfig\Tests\Unit\RuntimeTest(),
 	new \Lerm\AdminConfig\Tests\Smoke\ExamplesSmokeTest(),
 );
 

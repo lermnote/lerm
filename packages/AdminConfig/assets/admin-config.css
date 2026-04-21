@@ -1991,6 +1991,13 @@
 	background: #eff6ff;
 }
 
+.lerm-ajax-select__option:focus-visible,
+.lerm-ajax-select__load-more:focus-visible {
+	outline: 2px solid #0ea5e9;
+	outline-offset: -2px;
+	background: #eff6ff;
+}
+
 .lerm-ajax-select__option.is-selected {
 	color: #0369a1;
 	font-weight: 600;
@@ -2025,6 +2032,11 @@
 
 .lerm-ajax-select__pill-remove:hover {
 	background: #cbd5e1;
+}
+
+.lerm-ajax-select__pill-remove:focus-visible {
+	outline: 2px solid #0ea5e9;
+	outline-offset: 2px;
 }
 
 .lerm-debug-panel {

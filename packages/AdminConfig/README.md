@@ -242,6 +242,22 @@ mount step.
 
 If one integration callback needs to wire several schemas at once, `Runtime::register_many()` accepts a plain array of schema definitions and returns the compiled results.
 
+## Developer checks
+
+The package now ships with a small QA toolchain that works both standalone and
+when embedded inside a theme:
+
+- `composer lint:php` runs the lightweight PHP syntax/import checker
+- `composer lint:wpcs` runs WPCS through `tools/phpcs-runner.php`
+- `composer lint:js` validates `assets/admin-config.js`
+- `composer test` runs the package unit test harness
+- `composer ci` runs the default local gate
+- `composer analyse:phpstan` runs PHPStan when the binary is available
+
+The PHPCS and PHPStan runners prepend `tools/wp-tool-stubs.php`, so they can be
+executed from an embedded theme workspace without fatalling on eager theme
+autoloads that call WordPress functions.
+
 ## Reading meta-backed schemas
 
 Meta-backed stores such as `post_meta`, `term_meta`, `user_meta`, and `comment_meta`

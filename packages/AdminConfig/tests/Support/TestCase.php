@@ -26,6 +26,7 @@ abstract class TestCase {
 			}
 
 			try {
+				$this->reset_wordpress_globals();
 				$this->setUp();
 				$this->{$method}();
 				$results[] = array(
@@ -50,6 +51,12 @@ abstract class TestCase {
 	}
 
 	protected function tearDown(): void {
+	}
+
+	private function reset_wordpress_globals(): void {
+		$GLOBALS['lerm_admin_config_doing_it_wrong'] = array();
+		$GLOBALS['lerm_admin_config_deprecated']     = array();
+		$GLOBALS['lerm_admin_config_actions']        = array();
 	}
 
 	protected function assertTrue( bool $condition, string $message = 'Expected condition to be true.' ): void {
@@ -108,6 +115,13 @@ abstract class TestCase {
 		$this->assertTrue(
 			is_array( $value ) && array_key_exists( $key, $value ),
 			'' !== $message ? $message : sprintf( 'Expected array key "%s" to exist.', $key )
+		);
+	}
+
+	protected function assertStringContains( string $needle, string $haystack, string $message = '' ): void {
+		$this->assertTrue(
+			str_contains( $haystack, $needle ),
+			'' !== $message ? $message : sprintf( 'Expected "%s" to contain "%s".', $haystack, $needle )
 		);
 	}
 

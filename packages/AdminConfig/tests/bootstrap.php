@@ -11,6 +11,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/../' );
 }
 
+if ( ! defined( 'WP_DEBUG' ) ) {
+	define( 'WP_DEBUG', true );
+}
+
 if ( ! defined( 'MINUTE_IN_SECONDS' ) ) {
 	define( 'MINUTE_IN_SECONDS', 60 );
 }
@@ -100,6 +104,12 @@ if ( ! function_exists( 'sanitize_title' ) ) {
 	}
 }
 
+if ( ! function_exists( 'absint' ) ) {
+	function absint( $value ): int {
+		return max( 0, (int) $value );
+	}
+}
+
 if ( ! function_exists( 'sanitize_text_field' ) ) {
 	function sanitize_text_field( $text ): string {
 		return is_scalar( $text ) ? trim( (string) $text ) : '';
@@ -177,6 +187,14 @@ if ( ! function_exists( 'do_action' ) ) {
 		foreach ( $GLOBALS['lerm_admin_config_actions'][ $hook ] as $listener ) {
 			call_user_func_array( $listener['callback'], $args );
 		}
+	}
+}
+
+if ( ! function_exists( 'current_user_can' ) ) {
+	function current_user_can( string $capability, ...$args ): bool {
+		unset( $capability, $args );
+
+		return true;
 	}
 }
 
