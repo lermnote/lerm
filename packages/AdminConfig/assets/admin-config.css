@@ -1592,7 +1592,6 @@
 
 .lerm-backup-tools__header {
 	display: flex;
-	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
 }
@@ -1821,10 +1820,6 @@
 		width: 100%;
 	}
 
-	.lerm-settings-table {
-		border-spacing: 0 12px;
-	}
-
 	.lerm-settings-table th {
 		border-radius: 14px 14px 0 0;
 	}
@@ -1863,8 +1858,7 @@
 		margin-left: 0;
 	}
 
-	.lerm-settings-table--inline>tbody {
-		display: grid;
+	.lerm-settings-table--inline > tbody {
 		grid-template-columns: 1fr;
 	}
 
@@ -1989,10 +1983,6 @@
 /* Backup tools layout polish */
 .lerm-backup-tools {
 	gap: 24px;
-}
-
-.lerm-backup-tools__header {
-	align-items: center;
 }
 
 .lerm-backup-tools textarea {
@@ -2213,9 +2203,6 @@
 
 .lerm-settings-eyebrow {
 	margin-bottom: 10px;
-	color: #0f766e;
-	font-size: 11px;
-	font-weight: 700;
 	letter-spacing: 0.06em;
 }
 
@@ -2344,15 +2331,12 @@
 }
 
 .lerm-settings-actions__hint {
-	font-size: 12px;
 	line-height: 1.5;
-	color: #64748b;
 }
 
 .lerm-status-pill {
 	padding: 6px 12px;
 	font-size: 11px;
-	font-weight: 700;
 }
 
 .lerm-settings-subnav {
@@ -2471,7 +2455,6 @@
 .lerm-fieldset__item,
 .lerm-group-item__field {
 	padding: 12px;
-	background: linear-gradient(180deg, #ffffff, #fafcfd);
 }
 
 .lerm-typography-field {
@@ -2672,7 +2655,6 @@
 .lerm-color-control__input.regular-text,
 .lerm-color-control__input[type="text"] {
 	font-size: 12px;
-	font-weight: 600;
 	letter-spacing: 0.01em;
 }
 
@@ -2686,7 +2668,6 @@
 	width: min(220px, calc(100vw - 20px));
 	padding: 12px;
 	border-color: #cfd8e2;
-	border-radius: 12px;
 	box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
 }
 
