@@ -1,50 +1,40 @@
 <?php
 /**
- * Minimal package-local test runner.
+ * Legacy PHPUnit shim.
  *
  * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );
 
-require_once __DIR__ . '/bootstrap.php';
+$package_root = dirname( __DIR__ );
+$autoload     = $package_root . '/vendor/autoload.php';
+$phpunit      = $package_root . '/vendor/phpunit/phpunit/phpunit';
+$config       = $package_root . '/phpunit.xml.dist';
+$extra_args   = array_slice( $_SERVER['argv'] ?? array(), 1 );
 
-require_once __DIR__ . '/Support/TestCase.php';
-require_once __DIR__ . '/Unit/DataSourceRegistryTest.php';
-require_once __DIR__ . '/Unit/FieldModuleRegistryTest.php';
-require_once __DIR__ . '/Unit/PageSchemaTest.php';
-require_once __DIR__ . '/Unit/SchemaRegistryTest.php';
-require_once __DIR__ . '/Unit/SchemaCompilerTest.php';
-require_once __DIR__ . '/Unit/RuntimeTest.php';
-require_once __DIR__ . '/Smoke/ExamplesSmokeTest.php';
-
-$tests = array(
-	new \Lerm\AdminConfig\Tests\Unit\DataSourceRegistryTest(),
-	new \Lerm\AdminConfig\Tests\Unit\FieldModuleRegistryTest(),
-	new \Lerm\AdminConfig\Tests\Unit\PageSchemaTest(),
-	new \Lerm\AdminConfig\Tests\Unit\SchemaRegistryTest(),
-	new \Lerm\AdminConfig\Tests\Unit\SchemaCompilerTest(),
-	new \Lerm\AdminConfig\Tests\Unit\RuntimeTest(),
-	new \Lerm\AdminConfig\Tests\Smoke\ExamplesSmokeTest(),
-);
-
-$failures = 0;
-
-foreach ( $tests as $test ) {
-	foreach ( $test->run() as $result ) {
-		$status = 'passed' === $result['status'] ? 'PASS' : 'FAIL';
-		echo sprintf( "[%s] %s\n", $status, $result['test'] );
-
-		if ( 'failed' === $result['status'] ) {
-			$failures += 1;
-			echo '       ' . $result['error'] . "\n";
-		}
-	}
-}
-
-if ( $failures > 0 ) {
-	echo sprintf( "\n%d test(s) failed.\n", $failures );
+if ( ! file_exists( $autoload ) || ! file_exists( $phpunit ) ) {
+	fwrite( STDERR, "PHPUnit is not installed. Run `composer install` in packages/AdminConfig first.\n" );
 	exit( 1 );
 }
 
-echo "\nAll tests passed.\n";
+require_once $autoload;
+
+$command = sprintf(
+	'"%s" "%s" --configuration "%s"%s',
+	PHP_BINARY,
+	$phpunit,
+	$config,
+	empty( $extra_args )
+		? ''
+		: ' ' . implode(
+			' ',
+			array_map(
+				static fn ( $arg ): string => escapeshellarg( (string) $arg ),
+				$extra_args
+			)
+		)
+);
+
+passthru( $command, $exit_code );
+exit( $exit_code );

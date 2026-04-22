@@ -106,7 +106,7 @@ final class OptionsPage {
 			wp_die( esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) );
 		}
 
-		$tab = $this->posted_tab();
+		$tab        = $this->posted_tab();
 		$subsection = $this->posted_subsection();
 
 		check_admin_referer( $this->nonce_action( $tab ) );
@@ -115,16 +115,16 @@ final class OptionsPage {
 			? wp_unslash( $_POST[ $this->option_name() ] )
 			: array();
 
-		$success       = $this->store->save_all( $submitted );
-		$status        = 'success';
-		$redirect_tab  = $tab;
+		$success             = $this->store->save_all( $submitted );
+		$status              = 'success';
+		$redirect_tab        = $tab;
 		$redirect_subsection = $subsection;
 
 		if ( $this->store->has_validation_errors() ) {
 			$error_target = $this->first_validation_target( $this->store->validation_errors() );
 
-			$status = 'validation_error';
-			$redirect_tab = $error_target['tab'];
+			$status              = 'validation_error';
+			$redirect_tab        = $error_target['tab'];
 			$redirect_subsection = $error_target['subsection'];
 			$this->store_flash(
 				array(
@@ -154,9 +154,9 @@ final class OptionsPage {
 
 		$redirect_url = add_query_arg(
 			array(
-				'page'                       => $this->page_slug(),
-				'tab'                        => $redirect_tab,
-				'lerm_admin_config_status'   => $status,
+				'page'                     => $this->page_slug(),
+				'tab'                      => $redirect_tab,
+				'lerm_admin_config_status' => $status,
 			),
 			$this->admin_parent_url()
 		);
@@ -306,7 +306,7 @@ final class OptionsPage {
 
 		$json = wp_json_encode( $this->store->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 
-		if ( ! is_string( $json ) || '' === $json ) {
+		if ( false === $json ) {
 			wp_send_json_error(
 				array( 'message' => esc_html__( 'Unable to export the current settings snapshot.', 'lerm' ) ),
 				500
@@ -496,11 +496,11 @@ final class OptionsPage {
 			return;
 		}
 
-		$view         = is_array( $this->definition['view'] ?? null ) ? $this->definition['view'] : array();
-		$sections     = PageSchema::sections( $this->definition );
-		$current_tab  = $this->current_tab();
-		$values       = $this->store->all();
-		$flash        = $this->consume_flash();
+		$view        = is_array( $this->definition['view'] ?? null ) ? $this->definition['view'] : array();
+		$sections    = PageSchema::sections( $this->definition );
+		$current_tab = $this->current_tab();
+		$values      = $this->store->all();
+		$flash       = $this->consume_flash();
 		?>
 		<div class="wrap lerm-settings-wrap">
 			<div class="lerm-settings-shell">
@@ -614,6 +614,7 @@ final class OptionsPage {
 
 								<?php if ( $use_subsections ) : ?>
 									<div class="lerm-settings-sticky-wrap lerm-settings-sticky-wrap--subnav" data-lerm-sticky-wrap>
+										<?php /* translators: %s: section title. */ ?>
 										<nav class="lerm-settings-subnav lerm-settings-subnav--sticky lerm-settings-sticky-bar" data-lerm-sticky-bar aria-label="<?php echo esc_attr( sprintf( __( '%s groups', 'lerm' ), (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ) ); ?>">
 											<?php foreach ( $section_groups as $group_index => $group ) : ?>
 												<button type="button"
@@ -678,7 +679,7 @@ final class OptionsPage {
 			return ! empty( $view['debug'] );
 		}
 
-		return defined( 'WP_DEBUG' ) && WP_DEBUG;
+		return defined( 'WP_DEBUG' ) ? (bool) constant( 'WP_DEBUG' ) : false;
 	}
 
 	private function render_debug_panel(): void {
@@ -691,7 +692,7 @@ final class OptionsPage {
 			JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
 		);
 
-		if ( ! is_string( $json ) || '' === $json ) {
+		if ( false === $json ) {
 			return;
 		}
 		?>
@@ -727,28 +728,28 @@ final class OptionsPage {
 		}
 
 		return array(
-			'schema_id'    => $this->schema_id(),
-			'page_slug'    => $this->page_slug(),
-			'option_name'  => $this->option_name(),
-			'capability'   => $this->capability(),
+			'schema_id'     => $this->schema_id(),
+			'page_slug'     => $this->page_slug(),
+			'option_name'   => $this->option_name(),
+			'capability'    => $this->capability(),
 			'network_admin' => $this->network_admin,
-			'container'    => array(
+			'container'     => array(
 				'type'       => (string) ( $container['type'] ?? 'options_page' ),
 				'capability' => (string) ( $container['capability'] ?? $menu['capability'] ?? $this->capability() ),
 			),
-			'store'        => array(
+			'store'         => array(
 				'type' => (string) ( $store['type'] ?? 'option' ),
 				'key'  => (string) ( $store['key'] ?? $this->option_name() ),
 			),
-			'summary'      => array(
+			'summary'       => array(
 				'sections' => count( $sections ),
 				'fields'   => count( PageSchema::fields( $this->definition ) ),
 				'defaults' => count( PageSchema::defaults( $this->definition ) ),
 			),
-			'sections'     => $section_summary,
-			'field_types'  => $this->field_types_for_debug(),
-			'modules'      => $this->field_modules ? $this->field_modules->modules_for_definition( $this->definition ) : array(),
-			'data_sources' => $this->schema_data_sources(),
+			'sections'      => $section_summary,
+			'field_types'   => $this->field_types_for_debug(),
+			'modules'       => $this->field_modules ? $this->field_modules->modules_for_definition( $this->definition ) : array(),
+			'data_sources'  => $this->schema_data_sources(),
 		);
 	}
 
@@ -905,25 +906,12 @@ final class OptionsPage {
 		}
 
 		foreach ( $groups as $group ) {
-			if ( $requested_subsection === (string) ( $group['id'] ?? '' ) ) {
+			if ( (string) ( $group['id'] ?? '' ) === $requested_subsection ) {
 				return $requested_subsection;
 			}
 		}
 
 		return $fallback_subsection;
-	}
-
-	/**
-	 * Determine whether a section should render compact inline rows.
-	 */
-	private function section_uses_inline_rows( string $section_id ): bool {
-		$section = PageSchema::section( $this->definition, $section_id ) ?? array();
-
-		if ( array_key_exists( 'inline_fields', $section ) ) {
-			return ! empty( $section['inline_fields'] );
-		}
-
-		return false;
 	}
 
 	/**
@@ -1030,9 +1018,9 @@ final class OptionsPage {
 
 		$custom_render = $this->field_types->render_callback( $field_type );
 
-		$previous_errors            = $this->render_field_errors;
-		$this->render_field_errors  = $field_errors;
-		$this->render_path_stack[]  = $field_id;
+		$previous_errors           = $this->render_field_errors;
+		$this->render_field_errors = $field_errors;
+		$this->render_path_stack[] = $field_id;
 
 		try {
 			if ( is_callable( $custom_render ) ) {
@@ -1181,16 +1169,16 @@ final class OptionsPage {
 		echo '<div class="lerm-fieldset lerm-accordion-field' . ( $invalid ? ' is-invalid' : '' ) . '" data-target="' . esc_attr( $field_id ) . '" data-field-path="' . esc_attr( $field_path ) . '" data-lerm-accordion data-allow-multiple="' . esc_attr( $allow_multiple ? '1' : '0' ) . '">';
 
 		foreach ( $items as $index => $item ) {
-			$item_id       = (string) $item['id'];
-			$item_path     = $this->compose_render_path( $field_path, $item_id );
-			$item_title    = (string) $item['title'];
-			$item_desc     = (string) ( $item['description'] ?? '' );
-			$item_fields   = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
-			$item_values   = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
-			$item_invalid  = $this->field_has_errors( $this->render_field_errors, $item_path, true );
-			$is_open       = $item_invalid || ! empty( $item['open'] ) || ( $open_first && 0 === $index );
-			$panel_id      = $field_id . '__' . $item_id;
-			$button_id     = $panel_id . '__button';
+			$item_id      = (string) $item['id'];
+			$item_path    = $this->compose_render_path( $field_path, $item_id );
+			$item_title   = (string) $item['title'];
+			$item_desc    = (string) ( $item['description'] ?? '' );
+			$item_fields  = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
+			$item_values  = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
+			$item_invalid = $this->field_has_errors( $this->render_field_errors, $item_path, true );
+			$is_open      = $item_invalid || ! empty( $item['open'] ) || ( $open_first && 0 === $index );
+			$panel_id     = $field_id . '__' . $item_id;
+			$button_id    = $panel_id . '__button';
 
 			echo '<section class="lerm-accordion__item' . ( $item_invalid ? ' is-invalid' : '' ) . ( $is_open ? ' is-open' : '' ) . '" data-item-id="' . esc_attr( $item_id ) . '">';
 			echo '<button type="button" id="' . esc_attr( $button_id ) . '" class="lerm-accordion__trigger" data-lerm-accordion-trigger aria-expanded="' . esc_attr( $is_open ? 'true' : 'false' ) . '" aria-controls="' . esc_attr( $panel_id ) . '">';
@@ -1247,12 +1235,12 @@ final class OptionsPage {
 		echo '<div class="lerm-tabbed__nav" role="tablist">';
 
 		foreach ( $items as $index => $item ) {
-			$item_id     = (string) $item['id'];
-			$item_path   = $this->compose_render_path( $field_path, $item_id );
+			$item_id      = (string) $item['id'];
+			$item_path    = $this->compose_render_path( $field_path, $item_id );
 			$item_invalid = $this->field_has_errors( $this->render_field_errors, $item_path, true );
-			$is_active   = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
-			$panel_id    = $field_id . '__' . $item_id;
-			$trigger_id  = $panel_id . '__tab';
+			$is_active    = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
+			$panel_id     = $field_id . '__' . $item_id;
+			$trigger_id   = $panel_id . '__tab';
 
 			echo '<button type="button" id="' . esc_attr( $trigger_id ) . '" class="lerm-tabbed__trigger' . ( $is_active ? ' is-active' : '' ) . ( $item_invalid ? ' is-invalid' : '' ) . '" data-lerm-tabbed-trigger data-lerm-tabbed-target="' . esc_attr( $item_id ) . '" role="tab" aria-selected="' . esc_attr( $is_active ? 'true' : 'false' ) . '" aria-controls="' . esc_attr( $panel_id ) . '" tabindex="' . esc_attr( $is_active ? '0' : '-1' ) . '">';
 			echo esc_html( (string) $item['title'] );
@@ -1262,15 +1250,15 @@ final class OptionsPage {
 		echo '</div><div class="lerm-tabbed__panels">';
 
 		foreach ( $items as $index => $item ) {
-			$item_id       = (string) $item['id'];
-			$item_path     = $this->compose_render_path( $field_path, $item_id );
-			$item_desc     = (string) ( $item['description'] ?? '' );
-			$item_fields   = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
-			$item_values   = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
-			$item_invalid  = $this->field_has_errors( $this->render_field_errors, $item_path, true );
-			$is_active     = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
-			$panel_id      = $field_id . '__' . $item_id;
-			$trigger_id    = $panel_id . '__tab';
+			$item_id      = (string) $item['id'];
+			$item_path    = $this->compose_render_path( $field_path, $item_id );
+			$item_desc    = (string) ( $item['description'] ?? '' );
+			$item_fields  = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
+			$item_values  = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
+			$item_invalid = $this->field_has_errors( $this->render_field_errors, $item_path, true );
+			$is_active    = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
+			$panel_id     = $field_id . '__' . $item_id;
+			$trigger_id   = $panel_id . '__tab';
 
 			echo '<section id="' . esc_attr( $panel_id ) . '" class="lerm-tabbed__panel' . ( $item_invalid ? ' is-invalid' : '' ) . '" data-item-id="' . esc_attr( $item_id ) . '" data-lerm-tabbed-panel="' . esc_attr( $item_id ) . '" role="tabpanel" aria-labelledby="' . esc_attr( $trigger_id ) . '"' . ( $is_active ? '' : ' hidden' ) . '>';
 
@@ -1326,8 +1314,8 @@ final class OptionsPage {
 	 * @param array<string, mixed> $item  Current item values.
 	 */
 	private function group_item_markup( array $field, string $field_name, array $item, string $index, string $field_path = '', string $path_template = '' ): string {
-		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
-		$item_path = $this->compose_render_path( $field_path, $index );
+		$fields          = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
+		$item_path       = $this->compose_render_path( $field_path, $index );
 		$item_has_errors = $this->field_has_errors( $this->render_field_errors, $item_path, true );
 
 		ob_start();
@@ -1369,9 +1357,9 @@ final class OptionsPage {
 	 * @param mixed                $value Field value.
 	 */
 	private function render_nested_field( array $field, $value, string $field_name, string $input_id, string $name_template = '', string $id_template = '' ): void {
-		$field_type = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
-		$name_attr  = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
-		$id_attr    = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
+		$field_type    = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+		$name_attr     = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
+		$id_attr       = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
 		$custom_render = $this->field_types->nested_render_callback( $field_type );
 
 		if ( is_callable( $custom_render ) ) {
@@ -1488,35 +1476,6 @@ final class OptionsPage {
 			sanitize_html_class( 'lerm-' . $input_id ),
 			$editor_args
 		);
-	}
-
-	/**
-	 * Render a number input with custom step buttons.
-	 *
-	 * @param string               $input_id   Input ID.
-	 * @param string               $field_name Input name.
-	 * @param mixed                $value      Input value.
-	 * @param array<string, mixed> $field      Field definition.
-	 * @param string               $extra_attrs Additional raw attributes.
-	 */
-	private function render_number_input( string $input_id, string $field_name, $value, array $field, string $extra_attrs = '' ): void {
-		echo '<span class="lerm-number-input">';
-		printf(
-			'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text lerm-number-input__control" min="%4$s" max="%5$s" step="%6$s"%7$s>',
-			esc_attr( $input_id ),
-			esc_attr( $field_name ),
-			esc_attr( $this->scalar_string( $value ) ),
-			esc_attr( (string) ( $field['min'] ?? '' ) ),
-			esc_attr( (string) ( $field['max'] ?? '' ) ),
-			esc_attr( (string) ( $field['step'] ?? 1 ) ),
-			$extra_attrs
-		);
-		printf(
-			'<span class="lerm-number-input__actions"><button type="button" class="lerm-number-input__button" data-lerm-number-step="up" aria-label="%1$s"><span aria-hidden="true">&#9650;</span></button><button type="button" class="lerm-number-input__button" data-lerm-number-step="down" aria-label="%2$s"><span aria-hidden="true">&#9660;</span></button></span>',
-			esc_attr__( 'Increase value', 'lerm' ),
-			esc_attr__( 'Decrease value', 'lerm' )
-		);
-		echo '</span>';
 	}
 
 	/**
@@ -1814,7 +1773,7 @@ final class OptionsPage {
 
 	/**
 	 * @param array<string, mixed>|null $flash
-	 * @return array<string, string>
+	 * @return array<string, array<int, string>>
 	 */
 	private function section_flash_errors( ?array $flash, string $section_id ): array {
 		if ( ! is_array( $flash ) ) {
@@ -2405,4 +2364,3 @@ final class OptionsPage {
 		return $mtime > 0 ? $version . '.' . (string) $mtime : $version;
 	}
 }
-

@@ -47,4 +47,3 @@ final class SiteOptionBackend implements StorageBackend {
 		return delete_site_option( $this->option_name );
 	}
 }
-

@@ -51,4 +51,3 @@ final class UserMetaBackend implements StorageBackend {
 		return delete_user_meta( $this->user_id, $this->meta_key );
 	}
 }
-

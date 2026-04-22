@@ -18,15 +18,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class SchemaCompiler {
 
 	public function compile( array $schema ): CompiledSchema {
-		$id               = $this->schema_id( $schema );
-		$container        = $this->compile_container( $schema );
-		$store            = $this->compile_store( $schema, $id );
-		$definition       = $schema;
-		$definition['id'] = $id;
+		$id                      = $this->schema_id( $schema );
+		$container               = $this->compile_container( $schema );
+		$store                   = $this->compile_store( $schema, $id );
+		$definition              = $schema;
+		$definition['id']        = $id;
 		$definition['container'] = $container;
 		$definition['store']     = $store;
 
-		$field_metadata  = array();
+		$field_metadata   = array();
 		$dependency_graph = array();
 
 		foreach ( PageSchema::fields( $definition ) as $field ) {

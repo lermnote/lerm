@@ -54,7 +54,7 @@ final class MetaboxContainer implements Container {
 
 	public function register_meta_boxes( string $post_type ): void {
 		foreach ( $this->schemas as $schema ) {
-			$container = $schema->container();
+			$container  = $schema->container();
 			$post_types = $this->normalize_post_types( $container['post_types'] ?? array() );
 
 			if ( ! in_array( $post_type, $post_types, true ) ) {
@@ -82,9 +82,9 @@ final class MetaboxContainer implements Container {
 			return;
 		}
 
-		$schema   = $this->schemas[ $schema_id ];
-		$store    = $this->stores->store( $schema, array( 'post_id' => $post->ID ) );
-		$renderer = new OptionsPage(
+		$schema     = $this->schemas[ $schema_id ];
+		$store      = $this->stores->store( $schema, array( 'post_id' => $post->ID ) );
+		$renderer   = new OptionsPage(
 			$schema->definition(),
 			$store,
 			$this->framework->field_types(),
@@ -92,13 +92,13 @@ final class MetaboxContainer implements Container {
 			false,
 			$this->framework->field_modules()
 		);
-		$sections = PageSchema::sections( $schema->definition() );
+		$sections   = PageSchema::sections( $schema->definition() );
 		$section_id = (string) array_key_first( $sections );
-		$section = '' !== $section_id ? ( $sections[ $section_id ] ?? null ) : null;
-		$flash   = ValidationFlash::consume( 'metabox', $schema->id(), (string) $post->ID );
-		$values  = ValidationFlash::render_values( $store->all(), $flash );
-		$errors  = ValidationFlash::field_errors( $flash );
-		$notice  = ValidationFlash::notice( $flash );
+		$section    = '' !== $section_id ? ( $sections[ $section_id ] ?? null ) : null;
+		$flash      = ValidationFlash::consume( 'metabox', $schema->id(), (string) $post->ID );
+		$values     = ValidationFlash::render_values( $store->all(), $flash );
+		$errors     = ValidationFlash::field_errors( $flash );
+		$notice     = ValidationFlash::notice( $flash );
 
 		if ( ! is_array( $section ) ) {
 			return;
@@ -157,13 +157,13 @@ final class MetaboxContainer implements Container {
 				continue;
 			}
 
-			$store        = $this->stores->store( $schema, array( 'post_id' => $post_id ) );
-			$storage_key  = $store->storage_key();
-			$submitted    = isset( $_POST[ $storage_key ] ) && is_array( $_POST[ $storage_key ] )
+			$store       = $this->stores->store( $schema, array( 'post_id' => $post_id ) );
+			$storage_key = $store->storage_key();
+			$submitted   = isset( $_POST[ $storage_key ] ) && is_array( $_POST[ $storage_key ] )
 				? wp_unslash( $_POST[ $storage_key ] )
 				: array();
-			$sections     = PageSchema::sections( $schema->definition() );
-			$section_id   = (string) array_key_first( $sections );
+			$sections    = PageSchema::sections( $schema->definition() );
+			$section_id  = (string) array_key_first( $sections );
 
 			if ( '' === $section_id ) {
 				continue;

@@ -359,7 +359,7 @@ final class OptionStore {
 		}
 
 		foreach ( PageSchema::section_groups( $section ) as $group ) {
-			if ( $group_id === (string) ( $group['id'] ?? '' ) ) {
+			if ( (string) ( $group['id'] ?? '' ) === $group_id ) {
 				return true;
 			}
 		}
@@ -397,8 +397,8 @@ final class OptionStore {
 		$type     = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
 		$default  = $field['default'] ?? '';
 		$callback = $this->field_types->sanitize_callback( $type );
-		$field_id  = isset( $field['id'] ) && is_scalar( $field['id'] ) ? (string) $field['id'] : '';
-		$path      = '' !== $path ? $path : $this->resolve_field_path( $field_id );
+		$field_id = isset( $field['id'] ) && is_scalar( $field['id'] ) ? (string) $field['id'] : '';
+		$path     = '' !== $path ? $path : $this->resolve_field_path( $field_id );
 
 		$this->field_path_stack[] = $path;
 
@@ -800,12 +800,12 @@ final class OptionStore {
 	 *
 	 * @param array<string, mixed> $field Field definition.
 	 * @param mixed                $value Submitted value.
-	 * @param mixed                $default Default value.
+	 * @param mixed                $fallback Default value.
 	 * @return int|float
 	 */
-	private function sanitize_number_field( array $field, $value, $default ) {
+	private function sanitize_number_field( array $field, $value, $fallback ) {
 		$cast   = (string) ( $field['cast'] ?? 'int' );
-		$number = is_numeric( $value ) ? (float) $value : (float) $default;
+		$number = is_numeric( $value ) ? (float) $value : (float) $fallback;
 		$min    = isset( $field['min'] ) && is_numeric( $field['min'] ) ? (float) $field['min'] : null;
 		$max    = isset( $field['max'] ) && is_numeric( $field['max'] ) ? (float) $field['max'] : null;
 
@@ -931,7 +931,7 @@ final class OptionStore {
 		}
 
 		foreach ( $error->get_error_messages() as $message ) {
-			$message = is_scalar( $message ) ? trim( (string) $message ) : '';
+			$message = trim( $message );
 
 			if ( '' === $message || in_array( $message, $this->validation_errors[ $path ], true ) ) {
 				continue;
@@ -1020,7 +1020,7 @@ final class OptionStore {
 		}
 
 		foreach ( PageSchema::section_groups( $section ) as $group ) {
-			if ( $group_id === (string) ( $group['id'] ?? '' ) ) {
+			if ( (string) ( $group['id'] ?? '' ) === $group_id ) {
 				$fields = $group['fields'] ?? array();
 
 				return is_array( $fields ) ? array_values( $fields ) : array();
@@ -1037,10 +1037,10 @@ final class OptionStore {
 	 * malformed requests send array/object values into scalar fields.
 	 *
 	 * @param mixed  $value Submitted or stored value.
-	 * @param string $default Fallback value.
+	 * @param string $fallback Fallback value.
 	 */
-	private function string_value( $value, string $default = '', bool $trim = false ): string {
-		return PageSchema::scalar_value( $value, $default, $trim );
+	private function string_value( $value, string $fallback = '', bool $trim = false ): string {
+		return PageSchema::scalar_value( $value, $fallback, $trim );
 	}
 
 	/**
@@ -1103,4 +1103,3 @@ final class OptionStore {
 		return wp_kses_post( $this->string_value( $value ) );
 	}
 }
-

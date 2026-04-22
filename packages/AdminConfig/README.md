@@ -250,13 +250,43 @@ when embedded inside a theme:
 - `composer lint:php` runs the lightweight PHP syntax/import checker
 - `composer lint:wpcs` runs WPCS through `tools/phpcs-runner.php`
 - `composer lint:js` validates `assets/admin-config.js`
-- `composer test` runs the package unit test harness
+- `composer test` runs the PHPUnit unit and smoke suites
+- `composer test:integration` runs the real-WordPress integration suite when a
+  reachable `wp-load.php` is available
 - `composer ci` runs the default local gate
 - `composer analyse:phpstan` runs PHPStan when the binary is available
 
 The PHPCS and PHPStan runners prepend `tools/wp-tool-stubs.php`, so they can be
 executed from an embedded theme workspace without fatalling on eager theme
 autoloads that call WordPress functions.
+
+For browser and container-level coverage the package also ships with `wp-env`
+and Playwright scaffolding:
+
+- `npm install` installs `@wordpress/env` and `@playwright/test`
+- `npm run test:integration` starts `wp-env`, activates the package plugin, the
+  bundled schema demo plugin, and the embedded fixture theme, then runs
+  `phpunit.integration.xml.dist` inside the WordPress container
+- `npm run test:e2e` runs the Playwright smoke suite against plugin mode and
+  embedded mode
+
+The `tests/fixtures/wp-env/` directory contains the setup script and fixture
+theme used by those jobs. `wp-env` requires Docker; when you already have a
+local WordPress checkout available, `composer test:integration` can run
+directly against that install instead.
+
+## Support and Versioning
+
+- PHP support starts at `8.0`
+- The package targets modern WordPress admin APIs and ships integration/E2E
+  scaffolding against the default stable `wp-env` environment
+- Release channel:
+  - `0.x`: alpha/beta extraction phase, public APIs may still tighten
+  - `1.0.0+`: Semantic Versioning for runtime, extension, and schema-facing APIs
+- Breaking runtime changes should land with changelog notes, migration guidance,
+  and updated examples
+
+See [docs/support-matrix.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot and [CONTRIBUTING.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/CONTRIBUTING.md) for the local development flow.
 
 ## Reading meta-backed schemas
 

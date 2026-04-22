@@ -17,23 +17,45 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Lerm\\AdminConfig\\Tests\\": "tests/"
+			"Lerm\\AdminConfig\\Tests\\": "tests/",
+			"Lerm\\AdminConfig\\Examples\\": [
+				"examples/schema-demo-plugin/src/",
+				"examples/embedded-theme-demo/src/"
+			]
 		}
 	},
 	"require": {
 		"php": ">=8.0"
 	},
+	"require-dev": {
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.1",
+		"php-stubs/wordpress-stubs": "^6.8",
+		"phpstan/phpstan": "^1.12.0",
+		"phpunit/phpunit": "^9.6.22",
+		"squizlabs/php_codesniffer": "^3.10.0",
+		"wp-coding-standards/wpcs": "^3.1.0"
+	},
 	"scripts": {
 		"lint:php": "@php tools/lint-php.php",
 		"lint:wpcs": "@php tools/phpcs-runner.php",
-		"lint:js": "node --check assets/admin-config.js",
+		"lint:js": "node --check assets/admin-config.js && node --check playwright.config.js && node --check tests/E2E/helpers/wp-admin.js && node --check tests/E2E/plugin-mode.spec.js && node --check tests/E2E/embedded-mode.spec.js",
 		"analyse:phpstan": "@php tools/phpstan-runner.php",
-		"test": "@php tests/run.php",
+		"test:unit": "@php vendor/bin/phpunit --configuration phpunit.xml.dist --testsuite unit,smoke",
+		"test:integration": "@php vendor/bin/phpunit --configuration phpunit.integration.xml.dist",
+		"test": "@test:unit",
+		"test:legacy": "@php tests/run.php",
 		"ci": [
 			"@lint:php",
 			"@lint:wpcs",
 			"@lint:js",
+			"@analyse:phpstan",
 			"@test"
 		]
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"sort-packages": true
 	}
 }

@@ -205,4 +205,3 @@ final class FieldTypeRegistry {
 		return ! empty( $this->types[ sanitize_key( $type ) ]['builtin'] );
 	}
 }
-

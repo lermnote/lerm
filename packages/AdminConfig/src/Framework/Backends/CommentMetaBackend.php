@@ -47,4 +47,3 @@ final class CommentMetaBackend implements StorageBackend {
 		return delete_comment_meta( $this->comment_id, $this->meta_key );
 	}
 }
-

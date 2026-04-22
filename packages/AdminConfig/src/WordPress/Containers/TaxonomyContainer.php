@@ -57,13 +57,15 @@ final class TaxonomyContainer implements Container {
 			add_action(
 				$taxonomy . '_add_form_fields',
 				function ( string $taxonomy_name ) use ( $taxonomy ): void {
-					$this->render_add_form_fields( $taxonomy_name ?: $taxonomy );
+					$resolved_taxonomy = '' !== $taxonomy_name ? $taxonomy_name : $taxonomy;
+					$this->render_add_form_fields( $resolved_taxonomy );
 				}
 			);
 			add_action(
 				$taxonomy . '_edit_form_fields',
 				function ( \WP_Term $term, string $taxonomy_name ) use ( $taxonomy ): void {
-					$this->render_edit_form_fields( $term, $taxonomy_name ?: $taxonomy );
+					$resolved_taxonomy = '' !== $taxonomy_name ? $taxonomy_name : $taxonomy;
+					$this->render_edit_form_fields( $term, $resolved_taxonomy );
 				},
 				10,
 				2

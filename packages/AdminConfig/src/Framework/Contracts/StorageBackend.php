@@ -63,4 +63,3 @@ interface StorageBackend {
 	 */
 	public function delete(): bool;
 }
-

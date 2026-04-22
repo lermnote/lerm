@@ -36,9 +36,9 @@ final class FieldModuleRegistryTest extends TestCase {
 							'items'  => array(),
 							'fields' => array(
 								array(
-									'id'      => 'cards',
-									'type'    => 'group',
-									'fields'  => array(
+									'id'     => 'cards',
+									'type'   => 'group',
+									'fields' => array(
 										array(
 											'id'   => 'title',
 											'type' => 'text',

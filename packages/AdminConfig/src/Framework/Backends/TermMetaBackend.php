@@ -58,4 +58,3 @@ final class TermMetaBackend implements StorageBackend {
 		return delete_term_meta( $this->term_id, $this->meta_key );
 	}
 }
-

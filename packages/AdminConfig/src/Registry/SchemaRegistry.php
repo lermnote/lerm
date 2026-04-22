@@ -34,7 +34,7 @@ final class SchemaRegistry {
 		$compiled = $this->compiler->compile( $schema );
 
 		if ( isset( $this->schemas[ $compiled->id() ] ) ) {
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			if ( defined( 'WP_DEBUG' ) ? (bool) constant( 'WP_DEBUG' ) : false ) {
 				_doing_it_wrong(
 					__METHOD__,
 					sprintf(

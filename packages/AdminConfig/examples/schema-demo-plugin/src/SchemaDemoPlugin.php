@@ -72,7 +72,7 @@ final class SchemaDemoPlugin {
 				'debug'       => true,
 			),
 			'sections'  => array(
-				'general' => array(
+				'general'    => array(
 					'title'       => __( 'General', 'lerm-admin-config-demo' ),
 					'description' => __( 'Simple site-level options rendered by the shared runtime.', 'lerm-admin-config-demo' ),
 					'fields'      => array(
@@ -149,7 +149,7 @@ final class SchemaDemoPlugin {
 						),
 					),
 				),
-				'advanced' => array(
+				'advanced'   => array(
 					'title'       => __( 'Advanced Fields', 'lerm-admin-config-demo' ),
 					'description' => __( 'Typography, icon selection, accordion panels, and tabbed content all come from the same schema runtime.', 'lerm-admin-config-demo' ),
 					'fields'      => array(
@@ -179,11 +179,11 @@ final class SchemaDemoPlugin {
 							'label'       => __( 'Feature Icon', 'lerm-admin-config-demo' ),
 							'description' => __( 'A curated Dashicons picker rendered by the advanced fields module.', 'lerm-admin-config-demo' ),
 							'choices'     => array(
-								'dashicons-lightbulb'       => __( 'Idea', 'lerm-admin-config-demo' ),
-								'dashicons-megaphone'       => __( 'Launch', 'lerm-admin-config-demo' ),
-								'dashicons-chart-bar'       => __( 'Analytics', 'lerm-admin-config-demo' ),
-								'dashicons-format-image'    => __( 'Visual', 'lerm-admin-config-demo' ),
-								'dashicons-star-filled'     => __( 'Featured', 'lerm-admin-config-demo' ),
+								'dashicons-lightbulb'    => __( 'Idea', 'lerm-admin-config-demo' ),
+								'dashicons-megaphone'    => __( 'Launch', 'lerm-admin-config-demo' ),
+								'dashicons-chart-bar'    => __( 'Analytics', 'lerm-admin-config-demo' ),
+								'dashicons-format-image' => __( 'Visual', 'lerm-admin-config-demo' ),
+								'dashicons-star-filled'  => __( 'Featured', 'lerm-admin-config-demo' ),
 								'dashicons-admin-site-alt3' => __( 'Site', 'lerm-admin-config-demo' ),
 							),
 							'default'     => 'dashicons-lightbulb',
@@ -323,7 +323,7 @@ final class SchemaDemoPlugin {
 						),
 					),
 				),
-				'tools'   => array(
+				'tools'      => array(
 					'title'       => __( 'Tools', 'lerm-admin-config-demo' ),
 					'description' => __( 'Shared backup/import controls also work for non-theme plugin settings.', 'lerm-admin-config-demo' ),
 					'fields'      => array(
@@ -635,10 +635,10 @@ final class SchemaDemoPlugin {
 									'type'    => 'icon',
 									'label'   => __( 'Badge icon', 'lerm-admin-config-demo' ),
 									'choices' => array(
-										'dashicons-tag'         => __( 'Tag', 'lerm-admin-config-demo' ),
-										'dashicons-category'    => __( 'Category', 'lerm-admin-config-demo' ),
+										'dashicons-tag'  => __( 'Tag', 'lerm-admin-config-demo' ),
+										'dashicons-category' => __( 'Category', 'lerm-admin-config-demo' ),
 										'dashicons-star-filled' => __( 'Featured', 'lerm-admin-config-demo' ),
-										'dashicons-flag'        => __( 'Flag', 'lerm-admin-config-demo' ),
+										'dashicons-flag' => __( 'Flag', 'lerm-admin-config-demo' ),
 									),
 									'default' => 'dashicons-category',
 								),

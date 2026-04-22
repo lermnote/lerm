@@ -9,6 +9,10 @@
 
 declare( strict_types=1 );
 
+if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
+	define( 'WP_PLUGIN_DIR', dirname( __DIR__, 3 ) . '/plugins' );
+}
+
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		unset( $hook, $callback, $priority, $accepted_args );

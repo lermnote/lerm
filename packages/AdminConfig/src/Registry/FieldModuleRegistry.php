@@ -41,7 +41,7 @@ final class FieldModuleRegistry {
 	}
 
 	public function register( FieldModule $module ): void {
-		$module_id               = sanitize_key( $module->id() );
+		$module_id                   = sanitize_key( $module->id() );
 		$this->modules[ $module_id ] = $module;
 
 		foreach ( $module->field_types() as $field_type ) {

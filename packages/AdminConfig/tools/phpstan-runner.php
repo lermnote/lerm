@@ -32,7 +32,7 @@ if ( null === $phpstan ) {
 }
 
 $command = sprintf(
-	'"%s" -d auto_prepend_file="%s" "%s" analyse --configuration="%s"%s',
+	'"%s" -d auto_prepend_file="%s" "%s" analyse --memory-limit=1G --configuration="%s"%s',
 	$php_binary,
 	$stub_file,
 	$phpstan,

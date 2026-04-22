@@ -52,4 +52,3 @@ final class OptionBackend implements StorageBackend {
 		return delete_option( $this->option_name );
 	}
 }
-

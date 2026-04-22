@@ -9,13 +9,22 @@ Thanks for helping improve `lerm/admin-config`.
 
 ```bash
 composer validate --strict
-php tools/lint-php.php
-node --check assets/admin-config.js
-php tests/run.php
+composer ci
 ```
 
-3. Update docs or examples whenever the public API changes.
-4. Add or extend tests for compiler behavior, runtime contracts, or bundled example registrations.
+3. When you touch container mounting, backends, or admin flows, also run one of:
+
+```bash
+composer test:integration
+npm run test:integration
+npm run test:e2e
+```
+
+- `composer test:integration` works against an already-available WordPress install
+- `npm run test:integration` and `npm run test:e2e` use `wp-env` and therefore need Docker
+
+4. Update docs or examples whenever the public API changes.
+5. Add or extend tests for compiler behavior, runtime contracts, bundled example registrations, or WordPress integration flows as appropriate.
 
 ## Pull Request Expectations
 
@@ -35,3 +44,4 @@ php tests/run.php
 - Update `CHANGELOG.md` for user-visible changes.
 - Reflect new compatibility guarantees in `docs/support-matrix.md`.
 - Keep examples runnable and aligned with the public onboarding flow.
+- Keep `.wp-env.json`, `tests/fixtures/wp-env/`, and Playwright smoke coverage aligned with the example plugin and embedded fixture theme.

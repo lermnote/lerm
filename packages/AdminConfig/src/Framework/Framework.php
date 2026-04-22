@@ -57,8 +57,8 @@ final class Framework {
 	private AssetResolver $asset_resolver;
 
 	public function __construct( ?AssetResolver $resolver = null ) {
-		$this->field_types    = new FieldTypeRegistry();
-		$this->field_modules  = new FieldModuleRegistry( $this->field_types );
+		$this->field_types   = new FieldTypeRegistry();
+		$this->field_modules = new FieldModuleRegistry( $this->field_types );
 		$this->register_default_field_modules();
 		$this->asset_resolver = $resolver ?? new DefaultAssetResolver(
 			// When embedded in a theme/package tree, default to the bundled
@@ -228,4 +228,3 @@ final class Framework {
 		}
 	}
 }
-

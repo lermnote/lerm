@@ -620,7 +620,8 @@ final class ExtendedPrimitiveFieldTypes {
 			return '<img src="' . esc_url( $url ) . '" alt="">';
 		}
 
-		$label = wp_basename( wp_parse_url( $url, PHP_URL_PATH ) ?: $url );
+		$path  = wp_parse_url( $url, PHP_URL_PATH );
+		$label = wp_basename( is_string( $path ) && '' !== $path ? $path : $url );
 
 		return '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $label ) . '</a>';
 	}

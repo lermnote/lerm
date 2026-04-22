@@ -7,7 +7,16 @@ on:
       - 'assets/**'
       - 'tests/**'
       - 'tools/**'
+      - 'examples/**'
       - 'composer.json'
+      - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.wp-env.json'
+      - 'phpcs.xml.dist'
+      - 'phpstan.neon.dist'
+      - 'phpunit*.xml.dist'
+      - 'playwright.config.js'
       - 'README.md'
       - 'docs/**'
       - '.github/workflows/ci.yml'
@@ -17,13 +26,55 @@ on:
       - 'assets/**'
       - 'tests/**'
       - 'tools/**'
+      - 'examples/**'
       - 'composer.json'
+      - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.wp-env.json'
+      - 'phpcs.xml.dist'
+      - 'phpstan.neon.dist'
+      - 'phpunit*.xml.dist'
+      - 'playwright.config.js'
       - 'README.md'
       - 'docs/**'
       - '.github/workflows/ci.yml'
 
 jobs:
-  admin-config:
+  php-quality:
+    name: PHP Quality (${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.0', '8.1', '8.2', '8.3']
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Run package quality gate
+        run: composer ci
+
+  wordpress-integration:
+    name: WordPress Integration
     runs-on: ubuntu-latest
 
     steps:
@@ -34,24 +85,67 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          coverage: none
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Validate composer.json
-        working-directory: .
-        run: composer validate --strict
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
 
-      - name: Lint PHP
-        working-directory: .
-        run: php tools/lint-php.php
+      - name: Install Node dependencies
+        run: npm ci
 
-      - name: Lint JavaScript
-        working-directory: .
-        run: node --check assets/admin-config.js
+      - name: Run WordPress integration tests
+        run: npm run test:integration
 
-      - name: Run package tests
-        working-directory: .
-        run: php tests/run.php
+      - name: Stop wp-env
+        if: always()
+        run: npm run wp-env:stop
+
+  wordpress-e2e:
+    name: WordPress E2E
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright smoke suite
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+      - name: Stop wp-env
+        if: always()
+        run: npm run wp-env:stop

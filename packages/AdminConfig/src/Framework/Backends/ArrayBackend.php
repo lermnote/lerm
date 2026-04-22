@@ -48,4 +48,3 @@ final class ArrayBackend implements StorageBackend {
 		return true;
 	}
 }
-

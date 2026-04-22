@@ -69,7 +69,8 @@ Example: `examples/embedded-theme-demo`
 ## Regression notes
 
 - Run `composer ci` before the manual pass.
-- Run `composer analyse:phpstan` when `phpstan/phpstan` is installed in the package or workspace root vendor tree.
+- Run `composer test:integration` when a local WordPress install is available.
+- Run `npm run test:integration` and `npm run test:e2e` when Docker / `wp-env` is available.
 - Validation errors should block persistence for the affected save request.
 - AJAX saves should return field-level errors without reloading the page.
 - Non-JS options-page saves should show a flash notice and preserve submitted values for the active tab.

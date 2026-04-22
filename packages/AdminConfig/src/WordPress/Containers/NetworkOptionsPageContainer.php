@@ -31,13 +31,13 @@ final class NetworkOptionsPageContainer implements Container {
 	}
 
 	public function mount( CompiledSchema $schema ): void {
-		$definition = $schema->definition();
-		$menu       = is_array( $definition['menu'] ?? null ) ? $definition['menu'] : array();
+		$definition              = $schema->definition();
+		$menu                    = is_array( $definition['menu'] ?? null ) ? $definition['menu'] : array();
 		$has_explicit_capability = ( isset( $menu['capability'] ) && is_scalar( $menu['capability'] ) && '' !== trim( (string) $menu['capability'] ) )
 			|| ( isset( $definition['capability'] ) && is_scalar( $definition['capability'] ) && '' !== trim( (string) $definition['capability'] ) );
 
 		if ( ! $has_explicit_capability ) {
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			if ( defined( 'WP_DEBUG' ) ? (bool) constant( 'WP_DEBUG' ) : false ) {
 				_doing_it_wrong(
 					__METHOD__,
 					sprintf(

@@ -7,6 +7,10 @@
 
 declare( strict_types=1 );
 
+if ( file_exists( dirname( __DIR__ ) . '/vendor/autoload.php' ) ) {
+	require_once dirname( __DIR__ ) . '/vendor/autoload.php';
+}
+
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/../' );
 }
@@ -145,7 +149,7 @@ if ( ! function_exists( 'esc_url_raw' ) ) {
 
 if ( ! function_exists( 'trailingslashit' ) ) {
 	function trailingslashit( string $value ): string {
-		return rtrim( $value, "/\\" ) . '/';
+		return rtrim( $value, '/\\' ) . '/';
 	}
 }
 
@@ -198,6 +202,12 @@ if ( ! function_exists( 'current_user_can' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_admin' ) ) {
+	function is_admin(): bool {
+		return (bool) ( $GLOBALS['lerm_admin_config_is_admin'] ?? false );
+	}
+}
+
 if ( ! function_exists( 'is_multisite' ) ) {
 	function is_multisite(): bool {
 		return false;
@@ -205,18 +215,18 @@ if ( ! function_exists( 'is_multisite' ) ) {
 }
 
 spl_autoload_register(
-	static function ( string $class ): void {
+	static function ( string $class_name ): void {
 		$prefixes = array(
 			'Lerm\\AdminConfig\\Tests\\' => __DIR__ . '/',
 			'Lerm\\AdminConfig\\'        => dirname( __DIR__ ) . '/src/',
 		);
 
 		foreach ( $prefixes as $prefix => $base_dir ) {
-			if ( ! str_starts_with( $class, $prefix ) ) {
+			if ( ! str_starts_with( $class_name, $prefix ) ) {
 				continue;
 			}
 
-			$relative = str_replace( '\\', '/', substr( $class, strlen( $prefix ) ) );
+			$relative = str_replace( '\\', '/', substr( $class_name, strlen( $prefix ) ) );
 			$file     = $base_dir . $relative . '.php';
 
 			if ( is_file( $file ) ) {

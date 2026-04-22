@@ -44,12 +44,12 @@ final class DemoExtensions {
 			$runtime->register_data_source(
 				'campaign_library',
 				static function ( array $args = array() ): array {
-					$catalog   = DemoExtensions::campaign_library_items();
-					$search    = strtolower( trim( (string) ( $args['search'] ?? '' ) ) );
-					$page      = max( 1, (int) ( $args['page'] ?? 1 ) );
-					$per_page  = max( 1, (int) ( $args['per_page'] ?? 5 ) );
-					$selected  = is_array( $args['selected'] ?? null ) ? array_values( array_filter( array_map( 'strval', $args['selected'] ) ) ) : array();
-					$filtered  = array_values(
+					$catalog  = DemoExtensions::campaign_library_items();
+					$search   = strtolower( trim( (string) ( $args['search'] ?? '' ) ) );
+					$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
+					$per_page = max( 1, (int) ( $args['per_page'] ?? 5 ) );
+					$selected = is_array( $args['selected'] ?? null ) ? array_values( array_filter( array_map( 'strval', $args['selected'] ) ) ) : array();
+					$filtered = array_values(
 						array_filter(
 							$catalog,
 							static function ( array $item ) use ( $search ): bool {

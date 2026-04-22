@@ -53,4 +53,3 @@ final class PostMetaBackend implements StorageBackend {
 		return delete_post_meta( $this->post_id, $this->meta_key );
 	}
 }
-

@@ -34,4 +34,3 @@ interface AssetResolver {
 	 */
 	public function version(): string;
 }
-

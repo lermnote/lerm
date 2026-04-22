@@ -66,7 +66,7 @@ final class PageSchema {
 				$field_id = (string) $field['id'];
 
 				if ( isset( $seen[ $field_id ] ) ) {
-					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					if ( defined( 'WP_DEBUG' ) ? (bool) constant( 'WP_DEBUG' ) : false ) {
 						_doing_it_wrong(
 							__METHOD__,
 							sprintf(
@@ -223,12 +223,12 @@ final class PageSchema {
 	 * (string_value / scalar_string); both now delegate here.
 	 *
 	 * @param mixed  $value   Source value (may be array, null, scalar, etc.).
-	 * @param string $default Fallback when $value is not scalar.
+	 * @param string $fallback Fallback when $value is not scalar.
 	 * @param bool   $trim    Whether to trim the result.
 	 */
-	public static function scalar_value( $value, string $default = '', bool $trim = false ): string {
+	public static function scalar_value( $value, string $fallback = '', bool $trim = false ): string {
 		if ( ! is_scalar( $value ) ) {
-			return $default;
+			return $fallback;
 		}
 
 		$string = (string) $value;
@@ -257,7 +257,7 @@ final class PageSchema {
 				continue;
 			}
 
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && ! $reported_invalid_field_definition ) {
+			if ( ( defined( 'WP_DEBUG' ) ? (bool) constant( 'WP_DEBUG' ) : false ) && ! $reported_invalid_field_definition ) {
 				_doing_it_wrong(
 					__METHOD__,
 					'Admin Config field definitions must be arrays with a non-empty "id". Invalid entries are ignored.',
@@ -319,4 +319,3 @@ final class PageSchema {
 		return $groups;
 	}
 }
-

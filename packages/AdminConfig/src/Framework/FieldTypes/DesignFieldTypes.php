@@ -278,13 +278,41 @@ final class DesignFieldTypes {
 			echo '</div>';
 		}
 		foreach ( array(
-			'background-position'   => array( 'flag' => 'background_position', 'label' => __( 'Position', 'lerm' ), 'choices' => self::background_position_choices() ),
-			'background-repeat'     => array( 'flag' => 'background_repeat', 'label' => __( 'Repeat', 'lerm' ), 'choices' => self::background_repeat_choices() ),
-			'background-attachment' => array( 'flag' => 'background_attachment', 'label' => __( 'Attachment', 'lerm' ), 'choices' => self::background_attachment_choices() ),
-			'background-size'       => array( 'flag' => 'background_size', 'label' => __( 'Size', 'lerm' ), 'choices' => self::background_size_choices() ),
-			'background-origin'     => array( 'flag' => 'background_origin', 'label' => __( 'Origin', 'lerm' ), 'choices' => self::background_origin_choices() ),
-			'background-clip'       => array( 'flag' => 'background_clip', 'label' => __( 'Clip', 'lerm' ), 'choices' => self::background_clip_choices() ),
-			'background-blend-mode' => array( 'flag' => 'background_blend_mode', 'label' => __( 'Blend Mode', 'lerm' ), 'choices' => self::background_blend_mode_choices() ),
+			'background-position'   => array(
+				'flag'    => 'background_position',
+				'label'   => __( 'Position', 'lerm' ),
+				'choices' => self::background_position_choices(),
+			),
+			'background-repeat'     => array(
+				'flag'    => 'background_repeat',
+				'label'   => __( 'Repeat', 'lerm' ),
+				'choices' => self::background_repeat_choices(),
+			),
+			'background-attachment' => array(
+				'flag'    => 'background_attachment',
+				'label'   => __( 'Attachment', 'lerm' ),
+				'choices' => self::background_attachment_choices(),
+			),
+			'background-size'       => array(
+				'flag'    => 'background_size',
+				'label'   => __( 'Size', 'lerm' ),
+				'choices' => self::background_size_choices(),
+			),
+			'background-origin'     => array(
+				'flag'    => 'background_origin',
+				'label'   => __( 'Origin', 'lerm' ),
+				'choices' => self::background_origin_choices(),
+			),
+			'background-clip'       => array(
+				'flag'    => 'background_clip',
+				'label'   => __( 'Clip', 'lerm' ),
+				'choices' => self::background_clip_choices(),
+			),
+			'background-blend-mode' => array(
+				'flag'    => 'background_blend_mode',
+				'label'   => __( 'Blend Mode', 'lerm' ),
+				'choices' => self::background_blend_mode_choices(),
+			),
 		) as $key => $config ) {
 			$default_enabled = in_array( $key, array( 'background-position', 'background-repeat', 'background-attachment', 'background-size' ), true );
 			if ( self::flag( $field, (string) $config['flag'], $default_enabled ) ) {
@@ -442,23 +470,48 @@ final class DesignFieldTypes {
 
 	private static function default_dimensions( array $field ): array {
 		$units = self::units( $field );
-		$base  = array( 'width' => '', 'height' => '', 'unit' => $units[0] ?? 'px' );
+		$base  = array(
+			'width'  => '',
+			'height' => '',
+			'unit'   => $units[0] ?? 'px',
+		);
 		return is_array( $field['default'] ?? null ) ? wp_parse_args( $field['default'], $base ) : $base;
 	}
 
 	private static function default_spacing( array $field ): array {
 		$units = self::units( $field );
-		$base  = array( 'top' => '', 'right' => '', 'bottom' => '', 'left' => '', 'all' => '', 'unit' => $units[0] ?? 'px' );
+		$base  = array(
+			'top'    => '',
+			'right'  => '',
+			'bottom' => '',
+			'left'   => '',
+			'all'    => '',
+			'unit'   => $units[0] ?? 'px',
+		);
 		return is_array( $field['default'] ?? null ) ? wp_parse_args( $field['default'], $base ) : $base;
 	}
 
 	private static function default_border( array $field ): array {
-		$base = array( 'top' => '', 'right' => '', 'bottom' => '', 'left' => '', 'all' => '', 'style' => 'solid', 'color' => '' );
+		$base = array(
+			'top'    => '',
+			'right'  => '',
+			'bottom' => '',
+			'left'   => '',
+			'all'    => '',
+			'style'  => 'solid',
+			'color'  => '',
+		);
 		return is_array( $field['default'] ?? null ) ? wp_parse_args( $field['default'], $base ) : $base;
 	}
 
 	private static function default_link_colors( array $field ): array {
-		$base = array( 'color' => '', 'hover' => '', 'active' => '', 'visited' => '', 'focus' => '' );
+		$base = array(
+			'color'   => '',
+			'hover'   => '',
+			'active'  => '',
+			'visited' => '',
+			'focus'   => '',
+		);
 		return is_array( $field['default'] ?? null ) ? wp_parse_args( $field['default'], $base ) : $base;
 	}
 
@@ -547,8 +600,8 @@ final class DesignFieldTypes {
 		return array();
 	}
 
-	private static function flag( array $field, string $key, bool $default ): bool {
-		return array_key_exists( $key, $field ) ? ! empty( $field[ $key ] ) : $default;
+	private static function flag( array $field, string $key, bool $fallback ): bool {
+		return array_key_exists( $key, $field ) ? ! empty( $field[ $key ] ) : $fallback;
 	}
 
 	private static function numeric_fragment( $value ): string {
@@ -602,34 +655,84 @@ final class DesignFieldTypes {
 	}
 
 	private static function background_position_choices(): array {
-		return array( '' => __( 'Default', 'lerm' ), 'left top' => __( 'Left Top', 'lerm' ), 'left center' => __( 'Left Center', 'lerm' ), 'left bottom' => __( 'Left Bottom', 'lerm' ), 'center top' => __( 'Center Top', 'lerm' ), 'center center' => __( 'Center Center', 'lerm' ), 'center bottom' => __( 'Center Bottom', 'lerm' ), 'right top' => __( 'Right Top', 'lerm' ), 'right center' => __( 'Right Center', 'lerm' ), 'right bottom' => __( 'Right Bottom', 'lerm' ) );
+		return array(
+			''              => __( 'Default', 'lerm' ),
+			'left top'      => __( 'Left Top', 'lerm' ),
+			'left center'   => __( 'Left Center', 'lerm' ),
+			'left bottom'   => __( 'Left Bottom', 'lerm' ),
+			'center top'    => __( 'Center Top', 'lerm' ),
+			'center center' => __( 'Center Center', 'lerm' ),
+			'center bottom' => __( 'Center Bottom', 'lerm' ),
+			'right top'     => __( 'Right Top', 'lerm' ),
+			'right center'  => __( 'Right Center', 'lerm' ),
+			'right bottom'  => __( 'Right Bottom', 'lerm' ),
+		);
 	}
 
 	private static function background_repeat_choices(): array {
-		return array( '' => __( 'Default', 'lerm' ), 'repeat' => __( 'Repeat', 'lerm' ), 'no-repeat' => __( 'No Repeat', 'lerm' ), 'repeat-x' => __( 'Repeat Horizontally', 'lerm' ), 'repeat-y' => __( 'Repeat Vertically', 'lerm' ) );
+		return array(
+			''          => __( 'Default', 'lerm' ),
+			'repeat'    => __( 'Repeat', 'lerm' ),
+			'no-repeat' => __( 'No Repeat', 'lerm' ),
+			'repeat-x'  => __( 'Repeat Horizontally', 'lerm' ),
+			'repeat-y'  => __( 'Repeat Vertically', 'lerm' ),
+		);
 	}
 
 	private static function background_attachment_choices(): array {
-		return array( '' => __( 'Default', 'lerm' ), 'scroll' => __( 'Scroll', 'lerm' ), 'fixed' => __( 'Fixed', 'lerm' ) );
+		return array(
+			''       => __( 'Default', 'lerm' ),
+			'scroll' => __( 'Scroll', 'lerm' ),
+			'fixed'  => __( 'Fixed', 'lerm' ),
+		);
 	}
 
 	private static function background_size_choices(): array {
-		return array( '' => __( 'Default', 'lerm' ), 'cover' => __( 'Cover', 'lerm' ), 'contain' => __( 'Contain', 'lerm' ), 'auto' => __( 'Auto', 'lerm' ) );
+		return array(
+			''        => __( 'Default', 'lerm' ),
+			'cover'   => __( 'Cover', 'lerm' ),
+			'contain' => __( 'Contain', 'lerm' ),
+			'auto'    => __( 'Auto', 'lerm' ),
+		);
 	}
 
 	private static function background_origin_choices(): array {
-		return array( '' => __( 'Default', 'lerm' ), 'padding-box' => __( 'Padding Box', 'lerm' ), 'border-box' => __( 'Border Box', 'lerm' ), 'content-box' => __( 'Content Box', 'lerm' ) );
+		return array(
+			''            => __( 'Default', 'lerm' ),
+			'padding-box' => __( 'Padding Box', 'lerm' ),
+			'border-box'  => __( 'Border Box', 'lerm' ),
+			'content-box' => __( 'Content Box', 'lerm' ),
+		);
 	}
 
 	private static function background_clip_choices(): array {
-		return array( '' => __( 'Default', 'lerm' ), 'border-box' => __( 'Border Box', 'lerm' ), 'padding-box' => __( 'Padding Box', 'lerm' ), 'content-box' => __( 'Content Box', 'lerm' ) );
+		return array(
+			''            => __( 'Default', 'lerm' ),
+			'border-box'  => __( 'Border Box', 'lerm' ),
+			'padding-box' => __( 'Padding Box', 'lerm' ),
+			'content-box' => __( 'Content Box', 'lerm' ),
+		);
 	}
 
 	private static function background_blend_mode_choices(): array {
-		return array( '' => __( 'Default', 'lerm' ), 'normal' => __( 'Normal', 'lerm' ), 'multiply' => __( 'Multiply', 'lerm' ), 'screen' => __( 'Screen', 'lerm' ), 'overlay' => __( 'Overlay', 'lerm' ), 'darken' => __( 'Darken', 'lerm' ), 'lighten' => __( 'Lighten', 'lerm' ) );
+		return array(
+			''         => __( 'Default', 'lerm' ),
+			'normal'   => __( 'Normal', 'lerm' ),
+			'multiply' => __( 'Multiply', 'lerm' ),
+			'screen'   => __( 'Screen', 'lerm' ),
+			'overlay'  => __( 'Overlay', 'lerm' ),
+			'darken'   => __( 'Darken', 'lerm' ),
+			'lighten'  => __( 'Lighten', 'lerm' ),
+		);
 	}
 
 	private static function background_gradient_direction_choices(): array {
-		return array( '' => __( 'Default', 'lerm' ), 'to bottom' => __( 'Top to Bottom', 'lerm' ), 'to right' => __( 'Left to Right', 'lerm' ), '135deg' => __( 'Top Left to Bottom Right', 'lerm' ), '-135deg' => __( 'Top Right to Bottom Left', 'lerm' ) );
+		return array(
+			''          => __( 'Default', 'lerm' ),
+			'to bottom' => __( 'Top to Bottom', 'lerm' ),
+			'to right'  => __( 'Left to Right', 'lerm' ),
+			'135deg'    => __( 'Top Left to Bottom Right', 'lerm' ),
+			'-135deg'   => __( 'Top Right to Bottom Left', 'lerm' ),
+		);
 	}
 }

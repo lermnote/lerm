@@ -30,7 +30,7 @@ final class CommentContainer implements Container {
 	 */
 	private array $schemas = array();
 
-	private bool $hooks_registered = false;
+	private bool $hooks_registered       = false;
 	private bool $assets_hook_registered = false;
 
 	public function __construct(
@@ -99,15 +99,15 @@ final class CommentContainer implements Container {
 			return;
 		}
 
-		$schema       = $this->schemas[ $schema_id ];
-		$store        = $this->stores->store( $schema, array( 'comment_id' => $comment->comment_ID ) );
-		$renderer     = $this->renderer( $schema, $store );
-		$sections     = PageSchema::sections( $schema->definition() );
-		$flash        = ValidationFlash::consume( 'comment', $schema->id(), (string) $comment->comment_ID );
-		$values       = ValidationFlash::render_values( $store->all(), $flash );
-		$errors       = ValidationFlash::field_errors( $flash );
-		$notice       = ValidationFlash::notice( $flash );
-		$show_titles  = count( $sections ) > 1;
+		$schema      = $this->schemas[ $schema_id ];
+		$store       = $this->stores->store( $schema, array( 'comment_id' => $comment->comment_ID ) );
+		$renderer    = $this->renderer( $schema, $store );
+		$sections    = PageSchema::sections( $schema->definition() );
+		$flash       = ValidationFlash::consume( 'comment', $schema->id(), (string) $comment->comment_ID );
+		$values      = ValidationFlash::render_values( $store->all(), $flash );
+		$errors      = ValidationFlash::field_errors( $flash );
+		$notice      = ValidationFlash::notice( $flash );
+		$show_titles = count( $sections ) > 1;
 
 		echo '<div class="lerm-comment-metabox lerm-metabox--stack">';
 

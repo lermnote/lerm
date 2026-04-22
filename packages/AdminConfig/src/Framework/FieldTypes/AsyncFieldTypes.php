@@ -54,24 +54,24 @@ final class AsyncFieldTypes {
 	 * @param mixed $value
 	 */
 	private static function render_ajax_select( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-		$multiple          = ! empty( $field['multiple'] );
-		$source_id         = sanitize_key( (string) ( $field['source'] ?? $field['data_source'] ?? '' ) );
-		$placeholder       = (string) ( $field['placeholder'] ?? __( 'Search...', 'lerm' ) );
-		$search_label      = (string) ( $field['search_label'] ?? __( 'Search options', 'lerm' ) );
-		$min_search_length = max( 0, (int) ( $field['min_search_length'] ?? 0 ) );
-		$per_page          = max( 1, (int) ( $field['per_page'] ?? 20 ) );
-		$allow_clear       = ! array_key_exists( 'allow_clear', $field ) || ! empty( $field['allow_clear'] );
-		$selected_values   = self::normalize_selected_values( $field, $value );
-		$status_id         = $input_id . '__status';
-		$results_id        = $input_id . '__results';
+		$multiple            = ! empty( $field['multiple'] );
+		$source_id           = sanitize_key( (string) ( $field['source'] ?? $field['data_source'] ?? '' ) );
+		$placeholder         = (string) ( $field['placeholder'] ?? __( 'Search...', 'lerm' ) );
+		$search_label        = (string) ( $field['search_label'] ?? __( 'Search options', 'lerm' ) );
+		$min_search_length   = max( 0, (int) ( $field['min_search_length'] ?? 0 ) );
+		$per_page            = max( 1, (int) ( $field['per_page'] ?? 20 ) );
+		$allow_clear         = ! array_key_exists( 'allow_clear', $field ) || ! empty( $field['allow_clear'] );
+		$selected_values     = self::normalize_selected_values( $field, $value );
+		$status_id           = $input_id . '__status';
+		$results_id          = $input_id . '__results';
 		$input_name_template = '' !== $name_template ? ( $multiple ? $name_template . '[]' : $name_template ) : '';
 		$name_attr           = '' !== $input_name_template
 			? ' data-name-template="' . esc_attr( $input_name_template ) . '"'
 			: '';
-		$id_attr           = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
-		$search_id_attr    = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__search' ) . '"' : '';
-		$status_id_attr    = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__status' ) . '"' : '';
-		$results_id_attr   = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__results' ) . '"' : '';
+		$id_attr             = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
+		$search_id_attr      = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__search' ) . '"' : '';
+		$status_id_attr      = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__status' ) . '"' : '';
+		$results_id_attr     = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template . '__results' ) . '"' : '';
 
 		echo '<div class="lerm-ajax-select"';
 		echo ' data-target="' . esc_attr( $input_id ) . '"';

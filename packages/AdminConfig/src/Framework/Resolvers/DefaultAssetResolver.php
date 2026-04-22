@@ -44,4 +44,3 @@ final class DefaultAssetResolver implements AssetResolver {
 		return defined( $this->version_constant ) ? (string) constant( $this->version_constant ) : '1.0.0';
 	}
 }
-

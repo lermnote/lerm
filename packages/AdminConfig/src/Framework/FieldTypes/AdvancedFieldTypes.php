@@ -127,12 +127,12 @@ final class AdvancedFieldTypes {
 	 * @param mixed $value
 	 */
 	private static function render_icon_field( array $field, $value, string $field_name, string $input_id, string $extra_attrs = '', string $name_attr = '', string $id_attr = '' ): void {
-		$choices         = self::icon_choices( $field );
-		$current         = self::sanitize_icon_value( $field, $value, false );
-		$searchable      = ! array_key_exists( 'searchable', $field ) || ! empty( $field['searchable'] );
-		$search_label    = (string) ( $field['search_label'] ?? __( 'Filter icons', 'lerm' ) );
-		$empty_label     = (string) ( $field['empty_label'] ?? __( 'No icon selected', 'lerm' ) );
-		$selected_label  = $choices[ $current ] ?? ( '' !== $current ? $current : $empty_label );
+		$choices        = self::icon_choices( $field );
+		$current        = self::sanitize_icon_value( $field, $value, false );
+		$searchable     = ! array_key_exists( 'searchable', $field ) || ! empty( $field['searchable'] );
+		$search_label   = (string) ( $field['search_label'] ?? __( 'Filter icons', 'lerm' ) );
+		$empty_label    = (string) ( $field['empty_label'] ?? __( 'No icon selected', 'lerm' ) );
+		$selected_label = $choices[ $current ] ?? ( '' !== $current ? $current : $empty_label );
 
 		echo '<div class="lerm-icon-field" data-target="' . esc_attr( $input_id ) . '" data-empty-label="' . esc_attr( $empty_label ) . '">';
 		echo '<div class="lerm-icon-field__toolbar">';
@@ -202,9 +202,9 @@ final class AdvancedFieldTypes {
 		$clean  = array();
 
 		foreach ( $items as $item ) {
-			$item_id     = (string) $item['id'];
-			$item_fields = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
-			$item_value  = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
+			$item_id           = (string) $item['id'];
+			$item_fields       = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
+			$item_value        = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
 			$clean[ $item_id ] = $store->sanitize_fieldset_field(
 				array(
 					'id'     => $item_id,
@@ -372,26 +372,26 @@ final class AdvancedFieldTypes {
 		}
 
 		return array(
-			'dashicons-admin-site-alt3' => __( 'Site', 'lerm' ),
+			'dashicons-admin-site-alt3'  => __( 'Site', 'lerm' ),
 			'dashicons-admin-appearance' => __( 'Appearance', 'lerm' ),
-			'dashicons-admin-generic'   => __( 'Settings', 'lerm' ),
-			'dashicons-admin-users'     => __( 'Users', 'lerm' ),
-			'dashicons-admin-comments'  => __( 'Comments', 'lerm' ),
-			'dashicons-admin-links'     => __( 'Links', 'lerm' ),
-			'dashicons-format-image'    => __( 'Image', 'lerm' ),
-			'dashicons-format-gallery'  => __( 'Gallery', 'lerm' ),
-			'dashicons-format-audio'    => __( 'Audio', 'lerm' ),
-			'dashicons-format-video'    => __( 'Video', 'lerm' ),
-			'dashicons-star-filled'     => __( 'Star', 'lerm' ),
-			'dashicons-heart'           => __( 'Heart', 'lerm' ),
-			'dashicons-lightbulb'       => __( 'Idea', 'lerm' ),
-			'dashicons-yes-alt'         => __( 'Check', 'lerm' ),
-			'dashicons-warning'         => __( 'Warning', 'lerm' ),
-			'dashicons-megaphone'       => __( 'Announcement', 'lerm' ),
-			'dashicons-chart-bar'       => __( 'Chart', 'lerm' ),
-			'dashicons-palmtree'        => __( 'Lifestyle', 'lerm' ),
-			'dashicons-store'           => __( 'Store', 'lerm' ),
-			'dashicons-portfolio'       => __( 'Portfolio', 'lerm' ),
+			'dashicons-admin-generic'    => __( 'Settings', 'lerm' ),
+			'dashicons-admin-users'      => __( 'Users', 'lerm' ),
+			'dashicons-admin-comments'   => __( 'Comments', 'lerm' ),
+			'dashicons-admin-links'      => __( 'Links', 'lerm' ),
+			'dashicons-format-image'     => __( 'Image', 'lerm' ),
+			'dashicons-format-gallery'   => __( 'Gallery', 'lerm' ),
+			'dashicons-format-audio'     => __( 'Audio', 'lerm' ),
+			'dashicons-format-video'     => __( 'Video', 'lerm' ),
+			'dashicons-star-filled'      => __( 'Star', 'lerm' ),
+			'dashicons-heart'            => __( 'Heart', 'lerm' ),
+			'dashicons-lightbulb'        => __( 'Idea', 'lerm' ),
+			'dashicons-yes-alt'          => __( 'Check', 'lerm' ),
+			'dashicons-warning'          => __( 'Warning', 'lerm' ),
+			'dashicons-megaphone'        => __( 'Announcement', 'lerm' ),
+			'dashicons-chart-bar'        => __( 'Chart', 'lerm' ),
+			'dashicons-palmtree'         => __( 'Lifestyle', 'lerm' ),
+			'dashicons-store'            => __( 'Store', 'lerm' ),
+			'dashicons-portfolio'        => __( 'Portfolio', 'lerm' ),
 		);
 	}
 
@@ -443,16 +443,16 @@ final class AdvancedFieldTypes {
 	}
 
 	/**
-	 * @return array<string, string>
+	 * @return array<int, string>
 	 */
 	private static function font_weight_choices(): array {
 		return array(
-			'300' => __( '300', 'lerm' ),
-			'400' => __( '400', 'lerm' ),
-			'500' => __( '500', 'lerm' ),
-			'600' => __( '600', 'lerm' ),
-			'700' => __( '700', 'lerm' ),
-			'800' => __( '800', 'lerm' ),
+			'300' => '300',
+			'400' => '400',
+			'500' => '500',
+			'600' => '600',
+			'700' => '700',
+			'800' => '800',
 		);
 	}
 
@@ -504,8 +504,8 @@ final class AdvancedFieldTypes {
 		return $parts[0] ?? '';
 	}
 
-	private static function flag( array $field, string $key, bool $default ): bool {
-		return array_key_exists( $key, $field ) ? ! empty( $field[ $key ] ) : $default;
+	private static function flag( array $field, string $key, bool $fallback ): bool {
+		return array_key_exists( $key, $field ) ? ! empty( $field[ $key ] ) : $fallback;
 	}
 
 	private static function render_nested_warning( string $message ): void {

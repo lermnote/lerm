@@ -28,7 +28,7 @@ final class ProfileContainer implements Container {
 	 */
 	private array $schemas = array();
 
-	private bool $hooks_registered = false;
+	private bool $hooks_registered       = false;
 	private bool $assets_hook_registered = false;
 
 	public function __construct(

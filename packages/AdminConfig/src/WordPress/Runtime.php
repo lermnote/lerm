@@ -328,12 +328,12 @@ final class Runtime {
 	/**
 	 * @return mixed
 	 */
-	public function get( string $schema_id, string $field_id, string $tag = '', $default = '', array $context = array() ) {
+	public function get( string $schema_id, string $field_id, string $tag = '', $fallback = '', array $context = array() ) {
 		try {
-			return $this->store( $schema_id, $context )->get( $field_id, $tag, $default );
+			return $this->store( $schema_id, $context )->get( $field_id, $tag, $fallback );
 		} catch ( MissingStoreContextException $exception ) {
 			$this->report_missing_store_context( __METHOD__, $exception );
-			return $this->default_value( $schema_id, $field_id, $tag, $default );
+			return $this->default_value( $schema_id, $field_id, $tag, $fallback );
 		}
 	}
 
@@ -357,7 +357,7 @@ final class Runtime {
 			return;
 		}
 
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && empty( $this->missing_container_notice[ $compiled->id() ] ) ) {
+		if ( $this->wp_debug_enabled() && empty( $this->missing_container_notice[ $compiled->id() ] ) ) {
 			_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -373,33 +373,33 @@ final class Runtime {
 	}
 
 	/**
-	 * @param mixed $default
+	 * @param mixed $fallback
 	 * @return mixed
 	 */
-	private function default_value( string $schema_id, string $field_id, string $tag = '', $default = '' ) {
+	private function default_value( string $schema_id, string $field_id, string $tag = '', $fallback = '' ) {
 		$defaults = $this->defaults( $schema_id );
 
 		if ( ! array_key_exists( $field_id, $defaults ) ) {
-			return $default;
+			return $fallback;
 		}
 
 		$value = $defaults[ $field_id ];
 
 		if ( is_array( $value ) && '' !== $tag ) {
-			return $value[ $tag ] ?? $default;
+			return $value[ $tag ] ?? $fallback;
 		}
 
 		return $value;
 	}
 
 	private function report_missing_store_context( string $method, MissingStoreContextException $exception ): void {
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		if ( $this->wp_debug_enabled() ) {
 			_doing_it_wrong( $method, $exception->getMessage(), '0.2.0' );
 		}
 	}
 
 	private function report_mount_issue( string $schema_id, string $message ): void {
-		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG || ! empty( $this->mount_issue_notice[ $schema_id ] ) ) {
+		if ( ! $this->wp_debug_enabled() || ! empty( $this->mount_issue_notice[ $schema_id ] ) ) {
 			return;
 		}
 
@@ -414,6 +414,10 @@ final class Runtime {
 		);
 
 		$this->mount_issue_notice[ $schema_id ] = true;
+	}
+
+	private function wp_debug_enabled(): bool {
+		return defined( 'WP_DEBUG' ) ? (bool) constant( 'WP_DEBUG' ) : false;
 	}
 
 	/**
