@@ -204,7 +204,7 @@
 	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
-.lerm-settings-sticky-wrap > .lerm-settings-sticky-bar {
+.lerm-settings-sticky-wrap>.lerm-settings-sticky-bar {
 	margin-bottom: 0;
 }
 
@@ -356,20 +356,20 @@
 	background: #fff;
 }
 
-.lerm-settings-row.is-invalid > th,
-.lerm-settings-row.is-invalid > td,
+.lerm-settings-row.is-invalid>th,
+.lerm-settings-row.is-invalid>td,
 .lerm-settings-stack .lerm-settings-row.is-invalid .lerm-settings-row__head,
 .lerm-settings-stack .lerm-settings-row.is-invalid .lerm-settings-row__body {
 	background: #fff7f7;
 }
 
-.lerm-settings-row.is-invalid > th,
-.lerm-settings-table .lerm-settings-row.is-invalid > th {
+.lerm-settings-row.is-invalid>th,
+.lerm-settings-table .lerm-settings-row.is-invalid>th {
 	border-color: #fca5a5;
 }
 
-.lerm-settings-row.is-invalid > td,
-.lerm-settings-table .lerm-settings-row.is-invalid > td,
+.lerm-settings-row.is-invalid>td,
+.lerm-settings-table .lerm-settings-row.is-invalid>td,
 .lerm-settings-stack .lerm-settings-row.is-invalid {
 	border-color: #fca5a5;
 }
@@ -449,7 +449,7 @@
 	border-spacing: 0;
 }
 
-.lerm-settings-table--inline > tbody {
+.lerm-settings-table--inline>tbody {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 	gap: 16px;
@@ -467,8 +467,8 @@
 	box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
 }
 
-.lerm-settings-table--inline .lerm-settings-row > th,
-.lerm-settings-table--inline .lerm-settings-row > td {
+.lerm-settings-table--inline .lerm-settings-row>th,
+.lerm-settings-table--inline .lerm-settings-row>td {
 	display: block;
 	width: auto;
 	padding: 0;
@@ -478,7 +478,7 @@
 	border-radius: 0;
 }
 
-.lerm-settings-table--inline .lerm-settings-row > th label {
+.lerm-settings-table--inline .lerm-settings-row>th label {
 	display: block;
 	margin: 0;
 	font-size: 14px;
@@ -511,6 +511,19 @@
 	min-height: 40px;
 	padding: 0 12px;
 	line-height: 1.4;
+}
+
+.lerm-settings-row select.regular-text {
+	width: auto;
+	min-width: 88px;
+	max-width: min(100%, 260px);
+	appearance: none;
+	-webkit-appearance: none;
+	padding-right: 32px;
+	background-image: linear-gradient(45deg, transparent 50%, #64748b 50%), linear-gradient(135deg, #64748b 50%, transparent 50%);
+	background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 13px) calc(50% - 2px);
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat;
 }
 
 .lerm-settings-row textarea.large-text {
@@ -604,34 +617,34 @@
 	height: 22px;
 	background: #fff;
 	border-radius: 50%;
-	box-shadow: 0 1px 4px rgba(0,0,0,.18);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, .18);
 	transition: transform 0.2s ease;
 }
 
 /* Checked state — track */
-.lerm-switch input[type="checkbox"]:checked + .lerm-switch__track,
-.lerm-switch input[type="checkbox"]:checked ~ .lerm-switch__track {
+.lerm-switch input[type="checkbox"]:checked+.lerm-switch__track,
+.lerm-switch input[type="checkbox"]:checked~.lerm-switch__track {
 	background: #0284c7;
-	box-shadow: 0 4px 12px rgba(2,132,199,.28);
+	box-shadow: 0 4px 12px rgba(2, 132, 199, .28);
 }
 
 /* Checked state — text */
-.lerm-switch input[type="checkbox"]:checked + .lerm-switch__track::before,
-.lerm-switch input[type="checkbox"]:checked ~ .lerm-switch__track::before {
+.lerm-switch input[type="checkbox"]:checked+.lerm-switch__track::before,
+.lerm-switch input[type="checkbox"]:checked~.lerm-switch__track::before {
 	content: attr(data-on);
 	justify-content: flex-start;
 	padding: 0 28px 0 10px;
 }
 
 /* Checked state — knob slides right */
-.lerm-switch input[type="checkbox"]:checked + .lerm-switch__track::after,
-.lerm-switch input[type="checkbox"]:checked ~ .lerm-switch__track::after {
+.lerm-switch input[type="checkbox"]:checked+.lerm-switch__track::after,
+.lerm-switch input[type="checkbox"]:checked~.lerm-switch__track::after {
 	transform: translateX(28px);
 }
 
 /* Focus ring for keyboard navigation */
-.lerm-switch input[type="checkbox"]:focus-visible + .lerm-switch__track,
-.lerm-switch input[type="checkbox"]:focus-visible ~ .lerm-switch__track {
+.lerm-switch input[type="checkbox"]:focus-visible+.lerm-switch__track,
+.lerm-switch input[type="checkbox"]:focus-visible~.lerm-switch__track {
 	outline: 2px solid #0284c7;
 	outline-offset: 2px;
 }
@@ -806,8 +819,10 @@
 
 .lerm-fieldset {
 	display: grid;
-	gap: 14px;
-	max-width: 760px;
+	gap: 10px;
+	max-width: 920px;
+	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+	align-items: start;
 }
 
 .lerm-typography-field {
@@ -847,6 +862,16 @@
 	max-width: 100%;
 }
 
+.lerm-typography-field select,
+.lerm-typography-field select.regular-text,
+.lerm-fieldset__item select,
+.lerm-fieldset__item select.regular-text,
+.lerm-fieldset--single-line select.regular-text {
+	width: auto;
+	min-width: 88px;
+	max-width: 100%;
+}
+
 .lerm-typography-field .lerm-button-set {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
@@ -864,7 +889,7 @@
 }
 
 .lerm-color-control {
-	display: grid;
+	display: inline-grid;
 	grid-template-columns: 32px minmax(0, 1fr) auto;
 	align-items: center;
 	gap: 8px;
@@ -1225,16 +1250,17 @@
 .lerm-fieldset__item,
 .lerm-group-item__field {
 	display: grid;
-	gap: 8px;
+	align-content: start;
+	gap: 6px;
 	min-width: 0;
-	padding: 14px;
+	padding: 11px;
 	border: 1px solid #e2e8f0;
-	border-radius: 12px;
-	background: #f8fafc;
+	border-radius: 10px;
+	background: linear-gradient(180deg, #ffffff, #fafcfd);
 }
 
 .lerm-fieldset__item .lerm-number-input {
-	width: 84px;
+	width: 100%;
 	max-width: 100%;
 	justify-self: start;
 	grid-template-columns: minmax(56px, auto) 28px;
@@ -1257,8 +1283,13 @@
 }
 
 .lerm-fieldset__label {
+	margin: 0;
 	font-weight: 600;
-	color: #0f172a;
+	font-size: 11px;
+	line-height: 1.4;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: #607284;
 }
 
 .lerm-group {
@@ -1392,7 +1423,7 @@
 	overflow: hidden;
 }
 
-.lerm-accordion__item + .lerm-accordion__item {
+.lerm-accordion__item+.lerm-accordion__item {
 	margin-top: 10px;
 }
 
@@ -1668,7 +1699,7 @@
 	box-shadow: 0 6px 18px rgba(14, 165, 233, 0.12);
 }
 
-.lerm-button-set input:checked + span {
+.lerm-button-set input:checked+span {
 	color: #0369a1;
 	font-weight: 700;
 }
@@ -1832,7 +1863,7 @@
 		margin-left: 0;
 	}
 
-	.lerm-settings-table--inline > tbody {
+	.lerm-settings-table--inline>tbody {
 		display: grid;
 		grid-template-columns: 1fr;
 	}
@@ -1867,14 +1898,14 @@
 /* ── UI Polish ─────────────────────────────────────────────── */
 
 /* Row hover — subtle highlight to aid scanning */
-.lerm-settings-row:hover > th,
-.lerm-settings-row:hover > td {
+.lerm-settings-row:hover>th,
+.lerm-settings-row:hover>td {
 	background: #f0f9ff;
 	transition: background 0.14s ease;
 }
 
-.lerm-settings-table--inline .lerm-settings-row:hover > th,
-.lerm-settings-table--inline .lerm-settings-row:hover > td {
+.lerm-settings-table--inline .lerm-settings-row:hover>th,
+.lerm-settings-table--inline .lerm-settings-row:hover>td {
 	background: transparent;
 }
 
@@ -1909,8 +1940,15 @@
 
 /* Status pill — subtle pulse animation while saving/resetting */
 @keyframes lerm-pulse {
-	0%, 100% { opacity: 1; }
-	50%       { opacity: 0.6; }
+
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.6;
+	}
 }
 
 .lerm-status-pill[data-lerm-status="saving"],
@@ -1943,9 +1981,9 @@
 /* Sidebar brand gradient refreshed */
 .lerm-settings-sidebar__brand {
 	background:
-		linear-gradient(135deg, rgba(14,165,233,0.1), rgba(16,185,129,0.07)),
+		linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(16, 185, 129, 0.07)),
 		#fff;
-	border-bottom: 2px solid rgba(14,165,233,0.14);
+	border-bottom: 2px solid rgba(14, 165, 233, 0.14);
 }
 
 /* Backup tools layout polish */
@@ -1966,14 +2004,15 @@
 /* Fieldset items — slightly elevated */
 .lerm-fieldset__item,
 .lerm-group-item__field {
-	box-shadow: 0 1px 4px rgba(15,23,42,0.04);
+	box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
 	transition: box-shadow 0.16s ease;
 }
 
 .lerm-fieldset__item:focus-within,
 .lerm-group-item__field:focus-within {
-	box-shadow: 0 0 0 2px #bae6fd, 0 2px 8px rgba(14,165,233,0.12);
+	box-shadow: 0 0 0 2px #bae6fd, 0 2px 8px rgba(14, 165, 233, 0.12);
 }
+
 .lerm-ajax-select {
 	position: relative;
 	display: grid;
@@ -2382,8 +2421,8 @@
 	color: #667788;
 }
 
-.lerm-settings-row:hover > th,
-.lerm-settings-row:hover > td,
+.lerm-settings-row:hover>th,
+.lerm-settings-row:hover>td,
 .lerm-settings-stack .lerm-settings-row:hover .lerm-settings-row__head,
 .lerm-settings-stack .lerm-settings-row:hover .lerm-settings-row__body {
 	background: #fbfdff;
