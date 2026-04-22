@@ -1,0 +1,273 @@
+name: AdminConfig CI
+
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'examples/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.wp-env.json'
+      - 'phpcs.xml.dist'
+      - 'phpstan.neon.dist'
+      - 'phpunit*.xml.dist'
+      - 'playwright.config.js'
+      - 'README.md'
+      - 'docs/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'examples/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.wp-env.json'
+      - 'phpcs.xml.dist'
+      - 'phpstan.neon.dist'
+      - 'phpunit*.xml.dist'
+      - 'playwright.config.js'
+      - 'README.md'
+      - 'docs/**'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  php-quality:
+    name: PHP Quality (${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.0', '8.1', '8.2', '8.3']
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-${{ matrix.php-version }}-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Run package quality gate
+        run: composer ci
+
+  wordpress-integration:
+    name: WordPress Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-8.2-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-8.2-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run WordPress integration tests
+        run: npm run test:integration
+
+      - name: Capture wp-env logs
+        if: always()
+        run: |
+          mkdir -p artifacts/wp-env
+          npm run wp-env:logs > artifacts/wp-env/development.log 2>&1 || true
+          npm run wp-env:logs:tests > artifacts/wp-env/tests.log 2>&1 || true
+
+      - name: Upload wp-env logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-env-logs
+          path: artifacts/wp-env/
+          if-no-files-found: ignore
+
+      - name: Stop wp-env
+        if: always()
+        run: npm run wp-env:stop
+
+  wordpress-e2e:
+    name: WordPress E2E
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-8.2-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-8.2-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright smoke suite
+        run: npm run test:e2e
+
+      - name: Capture wp-env logs
+        if: always()
+        run: |
+          mkdir -p artifacts/wp-env
+          npm run wp-env:logs > artifacts/wp-env/development.log 2>&1 || true
+          npm run wp-env:logs:tests > artifacts/wp-env/tests.log 2>&1 || true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+      - name: Upload wp-env logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-env-logs-e2e
+          path: artifacts/wp-env/
+          if-no-files-found: ignore
+
+      - name: Stop wp-env
+        if: always()
+        run: npm run wp-env:stop
+
+  wordpress-multisite:
+    name: WordPress Multisite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-8.2-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-8.2-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run multisite integration tests
+        run: npm run test:integration:multisite
+
+      - name: Run multisite Playwright smoke suite
+        run: npm run test:e2e:multisite
+
+      - name: Capture multisite wp-env logs
+        if: always()
+        run: |
+          mkdir -p artifacts/wp-env
+          npm run wp-env:logs:multisite > artifacts/wp-env/development.log 2>&1 || true
+          npm run wp-env:logs:tests:multisite > artifacts/wp-env/tests.log 2>&1 || true
+
+      - name: Upload multisite artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wp-env-multisite-artifacts
+          path: |
+            artifacts/wp-env/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+      - name: Stop multisite wp-env
+        if: always()
+        run: npm run wp-env:stop:multisite
