@@ -4,7 +4,7 @@ Use this guide when you are already comfortable registering schemas and now need
 the smallest possible examples for extending the runtime.
 
 If you want a runnable plugin instead of isolated snippets, start with
-[examples/minimal-extension-plugin/README.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/examples/minimal-extension-plugin/README.md).
+[examples/minimal-extension-plugin/README.md](/packages/AdminConfig/examples/minimal-extension-plugin/README.md).
 
 ## Recipe 1: register a minimal custom field
 

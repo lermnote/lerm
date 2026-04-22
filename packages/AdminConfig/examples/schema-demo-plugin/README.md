@@ -5,9 +5,9 @@ Reference plugin demonstrating how to consume `lerm/admin-config` as a WordPress
 It follows the recommended package lifecycle: bootstrap once, register schemas in
 the bootstrap callback, and let the runtime auto-mount in `wp-admin`.
 
-For the smallest copyable setup, start with [docs/quick-start.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/quick-start.md), then use this example when you want a fuller end-to-end reference.
+For the smallest copyable setup, start with [docs/quick-start.md](/packages/AdminConfig/docs/quick-start.md), then use this example when you want a fuller end-to-end reference.
 
-If you only need the smallest public-extension example, start with [examples/minimal-extension-plugin/README.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/examples/minimal-extension-plugin/README.md) first.
+If you only need the smallest public-extension example, start with [examples/minimal-extension-plugin/README.md](/packages/AdminConfig/examples/minimal-extension-plugin/README.md) first.
 
 ## What it registers
 

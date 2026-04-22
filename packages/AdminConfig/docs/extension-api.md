@@ -2,9 +2,9 @@
 
 `Lerm\AdminConfig\WordPress\Runtime` is the public integration surface for extending Admin Config.
 
-If you are wiring the package into a plugin or theme for the first time, start with [quick-start.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/quick-start.md) and come back here when you need custom field types, stores, containers, or data sources.
+If you are wiring the package into a plugin or theme for the first time, start with [quick-start.md](/packages/AdminConfig/docs/quick-start.md) and come back here when you need custom field types, stores, containers, or data sources.
 
-For the smallest runnable example, see [examples/minimal-extension-plugin/README.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/examples/minimal-extension-plugin/README.md). For copyable focused snippets, see [extension-recipes.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-recipes.md).
+For the smallest runnable example, see [examples/minimal-extension-plugin/README.md](/packages/AdminConfig/examples/minimal-extension-plugin/README.md). For copyable focused snippets, see [extension-recipes.md](/packages/AdminConfig/docs/extension-recipes.md).
 
 ## Runtime methods
 

@@ -2133,3 +2133,394 @@
 	line-height: 1.55;
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
+
+/* Admin UI refresh */
+.lerm-settings-wrap {
+	margin-top: 14px;
+	margin-right: 18px;
+}
+
+.lerm-settings-shell {
+	grid-template-columns: 256px minmax(0, 1fr);
+	gap: 20px;
+}
+
+.lerm-settings-sidebar {
+	gap: 14px;
+}
+
+.lerm-settings-sidebar__brand,
+.lerm-settings-sidebar__card,
+.lerm-settings-panel {
+	border-color: #d7dde4;
+	border-radius: 14px;
+	box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.lerm-settings-sidebar__brand {
+	padding: 20px 20px 18px;
+	background:
+		linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
+		linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.05));
+	border-bottom: 1px solid rgba(14, 165, 233, 0.12);
+}
+
+.lerm-settings-sidebar__brand h1 {
+	font-size: 31px;
+	line-height: 1.12;
+	font-weight: 600;
+	letter-spacing: 0;
+}
+
+.lerm-settings-eyebrow {
+	margin-bottom: 10px;
+	color: #0f766e;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+}
+
+.lerm-settings-nav {
+	gap: 8px;
+}
+
+.lerm-settings-nav__item {
+	position: relative;
+	padding: 13px 14px;
+	border-radius: 12px;
+	box-shadow: none;
+}
+
+.lerm-settings-nav__item,
+.lerm-settings-subnav__item {
+	border-color: #d7dde4;
+	background: #fff;
+}
+
+.lerm-settings-nav__item::before {
+	content: "";
+	position: absolute;
+	top: 10px;
+	bottom: 10px;
+	left: 0;
+	width: 3px;
+	border-radius: 999px;
+	background: transparent;
+	transition: background-color 0.18s ease;
+}
+
+.lerm-settings-nav__item:hover,
+.lerm-settings-subnav__item:hover {
+	border-color: #b6c2cf;
+	box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+	transform: none;
+}
+
+.lerm-settings-nav__item.is-active,
+.lerm-settings-subnav__item.is-active {
+	border-color: #b9d7ef;
+	background: linear-gradient(180deg, #f8fbff, #f2f8fd);
+	box-shadow: inset 0 0 0 1px rgba(2, 132, 199, 0.04), 0 8px 22px rgba(14, 165, 233, 0.08);
+}
+
+.lerm-settings-nav__item.is-active {
+	padding-left: 14px;
+	border-left: 1px solid #b9d7ef;
+}
+
+.lerm-settings-nav__item.is-active::before {
+	background: #0284c7;
+}
+
+.lerm-settings-nav__title {
+	font-size: 14px;
+	line-height: 1.3;
+}
+
+.lerm-settings-nav__meta {
+	font-size: 11px;
+}
+
+.lerm-settings-sidebar__card {
+	padding: 16px 18px;
+}
+
+.lerm-settings-panel {
+	padding: 24px 24px 18px;
+	background: linear-gradient(180deg, #ffffff, #fbfcfd);
+}
+
+.lerm-settings-panel__intro {
+	margin-bottom: 14px;
+	padding-bottom: 14px;
+	border-bottom: 1px solid #eef2f6;
+}
+
+.lerm-settings-panel__intro h2 {
+	font-size: 26px;
+	line-height: 1.12;
+	font-weight: 600;
+}
+
+.lerm-settings-panel__intro p {
+	max-width: 760px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: #526274;
+}
+
+.lerm-settings-actions {
+	gap: 10px;
+	padding: 12px 14px;
+	margin-bottom: 14px;
+	border-color: #dde5ec;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.92);
+	backdrop-filter: blur(10px);
+	box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.lerm-settings-actions .button {
+	min-height: 36px;
+	padding: 0 14px;
+	border-radius: 8px;
+	box-shadow: none;
+}
+
+.lerm-settings-actions .button.button-primary {
+	background: #2271b1;
+	border-color: #2271b1;
+}
+
+.lerm-settings-actions .button.button-primary:hover,
+.lerm-settings-actions .button.button-primary:focus {
+	background: #135e96;
+	border-color: #135e96;
+}
+
+.lerm-settings-actions .button.button-secondary {
+	border-color: #c7d0da;
+	color: #1f2937;
+	background: #fff;
+}
+
+.lerm-settings-actions__hint {
+	font-size: 12px;
+	line-height: 1.5;
+	color: #64748b;
+}
+
+.lerm-status-pill {
+	padding: 6px 12px;
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.lerm-settings-subnav {
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.lerm-settings-subnav--sticky {
+	padding: 4px 2px 6px;
+	background: linear-gradient(180deg, rgba(251, 252, 253, 0.98), rgba(251, 252, 253, 0.92));
+}
+
+.lerm-settings-subnav__item {
+	padding: 10px 12px;
+	border-radius: 10px;
+	font-size: 12px;
+}
+
+.lerm-settings-table {
+	border-spacing: 0 12px;
+}
+
+.lerm-settings-table th,
+.lerm-settings-stack .lerm-settings-row__head {
+	background: linear-gradient(180deg, #fcfdff, #f8fafc);
+}
+
+.lerm-settings-table th {
+	width: 248px;
+	padding: 16px 16px 16px 18px;
+	border-color: #e6ebf1;
+}
+
+.lerm-settings-table td {
+	padding: 16px 18px;
+	border-color: #e6ebf1;
+}
+
+.lerm-settings-stack {
+	gap: 12px;
+}
+
+.lerm-settings-stack .lerm-settings-row {
+	grid-template-columns: 248px minmax(0, 1fr);
+	border-color: #e6ebf1;
+	border-radius: 12px;
+	background: #fff;
+	box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.lerm-settings-stack .lerm-settings-row__head {
+	padding: 16px 16px 16px 18px;
+	border-right: 1px solid #e9eef3;
+}
+
+.lerm-settings-stack .lerm-settings-row__body {
+	padding: 16px 18px;
+}
+
+.lerm-settings-stack .description,
+.lerm-settings-table .description,
+.lerm-accordion__description,
+.lerm-tabbed__description {
+	font-size: 12px;
+	line-height: 1.55;
+	color: #667788;
+}
+
+.lerm-settings-row:hover > th,
+.lerm-settings-row:hover > td,
+.lerm-settings-stack .lerm-settings-row:hover .lerm-settings-row__head,
+.lerm-settings-stack .lerm-settings-row:hover .lerm-settings-row__body {
+	background: #fbfdff;
+}
+
+.lerm-settings-row input.regular-text:not(.lerm-color-control__input),
+.lerm-settings-row input.small-text:not(.lerm-number-input__control),
+.lerm-settings-row textarea.large-text,
+.lerm-settings-row select.regular-text {
+	border-color: #cbd5df;
+	border-radius: 10px;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.lerm-settings-row input.regular-text:not(.lerm-color-control__input):focus,
+.lerm-settings-row input.small-text:not(.lerm-number-input__control):focus,
+.lerm-settings-row textarea.large-text:focus,
+.lerm-settings-row select.regular-text:focus,
+.lerm-number-input:focus-within,
+.lerm-color-control:focus-within {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.12);
+}
+
+.lerm-fieldset,
+.lerm-group,
+.lerm-icon-field,
+.lerm-accordion-field,
+.lerm-tabbed-field,
+.lerm-backup-tools {
+	max-width: 920px;
+}
+
+.lerm-fieldset__item,
+.lerm-group-item__field,
+.lerm-group-item,
+.lerm-accordion__item,
+.lerm-tabbed__panel,
+.lerm-backup-tools__block,
+.lerm-icon-field__item {
+	border-color: #dbe3ea;
+	border-radius: 10px;
+	box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.lerm-fieldset__item,
+.lerm-group-item__field {
+	padding: 12px;
+	background: linear-gradient(180deg, #ffffff, #fafcfd);
+}
+
+.lerm-typography-field {
+	max-width: 920px;
+	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.lerm-typography-field .lerm-fieldset__item {
+	padding: 11px;
+	background: linear-gradient(180deg, #ffffff, #f9fbfc);
+}
+
+.lerm-icon-field__toolbar {
+	gap: 10px;
+}
+
+.lerm-icon-field__current {
+	border-radius: 10px;
+	background: linear-gradient(180deg, #fff, #f8fafc);
+}
+
+.lerm-icon-field__item {
+	padding: 12px 10px;
+}
+
+.lerm-icon-field__item:hover {
+	transform: none;
+}
+
+.lerm-accordion__trigger {
+	padding: 13px 14px;
+	background: linear-gradient(180deg, #ffffff, #f8fafc);
+	font-size: 12px;
+}
+
+.lerm-accordion__panel,
+.lerm-tabbed__panel,
+.lerm-group-item__body,
+.lerm-backup-tools__block {
+	padding: 14px;
+}
+
+.lerm-tabbed__trigger {
+	padding: 9px 12px;
+	border-radius: 8px;
+	font-size: 12px;
+}
+
+.lerm-tabbed__trigger.is-active {
+	background: #eef6fc;
+	color: #0b5c93;
+}
+
+.lerm-debug-panel {
+	border-color: #dde5ec;
+	border-radius: 12px;
+	background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+@media (max-width: 1080px) {
+	.lerm-settings-shell {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+}
+
+@media (max-width: 782px) {
+	.lerm-settings-wrap {
+		margin-right: 10px;
+	}
+
+	.lerm-settings-panel {
+		padding: 18px 14px 14px;
+	}
+
+	.lerm-settings-sidebar__brand h1,
+	.lerm-settings-panel__intro h2 {
+		font-size: 24px;
+	}
+
+	.lerm-settings-actions {
+		padding: 12px;
+	}
+
+	.lerm-settings-stack .lerm-settings-row__head,
+	.lerm-settings-stack .lerm-settings-row__body,
+	.lerm-settings-table th,
+	.lerm-settings-table td {
+		padding: 14px;
+	}
+}

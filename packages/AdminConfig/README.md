@@ -139,7 +139,7 @@ $runtime->register_validator(
 
 Late registration is supported: if you register a schema after `boot()`, or register a container after some schemas were already compiled, the runtime will mount matching schemas when the needed container becomes available.
 
-See [docs/quick-start.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/quick-start.md) for the copyable onboarding path, [docs/extension-api.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-api.md) for the extension surface, [docs/extension-recipes.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-recipes.md) for minimal custom field/validator/data-source snippets, and [docs/smoke-checklist.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
+See [docs/quick-start.md](/packages/AdminConfig/docs/quick-start.md) for the copyable onboarding path, [docs/extension-api.md](/packages/AdminConfig/docs/extension-api.md) for the extension surface, [docs/extension-recipes.md](/packages/AdminConfig/docs/extension-recipes.md) for minimal custom field/validator/data-source snippets, and [docs/smoke-checklist.md](/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
 
 ## Recommended lifecycle
 
@@ -303,7 +303,7 @@ admin, also set `LERM_ADMIN_CONFIG_MULTISITE=1` and pass the spec path after `--
 - Breaking runtime changes should land with changelog notes, migration guidance,
   and updated examples
 
-See [docs/support-matrix.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [CONTRIBUTING.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
+See [docs/support-matrix.md](/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [CONTRIBUTING.md](/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
 
 ## Reading meta-backed schemas
 
