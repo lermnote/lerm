@@ -210,7 +210,7 @@ if ( ! function_exists( 'is_admin' ) ) {
 
 if ( ! function_exists( 'is_multisite' ) ) {
 	function is_multisite(): bool {
-		return false;
+		return (bool) ( $GLOBALS['lerm_admin_config_is_multisite'] ?? false );
 	}
 }
 

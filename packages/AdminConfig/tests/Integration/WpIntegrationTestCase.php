@@ -39,6 +39,10 @@ abstract class WpIntegrationTestCase extends TestCase {
 		$admin_user = get_user_by( 'login', 'admin' );
 
 		if ( $admin_user instanceof \WP_User ) {
+			if ( is_multisite() && function_exists( 'grant_super_admin' ) ) {
+				grant_super_admin( (int) $admin_user->ID );
+			}
+
 			wp_set_current_user( (int) $admin_user->ID );
 		}
 	}

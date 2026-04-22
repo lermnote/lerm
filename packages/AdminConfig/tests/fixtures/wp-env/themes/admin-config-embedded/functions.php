@@ -56,3 +56,29 @@ add_action(
 	},
 	20
 );
+
+add_filter(
+	'use_block_editor_for_post_type',
+	static function ( bool $use_block_editor, string $post_type ): bool {
+		if ( in_array( $post_type, array( 'post', 'page' ), true ) ) {
+			return false;
+		}
+
+		return $use_block_editor;
+	},
+	20,
+	2
+);
+
+add_filter(
+	'gutenberg_can_edit_post_type',
+	static function ( bool $can_edit, string $post_type ): bool {
+		if ( in_array( $post_type, array( 'post', 'page' ), true ) ) {
+			return false;
+		}
+
+		return $can_edit;
+	},
+	20,
+	2
+);

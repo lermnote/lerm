@@ -267,13 +267,29 @@ and Playwright scaffolding:
 - `npm run test:integration` starts `wp-env`, activates the package plugin, the
   bundled schema demo plugin, and the embedded fixture theme, then runs
   `phpunit.integration.xml.dist` inside the WordPress container
-- `npm run test:e2e` runs the Playwright smoke suite against plugin mode and
-  embedded mode
+- `npm run test:integration:multisite` boots a multisite `wp-env` instance on
+  ports `8890/8891` and runs the same integration suite with the multisite-only
+  assertions enabled
+- `npm run test:e2e` runs the Playwright smoke suite against plugin mode,
+  embedded mode, and the classic metabox/profile/taxonomy/comment containers
+- `npm run test:e2e:multisite` runs the multisite network settings smoke suite
 
 The `tests/fixtures/wp-env/` directory contains the setup script and fixture
-theme used by those jobs. `wp-env` requires Docker; when you already have a
-local WordPress checkout available, `composer test:integration` can run
-directly against that install instead.
+theme used by those jobs. The fixture bootstrap also creates deterministic page,
+post, comment, and category records so the browser smoke specs can navigate
+classic admin screens without extra manual setup. `wp-env` requires Docker; when
+you already have a local WordPress checkout available, `composer test:integration`
+can run directly against that install instead.
+
+For local Playwright runs against an existing WordPress install, set:
+
+- `LERM_ADMIN_CONFIG_BASE_URL`
+- `LERM_ADMIN_CONFIG_ADMIN_USER`
+- `LERM_ADMIN_CONFIG_ADMIN_PASS`
+
+Then run `npm run test:e2e:local`. This path skips `wp-env` and points the same
+specs at your chosen site. To point the network smoke spec at a local multisite
+admin, also set `LERM_ADMIN_CONFIG_MULTISITE=1` and pass the spec path after `--`.
 
 ## Support and Versioning
 
@@ -286,7 +302,7 @@ directly against that install instead.
 - Breaking runtime changes should land with changelog notes, migration guidance,
   and updated examples
 
-See [docs/support-matrix.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot and [CONTRIBUTING.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/CONTRIBUTING.md) for the local development flow.
+See [docs/support-matrix.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [CONTRIBUTING.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
 
 ## Reading meta-backed schemas
 
@@ -419,6 +435,6 @@ See `examples/embedded-theme-demo/` for an embedded-mode reference that boots th
 ## Next milestones
 
 1. Expand the extension guides for custom field types, validators, stores, and container adapters.
-2. Add automated smoke helpers around the example plugin and embedded demo so container regressions are easier to catch before release.
-3. Introduce async data-source hooks and richer validation pipelines for AJAX-backed fields.
+2. Broaden browser coverage from smoke flows into richer advanced-field interaction regressions.
+3. Add a no-Docker contributor path for browser automation where `wp-env` can use Playground.
 4. Keep commerce concerns such as licensing and updates in a separate layer on top of the runtime.

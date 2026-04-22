@@ -17,11 +17,16 @@ composer ci
 ```bash
 composer test:integration
 npm run test:integration
+npm run test:integration:multisite
 npm run test:e2e
+npm run test:e2e:multisite
 ```
 
 - `composer test:integration` works against an already-available WordPress install
 - `npm run test:integration` and `npm run test:e2e` use `wp-env` and therefore need Docker
+- `npm run test:integration:multisite` and `npm run test:e2e:multisite` use a multisite `wp-env` instance on ports `8890/8891`
+- `npm run test:e2e:local` targets an existing WordPress site; set `LERM_ADMIN_CONFIG_BASE_URL`, `LERM_ADMIN_CONFIG_ADMIN_USER`, and `LERM_ADMIN_CONFIG_ADMIN_PASS` first
+- for local multisite browser smoke runs, also set `LERM_ADMIN_CONFIG_MULTISITE=1` and pass `tests/E2E/network-mode.spec.js` after `--`
 
 4. Update docs or examples whenever the public API changes.
 5. Add or extend tests for compiler behavior, runtime contracts, bundled example registrations, or WordPress integration flows as appropriate.
@@ -43,5 +48,6 @@ npm run test:e2e
 
 - Update `CHANGELOG.md` for user-visible changes.
 - Reflect new compatibility guarantees in `docs/support-matrix.md`.
+- Keep `docs/release-checklist.md` in sync with the actual release gate.
 - Keep examples runnable and aligned with the public onboarding flow.
 - Keep `.wp-env.json`, `tests/fixtures/wp-env/`, and Playwright smoke coverage aligned with the example plugin and embedded fixture theme.

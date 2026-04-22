@@ -2,6 +2,8 @@
 
 const { defineConfig } = require( '@playwright/test' );
 
+const baseURL = process.env.LERM_ADMIN_CONFIG_BASE_URL || 'http://localhost:8888';
+
 module.exports = defineConfig( {
 	testDir: './tests/E2E',
 	timeout: 60_000,
@@ -10,7 +12,7 @@ module.exports = defineConfig( {
 		timeout: 10_000,
 	},
 	use: {
-		baseURL: 'http://localhost:8888',
+		baseURL,
 		trace: 'retain-on-failure',
 		screenshot: 'only-on-failure',
 		video: 'retain-on-failure',

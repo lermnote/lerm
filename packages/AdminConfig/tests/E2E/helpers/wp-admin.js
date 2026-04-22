@@ -1,5 +1,9 @@
 const { expect } = require( '@playwright/test' );
 
+const adminUser = process.env.LERM_ADMIN_CONFIG_ADMIN_USER || 'admin';
+const adminPass = process.env.LERM_ADMIN_CONFIG_ADMIN_PASS || 'password';
+const adminBase = '/wp-admin';
+
 async function login( page ) {
 	await page.goto( '/wp-login.php' );
 
@@ -7,31 +11,153 @@ async function login( page ) {
 		return;
 	}
 
-	await page.locator( '#user_login' ).fill( 'admin' );
-	await page.locator( '#user_pass' ).fill( 'password' );
+	await page.locator( '#user_login' ).fill( adminUser );
+	await page.locator( '#user_pass' ).fill( adminPass );
 	await page.locator( '#wp-submit' ).click();
 	await expect( page ).toHaveURL( /\/wp-admin\// );
 }
 
-async function saveOptionsPage( page ) {
-	const saveButton = page.locator( '[data-lerm-save]' ).first();
+function acceptNextDialog( page ) {
+	page.once( 'dialog', async ( dialog ) => {
+		await dialog.accept();
+	} );
+}
 
-	await expect( saveButton ).toBeVisible();
-
-	const saveRequest = page.waitForResponse(
+async function waitForAdminAjax( page, actionFragment = '' ) {
+	return page.waitForResponse(
 		( response ) =>
 			response.url().includes( 'admin-ajax.php' ) &&
 			response.request().method() === 'POST' &&
-			response.request().postData()?.includes( 'lerm_admin_config_ajax_save_' ),
+			( actionFragment === '' || response.request().postData()?.includes( actionFragment ) ),
 		{ timeout: 20_000 }
 	);
+}
 
+async function openSettingsSection( page, labelPattern ) {
+	const sectionLink = page.getByRole( 'link', { name: labelPattern } ).first();
+
+	await expect( sectionLink ).toBeVisible();
+	await sectionLink.click();
+}
+
+async function saveOptionsPage( page ) {
+	const saveButton = page.locator( '[data-lerm-save]' ).first();
+	const saveRequest = waitForAdminAjax( page, 'lerm_admin_config_ajax_save_' );
+
+	await expect( saveButton ).toBeVisible();
 	await saveButton.click();
 	await saveRequest;
 	await expect( page.locator( '[data-lerm-status]' ).first() ).toContainText( /Synced|Saved/ );
 }
 
+async function clickAndWaitForAjax( page, locator, actionFragment = '' ) {
+	const request = waitForAdminAjax( page, actionFragment );
+
+	await locator.click();
+	await request;
+}
+
+async function resetOptionsPage( page, scope = 'section' ) {
+	const resetButton = page.locator( `[data-lerm-reset="${ scope }"]` ).first();
+
+	await expect( resetButton ).toBeVisible();
+	acceptNextDialog( page );
+	await clickAndWaitForAjax( page, resetButton, 'lerm_admin_config_ajax_reset_' );
+}
+
+async function exportBackupSnapshot( page ) {
+	const exportButton = page.locator( '[data-lerm-backup-export]' ).first();
+
+	await expect( exportButton ).toBeVisible();
+	await clickAndWaitForAjax( page, exportButton, 'lerm_admin_config_ajax_export_' );
+
+	const output = page.locator( '[data-lerm-backup-export-output]' ).first();
+
+	await expect( output ).not.toHaveValue( '' );
+
+	return output.inputValue();
+}
+
+async function importBackupSnapshot( page, json ) {
+	const input = page.locator( '[data-lerm-backup-import-input]' ).first();
+	const button = page.locator( '[data-lerm-backup-import]' ).first();
+
+	await input.fill( json );
+	acceptNextDialog( page );
+	await clickAndWaitForAjax( page, button, 'lerm_admin_config_ajax_import_' );
+}
+
+async function submitClassicForm( page, submitSelector = '#submit' ) {
+	await Promise.all( [
+		page.waitForNavigation( { waitUntil: 'domcontentloaded', timeout: 20_000 } ),
+		page.locator( submitSelector ).first().click(),
+	] );
+}
+
+async function openPostEditor( page, title, postType = 'post' ) {
+	const query = encodeURIComponent( title );
+	const listingPath = `${ adminBase }/edit.php?post_status=all&post_type=${ encodeURIComponent( postType ) }&s=${ query }`;
+
+	await page.goto( listingPath );
+
+	const rowLink = page.locator( '#the-list .row-title', { hasText: title } ).first();
+
+	await expect( rowLink ).toBeVisible();
+	await rowLink.click();
+	await page.waitForLoadState( 'domcontentloaded' );
+}
+
+async function openCategoryEditor( page, categoryName ) {
+	const query = encodeURIComponent( categoryName );
+
+	await page.goto( `${ adminBase }/edit-tags.php?taxonomy=category&post_type=post&s=${ query }` );
+
+	const rowLink = page.locator( '#the-list .row-title', { hasText: categoryName } ).first();
+
+	await expect( rowLink ).toBeVisible();
+	await rowLink.click();
+	await page.waitForLoadState( 'domcontentloaded' );
+}
+
+async function openCommentEditor( page, commentSignature ) {
+	const query = encodeURIComponent( commentSignature );
+
+	await page.goto( `${ adminBase }/edit-comments.php?s=${ query }` );
+
+	const row = page.locator( '#the-comment-list tr', { hasText: commentSignature } ).first();
+
+	await expect( row ).toBeVisible();
+	await row.hover();
+	await row.locator( 'span.edit a' ).first().click();
+	await page.waitForLoadState( 'domcontentloaded' );
+}
+
+async function selectAjaxOption( page, fieldId, searchText, optionLabel ) {
+	const container = page.locator( `.lerm-ajax-select[data-target="${ fieldId }"]` ).first();
+	const search = container.locator( '.lerm-ajax-select__search' );
+
+	await expect( container ).toBeVisible();
+	await search.fill( searchText );
+
+	const option = container.locator( '[data-lerm-ajax-select-option]', { hasText: optionLabel } ).first();
+
+	await expect( option ).toBeVisible();
+	await option.click();
+}
+
 module.exports = {
+	acceptNextDialog,
+	clickAndWaitForAjax,
+	exportBackupSnapshot,
+	importBackupSnapshot,
 	login,
+	openCategoryEditor,
+	openCommentEditor,
+	openPostEditor,
+	openSettingsSection,
+	resetOptionsPage,
 	saveOptionsPage,
+	selectAjaxOption,
+	submitClassicForm,
+	waitForAdminAjax,
 };

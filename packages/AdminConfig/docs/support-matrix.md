@@ -10,7 +10,9 @@
 
 - PHP quality gate: PHP `8.0`, `8.1`, `8.2`, `8.3`
 - WordPress integration: default stable `wp-env` environment on PHP `8.2`
-- Browser smoke coverage: Playwright against plugin mode and embedded mode in `wp-env`
+- WordPress multisite automation: dedicated `wp-env` run on ports `8890/8891`
+- Browser smoke coverage: Playwright against plugin mode, embedded mode, classic admin containers, and multisite network settings in `wp-env`
+- Local browser smoke coverage can target an existing site through `LERM_ADMIN_CONFIG_BASE_URL` plus admin credentials
 
 ## Admin Surfaces Covered
 
@@ -44,8 +46,8 @@
 - WPCS and PHPStan gates
 - PHPUnit unit coverage for compiler, schema helpers, registries, and diagnostics
 - PHPUnit smoke coverage for the bundled plugin and embedded examples
-- Real-WordPress integration tests for bootstraps and option/meta/site-option stores
-- Playwright smoke coverage for plugin-mode and embedded-mode options pages
+- Real-WordPress integration tests for bootstraps, option/meta/site-option stores, and multisite network schema persistence
+- Playwright smoke coverage for plugin/embedded options pages, classic metabox/profile/taxonomy/comment screens, and the multisite network settings page
 
 ## Release Policy
 
@@ -55,6 +57,6 @@
 
 ## Planned Hardening
 
-- Broader browser regression coverage for advanced fields and validation failure UX
-- Multisite-specific automation for `network_options_page`
+- Broader browser regression coverage for richer advanced-field permutations and import/reset edge cases
+- A lighter no-Docker browser harness for contributors who cannot run `wp-env`
 - Higher-level relationship and remote-library field packages built on the async transport layer

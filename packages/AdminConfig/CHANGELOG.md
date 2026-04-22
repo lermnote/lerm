@@ -17,8 +17,12 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Real-WordPress integration coverage for bootstraps plus option/meta/site-option stores.
 - `wp-env` fixture setup, embedded fixture theme, and Playwright smoke specs for plugin mode and embedded mode.
 - Composer-installed WordPress stubs, PHPStan memory tuning, and package-local Node tooling for CI.
+- Local Playwright overrides via environment variables plus dedicated bootstrap/example unit tests.
+- Deterministic `wp-env` fixtures for classic admin screens plus Playwright smoke coverage for metabox, profile, taxonomy, and comment containers.
+- Multisite `wp-env` scripts, multisite integration coverage, and network settings browser smoke coverage.
+- Contributor-facing alpha release checklist for package hardening and cut verification.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
 - The extension docs, quick start guide, and smoke checklist now cover async fields and runtime debugging.
-- The CI workflow now splits PHP quality checks, WordPress integration, and Playwright browser smoke coverage into separate jobs.
+- The CI workflow now adds caching, wp-env log artifacts, and a dedicated multisite automation job on top of the PHP/integration/browser split.
