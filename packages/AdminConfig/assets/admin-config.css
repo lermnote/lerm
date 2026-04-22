@@ -2524,3 +2524,285 @@
 		padding: 14px;
 	}
 }
+
+/* Complex control refinement */
+.lerm-settings-actions .button {
+	font-weight: 600;
+	line-height: 34px;
+}
+
+.lerm-settings-actions .button.button-secondary.button-link-delete {
+	border-color: #efc1bf;
+	color: #b42318;
+	background: #fff;
+}
+
+.lerm-settings-actions .button.button-secondary.button-link-delete:hover,
+.lerm-settings-actions .button.button-secondary.button-link-delete:focus {
+	border-color: #e59a96;
+	background: #fff5f5;
+	color: #912018;
+}
+
+.lerm-settings-actions__status {
+	min-width: 88px;
+}
+
+.lerm-status-pill {
+	border: 1px solid rgba(100, 116, 139, 0.14);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.lerm-status-pill[data-lerm-status="dirty"] {
+	border-color: rgba(217, 119, 6, 0.18);
+}
+
+.lerm-status-pill[data-lerm-status="saving"],
+.lerm-status-pill[data-lerm-status="resetting"] {
+	border-color: rgba(37, 99, 235, 0.16);
+}
+
+.lerm-status-pill[data-lerm-status="success"] {
+	border-color: rgba(22, 101, 52, 0.14);
+}
+
+.lerm-status-pill[data-lerm-status="error"] {
+	border-color: rgba(185, 28, 28, 0.16);
+}
+
+.lerm-typography-field {
+	gap: 10px;
+}
+
+.lerm-typography-field .lerm-fieldset__item {
+	gap: 6px;
+	border-style: solid;
+}
+
+.lerm-typography-field .lerm-fieldset__label {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #607284;
+}
+
+.lerm-typography-field .lerm-button-set {
+	gap: 5px;
+}
+
+.lerm-typography-field .lerm-button-set label,
+.lerm-button-set label {
+	border-radius: 8px;
+}
+
+.lerm-typography-field .lerm-button-set label {
+	min-height: 34px;
+	padding: 6px 8px;
+	background: #f8fafc;
+}
+
+.lerm-typography-field .lerm-button-set label:has(input:checked),
+.lerm-button-set label:has(input:checked) {
+	border-color: #9fc6e0;
+	background: #eef6fc;
+	box-shadow: none;
+}
+
+.lerm-color-control {
+	grid-template-columns: 34px minmax(0, 1fr) auto;
+	min-height: 38px;
+	padding: 3px 8px 3px 3px;
+	border-radius: 10px;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.lerm-color-control__trigger {
+	width: 34px;
+	min-width: 34px;
+	height: 30px;
+	border-radius: 7px;
+}
+
+.lerm-color-control__swatch,
+.lerm-color-popover__swatch {
+	width: 16px;
+	height: 16px;
+	border-radius: 5px;
+}
+
+.lerm-color-control__input.regular-text,
+.lerm-color-control__input[type="text"] {
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
+
+.lerm-color-control__clear {
+	width: 20px;
+	height: 20px;
+	font-size: 15px;
+}
+
+.lerm-color-popover {
+	width: min(220px, calc(100vw - 20px));
+	padding: 12px;
+	border-color: #cfd8e2;
+	border-radius: 12px;
+	box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.lerm-color-popover__value {
+	font-size: 11px;
+	color: #526274;
+}
+
+.lerm-color-popover__spectrum,
+.lerm-color-popover__hue {
+	border-color: #d5dee7;
+}
+
+.lerm-number-input {
+	border-radius: 10px;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.lerm-number-input__actions {
+	background: linear-gradient(180deg, #fbfcfd, #f3f6f9);
+}
+
+.lerm-ajax-select {
+	gap: 10px;
+	max-width: min(100%, 560px);
+}
+
+.lerm-ajax-select__selected {
+	gap: 6px;
+}
+
+.lerm-ajax-select__controls {
+	align-items: stretch;
+	gap: 10px;
+}
+
+.lerm-ajax-select__search {
+	min-height: 40px;
+}
+
+.lerm-ajax-select__status {
+	font-size: 11px;
+	line-height: 1.45;
+	color: #6b7c8f;
+}
+
+.lerm-ajax-select__dropdown {
+	top: calc(100% + 8px);
+	border-color: #d4dce5;
+	border-radius: 10px;
+	box-shadow: 0 14px 36px rgba(15, 23, 42, 0.12);
+}
+
+.lerm-ajax-select__results {
+	padding: 5px;
+}
+
+.lerm-ajax-select__option,
+.lerm-ajax-select__load-more {
+	padding: 10px 11px;
+	border-radius: 8px;
+	font-size: 13px;
+	line-height: 1.35;
+}
+
+.lerm-ajax-select__option.is-selected {
+	background: #eef6fc;
+}
+
+.lerm-ajax-select__pill {
+	gap: 7px;
+	padding: 5px 9px;
+	border-color: #d4dde6;
+	border-radius: 999px;
+	background: #f6f9fc;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+	font-size: 12px;
+}
+
+.lerm-ajax-select__pill-remove {
+	width: 17px;
+	height: 17px;
+	background: #dbe7f2;
+	color: #425466;
+}
+
+.lerm-backup-tools {
+	gap: 16px;
+}
+
+.lerm-backup-tools__block {
+	gap: 12px;
+	padding: 14px;
+	background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.lerm-backup-tools__header {
+	align-items: center;
+	padding-bottom: 2px;
+}
+
+.lerm-backup-tools__header strong {
+	font-size: 13px;
+	font-weight: 600;
+	color: #0f172a;
+}
+
+.lerm-backup-tools textarea {
+	min-height: 180px;
+	border-color: #cfd8e2;
+	background: #fcfdff;
+}
+
+.lerm-fieldset--single-line {
+	gap: 8px;
+}
+
+.lerm-fieldset--single-line .lerm-fieldset__item {
+	flex: 0 1 auto;
+	align-self: start;
+}
+
+.lerm-fieldset--single-line .lerm-fieldset__item[data-field-type="color"] {
+	flex-wrap: nowrap;
+}
+
+.lerm-fieldset--single-line .lerm-fieldset__item[data-field-type="color"] .lerm-color-control {
+	grid-template-columns: 28px minmax(0, 74px) auto;
+	width: fit-content;
+	max-width: 132px;
+}
+
+
+.lerm-icon-field__current,
+.lerm-debug-panel {
+	box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+@media (max-width: 782px) {
+	.lerm-settings-actions .button {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.lerm-ajax-select,
+	.lerm-fieldset,
+	.lerm-group,
+	.lerm-icon-field,
+	.lerm-accordion-field,
+	.lerm-tabbed-field,
+	.lerm-backup-tools {
+		max-width: 100%;
+	}
+
+	.lerm-color-popover {
+		width: min(220px, calc(100vw - 16px));
+	}
+}
