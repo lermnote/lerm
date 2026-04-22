@@ -274,5 +274,7 @@ automatically in `WP_DEBUG`, or explicitly per schema:
 ## Next references
 
 - `examples/schema-demo-plugin/`
+- `examples/minimal-extension-plugin/`
 - `examples/embedded-theme-demo/`
 - `docs/extension-api.md`
+- `docs/extension-recipes.md`

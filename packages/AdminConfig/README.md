@@ -21,6 +21,7 @@ This repository now contains the first extraction slice:
 - `assets`: reusable admin UI assets
 - `lerm-admin-config.php`: plugin entry point for standalone installs
 - `examples/schema-demo-plugin`: reference plugin using the package in plugin-install mode
+- `examples/minimal-extension-plugin`: smallest runnable extension-author example
 - `examples/embedded-theme-demo`: reference embedded-mode bootstrap for themes
 
 ## Architecture layers
@@ -138,7 +139,7 @@ $runtime->register_validator(
 
 Late registration is supported: if you register a schema after `boot()`, or register a container after some schemas were already compiled, the runtime will mount matching schemas when the needed container becomes available.
 
-See [docs/quick-start.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/quick-start.md) for the copyable onboarding path, [docs/extension-api.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-api.md) for the extension surface, and [docs/smoke-checklist.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
+See [docs/quick-start.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/quick-start.md) for the copyable onboarding path, [docs/extension-api.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-api.md) for the extension surface, [docs/extension-recipes.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/extension-recipes.md) for minimal custom field/validator/data-source snippets, and [docs/smoke-checklist.md](/D:/xampp/htdocs/lerm/wp-content/themes/lerm/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
 
 ## Recommended lifecycle
 
@@ -427,6 +428,15 @@ See `examples/schema-demo-plugin/` for a runnable reference plugin that register
 - a custom field type, validator, and named data source through the public runtime API
 
 It is useful as the starting point for plugin authors consuming this package directly.
+
+## Minimal extension example
+
+See `examples/minimal-extension-plugin/` for the smallest runnable plugin that demonstrates:
+
+- `register_field_type()`
+- `register_validator()`
+- `register_data_source()`
+- one schema that consumes those registrations on a standard options page
 
 ## Example theme embed
 

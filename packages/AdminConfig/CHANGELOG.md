@@ -21,6 +21,7 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Deterministic `wp-env` fixtures for classic admin screens plus Playwright smoke coverage for metabox, profile, taxonomy, and comment containers.
 - Multisite `wp-env` scripts, multisite integration coverage, and network settings browser smoke coverage.
 - Contributor-facing alpha release checklist for package hardening and cut verification.
+- A minimal runnable extension example plugin plus focused extension recipes for custom fields, validators, and data sources.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
