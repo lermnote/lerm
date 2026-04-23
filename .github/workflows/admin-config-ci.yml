@@ -271,7 +271,7 @@ jobs:
         with:
           name: wp-env-multisite-artifacts
           path: |
-            artifacts/wp-env/
+            packages/AdminConfig/artifacts/wp-env/
             packages/AdminConfig/playwright-report/
             packages/AdminConfig/test-results/
           if-no-files-found: ignore
