@@ -55,7 +55,7 @@ test( 'plugin mode imports snapshots and saves ajax select and advanced field va
 	await selectAjaxOption( page, 'featured_campaign', 'studio', 'Studio Preview' );
 
 	await openSettingsSection( page, /Advanced Fields/i );
-	await page.locator( '[data-lerm-tabbed-target="secondary"]' ).first().click();
+	await page.locator( '[data-lerm-tabbed-target="secondary"]:visible' ).first().click();
 	await page.locator( 'input[name="acme_demo_settings[card_tabs][secondary][title]"]' ).fill( 'Imported secondary card' );
 	await page.locator( 'button[data-lerm-accordion-trigger]', { hasText: /CTA Panel/i } ).first().click();
 	await page.locator( 'input[name="acme_demo_settings[launch_accordion][cta][button_label]"]' ).fill( 'Ship it' );
@@ -75,13 +75,13 @@ test( 'plugin mode imports snapshots and saves ajax select and advanced field va
 	await importBackupSnapshot( page, JSON.stringify( snapshot, null, 2 ) );
 	await page.reload();
 
-	await openSettingsSection( page, /Extensions/i );
+	await openSettingsSection( page, /Extension API/i );
 	await expect( page.locator( 'input[name="acme_demo_settings[release_slug]"]' ) ).toHaveValue( 'snapshot-imported' );
 	await expect( page.locator( 'input[name="acme_demo_settings[featured_campaign]"]' ) ).toHaveValue( 'studio-preview' );
 
 	await openSettingsSection( page, /Advanced Fields/i );
 	await expect( page.locator( 'input[name="acme_demo_settings[brand_typography][font-size]"]' ) ).toHaveValue( '3.1' );
-	await page.locator( '[data-lerm-tabbed-target="secondary"]' ).first().click();
+	await page.locator( '[data-lerm-tabbed-target="secondary"]:visible' ).first().click();
 	await expect( page.locator( 'input[name="acme_demo_settings[card_tabs][secondary][title]"]' ) ).toHaveValue( 'Snapshot secondary card' );
 	await page.locator( 'button[data-lerm-accordion-trigger]', { hasText: /CTA Panel/i } ).first().click();
 	await expect( page.locator( 'input[name="acme_demo_settings[launch_accordion][cta][button_label]"]' ) ).toHaveValue( 'Import launch' );

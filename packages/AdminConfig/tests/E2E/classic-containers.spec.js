@@ -11,7 +11,7 @@ test( 'metabox container replays nested validation errors and persists valid val
 	await login( page );
 	await openPostEditor( page, 'Admin Config Smoke Post', 'post' );
 
-	const badgeSlug = page.locator( 'input[name="_acme_demo_entry_settings[entry_badge][slug]"]' );
+	const badgeSlug = page.locator( 'input[name="_acme_demo_entry_settings[entry_badge][slug]"]:visible' ).first();
 
 	await badgeSlug.fill( 'x' );
 	await submitClassicForm( page, '#publish' );
@@ -19,7 +19,7 @@ test( 'metabox container replays nested validation errors and persists valid val
 	await expect( page.locator( '.notice.notice-error.inline', { hasText: /highlighted metabox fields/i } ).first() ).toBeVisible();
 	await expect( page.locator( '.lerm-settings-row.is-invalid input[name="_acme_demo_entry_settings[entry_badge][slug]"]' ) ).toHaveValue( 'x' );
 
-	await page.locator( 'input[name="_acme_demo_entry_settings[entry_badge][label]"]' ).fill( 'Launch entry' );
+	await page.locator( 'input[name="_acme_demo_entry_settings[entry_badge][label]"]:visible' ).first().fill( 'Launch entry' );
 	await badgeSlug.fill( 'launch-entry' );
 	await submitClassicForm( page, '#publish' );
 
@@ -32,7 +32,7 @@ test( 'profile container replays nested validation errors and persists valid val
 	await login( page );
 	await page.goto( '/wp-admin/profile.php' );
 
-	const badgeSlug = page.locator( 'input[name="acme_demo_profile_settings[profile_badge][slug]"]' );
+	const badgeSlug = page.locator( 'input[name="acme_demo_profile_settings[profile_badge][slug]"]:visible' ).first();
 
 	await badgeSlug.fill( 'x' );
 	await submitClassicForm( page );
@@ -40,7 +40,7 @@ test( 'profile container replays nested validation errors and persists valid val
 	await expect( page.locator( '.notice.notice-error.inline', { hasText: /highlighted profile fields/i } ).first() ).toBeVisible();
 	await expect( page.locator( '.lerm-settings-row.is-invalid input[name="acme_demo_profile_settings[profile_badge][slug]"]' ) ).toHaveValue( 'x' );
 
-	await page.locator( 'select[name="acme_demo_profile_settings[profile_tone]"]' ).selectOption( 'bold' );
+	await page.locator( 'select[name="acme_demo_profile_settings[profile_tone]"]:visible' ).first().selectOption( 'bold' );
 	await badgeSlug.fill( 'profile-badge' );
 	await submitClassicForm( page );
 
@@ -53,7 +53,7 @@ test( 'taxonomy container replays nested validation errors and persists valid va
 	await login( page );
 	await openCategoryEditor( page, 'Admin Config Smoke' );
 
-	const badgeSlug = page.locator( 'input[name="acme_demo_category_settings[category_badge][slug]"]' );
+	const badgeSlug = page.locator( 'input[name="acme_demo_category_settings[category_badge][slug]"]:visible' ).first();
 
 	await badgeSlug.fill( 'x' );
 	await submitClassicForm( page );
@@ -61,7 +61,7 @@ test( 'taxonomy container replays nested validation errors and persists valid va
 	await expect( page.locator( '.notice.notice-error.inline', { hasText: /highlighted term fields/i } ).first() ).toBeVisible();
 	await expect( page.locator( '.lerm-settings-row.is-invalid input[name="acme_demo_category_settings[category_badge][slug]"]' ) ).toHaveValue( 'x' );
 
-	await page.locator( 'input[name="acme_demo_category_settings[category_badge][label]"]' ).fill( 'Editorial' );
+	await page.locator( 'input[name="acme_demo_category_settings[category_badge][label]"]:visible' ).first().fill( 'Editorial' );
 	await badgeSlug.fill( 'editorial-category' );
 	await submitClassicForm( page );
 
@@ -74,7 +74,7 @@ test( 'comment container replays nested validation errors and persists valid val
 	await login( page );
 	await openCommentEditor( page, 'Admin Config Smoke Comment' );
 
-	const badgeSlug = page.locator( 'input[name="acme_demo_comment_settings[review_badge][slug]"]' );
+	const badgeSlug = page.locator( 'input[name="acme_demo_comment_settings[review_badge][slug]"]:visible' ).first();
 
 	await badgeSlug.fill( 'x' );
 	await submitClassicForm( page );
@@ -82,7 +82,7 @@ test( 'comment container replays nested validation errors and persists valid val
 	await expect( page.locator( '.notice.notice-error.inline', { hasText: /highlighted comment fields/i } ).first() ).toBeVisible();
 	await expect( page.locator( '.lerm-settings-row.is-invalid input[name="acme_demo_comment_settings[review_badge][slug]"]' ) ).toHaveValue( 'x' );
 
-	await page.locator( 'textarea[name="acme_demo_comment_settings[staff_note]"]' ).fill( 'Escalate for editorial review.' );
+	await page.locator( 'textarea[name="acme_demo_comment_settings[staff_note]"]:visible' ).first().fill( 'Escalate for editorial review.' );
 	await badgeSlug.fill( 'staff-review' );
 	await submitClassicForm( page );
 

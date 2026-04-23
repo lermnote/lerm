@@ -110,7 +110,7 @@ async function clickAndWaitForAjax( page, locator, actionFragment = '' ) {
 }
 
 async function resetOptionsPage( page, scope = 'section' ) {
-	const resetButton = page.locator( `[data-lerm-reset="${ scope }"]` ).first();
+	const resetButton = page.locator( `[data-lerm-reset="${ scope }"]:visible` ).first();
 
 	await expect( resetButton ).toBeVisible();
 	acceptNextDialog( page );
@@ -118,12 +118,12 @@ async function resetOptionsPage( page, scope = 'section' ) {
 }
 
 async function exportBackupSnapshot( page ) {
-	const exportButton = page.locator( '[data-lerm-backup-export]' ).first();
+	const exportButton = page.locator( '[data-lerm-backup-export]:visible' ).first();
 
 	await expect( exportButton ).toBeVisible();
 	await clickAndWaitForAjax( page, exportButton, 'lerm_admin_config_ajax_export_' );
 
-	const output = page.locator( '[data-lerm-backup-export-output]' ).first();
+	const output = page.locator( '[data-lerm-backup-export-output]:visible' ).first();
 
 	await expect( output ).not.toHaveValue( '' );
 
@@ -131,8 +131,8 @@ async function exportBackupSnapshot( page ) {
 }
 
 async function importBackupSnapshot( page, json ) {
-	const input = page.locator( '[data-lerm-backup-import-input]' ).first();
-	const button = page.locator( '[data-lerm-backup-import]' ).first();
+	const input = page.locator( '[data-lerm-backup-import-input]:visible' ).first();
+	const button = page.locator( '[data-lerm-backup-import]:visible' ).first();
 
 	await input.fill( json );
 	acceptNextDialog( page );
@@ -203,7 +203,7 @@ async function openCommentEditor( page, commentSignature ) {
 }
 
 async function selectAjaxOption( page, fieldId, searchText, optionLabel ) {
-	const container = page.locator( `.lerm-ajax-select[data-target="${ fieldId }"]` ).first();
+	const container = page.locator( `.lerm-ajax-select[data-target="${ fieldId }"]:visible` ).first();
 	const search = container.locator( '.lerm-ajax-select__search' );
 
 	await expect( container ).toBeVisible();

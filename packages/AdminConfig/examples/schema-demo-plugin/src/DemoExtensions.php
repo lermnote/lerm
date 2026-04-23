@@ -102,15 +102,37 @@ final class DemoExtensions {
 			'slug_text',
 			array(
 				'render'   => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-					$field_id = (string) ( $field['id'] ?? '' );
+					$attrs = ! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : '';
 
-					printf(
-						'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text" placeholder="%4$s" spellcheck="false" autocapitalize="off" autocorrect="off" %5$s>',
-						esc_attr( $field_id ),
-						esc_attr( $field_name ),
-						esc_attr( is_scalar( $value ) ? (string) $value : '' ),
-						esc_attr( (string) ( $field['placeholder'] ?? 'spring-launch' ) ),
-						! empty( $field['dependency_field'] ) ? 'data-lerm-controller="1"' : ''
+					self::render_slug_text_input(
+						$field,
+						$value,
+						$field_name,
+						(string) ( $field['id'] ?? '' ),
+						$attrs
+					);
+				},
+				'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
+					$attrs = '';
+
+					if ( ! empty( $field['dependency_field'] ) ) {
+						$attrs .= ' data-lerm-controller="1"';
+					}
+
+					if ( '' !== $name_template ) {
+						$attrs .= ' data-name-template="' . esc_attr( $name_template ) . '"';
+					}
+
+					if ( '' !== $id_template ) {
+						$attrs .= ' data-id-template="' . esc_attr( $id_template ) . '"';
+					}
+
+					self::render_slug_text_input(
+						$field,
+						$value,
+						$field_name,
+						$input_id,
+						$attrs
 					);
 				},
 				'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
@@ -118,6 +140,7 @@ final class DemoExtensions {
 				},
 				'client'   => array(
 					'control' => 'slug_text',
+					'nested'  => true,
 				),
 			)
 		);
@@ -179,6 +202,20 @@ final class DemoExtensions {
 				'value' => 'studio-preview',
 				'label' => __( 'Studio Preview', 'lerm-admin-config-demo' ),
 			),
+		);
+	}
+
+	/**
+	 * @param mixed $value
+	 */
+	private static function render_slug_text_input( array $field, $value, string $field_name, string $input_id, string $extra_attrs = '' ): void {
+		printf(
+			'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text" placeholder="%4$s" spellcheck="false" autocapitalize="off" autocorrect="off"%5$s>',
+			esc_attr( $input_id ),
+			esc_attr( $field_name ),
+			esc_attr( is_scalar( $value ) ? (string) $value : '' ),
+			esc_attr( (string) ( $field['placeholder'] ?? 'spring-launch' ) ),
+			$extra_attrs
 		);
 	}
 }
