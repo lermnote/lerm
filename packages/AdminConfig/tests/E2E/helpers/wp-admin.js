@@ -5,7 +5,9 @@ const adminPass = process.env.LERM_ADMIN_CONFIG_ADMIN_PASS || 'password';
 const adminBase = '/wp-admin';
 
 async function login( page ) {
-	await page.goto( '/wp-login.php' );
+	const loginUrl = `/wp-login.php?redirect_to=${ encodeURIComponent( `${ adminBase }/` ) }`;
+
+	await page.goto( loginUrl );
 
 	if ( page.url().includes( '/wp-admin/' ) ) {
 		return;
@@ -14,7 +16,15 @@ async function login( page ) {
 	await page.locator( '#user_login' ).fill( adminUser );
 	await page.locator( '#user_pass' ).fill( adminPass );
 	await page.locator( '#wp-submit' ).click();
-	await expect( page ).toHaveURL( /\/wp-admin\// );
+
+	try {
+		await expect( page ).toHaveURL( /\/wp-admin\// );
+	} catch ( error ) {
+		const loginError = await page.locator( '#login_error' ).textContent().catch( () => '' );
+		const message = loginError ? ` Login error: ${ loginError.trim().replace( /\s+/g, ' ' ) }` : '';
+
+		throw new Error( `WordPress login did not reach wp-admin.${ message }` );
+	}
 }
 
 function acceptNextDialog( page ) {

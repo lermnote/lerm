@@ -102,9 +102,42 @@ function lerm_admin_config_ensure_term( string $name, string $taxonomy ): int {
 	return is_array( $created ) ? (int) $created['term_id'] : 0;
 }
 
+/**
+ * Ensure the E2E admin account exists and has deterministic credentials.
+ */
+function lerm_admin_config_ensure_admin_user( string $login, string $password ): ?WP_User {
+	$user = get_user_by( 'login', $login );
+
+	if ( ! $user instanceof WP_User ) {
+		$user_id = wp_create_user( $login, $password, $login . '@example.com' );
+
+		if ( is_wp_error( $user_id ) ) {
+			return null;
+		}
+
+		$user = get_user_by( 'id', (int) $user_id );
+	}
+
+	if ( ! $user instanceof WP_User ) {
+		return null;
+	}
+
+	wp_set_password( $password, (int) $user->ID );
+	$user = get_user_by( 'id', (int) $user->ID );
+
+	if ( $user instanceof WP_User ) {
+		$user->set_role( 'administrator' );
+	}
+
+	return $user instanceof WP_User ? $user : null;
+}
+
 $package_plugin = lerm_admin_config_find_plugin_file( 'lerm-admin-config.php' );
 $demo_plugin    = lerm_admin_config_find_plugin_file( 'schema-demo-plugin.php' );
 $network_wide   = is_multisite();
+$admin_password = getenv( 'LERM_ADMIN_CONFIG_ADMIN_PASS' );
+$admin_password = is_string( $admin_password ) && '' !== $admin_password ? $admin_password : 'password';
+$admin_user     = lerm_admin_config_ensure_admin_user( 'admin', $admin_password );
 
 if ( is_string( $package_plugin ) ) {
 	activate_plugin( plugin_basename( $package_plugin ), '', $network_wide, true );
@@ -114,10 +147,8 @@ if ( is_string( $demo_plugin ) ) {
 	activate_plugin( plugin_basename( $demo_plugin ), '', $network_wide, true );
 }
 
-if ( $network_wide && function_exists( 'grant_super_admin' ) ) {
-	$admin_user = get_user_by( 'login', 'admin' );
-
-	if ( $admin_user instanceof WP_User ) {
+if ( $admin_user instanceof WP_User ) {
+	if ( $network_wide && function_exists( 'grant_super_admin' ) ) {
 		grant_super_admin( (int) $admin_user->ID );
 	}
 }

@@ -20,6 +20,7 @@ use Lerm\Mail\Smtp;
 use Lerm\Update\Updater;
 use Lerm\Http\Rest\Router;
 use Lerm\Runtime\Lazyload;
+use Lerm\Theme\AdminConfig\SiteIdentitySync;
 use Lerm\Theme\AdminConfig\ThemeOptionsSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,6 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // ---------------------------------------------------------------------------
 
 $runtime = lerm_admin_config_runtime();
+SiteIdentitySync::init();
 $options = $runtime->all( ThemeOptionsSchema::schema_id() );
 
 // ---------------------------------------------------------------------------
@@ -89,8 +91,8 @@ if ( ! empty( $options ) ) {
 	);
 
 	$seo_options = array(
-		'blogname'             => $options['blogname'] ?? '',
-		'tagline'              => $options['tagline'] ?? '',
+		'blogname'             => get_bloginfo( 'name' ),
+		'tagline'              => get_bloginfo( 'description' ),
 		'baidu_submit'         => $options['baidu_submit'] ?? '',
 		'submit_url'           => $options['submit_url'] ?? '',
 		'submit_token'         => $options['submit_token'] ?? '',
@@ -207,8 +209,10 @@ if ( ! empty( $options ) ) {
 		'single_bottom'             => (array) ( $options['single_bottom'] ?? array() ),
 		'summary_meta'              => (array) ( $options['summary_meta'] ?? array() ),
 		'social_share'              => (array) ( $options['social_share'] ?? array() ),
-		'blogname'                  => (string) ( $options['blogname'] ?? '' ),
-		'tagline'                   => (string) ( $options['tagline'] ?? '' ),
+		'blogname'                  => get_bloginfo( 'name' ),
+		'tagline'                   => get_bloginfo( 'description' ),
+		'display_header_text'       => (bool) ( $options['display_header_text'] ?? SiteIdentitySync::display_header_text() ),
+		'site_icon'                 => (array) ( $options['site_icon'] ?? array() ),
 		'navbar_align'              => (string) ( $options['navbar_align'] ?? 'justify-content-md-start' ),
 		'navbar_search'             => (bool) ( $options['navbar_search'] ?? false ),
 		'dark_mode_enable'          => (bool) ( $options['dark_mode_enable'] ?? false ),

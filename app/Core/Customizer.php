@@ -53,11 +53,11 @@ class Customizer {
 		$mobile_logo    = self::$args['mobile_logo'];
 		$custom_logo_id = get_theme_mod( 'custom_logo' );
 
-		if ( ! empty( $large_logo ) ) {
+		if ( ! is_customize_preview() && ! empty( $large_logo ) ) {
 			$custom_logo_id = $large_logo;
 		}
 
-		if ( wp_is_mobile() && ! empty( $mobile_logo ) ) {
+		if ( ! is_customize_preview() && wp_is_mobile() && ! empty( $mobile_logo ) ) {
 			$custom_logo_id = $mobile_logo;
 		}
 
