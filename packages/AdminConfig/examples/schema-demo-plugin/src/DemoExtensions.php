@@ -101,7 +101,7 @@ final class DemoExtensions {
 		$runtime->register_field_type(
 			'slug_text',
 			array(
-				'render'   => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
+				'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
 					$attrs = ! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : '';
 
 					self::render_slug_text_input(
@@ -135,10 +135,10 @@ final class DemoExtensions {
 						$attrs
 					);
 				},
-				'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
+				'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
 					return sanitize_title( is_scalar( $value ) ? (string) $value : '' );
 				},
-				'client'   => array(
+				'client'        => array(
 					'control' => 'slug_text',
 					'nested'  => true,
 				),
