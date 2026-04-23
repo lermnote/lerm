@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TARGET="${1:-unit}"
+
+if [[ $# -gt 0 ]]; then
+	shift
+fi
+
+case "$TARGET" in
+	unit)
+		exec "$SCRIPT_DIR/phpunit" "$@"
+		;;
+	ci)
+		exec "$SCRIPT_DIR/composer" ci "$@"
+		;;
+	phpunit)
+		exec "$SCRIPT_DIR/phpunit" "$@"
+		;;
+	integration)
+		cd "$ROOT_DIR"
+		exec npm run test:integration -- "$@"
+		;;
+	e2e)
+		cd "$ROOT_DIR"
+		exec npm run test:e2e -- "$@"
+		;;
+	wp)
+		cd "$ROOT_DIR"
+		exec npm run test:wp -- "$@"
+		;;
+	*)
+		cat >&2 <<'EOF'
+Usage: ./bin/test [unit|ci|phpunit|integration|e2e|wp] [extra args]
+
+Examples:
+  ./bin/test
+  ./bin/test phpunit --filter RuntimeTest
+  ./bin/test integration
+  ./bin/test e2e
+EOF
+		exit 1
+		;;
+esac

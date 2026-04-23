@@ -261,6 +261,19 @@ The PHPCS and PHPStan runners prepend `tools/wp-tool-stubs.php`, so they can be
 executed from an embedded theme workspace without fatalling on eager theme
 autoloads that call WordPress functions.
 
+If your shell does not expose `php` on `PATH` (for example a WSL shell working
+against a XAMPP install on Windows), use the package-local wrappers:
+
+- `./bin/composer install`
+- `./bin/test` runs the default unit and smoke suite
+- `./bin/test phpunit --filter RuntimeTest` forwards extra PHPUnit arguments
+- `./bin/test integration` runs the Docker-backed `wp-env` integration flow
+- `./bin/test e2e` runs the Playwright smoke suite
+
+The wrappers default to `/mnt/d/xampp/php/php.exe` and
+`/mnt/c/ProgramData/ComposerSetup/bin/composer.phar`. Override those with
+`PHP_BIN` or `COMPOSER_PHAR` if your local paths differ.
+
 For browser and container-level coverage the package also ships with `wp-env`
 and Playwright scaffolding:
 
@@ -280,7 +293,9 @@ theme used by those jobs. The fixture bootstrap also creates deterministic page,
 post, comment, and category records so the browser smoke specs can navigate
 classic admin screens without extra manual setup. `wp-env` requires Docker; when
 you already have a local WordPress checkout available, `composer test:integration`
-can run directly against that install instead.
+can run directly against that install instead. On Linux and WSL shells, make
+sure the current user can access the Docker socket before running the `wp-env`
+scripts.
 
 For local Playwright runs against an existing WordPress install, set:
 

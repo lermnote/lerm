@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+DEFAULT_COMPOSER_PHAR="/mnt/c/ProgramData/ComposerSetup/bin/composer.phar"
+COMPOSER_PHAR="${COMPOSER_PHAR:-$DEFAULT_COMPOSER_PHAR}"
+DEFAULT_PHP_BIN="/mnt/d/xampp/php/php.exe"
+PHP_BIN="${PHP_BIN:-$DEFAULT_PHP_BIN}"
+
+to_runtime_path() {
+	local path="$1"
+
+	if [[ "$PHP_BIN" == *.exe && "$path" == /* ]]; then
+		wslpath -w "$path"
+		return
+	fi
+
+	printf '%s\n' "$path"
+}
+
+if [[ ! -f "$COMPOSER_PHAR" ]]; then
+	echo "Composer PHAR not found at: $COMPOSER_PHAR" >&2
+	echo "Set COMPOSER_PHAR to your composer.phar path and try again." >&2
+	exit 1
+fi
+
+exec "$SCRIPT_DIR/php" "$(to_runtime_path "$COMPOSER_PHAR")" --working-dir="$(to_runtime_path "$ROOT_DIR")" "$@"
