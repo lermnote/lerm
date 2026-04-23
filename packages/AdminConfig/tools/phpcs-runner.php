@@ -12,6 +12,11 @@ $stub_file    = __DIR__ . '/wp-tool-stubs.php';
 $config_file  = $package_root . '/phpcs.xml.dist';
 $extra_args   = array_slice( $_SERVER['argv'] ?? array(), 1 );
 
+if ( ! is_file( $config_file ) ) {
+	fwrite( STDERR, sprintf( "PHPCS config file not found: %s\n", $config_file ) );
+	exit( 1 );
+}
+
 $candidates = array(
 	$package_root . '/vendor/bin/phpcs',
 	$package_root . '/../../vendor/bin/phpcs',
@@ -31,12 +36,14 @@ if ( null === $phpcs ) {
 	exit( 1 );
 }
 
+chdir( $package_root );
+
 $command = sprintf(
-	'"%s" -d auto_prepend_file="%s" "%s" --standard="%s"%s',
-	$php_binary,
-	$stub_file,
-	$phpcs,
-	$config_file,
+	'%s -d auto_prepend_file=%s %s --standard=%s%s',
+	escapeshellarg( $php_binary ),
+	escapeshellarg( $stub_file ),
+	escapeshellarg( $phpcs ),
+	escapeshellarg( './phpcs.xml.dist' ),
 	empty( $extra_args )
 		? ''
 		: ' ' . implode(

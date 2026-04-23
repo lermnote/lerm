@@ -21,3 +21,7 @@ Thumbs.db
 *.swp
 *.swo
 *.dist
+!packages/AdminConfig/phpcs.xml.dist
+!packages/AdminConfig/phpstan.neon.dist
+!packages/AdminConfig/phpunit.integration.xml.dist
+!packages/AdminConfig/phpunit.xml.dist

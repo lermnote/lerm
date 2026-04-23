@@ -3,8 +3,6 @@
  * Prepare wp-env with the package plugin, schema demo plugin, and embedded theme.
  */
 
-declare( strict_types=1 );
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
