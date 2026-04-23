@@ -40,6 +40,47 @@ async function openSettingsSection( page, labelPattern ) {
 	await sectionLink.click();
 }
 
+async function isVisibleWithin( locator, timeout = 3_000 ) {
+	try {
+		await expect( locator ).toBeVisible( { timeout } );
+		return true;
+	} catch ( error ) {
+		return false;
+	}
+}
+
+async function openNetworkOptionsPage( page, pageSlug ) {
+	const encodedSlug = encodeURIComponent( pageSlug );
+	const saveButton = page.locator( '[data-lerm-save]' ).first();
+	const directPaths = [
+		`/wp-admin/network/settings.php?page=${ encodedSlug }`,
+		`/wp-admin/network/admin.php?page=${ encodedSlug }`,
+	];
+
+	for ( const path of directPaths ) {
+		await page.goto( path );
+
+		if ( await isVisibleWithin( saveButton ) ) {
+			return;
+		}
+	}
+
+	await page.goto( '/wp-admin/network/' );
+
+	const menuLink = page.locator( `#adminmenu a[href*="page=${ encodedSlug }"]` ).first();
+	const menuHref = await menuLink.getAttribute( 'href', { timeout: 3_000 } ).catch( () => null );
+
+	if ( ! menuHref ) {
+		await expect( menuLink, `Network menu link for ${ pageSlug } should exist` ).toHaveAttribute( 'href', /page=/ );
+		return;
+	}
+
+	const targetUrl = new URL( menuHref, new URL( '/wp-admin/network/', page.url() ) ).toString();
+
+	await page.goto( targetUrl );
+	await expect( saveButton ).toBeVisible();
+}
+
 async function saveOptionsPage( page ) {
 	const saveButton = page.locator( '[data-lerm-save]' ).first();
 	const saveRequest = waitForAdminAjax( page, 'lerm_admin_config_ajax_save_' );
@@ -88,10 +129,28 @@ async function importBackupSnapshot( page, json ) {
 }
 
 async function submitClassicForm( page, submitSelector = '#submit' ) {
-	await Promise.all( [
-		page.waitForNavigation( { waitUntil: 'domcontentloaded', timeout: 20_000 } ),
-		page.locator( submitSelector ).first().click(),
-	] );
+	const submitButton = page.locator( submitSelector ).first();
+	const acceptUnloadDialog = async ( dialog ) => {
+		await dialog.accept();
+	};
+
+	await expect( submitButton ).toBeVisible();
+
+	page.once( 'dialog', acceptUnloadDialog );
+
+	const navigation = page.waitForNavigation( { waitUntil: 'domcontentloaded', timeout: 20_000 } )
+		.then( () => true )
+		.catch( () => false );
+
+	await submitButton.click();
+
+	const didNavigate = await navigation;
+
+	page.off( 'dialog', acceptUnloadDialog );
+
+	if ( ! didNavigate ) {
+		await page.waitForLoadState( 'networkidle', { timeout: 5_000 } ).catch( () => {} );
+	}
 }
 
 async function openPostEditor( page, title, postType = 'post' ) {
@@ -153,6 +212,7 @@ module.exports = {
 	login,
 	openCategoryEditor,
 	openCommentEditor,
+	openNetworkOptionsPage,
 	openPostEditor,
 	openSettingsSection,
 	resetOptionsPage,

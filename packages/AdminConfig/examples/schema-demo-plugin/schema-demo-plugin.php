@@ -20,6 +20,16 @@ $autoload_candidates = array(
 	dirname( __DIR__, 4 ) . '/vendor/autoload.php',
 );
 
+if ( defined( 'WP_PLUGIN_DIR' ) ) {
+	$package_plugins = glob( WP_PLUGIN_DIR . '/*/lerm-admin-config.php' );
+
+	if ( false !== $package_plugins ) {
+		foreach ( $package_plugins as $package_plugin ) {
+			$autoload_candidates[] = dirname( (string) $package_plugin ) . '/vendor/autoload.php';
+		}
+	}
+}
+
 $autoload = '';
 
 foreach ( $autoload_candidates as $candidate ) {
@@ -29,7 +39,9 @@ foreach ( $autoload_candidates as $candidate ) {
 	}
 }
 
-if ( '' === $autoload ) {
+if ( '' !== $autoload ) {
+	require_once $autoload;
+} elseif ( ! class_exists( \Lerm\AdminConfig\WordPress\PluginBootstrap::class ) ) {
 	add_action(
 		'admin_notices',
 		static function (): void {
@@ -39,8 +51,6 @@ if ( '' === $autoload ) {
 
 	return;
 }
-
-require_once $autoload;
 
 require_once __DIR__ . '/src/DemoExtensions.php';
 require_once __DIR__ . '/src/SchemaDemoPlugin.php';

@@ -2,6 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const {
 	clickAndWaitForAjax,
 	login,
+	openNetworkOptionsPage,
 	saveOptionsPage,
 } = require( './helpers/wp-admin' );
 
@@ -11,7 +12,7 @@ test.skip( ! isMultisite, 'Network smoke suite only runs against a multisite env
 
 test( 'network options page replays nested validation errors and saves network settings', async ( { page } ) => {
 	await login( page );
-	await page.goto( '/wp-admin/network/settings.php?page=acme-demo-network-settings' );
+	await openNetworkOptionsPage( page, 'acme-demo-network-settings' );
 
 	await expect( page.locator( '[data-lerm-save]' ).first() ).toBeVisible();
 
