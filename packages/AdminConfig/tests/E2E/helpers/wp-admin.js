@@ -61,7 +61,7 @@ async function isVisibleWithin( locator, timeout = 3_000 ) {
 
 async function openNetworkOptionsPage( page, pageSlug ) {
 	const encodedSlug = encodeURIComponent( pageSlug );
-	const saveButton = page.locator( '[data-lerm-save]' ).first();
+	const saveButton = page.locator( '[data-lerm-save]:visible' ).first();
 	const directPaths = [
 		`/wp-admin/network/settings.php?page=${ encodedSlug }`,
 		`/wp-admin/network/admin.php?page=${ encodedSlug }`,
@@ -92,10 +92,11 @@ async function openNetworkOptionsPage( page, pageSlug ) {
 }
 
 async function saveOptionsPage( page ) {
-	const saveButton = page.locator( '[data-lerm-save]' ).first();
-	const saveRequest = waitForAdminAjax( page, 'lerm_admin_config_ajax_save_' );
+	const saveButton = page.locator( '[data-lerm-save]:visible' ).first();
 
 	await expect( saveButton ).toBeVisible();
+	const saveRequest = waitForAdminAjax( page, 'lerm_admin_config_ajax_save_' );
+
 	await saveButton.click();
 	await saveRequest;
 	await expect( page.locator( '[data-lerm-status]' ).first() ).toContainText( /Synced|Saved/ );

@@ -20,10 +20,12 @@ final class PluginBootstrap {
 			new PluginAssetResolver( $plugin_file )
 		);
 
+		if ( ! is_callable( $registrar ) ) {
+			return $runtime;
+		}
+
 		$boot_runtime = static function () use ( $runtime, $registrar ): void {
-			if ( is_callable( $registrar ) ) {
-				call_user_func( $registrar, $runtime );
-			}
+			call_user_func( $registrar, $runtime );
 
 			if ( is_admin() ) {
 				$runtime->boot();
