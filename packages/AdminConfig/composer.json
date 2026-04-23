@@ -29,6 +29,7 @@
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.1",
+		"doctrine/instantiator": "^1.5",
 		"php-stubs/wordpress-stubs": "^6.8",
 		"phpstan/phpstan": "^1.12.0",
 		"phpunit/phpunit": "^9.6.22",
