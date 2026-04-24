@@ -43,6 +43,18 @@ function lerm_admin_config_activate_plugin( string $plugin_file, bool $network_w
 			'Admin Config wp-env setup could not activate plugin ' . $plugin_basename . ': ' . $result->get_error_message()
 		);
 	}
+
+	if ( $network_wide && function_exists( 'is_plugin_active_for_network' ) && ! is_plugin_active_for_network( $plugin_basename ) ) {
+		$active_sitewide_plugins = get_site_option( 'active_sitewide_plugins', array() );
+
+		if ( ! is_array( $active_sitewide_plugins ) ) {
+			$active_sitewide_plugins = array();
+		}
+
+		$active_sitewide_plugins[ $plugin_basename ] = time();
+		update_site_option( 'active_sitewide_plugins', $active_sitewide_plugins );
+		wp_cache_delete( 'active_sitewide_plugins', 'site-options' );
+	}
 }
 
 /**
