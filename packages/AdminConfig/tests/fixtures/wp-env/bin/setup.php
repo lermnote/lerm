@@ -25,6 +25,27 @@ function lerm_admin_config_find_plugin_file( string $basename ): ?string {
 }
 
 /**
+ * Activate a fixture plugin, forcing network activation when requested.
+ */
+function lerm_admin_config_activate_plugin( string $plugin_file, bool $network_wide ): void {
+	$plugin_basename = plugin_basename( $plugin_file );
+
+	if ( $network_wide && function_exists( 'is_plugin_active_for_network' ) && ! is_plugin_active_for_network( $plugin_basename ) ) {
+		if ( is_plugin_active( $plugin_basename ) ) {
+			deactivate_plugins( $plugin_basename, true, false );
+		}
+	}
+
+	$result = activate_plugin( $plugin_basename, '', $network_wide, true );
+
+	if ( is_wp_error( $result ) ) {
+		throw new RuntimeException(
+			'Admin Config wp-env setup could not activate plugin ' . $plugin_basename . ': ' . $result->get_error_message()
+		);
+	}
+}
+
+/**
  * Ensure the deterministic admin fixture user exists.
  */
 function lerm_admin_config_ensure_admin_user(): int {
@@ -140,11 +161,11 @@ $network_wide   = is_multisite();
 $admin_user_id  = lerm_admin_config_ensure_admin_user();
 
 if ( is_string( $package_plugin ) ) {
-	activate_plugin( plugin_basename( $package_plugin ), '', $network_wide, true );
+	lerm_admin_config_activate_plugin( $package_plugin, $network_wide );
 }
 
 if ( is_string( $demo_plugin ) ) {
-	activate_plugin( plugin_basename( $demo_plugin ), '', $network_wide, true );
+	lerm_admin_config_activate_plugin( $demo_plugin, $network_wide );
 }
 
 if ( $network_wide && 0 !== $admin_user_id && function_exists( 'grant_super_admin' ) ) {
