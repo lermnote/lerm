@@ -7,6 +7,7 @@ const {
 } = require( './helpers/wp-admin' );
 
 const isMultisite = process.env.LERM_ADMIN_CONFIG_MULTISITE === '1';
+const fieldName = 'site_acme_demo_network_settings';
 
 test.skip( ! isMultisite, 'Network smoke suite only runs against a multisite environment.' );
 
@@ -16,19 +17,19 @@ test( 'network options page replays nested validation errors and saves network s
 
 	await expect( page.locator( '[data-lerm-save]:visible' ).first() ).toBeVisible();
 
-	const feedSlug = page.locator( 'input[name="acme_demo_network_settings[shared_library][feed_slug]"]' );
+	const feedSlug = page.locator( `input[name="${ fieldName }[shared_library][feed_slug]"]` );
 
 	await feedSlug.fill( 'x' );
 	await clickAndWaitForAjax( page, page.locator( '[data-lerm-save]:visible' ).first(), 'lerm_admin_config_ajax_save_' );
 
-	await expect( page.locator( '.lerm-settings-row.is-invalid input[name="acme_demo_network_settings[shared_library][feed_slug]"]' ) ).toHaveValue( 'x' );
+	await expect( page.locator( `.lerm-fieldset__item.is-invalid input[name="${ fieldName }[shared_library][feed_slug]"]` ) ).toHaveValue( 'x' );
 	await expect( page.locator( '[data-lerm-status]' ).first() ).toContainText( /highlighted fields/i );
 
-	await page.locator( 'input[name="acme_demo_network_settings[template_endpoint]"]' ).fill( 'https://example.com/network-templates.json' );
+	await page.locator( `input[name="${ fieldName }[template_endpoint]"]` ).fill( 'https://example.com/network-templates.json' );
 	await feedSlug.fill( 'shared-library-hub' );
 	await saveOptionsPage( page );
 
 	await page.reload();
-	await expect( page.locator( 'input[name="acme_demo_network_settings[template_endpoint]"]' ) ).toHaveValue( 'https://example.com/network-templates.json' );
+	await expect( page.locator( `input[name="${ fieldName }[template_endpoint]"]` ) ).toHaveValue( 'https://example.com/network-templates.json' );
 	await expect( feedSlug ).toHaveValue( 'shared-library-hub' );
 } );

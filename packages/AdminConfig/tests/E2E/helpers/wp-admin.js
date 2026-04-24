@@ -44,7 +44,8 @@ async function waitForAdminAjax( page, actionFragment = '' ) {
 }
 
 async function openSettingsSection( page, labelPattern ) {
-	const sectionLink = page.getByRole( 'link', { name: labelPattern } ).first();
+	const sectionNav = page.getByRole( 'navigation', { name: /Settings sections/i } ).first();
+	const sectionLink = sectionNav.getByRole( 'link', { name: labelPattern } ).first();
 
 	await expect( sectionLink ).toBeVisible();
 	await sectionLink.click();

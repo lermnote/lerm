@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "wp-env:start": "wp-env start",
-    "wp-env:start:multisite": "cross-env WP_ENV_MULTISITE=1 WP_ENV_PORT=8890 WP_ENV_TESTS_PORT=8891 wp-env start",
+    "wp-env:start:multisite": "node tools/wp-env-multisite.js start",
     "wp-env:stop": "wp-env stop",
     "wp-env:stop:multisite": "cross-env WP_ENV_MULTISITE=1 WP_ENV_PORT=8890 WP_ENV_TESTS_PORT=8891 wp-env stop",
     "wp-env:destroy": "wp-env destroy",

@@ -42,6 +42,7 @@ test( 'embedded mode saves typography, ajax select, accordion, and tabbed fields
 	await saveOptionsPage( page );
 	await page.reload();
 
+	await openSettingsSection( page, /Brand/i );
 	await expect( page.locator( 'input[name="acme_theme_style_kit[headline_typography][font-size]"]' ) ).toHaveValue( '3.4' );
 	await expect( page.locator( 'input[name="acme_theme_style_kit[headline_typography][color]"]' ) ).toHaveValue( '#112233' );
 	await page.locator( '[data-lerm-tabbed-target="featured"]' ).first().click();
