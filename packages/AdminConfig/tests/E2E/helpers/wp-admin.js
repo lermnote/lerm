@@ -5,7 +5,9 @@ const adminPass = process.env.LERM_ADMIN_CONFIG_ADMIN_PASS || 'password';
 const adminBase = '/wp-admin';
 
 async function login( page ) {
-	await page.goto( '/wp-login.php' );
+	const loginUrl = `/wp-login.php?redirect_to=${ encodeURIComponent( `${ adminBase }/` ) }`;
+
+	await page.goto( loginUrl );
 
 	if ( page.url().includes( '/wp-admin/' ) ) {
 		return;
@@ -14,7 +16,15 @@ async function login( page ) {
 	await page.locator( '#user_login' ).fill( adminUser );
 	await page.locator( '#user_pass' ).fill( adminPass );
 	await page.locator( '#wp-submit' ).click();
-	await expect( page ).toHaveURL( /\/wp-admin\// );
+
+	try {
+		await expect( page ).toHaveURL( /\/wp-admin\// );
+	} catch ( error ) {
+		const loginError = await page.locator( '#login_error' ).textContent().catch( () => '' );
+		const message = loginError ? ` Login error: ${ loginError.trim().replace( /\s+/g, ' ' ) }` : '';
+
+		throw new Error( `WordPress login did not reach wp-admin.${ message }` );
+	}
 }
 
 function acceptNextDialog( page ) {
@@ -40,11 +50,52 @@ async function openSettingsSection( page, labelPattern ) {
 	await sectionLink.click();
 }
 
+async function isVisibleWithin( locator, timeout = 3_000 ) {
+	try {
+		await expect( locator ).toBeVisible( { timeout } );
+		return true;
+	} catch ( error ) {
+		return false;
+	}
+}
+
+async function openNetworkOptionsPage( page, pageSlug ) {
+	const encodedSlug = encodeURIComponent( pageSlug );
+	const saveButton = page.locator( '[data-lerm-save]:visible' ).first();
+	const directPaths = [
+		`/wp-admin/network/settings.php?page=${ encodedSlug }`,
+		`/wp-admin/network/admin.php?page=${ encodedSlug }`,
+	];
+
+	for ( const path of directPaths ) {
+		await page.goto( path );
+
+		if ( await isVisibleWithin( saveButton ) ) {
+			return;
+		}
+	}
+
+	await page.goto( '/wp-admin/network/' );
+
+	const menuLink = page.locator( `#adminmenu a[href*="page=${ encodedSlug }"]` ).first();
+	const menuHref = await menuLink.getAttribute( 'href', { timeout: 3_000 } ).catch( () => null );
+
+	if ( ! menuHref ) {
+		await expect( menuLink, `Network menu link for ${ pageSlug } should exist` ).toHaveAttribute( 'href', /page=/ );
+		return;
+	}
+
+	const targetUrl = new URL( menuHref, new URL( '/wp-admin/network/', page.url() ) ).toString();
+
+	await page.goto( targetUrl );
+	await expect( saveButton ).toBeVisible();
+}
+
 async function saveOptionsPage( page ) {
-	const saveButton = page.locator( '[data-lerm-save]' ).first();
-	const saveRequest = waitForAdminAjax( page, 'lerm_admin_config_ajax_save_' );
+	const saveButton = page.locator( '[data-lerm-save]:visible' ).first();
 
 	await expect( saveButton ).toBeVisible();
+	const saveRequest = waitForAdminAjax( page, 'lerm_admin_config_ajax_save_' );
 	await saveButton.click();
 	await saveRequest;
 	await expect( page.locator( '[data-lerm-status]' ).first() ).toContainText( /Synced|Saved/ );
@@ -88,10 +139,28 @@ async function importBackupSnapshot( page, json ) {
 }
 
 async function submitClassicForm( page, submitSelector = '#submit' ) {
-	await Promise.all( [
-		page.waitForNavigation( { waitUntil: 'domcontentloaded', timeout: 20_000 } ),
-		page.locator( submitSelector ).first().click(),
-	] );
+	const submitButton = page.locator( submitSelector ).first();
+	const acceptUnloadDialog = async ( dialog ) => {
+		await dialog.accept();
+	};
+
+	await expect( submitButton ).toBeVisible();
+
+	page.once( 'dialog', acceptUnloadDialog );
+
+	const navigation = page.waitForNavigation( { waitUntil: 'domcontentloaded', timeout: 20_000 } )
+		.then( () => true )
+		.catch( () => false );
+
+	await submitButton.click();
+
+	const didNavigate = await navigation;
+
+	page.off( 'dialog', acceptUnloadDialog );
+
+	if ( ! didNavigate ) {
+		await page.waitForLoadState( 'networkidle', { timeout: 5_000 } ).catch( () => {} );
+	}
 }
 
 async function openPostEditor( page, title, postType = 'post' ) {
@@ -153,6 +222,7 @@ module.exports = {
 	login,
 	openCategoryEditor,
 	openCommentEditor,
+	openNetworkOptionsPage,
 	openPostEditor,
 	openSettingsSection,
 	resetOptionsPage,

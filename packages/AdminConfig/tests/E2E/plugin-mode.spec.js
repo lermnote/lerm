@@ -13,10 +13,10 @@ test( 'plugin mode saves changes across sections with one global save', async ( 
 	await login( page );
 	await page.goto( '/wp-admin/options-general.php?page=acme-demo-settings' );
 
-	await expect( page.locator( '[data-lerm-save]' ).first() ).toBeVisible();
+	await expect( page.locator( '[data-lerm-save]:visible' ).first() ).toBeVisible();
 	await page.locator( 'select[name="acme_demo_settings[tone_preset]"]' ).selectOption( 'bold' );
 
-	await openSettingsSection( page, /Extensions/i );
+	await openSettingsSection( page, /Extension API/i );
 
 	const releaseSlug = page.locator( 'input[name="acme_demo_settings[release_slug]"]' );
 	await releaseSlug.fill( 'spring-launch-2026' );
@@ -26,7 +26,7 @@ test( 'plugin mode saves changes across sections with one global save', async ( 
 	await page.reload();
 	await expect( page.locator( 'select[name="acme_demo_settings[tone_preset]"]' ) ).toHaveValue( 'bold' );
 
-	await openSettingsSection( page, /Extensions/i );
+	await openSettingsSection( page, /Extension API/i );
 	await expect( page.locator( 'input[name="acme_demo_settings[release_slug]"]' ) ).toHaveValue( 'spring-launch-2026' );
 } );
 
@@ -35,7 +35,7 @@ test( 'plugin mode resets the whole page back to schema defaults', async ( { pag
 	await page.goto( '/wp-admin/options-general.php?page=acme-demo-settings' );
 
 	await page.locator( 'select[name="acme_demo_settings[tone_preset]"]' ).selectOption( 'vivid' );
-	await openSettingsSection( page, /Extensions/i );
+	await openSettingsSection( page, /Extension API/i );
 	await page.locator( 'input[name="acme_demo_settings[release_slug]"]' ).fill( 'global-reset-check' );
 
 	// Navigate back to General so the sticky action bar is visible (hidden section bars take DOM priority).
@@ -45,7 +45,7 @@ test( 'plugin mode resets the whole page back to schema defaults', async ( { pag
 	await page.reload();
 	await expect( page.locator( 'select[name="acme_demo_settings[tone_preset]"]' ) ).toHaveValue( 'calm' );
 
-	await openSettingsSection( page, /Extensions/i );
+	await openSettingsSection( page, /Extension API/i );
 	await expect( page.locator( 'input[name="acme_demo_settings[release_slug]"]' ) ).toHaveValue( 'spring-launch' );
 } );
 
@@ -53,7 +53,7 @@ test( 'plugin mode imports snapshots and saves ajax select and advanced field va
 	await login( page );
 	await page.goto( '/wp-admin/options-general.php?page=acme-demo-settings' );
 
-	await openSettingsSection( page, /Extensions/i );
+	await openSettingsSection( page, /Extension API/i );
 	await selectAjaxOption( page, 'featured_campaign', 'studio', 'Studio Preview' );
 
 	await openSettingsSection( page, /Advanced Fields/i );
@@ -79,7 +79,7 @@ test( 'plugin mode imports snapshots and saves ajax select and advanced field va
 	await importBackupSnapshot( page, JSON.stringify( snapshot, null, 2 ) );
 	await page.reload();
 
-	await openSettingsSection( page, /Extensions/i );
+	await openSettingsSection( page, /Extension API/i );
 	await expect( page.locator( 'input[name="acme_demo_settings[release_slug]"]' ) ).toHaveValue( 'snapshot-imported' );
 	await expect( page.locator( 'input[name="acme_demo_settings[featured_campaign]"]' ) ).toHaveValue( 'studio-preview' );
 

@@ -25,6 +25,38 @@ function lerm_admin_config_find_plugin_file( string $basename ): ?string {
 }
 
 /**
+ * Ensure the deterministic admin fixture user exists.
+ */
+function lerm_admin_config_ensure_admin_user(): int {
+	$user = get_user_by( 'login', 'admin' );
+
+	if ( ! ( $user instanceof WP_User ) ) {
+		$user_id = wp_create_user( 'admin', 'password', 'admin@example.com' );
+
+		if ( is_wp_error( $user_id ) ) {
+			return 0;
+		}
+
+		$user = get_user_by( 'id', (int) $user_id );
+	}
+
+	if ( ! ( $user instanceof WP_User ) ) {
+		return 0;
+	}
+
+	wp_set_password( 'password', (int) $user->ID );
+	$user->set_role( 'administrator' );
+
+	if ( is_multisite() && function_exists( 'add_user_to_blog' ) ) {
+		add_user_to_blog( get_current_blog_id(), (int) $user->ID, 'administrator' );
+	}
+
+	clean_user_cache( (int) $user->ID );
+
+	return (int) $user->ID;
+}
+
+/**
  * Ensure a fixture post or page exists and return its ID.
  */
 function lerm_admin_config_ensure_post( string $slug, string $title, string $post_type, string $content ): int {
@@ -105,6 +137,7 @@ function lerm_admin_config_ensure_term( string $name, string $taxonomy ): int {
 $package_plugin = lerm_admin_config_find_plugin_file( 'lerm-admin-config.php' );
 $demo_plugin    = lerm_admin_config_find_plugin_file( 'schema-demo-plugin.php' );
 $network_wide   = is_multisite();
+$admin_user_id  = lerm_admin_config_ensure_admin_user();
 
 if ( is_string( $package_plugin ) ) {
 	activate_plugin( plugin_basename( $package_plugin ), '', $network_wide, true );
@@ -114,12 +147,8 @@ if ( is_string( $demo_plugin ) ) {
 	activate_plugin( plugin_basename( $demo_plugin ), '', $network_wide, true );
 }
 
-if ( $network_wide && function_exists( 'grant_super_admin' ) ) {
-	$admin_user = get_user_by( 'login', 'admin' );
-
-	if ( $admin_user instanceof WP_User ) {
-		grant_super_admin( (int) $admin_user->ID );
-	}
+if ( $network_wide && 0 !== $admin_user_id && function_exists( 'grant_super_admin' ) ) {
+	grant_super_admin( $admin_user_id );
 }
 
 switch_theme( 'admin-config-embedded' );
