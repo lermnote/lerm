@@ -38,6 +38,8 @@ test( 'plugin mode resets the whole page back to schema defaults', async ( { pag
 	await openSettingsSection( page, /Extensions/i );
 	await page.locator( 'input[name="acme_demo_settings[release_slug]"]' ).fill( 'global-reset-check' );
 
+	// Navigate back to General so the sticky action bar is visible (hidden section bars take DOM priority).
+	await openSettingsSection( page, /General/i );
 	await resetOptionsPage( page, 'all' );
 
 	await page.reload();
@@ -64,6 +66,8 @@ test( 'plugin mode imports snapshots and saves ajax select and advanced field va
 	await saveOptionsPage( page );
 
 	await openSettingsSection( page, /Tools/i );
+	// Wait for the Tools section content to be visible (hidden section containers take DOM priority).
+	await expect( page.locator( '[data-lerm-backup-export]' ).first() ).toBeVisible();
 
 	const snapshot = JSON.parse( await exportBackupSnapshot( page ) );
 	snapshot.release_slug = 'snapshot-imported';

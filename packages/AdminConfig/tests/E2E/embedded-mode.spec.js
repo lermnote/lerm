@@ -10,6 +10,8 @@ test( 'embedded mode saves nested theme settings', async ( { page } ) => {
 	await login( page );
 	await page.goto( '/wp-admin/themes.php?page=acme-theme-style-kit' );
 
+	await openSettingsSection( page, /Brand/i );
+
 	await expect( page.locator( '[data-lerm-save]' ).first() ).toBeVisible();
 	const surfaceTitle = page.locator( 'input[name="acme_theme_style_kit[surface_tabs][default][title]"]' );
 	await surfaceTitle.fill( 'Editorial surface updated' );
@@ -23,6 +25,8 @@ test( 'embedded mode saves nested theme settings', async ( { page } ) => {
 test( 'embedded mode saves typography, ajax select, accordion, and tabbed fields together', async ( { page } ) => {
 	await login( page );
 	await page.goto( '/wp-admin/themes.php?page=acme-theme-style-kit' );
+
+	await openSettingsSection( page, /Brand/i );
 
 	await expect( page.locator( '[data-lerm-save]' ).first() ).toBeVisible();
 	await page.locator( 'input[name="acme_theme_style_kit[headline_typography][font-size]"]' ).fill( '3.4' );

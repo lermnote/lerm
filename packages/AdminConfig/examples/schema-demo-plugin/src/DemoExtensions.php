@@ -101,7 +101,7 @@ final class DemoExtensions {
 		$runtime->register_field_type(
 			'slug_text',
 			array(
-				'render'   => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
+				'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
 					$field_id = (string) ( $field['id'] ?? '' );
 
 					printf(
@@ -113,10 +113,21 @@ final class DemoExtensions {
 						! empty( $field['dependency_field'] ) ? 'data-lerm-controller="1"' : ''
 					);
 				},
-				'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
+				'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
+					printf(
+						'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text" placeholder="%4$s" spellcheck="false" autocapitalize="off" autocorrect="off"%5$s%6$s>',
+						esc_attr( $input_id ),
+						esc_attr( $field_name ),
+						esc_attr( is_scalar( $value ) ? (string) $value : '' ),
+						esc_attr( (string) ( $field['placeholder'] ?? 'spring-launch' ) ),
+						'' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '',
+						'' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : ''
+					);
+				},
+				'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
 					return sanitize_title( is_scalar( $value ) ? (string) $value : '' );
 				},
-				'client'   => array(
+				'client'        => array(
 					'control' => 'slug_text',
 				),
 			)
