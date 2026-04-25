@@ -69,7 +69,7 @@ test( 'plugin mode imports snapshots and saves ajax select and advanced field va
 	// Wait for the Tools section content to be visible (hidden section containers take DOM priority).
 	await expect( page.locator( '[data-lerm-backup-export]' ).first() ).toBeVisible();
 
-	const snapshot = JSON.parse( await exportBackupSnapshot( page ) );
+	const snapshot = JSON.parse( ( await exportBackupSnapshot( page ) ).json );
 	snapshot.release_slug = 'snapshot-imported';
 	snapshot.featured_campaign = 'studio-preview';
 	snapshot.card_tabs.secondary.title = 'Snapshot secondary card';
@@ -89,4 +89,25 @@ test( 'plugin mode imports snapshots and saves ajax select and advanced field va
 	await expect( page.locator( 'input[name="acme_demo_settings[card_tabs][secondary][title]"]' ) ).toHaveValue( 'Snapshot secondary card' );
 	await page.locator( 'button[data-lerm-accordion-trigger]', { hasText: /CTA Panel/i } ).first().click();
 	await expect( page.locator( 'input[name="acme_demo_settings[launch_accordion][cta][button_label]"]' ) ).toHaveValue( 'Import launch' );
+} );
+
+test( 'plugin mode uses REST transport for async options page actions', async ( { page } ) => {
+	await login( page );
+	await page.goto( '/wp-admin/options-general.php?page=acme-demo-settings' );
+
+	await openSettingsSection( page, /Extension API/i );
+	const dataSourceResponse = await selectAjaxOption( page, 'featured_campaign', 'studio', 'Studio Preview', { transport: 'rest' } );
+	expect( dataSourceResponse.ok() ).toBe( true );
+	expect( decodeURIComponent( dataSourceResponse.url() ) ).toContain( 'lerm-admin-config/v1/schema/acme-demo-settings/data-source' );
+
+	await page.locator( 'input[name="acme_demo_settings[release_slug]"]' ).fill( 'rest-transport-check' );
+	const saveResponse = await saveOptionsPage( page, { transport: 'rest' } );
+	expect( saveResponse.ok() ).toBe( true );
+	expect( decodeURIComponent( saveResponse.url() ) ).toContain( 'lerm-admin-config/v1/schema/acme-demo-settings/save' );
+
+	await openSettingsSection( page, /Tools/i );
+	const exportResult = await exportBackupSnapshot( page, { transport: 'rest' } );
+	expect( exportResult.response.ok() ).toBe( true );
+	expect( decodeURIComponent( exportResult.response.url() ) ).toContain( 'lerm-admin-config/v1/schema/acme-demo-settings/export' );
+	expect( JSON.parse( exportResult.json ).release_slug ).toBe( 'rest-transport-check' );
 } );

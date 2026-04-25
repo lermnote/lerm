@@ -12,6 +12,33 @@ require_once ABSPATH . 'wp-admin/includes/theme.php';
 require_once ABSPATH . 'wp-admin/includes/user.php';
 
 /**
+ * Keep wp-env URLs aligned with the active mapped port.
+ */
+function lerm_admin_config_normalize_site_url(): void {
+	$configured_url = defined( 'WP_HOME' ) && is_string( WP_HOME ) ? WP_HOME : '';
+
+	if ( '' === $configured_url && defined( 'WP_SITEURL' ) && is_string( WP_SITEURL ) ) {
+		$configured_url = WP_SITEURL;
+	}
+
+	if ( '' !== $configured_url ) {
+		$url = untrailingslashit( $configured_url );
+	} else {
+		$port = getenv( 'WP_ENV_PORT' );
+		$port = is_string( $port ) ? preg_replace( '/\D+/', '', $port ) : '';
+		$port = '' !== $port ? $port : '8888';
+		$url  = 'http://localhost:' . $port;
+	}
+
+	update_option( 'siteurl', $url );
+	update_option( 'home', $url );
+
+	if ( is_multisite() ) {
+		update_site_option( 'siteurl', $url );
+	}
+}
+
+/**
  * Locate a plugin main file by basename.
  */
 function lerm_admin_config_find_plugin_file( string $basename ): ?string {
@@ -171,6 +198,8 @@ $package_plugin = lerm_admin_config_find_plugin_file( 'lerm-admin-config.php' );
 $demo_plugin    = lerm_admin_config_find_plugin_file( 'schema-demo-plugin.php' );
 $network_wide   = is_multisite();
 $admin_user_id  = lerm_admin_config_ensure_admin_user();
+
+lerm_admin_config_normalize_site_url();
 
 if ( is_string( $package_plugin ) ) {
 	lerm_admin_config_activate_plugin( $package_plugin, $network_wide );

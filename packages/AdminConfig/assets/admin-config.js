@@ -221,6 +221,10 @@
 		const headers = new Headers(options.headers || {});
 		headers.set('X-WP-Nonce', String(cfg.restNonce || ''));
 
+		if (options.body instanceof FormData) {
+			options.body.set('_wpnonce', String(cfg.restNonce || ''));
+		}
+
 		return fetch(restUrl(path), { ...options, headers }).then(parseJsonResponse);
 	};
 

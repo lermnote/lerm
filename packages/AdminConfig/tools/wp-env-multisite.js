@@ -24,6 +24,15 @@ if ( hadOverride && previousOverride.trim() !== '' ) {
 
 override.multisite = true;
 
+const port = process.env.WP_ENV_PORT || '8890';
+override.config = {
+	...( override.config || {} ),
+	DOMAIN_CURRENT_SITE: `localhost:${ port }`,
+	PATH_CURRENT_SITE: '/',
+	WP_HOME: `http://localhost:${ port }`,
+	WP_SITEURL: `http://localhost:${ port }`,
+};
+
 fs.writeFileSync( overridePath, `${ JSON.stringify( override, null, 2 ) }\n` );
 
 try {
@@ -42,7 +51,7 @@ try {
 			cwd: root,
 			env: {
 				...process.env,
-				WP_ENV_PORT: process.env.WP_ENV_PORT || '8890',
+				WP_ENV_PORT: port,
 				WP_ENV_TESTS_PORT: process.env.WP_ENV_TESTS_PORT || '8891',
 			},
 			stdio: 'inherit',
