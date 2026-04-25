@@ -29,6 +29,8 @@ abstract class TestCase extends BaseTestCase {
 		$GLOBALS['lerm_admin_config_actions']        = array();
 		$GLOBALS['lerm_admin_config_is_admin']       = false;
 		$GLOBALS['lerm_admin_config_is_multisite']   = false;
+		$GLOBALS['lerm_admin_config_options']        = array();
+		$GLOBALS['lerm_admin_config_rest_routes']    = array();
 	}
 
 	protected function assertStringContains( string $needle, string $haystack, string $message = '' ): void {
