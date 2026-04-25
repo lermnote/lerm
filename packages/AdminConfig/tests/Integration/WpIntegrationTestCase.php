@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Tests\Integration;
 
-use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\WordPress\Runtime;
 use PHPUnit\Framework\TestCase;
 
@@ -19,14 +18,12 @@ abstract class WpIntegrationTestCase extends TestCase {
 		parent::setUp();
 
 		Runtime::reset_instance();
-		Framework::reset_instance();
 
 		$this->set_admin_context();
 	}
 
 	protected function tearDown(): void {
 		Runtime::reset_instance();
-		Framework::reset_instance();
 
 		parent::tearDown();
 	}

@@ -82,6 +82,9 @@ jobs:
       - name: Validate composer.json
         run: composer validate --strict
 
+      - name: Check plugin version literals
+        run: php tools/sync-version.php --check
+
       - name: Run package quality gate
         run: composer ci
 

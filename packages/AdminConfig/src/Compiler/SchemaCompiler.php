@@ -97,10 +97,14 @@ final class SchemaCompiler {
 	private function compile_store( array $schema, string $id ): array {
 		$store = is_array( $schema['store'] ?? null ) ? $schema['store'] : array();
 		$type  = sanitize_key( (string) ( $store['type'] ?? 'option' ) );
-		$key   = sanitize_key( (string) ( $store['key'] ?? $schema['option_name'] ?? $id ) );
+		$key   = isset( $store['key'] ) && is_scalar( $store['key'] ) ? sanitize_key( (string) $store['key'] ) : '';
 
 		if ( '' === $type ) {
 			$type = 'option';
+		}
+
+		if ( '' === $key && isset( $schema['option_name'] ) && is_scalar( $schema['option_name'] ) ) {
+			$key = sanitize_key( (string) $schema['option_name'] );
 		}
 
 		if ( '' === $key ) {

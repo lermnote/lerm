@@ -26,3 +26,6 @@ Thumbs.db
 !packages/AdminConfig/phpstan.neon.dist
 !packages/AdminConfig/phpunit.integration.xml.dist
 !packages/AdminConfig/phpunit.xml.dist
+packages/AdminConfig/.wp-env.override.json
+packages/AdminConfig/playwright-report/
+packages/AdminConfig/test-results/

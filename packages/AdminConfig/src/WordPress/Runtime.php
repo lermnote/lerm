@@ -227,13 +227,18 @@ final class Runtime {
 	}
 
 	public function handle_ajax_data_source(): void {
+		check_ajax_referer( 'lerm_admin_config_data_source', 'nonce' );
+
 		$schema_id = isset( $_REQUEST['schema_id'] ) ? sanitize_key( wp_unslash( $_REQUEST['schema_id'] ) ) : '';
 
 		if ( '' === $schema_id || ! $this->has( $schema_id ) ) {
-			return;
+			wp_send_json_error(
+				array(
+					'message' => __( 'The requested schema was not found.', 'lerm' ),
+				),
+				404
+			);
 		}
-
-		check_ajax_referer( 'lerm_admin_config_data_source', 'nonce' );
 
 		$compiled = $this->compiled( $schema_id );
 		$context  = $this->request_context();

@@ -11,6 +11,7 @@ namespace Lerm\AdminConfig\Framework;
 
 use Lerm\AdminConfig\Contracts\FieldModule;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
+use Lerm\AdminConfig\Framework\Contracts\FrameworkContract;
 use Lerm\AdminConfig\Framework\Contracts\StorageBackend;
 use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
@@ -29,12 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class Framework {
-
-	/**
-	 * Deprecated shared framework instance retained for backward compatibility.
-	 */
-	private static ?self $instance = null;
+final class Framework implements FrameworkContract {
 
 	private FieldTypeRegistry $field_types;
 
@@ -65,26 +61,6 @@ final class Framework {
 			// AdminConfig assets. Plugin bootstrap injects its own resolver.
 			trailingslashit( get_template_directory_uri() . '/packages/AdminConfig/assets' )
 		);
-	}
-
-	/**
-	 * Get the deprecated shared framework singleton.
-	 *
-	 * Prefer `new Framework()` or injecting a Framework into `Runtime` so tests
-	 * and multi-runtime setups do not accidentally share mutable state.
-	 */
-	public static function instance(): self {
-		_deprecated_function( __METHOD__, '0.2.0', 'new ' . __CLASS__ . '()' );
-
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
-	}
-
-	public static function reset_instance(): void {
-		self::$instance = null;
 	}
 
 	/**

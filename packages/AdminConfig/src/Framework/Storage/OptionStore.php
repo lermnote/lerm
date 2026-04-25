@@ -17,7 +17,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Framework\Storage;
 
 use Lerm\AdminConfig\Framework\Backends\OptionBackend;
-use Lerm\AdminConfig\Framework\Framework;
+use Lerm\AdminConfig\Framework\Contracts\FrameworkContract;
 use Lerm\AdminConfig\Framework\Contracts\StorageBackend;
 use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
@@ -42,7 +42,7 @@ final class OptionStore {
 	/**
 	 * Optional reference to the Framework instance for lifecycle hooks.
 	 */
-	private ?object $framework;
+	private ?FrameworkContract $framework;
 
 	/**
 	 * Cached raw options.
@@ -84,7 +84,7 @@ final class OptionStore {
 	 *                                           OptionBackend using the option
 	 *                                           name resolved from $definition.
 	 */
-	public function __construct( array $definition, FieldTypeRegistry $field_types, ?StorageBackend $backend = null, ?object $framework = null ) {
+	public function __construct( array $definition, FieldTypeRegistry $field_types, ?StorageBackend $backend = null, ?FrameworkContract $framework = null ) {
 		$this->definition  = $definition;
 		$this->field_types = $field_types;
 		$this->backend     = $backend ?? new OptionBackend( $this->resolve_option_name() );
@@ -559,7 +559,7 @@ final class OptionStore {
 
 		$page_id = $this->backend->key();
 
-		if ( $this->framework && method_exists( $this->framework, 'fire' ) ) {
+		if ( null !== $this->framework ) {
 			$this->framework->fire( 'before_save', $page_id, $options );
 		}
 
@@ -567,7 +567,7 @@ final class OptionStore {
 		$this->normalized_options = null;
 
 		if ( $this->backend->write( $options ) ) {
-			if ( $this->framework && method_exists( $this->framework, 'fire' ) ) {
+			if ( null !== $this->framework ) {
 				$this->framework->fire( 'after_save', $page_id, $options );
 			}
 			return true;
