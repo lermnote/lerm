@@ -433,6 +433,8 @@ final class OptionsPage {
 			$this->js_global,
 			array(
 				'ajaxUrl'             => admin_url( 'admin-ajax.php' ),
+				'restUrl'             => rest_url( 'lerm-admin-config/v1/' ),
+				'restNonce'           => wp_create_nonce( 'wp_rest' ),
 				'saveAction'          => $this->ajax_save_action(),
 				'resetAction'         => $this->ajax_reset_action(),
 				'exportAction'        => $this->ajax_export_action(),

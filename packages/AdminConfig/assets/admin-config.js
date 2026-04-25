@@ -15,6 +15,7 @@
 	/**
 	 * @typedef {{
 	 *   ajaxUrl: string,
+	 *   restUrl?: string, restNonce?: string,
 	 *   saveAction: string, resetAction: string, exportAction: string, importAction: string,
 	 *   dataSourceAction: string, dataSourceNonce: string,
 	 *   codeEditor: object|null,
@@ -159,6 +160,69 @@
 
 	/** @type {LermConfig} */
 	let cfg = /** @type {any} */ ({});
+
+	const hasRestTransport = () => !!(cfg.restUrl && cfg.restNonce);
+
+	/**
+	 * @param {string} path
+	 */
+	const restUrl = (path) => `${String(cfg.restUrl || '').replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+
+	/**
+	 * @param {HTMLFormElement|null} form
+	 * @param {string} action
+	 */
+	const restActionPath = (form, action) => {
+		const schemaId = form ? getData(form, 'schema-id') : '';
+		if (!schemaId) return '';
+
+		if (action === cfg.saveAction) return `schema/${schemaId}/save`;
+		if (action === cfg.resetAction) return `schema/${schemaId}/reset`;
+		if (action === cfg.importAction) return `schema/${schemaId}/import`;
+		if (action === cfg.exportAction) return `schema/${schemaId}/export`;
+
+		return '';
+	};
+
+	/**
+	 * @param {Response} response
+	 * @returns {Promise<AjaxResponse>}
+	 */
+	const parseJsonResponse = async (response) => {
+		const text = await response.text();
+
+		try {
+			const parsed = JSON.parse(text);
+
+			if (parsed && typeof parsed === 'object' && 'success' in parsed) {
+				return /** @type {AjaxResponse} */ (parsed);
+			}
+
+			if (!response.ok || (parsed && typeof parsed === 'object' && 'code' in parsed)) {
+				return /** @type {AjaxResponse} */ ({
+					success: false,
+					data: parsed?.data?.data || { message: parsed?.message || cfg.saveError },
+				});
+			}
+
+			return /** @type {AjaxResponse} */ ({ success: true, data: parsed });
+		} catch {
+			if (!response.ok) throw new Error('Network error: ' + response.status);
+			throw new Error('Invalid JSON response: ' + text.slice(0, 120));
+		}
+	};
+
+	/**
+	 * @param {string} path
+	 * @param {RequestInit} [options]
+	 * @returns {Promise<AjaxResponse>}
+	 */
+	const requestRest = (path, options = {}) => {
+		const headers = new Headers(options.headers || {});
+		headers.set('X-WP-Nonce', String(cfg.restNonce || ''));
+
+		return fetch(restUrl(path), { ...options, headers }).then(parseJsonResponse);
+	};
 
 	/**
 	 * @returns {{ tab: string, subsection: string }}
@@ -963,8 +1027,6 @@
 	 */
 	const requestDataSource = (form, params) => {
 		const body = new FormData();
-		body.set('action', cfg.dataSourceAction);
-		body.set('nonce', cfg.dataSourceNonce);
 		body.set('schema_id', params.schemaId);
 		body.set('field_id', params.fieldId);
 		body.set('search', params.search ?? '');
@@ -977,15 +1039,14 @@
 			body.set(`context[${contextKey}]`, contextValue);
 		}
 
-		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(async (response) => {
-			const text = await response.text();
+		if (hasRestTransport()) {
+			return requestRest(`schema/${params.schemaId}/data-source`, { method: 'POST', body });
+		}
 
-			try {
-				return /** @type {AjaxResponse} */ (JSON.parse(text));
-			} catch {
-				throw new Error('Invalid JSON response: ' + text.slice(0, 120));
-			}
-		});
+		body.set('action', cfg.dataSourceAction);
+		body.set('nonce', cfg.dataSourceNonce);
+
+		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
 	};
 
 	/**
@@ -1215,7 +1276,7 @@
 	 * @param {boolean} [append]
 	 */
 	const loadAjaxSelectOptions = (instance, query, page = 1, append = false) => {
-		if (!cfg.ajaxUrl || !cfg.dataSourceAction || !instance.schemaId || !instance.source) return Promise.resolve();
+		if ((!hasRestTransport() && (!cfg.ajaxUrl || !cfg.dataSourceAction)) || !instance.schemaId || !instance.source) return Promise.resolve();
 
 		instance.currentQuery = query;
 		setAjaxSelectStatus(instance, cfg.loadingResults);
@@ -2491,16 +2552,17 @@
 		const body = new FormData(form);
 		body.set('action', action);
 		for (const [k, v] of Object.entries(extras)) body.set(k, v);
-		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(async (r) => {
-			const text = await r.text();
 
-			try {
-				return /** @type {AjaxResponse} */ (JSON.parse(text));
-			} catch {
-				if (!r.ok) throw new Error('Network error: ' + r.status);
-				throw new Error('Invalid JSON response: ' + text.slice(0, 120));
+		const path = restActionPath(form, action);
+		if (hasRestTransport() && path) {
+			if (action === cfg.exportAction) {
+				return requestRest(path, { method: 'GET' });
 			}
-		});
+
+			return requestRest(path, { method: 'POST', body });
+		}
+
+		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
 	};
 
 	/**
@@ -2534,16 +2596,12 @@
 			appendOptionEntries(body, pageForm);
 		});
 
-		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(async (r) => {
-			const text = await r.text();
+		const path = restActionPath(form, action);
+		if (hasRestTransport() && path) {
+			return requestRest(path, { method: 'POST', body });
+		}
 
-			try {
-				return /** @type {AjaxResponse} */ (JSON.parse(text));
-			} catch {
-				if (!r.ok) throw new Error('Network error: ' + r.status);
-				throw new Error('Invalid JSON response: ' + text.slice(0, 120));
-			}
-		});
+		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
 	};
 
 	// ─── Value Application ────────────────────────────────────────────────────

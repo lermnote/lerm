@@ -16,6 +16,7 @@ use Lerm\AdminConfig\Registry\ContainerRegistry;
 use Lerm\AdminConfig\Registry\DataSourceRegistry;
 use Lerm\AdminConfig\Registry\FieldModuleRegistry;
 use Lerm\AdminConfig\Registry\SchemaRegistry;
+use Lerm\AdminConfig\Rest\RestEndpoints;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Stores\MissingStoreContextException;
 use Lerm\AdminConfig\Stores\StoreResolver;
@@ -74,6 +75,7 @@ final class Runtime {
 		$this->containers->register( new ProfileContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new TaxonomyContainer( $this->framework, $this->stores ) );
 		add_action( 'wp_ajax_lerm_admin_config_data_source', array( $this, 'handle_ajax_data_source' ) );
+		( new RestEndpoints( $this ) )->register();
 	}
 
 	public static function instance( ?AssetResolver $asset_resolver = null ): self {
@@ -429,7 +431,7 @@ final class Runtime {
 	 * @param mixed $resolved
 	 * @return array{items: array<int, array{value: string, label: string}>, more: bool}
 	 */
-	private function normalize_data_source_response( $resolved ): array {
+	public function normalize_data_source_response( $resolved ): array {
 		$items = array();
 		$more  = false;
 
@@ -513,7 +515,7 @@ final class Runtime {
 	/**
 	 * @param array<string, int> $context
 	 */
-	private function current_user_can_schema( CompiledSchema $schema, array $context ): bool {
+	public function current_user_can_schema( CompiledSchema $schema, array $context = array() ): bool {
 		$container  = $schema->container();
 		$definition = $schema->definition();
 		$type       = sanitize_key( (string) ( $container['type'] ?? 'options_page' ) );

@@ -36,10 +36,11 @@
 ## Validation and Storage Guarantees
 
 - PHP schema remains the source of truth for defaults and sanitization
+- REST endpoints expose schema/value reads plus save, reset, import/export, and async data-source operations
 - AJAX and non-JS saves share the same store validation path
 - Meta-backed reads fall back to compiled defaults when context is missing through `Runtime::all()` and `Runtime::get()`
 - `admin-post.php` remains the supported no-JavaScript fallback for options pages
-- `admin-ajax.php` remains the supported async transport until the REST API transport fully replaces it
+- `admin-ajax.php` remains a deprecated async fallback while the REST transport rolls out
 
 ## Current Testing Coverage
 
