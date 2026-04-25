@@ -26,7 +26,6 @@ abstract class TestCase extends BaseTestCase {
 
 	private function reset_wordpress_globals(): void {
 		$GLOBALS['lerm_admin_config_doing_it_wrong'] = array();
-		$GLOBALS['lerm_admin_config_deprecated']     = array();
 		$GLOBALS['lerm_admin_config_actions']        = array();
 		$GLOBALS['lerm_admin_config_is_admin']       = false;
 		$GLOBALS['lerm_admin_config_is_multisite']   = false;

@@ -83,16 +83,6 @@ if ( ! function_exists( '_doing_it_wrong' ) ) {
 	}
 }
 
-if ( ! function_exists( '_deprecated_function' ) ) {
-	function _deprecated_function( string $function_name, string $version, string $replacement = '' ): void {
-		$GLOBALS['lerm_admin_config_deprecated'][] = array(
-			'function'    => $function_name,
-			'version'     => $version,
-			'replacement' => $replacement,
-		);
-	}
-}
-
 if ( ! function_exists( 'sanitize_key' ) ) {
 	function sanitize_key( $key ): string {
 		$key = is_scalar( $key ) ? strtolower( (string) $key ) : '';

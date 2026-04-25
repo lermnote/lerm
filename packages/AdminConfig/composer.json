@@ -44,7 +44,6 @@
 		"test:unit": "@php vendor/bin/phpunit --configuration phpunit.xml.dist --testsuite unit,smoke",
 		"test:integration": "@php vendor/bin/phpunit --configuration phpunit.integration.xml.dist",
 		"test": "@test:unit",
-		"test:legacy": "@php tests/run.php",
 		"ci": [
 			"@lint:php",
 			"@lint:wpcs",

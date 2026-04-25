@@ -15,6 +15,7 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Framework\Resolvers;
 
+use Lerm\AdminConfig\Version;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,7 +30,7 @@ final class DefaultAssetResolver implements AssetResolver {
 	/**
 	 * @param string $assets_url       Public URL of the framework assets directory (trailing slash optional).
 	 * @param string $version_constant Name of the PHP constant holding the version string.
-	 *                                 Falls back to '1.0.0' when not defined.
+	 *                                 Falls back to the package version when not defined.
 	 */
 	public function __construct( string $assets_url, string $version_constant = 'LERM_VERSION' ) {
 		$this->assets_url       = trailingslashit( $assets_url );
@@ -41,6 +42,6 @@ final class DefaultAssetResolver implements AssetResolver {
 	}
 
 	public function version(): string {
-		return defined( $this->version_constant ) ? (string) constant( $this->version_constant ) : '1.0.0';
+		return Version::from_constant( $this->version_constant );
 	}
 }

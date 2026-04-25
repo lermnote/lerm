@@ -38,6 +38,8 @@
 - PHP schema remains the source of truth for defaults and sanitization
 - AJAX and non-JS saves share the same store validation path
 - Meta-backed reads fall back to compiled defaults when context is missing through `Runtime::all()` and `Runtime::get()`
+- `admin-post.php` remains the supported no-JavaScript fallback for options pages
+- `admin-ajax.php` remains the supported async transport until the REST API transport fully replaces it
 
 ## Current Testing Coverage
 
