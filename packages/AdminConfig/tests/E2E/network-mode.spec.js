@@ -20,14 +20,29 @@ test( 'network options page replays nested validation errors and saves network s
 	const feedSlug = page.locator( `input[name="${ fieldName }[shared_library][feed_slug]"]` );
 
 	await feedSlug.fill( 'x' );
-	await clickAndWaitForAdminConfigTransport( page, page.locator( '[data-lerm-save]:visible' ).first(), 'lerm_admin_config_ajax_save_' );
+	const validationResponse = await clickAndWaitForAdminConfigTransport(
+		page,
+		page.locator( '[data-lerm-save]:visible' ).first(),
+		'lerm_admin_config_ajax_save_',
+		{ transport: 'rest' }
+	);
+
+	expect( validationResponse.status() ).toBe( 422 );
+	expect( decodeURIComponent( validationResponse.url() ) ).toContain(
+		'lerm-admin-config/v1/schema/acme-demo-network-settings/save'
+	);
 
 	await expect( page.locator( `.lerm-fieldset__item.is-invalid input[name="${ fieldName }[shared_library][feed_slug]"]` ) ).toHaveValue( 'x' );
 	await expect( page.locator( '[data-lerm-status]' ).first() ).toContainText( /highlighted fields/i );
 
 	await page.locator( `input[name="${ fieldName }[template_endpoint]"]` ).fill( 'https://example.com/network-templates.json' );
 	await feedSlug.fill( 'shared-library-hub' );
-	await saveOptionsPage( page );
+	const saveResponse = await saveOptionsPage( page, { transport: 'rest' } );
+
+	expect( saveResponse.ok() ).toBe( true );
+	expect( decodeURIComponent( saveResponse.url() ) ).toContain(
+		'lerm-admin-config/v1/schema/acme-demo-network-settings/save'
+	);
 
 	await page.reload();
 	await expect( page.locator( `input[name="${ fieldName }[template_endpoint]"]` ) ).toHaveValue( 'https://example.com/network-templates.json' );
