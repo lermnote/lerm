@@ -101,3 +101,8 @@ During Phase 1, existing PHP admin pages continue to render normally and use
 REST only when the localized `restUrl` and `restNonce` are present. If REST is
 missing or blocked, the admin JavaScript falls back to the deprecated Ajax
 transport.
+
+Plugin and embedded bootstraps can own isolated `Runtime` instances. REST routes
+remain global WordPress routes, so endpoint callbacks resolve the requested
+schema ID across the registered runtime pool before handling reads or
+mutations.

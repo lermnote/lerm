@@ -5,6 +5,7 @@
 - PHP: `>= 8.0`
 - WordPress: modern admin screens plus native capability / nonce APIs
 - Modes: plugin-install mode and embedded mode
+- Runtime lifecycle: one isolated `Runtime` per bootstrap call; no process-wide runtime singleton
 
 ## Automated Matrix
 

@@ -26,7 +26,6 @@ use Lerm\AdminConfig\WordPress\Containers\NetworkOptionsPageContainer;
 use Lerm\AdminConfig\WordPress\Containers\OptionsPageContainer;
 use Lerm\AdminConfig\WordPress\Containers\ProfileContainer;
 use Lerm\AdminConfig\WordPress\Containers\TaxonomyContainer;
-use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
@@ -36,8 +35,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Runtime {
-
-	private static ?self $instance = null;
 
 	private SchemaRegistry $registry;
 	private ContainerRegistry $containers;
@@ -76,21 +73,6 @@ final class Runtime {
 		$this->containers->register( new TaxonomyContainer( $this->framework, $this->stores ) );
 		add_action( 'wp_ajax_lerm_admin_config_data_source', array( $this, 'handle_ajax_data_source' ) );
 		( new RestEndpoints( $this ) )->register();
-	}
-
-	public static function instance( ?AssetResolver $asset_resolver = null ): self {
-		if ( null === self::$instance ) {
-			self::$instance = new self(
-				null,
-				new Framework( $asset_resolver )
-			);
-		}
-
-		return self::$instance;
-	}
-
-	public static function reset_instance(): void {
-		self::$instance = null;
 	}
 
 	public function register( array $schema ): CompiledSchema {

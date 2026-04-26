@@ -15,11 +15,6 @@ use Lerm\AdminConfig\WordPress\Runtime;
 
 final class RestEndpointsTest extends TestCase {
 
-	protected function tearDown(): void {
-		Runtime::reset_instance();
-		parent::tearDown();
-	}
-
 	public function testRegistersSchemaRestRoutes(): void {
 		$runtime = new Runtime();
 		unset( $runtime );
@@ -81,6 +76,33 @@ final class RestEndpointsTest extends TestCase {
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
 		);
+	}
+
+	public function testRegisteredRestRoutesDispatchToRuntimeOwningRequestedSchema(): void {
+		$empty_runtime = new Runtime();
+		unset( $empty_runtime );
+
+		$this->runtime_with_schema();
+
+		do_action( 'rest_api_init' );
+
+		$route   = $this->registered_route( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/save' );
+		$request = $this->request(
+			array( 'id' => 'rest_test' ),
+			array(
+				'values' => array(
+					'site_title' => ' Routed title ',
+				),
+			)
+		);
+
+		self::assertTrue( call_user_func( $route['permission_callback'], $request ) );
+
+		$response = call_user_func( $route['callback'], $request );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $response );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'Routed title', $response->get_data()['data']['values']['site_title'] );
 	}
 
 	public function testResetEndpointResetsSectionValues(): void {
@@ -260,5 +282,18 @@ final class RestEndpointsTest extends TestCase {
 		}
 
 		return $request;
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function registered_route( string $route ): array {
+		foreach ( $GLOBALS['lerm_admin_config_rest_routes'] ?? array() as $registered ) {
+			if ( $route === $registered['namespace'] . $registered['route'] ) {
+				return $registered['args'];
+			}
+		}
+
+		self::fail( sprintf( 'REST route %s was not registered.', $route ) );
 	}
 }

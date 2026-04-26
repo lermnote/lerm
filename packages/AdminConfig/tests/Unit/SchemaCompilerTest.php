@@ -66,6 +66,10 @@ final class SchemaCompilerTest extends TestCase {
 					'general' => array(
 						'fields' => array(
 							array(
+								'id'   => 'no_dependency_key',
+								'type' => 'text',
+							),
+							array(
 								'id'         => 'no_dependency_array',
 								'type'       => 'text',
 								'dependency' => 'feature_enabled',
@@ -82,6 +86,7 @@ final class SchemaCompilerTest extends TestCase {
 		);
 
 		$this->assertSame( array(), $compiled->dependency_graph() );
+		$this->assertArrayNotHasKey( 'dependency', $compiled->client_config()['fields']['no_dependency_key'] );
 		$this->assertArrayNotHasKey( 'dependency', $compiled->client_config()['fields']['no_dependency_array'] );
 		$this->assertArrayNotHasKey( 'dependency', $compiled->client_config()['fields']['empty_controller'] );
 	}
@@ -146,5 +151,31 @@ final class SchemaCompilerTest extends TestCase {
 
 		$this->assertSame( 'custom_options', $option_name_fallback->store()['key'] );
 		$this->assertSame( 'fallback_schema', $schema_id_fallback->store()['key'] );
+	}
+
+	public function testStoreDefaultsInvalidTypeAndPreservesContextualProperties(): void {
+		$compiled = ( new SchemaCompiler() )->compile(
+			array(
+				'id'    => 'context_store',
+				'store' => array(
+					'type'       => '',
+					'key'        => array( 'not-scalar' ),
+					'object_id'  => 123,
+					'network_id' => 7,
+					'autoload'   => false,
+				),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'type'       => 'option',
+				'key'        => 'context_store',
+				'object_id'  => 123,
+				'network_id' => 7,
+				'autoload'   => false,
+			),
+			$compiled->store()
+		);
 	}
 }

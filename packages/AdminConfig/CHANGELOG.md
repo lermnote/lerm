@@ -27,3 +27,10 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
 - The extension docs, quick start guide, and smoke checklist now cover async fields and runtime debugging.
 - The CI workflow now adds caching, wp-env log artifacts, and a dedicated multisite automation job on top of the PHP/integration/browser split.
+- Plugin and embedded bootstraps now create isolated `Runtime` instances instead of sharing a process-wide singleton.
+- CI `wp-env` jobs now wait for the WordPress login screen before fixture setup or browser checks run.
+- Plugin-mode asset resolution now falls back to the package assets when an extension/demo plugin does not bundle its own `assets/` directory.
+- REST routes now dispatch by schema ID across isolated runtimes instead of binding the global route table to whichever runtime registered first.
+
+### Removed
+- The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.

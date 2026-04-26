@@ -16,11 +16,6 @@ use Lerm\AdminConfig\WordPress\Runtime;
 
 final class ExamplesSmokeTest extends TestCase {
 
-	protected function setUp(): void {
-		parent::setUp();
-		Runtime::reset_instance();
-	}
-
 	public function testExampleRegistrationsProduceExpectedSchemas(): void {
 		$runtime = new Runtime();
 

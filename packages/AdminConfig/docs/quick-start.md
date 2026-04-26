@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-\Lerm\AdminConfig\WordPress\PluginBootstrap::boot(
+$runtime = \Lerm\AdminConfig\WordPress\PluginBootstrap::boot(
 	__FILE__,
 	static function ( \Lerm\AdminConfig\WordPress\Runtime $runtime ): void {
 		$runtime->register(
@@ -79,11 +79,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 Read back values later:
 
 ```php
-$runtime = \Lerm\AdminConfig\WordPress\Runtime::instance();
-
 $settings = $runtime->all( 'acme-settings' );
 $enabled  = $runtime->get( 'acme-settings', 'enabled', '', 0 );
 ```
+
+Keep the `Runtime` returned by `PluginBootstrap::boot()` or observe the `lerm_admin_config_booted` action when another integration owns the bootstrap.
 
 ## Embedded mode
 

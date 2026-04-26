@@ -125,6 +125,9 @@ jobs:
       - name: Start wp-env
         run: npm run wp-env:start
 
+      - name: Wait for wp-env
+        run: npm run wp-env:wait
+
       - name: Set up wp-env fixtures
         run: npm run wp-env:setup
 
@@ -189,6 +192,9 @@ jobs:
 
       - name: Start wp-env
         run: npm run wp-env:start
+
+      - name: Wait for wp-env
+        run: npm run wp-env:wait
 
       - name: Set up wp-env fixtures
         run: npm run wp-env:setup
@@ -264,6 +270,9 @@ jobs:
 
       - name: Start multisite wp-env
         run: npm run wp-env:start:multisite
+
+      - name: Wait for multisite wp-env
+        run: npm run wp-env:wait:multisite
 
       - name: Set up multisite wp-env fixtures
         run: npm run wp-env:setup:multisite

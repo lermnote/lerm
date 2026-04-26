@@ -11,6 +11,13 @@ $root      = dirname( __DIR__ );
 $directory = new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS );
 $iterator  = new RecursiveIteratorIterator( $directory );
 $failures  = array();
+$excluded  = array(
+	'.wp-env-multisite',
+	'node_modules',
+	'playwright-report',
+	'test-results',
+	'vendor',
+);
 
 foreach ( $iterator as $file ) {
 	if ( ! $file instanceof SplFileInfo || 'php' !== strtolower( $file->getExtension() ) ) {
@@ -19,7 +26,13 @@ foreach ( $iterator as $file ) {
 
 	$path = $file->getPathname();
 
-	if ( str_contains( $path, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR ) ) {
+	foreach ( $excluded as $directory_name ) {
+		if ( str_contains( $path, DIRECTORY_SEPARATOR . $directory_name . DIRECTORY_SEPARATOR ) ) {
+			continue 2;
+		}
+	}
+
+	if ( str_contains( $path, DIRECTORY_SEPARATOR . 'wp-content' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR ) ) {
 		continue;
 	}
 

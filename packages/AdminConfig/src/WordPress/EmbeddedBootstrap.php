@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\WordPress;
 
+use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Resolvers\DefaultAssetResolver;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,8 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class EmbeddedBootstrap {
 
 	public static function boot( string $assets_url, string $version_constant = 'LERM_VERSION', ?callable $registrar = null ): Runtime {
-		$runtime = Runtime::instance(
-			new DefaultAssetResolver( $assets_url, $version_constant )
+		$runtime = new Runtime(
+			null,
+			new Framework(
+				new DefaultAssetResolver( $assets_url, $version_constant )
+			)
 		);
 
 		$boot_runtime = static function () use ( $runtime, $registrar ): void {

@@ -333,6 +333,12 @@ if ( ! function_exists( 'trailingslashit' ) ) {
 	}
 }
 
+if ( ! function_exists( 'plugin_dir_url' ) ) {
+	function plugin_dir_url( string $plugin_file ): string {
+		return 'https://example.test/plugins/' . basename( dirname( $plugin_file ) ) . '/';
+	}
+}
+
 if ( ! function_exists( 'wp_parse_args' ) ) {
 	function wp_parse_args( $args, array $defaults = array() ): array {
 		$parsed = is_array( $args ) ? $args : array();

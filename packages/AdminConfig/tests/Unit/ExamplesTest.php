@@ -16,11 +16,6 @@ use Lerm\AdminConfig\WordPress\Runtime;
 
 final class ExamplesTest extends TestCase {
 
-	protected function tearDown(): void {
-		Runtime::reset_instance();
-		parent::tearDown();
-	}
-
 	public function testSchemaDemoPluginRegistersNetworkSchemaOnlyOnMultisite(): void {
 		require_once dirname( __DIR__, 2 ) . '/examples/schema-demo-plugin/src/DemoExtensions.php';
 		require_once dirname( __DIR__, 2 ) . '/examples/schema-demo-plugin/src/SchemaDemoPlugin.php';
@@ -30,7 +25,6 @@ final class ExamplesTest extends TestCase {
 
 		self::assertFalse( $runtime->has( 'acme-demo-network-settings' ) );
 
-		Runtime::reset_instance();
 		$GLOBALS['lerm_admin_config_is_multisite'] = true;
 
 		$runtime = new Runtime();

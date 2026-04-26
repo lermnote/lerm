@@ -6,7 +6,7 @@ Schema-driven WordPress admin configuration infrastructure.
 
 - Keep PHP schema as the single source of truth.
 - Support both plugin-install mode and embedded mode.
-- Share one runtime across options pages, metaboxes, taxonomy/profile/comment screens, and network settings.
+- Use one isolated runtime per integration across options pages, metaboxes, taxonomy/profile/comment screens, and network settings.
 - Separate core runtime concerns from commerce concerns such as licensing and updates.
 
 ## Current slice
@@ -17,7 +17,7 @@ This repository now contains the first extraction slice:
 - `src/Registry`: runtime schema registry
 - `src/Framework`: bundled field/store/admin framework used by the runtime
 - `src/Stores`: store resolution for WordPress option/meta backends
-- `src/WordPress`: embedded bootstrap, plugin bootstrap, shared runtime, and container adapters
+- `src/WordPress`: embedded bootstrap, plugin bootstrap, runtime, REST endpoints, and container adapters
 - `assets`: reusable admin UI assets
 - `lerm-admin-config.php`: plugin entry point for standalone installs
 - `examples/schema-demo-plugin`: reference plugin using the package in plugin-install mode
@@ -88,7 +88,7 @@ Options pages also expose an opt-in runtime debug panel. It turns on automatical
 
 ## Public Extension API
 
-The shared runtime now exposes explicit extension methods for third-party integrations:
+Each bootstrapped runtime exposes explicit extension methods for third-party integrations:
 
 - `register_field_type( $type, $definition )`
 - `register_validator( $type, $validator )`
@@ -155,7 +155,7 @@ Plugin-install mode:
 use Lerm\AdminConfig\WordPress\PluginBootstrap;
 use Lerm\AdminConfig\WordPress\Runtime;
 
-PluginBootstrap::boot(
+$runtime = PluginBootstrap::boot(
 	__FILE__,
 	static function ( Runtime $runtime ): void {
 		$runtime->register(
@@ -189,9 +189,14 @@ PluginBootstrap::boot(
 );
 ```
 
-The bootstrap callback runs before auto-mounting, so the runtime sees the full schema set during the initial `boot()`.
+The bootstrap callback runs before auto-mounting, so the runtime sees the full schema set during the initial `boot()`. Keep the returned runtime when you need to read values later, or observe `lerm_admin_config_booted` when another integration owns the bootstrap.
 
 Embedded mode follows the same shape through `EmbeddedBootstrap::boot(...)`.
+
+In plugin-install mode, the asset resolver uses the passed plugin file when
+that plugin bundles `assets/admin-config.css` and `assets/admin-config.js`.
+Extension/demo plugins that only register schemas fall back to the package
+assets.
 
 ## Boot modes
 
@@ -281,6 +286,12 @@ post, comment, and category records so the browser smoke specs can navigate
 classic admin screens without extra manual setup. `wp-env` requires Docker; when
 you already have a local WordPress checkout available, `composer test:integration`
 can run directly against that install instead.
+
+The multisite wrapper isolates its Docker Compose project and `WP_ENV_HOME`
+under `.wp-env-multisite/`. It temporarily writes `.wp-env.override.json` while
+delegating to `wp-env`, then restores or removes that file on exit. If a local
+run is interrupted, remove the generated override before starting a default
+single-site `wp-env` run.
 
 For local Playwright runs against an existing WordPress install, set:
 

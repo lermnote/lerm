@@ -15,11 +15,6 @@ use Lerm\AdminConfig\WordPress\Runtime;
 
 final class RuntimeTest extends TestCase {
 
-	protected function tearDown(): void {
-		Runtime::reset_instance();
-		parent::tearDown();
-	}
-
 	public function testAllFallsBackToDefaultsWhenMetaContextIsMissing(): void {
 		$runtime = new Runtime();
 		$runtime->register(

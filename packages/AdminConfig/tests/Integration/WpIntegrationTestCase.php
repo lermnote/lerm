@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Tests\Integration;
 
-use Lerm\AdminConfig\WordPress\Runtime;
 use PHPUnit\Framework\TestCase;
 
 abstract class WpIntegrationTestCase extends TestCase {
@@ -17,15 +16,7 @@ abstract class WpIntegrationTestCase extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		Runtime::reset_instance();
-
 		$this->set_admin_context();
-	}
-
-	protected function tearDown(): void {
-		Runtime::reset_instance();
-
-		parent::tearDown();
 	}
 
 	protected function set_admin_context( string $screen = 'dashboard' ): void {

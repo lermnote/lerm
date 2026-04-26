@@ -24,9 +24,11 @@ npm run test:e2e:multisite
 
 - `composer test:integration` works against an already-available WordPress install
 - `npm run test:integration` and `npm run test:e2e` use `wp-env` and therefore need Docker
-- `npm run test:integration:multisite` and `npm run test:e2e:multisite` use a multisite `wp-env` instance on ports `8890/8891`
+- `npm run test:integration:multisite` and `npm run test:e2e:multisite` use a multisite `wp-env` instance on ports `8890/8891`; the wrapper isolates `WP_ENV_HOME` under `.wp-env-multisite/` and removes its temporary `.wp-env.override.json` on exit
 - `npm run test:e2e:local` targets an existing WordPress site; set `LERM_ADMIN_CONFIG_BASE_URL`, `LERM_ADMIN_CONFIG_ADMIN_USER`, and `LERM_ADMIN_CONFIG_ADMIN_PASS` first
 - for local multisite browser smoke runs, also set `LERM_ADMIN_CONFIG_MULTISITE=1` and pass `tests/E2E/network-mode.spec.js` after `--`
+
+If a local multisite run is interrupted and leaves `packages/AdminConfig/.wp-env.override.json` behind, remove that generated file before running default single-site `wp-env` commands.
 
 4. Update docs or examples whenever the public API changes.
 5. Add or extend tests for compiler behavior, runtime contracts, bundled example registrations, or WordPress integration flows as appropriate.
