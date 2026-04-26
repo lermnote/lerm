@@ -16,10 +16,9 @@ $font_color     = isset( $meta['archive_color']['font_color'] ) ? $meta['archive
 $bg_image       = isset( $meta['archive_header_image'] ) ? 'url(' . $meta['archive_header_image']['url'] . ')' : '';
 $archive_header = sprintf( 'background: %s %s ; color: %s', $bg_image, $bg_color, $font_color );
 ?>
-<main role="main" class="container"><!--.container-->
 <?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
-		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
+		<div id="primary"  <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">
 				<?php if ( have_posts() ) : ?>
 					<header class="card archive-header mb-2 p-3" style="<?php echo esc_attr( $archive_header ); ?>">
@@ -40,6 +39,5 @@ $archive_header = sprintf( 'background: %s %s ; color: %s', $bg_image, $bg_color
 		</div>
 		<?php get_sidebar(); ?>
 		</div><!--.row-->
-</main><!--.container-->
 <?php
 get_footer();

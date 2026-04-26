@@ -21,7 +21,7 @@ function lerm_get_layout_options(): array {
 	return apply_filters(
 		'lerm_layout_options',
 		array(
-			'global_layout'   => 'layout-2c-r',
+			'global_layout'   => 'layout-2c-l',
 			'layout_style'    => '',
 			'loading_animate' => false,
 		)

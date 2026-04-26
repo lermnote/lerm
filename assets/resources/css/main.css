@@ -2141,3 +2141,23 @@ a[id="cancel-comment-reply-link"]:hover {
     visibility: visible;
   }
 }
+
+/*--------------------------------------------------------------
+ CMS Front Page
+--------------------------------------------------------------*/
+.card-img-top {
+  border-radius: var(--lerm-radius-card) var(--lerm-radius-card) 0 0;
+}
+
+.card-img-top .figure {
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.card-img-top .figure img {
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top img {
+  transform: scale(1.03);
+}
