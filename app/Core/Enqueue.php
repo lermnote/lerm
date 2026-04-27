@@ -189,7 +189,6 @@ class Enqueue {
 						'search_no_results'     => __( 'No results found.', 'lerm' ),
 						'search_loading'        => __( 'Searching…', 'lerm' ),
 						'search_view_all'       => __( 'View all results', 'lerm' ),
-						'search_loading'        => __( 'Searching...', 'lerm' ),
 					),
 				)
 			)

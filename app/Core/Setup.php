@@ -176,10 +176,11 @@ class Setup {
 				'name'          => __( 'Home Sidebar', 'lerm' ),
 				'id'            => 'home-sidebar',
 				'description'   => __( 'Add widgets here to appear in your sidebar.', 'lerm' ),
-				'before_widget' => '<section id="%1$s" class="card widget mb-3 %2$s loading-animate animate__fadeIn">',
+				'before_widget' => '<section id="%1$s" class="widget card mb-3 %2$s loading-animate animate__fadeIn">',
 				'after_widget'  => '</section>',
-				'before_title'  => '<h4 class="widget-title card-header border-bottom-0"><span class="wrap d-inline-block fa">',
-				'after_title'   => '</span></h4>',
+				'before_title'  => '<h2 class="widget-title card-header border-bottom-0"><span class="wrap d-inline-block fa"></span>',
+				'after_title'   => '</h2>',
+
 			)
 		);
 

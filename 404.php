@@ -29,24 +29,24 @@ $custom_img_url = $custom_img_id ? wp_get_attachment_image_url( (int) $custom_im
 $default_img    = LERM_URI . 'assets/img/notfound.gif';
 $img_url        = $custom_img_url ?: $default_img;
 ?>
-<main role="main" class="container"><!--.container-->
-	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
-	<div class="text-center py-5">
-		<img src="<?php echo esc_url( $img_url ); ?>"
-			alt="<?php echo esc_attr( $title ); ?>"
-			class="img-fluid mb-4"
-			style="max-height:300px;">
-		<h1 class="display-5 fw-bold mb-3"><?php echo esc_html( $title ); ?></h1>
-		<p class="text-muted mb-4"><?php echo esc_html( $message ); ?></p>
-		<?php if ( $show_search ) : ?>
-			<div class="mx-auto mb-4" style="max-width:480px;">
-				<?php get_search_form(); ?>
-			</div>
-		<?php endif; ?>
-		<a href="<?php echo esc_url( $btn_url ); ?>" class="btn btn-custom">
-			<?php echo esc_html( $btn_text ); ?>
-		</a>
-	</div>
-</main><!--.container-->
+
+<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+<div class="text-center py-5">
+	<img src="<?php echo esc_url( $img_url ); ?>"
+		alt="<?php echo esc_attr( $title ); ?>"
+		class="img-fluid mb-4"
+		style="max-height:300px;">
+	<h1 class="display-5 fw-bold mb-3"><?php echo esc_html( $title ); ?></h1>
+	<p class="text-muted mb-4"><?php echo esc_html( $message ); ?></p>
+	<?php if ( $show_search ) : ?>
+		<div class="mx-auto mb-4" style="max-width:480px;">
+			<?php get_search_form(); ?>
+		</div>
+	<?php endif; ?>
+	<a href="<?php echo esc_url( $btn_url ); ?>" class="btn btn-custom">
+		<?php echo esc_html( $btn_text ); ?>
+	</a>
+</div>
+
 <?php
 get_footer();

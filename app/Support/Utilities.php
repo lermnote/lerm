@@ -288,8 +288,58 @@ add_filter( 'render_block_core/social-link', __NAMESPACE__ . '\social_link_icon_
 // add_filter( 'render_block_core/latest-posts', __NAMESPACE__ . '\latest_posts_classes', 10, 2 );
 // add_filter( 'render_block_core/search', __NAMESPACE__ . '\search_classes', 10, 2 );
 
+function latest_posts_classes( $block_content, $block ) {
+	$search_replace = array(
+		'search'  => array(
+			'wp-block-latest-posts__list',
+			'<li',
+			'wp-post-image',
+			'<a',
+			'wp-block-latest-posts__post-author',
+			'wp-block-latest-posts__post-date',
+			'wp-block-latest-posts__post-excerpt',
+		),
+		'replace' => array(
+			'wp-block-latest-posts__list list-group',
+			'<li class="list-group-item list-group-item-action border-start-0 border-end-0"',
+			'wp-post-image rounded mb-3',
+			'<a class="stretched-link text-decoration-none"',
+			'small text-body-secondary',
+			'small text-body-secondary d-block',
+			'wp-block-latest-posts__post-excerpt mb-0',
+		),
+	);
+	return apply_bootstrap_classes( $block_content, $block, $search_replace );
+}
+add_filter( 'render_block_core/latest-posts', __NAMESPACE__ . '\latest_posts_classes', 10, 2 );
 
-// End of file
+function latest_comments_classes( $block_content, $block ) {
+	$search_replace = array(
+		'search'  => array(
+			'wp-block-latest-comments',
+			'<li class="wp-block-latest-comments bs-list-group list-group__comment">',
+			'avatar avatar-48 photo wp-block-latest-comments bs-list-group list-group__comment-avatar',
+			'list-group__comment-meta',
+			'<a class="wp-block-latest-comments bs-list-group list-group__comment-author',
+			'<a class="wp-block-latest-comments bs-list-group list-group__comment-link',
+			'wp-block-latest-comments bs-list-group list-group__comment-date',
+			'<p',
+		),
+		'replace' => array(
+			'wp-block-latest-comments bs-list-group list-group',
+			'<li class="list-group-item list-group-item-action text-body-secondary d-flex align-items-start border-start-0 border-end-0">',
+			'rounded-pill border p-1 me-2',
+			'list-group__comment-meta lh-base',
+			'<a class="text-decoration-none text-body-secondary',
+			'<a class="stretched-link text-decoration-none',
+			'small d-block',
+			'<p class="text-body mt-2 mb-0"',
+		),
+	);
+	return apply_bootstrap_classes( $block_content, $block, $search_replace );
+}
+add_filter( 'render_block_core/latest-comments', __NAMESPACE__ . '\latest_comments_classes', 10, 2 );
+
 
 add_action(
 	'wp_head',

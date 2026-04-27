@@ -226,7 +226,7 @@ if ( ! empty( $options ) ) {
 		'comment_likes_enable'      => ! array_key_exists( 'comment_likes_enable', $options ) ? true : (bool) $options['comment_likes_enable'],
 		'post_views_enable'         => ! array_key_exists( 'post_views_enable', $options ) ? true : (bool) $options['post_views_enable'],
 		'share_show_count'          => (bool) ( $options['share_show_count'] ?? false ),
-		'ladding_animate'           => (bool) ( $options['ladding_animate'] ?? false ),
+		'loading_animate'           => (bool) ( $options['loading_animate'] ?? false ),
 		'post_copyright_enable'     => ! array_key_exists( 'post_copyright_enable', $options ) ? true : (bool) $options['post_copyright_enable'],
 		'post_copyright_text'       => (string) ( $options['post_copyright_text'] ?? '' ),
 		'search_results_per_page'   => max( 1, (int) ( $options['search_results_per_page'] ?? 5 ) ),
