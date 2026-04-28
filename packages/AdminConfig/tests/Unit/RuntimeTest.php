@@ -15,6 +15,69 @@ use Lerm\AdminConfig\WordPress\Runtime;
 
 final class RuntimeTest extends TestCase {
 
+	public function testLegacyAjaxFallbacksRegisterByDefault(): void {
+		$runtime = new Runtime();
+		$runtime->register(
+			array(
+				'id'       => 'legacy_ajax_default',
+				'sections' => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id'      => 'headline',
+								'type'    => 'text',
+								'default' => '',
+							),
+						),
+					),
+				),
+			)
+		);
+		$runtime->boot();
+
+		$this->assertArrayHasKey( 'wp_ajax_lerm_admin_config_data_source', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayHasKey( 'wp_ajax_lerm_admin_config_ajax_save_legacy_ajax_default', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayHasKey( 'wp_ajax_lerm_admin_config_ajax_reset_legacy_ajax_default', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayHasKey( 'wp_ajax_lerm_admin_config_ajax_export_legacy_ajax_default', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayHasKey( 'wp_ajax_lerm_admin_config_ajax_import_legacy_ajax_default', $GLOBALS['lerm_admin_config_actions'] );
+	}
+
+	public function testLegacyAjaxFallbacksCanBeDisabledForRemovalRehearsals(): void {
+		add_filter(
+			'lerm_admin_config_legacy_ajax_enabled',
+			static function (): bool {
+				return false;
+			}
+		);
+
+		$runtime = new Runtime();
+		$runtime->register(
+			array(
+				'id'       => 'legacy_ajax_rehearsal',
+				'sections' => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id'      => 'headline',
+								'type'    => 'text',
+								'default' => '',
+							),
+						),
+					),
+				),
+			)
+		);
+		$runtime->boot();
+
+		$this->assertArrayHasKey( 'rest_api_init', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayHasKey( 'admin_post_lerm_admin_config_save_legacy_ajax_rehearsal', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayNotHasKey( 'wp_ajax_lerm_admin_config_data_source', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayNotHasKey( 'wp_ajax_lerm_admin_config_ajax_save_legacy_ajax_rehearsal', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayNotHasKey( 'wp_ajax_lerm_admin_config_ajax_reset_legacy_ajax_rehearsal', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayNotHasKey( 'wp_ajax_lerm_admin_config_ajax_export_legacy_ajax_rehearsal', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertArrayNotHasKey( 'wp_ajax_lerm_admin_config_ajax_import_legacy_ajax_rehearsal', $GLOBALS['lerm_admin_config_actions'] );
+	}
+
 	public function testAjaxDataSourceFallbackChecksNonceBeforeSchemaLookup(): void {
 		$runtime = new Runtime();
 		unset( $runtime );
@@ -36,6 +99,8 @@ final class RuntimeTest extends TestCase {
 		);
 		$this->assertFalse( $response['success'] );
 		$this->assertSame( 404, $response['status'] );
+		$this->assertSame( 'Lerm\AdminConfig\WordPress\Runtime::handle_ajax_data_source', $GLOBALS['lerm_admin_config_deprecated'][0]['function'] );
+		$this->assertSame( '0.2.0', $GLOBALS['lerm_admin_config_deprecated'][0]['version'] );
 	}
 
 	public function testAjaxDataSourceFallbackDispatchesToRuntimeOwningRequestedSchema(): void {

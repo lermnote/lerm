@@ -48,7 +48,7 @@ Return the validated value on success. Returning `WP_Error` records the message 
 
 ## Data sources
 
-Named data sources are small runtime registries for schema helpers and AJAX-backed fields.
+Named data sources are small runtime registries for schema helpers and async fields.
 
 Typical use today:
 
@@ -90,10 +90,11 @@ For reusable lists shared across multiple schemas, prefer `register_data_source(
 plus `resolve_data_source()` so the expensive lookup stays outside the field
 render path.
 
-### AJAX-backed select fields
+### Async select fields
 
 The built-in `ajax_select` field uses the same data-source registry at request
-time:
+time. The browser uses the REST data-source endpoint first; the deprecated
+`admin-ajax.php` path is only a rollout fallback.
 
 ```php
 $runtime->register_data_source(
@@ -141,7 +142,7 @@ array(
 ```
 
 Resolver callbacks receive an `$args` array with these keys when the field is
-queried over AJAX:
+queried over the async transport:
 
 - `search`
 - `page`

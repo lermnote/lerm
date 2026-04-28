@@ -14,6 +14,7 @@ use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Registry\FieldModuleRegistry;
+use Lerm\AdminConfig\WordPress\LegacyAjax;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -74,10 +75,12 @@ final class OptionsPage {
 		if ( $register_hooks ) {
 			add_action( $this->menu_action(), array( $this, 'register_menu' ) );
 			add_action( 'admin_post_' . $this->save_action(), array( $this, 'handle_save' ) );
-			add_action( 'wp_ajax_' . $this->ajax_save_action(), array( $this, 'handle_ajax_save' ) );
-			add_action( 'wp_ajax_' . $this->ajax_reset_action(), array( $this, 'handle_ajax_reset' ) );
-			add_action( 'wp_ajax_' . $this->ajax_export_action(), array( $this, 'handle_ajax_export' ) );
-			add_action( 'wp_ajax_' . $this->ajax_import_action(), array( $this, 'handle_ajax_import' ) );
+			if ( LegacyAjax::enabled() ) {
+				add_action( 'wp_ajax_' . $this->ajax_save_action(), array( $this, 'handle_ajax_save' ) );
+				add_action( 'wp_ajax_' . $this->ajax_reset_action(), array( $this, 'handle_ajax_reset' ) );
+				add_action( 'wp_ajax_' . $this->ajax_export_action(), array( $this, 'handle_ajax_export' ) );
+				add_action( 'wp_ajax_' . $this->ajax_import_action(), array( $this, 'handle_ajax_import' ) );
+			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		}
 	}
@@ -178,6 +181,8 @@ final class OptionsPage {
 	 * so the active-tab nonce is sufficient for a full-page save request.
 	 */
 	public function handle_ajax_save(): void {
+		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST save endpoint' );
+
 		if ( ! current_user_can( $this->capability() ) ) {
 			wp_send_json_error(
 				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
@@ -233,6 +238,8 @@ final class OptionsPage {
 	 * any tab at all.
 	 */
 	public function handle_ajax_reset(): void {
+		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST reset endpoint' );
+
 		if ( ! current_user_can( $this->capability() ) ) {
 			wp_send_json_error(
 				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
@@ -294,6 +301,8 @@ final class OptionsPage {
 	 * Export all settings as JSON for backup workflows.
 	 */
 	public function handle_ajax_export(): void {
+		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST export endpoint' );
+
 		if ( ! current_user_can( $this->capability() ) ) {
 			wp_send_json_error(
 				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
@@ -325,6 +334,8 @@ final class OptionsPage {
 	 * Import a full JSON payload from the backup tools UI.
 	 */
 	public function handle_ajax_import(): void {
+		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST import endpoint' );
+
 		if ( ! current_user_can( $this->capability() ) ) {
 			wp_send_json_error(
 				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
@@ -428,11 +439,14 @@ final class OptionsPage {
 			$this->asset_version(),
 			true
 		);
+		$legacy_ajax_enabled = LegacyAjax::enabled();
+
 		wp_localize_script(
 			$js_handle,
 			$this->js_global,
 			array(
-				'ajaxUrl'             => admin_url( 'admin-ajax.php' ),
+				'ajaxUrl'             => $legacy_ajax_enabled ? admin_url( 'admin-ajax.php' ) : '',
+				'legacyAjaxEnabled'   => $legacy_ajax_enabled,
 				'restUrl'             => rest_url( 'lerm-admin-config/v1/' ),
 				'restNonce'           => wp_create_nonce( 'wp_rest' ),
 				'saveAction'          => $this->ajax_save_action(),

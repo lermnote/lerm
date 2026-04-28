@@ -23,6 +23,7 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Contributor-facing alpha release checklist for package hardening and cut verification.
 - A minimal runnable extension example plugin plus focused extension recipes for custom fields, validators, and data sources.
 - REST contract coverage for permission errors, missing schema/context errors, validation envelopes, import JSON failures, and isolated-runtime dispatch.
+- A centralized legacy Ajax gate for removal rehearsals, covering options-page actions and async data-source fallback registration.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -33,6 +34,7 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Plugin-mode asset resolution now falls back to the package assets when an extension/demo plugin does not bundle its own `assets/` directory.
 - REST routes now dispatch by schema ID across isolated runtimes instead of binding the global route table to whichever runtime registered first.
 - The deprecated async data-source AJAX fallback now uses the same schema-ID runtime dispatch path as REST.
+- Legacy `admin-ajax.php` handlers now emit WordPress deprecation notices when used, and JavaScript stops falling back to `admin-ajax.php` when the legacy gate is disabled.
 
 ### Removed
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.

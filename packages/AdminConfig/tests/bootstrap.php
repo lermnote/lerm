@@ -239,6 +239,16 @@ if ( ! function_exists( '_doing_it_wrong' ) ) {
 	}
 }
 
+if ( ! function_exists( '_deprecated_function' ) ) {
+	function _deprecated_function( string $function_name, string $version, ?string $replacement = null ): void {
+		$GLOBALS['lerm_admin_config_deprecated'][] = array(
+			'function'    => $function_name,
+			'version'     => $version,
+			'replacement' => $replacement,
+		);
+	}
+}
+
 if ( ! function_exists( 'wp_json_encode' ) ) {
 	function wp_json_encode( $value, int $flags = 0, int $depth = 512 ): string|false {
 		return json_encode( $value, $flags, $depth );
@@ -404,6 +414,37 @@ if ( ! function_exists( 'add_action' ) ) {
 			'priority'      => $priority,
 			'accepted_args' => $accepted_args,
 		);
+	}
+}
+
+if ( ! function_exists( 'add_filter' ) ) {
+	function add_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): bool {
+		$GLOBALS['lerm_admin_config_filters'][ $hook ][ $priority ][] = array(
+			'callback'      => $callback,
+			'accepted_args' => $accepted_args,
+		);
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'apply_filters' ) ) {
+	function apply_filters( string $hook, $value, ...$args ) {
+		if ( empty( $GLOBALS['lerm_admin_config_filters'][ $hook ] ) ) {
+			return $value;
+		}
+
+		ksort( $GLOBALS['lerm_admin_config_filters'][ $hook ] );
+
+		foreach ( $GLOBALS['lerm_admin_config_filters'][ $hook ] as $callbacks ) {
+			foreach ( $callbacks as $listener ) {
+				$accepted_args = (int) $listener['accepted_args'];
+				$filter_args   = array_slice( array_merge( array( $value ), $args ), 0, max( 1, $accepted_args ) );
+				$value         = call_user_func_array( $listener['callback'], $filter_args );
+			}
+		}
+
+		return $value;
 	}
 }
 

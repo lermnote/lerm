@@ -27,10 +27,12 @@ abstract class TestCase extends BaseTestCase {
 	private function reset_wordpress_globals(): void {
 		$GLOBALS['lerm_admin_config_doing_it_wrong']    = array();
 		$GLOBALS['lerm_admin_config_actions']           = array();
+		$GLOBALS['lerm_admin_config_filters']           = array();
 		$GLOBALS['lerm_admin_config_is_admin']          = false;
 		$GLOBALS['lerm_admin_config_is_multisite']      = false;
 		$GLOBALS['lerm_admin_config_options']           = array();
 		$GLOBALS['lerm_admin_config_rest_routes']       = array();
+		$GLOBALS['lerm_admin_config_deprecated']        = array();
 		$GLOBALS['lerm_admin_config_current_user_can']  = true;
 		$GLOBALS['lerm_admin_config_ajax_nonce_checks'] = array();
 		$GLOBALS['lerm_admin_config_json_response']     = null;

@@ -15,6 +15,7 @@
 	/**
 	 * @typedef {{
 	 *   ajaxUrl: string,
+	 *   legacyAjaxEnabled?: boolean,
 	 *   restUrl?: string, restNonce?: string,
 	 *   saveAction: string, resetAction: string, exportAction: string, importAction: string,
 	 *   dataSourceAction: string, dataSourceNonce: string,
@@ -162,6 +163,7 @@
 	let cfg = /** @type {any} */ ({});
 
 	const hasRestTransport = () => !!(cfg.restUrl && cfg.restNonce);
+	const hasLegacyAjaxTransport = () => cfg.legacyAjaxEnabled !== false && !!cfg.ajaxUrl;
 
 	/**
 	 * @param {string} path
@@ -1050,7 +1052,11 @@
 		body.set('action', cfg.dataSourceAction);
 		body.set('nonce', cfg.dataSourceNonce);
 
-		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+		if (hasLegacyAjaxTransport()) {
+			return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+		}
+
+		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
 	};
 
 	/**
@@ -1280,7 +1286,7 @@
 	 * @param {boolean} [append]
 	 */
 	const loadAjaxSelectOptions = (instance, query, page = 1, append = false) => {
-		if ((!hasRestTransport() && (!cfg.ajaxUrl || !cfg.dataSourceAction)) || !instance.schemaId || !instance.source) return Promise.resolve();
+		if ((!hasRestTransport() && (!hasLegacyAjaxTransport() || !cfg.dataSourceAction)) || !instance.schemaId || !instance.source) return Promise.resolve();
 
 		instance.currentQuery = query;
 		setAjaxSelectStatus(instance, cfg.loadingResults);
@@ -2566,7 +2572,11 @@
 			return requestRest(path, { method: 'POST', body });
 		}
 
-		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+		if (hasLegacyAjaxTransport()) {
+			return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+		}
+
+		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
 	};
 
 	/**
@@ -2605,7 +2615,11 @@
 			return requestRest(path, { method: 'POST', body });
 		}
 
-		return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+		if (hasLegacyAjaxTransport()) {
+			return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+		}
+
+		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
 	};
 
 	// ─── Value Application ────────────────────────────────────────────────────

@@ -9,7 +9,10 @@ schema and `OptionStore` validation path as the source of truth.
 - Auth: WordPress cookie auth with `X-WP-Nonce: wp_create_nonce( 'wp_rest' )`
 - Client base URL: localized as `LermAdminConfig.restUrl`
 - Legacy fallback: `admin-ajax.php` remains available for older admin screens
-  during the rollout, but new clients should prefer REST.
+  during the rollout, but new clients should prefer REST. The fallback can be
+  disabled for removal rehearsals with `LERM_ADMIN_CONFIG_ENABLE_LEGACY_AJAX`
+  set to `false` or the `lerm_admin_config_legacy_ajax_enabled` filter returning
+  `false`.
 
 ## Endpoints
 
@@ -111,10 +114,24 @@ The REST layer is the contract for the future React and block-editor clients.
 During Phase 1, existing PHP admin pages continue to render normally and use
 REST only when the localized `restUrl` and `restNonce` are present. If REST is
 missing or blocked, the admin JavaScript falls back to the deprecated Ajax
-transport.
+transport only while legacy Ajax is enabled.
 
 Plugin and embedded bootstraps can own isolated `Runtime` instances. REST routes
 remain global WordPress routes, so endpoint callbacks resolve the requested
 schema ID across the registered runtime pool before handling reads or
 mutations. The deprecated async data-source AJAX fallback uses the same
 schema-ID runtime lookup while it remains available during the rollout.
+
+The legacy Ajax fallback is now controlled by one gate:
+
+```php
+add_filter(
+	'lerm_admin_config_legacy_ajax_enabled',
+	static fn (): bool => false
+);
+```
+
+When this gate is disabled, AdminConfig stops registering its `wp_ajax_*`
+handlers and keeps REST plus the no-JavaScript `admin-post.php` save path
+available. Hitting any remaining legacy handler while it is enabled emits a
+WordPress deprecation notice. The planned removal target is `0.3.0`.

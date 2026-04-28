@@ -71,7 +71,9 @@ final class Runtime {
 		$this->containers->register( new CommentContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new ProfileContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new TaxonomyContainer( $this->framework, $this->stores ) );
-		add_action( 'wp_ajax_lerm_admin_config_data_source', array( self::class, 'handle_ajax_data_source' ) );
+		if ( LegacyAjax::enabled() ) {
+			add_action( 'wp_ajax_lerm_admin_config_data_source', array( self::class, 'handle_ajax_data_source' ) );
+		}
 		( new RestEndpoints( $this ) )->register();
 	}
 
@@ -211,6 +213,8 @@ final class Runtime {
 	}
 
 	public static function handle_ajax_data_source(): void {
+		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST data-source endpoint' );
+
 		check_ajax_referer( 'lerm_admin_config_data_source', 'nonce' );
 
 		$schema_id = isset( $_REQUEST['schema_id'] ) ? sanitize_key( wp_unslash( $_REQUEST['schema_id'] ) ) : '';
