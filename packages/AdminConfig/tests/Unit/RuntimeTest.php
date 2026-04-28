@@ -15,6 +15,90 @@ use Lerm\AdminConfig\WordPress\Runtime;
 
 final class RuntimeTest extends TestCase {
 
+	public function testAjaxDataSourceFallbackChecksNonceBeforeSchemaLookup(): void {
+		$runtime = new Runtime();
+		unset( $runtime );
+
+		$_REQUEST = array(
+			'nonce' => 'valid',
+		);
+
+		$response = $this->dispatch_ajax_data_source();
+
+		$this->assertSame(
+			array(
+				array(
+					'action' => 'lerm_admin_config_data_source',
+					'arg'    => 'nonce',
+				),
+			),
+			$GLOBALS['lerm_admin_config_ajax_nonce_checks']
+		);
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 404, $response['status'] );
+	}
+
+	public function testAjaxDataSourceFallbackDispatchesToRuntimeOwningRequestedSchema(): void {
+		$empty_runtime = new Runtime();
+		unset( $empty_runtime );
+
+		$runtime = new Runtime();
+		$runtime->register_data_source(
+			'campaigns',
+			static function ( array $args ): array {
+				unset( $args );
+
+				return array(
+					'items' => array(
+						array(
+							'value' => 'alpha',
+							'label' => 'Alpha',
+						),
+					),
+					'more'  => false,
+				);
+			}
+		);
+		$runtime->register(
+			array(
+				'id'       => 'ajax_data_source_runtime',
+				'sections' => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id'     => 'campaign',
+								'type'   => 'ajax_select',
+								'source' => 'campaigns',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$_REQUEST = array(
+			'nonce'     => 'valid',
+			'schema_id' => 'ajax_data_source_runtime',
+			'field_id'  => 'campaign',
+		);
+
+		$response = $this->dispatch_ajax_data_source();
+
+		$this->assertTrue( $response['success'] );
+		$this->assertSame(
+			array(
+				'items' => array(
+					array(
+						'value' => 'alpha',
+						'label' => 'Alpha',
+					),
+				),
+				'more'  => false,
+			),
+			$response['data']
+		);
+	}
+
 	public function testAllFallsBackToDefaultsWhenMetaContextIsMissing(): void {
 		$runtime = new Runtime();
 		$runtime->register(
@@ -158,5 +242,24 @@ final class RuntimeTest extends TestCase {
 			'was not mounted',
 			(string) ( $GLOBALS['lerm_admin_config_doing_it_wrong'][0]['message'] ?? '' )
 		);
+	}
+
+	/**
+	 * @return array{success: bool, data: mixed, status: int}
+	 */
+	private function dispatch_ajax_data_source(): array {
+		try {
+			do_action( 'wp_ajax_lerm_admin_config_data_source' );
+		} catch ( \RuntimeException $exception ) {
+			if ( 'wp_send_json' !== $exception->getMessage() ) {
+				throw $exception;
+			}
+		}
+
+		$response = $GLOBALS['lerm_admin_config_json_response'];
+
+		$this->assertIsArray( $response );
+
+		return $response;
 	}
 }

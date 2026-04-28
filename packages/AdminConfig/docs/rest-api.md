@@ -105,4 +105,5 @@ transport.
 Plugin and embedded bootstraps can own isolated `Runtime` instances. REST routes
 remain global WordPress routes, so endpoint callbacks resolve the requested
 schema ID across the registered runtime pool before handling reads or
-mutations.
+mutations. The deprecated async data-source AJAX fallback uses the same
+schema-ID runtime lookup while it remains available during the rollout.

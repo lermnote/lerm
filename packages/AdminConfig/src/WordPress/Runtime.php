@@ -71,7 +71,7 @@ final class Runtime {
 		$this->containers->register( new CommentContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new ProfileContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new TaxonomyContainer( $this->framework, $this->stores ) );
-		add_action( 'wp_ajax_lerm_admin_config_data_source', array( $this, 'handle_ajax_data_source' ) );
+		add_action( 'wp_ajax_lerm_admin_config_data_source', array( self::class, 'handle_ajax_data_source' ) );
 		( new RestEndpoints( $this ) )->register();
 	}
 
@@ -210,12 +210,13 @@ final class Runtime {
 		return $this->boot_requested;
 	}
 
-	public function handle_ajax_data_source(): void {
+	public static function handle_ajax_data_source(): void {
 		check_ajax_referer( 'lerm_admin_config_data_source', 'nonce' );
 
 		$schema_id = isset( $_REQUEST['schema_id'] ) ? sanitize_key( wp_unslash( $_REQUEST['schema_id'] ) ) : '';
+		$runtime   = RestEndpoints::runtime_for_schema( $schema_id );
 
-		if ( '' === $schema_id || ! $this->has( $schema_id ) ) {
+		if ( null === $runtime ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'The requested schema was not found.', 'lerm' ),
@@ -224,8 +225,11 @@ final class Runtime {
 			);
 		}
 
-		$compiled = $this->compiled( $schema_id );
-		$context  = $this->request_context();
+		$runtime->handle_ajax_data_source_for_schema( $runtime->compiled( $schema_id ) );
+	}
+
+	private function handle_ajax_data_source_for_schema( CompiledSchema $compiled ): void {
+		$context = $this->request_context();
 
 		if ( ! $this->current_user_can_schema( $compiled, $context ) ) {
 			wp_send_json_error(

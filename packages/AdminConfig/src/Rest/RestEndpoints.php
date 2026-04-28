@@ -181,7 +181,11 @@ final class RestEndpoints {
 	}
 
 	private static function runtime_for_request( \WP_REST_Request $request ): ?Runtime {
-		$schema_id = sanitize_key( (string) $request->get_param( 'id' ) );
+		return self::runtime_for_schema( (string) $request->get_param( 'id' ) );
+	}
+
+	public static function runtime_for_schema( string $schema_id ): ?Runtime {
+		$schema_id = sanitize_key( $schema_id );
 
 		if ( '' === $schema_id ) {
 			return null;

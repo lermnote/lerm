@@ -352,6 +352,45 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 	}
 }
 
+if ( ! function_exists( 'check_ajax_referer' ) ) {
+	function check_ajax_referer( string $action, string $query_arg = '_ajax_nonce' ): bool {
+		$GLOBALS['lerm_admin_config_ajax_nonce_checks'][] = array(
+			'action' => $action,
+			'arg'    => $query_arg,
+		);
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wp_send_json_success' ) ) {
+	function wp_send_json_success( $data = null, ?int $status_code = null, int $flags = 0 ): void {
+		unset( $flags );
+
+		$GLOBALS['lerm_admin_config_json_response'] = array(
+			'success' => true,
+			'data'    => $data,
+			'status'  => $status_code ?? 200,
+		);
+
+		throw new RuntimeException( 'wp_send_json' );
+	}
+}
+
+if ( ! function_exists( 'wp_send_json_error' ) ) {
+	function wp_send_json_error( $data = null, ?int $status_code = null, int $flags = 0 ): void {
+		unset( $flags );
+
+		$GLOBALS['lerm_admin_config_json_response'] = array(
+			'success' => false,
+			'data'    => $data,
+			'status'  => $status_code ?? 200,
+		);
+
+		throw new RuntimeException( 'wp_send_json' );
+	}
+}
+
 if ( ! function_exists( 'get_template_directory_uri' ) ) {
 	function get_template_directory_uri(): string {
 		return 'https://example.test/theme';

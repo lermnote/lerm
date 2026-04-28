@@ -31,6 +31,7 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - CI `wp-env` jobs now wait for the WordPress login screen before fixture setup or browser checks run.
 - Plugin-mode asset resolution now falls back to the package assets when an extension/demo plugin does not bundle its own `assets/` directory.
 - REST routes now dispatch by schema ID across isolated runtimes instead of binding the global route table to whichever runtime registered first.
+- The deprecated async data-source AJAX fallback now uses the same schema-ID runtime dispatch path as REST.
 
 ### Removed
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.
