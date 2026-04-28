@@ -15,7 +15,7 @@
 	/**
 	 * @typedef {{
 	 *   ajaxUrl: string,
-	 *   legacyAjaxEnabled?: boolean,
+	 *   legacyAjaxEnabled?: boolean|string|number,
 	 *   restUrl?: string, restNonce?: string,
 	 *   saveAction: string, resetAction: string, exportAction: string, importAction: string,
 	 *   dataSourceAction: string, dataSourceNonce: string,
@@ -163,7 +163,8 @@
 	let cfg = /** @type {any} */ ({});
 
 	const hasRestTransport = () => !!(cfg.restUrl && cfg.restNonce);
-	const hasLegacyAjaxTransport = () => cfg.legacyAjaxEnabled !== false && !!cfg.ajaxUrl;
+	const legacyAjaxFlagEnabled = () => ![false, 0, '', '0', 'false'].includes( /** @type {any} */ (cfg.legacyAjaxEnabled ?? true) );
+	const hasLegacyAjaxTransport = () => legacyAjaxFlagEnabled() && !!cfg.ajaxUrl;
 
 	/**
 	 * @param {string} path

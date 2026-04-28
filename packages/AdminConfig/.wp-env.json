@@ -6,6 +6,9 @@
   "themes": [
     "./tests/fixtures/wp-env/themes/admin-config-embedded"
   ],
+  "mappings": {
+    "wp-content/mu-plugins/lerm-admin-config-e2e-rest-only.php": "./tests/fixtures/wp-env/mu-plugins/lerm-admin-config-e2e-rest-only.php"
+  },
   "config": {
     "WP_DEBUG": true,
     "SCRIPT_DEBUG": true,

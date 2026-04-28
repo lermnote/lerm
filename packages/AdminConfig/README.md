@@ -314,7 +314,7 @@ admin, also set `LERM_ADMIN_CONFIG_MULTISITE=1` and pass the spec path after `--
 - Breaking runtime changes should land with changelog notes, migration guidance,
   and updated examples
 
-See [docs/support-matrix.md](/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [docs/rest-api.md](/packages/AdminConfig/docs/rest-api.md) for the REST API contract, [CONTRIBUTING.md](/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
+See [docs/support-matrix.md](/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [docs/rest-api.md](/packages/AdminConfig/docs/rest-api.md) for the REST API contract, [docs/ajax-retirement.md](/packages/AdminConfig/docs/ajax-retirement.md) for the legacy Ajax removal checklist, [CONTRIBUTING.md](/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
 
 ## Reading meta-backed schemas
 

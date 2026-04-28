@@ -135,3 +135,6 @@ When this gate is disabled, AdminConfig stops registering its `wp_ajax_*`
 handlers and keeps REST plus the no-JavaScript `admin-post.php` save path
 available. Hitting any remaining legacy handler while it is enabled emits a
 WordPress deprecation notice. The planned removal target is `0.3.0`.
+
+See `docs/ajax-retirement.md` for the REST-only rehearsal command and removal
+checklist.

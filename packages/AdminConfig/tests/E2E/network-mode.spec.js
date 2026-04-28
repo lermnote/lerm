@@ -1,6 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const {
 	clickAndWaitForAdminConfigTransport,
+	collectAdminConfigAjaxRequests,
+	expectRestOnlyConfig,
 	login,
 	openNetworkOptionsPage,
 	saveOptionsPage,
@@ -12,8 +14,14 @@ const fieldName = 'site_acme_demo_network_settings';
 test.skip( ! isMultisite, 'Network smoke suite only runs against a multisite environment.' );
 
 test( 'network options page replays nested validation errors and saves network settings', async ( { page } ) => {
+	const legacyAjaxRequests = collectAdminConfigAjaxRequests( page );
+
 	await login( page );
 	await openNetworkOptionsPage( page, 'acme-demo-network-settings' );
+
+	if ( process.env.LERM_ADMIN_CONFIG_REST_ONLY === '1' ) {
+		await expectRestOnlyConfig( page );
+	}
 
 	await expect( page.locator( '[data-lerm-save]:visible' ).first() ).toBeVisible();
 
@@ -47,4 +55,8 @@ test( 'network options page replays nested validation errors and saves network s
 	await page.reload();
 	await expect( page.locator( `input[name="${ fieldName }[template_endpoint]"]` ) ).toHaveValue( 'https://example.com/network-templates.json' );
 	await expect( feedSlug ).toHaveValue( 'shared-library-hub' );
+
+	if ( process.env.LERM_ADMIN_CONFIG_REST_ONLY === '1' ) {
+		expect( legacyAjaxRequests, JSON.stringify( legacyAjaxRequests, null, 2 ) ).toHaveLength( 0 );
+	}
 } );

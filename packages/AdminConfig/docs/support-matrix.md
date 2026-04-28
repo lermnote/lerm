@@ -14,6 +14,7 @@
 - WordPress multisite automation: dedicated `wp-env` run on ports `8890/8891`
 - Browser smoke coverage: Playwright against plugin mode, embedded mode, classic admin containers, and multisite network settings in `wp-env`
 - Local browser smoke coverage can target an existing site through `LERM_ADMIN_CONFIG_BASE_URL` plus admin credentials
+- REST-only browser smoke coverage disables AdminConfig legacy Ajax and asserts that package actions avoid `admin-ajax.php`
 
 ## Admin Surfaces Covered
 
@@ -52,6 +53,7 @@
 - PHPUnit smoke coverage for the bundled plugin and embedded examples
 - Real-WordPress integration tests for bootstraps, option/meta/site-option stores, and multisite network schema persistence
 - Playwright smoke coverage for plugin/embedded options pages, classic metabox/profile/taxonomy/comment screens, and the multisite network settings page
+- REST-only Playwright rehearsal coverage for plugin-mode actions and multisite network settings
 
 ## Release Policy
 
@@ -64,3 +66,4 @@
 - Broader browser regression coverage for richer advanced-field permutations and import/reset edge cases
 - A lighter no-Docker browser harness for contributors who cannot run `wp-env`
 - Higher-level relationship and remote-library field packages built on the async transport layer
+- Removal of the deprecated AdminConfig `admin-ajax.php` fallback after the REST-only rehearsal suite is stable

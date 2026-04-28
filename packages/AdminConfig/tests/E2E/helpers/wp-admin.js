@@ -99,6 +99,51 @@ async function waitForAdminConfigTransport( page, actionFragment = '', options =
 	);
 }
 
+function collectAdminConfigAjaxRequests( page ) {
+	const requests = [];
+
+	page.on( 'request', ( request ) => {
+		const postData = request.postData() || '';
+
+		if ( request.url().includes( 'admin-ajax.php' ) && postData.includes( 'lerm_admin_config' ) ) {
+			requests.push( {
+				method: request.method(),
+				url: request.url(),
+				postData,
+			} );
+		}
+	} );
+
+	return requests;
+}
+
+async function expectRestOnlyConfig( page ) {
+	await expect
+		.poll(
+			() => page.evaluate( () => {
+				const config = window.lermAdminConfig || {};
+				const legacyFlag = config.legacyAjaxEnabled ?? true;
+
+				return {
+					ajaxUrl: config.ajaxUrl || '',
+					legacyAjaxEnabled: ! [ false, 0, '', '0', 'false' ].includes( legacyFlag ),
+					restUrl: config.restUrl || '',
+					restNonce: config.restNonce || '',
+				};
+			} ),
+			{ timeout: 10_000 }
+		)
+		.toMatchObject( {
+			ajaxUrl: '',
+			legacyAjaxEnabled: false,
+		} );
+
+	const config = await page.evaluate( () => window.lermAdminConfig || {} );
+
+	expect( config.restUrl || '' ).toContain( 'lerm-admin-config/v1' );
+	expect( config.restNonce || '' ).not.toBe( '' );
+}
+
 async function openSettingsSection( page, labelPattern ) {
 	const sectionNav = page.getByRole( 'navigation', { name: /Settings sections/i } ).first();
 	const sectionLink = sectionNav.getByRole( 'link', { name: labelPattern } ).first();
@@ -291,6 +336,8 @@ module.exports = {
 	acceptNextDialog,
 	clickAndWaitForAdminConfigTransport,
 	clickAndWaitForAjax,
+	collectAdminConfigAjaxRequests,
+	expectRestOnlyConfig,
 	exportBackupSnapshot,
 	importBackupSnapshot,
 	login,
