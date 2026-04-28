@@ -92,7 +92,18 @@ legacy Ajax-compatible envelope:
 ```
 
 Validation errors return `WP_Error` with HTTP status `422` and include
-`fieldErrors`, `errors`, `tab`, and `subsection` in the error data.
+`fieldErrors`, `errors`, `tab`, and `subsection` in the error data. The
+`fieldErrors` map is collapsed to top-level field IDs for client display, while
+`errors` keeps the full dotted paths from the PHP validation layer.
+
+REST errors use stable error codes and include `status`, `success: false`, and
+`data.message` in the error data. Contract-covered codes include:
+
+- `schema_not_found`: schema ID is missing or unregistered, `404`
+- `forbidden`: current user cannot access the schema, `403`
+- `missing_store_context`: object-backed store context is missing, `400`
+- `invalid_import_json`: import payload is not valid JSON, `400`
+- `validation_error`: save/import failed field validation, `422`
 
 ## Migration Notes
 

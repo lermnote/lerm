@@ -22,6 +22,7 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Multisite `wp-env` scripts, multisite integration coverage, and network settings browser smoke coverage.
 - Contributor-facing alpha release checklist for package hardening and cut verification.
 - A minimal runnable extension example plugin plus focused extension recipes for custom fields, validators, and data sources.
+- REST contract coverage for permission errors, missing schema/context errors, validation envelopes, import JSON failures, and isolated-runtime dispatch.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.

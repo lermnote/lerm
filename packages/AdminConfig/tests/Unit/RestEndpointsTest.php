@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Tests\Unit;
 
 use Lerm\AdminConfig\Rest\Controllers\SchemaController;
+use Lerm\AdminConfig\Rest\RestEndpoints;
 use Lerm\AdminConfig\Tests\Support\TestCase;
 use Lerm\AdminConfig\WordPress\Runtime;
 
@@ -103,6 +104,197 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertInstanceOf( \WP_REST_Response::class, $response );
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'Routed title', $response->get_data()['data']['values']['site_title'] );
+	}
+
+	public function testRegisteredRestDispatchCoversResetImportExportAndDataSourceAcrossRuntimePool(): void {
+		$empty_runtime = new Runtime();
+		unset( $empty_runtime );
+
+		$runtime = $this->runtime_with_schema();
+		$runtime->register_data_source(
+			'campaigns',
+			static function ( array $args ): array {
+				unset( $args );
+
+				return array(
+					'items' => array(
+						'alpha' => 'Alpha',
+					),
+					'more'  => false,
+				);
+			}
+		);
+
+		$GLOBALS['lerm_admin_config_options']['rest_test_settings'] = array(
+			'site_title'    => 'Stored title',
+			'items_per_row' => 2,
+			'campaign'      => '',
+		);
+
+		$reset = RestEndpoints::reset(
+			$this->request(
+				array(
+					'id'                => 'rest_test',
+					'lerm_settings_tab' => 'general',
+					'reset_scope'       => 'section',
+				)
+			)
+		);
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $reset );
+		$this->assertSame( 'Default title', $reset->get_data()['data']['values']['site_title'] );
+
+		$import = RestEndpoints::import(
+			$this->request(
+				array(
+					'id'          => 'rest_test',
+					'backup_json' => '{"site_title":"Imported through route","items_per_row":5,"campaign":"alpha"}',
+				)
+			)
+		);
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $import );
+		$this->assertSame( 'Imported through route', $import->get_data()['data']['values']['site_title'] );
+
+		$export = RestEndpoints::export( $this->request( array( 'id' => 'rest_test' ) ) );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $export );
+		$this->assertStringContainsString( '"site_title": "Imported through route"', $export->get_data()['data']['json'] );
+
+		$data_source = RestEndpoints::data_source(
+			$this->request(
+				array(
+					'id'       => 'rest_test',
+					'field_id' => 'campaign',
+				)
+			)
+		);
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $data_source );
+		$this->assertSame(
+			array(
+				array(
+					'value' => 'alpha',
+					'label' => 'Alpha',
+				),
+			),
+			$data_source->get_data()['data']['items']
+		);
+	}
+
+	public function testSaveValidationErrorsUseStableRestErrorShape(): void {
+		$runtime = $this->runtime_with_schema();
+		$runtime->register_validator(
+			'text',
+			static function ( array $field, $value ) {
+				if ( 'site_title' === (string) ( $field['id'] ?? '' ) && strlen( (string) $value ) < 3 ) {
+					return new \WP_Error( 'site_title_too_short', 'Site title is too short.' );
+				}
+
+				return $value;
+			}
+		);
+
+		$response = ( new SchemaController( $runtime ) )->save(
+			$this->request(
+				array( 'id' => 'rest_test' ),
+				array(
+					'values' => array(
+						'site_title' => 'No',
+					),
+				)
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'validation_error', $response->get_error_code() );
+
+		$data = $response->get_error_data();
+
+		$this->assertSame( 422, $data['status'] );
+		$this->assertFalse( $data['success'] );
+		$this->assertSame( 'Site title is too short.', $data['fieldErrors']['site_title'] );
+		$this->assertSame( array( 'Site title is too short.' ), $data['errors']['site_title'] );
+		$this->assertSame( 'general', $data['tab'] );
+		$this->assertSame( 'general', $data['subsection'] );
+		$this->assertSame( 'Please review the highlighted fields and try again.', $data['data']['message'] );
+	}
+
+	public function testImportEndpointRejectsInvalidJsonWithStableErrorShape(): void {
+		$response = ( new SchemaController( $this->runtime_with_schema() ) )->import(
+			$this->request(
+				array(
+					'id'          => 'rest_test',
+					'backup_json' => '{not-json',
+				)
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'invalid_import_json', $response->get_error_code() );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
+		$this->assertFalse( $response->get_error_data()['success'] );
+		$this->assertSame( 'The backup JSON is invalid.', $response->get_error_data()['data']['message'] );
+	}
+
+	public function testMissingMetaContextReturnsStableRestErrorShape(): void {
+		$runtime = new Runtime();
+		$runtime->register(
+			array(
+				'id'        => 'rest_meta',
+				'container' => array(
+					'type' => 'metabox',
+				),
+				'store'     => array(
+					'type' => 'post_meta',
+					'key'  => '_rest_meta',
+				),
+				'sections'  => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id'      => 'badge_text',
+								'type'    => 'text',
+								'default' => 'Featured',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$response = ( new SchemaController( $runtime ) )->save(
+			$this->request(
+				array( 'id' => 'rest_meta' ),
+				array(
+					'values' => array(
+						'badge_text' => 'Launch',
+					),
+				)
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'missing_store_context', $response->get_error_code() );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
+		$this->assertFalse( $response->get_error_data()['success'] );
+		$this->assertStringContainsString( 'requires one of', $response->get_error_data()['data']['message'] );
+	}
+
+	public function testPermissionCallbackReturnsForbiddenRestErrorShape(): void {
+		$GLOBALS['lerm_admin_config_current_user_can'] = array(
+			'manage_options' => false,
+		);
+
+		$response = ( new SchemaController( $this->runtime_with_schema() ) )->can_access_schema(
+			$this->request( array( 'id' => 'rest_test' ) )
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'forbidden', $response->get_error_code() );
+		$this->assertSame( 403, $response->get_error_data()['status'] );
+		$this->assertFalse( $response->get_error_data()['success'] );
+		$this->assertSame( 'You do not have permission to manage this schema.', $response->get_error_data()['data']['message'] );
 	}
 
 	public function testResetEndpointResetsSectionValues(): void {

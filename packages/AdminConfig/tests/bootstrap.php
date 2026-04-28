@@ -421,7 +421,17 @@ if ( ! function_exists( 'do_action' ) ) {
 
 if ( ! function_exists( 'current_user_can' ) ) {
 	function current_user_can( string $capability, ...$args ): bool {
-		unset( $capability, $args );
+		unset( $args );
+
+		$allowed = $GLOBALS['lerm_admin_config_current_user_can'] ?? true;
+
+		if ( is_array( $allowed ) && array_key_exists( $capability, $allowed ) ) {
+			return (bool) $allowed[ $capability ];
+		}
+
+		if ( is_bool( $allowed ) ) {
+			return $allowed;
+		}
 
 		return true;
 	}
