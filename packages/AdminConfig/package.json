@@ -2,6 +2,8 @@
   "name": "lerm-admin-config-tooling",
   "private": true,
   "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
     "wp-env:start": "wp-env start",
     "wp-env:start:multisite": "node tools/wp-env-multisite.js start",
     "wp-env:stop": "wp-env stop",
@@ -40,6 +42,7 @@
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "@wordpress/env": "^10.19.0",
+    "@wordpress/scripts": "^32.0.0",
     "cross-env": "^7.0.3"
   }
 }

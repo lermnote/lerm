@@ -425,6 +425,7 @@ final class OptionsPage {
 		$suffix     = '' !== $handle_suffix ? sanitize_key( $handle_suffix ) : $this->page_slug();
 		$css_handle = 'lerm-admin-config-' . $suffix;
 		$js_handle  = 'lerm-admin-config-js-' . $suffix;
+		$script     = $this->script_asset();
 
 		wp_enqueue_style(
 			$css_handle,
@@ -434,9 +435,9 @@ final class OptionsPage {
 		);
 		wp_enqueue_script(
 			$js_handle,
-			$this->asset_url( 'admin-config.js' ),
-			array( 'wp-theme-plugin-editor' ),
-			$this->asset_version(),
+			$this->asset_url( $script['file'] ),
+			$script['dependencies'],
+			$script['version'],
 			true
 		);
 		$legacy_ajax_enabled = LegacyAjax::enabled();
@@ -2354,6 +2355,48 @@ final class OptionsPage {
 	 */
 	private function asset_url( string $asset ): string {
 		return $this->asset_resolver->url( $asset );
+	}
+
+	/**
+	 * Resolve the built JavaScript asset metadata, falling back to the legacy
+	 * unbuilt file for source checkouts that have not run the build yet.
+	 *
+	 * @return array{file: string, dependencies: array<int, string>, version: string}
+	 */
+	private function script_asset(): array {
+		$dependencies = array( 'wp-theme-plugin-editor' );
+		$fallback     = array(
+			'file'         => 'admin-config.js',
+			'dependencies' => $dependencies,
+			'version'      => $this->asset_version(),
+		);
+		$asset_dir    = dirname( __DIR__, 3 ) . '/assets';
+		$script_file  = $asset_dir . '/build/admin-config.js';
+		$asset_file   = $asset_dir . '/build/admin-config.asset.php';
+
+		if ( ! is_readable( $script_file ) || ! is_readable( $asset_file ) ) {
+			return $fallback;
+		}
+
+		$asset = include $asset_file;
+
+		if ( ! is_array( $asset ) ) {
+			return $fallback;
+		}
+
+		foreach ( (array) ( $asset['dependencies'] ?? array() ) as $dependency ) {
+			if ( is_string( $dependency ) && '' !== $dependency ) {
+				$dependencies[] = $dependency;
+			}
+		}
+
+		return array(
+			'file'         => 'build/admin-config.js',
+			'dependencies' => array_values( array_unique( $dependencies ) ),
+			'version'      => isset( $asset['version'] ) && is_scalar( $asset['version'] )
+				? (string) $asset['version']
+				: $fallback['version'],
+		);
 	}
 
 	/**
