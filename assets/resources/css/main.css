@@ -1,4 +1,140 @@
 @charset "UTF-8";
+
+/*--------------------------------------------------------------
+ 0.0 Design Tokens  — CSS Custom Properties
+ All hardcoded values in this file should reference these vars.
+ Override any token via the Theme Options panel (Appearance →
+ Colors / Typography / Layout); the PHP layer outputs a :root {}
+ block with only the user-changed values, so CSS fallbacks here
+ always apply when an option is empty.
+--------------------------------------------------------------*/
+
+:root {
+
+  /* ── Brand ─────────────────────────────────────────────── */
+  --lerm-color-primary:        #0084ba;
+  --lerm-color-primary-hover:  #0063aa;
+  --lerm-color-primary-active: #0063aa;
+  --lerm-color-primary-focus:  #0063aa;
+
+  --lerm-color-link:           #0084ba;
+  --lerm-color-link-hover:     #0063aa;
+  --lerm-color-link-active:    #0063aa;
+  --lerm-color-link-focus:     #0063aa;
+
+  /* ── Text ───────────────────────────────────────────────── */
+  --lerm-color-text:           #5d6777;
+  --lerm-color-text-muted:     #828282;
+  --lerm-color-text-base:      #5d6777;  /* body typography color */
+  --lerm-color-text-nav:       #5d6777;  /* navbar typography color */
+  --lerm-color-border:         rgba(130,130,130,0.27);
+
+  /* ── Backgrounds ────────────────────────────────────────── */
+  --lerm-bg-body:              #ffffff;
+  --lerm-bg-card:              #ffffff;
+  --lerm-bg-header:            #ffffff;
+  --lerm-box-outer-bg:         #ebebeb;
+  --lerm-box-inner-bg:         #ffffff;
+
+  /* ── Navigation ─────────────────────────────────────────── */
+  --lerm-color-nav:            #828282;
+  --lerm-color-nav-hover:      #0084ba;
+  --lerm-color-nav-active:     #0084ba;
+  --lerm-nav-active-color:     #0084ba;  /* alias used in consumer rules */
+  --lerm-nav-active-bg:        #ffffff;
+  --lerm-nav-link-padding-y:   1.5rem;
+  --lerm-nav-link-padding-x:   0;
+
+  /* ── Header border ──────────────────────────────────────── */
+  --lerm-header-border-top:    0px solid rgba(130,130,130,0.27);
+  --lerm-header-border-bottom: 1px solid rgba(130,130,130,0.27);
+  --lerm-header-border-left:   0px solid rgba(130,130,130,0.27);
+  --lerm-header-border-right:  0px solid rgba(130,130,130,0.27);
+
+  /* ── Widget headers ─────────────────────────────────────── */
+  --lerm-widget-header-color:  inherit;
+  --lerm-widget-header-bg:     transparent;
+  --lerm-widget-header-border: transparent;
+
+  /* ── Footer ─────────────────────────────────────────────── */
+  --lerm-footer-widgets-color: #dddddd;
+  --lerm-footer-widgets-bg:    #333333;
+  --lerm-footer-bar-color:     #dddddd;
+  --lerm-footer-bar-bg:        #555555;
+
+  /* ── Buttons ────────────────────────────────────────────── */
+  --lerm-btn-color:            #0084ba;
+  --lerm-btn-bg:               transparent;
+  --lerm-btn-border:           #0084ba;
+  --lerm-btn-hover-color:      #ffffff;
+  --lerm-btn-hover-bg:         #0084ba;
+  --lerm-btn-hover-border:     #0084ba;
+
+  /* ── Typography: base ───────────────────────────────────── */
+  --lerm-font-family-base:     system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --lerm-font-size-base:       0.875rem;
+  --lerm-font-weight-base:     400;
+  --lerm-line-height-base:     1.7;
+
+  /* ── Typography: nav ────────────────────────────────────── */
+  --lerm-font-family-nav:      inherit;
+  --lerm-font-size-nav:        0.875rem;
+  --lerm-font-weight-nav:      400;
+  --lerm-line-height-nav:      1.5;
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  --lerm-container-max:        1140px;
+  --lerm-box-width:            1140px;
+  --lerm-content-width:        66.6667%;
+  --lerm-sidebar-width:        33.3333%;
+
+  /* ── Spacing & shape ─────────────────────────────────────── */
+  --lerm-card-padding:         1.25rem;
+  --lerm-section-gap:          1.5rem;
+  --lerm-radius-card:          0.375rem;
+  --lerm-radius-btn:           0.375rem;
+
+  /* ── Reading progress bar ───────────────────────────────── */
+  --lerm-progress-color:       #0084ba;
+  --lerm-progress-height:      3px;
+
+  /* ── Bootstrap 5 bridge ─────────────────────────────────────────────── */
+  --bs-body-color:          var(--lerm-color-text);
+  --bs-body-bg:             var(--lerm-bg-body);
+  --bs-body-font-family:    var(--lerm-font-family-base);
+  --bs-body-font-size:      var(--lerm-font-size-base);
+  --bs-body-font-weight:    var(--lerm-font-weight-base);
+  --bs-body-line-height:    var(--lerm-line-height-base);
+  --bs-link-color:          var(--lerm-color-link);
+  --bs-link-hover-color:    var(--lerm-color-link-hover);
+  --bs-primary:             var(--lerm-color-primary);
+  --bs-card-bg:             var(--lerm-bg-card);
+  --bs-border-color:        var(--lerm-color-border);
+  --bs-border-color-translucent: var(--lerm-color-border);
+  --bs-emphasis-color:      var(--lerm-color-text);
+  --bs-navbar-color:        var(--lerm-color-nav);
+  --bs-navbar-hover-color:  var(--lerm-color-nav-hover, var(--lerm-color-primary));
+  --bs-navbar-active-color: var(--lerm-nav-active-color, var(--lerm-color-primary));
+  --bs-dropdown-bg:         var(--lerm-bg-header);
+  --bs-font-sans-serif:     var(--lerm-font-family-base);
+
+  /* ── WordPress / theme.json bridge ──────────────────────────────────── */
+  --wp--preset--color--primary:         var(--lerm-color-primary);
+  --wp--preset--color--primary-dark:    var(--lerm-color-primary-hover, var(--lerm-color-primary));
+  --wp--preset--color--accent:          var(--lerm-color-primary);
+  --wp--preset--color--foreground:      var(--lerm-color-text);
+  --wp--preset--color--foreground-muted:var(--lerm-color-text-muted, var(--lerm-color-text));
+  --wp--preset--color--background:      var(--lerm-bg-body);
+  --wp--preset--color--surface:         var(--lerm-bg-card);
+  --wp--preset--color--background-alt:  var(--lerm-bg-card);
+  --wp--preset--color--header-bg:       var(--lerm-bg-header, var(--lerm-bg-body));
+  --wp--preset--color--border:          var(--lerm-color-border);
+  --wp--preset--color--footer-bg:       var(--lerm-footer-widgets-bg);
+  --wp--preset--color--footer-text:     var(--lerm-footer-widgets-color);
+  --wp--preset--font-family--system:    var(--lerm-font-family-base);
+
+}
+
 /*--------------------------------------------------------------
 >>> TABLE OF CONTENTS:
 ----------------------------------------------------------------
@@ -58,11 +194,11 @@ block
 }
 
 .screen-reader-text:focus {
-  background-color: #f1f1f1;
+  background-color: var(--lerm-box-outer-bg);
   border-radius: 3px;
   box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
   clip: auto !important;
-  color: #21759b;
+  color: var(--lerm-color-primary);
   display: block;
   font-size: 14px;
   font-size: 0.875rem;
@@ -140,7 +276,7 @@ body {
 /* Quotes ------------------------------------ */
 
 blockquote {
-  border-color: #cd2653;
+  border-color: var(--lerm-color-primary);
   border-style: solid;
 
   /*rtl:ignore*/
@@ -154,7 +290,7 @@ blockquote {
 }
 
 cite {
-  color: #6d6d6d;
+  color: var(--lerm-color-text-muted);
   opacity: 0.7;
   font-style: normal;
   line-height: 1.25;
@@ -189,7 +325,7 @@ input,
 select,
 button {
   border: 1px solid;
-  border-color: #ced4da;
+  border-color: var(--lerm-color-border);
   padding: 0.375rem 0.625rem;
   border-radius: 0.25rem;
 }
@@ -222,8 +358,8 @@ td {
 
 .entry-content table,
 .comment-content table {
-  border-bottom: 1px solid #ededed;
-  color: #757575;
+  border-bottom: 1px solid var(--lerm-color-border);
+  color: var(--lerm-color-text-muted);
   font-size: 12px;
   font-size: 0.857142857rem;
   line-height: 2;
@@ -234,7 +370,7 @@ td {
 
 entry-content td,
 .comment-content td {
-  border-top: 1px solid #ededed;
+  border-top: 1px solid var(--lerm-color-border);
   padding: 6px 10px 6px 0;
 }
 
@@ -284,15 +420,15 @@ form textarea {
 }
 
 body {
-  background: #fff;
+  background: var(--lerm-bg-body);
 }
 
 .boxed-layout {
-  background-color: #ebebeb;
+  background-color: var(--lerm-box-outer-bg);
 }
 
 .seperate-layout {
-  background-color: #f1f1f1;
+  background-color: var(--lerm-box-outer-bg);
 }
 
 /*site-title site-description*/
@@ -482,7 +618,7 @@ body {
   display: block;
   padding: 0.375rem 0.75rem;
   margin-left: -1px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--lerm-color-border);
 }
 
 .current .screen-reader-text,
@@ -507,7 +643,7 @@ body {
   text-decoration: none;
   margin: 4px;
   outline: none;
-  color: #666;
+  color: var(--lerm-color-text-muted);
   text-align: center;
   vertical-align: middle;
   transition: color 0.6s ease-out 0s;
@@ -566,10 +702,10 @@ body {
   left: -84px;
   width: 200px;
   height: 192px;
-  color: #666;
+  color: var(--lerm-color-text-muted);
   font-size: 12px;
   text-align: center;
-  background-color: #fff;
+  background-color: var(--lerm-bg-card);
   box-shadow: 0 2px 10px #aaa;
   transition: all 200ms;
   -webkit-tansition: all 350ms;
@@ -590,10 +726,10 @@ body {
   height: 26px;
   line-height: 26px;
   font-size: 12px;
-  background-color: #f3f3f3;
+  background-color: var(--lerm-box-outer-bg);
   margin: 0;
   padding: 0;
-  color: #777;
+  color: var(--lerm-color-text-muted);
 }
 
 .social-share .icon-wechat .wechat-qrcode .qrcode {
@@ -642,7 +778,7 @@ a[rel~="weixin"]::after {
   width: 128px;
   height: 128px;
   background-size: cover; /* 或 contain */
-  border: 4px solid #0095ba;
+  border: 4px solid var(--lerm-color-primary);
   transform-origin: top right;
   transform: scale(0);
   opacity: 0;
@@ -677,48 +813,48 @@ a[rel~="weixin"]:hover::after {
 /* CUSTOM COLORS */
 
 :root .has-accent-color {
-  color: #cd2653;
+  color: var(--lerm-color-primary);
 }
 
 :root .has-accent-background-color {
-  background-color: #cd2653;
+  background-color: var(--lerm-color-primary);
   color: #fff;
 }
 
 :root .has-primary-color {
-  color: #000;
+  color: var(--lerm-color-text);
 }
 
 :root .has-primary-background-color {
-  background-color: #000;
-  color: #f5efe0;
+  background-color: var(--lerm-bg-card);
+  color: var(--lerm-color-text);
 }
 
 :root .has-secondary-color {
-  color: #6d6d6d;
+  color: var(--lerm-color-text-muted);
 }
 
 :root .has-secondary-background-color {
-  background-color: #6d6d6d;
+  background-color: var(--lerm-color-text-muted);
   color: #fff;
 }
 
 :root .has-subtle-background-color {
-  color: #dcd7ca;
+  color: var(--lerm-color-border);
 }
 
 :root .has-subtle-background-background-color {
-  background-color: #dcd7ca;
-  color: #000;
+  background-color: var(--lerm-box-outer-bg);
+  color: var(--lerm-color-text);
 }
 
 :root .has-background-color {
-  color: #f5efe0;
+  color: var(--lerm-bg-body);
 }
 
 :root .has-background-background-color {
-  background-color: #f5efe0;
-  color: #000;
+  background-color: var(--lerm-bg-body);
+  color: var(--lerm-color-text);
 }
 
 /* Block Typography Classes ------------------ */
@@ -875,7 +1011,7 @@ a[rel~="weixin"]:hover::after {
 .entry-content .wp-block-archives li,
 .entry-content .wp-block-categories li,
 .entry-content .wp-block-latest-posts li {
-  color: #6d6d6d;
+  color: var(--lerm-color-text-muted);
 }
 
 .wp-block-archives a,
@@ -906,7 +1042,7 @@ a[rel~="weixin"]:hover::after {
 
 .wp-block-latest-comments__comment-date,
 .wp-block-latest-posts__post-date {
-  color: #6d6d6d;
+  color: var(--lerm-color-text-muted);
   font-size: 0.7em;
   font-weight: 600;
   letter-spacing: normal;
@@ -939,7 +1075,7 @@ a[rel~="weixin"]:hover::after {
 
 .wp-block-embed figcaption,
 .wp-block-image figcaption {
-  color: #6d6d6d;
+  color: var(--lerm-color-text-muted);
   font-size: 0.875rem;
   margin-bottom: 0;
   margin-top: 1rem;
@@ -964,7 +1100,7 @@ a[rel~="weixin"]:hover::after {
 }
 
 .wp-block-button.is-style-outline {
-  color: #cd2653;
+  color: var(--lerm-color-primary);
 }
 
 .is-style-outline .wp-block-button__link:not(.has-text-color) {
@@ -1430,7 +1566,7 @@ figure.wp-block-table.is-style-stripes {
   font-weight: 400;
   line-height: 1.5;
   color: #212529;
-  background-color: #fff;
+  background-color: var(--lerm-bg-card);
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
@@ -1472,7 +1608,7 @@ Comments
   flex-direction: column;
   min-width: 0;
   word-wrap: break-word;
-  background-color: #fff;
+  background-color: var(--lerm-bg-card);
   background-clip: border-box;
   border: 1px solid rgba(0, 0, 0, 0.125);
   border-radius: 0.25rem;
@@ -1662,7 +1798,7 @@ Media
 --------------------------------------------------------------*/
 .wp-caption,
 .gallery-caption {
-  color: #666;
+  color: var(--lerm-color-text-muted);
   font-size: 13px;
   font-size: 0.8125rem;
   font-style: italic;
@@ -1710,137 +1846,6 @@ Media
 .thumbnail-wrap:hover .post-thumbnail {
   transform: scale(1.1);
   transition: all 0.5s ease 0s;
-}
-
-/*lightbox*/
-.ekko-lightbox {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  padding-right: 0 !important;
-}
-
-.ekko-lightbox-container {
-  position: relative;
-}
-
-.ekko-lightbox-container > div.ekko-lightbox-item {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-}
-
-.ekko-lightbox iframe {
-  width: 100%;
-  height: 100%;
-}
-
-.ekko-lightbox-nav-overlay {
-  z-index: 1;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-}
-
-.ekko-lightbox-nav-overlay a {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.5s;
-  color: #fff;
-  font-size: 30px;
-  z-index: 1;
-}
-
-.ekko-lightbox-nav-overlay a > * {
-  flex-grow: 1;
-}
-
-.ekko-lightbox-nav-overlay a > :focus {
-  outline: none;
-}
-
-.ekko-lightbox-nav-overlay a span {
-  padding: 0 30px;
-}
-
-.ekko-lightbox-nav-overlay a:last-child span {
-  text-align: right;
-}
-
-.ekko-lightbox-nav-overlay a:hover {
-  text-decoration: none;
-}
-
-.ekko-lightbox-nav-overlay a:focus {
-  outline: none;
-}
-
-.ekko-lightbox-nav-overlay a.disabled {
-  cursor: default;
-  visibility: hidden;
-}
-
-.ekko-lightbox a:hover {
-  opacity: 1;
-  text-decoration: none;
-}
-
-.ekko-lightbox .modal-dialog {
-  display: none;
-}
-
-.ekko-lightbox .modal-footer {
-  text-align: left;
-}
-
-.ekko-lightbox-loader {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.ekko-lightbox-loader > div {
-  width: 40px;
-  height: 40px;
-  position: relative;
-  text-align: center;
-}
-
-.ekko-lightbox-loader > div > div {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background-color: #fff;
-  opacity: 0.6;
-  position: absolute;
-  top: 0;
-  left: 0;
-  -webkit-animation: a 2s infinite ease-in-out;
-  animation: a 2s infinite ease-in-out;
-}
-
-.ekko-lightbox-loader > div > div:last-child {
-  -webkit-animation-delay: -1s;
-  animation-delay: -1s;
-}
-
-.modal-dialog .ekko-lightbox-loader > div > div {
-  background-color: #333;
 }
 
 @-webkit-keyframes a {
@@ -1896,19 +1901,263 @@ Media
 }
 
 /* Carousel */
-.carousel-indicators li {
+.carousel-indicators [data-bs-target] {
   width: 1.25rem;
   transition: all 0.5s ease-in-out;
 }
 
 .carousel-indicators .active {
   width: 1.875rem;
-  color: #dc3545;
+  background-color: #dc3545;
   transition: all 0.5s ease-in-out;
 }
 
 @media (max-width: 991.98px) {
-  .carousel-indicators li {
+  .carousel-indicators [data-bs-target] {
     height: 2px;
   }
+}
+
+/*--------------------------------------------------------------
+ Design Token consumers
+ These rules replace the hard-wired Bootstrap col-lg-8 widths
+ and all direct color references with CSS custom property vars.
+ The :root defaults (above) apply when no option is saved;
+ the PHP CssVariables class overrides :root when options change.
+--------------------------------------------------------------*/
+
+/* ── Body ─────────────────────────────────────────────────── */
+body {
+  background-color: var(--lerm-bg-body);
+  color: var(--lerm-color-text);
+  font-family: var(--lerm-font-family-base);
+  font-size: var(--lerm-font-size-base);
+  font-weight: var(--lerm-font-weight-base);
+  line-height: var(--lerm-line-height-base);
+}
+
+/* ── Cards / content background ──────────────────────────── */
+.card,
+.card-header {
+  background-color: var(--lerm-bg-card);
+}
+
+/* ── Site header ──────────────────────────────────────────── */
+.site-header,
+.dropdown-menu,
+.offcanvas {
+  background-color: var(--lerm-bg-header);
+}
+
+.site-header {
+  border-top:    var(--lerm-header-border-top);
+  border-bottom: var(--lerm-header-border-bottom);
+  border-left:   var(--lerm-header-border-left);
+  border-right:  var(--lerm-header-border-right);
+}
+
+/* ── Navigation ───────────────────────────────────────────── */
+.navbar {
+  font-family:   var(--lerm-font-family-nav, inherit);
+  font-size:     var(--lerm-font-size-nav);
+  font-weight:   var(--lerm-font-weight-nav);
+  line-height:   var(--lerm-line-height-nav);
+}
+
+.navbar-nav .nav-link,
+.dropdown-item,
+.navbar-btn {
+  color: var(--lerm-color-nav) !important;
+}
+
+.navbar-nav .nav-link:hover,
+.dropdown-item:hover,
+.navbar-btn:hover {
+  color: var(--lerm-color-nav-hover) !important;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .show > .nav-link,
+.dropdown-item.active,
+.dropdown-item:active {
+  color:            var(--lerm-nav-active-color) !important;
+  background-color: var(--lerm-nav-active-bg) !important;
+}
+
+.nav-link {
+  padding-top:    var(--lerm-nav-link-padding-y);
+  padding-bottom: var(--lerm-nav-link-padding-y);
+}
+
+/* ── Links ────────────────────────────────────────────────── */
+a {
+  color: var(--lerm-color-link);
+}
+
+a:hover {
+  color: var(--lerm-color-link-hover);
+}
+
+a:active {
+  color: var(--lerm-color-link-active);
+}
+
+a:focus {
+  color: var(--lerm-color-link-focus);
+}
+
+/* ── Widget card-header ───────────────────────────────────── */
+.card-header,
+.navigation .current,
+.comment-pager .current {
+  color:            var(--lerm-widget-header-color);
+  background-color: var(--lerm-widget-header-bg);
+  border-color:     var(--lerm-widget-header-border);
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.footer {
+  color:            var(--lerm-footer-widgets-color);
+  background-color: var(--lerm-footer-widgets-bg);
+}
+
+.colophon {
+  color:            var(--lerm-footer-bar-color);
+  background-color: var(--lerm-footer-bar-bg);
+}
+
+/* ── Primary button ───────────────────────────────────────── */
+.btn-custom,
+a[id="cancel-comment-reply-link"] {
+  color:            var(--lerm-btn-color) !important;
+  background-color: var(--lerm-btn-bg) !important;
+  border-color:     var(--lerm-btn-border) !important;
+}
+
+.btn-custom:hover,
+a[id="cancel-comment-reply-link"]:hover {
+  color:            var(--lerm-btn-hover-color) !important;
+  background-color: var(--lerm-btn-hover-bg) !important;
+  border-color:     var(--lerm-btn-hover-border) !important;
+}
+
+/* ── Reading progress bar ─────────────────────────────────── */
+#reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 0%;
+  height: var(--lerm-progress-height);
+  background-color: var(--lerm-progress-color);
+  transition: width 0.1s linear;
+}
+
+/* ── Layout: content / sidebar column widths ──────────────── */
+/* Override Bootstrap col-lg-8 / col-lg-4 with CSS var widths.
+   Only applies on lg+ breakpoints (same as col-lg-*). */
+@media (min-width: 992px) {
+  .layout-2c-l #primary,
+  .layout-2c-r #primary {
+    width: var(--lerm-content-width);
+    flex: 0 0 var(--lerm-content-width);
+    max-width: var(--lerm-content-width);
+  }
+
+  #secondary {
+    width: var(--lerm-sidebar-width);
+    flex: 0 0 var(--lerm-sidebar-width);
+    max-width: var(--lerm-sidebar-width);
+  }
+}
+
+/* ── Container max-width (wide / separate layouts) ───────── */
+.wide-layout .container,
+.separate-layout .container {
+  max-width: var(--lerm-container-max);
+}
+
+/* ── Boxed layout ─────────────────────────────────────────── */
+.boxed-layout #page {
+  width: var(--lerm-box-width);
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.boxed-layout {
+  background-color: var(--lerm-box-outer-bg);
+}
+
+/* ── Dark mode base (toggled by JS setting data-bs-theme="dark") */
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .comment-respond {
+  border-color: var(--lerm-color-border);
+}
+
+[data-bs-theme="dark"] body {
+  color: var(--lerm-color-text);
+}
+
+[data-bs-theme="dark"] a {
+  color: var(--lerm-color-primary);
+}
+
+/*--------------------------------------------------------------
+ Sticky header + transparent header + dark mode classes
+ (toggled by themeOptions.js based on lermData settings)
+--------------------------------------------------------------*/
+
+/* Sticky header shrink state */
+.site-header.is-shrunk {
+  transition: padding 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.site-header.is-shrunk .custom-logo {
+  height: 1.5rem;
+  transition: height 0.25s ease;
+}
+
+/* Transparent header (over hero/carousel) */
+.site-header.header-transparent {
+  background-color: transparent !important;
+  border-bottom-color: transparent !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Dark mode toggle button */
+ 
+.loading-animate {
+  visibility: hidden;
+}
+
+.loading-animate.animate__animated {
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-animate {
+    visibility: visible;
+  }
+}
+
+/*--------------------------------------------------------------
+ CMS Front Page
+--------------------------------------------------------------*/
+.card-img-top {
+  border-radius: var(--lerm-radius-card) var(--lerm-radius-card) 0 0;
+}
+
+.card-img-top .figure {
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.card-img-top .figure img {
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top img {
+  transform: scale(1.03);
 }

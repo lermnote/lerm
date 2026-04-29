@@ -3,32 +3,46 @@ declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
 
-use WP_REST_Request;
-use WP_REST_Response;
-use WP_Error;
 use Lerm\Http\Rest\Middleware;
 use Lerm\Http\Rest\Repository\LikeRepository;
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
+
 use function Lerm\Support\get_like_user_id;
 
 /**
- * 点赞接口控制器
- *
- * GET  /lerm/v1/like/{id}  — 查询点赞数及当前用户状态
- * POST /lerm/v1/like/{id}  — 切换点赞（已赞则取消，未赞则点赞）
+ * Like endpoint controller.
  *
  * @package Lerm\Http\Rest\Controllers
  */
 final class LikeController {
 
-	/**
-	 * 查询点赞状态
-	 */
+	private static function likes_enabled( string $type ): bool {
+		$options = function_exists( 'lerm_get_template_options' ) ? \lerm_get_template_options() : array();
+
+		if ( 'comment' === $type ) {
+			return ! isset( $options['comment_likes_enable'] ) || ! empty( $options['comment_likes_enable'] );
+		}
+
+		return ! isset( $options['post_likes_enable'] ) || ! empty( $options['post_likes_enable'] );
+	}
+
 	public static function get( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id   = absint( $request->get_param( 'id' ) );
 		$type = sanitize_key( $request->get_param( 'type' ) !== null ? $request->get_param( 'type' ) : 'post' );
 
-		// Ensure cookie is set before performing any business logic
-		// to avoid data inconsistency when headers are already sent
+		if ( ! self::likes_enabled( $type ) ) {
+			return new WP_REST_Response(
+				array(
+					'count'  => 0,
+					'liked'  => false,
+					'status' => 'disabled',
+				),
+				200
+			);
+		}
+
 		if ( headers_sent() && ! is_user_logged_in() ) {
 			return new WP_Error(
 				'headers_already_sent',
@@ -55,17 +69,18 @@ final class LikeController {
 		);
 	}
 
-	/**
-	 * 切换点赞状态
-	 *
-	 * 频率限制：每 IP 每分钟最多 30 次（防刷）
-	 */
 	public static function toggle( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id   = absint( $request->get_param( 'id' ) );
 		$type = sanitize_key( $request->get_param( 'type' ) !== null ? $request->get_param( 'type' ) : 'post' );
 
-		// Ensure cookie can be set before processing the request
-		// This prevents data inconsistency when headers are already sent
+		if ( ! self::likes_enabled( $type ) ) {
+			return new WP_Error(
+				'likes_disabled',
+				__( 'Like button is disabled.', 'lerm' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		if ( headers_sent() && ! is_user_logged_in() ) {
 			return new WP_Error(
 				'headers_already_sent',
@@ -74,9 +89,8 @@ final class LikeController {
 			);
 		}
 
-		// 中间件链：先验文章，再限速
 		$check = Middleware::chain(
-			fn() =>self::validate_object( $id, $type ),
+			fn() => self::validate_object( $id, $type ),
 			fn() => Middleware::rate_limit( sprintf( 'like_%s_%d', $type, $id ), 30, 60 )
 		);
 		if ( is_wp_error( $check ) ) {

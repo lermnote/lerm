@@ -18,11 +18,16 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="theme-color" content="<?php echo esc_attr( $template_options['header_bg_color'] ); ?>">
 	<?php wp_head(); ?>
+		<?php if ( ! empty( $template_options['head_scripts'] ) ) : ?>
+			<?php echo $template_options['head_scripts']; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+	<?php endif; ?>
 </head>
 <body <?php body_class(); ?>>
 	<?php wp_body_open(); ?>
 	<div id="page" class="site">
-		<header id="site-header" class="card site-header" itemscope="" itemtype="https://schema.org/WPHeader">
+		<header id="site-header" class="card site-header mb-3 <?php echo ! empty( $template_options['sticky_header'] ) ? ' site-header--sticky' : ''; ?><?php echo ! empty( $template_options['transparent_header'] ) ? ' site-header--transparent' : ''; ?>"
+		data-shrink="<?php echo ( ! empty( $template_options['sticky_header'] ) && ! empty( $template_options['sticky_header_shrink'] ) ) ? 'true' : 'false'; ?>"
+		itemscope="" itemtype="https://schema.org/WPHeader">
 			<nav id="site-navigation" class="navbar navbar-expand-lg p-0">
 				<div class="container">
 					<!-- .navbar-brand  begin -->

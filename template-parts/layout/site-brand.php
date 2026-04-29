@@ -21,7 +21,7 @@
 			<?php
 		endif;
 
-		$description = $template_options['blogdesc'] ? $template_options['blogdesc'] : get_bloginfo( 'description' );
+		$description = $template_options['tagline'] ? $template_options['tagline'] : get_bloginfo( 'description' );
 		if ( ( ! wp_is_mobile() && $description ) || is_customize_preview() ) :
 			?>
 			<span class="site-description small d-none d-md-block text-muted"><?php echo esc_html( $description ); ?></span>

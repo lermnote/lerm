@@ -1,550 +1,248 @@
 <?php
 /**
- * The homepage file
+ * Front page template (CMS homepage).
  *
- * This is the most generic template file in a WordPress theme and one
- * of the two required files for a theme (the other being style.css).
- * It is used to display a page when nothing more specific matches a query,
- * e.g., it puts together the home page when no home.php file exists.
+ * Sections:
+ * 1. Carousel / Hero slider
+ * 2. Featured posts
+ * 3. Category-based post grid
+ * 4. Main post loop with sidebar
  *
- * @authors lerm http://lerm.net
- * @date    2018-01-30
- * @since   Lerm 3.0
+ * @package Lerm
+ * @since   5.0.0
  */
+
+use Lerm\Support\Image;
+
 get_header();
-// posts show on top
-$recent_posts = new WP_Query(
-	array(
-		'posts_per_page'      => 6,
-		'post_status'         => 'publish',
-		'post_type'           => 'post',
-		'ignore_sticky_posts' => true,
-		'no_found_rows'       => true,
-		'tax_query'           => array(
-			array(
-				'taxonomy' => 'post_format',
-				'terms'    => array( 'post-format-quote', 'post-format-aside' ),
-				'field'    => 'slug',
-				'operator' => 'NOT IN',
-			),
-		),
-	)
-);
+
+$template_options  = lerm_get_template_options();
+$show_thumbnail    = ! isset( $template_options['show_thumbnail'] ) || ! empty( $template_options['show_thumbnail'] );
+$thumbnail_gallery = (array) ( $template_options['thumbnail_gallery'] ?? array() );
+$excerpt_length    = (int) ( $template_options['excerpt_length'] ?? 95 );
+$cat_exclude       = (array) ( $template_options['cat_exclude'] ?? array() );
+
+// ─── Section 1: Carousel ────────────────────────────────────────────────
+if ( ! empty( $template_options['slide_enable'] ) ) :
+	get_template_part( 'template-parts/components/carousel' );
+endif;
 ?>
 
-<div class="container">
-	<div class="row">
-	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
-		<div class="col-md-8">
-			<div class="row row-cols-1 row-cols-md-3">
-				<?php
-				if ( $recent_posts->have_posts() ) :
-					while ( $recent_posts->have_posts() ) :
-						$recent_posts->the_post();
-						?>
-						<div class="col mb-4">
-							<div class="card h-100">
-								<?php get_template_part( 'template-parts/components/featured-image' ); ?>
-								<div class="card-body">
-									<h5 class="card-title">
-										<?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?>
-									</h5>
-								</div>
-								<?php //get_template_part( 'template-parts/content/content', get_post_type() ); ?>
-							</div>
-						</div>
-					<?php endwhile; ?>
-				<?php endif; ?>
-			</div><!-- row row-cols-1 row-cols-md-3 -->
-			<div class="card mb-3">
-				<div class="row g-0">
-					<div class="col-md-4">
-						<svg class="bd-placeholder-img" width="100%" height="250" xmlns="http://www.w3.org/2000/svg"
-							preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
-							aria-label="Placeholder: Image">
-							<title>Placeholder</title>
-							<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-								dy=".3em">Image</text>
-						</svg>
-					</div>
-					<div class="col-md-8">
-						<div class="card-body">
-							<h5 class="card-title">Card title</h5>
-							<p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-								additional content. This content is a little bit longer.</p>
-							<p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div><!-- .col-md-8 -->
-		<div class="col-md-4">
-			<div class="row row-cols-1">
-				<div class="col mb-4">
-					<div class="card h-100">
-						<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-							xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false"
-							role="img" aria-label="Placeholder: Image cap">
-							<title>Placeholder</title>
-							<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-								dy=".3em">Image cap</text>
-						</svg>
-						<div class="card-body">
-							<h5 class="card-title">Card title</h5>
-							<p class="card-text">This is a short card.</p>
-						</div>
-					</div>
-				</div>
-				<div class="col mb-4">
-					<div class="card h-100">
-						<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-							xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false"
-							role="img" aria-label="Placeholder: Image cap">
-							<title>Placeholder</title>
-							<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-								dy=".3em">Image cap</text>
-						</svg>
-						<div class="card-body">
-							<h5 class="card-title">Card title</h5>
-							<p class="card-text">This is a longer card with supporting text below as a natural lead-in
-								to additional content.</p>
-						</div>
-					</div>
-				</div>
-				<div class="col mb-4">
-					<div class="card h-100">
-						<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-							xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false"
-							role="img" aria-label="Placeholder: Image cap">
-							<title>Placeholder</title>
-							<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-								dy=".3em">Image cap</text>
-						</svg>
-						<div class="card-body">
-							<h5 class="card-title">Card title</h5>
-							<p class="card-text">This is a longer card with supporting text below as a natural lead-in
-								to additional content. This content is a little bit longer.</p>
-						</div>
-					</div>
-				</div>
-				<div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
-					<div class="carousel-inner">
-						<div class="carousel-item active">
-							<div class="col mb-4">
-								<div class="card h-100">
-									<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-										xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-										focusable="false" role="img" aria-label="Placeholder: Image cap">
-										<title>Placeholder</title>
-										<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-											fill="#dee2e6" dy=".3em">Image cap</text>
-									</svg>
-									<div class="card-body">
-										<h5 class="card-title">Card title</h5>
-										<p class="card-text">This is a longer card with supporting text below as a
-											natural lead-in to additional content. This content is a little bit longer.
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="carousel-item">
-							<div class="col mb-4">
-								<div class="card h-100">
-									<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-										xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-										focusable="false" role="img" aria-label="Placeholder: Image cap">
-										<title>Placeholder</title>
-										<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-											fill="#dee2e6" dy=".3em">Image cap</text>
-									</svg>
-									<div class="card-body">
-										<h5 class="card-title">Card title 1</h5>
-										<p class="card-text">This is a longer card with supporting text below as a
-											natural lead-in to additional content. This content is a little bit longer.
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="carousel-item">
-							<div class="col mb-4">
-								<div class="card h-100">
-									<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-										xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-										focusable="false" role="img" aria-label="Placeholder: Image cap">
-										<title>Placeholder</title>
-										<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-											fill="#dee2e6" dy=".3em">Image cap</text>
-									</svg>
-									<div class="card-body">
-										<h5 class="card-title">Card title 2</h5>
-										<p class="card-text">This is a longer card with supporting text below as a
-											natural lead-in to additional content. This content is a little bit longer.
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+<div class="row">
+<main id="main" class="col-lg-8 pe-lg-0">
 
-		</div><!-- col-md-4 -->
-	</div><!-- row -->
-	<div class="card bg-dark text-white mb-4">
-		<svg class="bd-placeholder-img bd-placeholder-img-lg card-img" width="100%" height="270"
-			xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
-			aria-label="Placeholder: Card image">
-			<title>Placeholder</title>
-			<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">Card
-				image</text>
-		</svg>
-		<div class="card-img-overlay">
-			<h5 class="card-title">Card title</h5>
-			<p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
-				content. This content is a little bit longer.</p>
-			<p class="card-text">Last updated 3 mins ago</p>
-		</div>
-	</div>
-	<div class="row row-cols-2 row-cols-md-4">
-		<div class="col mb-4">
-			<div class="card h-100">
-				<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-					xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
-					aria-label="Placeholder: Image cap">
-					<title>Placeholder</title>
-					<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-						dy=".3em">Image cap</text>
-				</svg>
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<p class="card-text">This is a longer card with supporting text below as a natural lead-in to
-						additional content. This content is a little bit longer.</p>
+<?php
+// ─── Section 2: Featured Posts ───────────────────────────────────────────
+$sticky_ids = get_option( 'sticky_posts', array() );
+
+$featured_args = array(
+	'post_type'           => 'post',
+	'post_status'         => 'publish',
+	'posts_per_page'      => 6,
+	'ignore_sticky_posts' => false,
+	'no_found_rows'       => true,
+	'tax_query'           => array(
+		array(
+			'taxonomy' => 'post_format',
+			'terms'    => array( 'post-format-quote', 'post-format-aside' ),
+			'field'    => 'slug',
+			'operator' => 'NOT IN',
+		),
+	),
+);
+
+if ( ! empty( $sticky_ids ) && is_array( $sticky_ids ) ) {
+	$featured_args['post__in']            = $sticky_ids;
+	$featured_args['ignore_sticky_posts'] = true;
+	$featured_args['posts_per_page']      = 6;
+} else {
+	$featured_args['ignore_sticky_posts'] = true;
+	$featured_args['posts_per_page']      = 6;
+	if ( ! empty( $cat_exclude ) ) {
+		$featured_args['category__not_in'] = array_map( 'absint', $cat_exclude );
+	}
+}
+
+$featured_query = new WP_Query( $featured_args );
+
+if ( $featured_query->have_posts() ) :
+	$has_sticky = ! empty( $sticky_ids ) && is_array( $sticky_ids );
+	?>
+	<section class="py-4">
+		<h2 class="h5 mb-3">
+			<?php if ( $has_sticky ) : ?>
+				<i class="fa fa-thumb-tack me-1" aria-hidden="true"></i><?php esc_html_e( 'Featured', 'lerm' ); ?>
+			<?php else : ?>
+				<i class="fa fa-clock-o me-1" aria-hidden="true"></i><?php esc_html_e( 'Latest Posts', 'lerm' ); ?>
+			<?php endif; ?>
+		</h2>
+		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+			<?php
+			while ( $featured_query->have_posts() ) :
+				$featured_query->the_post();
+				?>
+				<div class="col">
+					<article <?php post_class( 'card h-100' ); ?>>
+						<?php if ( $show_thumbnail ) : ?>
+							<a href="<?php the_permalink(); ?>" class="card-img-top overflow-hidden" aria-hidden="true" tabindex="-1">
+								<?php
+								get_template_part( 'template-parts/components/featured-image' );
+								?>
+							</a>
+						<?php endif; ?>
+						<div class="card-body d-flex flex-column">
+							<h3 class="card-title h6 mb-2"><?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?></h3>
+							<p class="card-text text-muted small mt-auto"><?php echo esc_html( wp_trim_words( get_the_excerpt(), $excerpt_length ) ); ?></p>
+						</div>
+						<div class="card-footer bg-transparent border-top-0 pt-0">
+							<small class="text-muted"><i class="fa fa-calendar-o me-1" aria-hidden="true"></i><?php echo esc_html( get_the_time( 'M d, Y' ) ); ?></small>
+						</div>
+					</article>
 				</div>
-			</div>
+				<?php
+			endwhile;
+			wp_reset_postdata();
+			?>
 		</div>
-		<div class="col mb-4">
-			<div class="card h-100">
-				<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-					xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
-					aria-label="Placeholder: Image cap">
-					<title>Placeholder</title>
-					<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-						dy=".3em">Image cap</text>
-				</svg>
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<p class="card-text">This is a short card.</p>
-				</div>
-			</div>
-		</div>
-		<div class="col mb-4">
-			<div class="card h-100">
-				<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-					xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
-					aria-label="Placeholder: Image cap">
-					<title>Placeholder</title>
-					<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-						dy=".3em">Image cap</text>
-				</svg>
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<p class="card-text">This is a longer card with supporting text below as a natural lead-in to
-						additional content.</p>
-				</div>
-			</div>
-		</div>
-		<div class="col mb-4">
-			<div class="card h-100">
-				<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-					xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
-					aria-label="Placeholder: Image cap">
-					<title>Placeholder</title>
-					<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-						dy=".3em">Image cap</text>
-				</svg>
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<p class="card-text">This is a longer card with supporting text below as a natural lead-in to
-						additional content. This content is a little bit longer.</p>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="card text-center mb-4">
-		<div class="card-header">
-			Featured
-		</div>
-		<div class="card-body">
-			<h5 class="card-title">Special title treatment</h5>
-			<p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-			<a href="#" class="btn btn-primary">Go somewhere</a>
-		</div>
-		<div class="card-footer text-muted">
-			2 days ago
-		</div>
-	</div>
-	<div class="row row-cols-1 row-cols-md-2">
-		<div class="col mb-4">
-			<div class="card mb-3">
-				<div class="row g-0">
-					<div class="col-md-4">
-						<svg class="bd-placeholder-img" width="100%" height="250" xmlns="http://www.w3.org/2000/svg"
-							preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
-							aria-label="Placeholder: Image">
-							<title>Placeholder</title>
-							<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-								dy=".3em">Image</text>
-						</svg>
-					</div>
-					<div class="col-md-8">
+	</section>
+	<?php
+endif;
+
+// ─── Section 3: Category Sections ───────────────────────────────────────────
+$featured_cat_ids = get_categories(
+	array(
+		'orderby'    => 'count',
+		'order'      => 'DESC',
+		'number'     => 3,
+		'hide_empty' => true,
+		'exclude'    => array_map( 'absint', $cat_exclude ),
+	)
+);
+
+if ( ! empty( $featured_cat_ids ) && ! is_wp_error( $featured_cat_ids ) ) :
+	foreach ( $featured_cat_ids as $category ) :
+		$cat_query = new WP_Query(
+			array(
+				'cat'            => $category->term_id,
+				'posts_per_page' => 4,
+				'post_status'    => 'publish',
+				'no_found_rows'  => true,
+			)
+		);
+		if ( ! $cat_query->have_posts() ) {
+			continue;
+		}
+		$cat_color_meta = get_term_meta( $category->term_id, 'cc_color', true );
+		$cat_color      = ! empty( $cat_color_meta ) ? $cat_color_meta : 'var(--lerm-color-primary)';
+		?>
+		<section class="py-4">
+			<h2 class="h5 mb-3">
+				<a href="<?php echo esc_url( get_category_link( $category ) ); ?>" class="text-decoration-none">
+					<i class="fa fa-folder-o me-1" aria-hidden="true"></i><?php echo esc_html( $category->name ); ?>
+				</a>
+				<small class="text-muted ms-2">(<?php echo absint( $category->count ); ?>)</small>
+			</h2>
+			<div class="row g-3">
+				<?php
+				$cat_query->the_post();
+				?>
+				<div class="col-md-6">
+					<article <?php post_class( 'card h-100' ); ?> style="border-left:3px solid <?php echo esc_attr( $cat_color ); ?>">
+						<?php if ( $show_thumbnail ) : ?>
+							<a href="<?php the_permalink(); ?>" class="card-img-top overflow-hidden" aria-hidden="true" tabindex="-1">
+								<?php get_template_part( 'template-parts/components/featured-image' ); ?>
+							</a>
+						<?php endif; ?>
 						<div class="card-body">
-							<h5 class="card-title">Card title</h5>
-							<p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-								additional content. This content is a little bit longer.</p>
-							<p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+							<h3 class="card-title h5"><?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?></h3>
+							<p class="card-text text-muted small"><?php echo esc_html( wp_trim_words( get_the_excerpt(), $excerpt_length ) ); ?></p>
 						</div>
+					</article>
+				</div>
+				<div class="col-md-6">
+					<div class="row row-cols-1 g-3">
+						<?php
+						while ( $cat_query->have_posts() ) :
+							$cat_query->the_post();
+							?>
+							<div class="col">
+								<article <?php post_class( 'card' ); ?>>
+									<div class="row g-0 align-items-center">
+										<?php if ( $show_thumbnail ) : ?>
+											<div class="col-4 col-sm-3">
+												<a href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1">
+													<?php get_template_part( 'template-parts/components/featured-image' ); ?>
+												</a>
+											</div>
+										<?php endif; ?>
+										<div class="<?php echo $show_thumbnail ? 'col-8 col-sm-9' : 'col-12'; ?>">
+											<div class="card-body py-2">
+												<h4 class="card-title h6 mb-0"><?php the_title( '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a>' ); ?></h4>
+												<small class="text-muted"><i class="fa fa-calendar-o me-1" aria-hidden="true"></i><?php echo esc_html( get_the_time( 'M d, Y' ) ); ?></small>
+											</div>
+										</div>
+									</div>
+								</article>
+							</div>
+							<?php
+						endwhile;
+						?>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="col mb-4">
-			<div class="card mb-3">
-				<div class="row g-0">
-					<div class="col-md-4">
-						<svg class="bd-placeholder-img" width="100%" height="250" xmlns="http://www.w3.org/2000/svg"
-							preserveAspectRatio="xMidYMid slice" focusable="false" role="img"
-							aria-label="Placeholder: Image">
-							<title>Placeholder</title>
-							<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6"
-								dy=".3em">Image</text>
-						</svg>
-					</div>
-					<div class="col-md-8">
-						<div class="card-body">
-							<h5 class="card-title">Card title</h5>
-							<p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-								additional content. This content is a little bit longer.</p>
-							<p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
-		<div class="carousel-inner">
-			<div class="carousel-item active">
-				<div class="row row-cols-2 row-cols-md-4">
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content. This content is a little bit longer.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a short card.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content. This content is a little bit longer.</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="carousel-item">
-				<div class="row row-cols-2 row-cols-md-4">
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content. This content is a little bit longer.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a short card.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content. This content is a little bit longer.</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="carousel-item">
-				<div class="row row-cols-2 row-cols-md-4">
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content. This content is a little bit longer.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a short card.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content.</p>
-							</div>
-						</div>
-					</div>
-					<div class="col mb-4">
-						<div class="card h-100">
-							<svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-								xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
-								focusable="false" role="img" aria-label="Placeholder: Image cap">
-								<title>Placeholder</title>
-								<rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%"
-									fill="#dee2e6" dy=".3em">Image cap</text>
-							</svg>
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a longer card with supporting text below as a natural
-									lead-in to additional content. This content is a little bit longer.</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-			<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-			<span class="sr-only">Previous</span>
-		</a>
-		<a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-			<span class="carousel-control-next-icon" aria-hidden="true"></span>
-			<span class="sr-only">Next</span>
-		</a>
-	</div>
+		</section>
+		<?php
+		wp_reset_postdata();
+	endforeach;
+endif;
+
+// ─── Section 4: Main Post Loop ──────────────────────────────────────────
+$main_args = array(
+	'post_type'           => 'post',
+	'post_status'         => 'publish',
+	'paged'               => get_query_var( 'paged' ) ? absint( get_query_var( 'paged' ) ) : 1,
+	'ignore_sticky_posts' => true,
+);
+
+if ( ! empty( $cat_exclude ) ) {
+	$main_args['category__not_in'] = array_map( 'absint', $cat_exclude );
+}
+
+$main_query = new WP_Query( $main_args );
+
+if ( $main_query->have_posts() ) :
+	?>
+	<section class="py-4">
+		<h2 class="h5 mb-3"><?php esc_html_e( 'Recent Articles', 'lerm' ); ?></h2>
+		<?php
+		while ( $main_query->have_posts() ) :
+			$main_query->the_post();
+			$summary_mode = (string) ( $template_options['summary_or_full'] ?? 'content_summary' );
+
+			if ( 'content_full' === $summary_mode ) {
+				get_template_part( 'template-parts/post/content', '' );
+			} else {
+				get_template_part( 'template-parts/post/content', 'excerpt' );
+			}
+		endwhile;
+		wp_reset_postdata();
+
+		$original_query = $wp_query;
+		$wp_query       = $main_query; // phpcs:ignore
+		get_template_part( 'template-parts/components/pagination' );
+		$wp_query       = $original_query; // phpcs:ignore
+		?>
+	</section>
+	<?php
+else :
+	?>
+	<p class="text-muted text-center py-5"><?php esc_html_e( 'No posts found.', 'lerm' ); ?></p>
+	<?php
+endif;
+?>
+
+</main>
+<?php get_sidebar(); ?>
 </div>
-<?php get_footer(); ?>
+
+<?php get_footer();

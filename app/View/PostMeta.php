@@ -157,7 +157,7 @@ class PostMeta {
 			?>
 			<span class="meta-icon">
 				<span class="screen-reader-text"><?php esc_html_e( 'Categories', 'lerm' ); ?></span>
-				<i class="fa fa-hdd pe-1"></i>
+				<i class="fa fa-folder pe-1"></i>
 			</span>
 			<span class="meta-text">
 				<?php echo wp_kses_post( $categories ); ?>
@@ -173,8 +173,9 @@ class PostMeta {
 	 */
 	public static function read(): void {
 		global $post;
+		$template_options = function_exists( 'lerm_get_template_options' ) ? \lerm_get_template_options() : array();
 
-		if ( empty( $post->ID ) ) {
+		if ( empty( $post->ID ) || empty( $template_options['post_views_enable'] ) ) {
 			return;
 		}
 

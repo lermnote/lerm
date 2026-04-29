@@ -5,7 +5,7 @@
  * 职责：
  *   1. 定义主题常量
  *   2. 加载 Composer autoload
- *   3. 加载 Admin 框架（CSF）
+ *   3. 引导共享 AdminConfig runtime
  *   4. 在 after_setup_theme 钩子内启动 bootstrap
  *
  * 不应放在这里的内容：模块初始化、选项解析、hook 注册 —— 这些全在 bootstrap.php。
@@ -78,42 +78,38 @@ add_action(
 );
 
 // -----------------------------------------------------------------------------
-// 4. Admin 框架（Codestar Framework）
-//    定义 lerm_options() 及后台选项面板，必须在 bootstrap 之前加载
+// 4. AdminConfig runtime
+//    主题只在这里注册 schema，渲染、存储、校验和后台交互由共享包负责
 // -----------------------------------------------------------------------------
 
-$lerm_csf = LERM_DIR . 'app/Http/Admin/codestar-framework.php';
-add_action(
-	'after_setup_theme',
-	function () use ( $lerm_csf ) {
-		if ( file_exists( $lerm_csf ) ) {
-			require_once $lerm_csf;  // options.config.php 里的 __('lerm') 现在安全
+if ( ! function_exists( 'lerm_admin_config_runtime' ) ) {
+	/**
+	 * Boot the embedded admin-config runtime and register the theme schema.
+	 */
+	function lerm_admin_config_runtime(): \Lerm\AdminConfig\WordPress\Runtime {
+		static $runtime = null;
+
+		if ( null === $runtime ) {
+			$runtime = \Lerm\AdminConfig\WordPress\EmbeddedBootstrap::boot(
+				trailingslashit( get_template_directory_uri() ) . 'packages/AdminConfig/assets',
+				'LERM_VERSION'
+			);
+
+			\Lerm\Theme\AdminConfig\Bootstrap::register( $runtime );
 		}
-	},
-	2
-);
+
+		return $runtime;
+	}
+}
+
 if ( ! function_exists( 'lerm_options' ) ) {
 	function lerm_options( string $id, string $tag = '', $default_value = '' ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
-		// Fetch the theme options array from the database
-		static $options = null;
-		if ( null === $options ) {
-			$options = (array) get_option( 'lerm_theme_options', array() );
-		}
-
-		// Check if the main option ID exists in the options array
-		if ( ! array_key_exists( $id, $options ) ) {
-			return $default_value;
-		}
-
-		$option_value = $options[ $id ];
-
-		// If the option value is an array and a tag is specified, return the tagged value or default
-		if ( is_array( $option_value ) && '' !== $tag ) {
-			return $options[ $id ][ $tag ] ?? $default_value;
-		}
-
-		// Return the option value (either array or single value)
-		return $option_value;
+		return lerm_admin_config_runtime()->get(
+			\Lerm\Theme\AdminConfig\ThemeOptionsSchema::schema_id(),
+			$id,
+			$tag,
+			$default_value
+		);
 	}
 }
 
@@ -127,41 +123,249 @@ if ( ! function_exists( 'lerm_get_template_options' ) ) {
 		return apply_filters(
 			'lerm_template_options',
 			array(
-				'header_bg_color'       => '#fff',
-				'slide_position'        => '',
-				'slide_enable'          => false,
-				'slide_images'          => array(),
-				'slide_indicators'      => false,
-				'slide_control'         => false,
-				'icp_num'               => '',
-				'copyright'             => '',
-				'author_bio'            => false,
-				'single_sidebar_select' => 'home-sidebar',
-				'blog_sidebar_select'   => 'home-sidebar',
-				'front_page_sidebar'    => 'home-sidebar',
-				'page_sidebar'          => 'home-sidebar',
-				'breadcrumb_container'  => 'nav',
-				'breadcrumb_before'     => '',
-				'breadcrumb_after'      => '',
-				'breadcrumb_list_tag'   => 'ol',
-				'breadcrumb_item_tag'   => 'li',
-				'breadcrumb_separator'  => '/',
-				'breadcrumb_front_show' => false,
-				'breadcrumb_show_title' => true,
-				'thumbnail_gallery'     => '',
-				'load_more'             => false,
-				'related_posts'         => false,
-				'related_number'        => 5,
-				'single_top'            => array(),
-				'single_bottom'         => array(),
-				'summary_meta'          => array(),
-				'social_share'          => array(),
-				'blogname'              => '',
-				'blogdesc'              => '',
-				'narbar_align'          => 'justify-content-md-start',
-				'narbar_search'         => false,
+				'header_bg_color'           => '#fff',
+				'slide_position'            => '',
+				'slide_enable'              => false,
+				'slide_images'              => array(),
+				'slide_indicators'          => false,
+				'slide_control'             => false,
+				'head_scripts'              => '',
+				'footer_scripts'            => '',
+				'footer_menus'              => 0,
+				'icp_num'                   => '',
+				'copyright'                 => '',
+				'author_bio'                => false,
+				'post_navigation'           => true,
+				'single_sidebar_select'     => 'home-sidebar',
+				'blog_sidebar_select'       => 'home-sidebar',
+				'front_page_sidebar'        => 'home-sidebar',
+				'page_sidebar'              => 'home-sidebar',
+				'breadcrumb_container'      => 'nav',
+				'breadcrumb_before'         => '',
+				'breadcrumb_after'          => '',
+				'breadcrumb_list_tag'       => 'ol',
+				'breadcrumb_item_tag'       => 'li',
+				'breadcrumb_separator'      => '/',
+				'breadcrumb_front_show'     => false,
+				'breadcrumb_show_title'     => true,
+				'summary_or_full'           => 'content_summary',
+				'show_thumbnail'            => true,
+				'thumbnail_gallery'         => array(),
+				'load_more'                 => false,
+				'related_posts'             => false,
+				'related_number'            => 5,
+				'single_top'                => array(
+					'enabled'  => array(
+						'publish_date' => __( 'Publish date', 'lerm' ),
+						'categories'   => __( 'Category', 'lerm' ),
+						'read'         => __( 'Reading time', 'lerm' ),
+						'responses'    => __( 'Comments', 'lerm' ),
+					),
+					'disabled' => array(
+						'format' => __( 'Format', 'lerm' ),
+						'author' => __( 'Author', 'lerm' ),
+					),
+				),
+				'single_bottom'             => array(
+					'enabled'  => array(
+						'publish_date' => __( 'Publish date', 'lerm' ),
+						'categories'   => __( 'Category', 'lerm' ),
+					),
+					'disabled' => array(
+						'format'    => __( 'Format', 'lerm' ),
+						'author'    => __( 'Author', 'lerm' ),
+						'read'      => __( 'Reading time', 'lerm' ),
+						'responses' => __( 'Comments', 'lerm' ),
+					),
+				),
+				'summary_meta'              => array(
+					'enabled'  => array(
+						'categories' => __( 'Category', 'lerm' ),
+						'read'       => __( 'Reading time', 'lerm' ),
+					),
+					'disabled' => array(
+						'author'       => __( 'Author', 'lerm' ),
+						'responses'    => __( 'Comments', 'lerm' ),
+						'publish_date' => __( 'Publish date', 'lerm' ),
+						'format'       => __( 'Format', 'lerm' ),
+					),
+				),
+				'social_share'              => array(),
+				'blogname'                  => '',
+				'tagline'                   => '',
+				'navbar_align'              => 'justify-content-md-end',
+				'navbar_search'             => false,
+				'dark_mode_enable'          => false,
+				'dark_mode_default'          => 'system',
+				'dark_mode_toggle_position' => 'navbar',
+				'reading_progress'           => false,
+				'reading_progress_color'     => '#0084ba',
+				'reading_progress_height'   => 3,
+				'sticky_header'              => false,
+				'sticky_header_shrink'       => false,
+				'transparent_header'         => false,
+				'back_to_top_threshold'     => 400,
+				'qq_chat_enable'            => false,
+				'qq_chat_number'            => '',
+				'toc_enable'                => false,
+				'toc_min_headings'          => 3,
+				'toc_position'              => 'before_content',
+				'toc_collapsed'             => false,
+				'post_likes_enable'         => true,
+				'comment_likes_enable'      => true,
+				'post_views_enable'         => true,
+				'share_show_count'          => false,
+				'share_position'            => 'bottom',
+				'post_copyright_enable'     => true,
+				'post_copyright_text'       => '',
+				'search_results_per_page'   => 5,
+				'search_placeholder'        => '',
+				'comments_enable'           => true,
+				'comments_require_login'    => false,
+				'comment_moderation'        => false,
+				'comments_per_page'         => 20,
+				'comment_nesting_depth'     => 3,
+				'comment_form_fields'       => array( 'name', 'email' ),
+				'comment_min_length'        => 10,
+				'comment_max_length'        => 2000,
+				'comment_avatar_size'       => 48,
+				'comment_show_cravatar_tip' => true,
+				'comment_placeholder'       => __( 'Leave a comment...', 'lerm' ),
+				'404_title'                 => __( '404 Not Found', 'lerm' ),
+				'404_message'               => __( 'Sorry, the page you are looking for could not be found.', 'lerm' ),
+				'404_button_text'           => __( 'Back to home', 'lerm' ),
+				'404_button_url'            => '',
+				'404_image_id'              => 0,
+				'404_show_search'           => true,
+				'social_weibo'              => '',
+				'social_wechat'             => '',
+				'social_qq'                 => '',
+				'social_bilibili'           => '',
+				'social_zhihu'              => '',
+				'social_douban'             => '',
+				'social_github'             => '',
+				'social_twitter'            => '',
+				'social_linkedin'           => '',
+				'social_instagram'          => '',
+				'social_youtube'            => '',
+				'social_email'              => '',
+				'social_rss'                => true,
+				'social_profiles_position'  => array( 'footer', 'author_bio' ),
+				'social_open_new_tab'       => true,
 			)
 		);
+	}
+}
+
+if ( ! function_exists( 'lerm_get_frontend_auth_page_url' ) ) {
+	/**
+	 * Build the frontend auth page URL for a given tab.
+	 */
+	function lerm_get_frontend_auth_page_url( string $tab = 'login' ): string {
+		$page_id = (int) lerm_options( 'frontend_login_page', '', 0 );
+		$url     = $page_id > 0 ? get_permalink( $page_id ) : wp_login_url();
+
+		if ( ! $url ) {
+			$url = home_url( '/' );
+		}
+
+		if ( ! in_array( $tab, array( 'login', 'regist', 'register', 'reset' ), true ) ) {
+			$tab = 'login';
+		}
+
+		if ( in_array( $tab, array( 'regist', 'register', 'reset' ), true ) ) {
+			$url = add_query_arg( 'tab', 'register' === $tab ? 'regist' : $tab, $url );
+		}
+
+		return esc_url_raw( $url );
+	}
+}
+
+if ( ! function_exists( 'lerm_get_frontend_account_page_url' ) ) {
+	/**
+	 * Get the configured frontend account page URL.
+	 */
+	function lerm_get_frontend_account_page_url(): string {
+		if ( ! lerm_options( 'front_user_center', '', false ) ) {
+			return esc_url_raw( home_url( '/' ) );
+		}
+
+		$page_id = (int) lerm_options( 'frontend_user_center_page', '', 0 );
+		$url     = $page_id > 0 ? get_permalink( $page_id ) : home_url( '/' );
+
+		return esc_url_raw( $url ? $url : home_url( '/' ) );
+	}
+}
+
+if ( ! function_exists( 'lerm_social_profile_links' ) ) {
+	/**
+	 * Render configured social profile links.
+	 *
+	 * @param array  $opts Theme options array.
+	 * @param bool   $new_tab Whether links should open in a new tab.
+	 * @param string $container_class CSS classes for the container wrapper.
+	 */
+	function lerm_social_profile_links(
+		array $opts,
+		bool $new_tab = true,
+		string $container_class = 'lerm-social-links d-flex gap-2 justify-content-center flex-wrap'
+	): void {
+		$target = $new_tab ? ' target="_blank" rel="noopener noreferrer"' : '';
+		$links  = array(
+			'social_weibo'     => array( 'fa fa-weibo', 'Weibo' ),
+			'social_wechat'    => array( 'fa fa-weixin', 'WeChat' ),
+			'social_qq'        => array( 'fa fa-qq', 'QQ' ),
+			'social_bilibili'  => array( 'lerm-icon-bilibili', 'Bilibili' ),
+			'social_zhihu'     => array( 'lerm-icon-zhihu', 'Zhihu' ),
+			'social_douban'    => array( 'lerm-icon-douban', 'Douban' ),
+			'social_github'    => array( 'fa fa-github', 'GitHub' ),
+			'social_twitter'   => array( 'fa fa-twitter', 'X / Twitter' ),
+			'social_linkedin'  => array( 'fa fa-linkedin', 'LinkedIn' ),
+			'social_instagram' => array( 'fa fa-instagram', 'Instagram' ),
+			'social_youtube'   => array( 'fa fa-youtube-play', 'YouTube' ),
+			'social_email'     => array( 'fa fa-envelope', 'Email' ),
+		);
+		$html   = '';
+
+		foreach ( $links as $key => $meta ) {
+			$url = trim( (string) ( $opts[ $key ] ?? '' ) );
+			if ( '' === $url ) {
+				continue;
+			}
+
+			if ( 'social_email' === $key && ! str_starts_with( $url, 'mailto:' ) ) {
+				$url = 'mailto:' . $url;
+			}
+
+			$href = esc_url( $url );
+			if ( '' === $href ) {
+				continue;
+			}
+
+			$html .= sprintf(
+				'<a class="social-link" href="%1$s"%2$s aria-label="%3$s"><i class="%4$s" aria-hidden="true"></i></a>',
+				$href,
+				$target,
+				esc_attr( $meta[1] ),
+				esc_attr( $meta[0] )
+			);
+		}
+
+		if ( ! empty( $opts['social_rss'] ) ) {
+			$html .= sprintf(
+				'<a class="social-link" href="%1$s"%2$s aria-label="RSS"><i class="fa fa-rss" aria-hidden="true"></i></a>',
+				esc_url( get_feed_link() ),
+				$target
+			);
+		}
+
+		if ( $html ) {
+			printf(
+				'<div class="%1$s">%2$s</div>',
+				esc_attr( $container_class ),
+				$html // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- individual links are escaped above.
+			);
+		}
 	}
 }
 // -----------------------------------------------------------------------------

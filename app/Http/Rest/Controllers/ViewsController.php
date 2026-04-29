@@ -3,18 +3,28 @@ declare( strict_types=1 );
 
 namespace Lerm\Http\Rest\Controllers;
 
-use WP_REST_Request;
-use WP_REST_Response;
-use WP_Error;
 use Lerm\Http\Rest\Middleware;
 use Lerm\Http\Rest\Repository\ViewsRepository;
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
+
 use function Lerm\Support\client_ip;
 
 final class ViewsController {
 
-	/**
-	 * 查询浏览数
-	 */
+	private static function views_enabled(): bool {
+		$options = function_exists( 'lerm_get_template_options' ) ? \lerm_get_template_options() : array();
+
+		return ! isset( $options['post_views_enable'] ) || ! empty( $options['post_views_enable'] );
+	}
+
+	private static function unique_views_only(): bool {
+		$options = function_exists( 'lerm_get_template_options' ) ? \lerm_get_template_options() : array();
+
+		return ! isset( $options['views_unique_only'] ) || ! empty( $options['views_unique_only'] );
+	}
+
 	public static function get( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$post_id = absint( $request->get_param( 'id' ) );
 
@@ -23,17 +33,16 @@ final class ViewsController {
 			return $check;
 		}
 
+		if ( ! self::views_enabled() ) {
+			return new WP_REST_Response( array( 'count' => 0 ), 200 );
+		}
+
 		return new WP_REST_Response(
 			array( 'count' => ViewsRepository::get_count( $post_id ) ),
 			200
 		);
 	}
 
-	/**
-	 * 递增浏览数
-	 *
-	 * 频率限制：每 IP 每分钟最多 5 次（正常浏览不会触发）
-	 */
 	public static function increment( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$post_id = absint( $request->get_param( 'id' ) );
 
@@ -45,9 +54,21 @@ final class ViewsController {
 			return $check;
 		}
 
-		// 用 IP hash 作为防重复标识，不直接暴露 IP
+		if ( ! self::views_enabled() ) {
+			return new WP_Error(
+				'views_disabled',
+				__( 'View counter is disabled.', 'lerm' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$client_key = substr( md5( client_ip() . wp_salt() ), 0, 16 );
-		$result     = ViewsRepository::record( $post_id, $client_key );
+		$result     = self::unique_views_only()
+			? ViewsRepository::record( $post_id, $client_key )
+			: array(
+				'count'    => ViewsRepository::increment( $post_id ),
+				'recorded' => true,
+			);
 
 		return new WP_REST_Response( $result, 200 );
 	}

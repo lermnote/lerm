@@ -151,6 +151,58 @@ final class Router {
 			)
 		);
 
+		register_rest_route(
+			$ns,
+			'/auth/register',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( LoginController::class, 'register' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'username'         => array(
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_user',
+					),
+					'email'            => array(
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_email',
+					),
+					'password'         => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'password_confirm' => array(
+						'required' => false,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$ns,
+			'/auth/reset',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( LoginController::class, 'reset' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'login' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'email' => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_email',
+					),
+				),
+			)
+		);
+
 		// ── 个人资料 ──────────────────────────────────────────
 		register_rest_route(
 			$ns,
@@ -159,12 +211,12 @@ final class Router {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( ProfileController::class, 'get' ),
-					'permission_callback' => '__return_true',
+					'permission_callback' => static fn() => is_user_logged_in(),
 				),
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( ProfileController::class, 'update' ),
-					'permission_callback' => '__return_true',
+					'permission_callback' => static fn() => is_user_logged_in(),
 				),
 			)
 		);

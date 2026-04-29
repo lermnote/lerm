@@ -23,8 +23,28 @@ class Enqueue {
 	 * @var array<string, mixed>
 	 */
 	private static $args = array(
-		'enable_code_highlight' => true,
-		'cdn_jquery'            => '',
+		'enable_code_highlight'     => true,
+		'cdn_jquery'                => '',
+		// Header behaviour
+		'sticky_header'             => false,
+		'sticky_header_shrink'      => false,
+		'transparent_header'        => false,
+		// Reading progress bar
+		'reading_progress'          => false,
+		// Back-to-top button
+		'back_to_top'               => true,
+		'back_to_top_threshold'     => 400,
+		// Dark mode
+		'dark_mode_enable'          => false,
+		'dark_mode_default'         => 'system',
+		'dark_mode_toggle_position' => 'navbar',
+		// QQ live chat
+		'qq_chat_enable'            => false,
+		'qq_chat_number'            => '',
+		// Search
+		'search_results_per_page'   => 5,
+		'comment_min_length'        => 10,
+		'comment_max_length'        => 2000,
 	);
 
 	/**
@@ -62,6 +82,7 @@ class Enqueue {
 	public static function hooks(): void {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
+		add_action( 'wp_head', array( __CLASS__, 'print_head_bootstrap' ), 0 );
 
 		add_filter( 'script_loader_tag', array( __CLASS__, 'add_module_type' ), 10, 2 );
 	}
@@ -111,52 +132,114 @@ class Enqueue {
 			apply_filters(
 				'lerm_l10n_data',
 				array(
-					'rest_url'       => esc_url_raw( rest_url( 'lerm/v1/' ) ),
-					'nonce'          => wp_create_nonce( 'wp_rest' ),
-					'profile_nonce'  => wp_create_nonce( 'lerm_profile' ),
-					'loggedin'       => is_user_logged_in(),
-					'post_id'        => is_singular() ? get_the_ID() : 0,
-					'route_like'     => 'like',
-					'route_views'    => 'views',
-					'route_search'   => 'search',
-					'route_loadmore' => 'posts',
-					'route_comment'  => 'comment',
-					'route_profile'  => 'profile',
-					'redirect'       => esc_url(
-						is_user_logged_in()
-							? ( get_edit_profile_url() !== false ? get_edit_profile_url() : home_url( '/' ) )
-							: home_url( '/' )
-					),
-					'i18n'           => array(
-						'like'                   => __( 'Like', 'lerm' ),
-						'unlike'                 => __( 'Unlike', 'lerm' ),
-						'missing_nonce'          => __( 'Security token is missing.', 'lerm' ),
-						'click_success'          => __( 'Action completed successfully.', 'lerm' ),
-						'click_failed'           => __( 'Unable to complete the requested action.', 'lerm' ),
-						'form_submitted'         => __( 'Form submitted successfully!', 'lerm' ),
-						'error_occurred'         => __( 'An error occurred: {message}', 'lerm' ),
-						'invalid_format'         => __( 'Invalid format.', 'lerm' ),
-						'invalid_email_format'   => __( 'Please enter a valid email address.', 'lerm' ),
-						'register_username_min'  => __( 'Username must be at least {minLength} characters long.', 'lerm' ),
-						'comment_username_min'   => __( 'Name must be at least {minLength} characters long.', 'lerm' ),
-						'password_min'           => __( 'Password must be at least {minLength} characters long.', 'lerm' ),
-						'password_uppercase'     => __( 'Password must contain at least one uppercase letter.', 'lerm' ),
-						'password_number'        => __( 'Password must contain at least one number.', 'lerm' ),
-						'password_special'       => __( 'Password must contain at least one special character.', 'lerm' ),
-						'password_mismatch'      => __( 'Passwords do not match.', 'lerm' ),
-						'comment_min'            => __( 'Comment must be at least {minLength} characters long.', 'lerm' ),
-						'show'                   => __( 'Show', 'lerm' ),
-						'hide'                   => __( 'Hide', 'lerm' ),
-						'show_password'          => __( 'Show password', 'lerm' ),
-						'hide_password'          => __( 'Hide password', 'lerm' ),
+					'rest_url'                => esc_url_raw( rest_url( 'lerm/v1/' ) ),
+					'nonce'                   => wp_create_nonce( 'wp_rest' ),
+					'profile_nonce'           => wp_create_nonce( 'lerm_profile' ),
+					'loggedin'                => is_user_logged_in(),
+					'post_id'                 => is_singular() ? get_the_ID() : 0,
+					'route_like'              => 'like',
+					'route_views'             => 'views',
+					'route_search'            => 'search',
+					'route_loadmore'          => 'posts',
+					'route_comment'           => 'comment',
+					'route_profile'           => 'profile',
+					'route_auth_login'        => 'auth/login',
+					'route_auth_register'     => 'auth/register',
+					'route_auth_reset'        => 'auth/reset',
+					'redirect'                => esc_url( is_user_logged_in() ? ( get_edit_profile_url() !== false ? get_edit_profile_url() : home_url( '/' ) ) : home_url( '/' ) ),
+					// ── Behaviour settings ────────────────────────────────────
+					'stickyHeader'            => self::$args['sticky_header'],
+					'stickyHeaderShrink'      => self::$args['sticky_header_shrink'],
+					'transparentHeader'       => self::$args['transparent_header'],
+					'readingProgress'         => self::$args['reading_progress'],
+					'backToTop'               => self::$args['back_to_top'],
+					'backToTopThreshold'      => self::$args['back_to_top_threshold'],
+					'darkMode'                => self::$args['dark_mode_enable'],
+					'darkModeDefault'         => self::$args['dark_mode_default'],
+					'darkModeToggle'          => self::$args['dark_mode_toggle_position'],
+					'qqChatEnable'            => self::$args['qq_chat_enable'],
+					'qqChatNumber'            => self::$args['qq_chat_number'],
+					'search_results_per_page' => self::$args['search_results_per_page'],
+					'comment_min_length'      => self::$args['comment_min_length'],
+					'comment_max_length'      => self::$args['comment_max_length'],
+					// ── i18n ─────────────────────────────────────────────────
+					'i18n'                    => array(
+						'like'                  => __( 'Like', 'lerm' ),
+						'unlike'                => __( 'Unlike', 'lerm' ),
+						'missing_nonce'         => __( 'Security token is missing.', 'lerm' ),
+						'click_success'         => __( 'Action completed successfully.', 'lerm' ),
+						'click_failed'          => __( 'Unable to complete the requested action.', 'lerm' ),
+						'form_submitted'        => __( 'Form submitted successfully!', 'lerm' ),
+						'error_occurred'        => __( 'An error occurred: {message}', 'lerm' ),
+						'invalid_format'        => __( 'Invalid format.', 'lerm' ),
+						'invalid_email_format'  => __( 'Please enter a valid email address.', 'lerm' ),
+						'register_username_min' => __( 'Username must be at least {minLength} characters long.', 'lerm' ),
+						'comment_username_min'  => __( 'Name must be at least {minLength} characters long.', 'lerm' ),
+						'password_min'          => __( 'Password must be at least {minLength} characters long.', 'lerm' ),
+						'password_uppercase'    => __( 'Password must contain at least one uppercase letter.', 'lerm' ),
+						'password_number'       => __( 'Password must contain at least one number.', 'lerm' ),
+						'password_special'      => __( 'Password must contain at least one special character.', 'lerm' ),
+						'password_mismatch'     => __( 'Passwords do not match.', 'lerm' ),
+						'comment_min'           => __( 'Comment must be at least {minLength} characters long.', 'lerm' ),
+						'comment_max'           => __( 'Comment must be no more than {maxLength} characters long.', 'lerm' ),
+						'show'                  => __( 'Show', 'lerm' ),
+						'hide'                  => __( 'Hide', 'lerm' ),
+						'show_password'         => __( 'Show password', 'lerm' ),
+						'hide_password'         => __( 'Hide password', 'lerm' ),
+						'search_no_results'     => __( 'No results found.', 'lerm' ),
+						'search_loading'        => __( 'Searching…', 'lerm' ),
+						'search_view_all'       => __( 'View all results', 'lerm' ),
 					),
 				)
 			)
 		);
 
+		// Reading progress bar element — injected after <body> open when enabled.
+		if ( self::$args['reading_progress'] ) {
+			add_action( 'wp_body_open', array( __CLASS__, 'reading_progress_bar' ) );
+		}
+
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 			wp_enqueue_script( 'comment-reply' );
 		}
+	}
+
+	/**
+	 * Output the reading progress bar element.
+	 * Driven by --lerm-progress-color / --lerm-progress-height CSS vars.
+	 * Width is updated via scroll listener in the JS bundle (reads lermData.readingProgress).
+	 */
+	public static function reading_progress_bar(): void {
+		echo '<div id="reading-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="' . esc_attr__( 'Reading progress', 'lerm' ) . '"></div>' . "\n";
+	}
+
+	/**
+	 * Print the minimal head bootstrap needed before the main bundle runs.
+	 * Keeps early dark-mode sync out of templates while still preventing a flash.
+	 */
+	public static function print_head_bootstrap(): void {
+		if ( empty( self::$args['dark_mode_enable'] ) ) {
+			return;
+		}
+
+		$default_scheme = (string) ( self::$args['dark_mode_default'] ?? 'system' );
+		if ( ! in_array( $default_scheme, array( 'light', 'dark', 'system' ), true ) ) {
+			$default_scheme = 'system';
+		}
+
+		$config = wp_json_encode(
+			array(
+				'defaultScheme'    => $default_scheme,
+				'storageKey'       => 'lerm-color-scheme',
+				'legacyStorageKey' => 'lerm-theme',
+			)
+		);
+
+		if ( ! is_string( $config ) || '' === $config ) {
+			return;
+		}
+
+		echo '<script>(function(){var c=' . $config . ';try{var s=localStorage.getItem(c.storageKey)||localStorage.getItem(c.legacyStorageKey);var p=s||c.defaultScheme;if(p==="system"){p=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}if(s==="light"||s==="dark"){localStorage.setItem(c.storageKey,s);localStorage.removeItem(c.legacyStorageKey);}document.documentElement.setAttribute("data-bs-theme",p);}catch(e){var f=c.defaultScheme==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":c.defaultScheme==="dark"?"dark":"light";document.documentElement.setAttribute("data-bs-theme",f);}})();</script>' . "\n";
 	}
 
 	/**

@@ -1,0 +1,48 @@
+# Block Editor Migration Plan
+
+AdminConfig should reach the block editor through the REST contract, not through
+the current classic-admin DOM implementation. Phase 1 keeps the PHP rendering
+stable while carving out client boundaries that a React/Gutenberg client can
+reuse.
+
+## Target Shape
+
+- REST API remains the only data contract for JavaScript clients.
+- PHP schema compilation and storage stay server-side sources of truth.
+- Classic admin screens keep working until the block-editor UI reaches feature
+  parity.
+- Block-editor clients consume `client_config` plus values from
+  `GET /schema/{id}` and submit mutations through the same REST endpoints as
+  classic admin.
+
+## Current Client Boundaries
+
+- `assets/src/config.js`: resolves the localized runtime config for a screen.
+- `assets/src/transport.js`: owns REST and deprecated Ajax transports. REST uses
+  WordPress `@wordpress/api-fetch`; Ajax remains isolated for the `0.2.x`
+  compatibility window.
+- `assets/src/form-state.js`: reads and compares classic form values. This is a
+  temporary bridge until React state owns values directly.
+- `assets/src/admin-config.js`: classic admin mounting, field widgets, DOM
+  binding, dirty tracking, and tab/subsection behavior.
+
+## Phase 2 Order
+
+1. Create a React state adapter that maps `schema + values` into field state
+   without reading DOM forms.
+2. Move field renderers behind a registry that can mount either classic DOM
+   widgets or React components.
+3. Add a small block-editor package entry that imports the REST transport and
+   state adapter, then renders one schema in an editor sidebar or settings
+   panel.
+4. Keep classic admin E2E as regression coverage while adding a small editor
+   smoke test for schema load, save, validation error replay, and reset.
+5. Remove the Ajax fallback in `0.3.0` only after REST-only CI is consistently
+   green and the block-editor entry no longer references localized Ajax keys.
+
+## Non-Goals For Phase 1
+
+- Do not rewrite classic field markup in React yet.
+- Do not change PHP schema definitions to fit Gutenberg-specific components.
+- Do not remove `admin-post.php` no-JavaScript save handling as part of Ajax
+  retirement.

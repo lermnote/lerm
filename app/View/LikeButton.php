@@ -50,6 +50,15 @@ final class LikeButton {
 			)
 		);
 
+		$template_options = function_exists( 'lerm_get_template_options' ) ? \lerm_get_template_options() : array();
+		$enabled          = $is_comment
+			? ( ! isset( $template_options['comment_likes_enable'] ) || ! empty( $template_options['comment_likes_enable'] ) )
+			: ( ! isset( $template_options['post_likes_enable'] ) || ! empty( $template_options['post_likes_enable'] ) );
+
+		if ( ! $enabled ) {
+			return false === $args['echo'] ? '' : null;
+		}
+
 		$user_id    = get_like_user_id();
 		$type       = $is_comment ? 'comment' : 'post';
 		$liked      = LikeRepository::has_liked( $id, $user_id, $type );

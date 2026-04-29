@@ -4,14 +4,8 @@ declare( strict_types=1 );
 namespace Lerm\View;
 
 /**
- * 导航栏登录/用户菜单项
+ * injection of login/logout links in nav menu
  *
- * 原来混在 AjaxLogin 里，与 Ajax 逻辑无关，单独提取。
- *
- * bootstrap.php 中按需初始化：
- *   if ( $login_options['menu_login_item'] ) {
- *       NavMenu::init( $login_options );
- *   }
  *
  * @package Lerm\View
  */
@@ -19,6 +13,7 @@ final class NavMenu {
 
 	private static array $args = array(
 		'login_page_id'       => 0,
+		'account_page_url'    => '',
 		'login_redirect_url'  => '',
 		'logout_redirect_url' => '',
 	);
@@ -32,7 +27,7 @@ final class NavMenu {
 	 * 在 primary 菜单末尾注入登录按钮 / 用户下拉菜单
 	 */
 	public static function inject_login_item( string $items, object $args ): string {
-		if ( 'primary' !== ( $args->theme_location ?? '' ) ) {
+		if ( 'secondary' !== ( $args->theme_location ?? '' ) ) {
 			return $items;
 		}
 
@@ -51,7 +46,7 @@ final class NavMenu {
 
 	private static function render_user_dropdown(): string {
 		$user        = wp_get_current_user();
-		$account_url = esc_url( self::$args['login_redirect_url'] ? self::$args['login_redirect_url'] : home_url( '/' ) );
+		$account_url = esc_url( self::$args['account_page_url'] ? self::$args['account_page_url'] : home_url( '/' ) );
 		$logout_url  = esc_url( wp_logout_url( self::$args['logout_redirect_url'] ? self::$args['logout_redirect_url'] : home_url( '/' ) ) );
 
 		ob_start();

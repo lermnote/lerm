@@ -1,0 +1,11 @@
+parameters:
+  level: 5
+  paths:
+    - src
+    - tests
+    - examples
+  excludePaths:
+    - */vendor/*
+  scanFiles:
+    - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+    - tools/wp-tool-stubs.php

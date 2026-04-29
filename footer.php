@@ -8,6 +8,20 @@
 use function Lerm\Support\copyright_text;
 
 $template_options = lerm_get_template_options();
+$social_positions = (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) );
+$social_new_tab   = ! isset( $template_options['social_open_new_tab'] ) || ! empty( $template_options['social_open_new_tab'] );
+$footer_menu_id   = (int) ( $template_options['footer_menus'] ?? 0 );
+$footer_menu_args = array(
+	'depth'       => 1,
+	'menu_class'  => 'footer-menu d-flex justify-content-center list-unstyled mb-0',
+	'fallback_cb' => false,
+);
+
+if ( $footer_menu_id > 0 ) {
+	$footer_menu_args['menu'] = $footer_menu_id;
+} else {
+	$footer_menu_args['theme_location'] = 'footer';
+}
 ?>
 </main>
 <footer class="card footer" itemscope="" itemtype="http://schema.org/WPFooter">
@@ -16,35 +30,54 @@ $template_options = lerm_get_template_options();
 			<?php dynamic_sidebar( 'footer-sidebar' ); ?>
 		</div>
 	<?php endif; ?>
+
 	<div class="colophon py-3 text-center">
 		<div class="container">
+			<?php if ( in_array( 'footer', $social_positions, true ) ) : ?>
+				<?php lerm_social_profile_links( $template_options, $social_new_tab ); ?>
+			<?php endif; ?>
+
 			<span><?php copyright_text( 'short' ); ?></span>
+
 			<?php if ( ! empty( $template_options['icp_num'] ) ) : ?>
 				<span><a href="https://beian.miit.gov.cn"><?php echo esc_html( $template_options['icp_num'] ); ?></a></span>
 			<?php endif; ?>
+
 			<br>
 			<span><?php echo esc_html__( 'Theme by', 'lerm' ); ?><a href="<?php echo esc_url( 'https://lerm.net/' ); ?>"> Lerm </a></span>
-			<?php
-			wp_nav_menu(
-				array(
-					'theme_location' => 'footer',
-					'depth'          => 1,
-					'menu_class'     => 'footer-menu d-flex justify-content-center list-unstyled mb-0',
-					'fallback_cb'    => false,
-				)
-			);
-			?>
+
+			<?php wp_nav_menu( $footer_menu_args ); ?>
+
 			<?php if ( ! empty( $template_options['copyright'] ) ) : ?>
-				<div class="d-block"><?php echo esc_html( $template_options['copyright'] ); ?></div>
+				<div class="d-block"><?php echo wp_kses_post( $template_options['copyright'] ); ?></div>
 			<?php endif; ?>
 		</div>
 	</div>
 </footer>
+
 <div class="position-fixed d-grid gap-1 btn-group-sm" style="bottom: 4rem;right: 1rem">
-	<a class="btn btn-custom" target="_blank" rel="noopener noreferrer" href="http://wpa.qq.com/msgrd?v=3&uin=825641026&site=qq&menu=yes" data-bs-toggle="tooltip" data-bs-placement="left" title="<?php echo esc_attr__( 'QQ live chat', 'lerm' ); ?>" role="button"><i class="fa fa-qq"></i></a>
-	<button class="btn btn-custom" id="scroll-up" data-bs-toggle="tooltip" data-bs-placement="left" title="<?php echo esc_attr__( 'Back to top', 'lerm' ); ?>" role="button"><i class="fa fa-chevron-up"></i></button>
+	<?php if ( ! empty( $template_options['qq_chat_enable'] ) && ! empty( $template_options['qq_chat_number'] ) ) : ?>
+		<a class="btn btn-custom" target="_blank" rel="noopener noreferrer"
+			href="<?php echo esc_url( 'http://wpa.qq.com/msgrd?v=3&uin=' . rawurlencode( $template_options['qq_chat_number'] ) . '&site=qq&menu=yes' ); ?>"
+			data-bs-toggle="tooltip"
+			data-bs-placement="left"
+			title="<?php echo esc_attr__( 'QQ live chat', 'lerm' ); ?>"
+			role="button"><i class="fa fa-qq"></i></a>
+	<?php endif; ?>
+
+	<?php if ( ! isset( $template_options['back_to_top'] ) || ! empty( $template_options['back_to_top'] ) ) : ?>
+		<button class="btn btn-custom d-none" id="scroll-up"
+			data-bs-toggle="tooltip"
+			data-bs-placement="left"
+			title="<?php echo esc_attr__( 'Back to top', 'lerm' ); ?>"
+			role="button"><i class="fa fa-chevron-up"></i></button>
+	<?php endif; ?>
 </div>
 </div><!-- #page -->
 <?php wp_footer(); ?>
+
+<?php if ( ! empty( $template_options['footer_scripts'] ) ) : ?>
+	<?php echo $template_options['footer_scripts']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+<?php endif; ?>
 </body>
 </html>

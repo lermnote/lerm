@@ -64,7 +64,7 @@ final class Smtp {
 
 		if ( $phpmailer->SMTPAuth ) {
 			$phpmailer->Username = $smtp['username'];
-			$phpmailer->Password = $smtp['pwd'];
+			$phpmailer->Password = $smtp['pswd'];
 		}
 
 		$phpmailer->SMTPAutoTLS = ( 'tls' === $smtp['ssl_enable'] );

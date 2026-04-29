@@ -17,6 +17,7 @@
 	],
 	"autoload": {
 		"psr-4": {
+			"Lerm\\AdminConfig\\": "packages/AdminConfig/src/",
 			"Lerm\\": "app/"
 		},
 		"files": [
