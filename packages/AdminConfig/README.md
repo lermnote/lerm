@@ -18,7 +18,8 @@ This repository now contains the first extraction slice:
 - `src/Framework`: bundled field/store/admin framework used by the runtime
 - `src/Stores`: store resolution for WordPress option/meta backends
 - `src/WordPress`: embedded bootstrap, plugin bootstrap, runtime, REST endpoints, and container adapters
-- `assets/src`: source entry points for reusable admin UI scripts
+- `assets/src`: source entry points and client boundaries for config,
+  transport, form-state, and classic admin mounting
 - `assets/build`: generated WordPress script bundles and `*.asset.php` metadata
 - `assets`: reusable admin UI styles plus legacy unbuilt script fallback
 - `lerm-admin-config.php`: plugin entry point for standalone installs
@@ -141,7 +142,7 @@ $runtime->register_validator(
 
 Late registration is supported: if you register a schema after `boot()`, or register a container after some schemas were already compiled, the runtime will mount matching schemas when the needed container becomes available.
 
-See [docs/quick-start.md](/packages/AdminConfig/docs/quick-start.md) for the copyable onboarding path, [docs/extension-api.md](/packages/AdminConfig/docs/extension-api.md) for the extension surface, [docs/extension-recipes.md](/packages/AdminConfig/docs/extension-recipes.md) for minimal custom field/validator/data-source snippets, [docs/rest-api.md](/packages/AdminConfig/docs/rest-api.md) for the REST transport contract, and [docs/smoke-checklist.md](/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
+See [docs/quick-start.md](/packages/AdminConfig/docs/quick-start.md) for the copyable onboarding path, [docs/extension-api.md](/packages/AdminConfig/docs/extension-api.md) for the extension surface, [docs/extension-recipes.md](/packages/AdminConfig/docs/extension-recipes.md) for minimal custom field/validator/data-source snippets, [docs/rest-api.md](/packages/AdminConfig/docs/rest-api.md) for the REST transport contract, [docs/block-editor-migration.md](/packages/AdminConfig/docs/block-editor-migration.md) for the eventual Gutenberg migration path, and [docs/smoke-checklist.md](/packages/AdminConfig/docs/smoke-checklist.md) for the current manual regression pass.
 
 ## Recommended lifecycle
 
@@ -322,7 +323,7 @@ admin, also set `LERM_ADMIN_CONFIG_MULTISITE=1` and pass the spec path after `--
 - Breaking runtime changes should land with changelog notes, migration guidance,
   and updated examples
 
-See [docs/support-matrix.md](/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [docs/rest-api.md](/packages/AdminConfig/docs/rest-api.md) for the REST API contract, [docs/ajax-retirement.md](/packages/AdminConfig/docs/ajax-retirement.md) for the legacy Ajax removal checklist, [CONTRIBUTING.md](/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
+See [docs/support-matrix.md](/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [docs/rest-api.md](/packages/AdminConfig/docs/rest-api.md) for the REST API contract, [docs/ajax-retirement.md](/packages/AdminConfig/docs/ajax-retirement.md) for the legacy Ajax removal checklist, [docs/block-editor-migration.md](/packages/AdminConfig/docs/block-editor-migration.md) for the block-editor migration path, [CONTRIBUTING.md](/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
 
 ## Reading meta-backed schemas
 

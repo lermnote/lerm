@@ -14,6 +14,8 @@
 - WordPress integration: default stable `wp-env` environment on PHP `8.2`
 - WordPress multisite automation: dedicated `wp-env` run on ports `8890/8891`
 - Browser smoke coverage: Playwright against plugin mode, embedded mode, classic admin containers, and multisite network settings in `wp-env`
+- REST-only browser coverage: Playwright single-site and multisite smoke runs
+  with AdminConfig legacy Ajax disabled
 - Local browser smoke coverage can target an existing site through `LERM_ADMIN_CONFIG_BASE_URL` plus admin credentials
 - REST-only browser smoke coverage disables AdminConfig legacy Ajax and asserts that package actions avoid `admin-ajax.php`
 
@@ -50,6 +52,7 @@
 - Recursive PHP syntax checks
 - JavaScript syntax checks
 - Reproducible admin script build checks
+- Built asset dependency extraction for `wp-api-fetch`
 - WPCS and PHPStan gates
 - PHPUnit unit coverage for compiler, schema helpers, registries, and diagnostics
 - PHPUnit smoke coverage for the bundled plugin and embedded examples

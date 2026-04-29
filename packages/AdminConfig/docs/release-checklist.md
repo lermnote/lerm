@@ -20,6 +20,7 @@ When Docker is available, also run:
 npm run test:integration
 npm run test:e2e
 npm run test:wp:multisite
+npm run test:wp:rest-only
 ```
 
 ## Manual Sanity Pass
@@ -28,6 +29,8 @@ npm run test:wp:multisite
 - Confirm the embedded fixture theme still boots in embedded mode.
 - Confirm WordPress loads `assets/build/admin-config.js` and falls back only
   when the built asset is intentionally absent in a source checkout.
+- Confirm the built asset metadata includes `wp-api-fetch` after transport
+  changes.
 - Check options-page global save across multiple sections.
 - Check reset current page and reset all tabs.
 - Check import/export on the schema demo plugin.

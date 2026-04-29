@@ -8,6 +8,9 @@ schema and `OptionStore` validation path as the source of truth.
 - Namespace: `lerm-admin-config/v1`
 - Auth: WordPress cookie auth with `X-WP-Nonce: wp_create_nonce( 'wp_rest' )`
 - Client base URL: localized as `LermAdminConfig.restUrl`
+- Classic admin client: `assets/src/transport.js` uses the WordPress
+  `@wordpress/api-fetch` package for REST requests and keeps the deprecated
+  `admin-ajax.php` branch isolated behind `requestLegacyAjax()`.
 - Legacy fallback: `admin-ajax.php` remains available for older admin screens
   during the rollout, but new clients should prefer REST. The fallback can be
   disabled for removal rehearsals with `LERM_ADMIN_CONFIG_ENABLE_LEGACY_AJAX`
@@ -107,6 +110,135 @@ REST errors use stable error codes and include `status`, `success: false`, and
 - `missing_store_context`: object-backed store context is missing, `400`
 - `invalid_import_json`: import payload is not valid JSON, `400`
 - `validation_error`: save/import failed field validation, `422`
+
+## Stable Response Shapes
+
+These shapes are the Phase 1 contract for classic admin JavaScript and the
+future block-editor client.
+
+`GET /schema/{id}`:
+
+```json
+{
+  "schema": {
+    "id": "schema_id",
+    "sections": []
+  },
+  "values": {
+    "field_id": "value"
+  }
+}
+```
+
+`GET /schema/{id}/values`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "values": {
+      "field_id": "value"
+    }
+  }
+}
+```
+
+`POST /schema/{id}/save`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Settings saved.",
+    "values": {
+      "field_id": "value"
+    }
+  }
+}
+```
+
+`POST /schema/{id}/reset`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Settings reset.",
+    "values": {
+      "field_id": "default"
+    }
+  }
+}
+```
+
+`GET /schema/{id}/export`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "json": "{\n    \"field_id\": \"value\"\n}"
+  }
+}
+```
+
+`POST /schema/{id}/import`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Settings imported.",
+    "values": {
+      "field_id": "value"
+    }
+  }
+}
+```
+
+`GET` or `POST /schema/{id}/data-source`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "value": "example",
+        "label": "Example"
+      }
+    ],
+    "more": false
+  }
+}
+```
+
+Validation failure:
+
+```json
+{
+  "code": "validation_error",
+  "message": "Validation failed.",
+  "data": {
+    "status": 422,
+    "success": false,
+    "data": {
+      "message": "Validation failed.",
+      "fieldErrors": {
+        "field_id": "Required."
+      },
+      "errors": {
+        "section.field_id": "Required."
+      },
+      "tab": "general",
+      "subsection": ""
+    }
+  }
+}
+```
+
+Client adapters should normalize both direct Ajax-compatible envelopes and
+`WP_Error` REST envelopes into `{ success, data }` before updating UI state.
 
 ## Migration Notes
 

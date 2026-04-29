@@ -312,3 +312,71 @@ jobs:
       - name: Stop multisite wp-env
         if: always()
         run: npm run wp-env:stop:multisite
+
+  wordpress-rest-only:
+    name: WordPress REST-only
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@728c6c6b8cf02c2e48117716a91ee48313958a19
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Cache Composer downloads
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ runner.os }}-rest-only-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-rest-only-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run REST-only browser suite
+        run: npm run test:wp:rest-only
+
+      - name: Capture REST-only wp-env logs
+        if: always()
+        run: |
+          mkdir -p artifacts/wp-env
+          npm run wp-env:logs > artifacts/wp-env/rest-only-development.log 2>&1 || true
+          npm run wp-env:logs:tests > artifacts/wp-env/rest-only-tests.log 2>&1 || true
+          npm run wp-env:logs:multisite > artifacts/wp-env/rest-only-multisite-development.log 2>&1 || true
+          npm run wp-env:logs:tests:multisite > artifacts/wp-env/rest-only-multisite-tests.log 2>&1 || true
+
+      - name: Upload REST-only artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: wp-env-rest-only-artifacts
+          path: |
+            artifacts/wp-env/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+      - name: Stop wp-env
+        if: always()
+        run: npm run wp-env:stop
+
+      - name: Stop multisite wp-env
+        if: always()
+        run: npm run wp-env:stop:multisite

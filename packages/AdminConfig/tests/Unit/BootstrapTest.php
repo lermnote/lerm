@@ -206,6 +206,7 @@ final class BootstrapTest extends TestCase {
 		$this->assertSame( 'https://example.test/assets/build/admin-config.js', $script['src'] );
 		$this->assertSame( (string) $asset['version'], $script['version'] );
 		$this->assertContains( 'wp-theme-plugin-editor', $script['dependencies'] );
+		$this->assertContains( 'wp-api-fetch', $script['dependencies'] );
 		$this->assertSame(
 			'https://example.test/wp-json/lerm-admin-config/v1/',
 			$GLOBALS['lerm_admin_config_localized_scripts']['lerm-admin-config-js-unit-build-asset']['lermAdminConfig']['restUrl']

@@ -5,6 +5,10 @@
  */
 
 // ─── WordPress Global Stubs (typed as any — official typings are incomplete) ──
+const { resolveAdminConfig } = require('./config');
+const { createFormStateHelpers } = require('./form-state');
+const { createAdminConfigTransport } = require('./transport');
+
 /** @type {any} */ const wp = /** @type {any} */ (window['wp']);
 
 (function () {
@@ -161,75 +165,16 @@
 
 	/** @type {LermConfig} */
 	let cfg = /** @type {any} */ ({});
+	const transport = createAdminConfigTransport({
+		getConfig: () => /** @type {Record<string, unknown>} */ (cfg),
+		getData,
+	});
 
-	const hasRestTransport = () => !!(cfg.restUrl && cfg.restNonce);
-	const legacyAjaxFlagEnabled = () => ![false, 0, '', '0', 'false'].includes( /** @type {any} */ (cfg.legacyAjaxEnabled ?? true) );
-	const hasLegacyAjaxTransport = () => legacyAjaxFlagEnabled() && !!cfg.ajaxUrl;
-
-	/**
-	 * @param {string} path
-	 */
-	const restUrl = (path) => `${String(cfg.restUrl || '').replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
-
-	/**
-	 * @param {HTMLFormElement|null} form
-	 * @param {string} action
-	 */
-	const restActionPath = (form, action) => {
-		const schemaId = form ? getData(form, 'schema-id') : '';
-		if (!schemaId) return '';
-
-		if (action === cfg.saveAction) return `schema/${schemaId}/save`;
-		if (action === cfg.resetAction) return `schema/${schemaId}/reset`;
-		if (action === cfg.importAction) return `schema/${schemaId}/import`;
-		if (action === cfg.exportAction) return `schema/${schemaId}/export`;
-
-		return '';
-	};
-
-	/**
-	 * @param {Response} response
-	 * @returns {Promise<AjaxResponse>}
-	 */
-	const parseJsonResponse = async (response) => {
-		const text = await response.text();
-
-		try {
-			const parsed = JSON.parse(text);
-
-			if (parsed && typeof parsed === 'object' && 'success' in parsed) {
-				return /** @type {AjaxResponse} */ (parsed);
-			}
-
-			if (!response.ok || (parsed && typeof parsed === 'object' && 'code' in parsed)) {
-				return /** @type {AjaxResponse} */ ({
-					success: false,
-					data: parsed?.data?.data || { message: parsed?.message || cfg.saveError },
-				});
-			}
-
-			return /** @type {AjaxResponse} */ ({ success: true, data: parsed });
-		} catch {
-			if (!response.ok) throw new Error('Network error: ' + response.status);
-			throw new Error('Invalid JSON response: ' + text.slice(0, 120));
-		}
-	};
-
-	/**
-	 * @param {string} path
-	 * @param {RequestInit} [options]
-	 * @returns {Promise<AjaxResponse>}
-	 */
-	const requestRest = (path, options = {}) => {
-		const headers = new Headers(options.headers || {});
-		headers.set('X-WP-Nonce', String(cfg.restNonce || ''));
-
-		if (options.body instanceof FormData) {
-			options.body.set('_wpnonce', String(cfg.restNonce || ''));
-		}
-
-		return fetch(restUrl(path), { ...options, headers }).then(parseJsonResponse);
-	};
+	const hasRestTransport = () => transport.hasRestTransport();
+	const hasLegacyAjaxTransport = () => transport.hasLegacyAjaxTransport();
+	const restActionPath = (form, action) => transport.restActionPath(form, action);
+	const requestRest = (path, options = {}) => transport.requestRest(path, options);
+	const requestLegacyAjax = (body) => transport.requestLegacyAjax(body);
 
 	/**
 	 * @returns {{ tab: string, subsection: string }}
@@ -1054,7 +999,7 @@
 		body.set('nonce', cfg.dataSourceNonce);
 
 		if (hasLegacyAjaxTransport()) {
-			return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+			return requestLegacyAjax(body);
 		}
 
 		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
@@ -2393,108 +2338,11 @@
 	 */
 	const pageIsDirty = (form) => pageForms(form).some((pageForm) => isDirty(pageForm));
 
-	/**
-	 * @param {string} token
-	 * @returns {boolean}
-	 */
-	const isArrayToken = (token) => token === '' || /^\d+$/.test(String(token));
-
-	/**
-	 * @param {string|null|undefined} nextToken
-	 * @returns {unknown[]|Record<string, unknown>}
-	 */
-	const createStateContainer = (nextToken) => isArrayToken(String(nextToken ?? '')) ? [] : {};
-
-	/**
-	 * @param {HTMLFormElement} form
-	 * @param {string} name
-	 * @returns {string[]}
-	 */
-	const optionFieldTokens = (form, name) => {
-		const prefix = `${getOptionName(form)}[`;
-		if (!String(name).startsWith(prefix)) return [];
-		return Array.from(String(name).matchAll(/\[([^\]]*)\]/g)).map((match) => match[1] ?? '');
-	};
-
-	/**
-	 * @param {Record<string, unknown>} state
-	 * @param {string[]} tokens
-	 * @param {string} value
-	 */
-	const assignStateValue = (state, tokens, value) => {
-		/** @type {unknown} */
-		let cursor = state;
-
-		tokens.forEach((token, index) => {
-			const isLast = index === tokens.length - 1;
-			const nextToken = tokens[index + 1] ?? '';
-
-			if (token === '') {
-				if (!Array.isArray(cursor)) return;
-				if (isLast) {
-					cursor.push(value);
-					return;
-				}
-				const nextContainer = createStateContainer(nextToken);
-				cursor.push(nextContainer);
-				cursor = nextContainer;
-				return;
-			}
-
-			if (!cursor || typeof cursor !== 'object') return;
-
-			const key = Array.isArray(cursor) && /^\d+$/.test(token) ? Number(token) : token;
-
-			if (isLast) {
-				cursor[key] = value;
-				return;
-			}
-
-			if (!Object.prototype.hasOwnProperty.call(cursor, key) || !cursor[key] || typeof cursor[key] !== 'object') {
-				cursor[key] = createStateContainer(nextToken);
-			}
-
-			cursor = cursor[key];
-		});
-	};
-
-	/**
-	 * @param {unknown} value
-	 * @returns {string}
-	 */
-	const stableStateString = (value) => {
-		if (Array.isArray(value)) return `[${value.map((item) => stableStateString(item)).join(',')}]`;
-		if (value && typeof value === 'object') {
-			return `{${Object.keys(/** @type {Record<string, unknown>} */ (value)).sort().map((key) => (
-				`${JSON.stringify(key)}:${stableStateString(/** @type {Record<string, unknown>} */ (value)[key])}`
-			)).join(',')}}`;
-		}
-		return JSON.stringify(value ?? null);
-	};
-
-	/**
-	 * @param {HTMLFormElement} form
-	 * @returns {Record<string, unknown>}
-	 */
-	const readFormState = (form) => {
-		/** @type {Record<string, unknown>} */
-		const state = {};
-		const formData = new FormData(form);
-
-		for (const [name, rawValue] of formData.entries()) {
-			const tokens = optionFieldTokens(form, String(name));
-			if (!tokens.length) continue;
-			assignStateValue(state, tokens, String(rawValue));
-		}
-
-		return state;
-	};
-
-	/**
-	 * @param {unknown} value
-	 * @returns {Record<string, unknown>}
-	 */
-	const cloneState = (value) => /** @type {Record<string, unknown>} */ (JSON.parse(JSON.stringify(value ?? {})));
+	const {
+		cloneState,
+		readFormState,
+		stableStateString,
+	} = createFormStateHelpers({ getOptionName });
 
 	/** @param {HTMLFormElement} form */
 	const saveFormSnapshot = (form) => {
@@ -2574,7 +2422,7 @@
 		}
 
 		if (hasLegacyAjaxTransport()) {
-			return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+			return requestLegacyAjax(body);
 		}
 
 		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
@@ -2617,7 +2465,7 @@
 		}
 
 		if (hasLegacyAjaxTransport()) {
-			return fetch(cfg.ajaxUrl, { method: 'POST', body }).then(parseJsonResponse);
+			return requestLegacyAjax(body);
 		}
 
 		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
@@ -3603,13 +3451,11 @@
 
 	document.addEventListener('DOMContentLoaded', () => {
 		// Resolve shared cfg from the first form found (all forms share the same global).
-		const firstForm = /** @type {HTMLFormElement|null} */ (dom.find('.lerm-settings-form'));
-		if (firstForm) {
-			const jsGlobal = getData(firstForm, 'js-global');
-			cfg = /** @type {LermConfig} */ ((jsGlobal && window[jsGlobal]) ? window[jsGlobal] : {});
-		} else {
-			cfg = /** @type {LermConfig} */ (window['lermAdminConfig'] || {});
-		}
+		cfg = /** @type {LermConfig} */ (resolveAdminConfig({
+			find: dom.find,
+			getData,
+			windowRef: window,
+		}));
 
 		// Register a single Ctrl/Cmd+S shortcut that submits the visible form,
 		// which now bundles values from every tab on the page.

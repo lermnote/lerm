@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
+    "@wordpress/api-fetch": "^7.44.0",
     "@wordpress/env": "^10.19.0",
     "@wordpress/scripts": "^32.0.0",
     "cross-env": "^7.0.3"
