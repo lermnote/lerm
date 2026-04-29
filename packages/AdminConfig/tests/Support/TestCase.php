@@ -36,6 +36,9 @@ abstract class TestCase extends BaseTestCase {
 		$GLOBALS['lerm_admin_config_current_user_can']  = true;
 		$GLOBALS['lerm_admin_config_ajax_nonce_checks'] = array();
 		$GLOBALS['lerm_admin_config_json_response']     = null;
+		$GLOBALS['lerm_admin_config_enqueued_styles']   = array();
+		$GLOBALS['lerm_admin_config_enqueued_scripts']  = array();
+		$GLOBALS['lerm_admin_config_localized_scripts'] = array();
 
 		$_REQUEST = array();
 	}

@@ -12,6 +12,7 @@ on:
       - 'packages/AdminConfig/composer.lock'
       - 'packages/AdminConfig/package.json'
       - 'packages/AdminConfig/package-lock.json'
+      - 'packages/AdminConfig/webpack.config.js'
       - 'packages/AdminConfig/.wp-env.json'
       - 'packages/AdminConfig/phpcs.xml.dist'
       - 'packages/AdminConfig/phpstan.neon.dist'
@@ -31,6 +32,7 @@ on:
       - 'packages/AdminConfig/composer.lock'
       - 'packages/AdminConfig/package.json'
       - 'packages/AdminConfig/package-lock.json'
+      - 'packages/AdminConfig/webpack.config.js'
       - 'packages/AdminConfig/.wp-env.json'
       - 'packages/AdminConfig/phpcs.xml.dist'
       - 'packages/AdminConfig/phpstan.neon.dist'
@@ -83,6 +85,12 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Verify asset build
+        run: npm run build:check
 
       - name: Validate composer.json
         run: composer validate --strict

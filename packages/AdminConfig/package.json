@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "wp-scripts build",
+    "build:check": "npm run build && git diff --exit-code -- assets/build/admin-config.js assets/build/admin-config.asset.php",
     "start": "wp-scripts start",
     "wp-env:start": "wp-env start",
     "wp-env:start:multisite": "node tools/wp-env-multisite.js start",

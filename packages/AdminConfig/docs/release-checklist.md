@@ -9,13 +9,14 @@ Run from the package root:
 ```bash
 composer validate --strict
 composer ci
+npm ci
+npm run build:check
 composer test:integration
 ```
 
 When Docker is available, also run:
 
 ```bash
-npm ci
 npm run test:integration
 npm run test:e2e
 npm run test:wp:multisite
@@ -25,6 +26,8 @@ npm run test:wp:multisite
 
 - Confirm the example plugin still boots in plugin-install mode.
 - Confirm the embedded fixture theme still boots in embedded mode.
+- Confirm WordPress loads `assets/build/admin-config.js` and falls back only
+  when the built asset is intentionally absent in a source checkout.
 - Check options-page global save across multiple sections.
 - Check reset current page and reset all tabs.
 - Check import/export on the schema demo plugin.

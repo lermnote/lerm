@@ -10,6 +10,7 @@
 ## Automated Matrix
 
 - PHP quality gate: PHP `8.0`, `8.1`, `8.2`, `8.3`
+- Asset build gate: `@wordpress/scripts` compiles `assets/src/admin-config.js` and verifies committed `assets/build` output
 - WordPress integration: default stable `wp-env` environment on PHP `8.2`
 - WordPress multisite automation: dedicated `wp-env` run on ports `8890/8891`
 - Browser smoke coverage: Playwright against plugin mode, embedded mode, classic admin containers, and multisite network settings in `wp-env`
@@ -48,6 +49,7 @@
 
 - Recursive PHP syntax checks
 - JavaScript syntax checks
+- Reproducible admin script build checks
 - WPCS and PHPStan gates
 - PHPUnit unit coverage for compiler, schema helpers, registries, and diagnostics
 - PHPUnit smoke coverage for the bundled plugin and embedded examples

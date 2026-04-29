@@ -12,6 +12,7 @@ on:
       - 'composer.lock'
       - 'package.json'
       - 'package-lock.json'
+      - 'webpack.config.js'
       - '.wp-env.json'
       - 'phpcs.xml.dist'
       - 'phpstan.neon.dist'
@@ -31,6 +32,7 @@ on:
       - 'composer.lock'
       - 'package.json'
       - 'package-lock.json'
+      - 'webpack.config.js'
       - '.wp-env.json'
       - 'phpcs.xml.dist'
       - 'phpstan.neon.dist'
@@ -78,6 +80,12 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Verify asset build
+        run: npm run build:check
 
       - name: Validate composer.json
         run: composer validate --strict

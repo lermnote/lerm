@@ -25,6 +25,7 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - REST contract coverage for permission errors, missing schema/context errors, validation envelopes, import JSON failures, and isolated-runtime dispatch.
 - A centralized legacy Ajax gate for removal rehearsals, covering options-page actions and async data-source fallback registration.
 - REST-only wp-env rehearsal scripts and browser coverage for legacy Ajax disabled mode.
+- `@wordpress/scripts` build pipeline for the classic admin script, including committed `assets/build` output and asset metadata.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -37,6 +38,7 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - The deprecated async data-source AJAX fallback now uses the same schema-ID runtime dispatch path as REST.
 - Legacy `admin-ajax.php` handlers now emit WordPress deprecation notices when used, and JavaScript stops falling back to `admin-ajax.php` when the legacy gate is disabled.
 - The Ajax retirement plan now has documented `0.3.0` removal criteria and deletion candidates.
+- Admin pages now prefer the built `assets/build/admin-config.js` bundle while retaining the legacy unbuilt script fallback for source checkouts.
 
 ### Removed
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.

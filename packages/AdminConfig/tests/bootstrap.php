@@ -349,6 +349,73 @@ if ( ! function_exists( 'plugin_dir_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'admin_url' ) ) {
+	function admin_url( string $path = '' ): string {
+		return 'https://example.test/wp-admin/' . ltrim( $path, '/' );
+	}
+}
+
+if ( ! function_exists( 'network_admin_url' ) ) {
+	function network_admin_url( string $path = '' ): string {
+		return 'https://example.test/wp-admin/network/' . ltrim( $path, '/' );
+	}
+}
+
+if ( ! function_exists( 'rest_url' ) ) {
+	function rest_url( string $path = '' ): string {
+		return 'https://example.test/wp-json/' . ltrim( $path, '/' );
+	}
+}
+
+if ( ! function_exists( 'wp_create_nonce' ) ) {
+	function wp_create_nonce( string $action ): string {
+		return 'nonce-' . $action;
+	}
+}
+
+if ( ! function_exists( 'wp_enqueue_code_editor' ) ) {
+	function wp_enqueue_code_editor( array $args ) {
+		unset( $args );
+
+		return array( 'codemirror' => true );
+	}
+}
+
+if ( ! function_exists( 'wp_enqueue_media' ) ) {
+	function wp_enqueue_media(): void {
+		$GLOBALS['lerm_admin_config_media_enqueued'] = true;
+	}
+}
+
+if ( ! function_exists( 'wp_enqueue_style' ) ) {
+	function wp_enqueue_style( string $handle, string $src = '', array $deps = array(), $ver = false ): void {
+		$GLOBALS['lerm_admin_config_enqueued_styles'][ $handle ] = array(
+			'src'          => $src,
+			'dependencies' => $deps,
+			'version'      => $ver,
+		);
+	}
+}
+
+if ( ! function_exists( 'wp_enqueue_script' ) ) {
+	function wp_enqueue_script( string $handle, string $src = '', array $deps = array(), $ver = false, $args = false ): void {
+		$GLOBALS['lerm_admin_config_enqueued_scripts'][ $handle ] = array(
+			'src'          => $src,
+			'dependencies' => $deps,
+			'version'      => $ver,
+			'args'         => $args,
+		);
+	}
+}
+
+if ( ! function_exists( 'wp_localize_script' ) ) {
+	function wp_localize_script( string $handle, string $object_name, array $l10n ): bool {
+		$GLOBALS['lerm_admin_config_localized_scripts'][ $handle ][ $object_name ] = $l10n;
+
+		return true;
+	}
+}
+
 if ( ! function_exists( 'wp_parse_args' ) ) {
 	function wp_parse_args( $args, array $defaults = array() ): array {
 		$parsed = is_array( $args ) ? $args : array();

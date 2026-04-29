@@ -18,7 +18,9 @@ This repository now contains the first extraction slice:
 - `src/Framework`: bundled field/store/admin framework used by the runtime
 - `src/Stores`: store resolution for WordPress option/meta backends
 - `src/WordPress`: embedded bootstrap, plugin bootstrap, runtime, REST endpoints, and container adapters
-- `assets`: reusable admin UI assets
+- `assets/src`: source entry points for reusable admin UI scripts
+- `assets/build`: generated WordPress script bundles and `*.asset.php` metadata
+- `assets`: reusable admin UI styles plus legacy unbuilt script fallback
 - `lerm-admin-config.php`: plugin entry point for standalone installs
 - `examples/schema-demo-plugin`: reference plugin using the package in plugin-install mode
 - `examples/minimal-extension-plugin`: smallest runnable extension-author example
@@ -194,7 +196,9 @@ The bootstrap callback runs before auto-mounting, so the runtime sees the full s
 Embedded mode follows the same shape through `EmbeddedBootstrap::boot(...)`.
 
 In plugin-install mode, the asset resolver uses the passed plugin file when
-that plugin bundles `assets/admin-config.css` and `assets/admin-config.js`.
+that plugin bundles the AdminConfig assets. Built script bundles are loaded from
+`assets/build/*.js` with `*.asset.php` metadata when present; source checkouts
+fall back to `assets/admin-config.js` before a build has run.
 Extension/demo plugins that only register schemas fall back to the package
 assets.
 
@@ -255,12 +259,16 @@ when embedded inside a theme:
 
 - `composer lint:php` runs the lightweight PHP syntax/import checker
 - `composer lint:wpcs` runs WPCS through `tools/phpcs-runner.php`
-- `composer lint:js` validates `assets/admin-config.js`
+- `composer lint:js` validates `assets/src/admin-config.js`, the legacy script
+  fallback, webpack config, and Playwright specs
 - `composer test` runs the PHPUnit unit and smoke suites
 - `composer test:integration` runs the real-WordPress integration suite when a
   reachable `wp-load.php` is available
 - `composer ci` runs the default local gate
 - `composer analyse:phpstan` runs PHPStan when the binary is available
+- `npm run build` compiles `assets/src/admin-config.js` to
+  `assets/build/admin-config.js` plus `admin-config.asset.php`
+- `npm run build:check` rebuilds and fails if the committed build output drifts
 
 The PHPCS and PHPStan runners prepend `tools/wp-tool-stubs.php`, so they can be
 executed from an embedded theme workspace without fatalling on eager theme
