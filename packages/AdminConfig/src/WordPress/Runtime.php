@@ -36,6 +36,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Runtime {
 
+	public const MAX_DATA_SOURCE_PER_PAGE = 100;
+
 	private SchemaRegistry $registry;
 	private ContainerRegistry $containers;
 	private DataSourceRegistry $data_sources;
@@ -212,6 +214,19 @@ final class Runtime {
 		return $this->boot_requested;
 	}
 
+	/**
+	 * @param mixed $value Raw page size.
+	 */
+	public static function sanitize_data_source_per_page( $value, int $fallback = 20 ): int {
+		$per_page = absint( $value );
+
+		if ( 0 === $per_page ) {
+			$per_page = $fallback;
+		}
+
+		return min( self::MAX_DATA_SOURCE_PER_PAGE, max( 1, $per_page ) );
+	}
+
 	public static function handle_ajax_data_source(): void {
 		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST data-source endpoint' );
 
@@ -284,7 +299,7 @@ final class Runtime {
 		$args = array(
 			'search'    => isset( $_REQUEST['search'] ) && is_scalar( $_REQUEST['search'] ) ? trim( (string) wp_unslash( $_REQUEST['search'] ) ) : '',
 			'page'      => isset( $_REQUEST['page'] ) ? max( 1, absint( $_REQUEST['page'] ) ) : 1,
-			'per_page'  => isset( $_REQUEST['per_page'] ) ? max( 1, absint( $_REQUEST['per_page'] ) ) : 20,
+			'per_page'  => self::sanitize_data_source_per_page( $_REQUEST['per_page'] ?? null ),
 			'selected'  => $selected,
 			'context'   => $context,
 			'field'     => $field,

@@ -60,7 +60,8 @@ Reset accepts:
 Import accepts `backup_json` or `json`.
 
 Data-source requests accept `field_id`, `search`, `page`, `per_page`, and
-`selected`.
+`selected`. `per_page` defaults to `20` and is capped at `100` for both REST and
+legacy Ajax fallback requests.
 
 Object-backed stores can include context params either as top-level params or
 inside `context`:
@@ -129,6 +130,10 @@ future block-editor client.
   }
 }
 ```
+
+Server-only authorization fields such as `capability` are intentionally omitted
+from the client schema payload. Permission checks remain server-side through the
+route `permission_callback`.
 
 `GET /schema/{id}/values`:
 

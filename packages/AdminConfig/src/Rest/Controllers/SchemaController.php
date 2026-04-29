@@ -295,7 +295,7 @@ final class SchemaController {
 		$args = array(
 			'search'    => RequestPayload::string( $request, 'search' ),
 			'page'      => max( 1, absint( $request->get_param( 'page' ) ) ),
-			'per_page'  => max( 1, absint( $request->get_param( 'per_page' ) ) ),
+			'per_page'  => Runtime::sanitize_data_source_per_page( $request->get_param( 'per_page' ) ),
 			'selected'  => $this->selected_values( $request ),
 			'context'   => ContextResolver::from_request( $request ),
 			'field'     => $field,
@@ -310,7 +310,7 @@ final class SchemaController {
 		);
 	}
 
-	public function can_access_schema( \WP_REST_Request $request ): true|\WP_Error {
+	public function can_access_schema( \WP_REST_Request $request ): bool|\WP_Error {
 		$schema = $this->schema_from_request( $request );
 
 		if ( is_wp_error( $schema ) ) {

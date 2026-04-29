@@ -22,11 +22,11 @@ final class RestEndpoints {
 	private const NAMESPACE = 'lerm-admin-config/v1';
 
 	/**
-	 * REST routes are process-global, while package integrations can now own
-	 * isolated runtimes. Keep a request-local runtime pool so each schema ID is
-	 * dispatched to the runtime that registered it.
+	 * REST routes are process-global, while package integrations can own
+	 * isolated runtimes. Keep weak runtime references so long-lived test and
+	 * worker processes do not retain stale runtime instances between requests.
 	 *
-	 * @var array<int, Runtime>
+	 * @var array<int, \WeakReference>
 	 */
 	private static array $runtimes = array();
 
@@ -36,7 +36,7 @@ final class RestEndpoints {
 	}
 
 	public function register(): void {
-		self::$runtimes[ spl_object_id( $this->runtime ) ] = $this->runtime;
+		self::$runtimes[ spl_object_id( $this->runtime ) ] = \WeakReference::create( $this->runtime );
 
 		add_action( 'rest_api_init', array( self::class, 'register_routes' ) );
 	}
@@ -136,7 +136,7 @@ final class RestEndpoints {
 		return self::dispatch( $request, 'data_source' );
 	}
 
-	public static function can_access_schema( \WP_REST_Request $request ): true|\WP_Error {
+	public static function can_access_schema( \WP_REST_Request $request ): bool|\WP_Error {
 		$runtime = self::runtime_for_request( $request );
 
 		if ( null === $runtime ) {
@@ -191,7 +191,14 @@ final class RestEndpoints {
 			return null;
 		}
 
-		foreach ( array_reverse( self::$runtimes ) as $runtime ) {
+		foreach ( array_reverse( self::$runtimes, true ) as $runtime_id => $runtime_ref ) {
+			$runtime = $runtime_ref->get();
+
+			if ( null === $runtime ) {
+				unset( self::$runtimes[ $runtime_id ] );
+				continue;
+			}
+
 			if ( $runtime->has( $schema_id ) ) {
 				return $runtime;
 			}

@@ -52,6 +52,44 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertSame( 'Stored title', $data['values']['site_title'] );
 	}
 
+	public function testSchemaEndpointDoesNotExposeServerCapabilitiesToClient(): void {
+		$runtime = new Runtime();
+		$runtime->register(
+			array(
+				'id'        => 'private_rest_test',
+				'container' => array(
+					'type'       => 'options_page',
+					'capability' => 'manage_private_schema',
+				),
+				'store'     => array(
+					'type' => 'option',
+					'key'  => 'private_rest_test_settings',
+				),
+				'sections'  => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id'         => 'secret_title',
+								'type'       => 'text',
+								'default'    => '',
+								'capability' => 'manage_private_field',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$response = ( new SchemaController( $runtime ) )->schema( $this->request( array( 'id' => 'private_rest_test' ) ) );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $response );
+
+		$schema = $response->get_data()['schema'];
+
+		$this->assertArrayNotHasKey( 'capability', $schema['container'] );
+		$this->assertArrayNotHasKey( 'capability', $schema['fields']['secret_title'] );
+	}
+
 	public function testSaveEndpointPersistsJsonValues(): void {
 		$runtime = $this->runtime_with_schema();
 
@@ -83,7 +121,7 @@ final class RestEndpointsTest extends TestCase {
 		$empty_runtime = new Runtime();
 		unset( $empty_runtime );
 
-		$this->runtime_with_schema();
+		$runtime = $this->runtime_with_schema();
 
 		do_action( 'rest_api_init' );
 
@@ -101,9 +139,22 @@ final class RestEndpointsTest extends TestCase {
 
 		$response = call_user_func( $route['callback'], $request );
 
+		unset( $runtime );
+
 		$this->assertInstanceOf( \WP_REST_Response::class, $response );
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'Routed title', $response->get_data()['data']['values']['site_title'] );
+	}
+
+	public function testRegisteredRuntimePoolDropsUnreferencedRuntimesBetweenTests(): void {
+		$runtime = $this->runtime_with_schema();
+
+		$this->assertSame( $runtime, RestEndpoints::runtime_for_schema( 'rest_test' ) );
+
+		unset( $runtime );
+		gc_collect_cycles();
+
+		$this->assertNull( RestEndpoints::runtime_for_schema( 'rest_test' ) );
 	}
 
 	public function testRegisteredRestDispatchCoversResetImportExportAndDataSourceAcrossRuntimePool(): void {
@@ -400,6 +451,64 @@ final class RestEndpointsTest extends TestCase {
 			$response->get_data()['data']['items']
 		);
 		$this->assertTrue( $response->get_data()['data']['more'] );
+	}
+
+	public function testDataSourceEndpointClampsPerPage(): void {
+		$runtime   = $this->runtime_with_schema();
+		$seen_args = array();
+
+		$runtime->register_data_source(
+			'campaigns',
+			static function ( array $args ) use ( &$seen_args ): array {
+				$seen_args = $args;
+
+				return array();
+			}
+		);
+
+		$response = ( new SchemaController( $runtime ) )->data_source(
+			$this->request(
+				array(
+					'id'       => 'rest_test',
+					'field_id' => 'campaign',
+					'per_page' => 9999,
+				)
+			)
+		);
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $response );
+		$this->assertSame( Runtime::MAX_DATA_SOURCE_PER_PAGE, $seen_args['per_page'] );
+	}
+
+	public function testLegacyAjaxDataSourceClampsPerPage(): void {
+		$runtime   = $this->runtime_with_schema();
+		$seen_args = array();
+
+		$runtime->register_data_source(
+			'campaigns',
+			static function ( array $args ) use ( &$seen_args ): array {
+				$seen_args = $args;
+
+				return array();
+			}
+		);
+
+		$_REQUEST = array(
+			'schema_id' => 'rest_test',
+			'field_id'  => 'campaign',
+			'per_page'  => '9999',
+			'nonce'     => 'nonce',
+		);
+
+		$this->assertThrows(
+			\RuntimeException::class,
+			static function (): void {
+				Runtime::handle_ajax_data_source();
+			}
+		);
+
+		$this->assertSame( Runtime::MAX_DATA_SOURCE_PER_PAGE, $seen_args['per_page'] );
+		$this->assertTrue( $GLOBALS['lerm_admin_config_json_response']['success'] );
 	}
 
 	public function testMissingSchemaReturnsRestError(): void {
