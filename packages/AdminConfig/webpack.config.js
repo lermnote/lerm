@@ -6,7 +6,8 @@ const path = require( 'path' );
 module.exports = {
 	...defaultConfig,
 	entry: {
-		'admin-config': path.resolve( __dirname, 'assets/src/admin-config.js' ),
+		'admin-config': path.resolve( __dirname, 'resources/admin/index.js' ),
+		'block-panel': path.resolve( __dirname, 'resources/block-panel/index.js' ),
 	},
 	output: {
 		...defaultConfig.output,

@@ -8,7 +8,7 @@ schema and `OptionStore` validation path as the source of truth.
 - Namespace: `lerm-admin-config/v1`
 - Auth: WordPress cookie auth with `X-WP-Nonce: wp_create_nonce( 'wp_rest' )`
 - Client base URL: localized as `LermAdminConfig.restUrl`
-- Classic admin client: `assets/src/transport.js` uses the WordPress
+- Classic admin client: `resources/admin/transport.js` uses the WordPress
   `@wordpress/api-fetch` package for REST requests and keeps the deprecated
   `admin-ajax.php` branch isolated behind `requestLegacyAjax()`.
 - Legacy fallback: `admin-ajax.php` remains available for older admin screens
