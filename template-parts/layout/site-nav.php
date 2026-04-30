@@ -9,9 +9,10 @@
 use Lerm\Core\Menu;
 
 $template_options      = lerm_get_template_options();
-$theme_location        = wp_is_mobile() ? 'mobile' : 'primary';
+$theme_location        = 'primary';
 $show_navbar_search    = ! empty( $template_options['navbar_search'] );
 $show_social_in_header = in_array( 'header', (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) ), true );
+$show_darkmode_navbar  = ! empty( $template_options['dark_mode_enable'] ) && ( $template_options['dark_mode_toggle_position'] ?? 'navbar' ) === 'navbar';
 ?>
 
 <?php if ( wp_is_mobile() ) : ?>
@@ -50,6 +51,31 @@ $show_social_in_header = in_array( 'header', (array) ( $template_options['social
 				);
 			endif;
 			?>
+			<?php if ( $show_darkmode_navbar || true ) : ?>
+			<ul class="navbar-nav border-top mt-2 pt-2">
+				<?php if ( $show_darkmode_navbar ) : ?>
+				<li class="nav-item">
+					<button type="button" class="nav-link dark-mode-toggle w-100 text-start d-flex align-items-center gap-2" id="dark-mode-btn-mobile">
+						<i class="fa fa-moon" aria-hidden="true"></i>
+						<span><?php esc_html_e( 'Dark mode', 'lerm' ); ?></span>
+					</button>
+				</li>
+				<?php endif; ?>
+				<li class="nav-item menu-item-login">
+					<?php if ( is_user_logged_in() ) : ?>
+					<a class="nav-link d-flex align-items-center gap-2" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+						<?php echo get_avatar( wp_get_current_user()->ID, 20, '', '', array( 'class' => 'rounded-circle' ) ); ?>
+						<?php echo esc_html( wp_get_current_user()->display_name ); ?>
+					</a>
+					<?php else : ?>
+					<a class="nav-link" href="<?php echo esc_url( wp_login_url() ); ?>">
+						<i class="fa fa-sign-in" aria-hidden="true"></i>
+						<?php esc_html_e( 'Login', 'lerm' ); ?>
+					</a>
+					<?php endif; ?>
+				</li>
+			</ul>
+			<?php endif; ?>
 			<?php if ( $show_navbar_search ) : ?>
 				<div class="border-top px-3 py-3 mt-auto">
 					<?php get_search_form(); ?>
@@ -106,4 +132,41 @@ $show_social_in_header = in_array( 'header', (array) ( $template_options['social
 		);
 	endif;
 	?>
+
+	<?php if ( $show_darkmode_navbar || is_user_logged_in() || true ) : ?>
+	<div class="navbar-utility d-none d-lg-flex align-items-center">
+		<?php if ( $show_darkmode_navbar ) : ?>
+		<button type="button" class="btn btn-sm btn-custom dark-mode-toggle nav-item" id="dark-mode-btn-desktop" aria-label="<?php esc_attr_e( 'Toggle colour scheme', 'lerm' ); ?>">
+			<i class="fa fa-moon" aria-hidden="true"></i>
+		</button>
+		<?php endif; ?>
+		<?php
+		if ( is_user_logged_in() ) :
+			$current_user = wp_get_current_user();
+		?>
+		<div class="nav-item dropdown menu-item-login">
+			<a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				<?php echo get_avatar( $current_user->ID, 20, '', '', array( 'class' => 'rounded-circle' ) ); ?>
+				<span class="d-none d-xl-inline"><?php echo esc_html( $current_user->user_login ); ?></span>
+			</a>
+			<ul class="dropdown-menu dropdown-menu-end">
+				<li class="text-center">
+					<h6 class="dropdown-header"><?php echo get_avatar( $current_user->ID, 64 ); ?></h6>
+					<span class="text-info"><?php echo esc_html( $current_user->display_name ); ?></span>
+				</li>
+				<li><a class="dropdown-item" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Account', 'lerm' ); ?></a></li>
+				<li><hr class="dropdown-divider"></li>
+				<li><a class="dropdown-item" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Log out', 'lerm' ); ?></a></li>
+			</ul>
+		</div>
+		<?php else : ?>
+		<div class="nav-item menu-item-login">
+			<a class="nav-link" href="<?php echo esc_url( wp_login_url() ); ?>">
+				<i class="fa fa-sign-in" aria-hidden="true"></i>
+				<?php esc_html_e( 'Login', 'lerm' ); ?>
+			</a>
+		</div>
+		<?php endif; ?>
+	</div>
+	<?php endif; ?>
 <?php endif; ?>

@@ -1960,6 +1960,21 @@ body {
   background-color: var(--lerm-bg-header);
 }
 
+/* Offcanvas: dropdown → accordion-style flyout */
+.offcanvas .dropdown-menu {
+  position: static;
+  float: none;
+  border: none;
+  box-shadow: none;
+  padding-left: 1rem;
+}
+.offcanvas .dropdown-toggle::after {
+  transition: transform 0.2s ease;
+}
+.offcanvas .dropdown-toggle[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+
 .site-header {
   border-top: var(--lerm-header-border-top);
   border-bottom: var(--lerm-header-border-bottom);

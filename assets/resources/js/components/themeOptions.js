@@ -135,23 +135,29 @@ const initDarkMode = () => {
 	applyScheme(resolveInitialScheme());
 
 	// Sync toggle icon once DOM is available
-	const btn = buildToggleButton();
-	const pos = DATA.darkModeToggle || 'navbar';
 	const dark = document.documentElement.getAttribute(ATTR) === 'dark';
-	const icon = btn.querySelector('i');
-	if (icon) icon.className = dark ? 'fa fa-sun' : 'fa fa-moon';
+	const pos = DATA.darkModeToggle || 'navbar';
 
 	if (pos === 'navbar') {
-		// Append inside .navbar-collapse > .navbar-nav, or fallback to end of .navbar
-		const nav = document.querySelector('.top-social-menus') || document.querySelector('.navbar');
-		if (nav) {
-			const li = document.createElement('li');
-			li.className = 'nav-item d-flex align-items-center ms-1';
-			li.appendChild(btn);
-			nav.appendChild(li);
-		}
+		// Find all static dark-mode-toggle buttons rendered by PHP and bind click
+		document.querySelectorAll('.dark-mode-toggle').forEach((btn) => {
+			const icon = btn.querySelector('i');
+			if (icon) icon.className = dark ? 'fa fa-sun' : 'fa fa-moon';
+			btn.addEventListener('click', (e) => {
+				e.preventDefault();
+				toggleScheme();
+				const i = btn.querySelector('i');
+				if (i) {
+					const isDark = document.documentElement.getAttribute(ATTR) === 'dark';
+					i.className = isDark ? 'fa fa-sun' : 'fa fa-moon';
+				}
+			});
+		});
 	} else {
-		// Floating — absolute button beside the scroll-up button
+		// Floating — create button and place beside the scroll-up button
+		const btn = buildToggleButton();
+		const icon = btn.querySelector('i');
+		if (icon) icon.className = dark ? 'fa fa-sun' : 'fa fa-moon';
 		btn.classList.add('btn-custom');
 		const container = document.querySelector('.position-fixed.d-grid');
 		if (container) {

@@ -16,6 +16,10 @@ const updateOffCanvasMenuOffset = () => {
 const bindDropdownHover = (dropdown) => {
 	if (dropdown.dataset.lermDropdownBound === 'true') return;
 
+	// Skip hover binding on touch devices or inside offcanvas — rely on click toggle instead
+	if (window.matchMedia('(pointer: coarse)').matches) return;
+	if (dropdown.closest('.offcanvas')) return;
+
 	const menu = dropdown.querySelector('.dropdown-menu');
 	if (!menu) return;
 
