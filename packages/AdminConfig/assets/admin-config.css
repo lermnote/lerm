@@ -204,7 +204,7 @@
 	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
-.lerm-settings-sticky-wrap > .lerm-settings-sticky-bar {
+.lerm-settings-sticky-wrap>.lerm-settings-sticky-bar {
 	margin-bottom: 0;
 }
 
@@ -356,20 +356,20 @@
 	background: #fff;
 }
 
-.lerm-settings-row.is-invalid > th,
-.lerm-settings-row.is-invalid > td,
+.lerm-settings-row.is-invalid>th,
+.lerm-settings-row.is-invalid>td,
 .lerm-settings-stack .lerm-settings-row.is-invalid .lerm-settings-row__head,
 .lerm-settings-stack .lerm-settings-row.is-invalid .lerm-settings-row__body {
 	background: #fff7f7;
 }
 
-.lerm-settings-row.is-invalid > th,
-.lerm-settings-table .lerm-settings-row.is-invalid > th {
+.lerm-settings-row.is-invalid>th,
+.lerm-settings-table .lerm-settings-row.is-invalid>th {
 	border-color: #fca5a5;
 }
 
-.lerm-settings-row.is-invalid > td,
-.lerm-settings-table .lerm-settings-row.is-invalid > td,
+.lerm-settings-row.is-invalid>td,
+.lerm-settings-table .lerm-settings-row.is-invalid>td,
 .lerm-settings-stack .lerm-settings-row.is-invalid {
 	border-color: #fca5a5;
 }
@@ -467,8 +467,8 @@
 	box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
 }
 
-.lerm-settings-table--inline .lerm-settings-row > th,
-.lerm-settings-table--inline .lerm-settings-row > td {
+.lerm-settings-table--inline .lerm-settings-row>th,
+.lerm-settings-table--inline .lerm-settings-row>td {
 	display: block;
 	width: auto;
 	padding: 0;
@@ -478,7 +478,7 @@
 	border-radius: 0;
 }
 
-.lerm-settings-table--inline .lerm-settings-row > th label {
+.lerm-settings-table--inline .lerm-settings-row>th label {
 	display: block;
 	margin: 0;
 	font-size: 14px;
@@ -622,29 +622,29 @@
 }
 
 /* Checked state: track */
-.lerm-switch input[type="checkbox"]:checked + .lerm-switch__track,
-.lerm-switch input[type="checkbox"]:checked ~ .lerm-switch__track {
+.lerm-switch input[type="checkbox"]:checked+.lerm-switch__track,
+.lerm-switch input[type="checkbox"]:checked~.lerm-switch__track {
 	background: #0284c7;
 	box-shadow: 0 4px 12px rgba(2, 132, 199, .28);
 }
 
 /* Checked state: text */
-.lerm-switch input[type="checkbox"]:checked + .lerm-switch__track::before,
-.lerm-switch input[type="checkbox"]:checked ~ .lerm-switch__track::before {
+.lerm-switch input[type="checkbox"]:checked+.lerm-switch__track::before,
+.lerm-switch input[type="checkbox"]:checked~.lerm-switch__track::before {
 	content: attr(data-on);
 	justify-content: flex-start;
 	padding: 0 28px 0 10px;
 }
 
 /* Checked state: knob slides right */
-.lerm-switch input[type="checkbox"]:checked + .lerm-switch__track::after,
-.lerm-switch input[type="checkbox"]:checked ~ .lerm-switch__track::after {
+.lerm-switch input[type="checkbox"]:checked+.lerm-switch__track::after,
+.lerm-switch input[type="checkbox"]:checked~.lerm-switch__track::after {
 	transform: translateX(28px);
 }
 
 /* Focus ring for keyboard navigation */
-.lerm-switch input[type="checkbox"]:focus-visible + .lerm-switch__track,
-.lerm-switch input[type="checkbox"]:focus-visible ~ .lerm-switch__track {
+.lerm-switch input[type="checkbox"]:focus-visible+.lerm-switch__track,
+.lerm-switch input[type="checkbox"]:focus-visible~.lerm-switch__track {
 	outline: 2px solid #0284c7;
 	outline-offset: 2px;
 }
@@ -881,7 +881,6 @@
 
 .lerm-typography-field .lerm-button-set label {
 	justify-content: center;
-	width: 100%;
 	min-height: 32px;
 	margin: 0;
 	padding: 6px 10px;
@@ -1423,7 +1422,7 @@
 	overflow: hidden;
 }
 
-.lerm-accordion__item + .lerm-accordion__item {
+.lerm-accordion__item+.lerm-accordion__item {
 	margin-top: 10px;
 }
 
@@ -1698,7 +1697,7 @@
 	box-shadow: 0 6px 18px rgba(14, 165, 233, 0.12);
 }
 
-.lerm-button-set input:checked + span {
+.lerm-button-set input:checked+span {
 	color: #0369a1;
 	font-weight: 700;
 }
@@ -1858,7 +1857,7 @@
 		margin-left: 0;
 	}
 
-	.lerm-settings-table--inline > tbody {
+	.lerm-settings-table--inline>tbody {
 		grid-template-columns: 1fr;
 	}
 
@@ -1892,14 +1891,14 @@
 /* UI polish */
 
 /* Row hover: subtle highlight to aid scanning */
-.lerm-settings-row:hover > th,
-.lerm-settings-row:hover > td {
+.lerm-settings-row:hover>th,
+.lerm-settings-row:hover>td {
 	background: #f0f9ff;
 	transition: background 0.14s ease;
 }
 
-.lerm-settings-table--inline .lerm-settings-row:hover > th,
-.lerm-settings-table--inline .lerm-settings-row:hover > td {
+.lerm-settings-table--inline .lerm-settings-row:hover>th,
+.lerm-settings-table--inline .lerm-settings-row:hover>td {
 	background: transparent;
 }
 
@@ -2405,8 +2404,8 @@
 	color: #667788;
 }
 
-.lerm-settings-row:hover > th,
-.lerm-settings-row:hover > td,
+.lerm-settings-row:hover>th,
+.lerm-settings-row:hover>td,
 .lerm-settings-stack .lerm-settings-row:hover .lerm-settings-row__head,
 .lerm-settings-stack .lerm-settings-row:hover .lerm-settings-row__body {
 	background: #fbfdff;
