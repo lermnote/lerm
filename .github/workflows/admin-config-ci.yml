@@ -90,7 +90,7 @@ jobs:
         run: npm ci
 
       - name: Verify asset build
-        run: npm run build:check
+        run: npm run check:phase1
 
       - name: Validate composer.json
         run: composer validate --strict

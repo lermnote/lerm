@@ -18,9 +18,11 @@ reuse.
 ## Current Client Boundaries
 
 - `assets/src/config.js`: resolves the localized runtime config for a screen.
-- `assets/src/transport.js`: owns REST and deprecated Ajax transports. REST uses
-  WordPress `@wordpress/api-fetch`; Ajax remains isolated for the `0.2.x`
-  compatibility window.
+- `assets/src/rest-client.js`: reusable REST client built on WordPress
+  `@wordpress/api-fetch`; this is the client boundary for classic admin and the
+  future block-editor entry.
+- `assets/src/transport.js`: maps classic admin form actions to REST endpoints
+  and owns the deprecated Ajax fallback for the `0.2.x` compatibility window.
 - `assets/src/form-state.js`: reads and compares classic form values. This is a
   temporary bridge until React state owns values directly.
 - `assets/src/admin-config.js`: classic admin mounting, field widgets, DOM
@@ -34,7 +36,8 @@ reuse.
    widgets or React components.
 3. Add a small block-editor package entry that imports the REST transport and
    state adapter, then renders one schema in an editor sidebar or settings
-   panel.
+   panel. The editor entry should import `assets/src/rest-client.js` directly
+   instead of importing classic admin transport fallback code.
 4. Keep classic admin E2E as regression coverage while adding a small editor
    smoke test for schema load, save, validation error replay, and reset.
 5. Remove the Ajax fallback in `0.3.0` only after REST-only CI is consistently
