@@ -36,12 +36,16 @@ final class SchemaController {
 			return $schema;
 		}
 
-		$context = ContextResolver::from_request( $request );
+		try {
+			$values = $this->runtime->store( $schema->id(), ContextResolver::from_request( $request ) )->all();
+		} catch ( MissingStoreContextException $exception ) {
+			return $this->missing_context_error( $exception );
+		}
 
 		return rest_ensure_response(
 			array(
 				'schema' => SchemaClientConfig::from_compiled( $schema ),
-				'values' => $this->runtime->all( $schema->id(), $context ),
+				'values' => $values,
 			)
 		);
 	}
@@ -53,11 +57,15 @@ final class SchemaController {
 			return $schema;
 		}
 
-		$context = ContextResolver::from_request( $request );
+		try {
+			$values = $this->runtime->store( $schema->id(), ContextResolver::from_request( $request ) )->all();
+		} catch ( MissingStoreContextException $exception ) {
+			return $this->missing_context_error( $exception );
+		}
 
 		return ResponseFactory::success(
 			array(
-				'values' => $this->runtime->all( $schema->id(), $context ),
+				'values' => $values,
 			)
 		);
 	}

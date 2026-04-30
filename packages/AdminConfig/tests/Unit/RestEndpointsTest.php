@@ -289,30 +289,7 @@ final class RestEndpointsTest extends TestCase {
 	}
 
 	public function testMissingMetaContextReturnsStableRestErrorShape(): void {
-		$runtime = new Runtime();
-		$runtime->register(
-			array(
-				'id'        => 'rest_meta',
-				'container' => array(
-					'type' => 'metabox',
-				),
-				'store'     => array(
-					'type' => 'post_meta',
-					'key'  => '_rest_meta',
-				),
-				'sections'  => array(
-					'general' => array(
-						'fields' => array(
-							array(
-								'id'      => 'badge_text',
-								'type'    => 'text',
-								'default' => 'Featured',
-							),
-						),
-					),
-				),
-			)
-		);
+		$runtime = $this->runtime_with_meta_schema();
 
 		$response = ( new SchemaController( $runtime ) )->save(
 			$this->request(
@@ -330,6 +307,26 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertSame( 400, $response->get_error_data()['status'] );
 		$this->assertFalse( $response->get_error_data()['success'] );
 		$this->assertStringContainsString( 'requires one of', $response->get_error_data()['data']['message'] );
+	}
+
+	public function testSchemaEndpointReturnsMissingContextForObjectBackedStore(): void {
+		$response = ( new SchemaController( $this->runtime_with_meta_schema() ) )->schema(
+			$this->request( array( 'id' => 'rest_meta' ) )
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'missing_store_context', $response->get_error_code() );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
+	}
+
+	public function testValuesEndpointReturnsMissingContextForObjectBackedStore(): void {
+		$response = ( new SchemaController( $this->runtime_with_meta_schema() ) )->values(
+			$this->request( array( 'id' => 'rest_meta' ) )
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'missing_store_context', $response->get_error_code() );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
 	}
 
 	public function testPermissionCallbackReturnsForbiddenRestErrorShape(): void {
@@ -480,6 +477,32 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertSame( Runtime::MAX_DATA_SOURCE_PER_PAGE, $seen_args['per_page'] );
 	}
 
+	public function testDataSourceEndpointUsesDefaultPerPage(): void {
+		$runtime   = $this->runtime_with_schema();
+		$seen_args = array();
+
+		$runtime->register_data_source(
+			'campaigns',
+			static function ( array $args ) use ( &$seen_args ): array {
+				$seen_args = $args;
+
+				return array();
+			}
+		);
+
+		$response = ( new SchemaController( $runtime ) )->data_source(
+			$this->request(
+				array(
+					'id'       => 'rest_test',
+					'field_id' => 'campaign',
+				)
+			)
+		);
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $response );
+		$this->assertSame( 20, $seen_args['per_page'] );
+	}
+
 	public function testLegacyAjaxDataSourceClampsPerPage(): void {
 		$runtime   = $this->runtime_with_schema();
 		$seen_args = array();
@@ -551,6 +574,35 @@ final class RestEndpointsTest extends TestCase {
 								'type'    => 'ajax_select',
 								'source'  => 'campaigns',
 								'default' => '',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		return $runtime;
+	}
+
+	private function runtime_with_meta_schema(): Runtime {
+		$runtime = new Runtime();
+		$runtime->register(
+			array(
+				'id'        => 'rest_meta',
+				'container' => array(
+					'type' => 'metabox',
+				),
+				'store'     => array(
+					'type' => 'post_meta',
+					'key'  => '_rest_meta',
+				),
+				'sections'  => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id'      => 'badge_text',
+								'type'    => 'text',
+								'default' => 'Featured',
 							),
 						),
 					),

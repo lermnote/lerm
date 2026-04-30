@@ -75,7 +75,10 @@ inside `context`:
 ```
 
 Supported context keys are `post_id`, `term_id`, `user_id`, `comment_id`, and
-`network_id`.
+`network_id`. Read endpoints and mutation endpoints share the same context
+requirement; object-backed schema and values reads return `missing_store_context`
+instead of silently falling back to defaults when the required object ID is
+missing.
 
 ## Responses
 
