@@ -42,13 +42,13 @@ transport code:
 npm run audit:ajax
 ```
 
-The audit scans `src/` and `assets/src/` and fails when `admin-ajax.php`,
+The audit scans `src/` and `resources/` and fails when `admin-ajax.php`,
 `wp_ajax_lerm_admin_config_*`, or localized Ajax fallback keys appear outside
 the approved compatibility surface. Until the `0.3.0` deletion pass, approved
 production references are limited to:
 
-- `assets/src/admin-config.js`
-- `assets/src/transport.js`
+- `resources/admin/admin-config.js`
+- `resources/admin/transport.js`
 - `src/Framework/Admin/OptionsPage.php`
 - `src/WordPress/LegacyAjax.php`
 - `src/WordPress/Runtime.php`
@@ -95,7 +95,7 @@ one reviewed unit:
   'wp_ajax_lerm_admin_config_*', ... )` registration.
 - Remove localized Ajax-only client keys from `OptionsPage::enqueue_support_assets()`.
 - Remove `hasLegacyAjaxTransport()` and `requestLegacyAjax()` from
-  `assets/src/transport.js`.
+  `resources/admin/transport.js`.
 - Remove the REST-only fixture that disables Ajax and replace the browser test
   expectation with an assertion that no AdminConfig `admin-ajax.php` fallback
   route is registered.

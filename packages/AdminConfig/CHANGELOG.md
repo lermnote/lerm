@@ -28,6 +28,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - `@wordpress/scripts` build pipeline for the classic admin script, including committed `assets/build` output and asset metadata.
 - A REST-only CI job that runs single-site and multisite browser rehearsals with legacy Ajax disabled.
 - Initial client-side boundaries for config resolution, REST/Ajax transport, and classic form-state tracking ahead of the block-editor migration.
+- A Phase 2 `resources/` JavaScript source tree with core, controls, store,
+  classic admin, and block-panel entry boundaries.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -42,6 +44,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - The Ajax retirement plan now has documented `0.3.0` removal criteria and deletion candidates.
 - Admin pages now prefer the built `assets/build/admin-config.js` bundle while retaining the legacy unbuilt script fallback for source checkouts.
 - The REST client path now uses WordPress `@wordpress/api-fetch` through the build dependency extraction pipeline.
+- The admin script source now builds from `resources/admin/index.js`, and the
+  build pipeline emits a `block-panel` bundle for the future editor panel.
 
 ### Removed
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.

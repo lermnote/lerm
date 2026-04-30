@@ -2,8 +2,8 @@
 
 AdminConfig should reach the block editor through the REST contract, not through
 the current classic-admin DOM implementation. Phase 1 keeps the PHP rendering
-stable while carving out client boundaries that a React/Gutenberg client can
-reuse.
+stable while Phase 2 moves JavaScript source under `resources/` and carves out
+client boundaries that a React/Gutenberg client can reuse.
 
 ## Target Shape
 
@@ -17,16 +17,18 @@ reuse.
 
 ## Current Client Boundaries
 
-- `assets/src/config.js`: resolves the localized runtime config for a screen.
-- `assets/src/rest-client.js`: reusable REST client built on WordPress
+- `resources/core/config.js`: resolves the localized runtime config for a screen.
+- `resources/core/rest-client.js`: reusable REST client built on WordPress
   `@wordpress/api-fetch`; this is the client boundary for classic admin and the
   future block-editor entry.
-- `assets/src/transport.js`: maps classic admin form actions to REST endpoints
+- `resources/admin/transport.js`: maps classic admin form actions to REST endpoints
   and owns the deprecated Ajax fallback for the `0.2.x` compatibility window.
-- `assets/src/form-state.js`: reads and compares classic form values. This is a
+- `resources/admin/form-state.js`: reads and compares classic form values. This is a
   temporary bridge until React state owns values directly.
-- `assets/src/admin-config.js`: classic admin mounting, field widgets, DOM
+- `resources/admin/admin-config.js`: classic admin mounting, field widgets, DOM
   binding, dirty tracking, and tab/subsection behavior.
+- `resources/block-panel/index.js`: build-only editor-panel entry for Phase 2;
+  Phase 3 will attach the first editor UI here.
 
 ## Phase 2 Order
 
@@ -36,7 +38,7 @@ reuse.
    widgets or React components.
 3. Add a small block-editor package entry that imports the REST transport and
    state adapter, then renders one schema in an editor sidebar or settings
-   panel. The editor entry should import `assets/src/rest-client.js` directly
+   panel. The editor entry should import `resources/core/rest-client.js` directly
    instead of importing classic admin transport fallback code.
 4. Keep classic admin E2E as regression coverage while adding a small editor
    smoke test for schema load, save, validation error replay, and reset.

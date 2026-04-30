@@ -5,7 +5,7 @@
  */
 
 // ─── WordPress Global Stubs (typed as any — official typings are incomplete) ──
-const { resolveAdminConfig } = require('./config');
+const { resolveAdminConfig } = require('../core/config');
 const { createFormStateHelpers } = require('./form-state');
 const { createAdminConfigTransport } = require('./transport');
 
