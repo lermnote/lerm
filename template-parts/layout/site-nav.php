@@ -100,7 +100,7 @@ $show_social_in_header = in_array( 'header', $social_positions, true );
 	?>
 
 	<?php if ( $show_navbar_search ) : ?>
-		<div class="d-none d-lg-block">
+		<div class="navbar-search-wrapper d-none d-lg-flex">
 			<?php get_search_form(); ?>
 		</div>
 	<?php endif; ?>
