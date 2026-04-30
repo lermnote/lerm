@@ -33,11 +33,32 @@ REST routes and do not issue AdminConfig `admin-ajax.php` requests.
 The GitHub Actions job `WordPress REST-only` now runs this command on every
 AdminConfig push and pull request that touches the package.
 
+## Legacy Reference Audit
+
+Run the production legacy Ajax reference audit before adding or moving client
+transport code:
+
+```sh
+npm run audit:ajax
+```
+
+The audit scans `src/` and `assets/src/` and fails when `admin-ajax.php`,
+`wp_ajax_lerm_admin_config_*`, or localized Ajax fallback keys appear outside
+the approved compatibility surface. Until the `0.3.0` deletion pass, approved
+production references are limited to:
+
+- `assets/src/admin-config.js`
+- `assets/src/transport.js`
+- `src/Framework/Admin/OptionsPage.php`
+- `src/WordPress/LegacyAjax.php`
+- `src/WordPress/Runtime.php`
+
 ## Removal Criteria
 
 Before removing the fallback in `0.3.0`, all of these must be true:
 
 - `composer ci` passes.
+- `npm run check:phase1` passes.
 - `npm run test:wp` passes with the default compatibility mode.
 - `npm run test:wp:multisite` passes with the default compatibility mode.
 - `npm run test:wp:rest-only` passes with legacy Ajax disabled.

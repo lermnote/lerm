@@ -10,7 +10,7 @@ Run from the package root:
 composer validate --strict
 composer ci
 npm ci
-npm run build:check
+npm run check:phase1
 composer test:integration
 ```
 
@@ -31,6 +31,7 @@ npm run test:wp:rest-only
   when the built asset is intentionally absent in a source checkout.
 - Confirm the built asset metadata includes `wp-api-fetch` after transport
   changes.
+- Confirm `npm run audit:ajax` reports only approved compatibility references.
 - Check options-page global save across multiple sections.
 - Check reset current page and reset all tabs.
 - Check import/export on the schema demo plugin.

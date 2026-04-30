@@ -10,7 +10,7 @@
 ## Automated Matrix
 
 - PHP quality gate: PHP `8.0`, `8.1`, `8.2`, `8.3`
-- Asset build gate: `@wordpress/scripts` compiles `assets/src/admin-config.js` and verifies committed `assets/build` output
+- Asset build gate: `@wordpress/scripts` compiles `assets/src/admin-config.js`, verifies committed `assets/build` output, and runs the legacy Ajax reference audit
 - WordPress integration: default stable `wp-env` environment on PHP `8.2`
 - WordPress multisite automation: dedicated `wp-env` run on ports `8890/8891`
 - Browser smoke coverage: Playwright against plugin mode, embedded mode, classic admin containers, and multisite network settings in `wp-env`
@@ -43,7 +43,7 @@
 - PHP schema remains the source of truth for defaults and sanitization
 - REST endpoints expose schema/value reads plus save, reset, import/export, and async data-source operations
 - AJAX and non-JS saves share the same store validation path
-- Meta-backed reads fall back to compiled defaults when context is missing through `Runtime::all()` and `Runtime::get()`
+- Meta-backed runtime reads fall back to compiled defaults when context is missing through `Runtime::all()` and `Runtime::get()`; REST read endpoints return `missing_store_context` so JavaScript clients cannot silently hydrate against the wrong object
 - `admin-post.php` remains the supported no-JavaScript fallback for options pages
 - `admin-ajax.php` remains a deprecated async fallback while the REST transport rolls out; it can be disabled with `LERM_ADMIN_CONFIG_ENABLE_LEGACY_AJAX` or `lerm_admin_config_legacy_ajax_enabled` before the planned `0.3.0` removal
 
@@ -52,6 +52,7 @@
 - Recursive PHP syntax checks
 - JavaScript syntax checks
 - Reproducible admin script build checks
+- Legacy Ajax production reference audit through `npm run audit:ajax`
 - Built asset dependency extraction for `wp-api-fetch`
 - WPCS and PHPStan gates
 - PHPUnit unit coverage for compiler, schema helpers, registries, and diagnostics
