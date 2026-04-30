@@ -51,6 +51,8 @@
 
 - Recursive PHP syntax checks
 - JavaScript syntax checks
+- JavaScript runtime contract checks for core schema state, context, error, and
+  block-panel REST orchestration helpers
 - Reproducible admin script build checks
 - Legacy Ajax production reference audit through `npm run audit:ajax`
 - Built asset dependency extraction for `wp-api-fetch`

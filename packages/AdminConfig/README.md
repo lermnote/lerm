@@ -270,6 +270,9 @@ when embedded inside a theme:
 - `npm run build` compiles `resources/admin/index.js` and
   `resources/block-panel/index.js` to `assets/build/*.js` plus asset metadata
 - `npm run build:check` rebuilds and fails if the committed build output drifts
+- `npm run test:js-runtime` checks the core schema state, context, error, and
+  block-panel runtime helpers
+- `npm run check:phase2` runs build drift, legacy Ajax, and JS runtime checks
 
 The PHPCS and PHPStan runners prepend `tools/wp-tool-stubs.php`, so they can be
 executed from an embedded theme workspace without fatalling on eager theme
