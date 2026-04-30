@@ -1,5 +1,3 @@
-import { delegate } from '../utils/dom.js';
-
 let navigationInitialized = false;
 
 const updateOffCanvasMenuOffset = () => {
@@ -38,9 +36,15 @@ export const initializeNavigation = () => {
 	if (!navigationInitialized) {
 		navigationInitialized = true;
 
-		delegate('click', '.navbar-toggler', (_event, toggler) => {
-			toggler.classList.toggle('active');
-		});
+		const offcanvas = document.querySelector('#offcanvasMenu');
+		if (offcanvas) {
+			offcanvas.addEventListener('shown.bs.offcanvas', () => {
+				document.querySelectorAll('.navbar-toggler').forEach(t => t.classList.add('active'));
+			});
+			offcanvas.addEventListener('hidden.bs.offcanvas', () => {
+				document.querySelectorAll('.navbar-toggler').forEach(t => t.classList.remove('active'));
+			});
+		}
 
 		window.addEventListener('resize', updateOffCanvasMenuOffset, { passive: true });
 	}

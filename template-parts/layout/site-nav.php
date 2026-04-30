@@ -11,29 +11,28 @@ use Lerm\Core\Menu;
 $template_options      = lerm_get_template_options();
 $theme_location        = wp_is_mobile() ? 'mobile' : 'primary';
 $show_navbar_search    = ! empty( $template_options['navbar_search'] );
-$social_positions      = (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) );
-$show_header_social    = in_array( 'header', $social_positions, true );
-$social_open_new_tab   = ! isset( $template_options['social_open_new_tab'] ) || ! empty( $template_options['social_open_new_tab'] );
-$show_social_in_header = in_array( 'header', $social_positions, true );
+$show_social_in_header = in_array( 'header', (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) ), true );
 ?>
 
 <?php if ( wp_is_mobile() ) : ?>
-	<div class="d-flex align-items-center">
-		<?php if ( $show_navbar_search ) : ?>
-			<button type="button" class="navbar-search d-lg-none" data-bs-toggle="modal" data-bs-target="#searchModal">
-				<i class="fa fa-search"></i>
-			</button>
-		<?php endif; ?>
-		<button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
-			<span></span>
-			<span></span>
-			<span></span>
-		</button>
-	</div>
+	<button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+		<span></span>
+		<span></span>
+		<span></span>
+	</button>
 
-	<div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenu">
-		<div class="offcanvas-header py-0"></div>
-		<div class="offcanvas-body px-0">
+	<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenu">
+		<div class="offcanvas-header border-bottom d-flex align-items-center">
+			<div class="d-flex align-items-center gap-2">
+				<?php the_custom_logo(); ?>
+				<span class="site-title h5 mb-0">
+					<a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home">
+						<?php echo esc_html( $template_options['blogname'] ? $template_options['blogname'] : get_bloginfo( 'name' ) ); ?>
+					</a>
+				</span>
+			</div>
+		</div>
+		<div class="offcanvas-body px-0 d-flex flex-column">
 			<?php
 			if ( has_nav_menu( $theme_location ) ) :
 				wp_nav_menu(
@@ -51,30 +50,17 @@ $show_social_in_header = in_array( 'header', $social_positions, true );
 				);
 			endif;
 			?>
+			<?php if ( $show_navbar_search ) : ?>
+				<div class="border-top px-3 py-3 mt-auto">
+					<?php get_search_form(); ?>
+				</div>
+			<?php endif; ?>
 		</div>
 	</div>
-
-	<?php if ( $show_navbar_search ) : ?>
-		<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-			<div class="modal-dialog mt-5">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h1 class="modal-title fs-5" id="searchModalLabel"><?php esc_html_e( 'Search whole site', 'lerm' ); ?></h1>
-					</div>
-					<div class="modal-body" style="overflow:visible">
-						<?php get_search_form(); ?>
-					</div>
-					<div class="d-flex justify-content-center p-3">
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php esc_attr_e( 'Close', 'lerm' ); ?>"></button>
-					</div>
-				</div>
-			</div>
-		</div>
-	<?php endif; ?>
 <?php else : ?>
 	<?php
 	$found    = false;
-	$nav_menu = wp_cache_get( 'lerm_nav_menu', 'lerm_nav', false, $found );
+	$nav_menu = wp_cache_get( 'lerm_nav_menu_' . $theme_location, 'lerm_nav', false, $found );
 
 	if ( ! $found && has_nav_menu( $theme_location ) ) :
 		$nav_menu = wp_nav_menu(
@@ -91,7 +77,7 @@ $show_social_in_header = in_array( 'header', $social_positions, true );
 				'echo'            => false,
 			)
 		);
-		wp_cache_set( 'lerm_nav_menu', (string) $nav_menu, 'lerm_nav', HOUR_IN_SECONDS );
+		wp_cache_set( 'lerm_nav_menu_' . $theme_location, (string) $nav_menu, 'lerm_nav', HOUR_IN_SECONDS );
 	endif;
 
 	if ( $nav_menu ) :
