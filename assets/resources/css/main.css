@@ -270,7 +270,7 @@ h6 {
 body {
   -ms-word-wrap: break-word;
   word-wrap: break-word;
-  word-break: break-all;
+  word-break: break-word;
   -webkit-hyphens: auto;
   -ms-hyphens: auto;
   hyphens: auto;
@@ -380,8 +380,7 @@ entry-content td,
 
 /* bootstrap */
 .text-muted {
-  color: inherit !important;
-  opacity: 0.6;
+  color: var(--lerm-color-text-muted) !important;
 }
 
 .list-group-item {
@@ -482,6 +481,10 @@ body {
   padding-top:    var(--lerm-nav-link-padding-y);
   padding-bottom: var(--lerm-nav-link-padding-y);
   align-items:    center;
+}
+
+.navbar-brand {
+  gap: 0.75rem;
 }
 
 .navbar-search {
@@ -1993,8 +1996,9 @@ body {
 }
 
 .nav-link {
-  padding-top: var(--lerm-nav-link-padding-y);
+  padding-top:    var(--lerm-nav-link-padding-y);
   padding-bottom: var(--lerm-nav-link-padding-y);
+  transition:     padding-top 0.25s ease, padding-bottom 0.25s ease;
 }
 
 /* ── Links ────────────────────────────────────────────────── */
@@ -2126,6 +2130,11 @@ a[id="cancel-comment-reply-link"]:hover {
 .site-header.is-shrunk .custom-logo {
   height: 1.5rem;
   transition: height 0.25s ease;
+}
+
+.site-header.is-shrunk .nav-link {
+  padding-top:    0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 /* Transparent header (over hero/carousel) */

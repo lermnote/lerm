@@ -210,7 +210,12 @@ const initTransparentHeader = () => {
 	header.classList.add('header-transparent');
 
 	registerScrollHandler((y) => {
-		header.classList.toggle('header-transparent', y < heroBottom());
+		const isTransparent = y < heroBottom();
+		header.classList.toggle('header-transparent', isTransparent);
+		// Prevent shrink while transparent (conflict: transparent bg + sticky shrink)
+		if (isTransparent) {
+			header.classList.remove('is-shrunk');
+		}
 	});
 };
 
