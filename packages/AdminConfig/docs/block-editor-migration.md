@@ -112,9 +112,11 @@ Acceptance for this slice:
   storage.
 - Saved values persist after a block-editor reload.
 - No AdminConfig `admin-ajax.php` request is made by the block-editor panel.
+- Unsupported controls remain visible as read-only field notices instead of
+  silently disappearing from the panel.
 - The classic metabox and options-page E2E coverage still passes.
-- Advanced, structured, media, async, reset, and import/export controls stay out
-  of this slice.
+- Advanced, structured, media, async, reset, and import/export controls stay
+  read-only or out of scope for this slice.
 
 ## Non-Goals For The Current Block-Panel Slice
 

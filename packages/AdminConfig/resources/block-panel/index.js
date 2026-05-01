@@ -315,6 +315,56 @@ const fieldValue = (values, fieldId, fallback = '') => (
 );
 
 /**
+ * @param {Function} createElement
+ * @param {Record<string, unknown>} field
+ * @param {string} controlType
+ * @param {string} error
+ * @returns {unknown}
+ */
+const renderUnsupportedField = (createElement, field, controlType, error = '') => {
+	const fieldId = String(field.id || '');
+	const label = String(field.label || fieldId);
+	const description = String(field.description || '');
+
+	return createElement(
+		'div',
+		{
+			className: `lerm-admin-config-block-panel__field lerm-admin-config-block-panel__unsupported-field${ error ? ' is-error' : '' }`,
+			'data-field-id': fieldId,
+			'data-field-type': controlType,
+			'data-unsupported-control': 'true',
+			key: fieldId,
+			role: 'note',
+		},
+		[
+			createElement('strong', { key: 'label' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			createElement(
+				'p',
+				{
+					className: 'lerm-admin-config-block-panel__unsupported-message',
+					key: 'unsupported',
+				},
+				`Field type "${ controlType }" is not available in the block editor panel yet.`
+			),
+			error
+				? createElement(
+					'p',
+					{
+						className: 'lerm-admin-config-block-panel__field-error',
+						'data-field-error': fieldId,
+						key: `${ fieldId }-error`,
+					},
+					error
+				)
+				: null,
+		].filter(Boolean)
+	);
+};
+
+/**
  * @param {Record<string, unknown>} config
  * @param {Function} Panel
  * @param {{ createElement: Function, useEffect: Function, useMemo: Function, useState: Function }} element
@@ -402,6 +452,7 @@ const createPanelComponent = (config, Panel, element) => {
 		const Button = components.Button;
 		const Spinner = components.Spinner;
 		const fieldBody = [];
+		let hasEditableFields = false;
 
 		if (status === 'loading' && typeof Spinner === 'function') {
 			fieldBody.push(createElement(Spinner, { key: 'spinner' }));
@@ -412,20 +463,27 @@ const createPanelComponent = (config, Panel, element) => {
 				const fields = Array.isArray(section.fields) ? section.fields : [];
 				const renderedFields = fields.map((field) => {
 					const fieldId = String(field.id || '');
-					const control = runtime.controls.get(fieldControlType(field));
+					const controlType = fieldControlType(field);
+					const control = runtime.controls.get(controlType);
 
-					if (!fieldId || !control) {
+					if (!fieldId) {
 						return null;
 					}
 
 					const error = fieldError(state.errors || {}, fieldId);
+
+					if (!control) {
+						return renderUnsupportedField(createElement, field, controlType, error);
+					}
+
+					hasEditableFields = true;
 
 					return createElement(
 						'div',
 						{
 							className: `lerm-admin-config-block-panel__field${ error ? ' is-error' : '' }`,
 							'data-field-id': fieldId,
-							'data-field-type': fieldControlType(field),
+							'data-field-type': controlType,
 							key: fieldId,
 						},
 						[
@@ -482,6 +540,9 @@ const createPanelComponent = (config, Panel, element) => {
 
 		if (fieldBody.length) {
 			body.push(...fieldBody);
+		}
+
+		if (fieldBody.length && hasEditableFields) {
 			body.push(createElement(
 				'div',
 				{
