@@ -117,11 +117,54 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 
 	const panel = await expandBlockPanel( page, 'acme-demo-post-metabox', 'Entry Display Overrides' );
 	const featuredToggle = panel.getByRole( 'checkbox', { name: /Feature this entry/i } );
+	const entrySlug = panel.getByRole( 'textbox', { name: /Entry slug/i } );
+	const entryLayout = panel.getByRole( 'combobox', { name: /Entry layout/i } );
+	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
 
 	await expect( featuredToggle ).toBeVisible();
+	await expect( entrySlug ).toBeVisible();
+	await expect( entryLayout ).toBeVisible();
+	await expect( newsletterChannel ).toBeVisible();
 	const initialChecked = await featuredToggle.isChecked();
+	const initialSlug = await entrySlug.inputValue();
+	const initialLayout = await entryLayout.inputValue();
+	const initialNewsletter = await newsletterChannel.isChecked();
+	const discardSlug = initialSlug === 'discard-check' ? 'discard-check-next' : 'discard-check';
+	const discardLayout = initialLayout === 'wide' ? 'compact' : 'wide';
+	const savedSlug = initialSlug === 'block-panel-valid' ? 'block-panel-valid-next' : 'block-panel-valid';
+	const savedLayout = initialLayout === 'feature' ? 'compact' : 'feature';
 
+	await entrySlug.fill( discardSlug );
+	await entryLayout.selectOption( discardLayout );
+	await newsletterChannel.setChecked( ! initialNewsletter );
+	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
+
+	await panel.getByRole( 'button', { name: /^Discard$/ } ).click();
+	await expect( panel ).toHaveAttribute( 'data-dirty', 'false' );
+	await expect( entrySlug ).toHaveValue( initialSlug );
+	await expect( entryLayout ).toHaveValue( initialLayout );
+	await expect( newsletterChannel ).toBeChecked( { checked: initialNewsletter } );
+
+	await entrySlug.fill( 'x' );
+	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
+
+	const invalidSaveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
+
+	await panel.getByRole( 'button', { name: /^Save$/ } ).click();
+
+	const invalidSaveResponse = await invalidSaveRequest;
+
+	expect( invalidSaveResponse.status() ).toBe( 422 );
+	await expect( panel ).toHaveAttribute( 'data-status', 'error' );
+	await expect( panel ).toHaveAttribute( 'data-error-count', '1' );
+	await expect( panel.locator( '[data-field-error="entry_slug"]' ) ).toContainText( /between 3 and 32/i );
+
+	await entrySlug.fill( savedSlug );
+	await expect( panel ).toHaveAttribute( 'data-status', 'ready' );
+	await expect( panel ).toHaveAttribute( 'data-error-count', '0' );
 	await featuredToggle.setChecked( ! initialChecked );
+	await entryLayout.selectOption( savedLayout );
+	await newsletterChannel.setChecked( ! initialNewsletter );
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
 	const saveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
@@ -133,6 +176,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	expect( saveResponse.ok() ).toBe( true );
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'false' );
 	await expect( featuredToggle ).toBeChecked( { checked: ! initialChecked } );
+	await expect( entrySlug ).toHaveValue( savedSlug );
+	await expect( entryLayout ).toHaveValue( savedLayout );
+	await expect( newsletterChannel ).toBeChecked( { checked: ! initialNewsletter } );
 
 	const reloadSchemaRequest = page.waitForResponse( ( reloadResponse ) => isMetaboxSchemaResponse( reloadResponse ), { timeout: 30_000 } );
 
@@ -143,6 +189,11 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 
 	await expect( reloadedPanel.getByRole( 'checkbox', { name: /Feature this entry/i } ) ).toBeChecked(
 		{ checked: ! initialChecked, timeout: 30_000 }
+	);
+	await expect( reloadedPanel.getByRole( 'textbox', { name: /Entry slug/i } ) ).toHaveValue( savedSlug );
+	await expect( reloadedPanel.getByRole( 'combobox', { name: /Entry layout/i } ) ).toHaveValue( savedLayout );
+	await expect( reloadedPanel.getByRole( 'checkbox', { name: /^Newsletter$/i } ) ).toBeChecked(
+		{ checked: ! initialNewsletter }
 	);
 	expect( ajaxRequests ).toEqual( [] );
 } );

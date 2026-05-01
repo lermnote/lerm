@@ -109,6 +109,13 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 			return state;
 		},
 
+		discardChanges() {
+			state = withValues(state, state.savedValues);
+			state = withStatus(state, 'ready', 'Unsaved changes discarded.');
+
+			return state;
+		},
+
 		/**
 		 * @param {Record<string, unknown>} [values]
 		 */
@@ -348,6 +355,7 @@ const createPanelComponent = (config, Panel, element) => {
 
 		const status = String(state.status || 'idle');
 		const message = String(state.message || '');
+		const errorCount = Object.keys(state.errors || {}).length;
 		const title = String(config.title || 'Admin Config');
 		const context = asRecord(config.context);
 		const postId = String(context.post_id || '');
@@ -358,7 +366,7 @@ const createPanelComponent = (config, Panel, element) => {
 					className: 'lerm-admin-config-block-panel__status',
 					key: 'status',
 				},
-				status === 'ready' ? 'Ready' : status
+				status === 'ready' ? 'Ready' : status.charAt(0).toUpperCase() + status.slice(1)
 			),
 		];
 
@@ -367,7 +375,9 @@ const createPanelComponent = (config, Panel, element) => {
 				'p',
 				{
 					className: 'lerm-admin-config-block-panel__message',
+					'data-error-count': String(errorCount),
 					key: 'message',
+					role: status === 'error' ? 'alert' : 'status',
 				},
 				message
 			));
@@ -511,6 +521,33 @@ const createPanelComponent = (config, Panel, element) => {
 							},
 							status === 'saving' ? 'Saving' : 'Save'
 						),
+					typeof Button === 'function'
+						? createElement(
+							Button,
+							{
+								disabled: isBusy || !dirty,
+								key: 'discard',
+								onClick: () => {
+									runtime.discardChanges();
+									setState(runtime.getState());
+								},
+								variant: 'secondary',
+							},
+							'Discard'
+						)
+						: createElement(
+							'button',
+							{
+								disabled: isBusy || !dirty,
+								key: 'discard',
+								onClick: () => {
+									runtime.discardChanges();
+									setState(runtime.getState());
+								},
+								type: 'button',
+							},
+							'Discard'
+						),
 					createElement(
 						'span',
 						{
@@ -540,6 +577,7 @@ const createPanelComponent = (config, Panel, element) => {
 					'data-schema-id': String(config.schemaId || ''),
 					'data-status': status,
 					'data-dirty': dirty ? 'true' : 'false',
+					'data-error-count': String(errorCount),
 				},
 				body
 			)
