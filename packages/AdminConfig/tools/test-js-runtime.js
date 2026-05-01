@@ -79,6 +79,7 @@ function testSchemaStateHelpers() {
 		},
 		message: 'Please review.',
 	});
+	const recovered = withFieldValue(errored, 'group.heading', 'Long enough');
 
 	assert.equal(hydrated.status, 'ready');
 	assert.equal(isSchemaStateDirty(hydrated), false);
@@ -95,6 +96,8 @@ function testSchemaStateHelpers() {
 	assert.equal(errored.status, 'error');
 	assert.equal(errored.message, 'Please review.');
 	assert.deepEqual(errored.errors, { 'group.heading': [ 'Too short.' ] });
+	assert.equal(recovered.status, 'ready');
+	assert.deepEqual(recovered.errors, {});
 }
 
 function testDefaultControlRegistry() {
@@ -106,6 +109,7 @@ function testDefaultControlRegistry() {
 	assert(types.includes('switcher'));
 	assert(types.includes('select'));
 	assert(types.includes('number'));
+	assert(types.includes('slug_text'));
 
 	const rendered = registry.get('text')({
 		components: {},
@@ -135,6 +139,18 @@ async function testBlockPanelRuntime() {
 			requests.push({ path, options });
 
 			if (path.includes('/save')) {
+				if (options.data.values.title === 'Bad') {
+					return {
+						success: false,
+						data: {
+							fieldErrors: {
+								title: 'Too short.',
+							},
+							message: 'Please review.',
+						},
+					};
+				}
+
 				return {
 					success: true,
 					data: {
@@ -170,6 +186,10 @@ async function testBlockPanelRuntime() {
 	assert.equal(runtime.isDirty(), false);
 	runtime.updateValue('title', 'Saved');
 	assert.equal(runtime.isDirty(), true);
+	runtime.discardChanges();
+	assert.equal(runtime.getState().values.title, 'Loaded');
+	assert.equal(runtime.isDirty(), false);
+	runtime.updateValue('title', 'Saved');
 	await runtime.save();
 
 	assert.equal(requests[0].path, 'schema/demo?post_id=77');
@@ -182,6 +202,15 @@ async function testBlockPanelRuntime() {
 	});
 	assert.equal(runtime.getState().values.title, 'Saved');
 	assert.equal(runtime.isDirty(), false);
+
+	runtime.updateValue('title', 'Bad');
+	await runtime.save();
+	assert.equal(runtime.getState().status, 'error');
+	assert.deepEqual(runtime.getState().errors, { title: 'Too short.' });
+	assert.equal(runtime.isDirty(), true);
+	runtime.updateValue('title', 'Better');
+	assert.equal(runtime.getState().status, 'ready');
+	assert.deepEqual(runtime.getState().errors, {});
 }
 
 async function main() {

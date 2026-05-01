@@ -67,6 +67,33 @@ const setValueAtPath = (values, path, value) => {
 };
 
 /**
+ * @param {Record<string, string|string[]>} errors
+ * @param {string|string[]} path
+ * @returns {Record<string, string|string[]>}
+ */
+const withoutErrorAtPath = (errors, path) => {
+	const tokens = pathTokens(path);
+	const fieldId = tokens[0] || '';
+	const exactPath = tokens.join('.');
+
+	if (
+		!fieldId ||
+		(
+			!Object.prototype.hasOwnProperty.call(errors, fieldId) &&
+			!Object.prototype.hasOwnProperty.call(errors, exactPath)
+		)
+	) {
+		return errors;
+	}
+
+	const nextErrors = { ...errors };
+	delete nextErrors[fieldId];
+	delete nextErrors[exactPath];
+
+	return nextErrors;
+};
+
+/**
  * @param {Record<string, unknown>} schema
  * @param {Record<string, unknown>} values
  * @param {Record<string, number>} context
@@ -147,10 +174,18 @@ const withErrors = (state, errors) => ({
  * @param {unknown} value
  * @returns {SchemaState}
  */
-const withFieldValue = (state, path, value) => ({
-	...state,
-	values: setValueAtPath(state.values, path, value),
-});
+const withFieldValue = (state, path, value) => {
+	const errors = withoutErrorAtPath(state.errors, path);
+	const hasErrors = Object.keys(errors).length > 0;
+
+	return {
+		...state,
+		errors,
+		message: state.status === 'error' && !hasErrors ? '' : state.message,
+		status: state.status === 'error' && !hasErrors ? 'ready' : state.status,
+		values: setValueAtPath(state.values, path, value),
+	};
+};
 
 /**
  * @param {SchemaState} state
@@ -205,6 +240,7 @@ module.exports = {
 	isSchemaStateDirty,
 	serializeSavePayload,
 	setValueAtPath,
+	withoutErrorAtPath,
 	withErrors,
 	withFieldValue,
 	withRestError,

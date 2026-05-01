@@ -36,6 +36,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   block-panel helpers.
 - Section-aware block editor panel controls for basic REST-safe field types,
   including dirty tracking and REST save persistence coverage.
+- Block editor panel hardening for local discard, validation-error replay,
+  stale-error clearing, and select/checkbox-list persistence coverage.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -56,6 +58,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   alongside build drift and legacy Ajax reference audits.
 - The client schema payload now includes section metadata and client-safe field
   control metadata for the block editor panel.
+- Block editor controls now normalize WordPress component change events before
+  values enter client state.
 
 ### Removed
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.

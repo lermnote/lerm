@@ -33,6 +33,58 @@ const boolValue = (value) => ! [ false, 0, '', '0', 'false', null, undefined ].i
 );
 
 /**
+ * @param {unknown} value
+ * @returns {Record<string, unknown>}
+ */
+const eventTarget = (value) => {
+	const record = asRecord(value);
+
+	return asRecord(record.target || record.currentTarget || value);
+};
+
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const changeValue = (value) => {
+	const target = eventTarget(value);
+
+	return 'value' in target ? target.value : value;
+};
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+const changeChecked = (value) => {
+	const target = eventTarget(value);
+
+	return 'checked' in target
+		? boolValue(target.checked)
+		: boolValue(value);
+};
+
+/**
+ * @param {unknown} value
+ * @param {boolean} multiple
+ * @returns {string|string[]}
+ */
+const selectChangeValue = (value, multiple) => {
+	const target = eventTarget(value);
+	const selectedOptions = Array.from(
+		/** @type {Iterable<{ value: string }> | undefined} */ (target.selectedOptions || [])
+	);
+
+	if (multiple && selectedOptions.length) {
+		return selectedOptions.map((option) => option.value);
+	}
+
+	const changed = changeValue(value);
+
+	return multiple ? asArray(changed).map(stringValue) : stringValue(changed);
+};
+
+/**
  * @param {Record<string, unknown>} field
  * @returns {Array<{ label: string, value: string }>}
  */
@@ -78,11 +130,13 @@ const normalizeProps = (props) => ({
 const sharedControlProps = (props) => {
 	const { error, field, inputId } = props;
 	const description = stringValue(field.description);
+	const label = stringValue(field.label || field.id);
 
 	return {
+		'aria-label': label,
 		help: error || description,
 		id: inputId,
-		label: stringValue(field.label || field.id),
+		label,
 	};
 };
 
@@ -98,7 +152,7 @@ const renderTextLikeControl = (props, type = 'text') => {
 	const controlProps = {
 		...sharedControlProps(normalized),
 		'aria-invalid': normalized.error ? 'true' : undefined,
-		onChange,
+		onChange: (nextValue) => onChange(stringValue(changeValue(nextValue))),
 		placeholder: stringValue(field.placeholder),
 		type: stringValue(field.input_type || type),
 		value: stringValue(value),
@@ -108,7 +162,7 @@ const renderTextLikeControl = (props, type = 'text') => {
 		? createElement(TextControl, controlProps)
 		: createElement('input', {
 			...controlProps,
-			onInput: (event) => onChange(event.target.value),
+			onInput: (event) => onChange(stringValue(changeValue(event))),
 		});
 };
 
@@ -135,7 +189,7 @@ const TextareaControl = (props) => {
 	const controlProps = {
 		...sharedControlProps(normalized),
 		'aria-invalid': normalized.error ? 'true' : undefined,
-		onChange,
+		onChange: (nextValue) => onChange(stringValue(changeValue(nextValue))),
 		placeholder: stringValue(field.placeholder),
 		rows: Number.parseInt(stringValue(field.rows || 4), 10) || 4,
 		value: stringValue(value),
@@ -145,7 +199,7 @@ const TextareaControl = (props) => {
 		? createElement(Component, controlProps)
 		: createElement('textarea', {
 			...controlProps,
-			onInput: (event) => onChange(event.target.value),
+			onInput: (event) => onChange(stringValue(changeValue(event))),
 		});
 };
 
@@ -162,7 +216,7 @@ const NumberControl = (props) => {
 		'aria-invalid': normalized.error ? 'true' : undefined,
 		max: stringValue(field.max),
 		min: stringValue(field.min),
-		onChange,
+		onChange: (nextValue) => onChange(stringValue(changeValue(nextValue))),
 		step: stringValue(field.step || 1),
 		type: 'number',
 		value: stringValue(value),
@@ -172,7 +226,7 @@ const NumberControl = (props) => {
 		? createElement(TextControl, controlProps)
 		: createElement('input', {
 			...controlProps,
-			onInput: (event) => onChange(event.target.value),
+			onInput: (event) => onChange(stringValue(changeValue(event))),
 		});
 };
 
@@ -187,7 +241,7 @@ const ToggleControl = (props) => {
 	const controlProps = {
 		...sharedControlProps(normalized),
 		checked: boolValue(value),
-		onChange: (nextValue) => onChange(boolValue(nextValue)),
+		onChange: (nextValue) => onChange(changeChecked(nextValue)),
 	};
 
 	return typeof Component === 'function'
@@ -195,7 +249,8 @@ const ToggleControl = (props) => {
 		: createElement('label', {}, [
 			createElement('input', {
 				checked: boolValue(value),
-				onChange: (event) => onChange(event.target.checked),
+				key: 'input',
+				onChange: (event) => onChange(changeChecked(event)),
 				type: 'checkbox',
 			}),
 			` ${ controlProps.label }`,
@@ -216,7 +271,7 @@ const SelectControl = (props) => {
 		...sharedControlProps(normalized),
 		'aria-invalid': normalized.error ? 'true' : undefined,
 		multiple,
-		onChange,
+		onChange: (nextValue) => onChange(selectChangeValue(nextValue, multiple)),
 		options,
 		value: multiple ? asArray(value).map(stringValue) : stringValue(value),
 	};
@@ -227,14 +282,7 @@ const SelectControl = (props) => {
 			'select',
 			{
 				...controlProps,
-				onChange: (event) => {
-					if (!multiple) {
-						onChange(event.target.value);
-						return;
-					}
-
-					onChange(Array.from(event.target.selectedOptions).map((option) => option.value));
-				},
+				onChange: (event) => onChange(selectChangeValue(event, multiple)),
 			},
 			options.map((option) => createElement('option', { key: option.value, value: option.value }, option.label))
 		);
@@ -272,12 +320,13 @@ const CheckboxListControl = (props) => {
 						checked,
 						key: option.value,
 						label: option.label,
-						onChange: (nextValue) => toggle(option.value, boolValue(nextValue)),
+						onChange: (nextValue) => toggle(option.value, changeChecked(nextValue)),
 					})
 					: createElement('label', { key: option.value }, [
 						createElement('input', {
 							checked,
-							onChange: (event) => toggle(option.value, event.target.checked),
+							key: `${ option.value }-input`,
+							onChange: (event) => toggle(option.value, changeChecked(event)),
 							type: 'checkbox',
 							value: option.value,
 						}),
@@ -330,6 +379,7 @@ const createDefaultControlRegistry = () => createControlRegistry({
 	checkbox_list: CheckboxListControl,
 	number: NumberControl,
 	select: SelectControl,
+	slug_text: TextControl,
 	switcher: ToggleControl,
 	text: TextControl,
 	textarea: TextareaControl,

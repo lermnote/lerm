@@ -80,8 +80,9 @@ metabox container mounts `assets/build/block-panel.js` during
 `enqueue_block_editor_assets`; the PHP boot config includes the matched schema
 ID, REST root, nonce, post type, and `post_id` context. The editor entry
 registers a `PluginDocumentSettingPanel`, loads the schema through REST, renders
-section-aware controls, tracks dirty state, saves through REST, and rehydrates
-from the server response after save.
+section-aware controls, tracks dirty state, supports local discard, saves
+through REST, replays validation errors, and rehydrates from the server response
+after save.
 
 Supported controls in this slice:
 
@@ -90,6 +91,7 @@ Supported controls in this slice:
 - `textarea`
 - `number`
 - `select`
+- `slug_text`
 - `switcher`
 - `toggle`
 - `checkbox`
@@ -100,6 +102,10 @@ Acceptance for this slice:
 - The block editor requests `GET /schema/{id}?post_id={post_id}`.
 - The panel can edit supported field values and save them with
   `POST /schema/{id}/save`.
+- Validation failures keep the panel mounted, expose field errors, and clear the
+  stale field error when the field changes.
+- Local discard reverts unsaved edits to the last saved values without touching
+  storage.
 - Saved values persist after a block-editor reload.
 - No AdminConfig `admin-ajax.php` request is made by the block-editor panel.
 - The classic metabox and options-page E2E coverage still passes.

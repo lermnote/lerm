@@ -372,6 +372,38 @@ final class SchemaDemoPlugin {
 							'default'     => 0,
 						),
 						array(
+							'id'          => 'entry_slug',
+							'type'        => 'slug_text',
+							'label'       => __( 'Entry slug', 'lerm-admin-config-demo' ),
+							'description' => __( 'A root-level custom text field used by the block editor panel validation flow.', 'lerm-admin-config-demo' ),
+							'default'     => 'featured-entry',
+							'placeholder' => 'featured-entry',
+						),
+						array(
+							'id'          => 'entry_layout',
+							'type'        => 'select',
+							'label'       => __( 'Entry layout', 'lerm-admin-config-demo' ),
+							'description' => __( 'A simple select field rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'choices'     => array(
+								'compact' => __( 'Compact', 'lerm-admin-config-demo' ),
+								'feature' => __( 'Feature', 'lerm-admin-config-demo' ),
+								'wide'    => __( 'Wide', 'lerm-admin-config-demo' ),
+							),
+							'default'     => 'compact',
+						),
+						array(
+							'id'          => 'entry_channels',
+							'type'        => 'checkbox_list',
+							'label'       => __( 'Entry channels', 'lerm-admin-config-demo' ),
+							'description' => __( 'Multi-value choices rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'choices'     => array(
+								'homepage'   => __( 'Homepage', 'lerm-admin-config-demo' ),
+								'newsletter' => __( 'Newsletter', 'lerm-admin-config-demo' ),
+								'rss'        => __( 'RSS', 'lerm-admin-config-demo' ),
+							),
+							'default'     => array( 'homepage' ),
+						),
+						array(
 							'id'          => 'entry_icon',
 							'type'        => 'icon',
 							'label'       => __( 'Entry icon', 'lerm-admin-config-demo' ),
