@@ -52,6 +52,27 @@ client boundaries that a React/Gutenberg client can reuse.
 5. Remove the Ajax fallback in `0.3.0` only after REST-only CI is consistently
    green and the block-editor entry no longer references localized Ajax keys.
 
+## Current Status
+
+As of 2026-05-01, Phase 2 has landed on `main` through the stacked AdminConfig
+PRs:
+
+- `resources/` source layout is in place.
+- `resources/block-panel/index.js` builds into `assets/build/block-panel.js`.
+- The block-panel runtime can load schema data, update local values, save via
+  REST, and replay validation errors into state.
+- `npm run check:phase2` verifies build drift, legacy Ajax references, and
+  JavaScript runtime contracts.
+
+See `docs/phase-2-stabilization.md` for the mainline audit and stable-point
+verification set.
+
+## Phase 3 Entry Criteria
+
+The first Phase 3 PR should only mount the block-panel bundle in the editor and
+create a runtime with editor context. It should not migrate the full field UI
+yet.
+
 ## Non-Goals For Phase 1
 
 - Do not rewrite classic field markup in React yet.
