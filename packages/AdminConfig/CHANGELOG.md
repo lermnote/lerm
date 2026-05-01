@@ -38,6 +38,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   including dirty tracking and REST save persistence coverage.
 - Block editor panel hardening for local discard, validation-error replay,
   stale-error clearing, and select/checkbox-list persistence coverage.
+- Block editor panel controls and browser coverage for simple choice and color
+  fields, including `radio`, `button_set`, and `color`.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.

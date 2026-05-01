@@ -110,6 +110,9 @@ function testDefaultControlRegistry() {
 	assert(types.includes('select'));
 	assert(types.includes('number'));
 	assert(types.includes('slug_text'));
+	assert(types.includes('radio'));
+	assert(types.includes('button_set'));
+	assert(types.includes('color'));
 
 	const rendered = registry.get('text')({
 		components: {},
@@ -129,6 +132,40 @@ function testDefaultControlRegistry() {
 	assert.equal(rendered.props.id, 'demo-title');
 	assert.equal(rendered.props.placeholder, 'Write a title');
 	assert.equal(rendered.props.value, 'Loaded');
+
+	const changes = [];
+	const renderedSelect = registry.get('select')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			choices: {
+				compact: 'Compact',
+				feature: 'Feature',
+			},
+			id: 'layout',
+			label: 'Layout',
+			type: 'select',
+		},
+		inputId: 'demo-layout',
+		onChange: (value) => changes.push(value),
+		value: 'compact',
+	});
+	const renderedColor = registry.get('color')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			id: 'accent',
+			label: 'Accent',
+			type: 'color',
+		},
+		inputId: 'demo-accent',
+		onChange: (value) => changes.push(value),
+		value: '#2271b1',
+	});
+
+	renderedSelect.props.onChange({ target: { value: 'feature' } });
+	renderedColor.children[0][1].props.onChange({ target: { value: '#13579b' } });
+	assert.deepEqual(changes, [ 'feature', '#13579b' ]);
 }
 
 async function testBlockPanelRuntime() {
