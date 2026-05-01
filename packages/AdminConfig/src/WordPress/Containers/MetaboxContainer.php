@@ -48,8 +48,52 @@ final class MetaboxContainer implements Container {
 		}
 
 		add_action( 'add_meta_boxes', array( $this, 'register_meta_boxes' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		$this->hooks_registered = true;
+	}
+
+	public function enqueue_block_editor_assets(): void {
+		$editor_context = $this->current_editor_context();
+
+		if ( empty( $editor_context['post_id'] ) || '' === $editor_context['post_type'] ) {
+			return;
+		}
+
+		$schemas = $this->block_editor_schemas( $editor_context['post_type'], $editor_context['post_id'] );
+
+		if ( empty( $schemas ) ) {
+			return;
+		}
+
+		$script = $this->block_panel_script_asset();
+		$handle = 'lerm-admin-config-block-panel';
+
+		wp_enqueue_script(
+			$handle,
+			$this->asset_url( $script['file'] ),
+			$script['dependencies'],
+			$script['version'],
+			true
+		);
+
+		$payload = wp_json_encode(
+			array(
+				'restUrl'   => rest_url( 'lerm-admin-config/v1/' ),
+				'restNonce' => wp_create_nonce( 'wp_rest' ),
+				'schemas'   => $schemas,
+			)
+		);
+
+		if ( false === $payload ) {
+			return;
+		}
+
+		wp_add_inline_script(
+			$handle,
+			'window.lermAdminConfigBlockPanelConfigs = window.lermAdminConfigBlockPanelConfigs || []; window.lermAdminConfigBlockPanelConfigs.push(' . $payload . ');',
+			'before'
+		);
 	}
 
 	public function register_meta_boxes( string $post_type ): void {
@@ -213,6 +257,138 @@ final class MetaboxContainer implements Container {
 
 	private function nonce_action( CompiledSchema $schema ): string {
 		return 'lerm_admin_config_metabox_' . $schema->id();
+	}
+
+	/**
+	 * @return array{post_id: int, post_type: string}
+	 */
+	private function current_editor_context(): array {
+		$post_id   = 0;
+		$post_type = '';
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		if ( is_object( $screen ) ) {
+			$screen_vars      = get_object_vars( $screen );
+			$screen_post_type = $screen_vars['post_type'] ?? '';
+
+			if ( is_scalar( $screen_post_type ) ) {
+				$post_type = sanitize_key( (string) $screen_post_type );
+			}
+		}
+
+		if ( isset( $_GET['post'] ) ) {
+			$post_id = absint( wp_unslash( $_GET['post'] ) );
+		}
+
+		global $post;
+
+		if ( 0 === $post_id && is_object( $post ) && isset( $post->ID ) ) {
+			$post_id = absint( $post->ID );
+		}
+
+		if ( '' === $post_type && is_object( $post ) && isset( $post->post_type ) && is_scalar( $post->post_type ) ) {
+			$post_type = sanitize_key( (string) $post->post_type );
+		}
+
+		if ( '' === $post_type && $post_id > 0 && function_exists( 'get_post_type' ) ) {
+			$resolved_post_type = get_post_type( $post_id );
+
+			if ( is_scalar( $resolved_post_type ) ) {
+				$post_type = sanitize_key( (string) $resolved_post_type );
+			}
+		}
+
+		return array(
+			'post_id'   => $post_id,
+			'post_type' => $post_type,
+		);
+	}
+
+	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function block_editor_schemas( string $post_type, int $post_id ): array {
+		$schemas = array();
+
+		foreach ( $this->schemas as $schema ) {
+			$container = $schema->container();
+
+			if ( ! in_array( $post_type, $this->normalize_post_types( $container['post_types'] ?? array() ), true ) ) {
+				continue;
+			}
+
+			$capability = (string) ( $container['capability'] ?? 'edit_post' );
+
+			if ( ! current_user_can( $capability, $post_id ) ) {
+				continue;
+			}
+
+			$schemas[] = array(
+				'schemaId'      => $schema->id(),
+				'title'         => (string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Settings', 'lerm' ) ),
+				'containerType' => 'metabox',
+				'postType'      => $post_type,
+				'context'       => array(
+					'post_id' => $post_id,
+				),
+			);
+		}
+
+		return $schemas;
+	}
+
+	/**
+	 * @return array{file: string, dependencies: array<int, string>, version: string}
+	 */
+	private function block_panel_script_asset(): array {
+		$dependencies = array(
+			'wp-api-fetch',
+			'wp-components',
+			'wp-edit-post',
+			'wp-element',
+			'wp-plugins',
+		);
+		$fallback     = array(
+			'file'         => 'build/block-panel.js',
+			'dependencies' => $dependencies,
+			'version'      => $this->asset_version(),
+		);
+		$asset_dir    = dirname( __DIR__, 3 ) . '/assets';
+		$script_file  = $asset_dir . '/build/block-panel.js';
+		$asset_file   = $asset_dir . '/build/block-panel.asset.php';
+
+		if ( ! is_readable( $script_file ) || ! is_readable( $asset_file ) ) {
+			return $fallback;
+		}
+
+		$asset = include $asset_file;
+
+		if ( ! is_array( $asset ) ) {
+			return $fallback;
+		}
+
+		foreach ( (array) ( $asset['dependencies'] ?? array() ) as $dependency ) {
+			if ( is_string( $dependency ) && '' !== $dependency ) {
+				$dependencies[] = $dependency;
+			}
+		}
+
+		return array(
+			'file'         => 'build/block-panel.js',
+			'dependencies' => array_values( array_unique( $dependencies ) ),
+			'version'      => isset( $asset['version'] ) && is_scalar( $asset['version'] )
+				? (string) $asset['version']
+				: $fallback['version'],
+		);
+	}
+
+	private function asset_url( string $asset ): string {
+		return $this->framework->asset_resolver()->url( $asset );
+	}
+
+	private function asset_version(): string {
+		return $this->framework->asset_resolver()->version();
 	}
 
 	/**

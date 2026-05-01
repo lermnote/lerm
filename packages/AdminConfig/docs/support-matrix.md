@@ -27,6 +27,7 @@
 - Taxonomy term screens
 - User profile screens
 - Comment edit screens
+- Block editor document settings panel for post/page metabox schemas
 
 ## Built-In Field Coverage
 
@@ -61,6 +62,8 @@
 - PHPUnit smoke coverage for the bundled plugin and embedded examples
 - Real-WordPress integration tests for bootstraps, option/meta/site-option stores, and multisite network schema persistence
 - Playwright smoke coverage for plugin/embedded options pages, classic metabox/profile/taxonomy/comment screens, and the multisite network settings page
+- Playwright smoke coverage for block editor panel schema loading with `post_id`
+  context and no AdminConfig legacy Ajax requests
 - REST-only Playwright rehearsal coverage for plugin-mode actions and multisite network settings
 - Phase 2 mainline stabilization notes in `docs/phase-2-stabilization.md`
 

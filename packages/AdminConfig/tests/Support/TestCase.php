@@ -38,7 +38,11 @@ abstract class TestCase extends BaseTestCase {
 		$GLOBALS['lerm_admin_config_json_response']     = null;
 		$GLOBALS['lerm_admin_config_enqueued_styles']   = array();
 		$GLOBALS['lerm_admin_config_enqueued_scripts']  = array();
+		$GLOBALS['lerm_admin_config_inline_scripts']    = array();
 		$GLOBALS['lerm_admin_config_localized_scripts'] = array();
+		$GLOBALS['lerm_admin_config_current_screen']    = null;
+		$GLOBALS['lerm_admin_config_current_post_type'] = '';
+		$GLOBALS['post']                                = null;
 
 		$_REQUEST = array();
 	}
