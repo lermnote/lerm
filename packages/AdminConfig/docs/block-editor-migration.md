@@ -27,19 +27,26 @@ client boundaries that a React/Gutenberg client can reuse.
   temporary bridge until React state owns values directly.
 - `resources/admin/admin-config.js`: classic admin mounting, field widgets, DOM
   binding, dirty tracking, and tab/subsection behavior.
-- `resources/block-panel/index.js`: build-only editor-panel entry for Phase 2;
-  Phase 3 will attach the first editor UI here.
+- `resources/core/schema-state.js`: pure schema/value state helpers for
+  hydration, local value updates, save payload serialization, and REST
+  validation-error replay.
+- `resources/core/context.js`: canonical context helpers for object-backed
+  stores such as `post_id`, `term_id`, `user_id`, `comment_id`, and
+  `network_id`.
+- `resources/block-panel/index.js`: editor-panel runtime entry for Phase 2. It
+  can create a runtime, load a schema, update local values, and save through
+  REST. Phase 3 will attach the first React UI here.
 
 ## Phase 2 Order
 
-1. Create a React state adapter that maps `schema + values` into field state
-   without reading DOM forms.
+1. Create a state adapter that maps `schema + values` into field state without
+   reading DOM forms.
 2. Move field renderers behind a registry that can mount either classic DOM
    widgets or React components.
-3. Add a small block-editor package entry that imports the REST transport and
-   state adapter, then renders one schema in an editor sidebar or settings
-   panel. The editor entry should import `resources/core/rest-client.js` directly
-   instead of importing classic admin transport fallback code.
+3. Add a small block-editor package entry that imports the REST client and state
+   adapter, then renders one schema in an editor sidebar or settings panel. The
+   editor entry should import `resources/core/rest-client.js` directly instead
+   of importing classic admin transport fallback code.
 4. Keep classic admin E2E as regression coverage while adding a small editor
    smoke test for schema load, save, validation error replay, and reset.
 5. Remove the Ajax fallback in `0.3.0` only after REST-only CI is consistently

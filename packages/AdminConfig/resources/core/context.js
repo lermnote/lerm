@@ -26,7 +26,44 @@ const contextFromRecord = (source = {}) => {
 	return context;
 };
 
+/**
+ * @param {unknown} value
+ * @returns {Record<string, unknown>}
+ */
+const recordFromUnknown = (value) => value && typeof value === 'object'
+	? /** @type {Record<string, unknown>} */ (value)
+	: {};
+
+/**
+ * @param {Record<string, unknown>} source
+ * @returns {Record<string, number>}
+ */
+const contextFromConfig = (source = {}) => ({
+	...contextFromRecord(source),
+	...contextFromRecord(recordFromUnknown(source.context)),
+});
+
+/**
+ * @param {Record<string, number>} context
+ * @returns {string}
+ */
+const contextQueryString = (context = {}) => {
+	const params = new URLSearchParams();
+
+	for (const key of CONTEXT_KEYS) {
+		const value = context[key];
+
+		if (Number.isInteger(value) && value > 0) {
+			params.set(key, String(value));
+		}
+	}
+
+	return params.toString();
+};
+
 module.exports = {
 	CONTEXT_KEYS,
+	contextFromConfig,
 	contextFromRecord,
+	contextQueryString,
 };

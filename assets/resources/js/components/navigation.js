@@ -1,5 +1,3 @@
-import { delegate } from '../utils/dom.js';
-
 let navigationInitialized = false;
 
 const updateOffCanvasMenuOffset = () => {
@@ -17,6 +15,10 @@ const updateOffCanvasMenuOffset = () => {
 
 const bindDropdownHover = (dropdown) => {
 	if (dropdown.dataset.lermDropdownBound === 'true') return;
+
+	// Skip hover binding on touch devices or inside offcanvas — rely on click toggle instead
+	if (window.matchMedia('(pointer: coarse)').matches) return;
+	if (dropdown.closest('.offcanvas')) return;
 
 	const menu = dropdown.querySelector('.dropdown-menu');
 	if (!menu) return;
@@ -38,9 +40,15 @@ export const initializeNavigation = () => {
 	if (!navigationInitialized) {
 		navigationInitialized = true;
 
-		delegate('click', '.navbar-toggler', (_event, toggler) => {
-			toggler.classList.toggle('active');
-		});
+		const offcanvas = document.querySelector('#offcanvasMenu');
+		if (offcanvas) {
+			offcanvas.addEventListener('shown.bs.offcanvas', () => {
+				document.querySelectorAll('.navbar-toggler').forEach(t => t.classList.add('active'));
+			});
+			offcanvas.addEventListener('hidden.bs.offcanvas', () => {
+				document.querySelectorAll('.navbar-toggler').forEach(t => t.classList.remove('active'));
+			});
+		}
 
 		window.addEventListener('resize', updateOffCanvasMenuOffset, { passive: true });
 	}
