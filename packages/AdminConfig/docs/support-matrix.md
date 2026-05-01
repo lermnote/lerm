@@ -29,7 +29,7 @@
 - Comment edit screens
 - Block editor document settings panel for post/page metabox schemas
 
-## Built-In Field Coverage
+## Package-Level Built-In Field Coverage
 
 - Core primitives
 - Extended primitives and presentation fields

@@ -69,9 +69,10 @@ verification set.
 
 ## Phase 3 Entry Criteria
 
-The first Phase 3 PR should only mount the block-panel bundle in the editor and
-create a runtime with editor context. It should not migrate the full field UI
-yet.
+Phase 3 started by mounting the block-panel bundle in the editor and creating a
+runtime with editor context before broadening field-control coverage. Later
+Phase 3 slices can add controls only when they stay on the REST contract and keep
+classic admin regression coverage green.
 
 ## Phase 3 Current Step
 
@@ -115,7 +116,7 @@ Acceptance for this slice:
 - Advanced, structured, media, async, reset, and import/export controls stay out
   of this slice.
 
-## Non-Goals For Phase 1
+## Non-Goals For The Current Block-Panel Slice
 
 - Do not rewrite classic field markup in React yet.
 - Do not change PHP schema definitions to fit Gutenberg-specific components.

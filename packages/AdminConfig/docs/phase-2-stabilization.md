@@ -66,8 +66,10 @@ Passing this set means:
 - Core JavaScript runtime helpers are covered by lightweight contract tests.
 - REST-only, default single-site, and multisite wp-env rehearsals remain green.
 
-## Next Gate
+## Phase 3 Handoff
 
-Phase 3 should start only after this stable point is green on `main`. The first
-Phase 3 PR should mount the block-panel script in the editor and create the
-runtime with `post_id` context, but it should not migrate field controls yet.
+At this Phase 2 checkpoint, the next gate was to mount the block-panel script in
+the editor and create the runtime with `post_id` context before migrating field
+controls. Current block-editor capabilities are tracked in
+`docs/block-editor-migration.md`; this document remains a Phase 2 baseline
+snapshot.
