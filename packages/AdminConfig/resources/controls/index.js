@@ -292,6 +292,126 @@ const SelectControl = (props) => {
  * @param {Record<string, unknown>} props
  * @returns {unknown}
  */
+const RadioControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, onChange, value } = normalized;
+	const selected = stringValue(value);
+	const options = choiceOptions(field);
+	const controlProps = {
+		...sharedControlProps(normalized),
+		'aria-invalid': normalized.error ? 'true' : undefined,
+		onChange: (nextValue) => onChange(stringValue(changeValue(nextValue))),
+		selected,
+	};
+
+	return createElement(
+		'fieldset',
+		{
+			'aria-invalid': controlProps['aria-invalid'],
+			'aria-label': controlProps.label,
+			className: 'lerm-admin-config-block-panel__radio',
+		},
+		[
+			createElement('legend', { key: 'legend' }, controlProps.label),
+			...options.map((option) => createElement('label', { key: option.value }, [
+				createElement('input', {
+					checked: selected === option.value,
+					key: `${ option.value }-input`,
+					name: stringValue(field.id || controlProps.label),
+					onChange: () => onChange(option.value),
+					type: 'radio',
+					value: option.value,
+				}),
+				` ${ option.label }`,
+			])),
+		]
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const ButtonSetControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { components, createElement, field, onChange, value } = normalized;
+	const Button = components.Button;
+	const ButtonGroup = components.ButtonGroup;
+	const selected = stringValue(value);
+	const options = choiceOptions(field);
+	const buttons = options.map((option) => {
+		const isPressed = selected === option.value;
+		const buttonProps = {
+			'aria-pressed': isPressed ? 'true' : 'false',
+			'data-value': option.value,
+			key: option.value,
+			onClick: () => onChange(option.value),
+			type: 'button',
+		};
+
+		return typeof Button === 'function'
+			? createElement(
+				Button,
+				{
+					...buttonProps,
+					isPressed,
+					variant: isPressed ? 'primary' : 'secondary',
+				},
+				option.label
+			)
+			: createElement('button', buttonProps, option.label);
+	});
+
+	return createElement(
+		'div',
+		{
+			'aria-label': stringValue(field.label || field.id),
+			className: 'lerm-admin-config-block-panel__button-set',
+			role: 'group',
+		},
+		[
+			createElement('span', { key: 'label' }, stringValue(field.label || field.id)),
+			typeof ButtonGroup === 'function'
+				? createElement(ButtonGroup, { key: 'buttons' }, buttons)
+				: createElement('div', { key: 'buttons' }, buttons),
+		]
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const ColorControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, onChange, value } = normalized;
+	const current = stringValue(value || field.default || '#000000');
+	const label = stringValue(field.label || field.id);
+
+	return createElement(
+		'label',
+		{
+			className: 'lerm-admin-config-block-panel__color',
+		},
+		[
+			createElement('span', { key: 'label' }, label),
+			createElement('input', {
+				'aria-label': label,
+				key: 'input',
+				onChange: (event) => onChange(stringValue(changeValue(event))),
+				onInput: (event) => onChange(stringValue(changeValue(event))),
+				type: 'color',
+				value: current,
+			}),
+			createElement('code', { key: 'value' }, current),
+		]
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
 const CheckboxListControl = (props) => {
 	const normalized = normalizeProps(props);
 	const { components, createElement, field, onChange, value } = normalized;
@@ -375,9 +495,12 @@ const createControlRegistry = (initialControls = {}) => {
  * @returns {ReturnType<typeof createControlRegistry>}
  */
 const createDefaultControlRegistry = () => createControlRegistry({
+	button_set: ButtonSetControl,
 	checkbox: ToggleControl,
 	checkbox_list: CheckboxListControl,
+	color: ColorControl,
 	number: NumberControl,
+	radio: RadioControl,
 	select: SelectControl,
 	slug_text: TextControl,
 	switcher: ToggleControl,

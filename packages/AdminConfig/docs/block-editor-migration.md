@@ -90,7 +90,10 @@ Supported controls in this slice:
 - `url`
 - `textarea`
 - `number`
+- `color`
 - `select`
+- `radio`
+- `button_set`
 - `slug_text`
 - `switcher`
 - `toggle`

@@ -392,6 +392,37 @@ final class SchemaDemoPlugin {
 							'default'     => 'compact',
 						),
 						array(
+							'id'          => 'entry_format',
+							'type'        => 'radio',
+							'label'       => __( 'Entry format', 'lerm-admin-config-demo' ),
+							'description' => __( 'A simple radio field rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'choices'     => array(
+								'standard'  => __( 'Standard', 'lerm-admin-config-demo' ),
+								'editorial' => __( 'Editorial', 'lerm-admin-config-demo' ),
+								'alert'     => __( 'Alert', 'lerm-admin-config-demo' ),
+							),
+							'default'     => 'standard',
+						),
+						array(
+							'id'          => 'entry_emphasis',
+							'type'        => 'button_set',
+							'label'       => __( 'Entry emphasis', 'lerm-admin-config-demo' ),
+							'description' => __( 'A compact button-set choice field rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'choices'     => array(
+								'normal'    => __( 'Normal', 'lerm-admin-config-demo' ),
+								'spotlight' => __( 'Spotlight', 'lerm-admin-config-demo' ),
+								'quiet'     => __( 'Quiet', 'lerm-admin-config-demo' ),
+							),
+							'default'     => 'normal',
+						),
+						array(
+							'id'          => 'entry_accent',
+							'type'        => 'color',
+							'label'       => __( 'Entry accent', 'lerm-admin-config-demo' ),
+							'description' => __( 'A color value rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'default'     => '#2271b1',
+						),
+						array(
 							'id'          => 'entry_channels',
 							'type'        => 'checkbox_list',
 							'label'       => __( 'Entry channels', 'lerm-admin-config-demo' ),
