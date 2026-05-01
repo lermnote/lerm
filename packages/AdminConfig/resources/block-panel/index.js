@@ -19,6 +19,33 @@ const BLOCK_PANEL_CONFIG_GLOBAL = 'lermAdminConfigBlockPanelConfigs';
 const LEGACY_BLOCK_PANEL_CONFIG_GLOBAL = 'lermAdminConfigBlockPanelConfig';
 const panelInstances = new Map();
 const registeredPanelNames = new Set();
+const READ_ONLY_CONTROL_TYPES = new Set([
+	'accordion',
+	'ajax_select',
+	'background',
+	'backup_tools',
+	'border',
+	'code_editor',
+	'content',
+	'dimensions',
+	'fieldset',
+	'gallery',
+	'group',
+	'heading',
+	'icon',
+	'image_select',
+	'link_color',
+	'media',
+	'notice',
+	'palette',
+	'sorter',
+	'spacing',
+	'subheading',
+	'tabbed',
+	'typography',
+	'upload',
+	'wp_editor',
+]);
 
 /**
  * @param {Record<string, unknown>} config
@@ -315,24 +342,46 @@ const fieldValue = (values, fieldId, fallback = '') => (
 );
 
 /**
+ * @param {string} controlType
+ * @param {unknown} control
+ * @returns {'editable'|'read-only'|'unsupported'}
+ */
+const fieldControlStatus = (controlType, control) => {
+	if (typeof control === 'function') {
+		return 'editable';
+	}
+
+	return READ_ONLY_CONTROL_TYPES.has(controlType) ? 'read-only' : 'unsupported';
+};
+
+/**
+ * @returns {Array<string>}
+ */
+const blockPanelReadOnlyControlTypes = () => Array.from(READ_ONLY_CONTROL_TYPES).sort();
+
+/**
  * @param {Function} createElement
  * @param {Record<string, unknown>} field
  * @param {string} controlType
+ * @param {'read-only'|'unsupported'} status
  * @param {string} error
  * @returns {unknown}
  */
-const renderUnsupportedField = (createElement, field, controlType, error = '') => {
+const renderUnavailableField = (createElement, field, controlType, status, error = '') => {
 	const fieldId = String(field.id || '');
 	const label = String(field.label || fieldId);
 	const description = String(field.description || '');
+	const isReadOnly = status === 'read-only';
 
 	return createElement(
 		'div',
 		{
-			className: `lerm-admin-config-block-panel__field lerm-admin-config-block-panel__unsupported-field${ error ? ' is-error' : '' }`,
+			className: `lerm-admin-config-block-panel__field lerm-admin-config-block-panel__${ isReadOnly ? 'readonly' : 'unsupported' }-field${ error ? ' is-error' : '' }`,
+			'data-control-status': status,
 			'data-field-id': fieldId,
 			'data-field-type': controlType,
-			'data-unsupported-control': 'true',
+			'data-read-only-control': isReadOnly ? 'true' : undefined,
+			'data-unsupported-control': isReadOnly ? undefined : 'true',
 			key: fieldId,
 			role: 'note',
 		},
@@ -347,7 +396,9 @@ const renderUnsupportedField = (createElement, field, controlType, error = '') =
 					className: 'lerm-admin-config-block-panel__unsupported-message',
 					key: 'unsupported',
 				},
-				`Field type "${ controlType }" is not available in the block editor panel yet.`
+				isReadOnly
+					? `Field type "${ controlType }" is read-only in the block editor panel.`
+					: `Field type "${ controlType }" is not available in the block editor panel yet.`
 			),
 			error
 				? createElement(
@@ -465,6 +516,7 @@ const createPanelComponent = (config, Panel, element) => {
 					const fieldId = String(field.id || '');
 					const controlType = fieldControlType(field);
 					const control = runtime.controls.get(controlType);
+					const controlStatus = fieldControlStatus(controlType, control);
 
 					if (!fieldId) {
 						return null;
@@ -472,8 +524,8 @@ const createPanelComponent = (config, Panel, element) => {
 
 					const error = fieldError(state.errors || {}, fieldId);
 
-					if (!control) {
-						return renderUnsupportedField(createElement, field, controlType, error);
+					if (controlStatus !== 'editable') {
+						return renderUnavailableField(createElement, field, controlType, controlStatus, error);
 					}
 
 					hasEditableFields = true;
@@ -482,6 +534,7 @@ const createPanelComponent = (config, Panel, element) => {
 						'div',
 						{
 							className: `lerm-admin-config-block-panel__field${ error ? ' is-error' : '' }`,
+							'data-control-status': 'editable',
 							'data-field-id': fieldId,
 							'data-field-type': controlType,
 							key: fieldId,
@@ -706,6 +759,7 @@ if (typeof window !== 'undefined') {
 }
 
 module.exports = {
+	blockPanelReadOnlyControlTypes,
 	createBlockPanelRuntime,
 	registerBlockEditorPanels,
 };

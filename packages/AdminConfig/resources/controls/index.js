@@ -141,6 +141,17 @@ const sharedControlProps = (props) => {
 };
 
 /**
+ * @param {unknown} value
+ * @param {Record<string, unknown>} field
+ * @returns {string}
+ */
+const numericValue = (value, field) => {
+	const current = stringValue(value);
+
+	return current !== '' ? current : stringValue(field.default || 0);
+};
+
+/**
  * @param {Record<string, unknown>} props
  * @param {string} type
  * @returns {unknown}
@@ -219,7 +230,7 @@ const NumberControl = (props) => {
 		onChange: (nextValue) => onChange(stringValue(changeValue(nextValue))),
 		step: stringValue(field.step || 1),
 		type: 'number',
-		value: stringValue(value),
+		value: numericValue(value, field),
 	};
 
 	return typeof TextControl === 'function'
@@ -228,6 +239,121 @@ const NumberControl = (props) => {
 			...controlProps,
 			onInput: (event) => onChange(stringValue(changeValue(event))),
 		});
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const RangeControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, onChange, value } = normalized;
+	const current = numericValue(value, field);
+	const label = stringValue(field.label || field.id);
+	const controlProps = {
+		'aria-invalid': normalized.error ? 'true' : undefined,
+		'aria-label': label,
+		max: stringValue(field.max || 100),
+		min: stringValue(field.min || 0),
+		onChange: (event) => onChange(stringValue(changeValue(event))),
+		onInput: (event) => onChange(stringValue(changeValue(event))),
+		step: stringValue(field.step || 1),
+		value: current,
+	};
+
+	return createElement(
+		'label',
+		{
+			className: 'lerm-admin-config-block-panel__range',
+		},
+		[
+			createElement('span', { key: 'label' }, label),
+			createElement('input', {
+				...controlProps,
+				key: 'range',
+				type: 'range',
+			}),
+			createElement('input', {
+				...controlProps,
+				key: 'number',
+				type: 'number',
+			}),
+			stringValue(field.unit)
+				? createElement('span', { key: 'unit' }, stringValue(field.unit))
+				: null,
+		].filter(Boolean)
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const DateControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, onChange, value } = normalized;
+	const label = stringValue(field.label || field.id);
+	const current = field.from_to === true ? asRecord(value) : {};
+	const inputProps = {
+		'aria-invalid': normalized.error ? 'true' : undefined,
+		type: 'date',
+	};
+
+	if (field.from_to === true) {
+		const updateRange = (key, nextValue) => onChange({
+			...current,
+			[key]: stringValue(changeValue(nextValue)),
+		});
+
+		return createElement(
+			'fieldset',
+			{
+				'aria-label': label,
+				className: 'lerm-admin-config-block-panel__date-range',
+			},
+			[
+				createElement('legend', { key: 'legend' }, label),
+				createElement('label', { key: 'from' }, [
+					createElement('span', { key: 'label' }, stringValue(field.text_from || 'From')),
+					createElement('input', {
+						...inputProps,
+						key: 'input',
+						onChange: (event) => updateRange('from', event),
+						onInput: (event) => updateRange('from', event),
+						value: stringValue(current.from),
+					}),
+				]),
+				createElement('label', { key: 'to' }, [
+					createElement('span', { key: 'label' }, stringValue(field.text_to || 'To')),
+					createElement('input', {
+						...inputProps,
+						key: 'input',
+						onChange: (event) => updateRange('to', event),
+						onInput: (event) => updateRange('to', event),
+						value: stringValue(current.to),
+					}),
+				]),
+			]
+		);
+	}
+
+	return createElement(
+		'label',
+		{
+			className: 'lerm-admin-config-block-panel__date',
+		},
+		[
+			createElement('span', { key: 'label' }, label),
+			createElement('input', {
+				...inputProps,
+				'aria-label': label,
+				key: 'input',
+				onChange: (event) => onChange(stringValue(changeValue(event))),
+				onInput: (event) => onChange(stringValue(changeValue(event))),
+				value: stringValue(value),
+			}),
+		]
+	);
 };
 
 /**
@@ -458,6 +584,16 @@ const CheckboxListControl = (props) => {
 };
 
 /**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const CheckboxControl = (props) => {
+	const normalized = normalizeProps(props);
+
+	return choiceOptions(normalized.field).length ? CheckboxListControl(props) : ToggleControl(props);
+};
+
+/**
  * @param {Record<string, FieldControl>} initialControls
  */
 const createControlRegistry = (initialControls = {}) => {
@@ -496,13 +632,16 @@ const createControlRegistry = (initialControls = {}) => {
  */
 const createDefaultControlRegistry = () => createControlRegistry({
 	button_set: ButtonSetControl,
-	checkbox: ToggleControl,
+	checkbox: CheckboxControl,
 	checkbox_list: CheckboxListControl,
 	color: ColorControl,
+	date: DateControl,
 	number: NumberControl,
 	radio: RadioControl,
 	select: SelectControl,
 	slug_text: TextControl,
+	slider: RangeControl,
+	spinner: NumberControl,
 	switcher: ToggleControl,
 	text: TextControl,
 	textarea: TextareaControl,

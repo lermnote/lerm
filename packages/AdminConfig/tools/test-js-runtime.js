@@ -14,7 +14,7 @@ const {
 	withRestError,
 } = require('../resources/core/schema-state');
 const { createDefaultControlRegistry } = require('../resources/controls');
-const { createBlockPanelRuntime } = require('../resources/block-panel');
+const { blockPanelReadOnlyControlTypes, createBlockPanelRuntime } = require('../resources/block-panel');
 
 function testContextHelpers() {
 	assert.deepEqual(
@@ -113,6 +113,9 @@ function testDefaultControlRegistry() {
 	assert(types.includes('radio'));
 	assert(types.includes('button_set'));
 	assert(types.includes('color'));
+	assert(types.includes('date'));
+	assert(types.includes('slider'));
+	assert(types.includes('spinner'));
 
 	const rendered = registry.get('text')({
 		components: {},
@@ -162,10 +165,93 @@ function testDefaultControlRegistry() {
 		onChange: (value) => changes.push(value),
 		value: '#2271b1',
 	});
+	const renderedDate = registry.get('date')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			id: 'review_date',
+			label: 'Review date',
+			type: 'date',
+		},
+		inputId: 'demo-review-date',
+		onChange: (value) => changes.push(value),
+		value: '2026-04-26',
+	});
+	const renderedRange = registry.get('slider')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			id: 'priority',
+			label: 'Priority',
+			max: 5,
+			min: 1,
+			type: 'slider',
+		},
+		inputId: 'demo-priority',
+		onChange: (value) => changes.push(value),
+		value: '3',
+	});
+	const renderedCheckboxChoices = registry.get('checkbox')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			choices: {
+				newsletter: 'Newsletter',
+			},
+			id: 'channels',
+			label: 'Channels',
+			type: 'checkbox',
+		},
+		inputId: 'demo-channels',
+		onChange: (value) => changes.push(value),
+		value: [],
+	});
 
 	renderedSelect.props.onChange({ target: { value: 'feature' } });
 	renderedColor.children[0][1].props.onChange({ target: { value: '#13579b' } });
-	assert.deepEqual(changes, [ 'feature', '#13579b' ]);
+	renderedDate.children[0][1].props.onChange({ target: { value: '2026-05-03' } });
+	renderedRange.children[0][1].props.onChange({ target: { value: '4' } });
+	renderedCheckboxChoices.children[0][1].children[0][0].props.onChange({ target: { checked: true } });
+	assert.deepEqual(changes, [ 'feature', '#13579b', '2026-05-03', '4', [ 'newsletter' ] ]);
+}
+
+function testBlockPanelFieldStatusContract() {
+	const readOnlyTypes = blockPanelReadOnlyControlTypes();
+	const editableTypes = createDefaultControlRegistry().types();
+
+	for (const type of [
+		'accordion',
+		'ajax_select',
+		'background',
+		'backup_tools',
+		'border',
+		'code_editor',
+		'content',
+		'dimensions',
+		'fieldset',
+		'gallery',
+		'group',
+		'heading',
+		'icon',
+		'image_select',
+		'link_color',
+		'media',
+		'notice',
+		'palette',
+		'sorter',
+		'spacing',
+		'subheading',
+		'tabbed',
+		'typography',
+		'upload',
+		'wp_editor',
+	]) {
+		assert(readOnlyTypes.includes(type), `${type} should be read-only in the block panel`);
+	}
+
+	for (const type of readOnlyTypes) {
+		assert(! editableTypes.includes(type), `${type} should not be registered as an editable control`);
+	}
 }
 
 async function testBlockPanelRuntime() {
@@ -256,6 +342,7 @@ async function main() {
 	testRestUrlHelpers();
 	testSchemaStateHelpers();
 	testDefaultControlRegistry();
+	testBlockPanelFieldStatusContract();
 	await testBlockPanelRuntime();
 	console.log('JS runtime tests passed.');
 }
