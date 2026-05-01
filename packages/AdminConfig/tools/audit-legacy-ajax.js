@@ -5,7 +5,7 @@ const path = require('path');
 
 const packageRoot = path.resolve(__dirname, '..');
 const scanRoots = [
-	'assets/src',
+	'resources',
 	'src',
 ];
 
@@ -13,11 +13,11 @@ const legacyPattern = /admin-ajax\.php|wp_ajax_lerm_admin_config|lerm_admin_conf
 
 const allowedFiles = new Map([
 	[
-		'assets/src/admin-config.js',
+		'resources/admin/admin-config.js',
 		'classic admin fallback branches until 0.3.0 removal',
 	],
 	[
-		'assets/src/transport.js',
+		'resources/admin/transport.js',
 		'isolated deprecated Ajax transport wrapper',
 	],
 	[

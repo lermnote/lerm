@@ -18,8 +18,8 @@ This repository now contains the first extraction slice:
 - `src/Framework`: bundled field/store/admin framework used by the runtime
 - `src/Stores`: store resolution for WordPress option/meta backends
 - `src/WordPress`: embedded bootstrap, plugin bootstrap, runtime, REST endpoints, and container adapters
-- `assets/src`: source entry points and client boundaries for config,
-  transport, form-state, and classic admin mounting
+- `resources`: JavaScript source entry points and client boundaries for core,
+  controls, store, classic admin, and the future block-editor panel
 - `assets/build`: generated WordPress script bundles and `*.asset.php` metadata
 - `assets`: reusable admin UI styles plus legacy unbuilt script fallback
 - `lerm-admin-config.php`: plugin entry point for standalone installs
@@ -260,16 +260,19 @@ when embedded inside a theme:
 
 - `composer lint:php` runs the lightweight PHP syntax/import checker
 - `composer lint:wpcs` runs WPCS through `tools/phpcs-runner.php`
-- `composer lint:js` validates `assets/src/admin-config.js`, the legacy script
-  fallback, webpack config, and Playwright specs
+- `composer lint:js` validates `resources/`, the legacy script fallback,
+  webpack config, and Playwright specs
 - `composer test` runs the PHPUnit unit and smoke suites
 - `composer test:integration` runs the real-WordPress integration suite when a
   reachable `wp-load.php` is available
 - `composer ci` runs the default local gate
 - `composer analyse:phpstan` runs PHPStan when the binary is available
-- `npm run build` compiles `assets/src/admin-config.js` to
-  `assets/build/admin-config.js` plus `admin-config.asset.php`
+- `npm run build` compiles `resources/admin/index.js` and
+  `resources/block-panel/index.js` to `assets/build/*.js` plus asset metadata
 - `npm run build:check` rebuilds and fails if the committed build output drifts
+- `npm run test:js-runtime` checks the core schema state, context, error, and
+  block-panel runtime helpers
+- `npm run check:phase2` runs build drift, legacy Ajax, and JS runtime checks
 
 The PHPCS and PHPStan runners prepend `tools/wp-tool-stubs.php`, so they can be
 executed from an embedded theme workspace without fatalling on eager theme

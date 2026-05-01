@@ -9,31 +9,31 @@
 use Lerm\Core\Menu;
 
 $template_options      = lerm_get_template_options();
-$theme_location        = wp_is_mobile() ? 'mobile' : 'primary';
+$theme_location        = 'primary';
 $show_navbar_search    = ! empty( $template_options['navbar_search'] );
-$social_positions      = (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) );
-$show_header_social    = in_array( 'header', $social_positions, true );
-$social_open_new_tab   = ! isset( $template_options['social_open_new_tab'] ) || ! empty( $template_options['social_open_new_tab'] );
-$show_social_in_header = in_array( 'header', $social_positions, true );
+$show_social_in_header = in_array( 'header', (array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) ), true );
+$show_darkmode_navbar  = ! empty( $template_options['dark_mode_enable'] ) && ( $template_options['dark_mode_toggle_position'] ?? 'navbar' ) === 'navbar';
 ?>
 
 <?php if ( wp_is_mobile() ) : ?>
-	<div class="d-flex align-items-center">
-		<?php if ( $show_navbar_search ) : ?>
-			<button type="button" class="navbar-search d-lg-none" data-bs-toggle="modal" data-bs-target="#searchModal">
-				<i class="fa fa-search"></i>
-			</button>
-		<?php endif; ?>
-		<button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
-			<span></span>
-			<span></span>
-			<span></span>
-		</button>
-	</div>
+	<button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+		<span></span>
+		<span></span>
+		<span></span>
+	</button>
 
-	<div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenu">
-		<div class="offcanvas-header py-0"></div>
-		<div class="offcanvas-body px-0">
+	<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenu">
+		<div class="offcanvas-header border-bottom d-flex align-items-center">
+			<div class="d-flex align-items-center gap-2">
+				<?php the_custom_logo(); ?>
+				<span class="site-title h5 mb-0">
+					<a href="<?php echo esc_url( home_url( '' ) ); ?>" rel="home">
+						<?php echo esc_html( $template_options['blogname'] ? $template_options['blogname'] : get_bloginfo( 'name' ) ); ?>
+					</a>
+				</span>
+			</div>
+		</div>
+		<div class="offcanvas-body px-0 d-flex flex-column">
 			<?php
 			if ( has_nav_menu( $theme_location ) ) :
 				wp_nav_menu(
@@ -51,30 +51,42 @@ $show_social_in_header = in_array( 'header', $social_positions, true );
 				);
 			endif;
 			?>
+			<?php if ( $show_darkmode_navbar || true ) : ?>
+			<ul class="navbar-nav border-top mt-2 pt-2">
+				<?php if ( $show_darkmode_navbar ) : ?>
+				<li class="nav-item">
+					<button type="button" class="nav-link dark-mode-toggle w-100 text-start d-flex align-items-center gap-2" id="dark-mode-btn-mobile">
+						<i class="fa fa-moon" aria-hidden="true"></i>
+						<span><?php esc_html_e( 'Dark mode', 'lerm' ); ?></span>
+					</button>
+				</li>
+				<?php endif; ?>
+				<li class="nav-item menu-item-login">
+					<?php if ( is_user_logged_in() ) : ?>
+					<a class="nav-link d-flex align-items-center gap-2" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+						<?php echo get_avatar( wp_get_current_user()->ID, 20, '', '', array( 'class' => 'rounded-circle' ) ); ?>
+						<?php echo esc_html( wp_get_current_user()->display_name ); ?>
+					</a>
+					<?php else : ?>
+					<a class="nav-link" href="<?php echo esc_url( wp_login_url() ); ?>">
+						<i class="fa fa-sign-in" aria-hidden="true"></i>
+						<?php esc_html_e( 'Login', 'lerm' ); ?>
+					</a>
+					<?php endif; ?>
+				</li>
+			</ul>
+			<?php endif; ?>
+			<?php if ( $show_navbar_search ) : ?>
+				<div class="border-top px-3 py-3 mt-auto">
+					<?php get_search_form(); ?>
+				</div>
+			<?php endif; ?>
 		</div>
 	</div>
-
-	<?php if ( $show_navbar_search ) : ?>
-		<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-			<div class="modal-dialog mt-5">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h1 class="modal-title fs-5" id="searchModalLabel"><?php esc_html_e( 'Search whole site', 'lerm' ); ?></h1>
-					</div>
-					<div class="modal-body" style="overflow:visible">
-						<?php get_search_form(); ?>
-					</div>
-					<div class="d-flex justify-content-center p-3">
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php esc_attr_e( 'Close', 'lerm' ); ?>"></button>
-					</div>
-				</div>
-			</div>
-		</div>
-	<?php endif; ?>
 <?php else : ?>
 	<?php
 	$found    = false;
-	$nav_menu = wp_cache_get( 'lerm_nav_menu', 'lerm_nav', false, $found );
+	$nav_menu = wp_cache_get( 'lerm_nav_menu_' . $theme_location, 'lerm_nav', false, $found );
 
 	if ( ! $found && has_nav_menu( $theme_location ) ) :
 		$nav_menu = wp_nav_menu(
@@ -91,7 +103,7 @@ $show_social_in_header = in_array( 'header', $social_positions, true );
 				'echo'            => false,
 			)
 		);
-		wp_cache_set( 'lerm_nav_menu', (string) $nav_menu, 'lerm_nav', HOUR_IN_SECONDS );
+		wp_cache_set( 'lerm_nav_menu_' . $theme_location, (string) $nav_menu, 'lerm_nav', HOUR_IN_SECONDS );
 	endif;
 
 	if ( $nav_menu ) :
@@ -100,7 +112,7 @@ $show_social_in_header = in_array( 'header', $social_positions, true );
 	?>
 
 	<?php if ( $show_navbar_search ) : ?>
-		<div class="d-none d-lg-block">
+		<div class="navbar-search-wrapper d-none d-lg-flex">
 			<?php get_search_form(); ?>
 		</div>
 	<?php endif; ?>
@@ -120,4 +132,41 @@ $show_social_in_header = in_array( 'header', $social_positions, true );
 		);
 	endif;
 	?>
+
+	<?php if ( $show_darkmode_navbar || is_user_logged_in() || true ) : ?>
+	<div class="navbar-utility d-none d-lg-flex align-items-center">
+		<?php if ( $show_darkmode_navbar ) : ?>
+		<button type="button" class="btn btn-sm btn-custom dark-mode-toggle nav-item" id="dark-mode-btn-desktop" aria-label="<?php esc_attr_e( 'Toggle colour scheme', 'lerm' ); ?>">
+			<i class="fa fa-moon" aria-hidden="true"></i>
+		</button>
+		<?php endif; ?>
+		<?php
+		if ( is_user_logged_in() ) :
+			$current_user = wp_get_current_user();
+		?>
+		<div class="nav-item dropdown menu-item-login">
+			<a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				<?php echo get_avatar( $current_user->ID, 20, '', '', array( 'class' => 'rounded-circle' ) ); ?>
+				<span class="d-none d-xl-inline"><?php echo esc_html( $current_user->user_login ); ?></span>
+			</a>
+			<ul class="dropdown-menu dropdown-menu-end">
+				<li class="text-center">
+					<h6 class="dropdown-header"><?php echo get_avatar( $current_user->ID, 64 ); ?></h6>
+					<span class="text-info"><?php echo esc_html( $current_user->display_name ); ?></span>
+				</li>
+				<li><a class="dropdown-item" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Account', 'lerm' ); ?></a></li>
+				<li><hr class="dropdown-divider"></li>
+				<li><a class="dropdown-item" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Log out', 'lerm' ); ?></a></li>
+			</ul>
+		</div>
+		<?php else : ?>
+		<div class="nav-item menu-item-login">
+			<a class="nav-link" href="<?php echo esc_url( wp_login_url() ); ?>">
+				<i class="fa fa-sign-in" aria-hidden="true"></i>
+				<?php esc_html_e( 'Login', 'lerm' ); ?>
+			</a>
+		</div>
+		<?php endif; ?>
+	</div>
+	<?php endif; ?>
 <?php endif; ?>

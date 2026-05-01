@@ -1,6 +1,6 @@
 // @ts-check
 
-const { createAdminConfigRestClient } = require('./rest-client');
+const { createAdminConfigRestClient } = require('../core/rest-client');
 
 /**
  * @typedef {{

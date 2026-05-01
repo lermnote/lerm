@@ -29,10 +29,10 @@ produces a reusable client boundary for the future block-editor UI.
 - Legacy Ajax handlers emit deprecation notices while they remain available.
 - REST-only browser rehearsals pass with legacy Ajax disabled for single-site
   and multisite.
-- `@wordpress/scripts` builds `assets/src/admin-config.js` into
+- `@wordpress/scripts` builds `resources/admin/index.js` into
   `assets/build/admin-config.js` with `wp-api-fetch` listed in the asset
   metadata.
-- `assets/src/rest-client.js` is the reusable REST client boundary for classic
+- `resources/core/rest-client.js` is the reusable REST client boundary for classic
   admin and the future block-editor entry.
 - `npm run audit:ajax` passes and keeps production legacy Ajax references
   limited to the approved rollout surface.
@@ -59,6 +59,6 @@ npm run test:wp:multisite
 ## Exit State
 
 After Phase 1, new JavaScript clients must use REST through
-`assets/src/rest-client.js` or a small wrapper around it. New production code
+`resources/core/rest-client.js` or a small wrapper around it. New production code
 must not call `admin-ajax.php` directly. The remaining Ajax fallback is
 compatibility-only and is scheduled for removal in `0.3.0`.

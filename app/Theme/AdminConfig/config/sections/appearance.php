@@ -126,80 +126,36 @@ return array(
 			'fields' => array(
 				array(
 					'id'            => 'primary_color',
-					'type'          => 'fieldset',
+					'type'          => 'link_color',
 					'label'         => __( 'Primary color', 'lerm' ),
 					'description'   => __( 'Used for buttons, badges, and interactive accents.', 'lerm' ),
 					'group_heading' => __( 'Brand colors', 'lerm' ),
+					'color'         => '#0084ba',
+					'hover'         => '#0063aa',
+					'active'        => '#0063aa',
+					'focus'         => '#0063aa',
 					'default'       => array(
 						'color'  => '#0084ba',
 						'hover'  => '#0063aa',
 						'active' => '#0063aa',
 						'focus'  => '#0063aa',
-					),
-					'fields'        => array(
-						array(
-							'id'      => 'color',
-							'type'    => 'color',
-							'label'   => __( 'Base', 'lerm' ),
-							'default' => '#0084ba',
-						),
-						array(
-							'id'      => 'hover',
-							'type'    => 'color',
-							'label'   => __( 'Hover', 'lerm' ),
-							'default' => '#0063aa',
-						),
-						array(
-							'id'      => 'active',
-							'type'    => 'color',
-							'label'   => __( 'Active', 'lerm' ),
-							'default' => '#0063aa',
-						),
-						array(
-							'id'      => 'focus',
-							'type'    => 'color',
-							'label'   => __( 'Focus', 'lerm' ),
-							'default' => '#0063aa',
-						),
 					),
 				),
 				array(
 					'id'            => 'link_color',
-					'type'          => 'fieldset',
+					'type'          => 'link_color',
 					'label'         => __( 'Link color', 'lerm' ),
 					'description'   => __( 'Colour of anchors in article and page content.', 'lerm' ),
 					'group_heading' => __( 'Brand colors', 'lerm' ),
+					'color'         => '#0084ba',
+					'hover'         => '#0063aa',
+					'active'        => '#0063aa',
+					'focus'         => '#0063aa',
 					'default'       => array(
 						'color'  => '#0084ba',
 						'hover'  => '#0063aa',
 						'active' => '#0063aa',
 						'focus'  => '#0063aa',
-					),
-					'fields'        => array(
-						array(
-							'id'      => 'color',
-							'type'    => 'color',
-							'label'   => __( 'Base', 'lerm' ),
-							'default' => '#0084ba',
-						),
-						array(
-							'id'      => 'hover',
-							'type'    => 'color',
-							'label'   => __( 'Hover', 'lerm' ),
-							'default' => '#0063aa',
-						),
-						array(
-							'id'      => 'active',
-							'type'    => 'color',
-							'label'   => __( 'Active', 'lerm' ),
-							'default' => '#0063aa',
-						),
-						array(
-							'id'      => 'focus',
-							'type'    => 'color',
-							'label'   => __( 'Focus', 'lerm' ),
-							'default' => '#0063aa',
-						),
 					),
 				),
 				array(
@@ -311,57 +267,36 @@ return array(
 				),
 				array(
 					'id'            => 'navbar_link_color',
-					'type'          => 'fieldset',
+					'type'          => 'link_color',
 					'label'         => __( 'Nav link color', 'lerm' ),
 					'description'   => __( 'Colour of navigation links and dropdown items.', 'lerm' ),
 					'group_heading' => __( 'Header & navigation', 'lerm' ),
+					'color'         => '#828282',
+					'hover'         => '#0084ba',
 					'default'       => array(
 						'color' => '#828282',
 						'hover' => '#0084ba',
 					),
-					'fields'        => array(
-						array(
-							'id'      => 'color',
-							'type'    => 'color',
-							'label'   => __( 'Base', 'lerm' ),
-							'default' => '#828282',
-						),
-						array(
-							'id'      => 'hover',
-							'type'    => 'color',
-							'label'   => __( 'Hover', 'lerm' ),
-							'default' => '#0084ba',
-						),
-					),
+
 				),
 				array(
 					'id'            => 'navbar_active_color',
-					'type'          => 'fieldset',
+					'type'          => 'link_color',
 					'label'         => __( 'Nav active item color', 'lerm' ),
 					'description'   => __( 'Text and background colours for the active navigation item.', 'lerm' ),
 					'group_heading' => __( 'Header & navigation', 'lerm' ),
+					'color'         => '#0084ba',
+					'hover'         => '#0063aa',
+					'active'        => '#0063aa',
+					'focus'         => '#0063aa',
 					'default'       => array(
 						'color'            => '#0084ba',
 						'background_color' => '#ffffff',
 					),
-					'fields'        => array(
-						array(
-							'id'      => 'color',
-							'type'    => 'color',
-							'label'   => __( 'Text color', 'lerm' ),
-							'default' => '#0084ba',
-						),
-						array(
-							'id'      => 'background_color',
-							'type'    => 'color',
-							'label'   => __( 'Background color', 'lerm' ),
-							'default' => '#ffffff',
-						),
-					),
 				),
 				array(
 					'id'            => 'navbar_item_padding',
-					'type'          => 'fieldset',
+					'type'          => 'spacing',
 					'label'         => __( 'Nav item padding', 'lerm' ),
 					'description'   => __( 'Vertical padding applied to each navigation link.', 'lerm' ),
 					'group_heading' => __( 'Header & navigation', 'lerm' ),
@@ -417,17 +352,20 @@ return array(
 					),
 				),
 				array(
-					'id'            => 'widget_header_color',
-					'type'          => 'fieldset',
-					'label'         => __( 'Widget header color', 'lerm' ),
-					'description'   => __( 'Text, background, and border colours of widget and card headers.', 'lerm' ),
-					'group_heading' => __( 'Widget headers', 'lerm' ),
-					'default'       => array(
+					'id'               => 'widget_header_color',
+					'type'             => 'fieldset',
+					'label'            => __( 'Widget header color', 'lerm' ),
+					'description'      => __( 'Text, background, and border colours of widget and card headers.', 'lerm' ),
+					'group_heading'    => __( 'Widget headers', 'lerm' ),
+					'color'            => '',
+					'background_color' => '',
+					'border_color'     => '',
+					'default'          => array(
 						'color'            => '',
 						'background_color' => '',
 						'border_color'     => '',
 					),
-					'fields'        => array(
+					'fields'           => array(
 						array(
 							'id'      => 'color',
 							'type'    => 'color',
