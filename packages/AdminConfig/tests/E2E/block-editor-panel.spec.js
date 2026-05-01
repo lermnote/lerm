@@ -130,6 +130,8 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryFormat = panel.locator( '[data-field-id="entry_format"]' );
 	const entryEmphasis = panel.locator( '[data-field-id="entry_emphasis"]' );
 	const entryAccent = panel.locator( '[data-field-id="entry_accent"] input[type="color"]' );
+	const entryIconUnsupported = panel.locator( '[data-field-id="entry_icon"][data-unsupported-control="true"]' );
+	const entryBadgeUnsupported = panel.locator( '[data-field-id="entry_badge"][data-unsupported-control="true"]' );
 	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
 
 	await expect( featuredToggle ).toBeVisible();
@@ -139,6 +141,8 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryEmphasis.getByRole( 'button', { name: /^Normal$/i } ) ).toBeVisible();
 	await expect( entryAccent ).toBeVisible();
 	await expect( newsletterChannel ).toBeVisible();
+	await expect( entryIconUnsupported ).toContainText( /Field type "icon" is not available/i );
+	await expect( entryBadgeUnsupported ).toContainText( /Field type "fieldset" is not available/i );
 	const initialChecked = await featuredToggle.isChecked();
 	const initialSlug = await entrySlug.inputValue();
 	const initialLayout = await entryLayout.inputValue();

@@ -40,6 +40,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   stale-error clearing, and select/checkbox-list persistence coverage.
 - Block editor panel controls and browser coverage for simple choice and color
   fields, including `radio`, `button_set`, and `color`.
+- Block editor panel unsupported-control notices so advanced or structured
+  fields do not silently disappear from the editor panel.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
