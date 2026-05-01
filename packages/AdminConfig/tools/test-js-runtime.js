@@ -8,10 +8,12 @@ const { restUrl } = require('../resources/core/rest-client');
 const {
 	createSchemaState,
 	hydrateSchemaResponse,
+	isSchemaStateDirty,
 	serializeSavePayload,
 	withFieldValue,
 	withRestError,
 } = require('../resources/core/schema-state');
+const { createDefaultControlRegistry } = require('../resources/controls');
 const { createBlockPanelRuntime } = require('../resources/block-panel');
 
 function testContextHelpers() {
@@ -79,7 +81,9 @@ function testSchemaStateHelpers() {
 	});
 
 	assert.equal(hydrated.status, 'ready');
+	assert.equal(isSchemaStateDirty(hydrated), false);
 	assert.deepEqual(updated.values.group, { heading: 'Next' });
+	assert.equal(isSchemaStateDirty(updated), true);
 	assert.deepEqual(serializeSavePayload(updated), {
 		values: {
 			title: 'Initial',
@@ -91,6 +95,36 @@ function testSchemaStateHelpers() {
 	assert.equal(errored.status, 'error');
 	assert.equal(errored.message, 'Please review.');
 	assert.deepEqual(errored.errors, { 'group.heading': [ 'Too short.' ] });
+}
+
+function testDefaultControlRegistry() {
+	const registry = createDefaultControlRegistry();
+	const types = registry.types();
+
+	assert(types.includes('text'));
+	assert(types.includes('textarea'));
+	assert(types.includes('switcher'));
+	assert(types.includes('select'));
+	assert(types.includes('number'));
+
+	const rendered = registry.get('text')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			id: 'title',
+			label: 'Title',
+			placeholder: 'Write a title',
+			type: 'text',
+		},
+		inputId: 'demo-title',
+		onChange: () => {},
+		value: 'Loaded',
+	});
+
+	assert.equal(rendered.type, 'input');
+	assert.equal(rendered.props.id, 'demo-title');
+	assert.equal(rendered.props.placeholder, 'Write a title');
+	assert.equal(rendered.props.value, 'Loaded');
 }
 
 async function testBlockPanelRuntime() {
@@ -133,7 +167,9 @@ async function testBlockPanelRuntime() {
 	);
 
 	await runtime.loadSchema();
+	assert.equal(runtime.isDirty(), false);
 	runtime.updateValue('title', 'Saved');
+	assert.equal(runtime.isDirty(), true);
 	await runtime.save();
 
 	assert.equal(requests[0].path, 'schema/demo?post_id=77');
@@ -145,6 +181,7 @@ async function testBlockPanelRuntime() {
 		},
 	});
 	assert.equal(runtime.getState().values.title, 'Saved');
+	assert.equal(runtime.isDirty(), false);
 }
 
 async function main() {
@@ -152,6 +189,7 @@ async function main() {
 	testErrorHelpers();
 	testRestUrlHelpers();
 	testSchemaStateHelpers();
+	testDefaultControlRegistry();
 	await testBlockPanelRuntime();
 	console.log('JS runtime tests passed.');
 }

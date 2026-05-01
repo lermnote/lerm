@@ -48,6 +48,7 @@ final class SchemaCompiler {
 			'container'    => $container,
 			'store'        => $store,
 			'defaults'     => $defaults,
+			'sections'     => $this->compile_sections( $definition ),
 			'fields'       => $field_metadata,
 			'dependencies' => $dependency_graph,
 			'optionName'   => (string) ( $definition['option_name'] ?? $store['key'] ?? $id ),
@@ -154,12 +155,86 @@ final class SchemaCompiler {
 			$metadata['client'] = $field['client'];
 		}
 
+		$this->copy_scalar_field_props(
+			$field,
+			$metadata,
+			array( 'placeholder', 'input_type', 'min', 'max', 'step', 'rows' )
+		);
+
+		foreach ( array( 'multiple' ) as $key ) {
+			if ( array_key_exists( $key, $field ) ) {
+				$metadata[ $key ] = (bool) $field[ $key ];
+			}
+		}
+
+		if ( array_key_exists( 'choices', $field ) ) {
+			$metadata['choices'] = PageSchema::choices( $field );
+		}
+
 		$dependency = $this->compile_dependency( $field );
 		if ( ! empty( $dependency ) ) {
 			$metadata['dependency'] = $dependency;
 		}
 
 		return $metadata;
+	}
+
+	/**
+	 * @param array<string, mixed> $definition
+	 * @return array<string, mixed>
+	 */
+	private function compile_sections( array $definition ): array {
+		$compiled = array();
+
+		foreach ( PageSchema::sections( $definition ) as $section_id => $section ) {
+			$fields = array();
+			$groups = array();
+
+			foreach ( PageSchema::section_fields( $section ) as $field ) {
+				if ( isset( $field['id'] ) && is_scalar( $field['id'] ) ) {
+					$fields[] = (string) $field['id'];
+				}
+			}
+
+			foreach ( PageSchema::section_groups( $section ) as $group ) {
+				$group_fields = array();
+
+				foreach ( (array) ( $group['fields'] ?? array() ) as $field ) {
+					if ( is_array( $field ) && isset( $field['id'] ) && is_scalar( $field['id'] ) ) {
+						$group_fields[] = (string) $field['id'];
+					}
+				}
+
+				$groups[] = array(
+					'id'     => isset( $group['id'] ) && is_scalar( $group['id'] ) ? (string) $group['id'] : '',
+					'label'  => isset( $group['label'] ) && is_scalar( $group['label'] ) ? (string) $group['label'] : '',
+					'fields' => $group_fields,
+				);
+			}
+
+			$compiled[ (string) $section_id ] = array(
+				'id'          => (string) $section_id,
+				'title'       => $this->first_string( $section, array( 'title' ) ),
+				'description' => $this->first_string( $section, array( 'description' ) ),
+				'fields'      => $fields,
+				'groups'      => $groups,
+			);
+		}
+
+		return $compiled;
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param array<string, mixed> $metadata
+	 * @param array<int, string>   $keys
+	 */
+	private function copy_scalar_field_props( array $field, array &$metadata, array $keys ): void {
+		foreach ( $keys as $key ) {
+			if ( isset( $field[ $key ] ) && is_scalar( $field[ $key ] ) ) {
+				$metadata[ $key ] = $field[ $key ];
+			}
+		}
 	}
 
 	/**

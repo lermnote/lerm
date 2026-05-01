@@ -34,6 +34,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   payloads, context query strings, and REST validation-error replay.
 - Lightweight JavaScript runtime contract checks for the Phase 2 core and
   block-panel helpers.
+- Section-aware block editor panel controls for basic REST-safe field types,
+  including dirty tracking and REST save persistence coverage.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -52,6 +54,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   build pipeline emits a `block-panel` bundle for the future editor panel.
 - CI asset verification now runs the Phase 2 JavaScript runtime contract check
   alongside build drift and legacy Ajax reference audits.
+- The client schema payload now includes section metadata and client-safe field
+  control metadata for the block editor panel.
 
 ### Removed
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.

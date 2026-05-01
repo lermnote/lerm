@@ -33,10 +33,9 @@ client boundaries that a React/Gutenberg client can reuse.
 - `resources/core/context.js`: canonical context helpers for object-backed
   stores such as `post_id`, `term_id`, `user_id`, `comment_id`, and
   `network_id`.
-- `resources/block-panel/index.js`: editor-panel runtime entry for Phase 2. It
-  can create a runtime, load a schema, update local values, and save through
-  REST. Phase 3 attaches the first editor-only status panel here without
-  migrating field controls yet.
+- `resources/block-panel/index.js`: editor-panel runtime entry. It can create a
+  runtime, load a schema, render basic field controls, track dirty state, save
+  through REST, and replay validation errors into the panel state.
 
 ## Phase 2 Order
 
@@ -76,18 +75,36 @@ yet.
 
 ## Phase 3 Current Step
 
-The first Phase 3 slice mounts `assets/build/block-panel.js` from the metabox
-container during `enqueue_block_editor_assets`. The PHP boot config includes the
-matched schema ID, REST root, nonce, post type, and `post_id` context. The
-editor entry registers a `PluginDocumentSettingPanel`, loads the schema through
-REST, and exposes a ready/error status only.
+Phase 3 now has an editor-side editing slice for REST-safe basic fields. The
+metabox container mounts `assets/build/block-panel.js` during
+`enqueue_block_editor_assets`; the PHP boot config includes the matched schema
+ID, REST root, nonce, post type, and `post_id` context. The editor entry
+registers a `PluginDocumentSettingPanel`, loads the schema through REST, renders
+section-aware controls, tracks dirty state, saves through REST, and rehydrates
+from the server response after save.
+
+Supported controls in this slice:
+
+- `text`
+- `url`
+- `textarea`
+- `number`
+- `select`
+- `switcher`
+- `toggle`
+- `checkbox`
+- `checkbox_list`
 
 Acceptance for this slice:
 
 - The block editor requests `GET /schema/{id}?post_id={post_id}`.
+- The panel can edit supported field values and save them with
+  `POST /schema/{id}/save`.
+- Saved values persist after a block-editor reload.
 - No AdminConfig `admin-ajax.php` request is made by the block-editor panel.
 - The classic metabox and options-page E2E coverage still passes.
-- Field controls, save buttons, reset, and import/export stay out of this slice.
+- Advanced, structured, media, async, reset, and import/export controls stay out
+  of this slice.
 
 ## Non-Goals For Phase 1
 
