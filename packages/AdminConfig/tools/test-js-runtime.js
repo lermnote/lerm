@@ -4,6 +4,7 @@ const assert = require('assert/strict');
 
 const { contextFromConfig, contextQueryString } = require('../resources/core/context');
 const { fieldErrorsFromResponse, messageFromResponse } = require('../resources/core/errors');
+const { restUrl } = require('../resources/core/rest-client');
 const {
 	createSchemaState,
 	hydrateSchemaResponse,
@@ -41,6 +42,21 @@ function testErrorHelpers() {
 
 	assert.deepEqual(fieldErrorsFromResponse(response), { title: 'Required.' });
 	assert.equal(messageFromResponse(response), 'Validation failed.');
+}
+
+function testRestUrlHelpers() {
+	const plain = restUrl(
+		{ restUrl: 'https://example.test/wp-json/lerm-admin-config/v1/' },
+		'schema/demo?post_id=77'
+	);
+	const fallback = new URL(restUrl(
+		{ restUrl: 'https://example.test/index.php?rest_route=/lerm-admin-config/v1/' },
+		'schema/demo?post_id=77'
+	));
+
+	assert.equal(plain, 'https://example.test/wp-json/lerm-admin-config/v1/schema/demo?post_id=77');
+	assert.equal(fallback.searchParams.get('rest_route'), '/lerm-admin-config/v1/schema/demo');
+	assert.equal(fallback.searchParams.get('post_id'), '77');
 }
 
 function testSchemaStateHelpers() {
@@ -134,6 +150,7 @@ async function testBlockPanelRuntime() {
 async function main() {
 	testContextHelpers();
 	testErrorHelpers();
+	testRestUrlHelpers();
 	testSchemaStateHelpers();
 	await testBlockPanelRuntime();
 	console.log('JS runtime tests passed.');

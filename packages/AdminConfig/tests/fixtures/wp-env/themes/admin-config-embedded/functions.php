@@ -61,7 +61,9 @@ add_filter(
 	'use_block_editor_for_post_type',
 	static function ( bool $use_block_editor, string $post_type ): bool {
 		if ( in_array( $post_type, array( 'post', 'page' ), true ) ) {
-			return false;
+			return '1' === (string) get_option( 'lerm_admin_config_e2e_block_editor', '0' )
+				? $use_block_editor
+				: false;
 		}
 
 		return $use_block_editor;
@@ -74,7 +76,9 @@ add_filter(
 	'gutenberg_can_edit_post_type',
 	static function ( bool $can_edit, string $post_type ): bool {
 		if ( in_array( $post_type, array( 'post', 'page' ), true ) ) {
-			return false;
+			return '1' === (string) get_option( 'lerm_admin_config_e2e_block_editor', '0' )
+				? $can_edit
+				: false;
 		}
 
 		return $can_edit;

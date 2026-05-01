@@ -21,7 +21,40 @@ const hasRestConfig = (cfg) => !!(cfg.restUrl && cfg.restNonce);
  * @param {string} path
  * @returns {string}
  */
-const restUrl = (cfg, path) => `${String(cfg.restUrl || '').replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+const restUrl = (cfg, path) => {
+	const base = String(cfg.restUrl || '');
+	const normalizedPath = path.replace(/^\/+/, '');
+
+	if (!base.includes('rest_route=')) {
+		return `${base.replace(/\/+$/, '')}/${normalizedPath}`;
+	}
+
+	try {
+		const url = new URL(base);
+		const route = url.searchParams.get('rest_route');
+
+		if (!route) {
+			return `${base.replace(/\/+$/, '')}/${normalizedPath}`;
+		}
+
+		const queryIndex = normalizedPath.indexOf('?');
+		const routePath = queryIndex >= 0 ? normalizedPath.slice(0, queryIndex) : normalizedPath;
+		const queryString = queryIndex >= 0 ? normalizedPath.slice(queryIndex + 1) : '';
+
+		url.searchParams.set(
+			'rest_route',
+			`${ route.replace(/\/+$/, '') }/${ routePath.replace(/^\/+/, '') }`
+		);
+
+		new URLSearchParams(queryString).forEach((value, key) => {
+			url.searchParams.set(key, value);
+		});
+
+		return url.toString();
+	} catch (error) {
+		return `${base.replace(/\/+$/, '')}/${normalizedPath}`;
+	}
+};
 
 /**
  * @param {HeadersInit|undefined} headersInit

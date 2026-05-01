@@ -35,7 +35,8 @@ client boundaries that a React/Gutenberg client can reuse.
   `network_id`.
 - `resources/block-panel/index.js`: editor-panel runtime entry for Phase 2. It
   can create a runtime, load a schema, update local values, and save through
-  REST. Phase 3 will attach the first React UI here.
+  REST. Phase 3 attaches the first editor-only status panel here without
+  migrating field controls yet.
 
 ## Phase 2 Order
 
@@ -72,6 +73,21 @@ verification set.
 The first Phase 3 PR should only mount the block-panel bundle in the editor and
 create a runtime with editor context. It should not migrate the full field UI
 yet.
+
+## Phase 3 Current Step
+
+The first Phase 3 slice mounts `assets/build/block-panel.js` from the metabox
+container during `enqueue_block_editor_assets`. The PHP boot config includes the
+matched schema ID, REST root, nonce, post type, and `post_id` context. The
+editor entry registers a `PluginDocumentSettingPanel`, loads the schema through
+REST, and exposes a ready/error status only.
+
+Acceptance for this slice:
+
+- The block editor requests `GET /schema/{id}?post_id={post_id}`.
+- No AdminConfig `admin-ajax.php` request is made by the block-editor panel.
+- The classic metabox and options-page E2E coverage still passes.
+- Field controls, save buttons, reset, and import/export stay out of this slice.
 
 ## Non-Goals For Phase 1
 
