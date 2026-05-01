@@ -54,5 +54,14 @@
     "@wordpress/env": "^10.19.0",
     "@wordpress/scripts": "^32.0.0",
     "cross-env": "^7.0.3"
+  },
+  "overrides": {
+    "ajv": "^8.20.0",
+    "copy-webpack-plugin": "^14.0.0",
+    "markdownlint-cli": "^0.48.0",
+    "sockjs": {
+      "uuid": "^14.0.0"
+    },
+    "webpack-dev-server": "^5.2.3"
   }
 }
