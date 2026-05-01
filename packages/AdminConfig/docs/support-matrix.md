@@ -62,6 +62,7 @@
 - Real-WordPress integration tests for bootstraps, option/meta/site-option stores, and multisite network schema persistence
 - Playwright smoke coverage for plugin/embedded options pages, classic metabox/profile/taxonomy/comment screens, and the multisite network settings page
 - REST-only Playwright rehearsal coverage for plugin-mode actions and multisite network settings
+- Phase 2 mainline stabilization notes in `docs/phase-2-stabilization.md`
 
 ## Release Policy
 
