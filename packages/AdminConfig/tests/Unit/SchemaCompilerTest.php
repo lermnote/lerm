@@ -29,7 +29,9 @@ final class SchemaCompilerTest extends TestCase {
 				),
 				'sections'  => array(
 					'general' => array(
-						'fields' => array(
+						'title'       => 'General',
+						'description' => 'General settings.',
+						'fields'      => array(
 							array(
 								'id'      => 'feature_enabled',
 								'type'    => 'switcher',
@@ -44,6 +46,26 @@ final class SchemaCompilerTest extends TestCase {
 								'dependency'  => array( 'feature_enabled', '==', true ),
 								'description' => 'Shown when the feature is enabled.',
 							),
+							array(
+								'id'          => 'layout',
+								'type'        => 'select',
+								'label'       => 'Layout',
+								'choices'     => array(
+									'compact' => 'Compact',
+									'wide'    => 'Wide',
+								),
+								'default'     => 'compact',
+								'placeholder' => 'Choose a layout',
+							),
+							array(
+								'id'      => 'columns',
+								'type'    => 'number',
+								'label'   => 'Columns',
+								'min'     => 1,
+								'max'     => 4,
+								'step'    => 1,
+								'default' => 2,
+							),
 						),
 					),
 				),
@@ -55,6 +77,18 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertArrayHasKey( 'accent_color', $compiled->dependency_graph() );
 		$this->assertSame( 'feature_enabled', $compiled->dependency_graph()['accent_color']['field'] );
 		$this->assertSame( 'demo_settings', $compiled->client_config()['optionName'] );
+		$this->assertSame( array( 'feature_enabled', 'accent_color', 'layout', 'columns' ), $compiled->client_config()['sections']['general']['fields'] );
+		$this->assertSame( 'General settings.', $compiled->client_config()['sections']['general']['description'] );
+		$this->assertSame(
+			array(
+				'compact' => 'Compact',
+				'wide'    => 'Wide',
+			),
+			$compiled->client_config()['fields']['layout']['choices']
+		);
+		$this->assertSame( 'Choose a layout', $compiled->client_config()['fields']['layout']['placeholder'] );
+		$this->assertSame( 1, $compiled->client_config()['fields']['columns']['min'] );
+		$this->assertSame( 4, $compiled->client_config()['fields']['columns']['max'] );
 		$this->assertSame( 'option', $compiled->store()['type'] );
 	}
 

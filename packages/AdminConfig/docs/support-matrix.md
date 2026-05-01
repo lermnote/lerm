@@ -52,8 +52,8 @@
 
 - Recursive PHP syntax checks
 - JavaScript syntax checks
-- JavaScript runtime contract checks for core schema state, context, error, and
-  block-panel REST orchestration helpers
+- JavaScript runtime contract checks for core schema state, context, error,
+  default controls, dirty tracking, and block-panel REST orchestration helpers
 - Reproducible admin script build checks
 - Legacy Ajax production reference audit through `npm run audit:ajax`
 - Built asset dependency extraction for `wp-api-fetch`
@@ -62,8 +62,9 @@
 - PHPUnit smoke coverage for the bundled plugin and embedded examples
 - Real-WordPress integration tests for bootstraps, option/meta/site-option stores, and multisite network schema persistence
 - Playwright smoke coverage for plugin/embedded options pages, classic metabox/profile/taxonomy/comment screens, and the multisite network settings page
-- Playwright smoke coverage for block editor panel schema loading with `post_id`
-  context and no AdminConfig legacy Ajax requests
+- Playwright smoke coverage for block editor panel schema loading, basic field
+  editing, REST save persistence with `post_id` context, and no AdminConfig
+  legacy Ajax requests
 - REST-only Playwright rehearsal coverage for plugin-mode actions and multisite network settings
 - Phase 2 mainline stabilization notes in `docs/phase-2-stabilization.md`
 

@@ -9,6 +9,7 @@ const { fieldErrorsFromResponse, messageFromResponse } = require('./errors');
  *   schema: Record<string, unknown>,
  *   schemaId: string,
  *   values: Record<string, unknown>,
+ *   savedValues: Record<string, unknown>,
  *   errors: Record<string, string|string[]>,
  *   status: 'idle'|'loading'|'saving'|'error'|'ready'
  * }} SchemaState
@@ -78,6 +79,7 @@ const createSchemaState = (schema = {}, values = {}, context = {}, schemaId = ''
 	schema,
 	schemaId,
 	values,
+	savedValues: cloneRecord(values),
 	errors: {},
 	status: 'idle',
 });
@@ -110,6 +112,7 @@ const withSchema = (state, schema, values = {}, context = state.context, schemaI
 	schema,
 	schemaId,
 	values,
+	savedValues: cloneRecord(values),
 	status: 'ready',
 });
 
@@ -123,6 +126,7 @@ const withValues = (state, values) => ({
 	errors: {},
 	message: '',
 	values,
+	savedValues: cloneRecord(values),
 	status: 'ready',
 });
 
@@ -187,9 +191,18 @@ const serializeSavePayload = (state, values = state.values) => ({
 	values,
 });
 
+/**
+ * @param {SchemaState} state
+ * @returns {boolean}
+ */
+const isSchemaStateDirty = (state) => (
+	JSON.stringify(asRecord(state.values)) !== JSON.stringify(asRecord(state.savedValues))
+);
+
 module.exports = {
 	createSchemaState,
 	hydrateSchemaResponse,
+	isSchemaStateDirty,
 	serializeSavePayload,
 	setValueAtPath,
 	withErrors,

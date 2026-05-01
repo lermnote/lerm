@@ -5,13 +5,14 @@ const { contextFromConfig, contextQueryString } = require('../core/context');
 const {
 	createSchemaState,
 	hydrateSchemaResponse,
+	isSchemaStateDirty,
 	serializeSavePayload,
 	withFieldValue,
 	withRestError,
 	withStatus,
 	withValues,
 } = require('../core/schema-state');
-const { createControlRegistry } = require('../controls');
+const { createDefaultControlRegistry } = require('../controls');
 const { STORE_NAME } = require('../store');
 
 const BLOCK_PANEL_CONFIG_GLOBAL = 'lermAdminConfigBlockPanelConfigs';
@@ -24,7 +25,7 @@ const registeredPanelNames = new Set();
  * @param {{ restClient?: { hasTransport: () => boolean, request: (path: string, options?: Record<string, unknown>) => Promise<{ success: boolean, data: Record<string, unknown> }> } }} options
  */
 const createBlockPanelRuntime = (config = {}, options = {}) => {
-	const controls = createControlRegistry();
+	const controls = createDefaultControlRegistry();
 	const rest = options.restClient || createAdminConfigRestClient({ getConfig: () => config });
 	let context = contextFromConfig(config);
 	let schemaId = String(config.schemaId || config.schema_id || '');
@@ -63,6 +64,7 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 		getContext: () => ({ ...context }),
 		getSchemaId: () => schemaId,
 		getState: () => state,
+		isDirty: () => isSchemaStateDirty(state),
 
 		/**
 		 * @param {Record<string, unknown>} nextContext
@@ -131,6 +133,7 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 			state = withValues(state, response.data.values && typeof response.data.values === 'object'
 				? /** @type {Record<string, unknown>} */ (response.data.values)
 				: values);
+			state = withStatus(state, 'ready', String(response.data.message || 'Settings saved.'));
 
 			return response;
 		},
@@ -217,14 +220,92 @@ const panelName = (config) => `lerm-admin-config-${panelSlug(String(config.schem
  * @returns {number}
  */
 const fieldCount = (schema) => {
+	const fields = asRecord(schema.fields);
 	const sections = asRecord(schema.sections);
 
-	return Object.values(sections).reduce((count, section) => {
-		const fields = asRecord(section).fields;
+	if (!Object.keys(sections).length) {
+		return Object.keys(fields).length;
+	}
 
-		return count + (Array.isArray(fields) ? fields.length : 0);
+	return Object.values(sections).reduce((count, section) => {
+		const sectionRecord = asRecord(section);
+		const sectionFields = Array.isArray(sectionRecord.fields)
+			? sectionRecord.fields
+			: Object.values(asRecord(sectionRecord.fields));
+
+		return count + (Array.isArray(sectionFields) ? sectionFields.length : 0);
 	}, 0);
 };
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {string}
+ */
+const fieldControlType = (field) => {
+	const client = asRecord(field.client);
+
+	return String(client.control || field.type || 'text');
+};
+
+/**
+ * @param {Record<string, unknown>} schema
+ * @returns {Array<Record<string, unknown>>}
+ */
+const orderedSections = (schema) => {
+	const fields = asRecord(schema.fields);
+	const sections = asRecord(schema.sections);
+
+	if (!Object.keys(sections).length) {
+		return [
+			{
+				id: 'general',
+				title: '',
+				description: '',
+				fields: Object.values(fields).map(asRecord),
+			},
+		];
+	}
+
+	return Object.entries(sections).map(([ sectionId, section ]) => {
+		const sectionRecord = asRecord(section);
+		const fieldIds = Array.isArray(sectionRecord.fields) ? sectionRecord.fields : [];
+		const sectionFields = fieldIds
+			.map((fieldId) => asRecord(fields[String(fieldId)]))
+			.filter((field) => String(field.id || '') !== '');
+
+		return {
+			description: String(sectionRecord.description || ''),
+			fields: sectionFields,
+			id: String(sectionRecord.id || sectionId),
+			title: String(sectionRecord.title || ''),
+		};
+	});
+};
+
+/**
+ * @param {Record<string, string|string[]>} errors
+ * @param {string} fieldId
+ * @returns {string}
+ */
+const fieldError = (errors, fieldId) => {
+	const error = errors[fieldId];
+
+	if (Array.isArray(error)) {
+		return error.map(String).filter(Boolean).join(' ');
+	}
+
+	return String(error || '');
+};
+
+/**
+ * @param {Record<string, unknown>} values
+ * @param {string} fieldId
+ * @param {unknown} fallback
+ * @returns {unknown}
+ */
+const fieldValue = (values, fieldId, fallback = '') => (
+	Object.prototype.hasOwnProperty.call(values, fieldId) ? values[fieldId] : fallback
+);
 
 /**
  * @param {Record<string, unknown>} config
@@ -303,10 +384,151 @@ const createPanelComponent = (config, Panel, element) => {
 			));
 		}
 
+		const components = asRecord((typeof window !== 'undefined' && window.wp && window.wp.components) || {});
+		const sections = orderedSections(state.schema);
+		const dirty = isSchemaStateDirty(state);
+		const isBusy = status === 'loading' || status === 'saving';
+		const canRenderFields = status === 'ready' || (status === 'error' && Object.keys(state.schema || {}).length > 0);
+		const Button = components.Button;
+		const Spinner = components.Spinner;
+		const fieldBody = [];
+
+		if (status === 'loading' && typeof Spinner === 'function') {
+			fieldBody.push(createElement(Spinner, { key: 'spinner' }));
+		}
+
+		if (canRenderFields) {
+			sections.forEach((section) => {
+				const fields = Array.isArray(section.fields) ? section.fields : [];
+				const renderedFields = fields.map((field) => {
+					const fieldId = String(field.id || '');
+					const control = runtime.controls.get(fieldControlType(field));
+
+					if (!fieldId || !control) {
+						return null;
+					}
+
+					const error = fieldError(state.errors || {}, fieldId);
+
+					return createElement(
+						'div',
+						{
+							className: `lerm-admin-config-block-panel__field${ error ? ' is-error' : '' }`,
+							'data-field-id': fieldId,
+							'data-field-type': fieldControlType(field),
+							key: fieldId,
+						},
+						[
+							control({
+								components,
+								createElement,
+								error,
+								field,
+								inputId: `${ panelSlug(String(config.schemaId || 'schema')) }-${ fieldId }`,
+								onChange: (value) => {
+									runtime.updateValue(fieldId, value);
+									setState(runtime.getState());
+								},
+								value: fieldValue(state.values || {}, fieldId, field.default),
+							}),
+							error
+								? createElement(
+									'p',
+									{
+										className: 'lerm-admin-config-block-panel__field-error',
+										'data-field-error': fieldId,
+										key: `${ fieldId }-error`,
+									},
+									error
+								)
+								: null,
+						].filter(Boolean)
+					);
+				}).filter(Boolean);
+
+				if (!renderedFields.length) {
+					return;
+				}
+
+				fieldBody.push(createElement(
+					'section',
+					{
+						className: 'lerm-admin-config-block-panel__section',
+						'data-section-id': section.id,
+						key: section.id,
+					},
+					[
+						section.title
+							? createElement('h3', { key: 'title' }, section.title)
+							: null,
+						section.description
+							? createElement('p', { className: 'lerm-admin-config-block-panel__section-description', key: 'description' }, section.description)
+							: null,
+						...renderedFields,
+					].filter(Boolean)
+				));
+			});
+		}
+
+		if (fieldBody.length) {
+			body.push(...fieldBody);
+			body.push(createElement(
+				'div',
+				{
+					className: 'lerm-admin-config-block-panel__actions',
+					key: 'actions',
+				},
+				[
+					typeof Button === 'function'
+						? createElement(
+							Button,
+							{
+								disabled: isBusy || !dirty,
+								isBusy: status === 'saving',
+								key: 'save',
+								onClick: () => {
+									setState(runtime.getState());
+									runtime.save().then(() => {
+										setState(runtime.getState());
+									});
+								},
+								variant: 'primary',
+							},
+							status === 'saving' ? 'Saving' : 'Save'
+						)
+						: createElement(
+							'button',
+							{
+								disabled: isBusy || !dirty,
+								key: 'save',
+								onClick: () => {
+									setState(runtime.getState());
+									runtime.save().then(() => {
+										setState(runtime.getState());
+									});
+								},
+								type: 'button',
+							},
+							status === 'saving' ? 'Saving' : 'Save'
+						),
+					createElement(
+						'span',
+						{
+							className: 'lerm-admin-config-block-panel__dirty-state',
+							'data-dirty': dirty ? 'true' : 'false',
+							key: 'dirty',
+						},
+						dirty ? 'Unsaved changes' : 'Saved'
+					),
+				]
+			));
+		}
+
 		return createElement(
 			Panel,
 			{
 				className: 'lerm-admin-config-block-panel',
+				initialOpen: true,
 				name: panelSlug(String(config.schemaId || 'schema')),
 				title,
 			},
@@ -317,6 +539,7 @@ const createPanelComponent = (config, Panel, element) => {
 					'data-post-id': postId,
 					'data-schema-id': String(config.schemaId || ''),
 					'data-status': status,
+					'data-dirty': dirty ? 'true' : 'false',
 				},
 				body
 			)
