@@ -21,7 +21,7 @@ final class ContextResolver {
 	public static function from_request( \WP_REST_Request $request ): array {
 		$raw_context = $request->get_param( 'context' );
 
-		return self::from_array( is_array( $raw_context ) ? $raw_context : $request->get_params() );
+		return self::from_array( is_array( $raw_context ) ? $raw_context : self::top_level_context_params( $request ) );
 	}
 
 	/**
@@ -43,6 +43,23 @@ final class ContextResolver {
 
 			if ( $value > 0 ) {
 				$context[ $target_key ] = $value;
+			}
+		}
+
+		return $context;
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function top_level_context_params( \WP_REST_Request $request ): array {
+		$context = array();
+
+		foreach ( array( 'post_id', 'term_id', 'user_id', 'comment_id', 'network_id' ) as $key ) {
+			$value = $request->get_param( $key );
+
+			if ( null !== $value ) {
+				$context[ $key ] = $value;
 			}
 		}
 

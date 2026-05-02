@@ -4,7 +4,8 @@ const assert = require('assert/strict');
 
 const { contextFromConfig, contextQueryString } = require('../resources/core/context');
 const { fieldErrorsFromResponse, messageFromResponse } = require('../resources/core/errors');
-const { restUrl } = require('../resources/core/rest-client');
+const { asRecord, asRecordArray } = require('../resources/core/records');
+const { normalizeRestError, restUrl } = require('../resources/core/rest-client');
 const {
 	createSchemaState,
 	hydrateSchemaResponse,
@@ -15,6 +16,16 @@ const {
 } = require('../resources/core/schema-state');
 const { createDefaultControlRegistry } = require('../resources/controls');
 const { blockPanelReadOnlyControlTypes, createBlockPanelRuntime } = require('../resources/block-panel');
+
+function testRecordHelpers() {
+	const record = { title: 'Loaded' };
+
+	assert.equal(asRecord(record), record);
+	assert.deepEqual(asRecord(null), {});
+	assert.deepEqual(asRecord([]), {});
+	assert.deepEqual(asRecord('value'), {});
+	assert.deepEqual(asRecordArray([ record, [], null, { id: 'next' } ]), [ record, { id: 'next' } ]);
+}
 
 function testContextHelpers() {
 	assert.deepEqual(
@@ -59,6 +70,38 @@ function testRestUrlHelpers() {
 	assert.equal(plain, 'https://example.test/wp-json/lerm-admin-config/v1/schema/demo?post_id=77');
 	assert.equal(fallback.searchParams.get('rest_route'), '/lerm-admin-config/v1/schema/demo');
 	assert.equal(fallback.searchParams.get('post_id'), '77');
+
+	assert.deepEqual(
+		normalizeRestError(
+			{
+				code: 'validation_error',
+				data: {
+					status: 422,
+					success: false,
+					data: {
+						fieldErrors: {
+							title: 'Required.',
+						},
+						message: 'Please review.',
+					},
+				},
+				message: 'Fallback message.',
+			},
+			'Request failed.'
+		),
+		{
+			success: false,
+			data: {
+				code: 'validation_error',
+				fieldErrors: {
+					title: 'Required.',
+				},
+				message: 'Please review.',
+				status: 422,
+				success: false,
+			},
+		}
+	);
 }
 
 function testSchemaStateHelpers() {
@@ -73,6 +116,24 @@ function testSchemaStateHelpers() {
 		'demo'
 	);
 	const updated = withFieldValue(hydrated, 'group.heading', 'Next');
+	const updatedArray = withFieldValue(
+		{
+			...hydrated,
+			values: {
+				items: [
+					{
+						name: 'First',
+						tags: [ 'alpha' ],
+					},
+					{
+						name: 'Second',
+					},
+				],
+			},
+		},
+		'items.0.name',
+		'Updated'
+	);
 	const errored = withRestError(updated, {
 		fieldErrors: {
 			'group.heading': [ 'Too short.' ],
@@ -84,6 +145,15 @@ function testSchemaStateHelpers() {
 	assert.equal(hydrated.status, 'ready');
 	assert.equal(isSchemaStateDirty(hydrated), false);
 	assert.deepEqual(updated.values.group, { heading: 'Next' });
+	assert.deepEqual(updatedArray.values.items, [
+		{
+			name: 'Updated',
+			tags: [ 'alpha' ],
+		},
+		{
+			name: 'Second',
+		},
+	]);
 	assert.equal(isSchemaStateDirty(updated), true);
 	assert.deepEqual(serializeSavePayload(updated), {
 		values: {
@@ -135,6 +205,36 @@ function testDefaultControlRegistry() {
 	assert.equal(rendered.props.id, 'demo-title');
 	assert.equal(rendered.props.placeholder, 'Write a title');
 	assert.equal(rendered.props.value, 'Loaded');
+
+	const renderedNumberDefault = registry.get('number')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			default: 5,
+			id: 'limit',
+			label: 'Limit',
+			type: 'number',
+		},
+		inputId: 'demo-limit',
+		onChange: () => {},
+		value: undefined,
+	});
+	const renderedNumberCleared = registry.get('number')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			default: 5,
+			id: 'limit',
+			label: 'Limit',
+			type: 'number',
+		},
+		inputId: 'demo-limit',
+		onChange: () => {},
+		value: '',
+	});
+
+	assert.equal(renderedNumberDefault.props.value, '5');
+	assert.equal(renderedNumberCleared.props.value, '');
 
 	const changes = [];
 	const renderedSelect = registry.get('select')({
@@ -208,11 +308,14 @@ function testDefaultControlRegistry() {
 	});
 
 	renderedSelect.props.onChange({ target: { value: 'feature' } });
-	renderedColor.children[0][1].props.onChange({ target: { value: '#13579b' } });
-	renderedDate.children[0][1].props.onChange({ target: { value: '2026-05-03' } });
-	renderedRange.children[0][1].props.onChange({ target: { value: '4' } });
+	renderedColor.children[0][1].props.onInput({ target: { value: '#13579b' } });
+	renderedDate.children[0][1].props.onInput({ target: { value: '2026-05-03' } });
+	renderedRange.children[0][1].props.onInput({ target: { value: '4' } });
 	renderedCheckboxChoices.children[0][1].children[0][0].props.onChange({ target: { checked: true } });
 	assert.deepEqual(changes, [ 'feature', '#13579b', '2026-05-03', '4', [ 'newsletter' ] ]);
+	assert.equal(renderedColor.children[0][1].props.onChange, undefined);
+	assert.equal(renderedDate.children[0][1].props.onChange, undefined);
+	assert.equal(renderedRange.children[0][1].props.onChange, undefined);
 }
 
 function testBlockPanelFieldStatusContract() {
@@ -336,7 +439,50 @@ async function testBlockPanelRuntime() {
 	assert.deepEqual(runtime.getState().errors, {});
 }
 
+async function testBlockPanelRuntimeRejectedSave() {
+	const restClient = {
+		hasTransport: () => true,
+		request: async (path) => {
+			if (path.includes('/save')) {
+				throw new Error('Network failed.');
+			}
+
+			return {
+				success: true,
+				data: {
+					schema: {
+						schemaId: 'demo',
+					},
+					values: {
+						title: 'Loaded',
+					},
+				},
+			};
+		},
+	};
+	const runtime = createBlockPanelRuntime(
+		{
+			context: {
+				post_id: 77,
+			},
+			schemaId: 'demo',
+		},
+		{ restClient }
+	);
+
+	await runtime.loadSchema();
+	runtime.updateValue('title', 'Changed');
+
+	const response = await runtime.save();
+
+	assert.equal(response.success, false);
+	assert.equal(runtime.getState().status, 'error');
+	assert.equal(runtime.getState().message, 'Network failed.');
+	assert.equal(runtime.isDirty(), true);
+}
+
 async function main() {
+	testRecordHelpers();
 	testContextHelpers();
 	testErrorHelpers();
 	testRestUrlHelpers();
@@ -344,6 +490,7 @@ async function main() {
 	testDefaultControlRegistry();
 	testBlockPanelFieldStatusContract();
 	await testBlockPanelRuntime();
+	await testBlockPanelRuntimeRejectedSave();
 	console.log('JS runtime tests passed.');
 }
 

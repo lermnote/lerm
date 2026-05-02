@@ -66,6 +66,18 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   control metadata for the block editor panel.
 - Block editor controls now normalize WordPress component change events before
   values enter client state.
+- Block editor JavaScript now shares record coercion helpers across runtime,
+  controls, and schema-state modules.
+- Block editor discard now asks for confirmation before reverting dirty values.
+- REST errors now use a single canonical nested data payload instead of
+  duplicating validation metadata at two levels.
+- Block editor schema state now preserves array containers when setting nested
+  values by path.
+- Block editor color/date/range controls now avoid duplicate input/change state
+  updates.
+- Block editor number controls now preserve an explicitly cleared empty value
+  instead of redisplaying the field default before save.
 
 ### Removed
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.
+- The unused legacy single-config block-panel global fallback.

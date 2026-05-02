@@ -366,6 +366,8 @@ final class SchemaController {
 	 * @return array{tab: string, subsection: string}
 	 */
 	private function first_validation_target( CompiledSchema $schema, array $errors ): array {
+		$targets = $this->validation_targets( $schema );
+
 		foreach ( array_keys( $errors ) as $field_path ) {
 			$field_id = sanitize_key( (string) strtok( (string) $field_path, '.' ) );
 
@@ -373,17 +375,8 @@ final class SchemaController {
 				continue;
 			}
 
-			foreach ( PageSchema::sections( $schema->definition() ) as $section_id => $section ) {
-				foreach ( PageSchema::section_groups( $section ) as $group ) {
-					foreach ( (array) ( $group['fields'] ?? array() ) as $field ) {
-						if ( is_array( $field ) && (string) ( $field['id'] ?? '' ) === $field_id ) {
-							return array(
-								'tab'        => (string) $section_id,
-								'subsection' => sanitize_key( (string) ( $group['id'] ?? '' ) ),
-							);
-						}
-					}
-				}
+			if ( isset( $targets[ $field_id ] ) ) {
+				return $targets[ $field_id ];
 			}
 		}
 
@@ -391,6 +384,36 @@ final class SchemaController {
 			'tab'        => (string) array_key_first( PageSchema::sections( $schema->definition() ) ),
 			'subsection' => '',
 		);
+	}
+
+	/**
+	 * @return array<string, array{tab: string, subsection: string}>
+	 */
+	private function validation_targets( CompiledSchema $schema ): array {
+		$targets = array();
+
+		foreach ( PageSchema::sections( $schema->definition() ) as $section_id => $section ) {
+			foreach ( PageSchema::section_groups( $section ) as $group ) {
+				foreach ( (array) ( $group['fields'] ?? array() ) as $field ) {
+					if ( ! is_array( $field ) ) {
+						continue;
+					}
+
+					$field_id = sanitize_key( (string) ( $field['id'] ?? '' ) );
+
+					if ( '' === $field_id || isset( $targets[ $field_id ] ) ) {
+						continue;
+					}
+
+					$targets[ $field_id ] = array(
+						'tab'        => (string) $section_id,
+						'subsection' => sanitize_key( (string) ( $group['id'] ?? '' ) ),
+					);
+				}
+			}
+		}
+
+		return $targets;
 	}
 
 	/**

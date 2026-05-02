@@ -34,21 +34,20 @@ final class ResponseFactory {
 	 * @param array<string, mixed> $data
 	 */
 	public static function error( string $code, string $message, int $status, array $data = array() ): \WP_Error {
+		$payload = array_merge(
+			array(
+				'message' => $message,
+			),
+			$data
+		);
+
 		return new \WP_Error(
 			$code,
 			$message,
-			array_merge(
-				array(
-					'status'  => $status,
-					'success' => false,
-					'data'    => array_merge(
-						array(
-							'message' => $message,
-						),
-						$data
-					),
-				),
-				$data
+			array(
+				'status'  => $status,
+				'success' => false,
+				'data'    => $payload,
 			)
 		);
 	}

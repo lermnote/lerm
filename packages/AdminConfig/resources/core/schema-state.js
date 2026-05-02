@@ -1,6 +1,7 @@
 // @ts-check
 
 const { fieldErrorsFromResponse, messageFromResponse } = require('./errors');
+const { asRecord } = require('./records');
 
 /**
  * @typedef {{
@@ -19,15 +20,19 @@ const { fieldErrorsFromResponse, messageFromResponse } = require('./errors');
  * @param {unknown} value
  * @returns {Record<string, unknown>}
  */
-const asRecord = (value) => value && typeof value === 'object' && !Array.isArray(value)
-	? /** @type {Record<string, unknown>} */ (value)
-	: {};
+const cloneRecord = (value) => JSON.parse(JSON.stringify(asRecord(value)));
 
 /**
  * @param {unknown} value
- * @returns {Record<string, unknown>}
+ * @returns {Record<string, unknown>|Array<unknown>}
  */
-const cloneRecord = (value) => JSON.parse(JSON.stringify(asRecord(value)));
+const cloneContainer = (value) => {
+	if (Array.isArray(value)) {
+		return JSON.parse(JSON.stringify(value));
+	}
+
+	return cloneRecord(value);
+};
 
 /**
  * @param {string|string[]} path
@@ -59,7 +64,7 @@ const setValueAtPath = (values, path, value) => {
 			return;
 		}
 
-		cursor[token] = cloneRecord(cursor[token]);
+		cursor[token] = cloneContainer(cursor[token]);
 		cursor = /** @type {Record<string, unknown>} */ (cursor[token]);
 	});
 

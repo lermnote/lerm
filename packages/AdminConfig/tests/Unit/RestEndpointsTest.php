@@ -11,6 +11,7 @@ namespace Lerm\AdminConfig\Tests\Unit;
 
 use Lerm\AdminConfig\Rest\Controllers\SchemaController;
 use Lerm\AdminConfig\Rest\RestEndpoints;
+use Lerm\AdminConfig\Rest\Support\ContextResolver;
 use Lerm\AdminConfig\Tests\Support\TestCase;
 use Lerm\AdminConfig\WordPress\Runtime;
 
@@ -264,11 +265,49 @@ final class RestEndpointsTest extends TestCase {
 
 		$this->assertSame( 422, $data['status'] );
 		$this->assertFalse( $data['success'] );
-		$this->assertSame( 'Site title is too short.', $data['fieldErrors']['site_title'] );
-		$this->assertSame( array( 'Site title is too short.' ), $data['errors']['site_title'] );
-		$this->assertSame( 'general', $data['tab'] );
-		$this->assertSame( 'general', $data['subsection'] );
+		$this->assertArrayNotHasKey( 'fieldErrors', $data );
+		$this->assertSame( 'Site title is too short.', $data['data']['fieldErrors']['site_title'] );
+		$this->assertSame( array( 'Site title is too short.' ), $data['data']['errors']['site_title'] );
+		$this->assertSame( 'general', $data['data']['tab'] );
+		$this->assertSame( 'general', $data['data']['subsection'] );
 		$this->assertSame( 'Please review the highlighted fields and try again.', $data['data']['message'] );
+	}
+
+	public function testContextResolverUsesExplicitContextArrayBeforeTopLevelParams(): void {
+		$request = $this->request(
+			array(
+				'context' => array(
+					'post_id' => 123,
+				),
+				'post_id' => 456,
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'post_id' => 123,
+			),
+			ContextResolver::from_request( $request )
+		);
+	}
+
+	public function testContextResolverOnlyReadsKnownTopLevelContextKeys(): void {
+		$request = $this->request(
+			array(
+				'id'      => 'rest_test',
+				'post_id' => 456,
+				'values'  => array(
+					'term_id' => 789,
+				),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'post_id' => 456,
+			),
+			ContextResolver::from_request( $request )
+		);
 	}
 
 	public function testImportEndpointRejectsInvalidJsonWithStableErrorShape(): void {

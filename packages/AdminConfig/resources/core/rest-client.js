@@ -2,6 +2,7 @@
 
 const apiFetchModule = require('@wordpress/api-fetch');
 const apiFetch = apiFetchModule.default || apiFetchModule;
+const { asRecord } = require('./records');
 
 /**
  * @typedef {{
@@ -89,15 +90,19 @@ const normalizeRestSuccess = (parsed) => {
  * @returns {AdminConfigResponse}
  */
 const normalizeRestError = (error, fallbackMessage) => {
-	const err = /** @type {{ code?: string, message?: string, data?: { status?: number, data?: Record<string, unknown> } }} */ (error || {});
-	const nestedData = err.data && typeof err.data.data === 'object' && err.data.data
-		? err.data.data
-		: {};
-	const data = { ...nestedData };
+	const err = /** @type {{ code?: string, message?: string, data?: Record<string, unknown> }} */ (error || {});
+	const errorData = asRecord(err.data);
+	const nestedData = asRecord(errorData.data);
+	const topLevelData = { ...errorData };
+	delete topLevelData.data;
+	const data = {
+		...nestedData,
+		...topLevelData,
+	};
 
 	if (!data.message) data.message = err.message || fallbackMessage;
 	if (err.code && !data.code) data.code = err.code;
-	if (err.data?.status && !data.status) data.status = err.data.status;
+	if (errorData.status && !data.status) data.status = errorData.status;
 
 	return {
 		success: false,
