@@ -62,7 +62,7 @@ const expandBlockPanel = async ( page, schemaId, title ) => {
 	return panel;
 };
 
-const setColorValue = async ( locator, value ) => {
+const setInputValue = async ( locator, value ) => {
 	await locator.evaluate( ( input, nextValue ) => {
 		input.value = nextValue;
 		input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
@@ -130,8 +130,11 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryFormat = panel.locator( '[data-field-id="entry_format"]' );
 	const entryEmphasis = panel.locator( '[data-field-id="entry_emphasis"]' );
 	const entryAccent = panel.locator( '[data-field-id="entry_accent"] input[type="color"]' );
-	const entryIconUnsupported = panel.locator( '[data-field-id="entry_icon"][data-unsupported-control="true"]' );
-	const entryBadgeUnsupported = panel.locator( '[data-field-id="entry_badge"][data-unsupported-control="true"]' );
+	const entryReviewDate = panel.locator( '[data-field-id="entry_review_date"] input[type="date"]' );
+	const entryPriority = panel.locator( '[data-field-id="entry_priority"] input[type="range"]' );
+	const entryScore = panel.locator( '[data-field-id="entry_score"] input[type="number"]' );
+	const entryIconReadOnly = panel.locator( '[data-field-id="entry_icon"][data-read-only-control="true"]' );
+	const entryBadgeReadOnly = panel.locator( '[data-field-id="entry_badge"][data-read-only-control="true"]' );
 	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
 
 	await expect( featuredToggle ).toBeVisible();
@@ -140,32 +143,47 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryFormat.getByRole( 'radio', { name: /^Standard$/i } ) ).toBeVisible();
 	await expect( entryEmphasis.getByRole( 'button', { name: /^Normal$/i } ) ).toBeVisible();
 	await expect( entryAccent ).toBeVisible();
+	await expect( entryReviewDate ).toBeVisible();
+	await expect( entryPriority ).toBeVisible();
+	await expect( entryScore ).toBeVisible();
 	await expect( newsletterChannel ).toBeVisible();
-	await expect( entryIconUnsupported ).toContainText( /Field type "icon" is not available/i );
-	await expect( entryBadgeUnsupported ).toContainText( /Field type "fieldset" is not available/i );
+	await expect( entryIconReadOnly ).toContainText( /Field type "icon" is read-only/i );
+	await expect( entryBadgeReadOnly ).toContainText( /Field type "fieldset" is read-only/i );
 	const initialChecked = await featuredToggle.isChecked();
 	const initialSlug = await entrySlug.inputValue();
 	const initialLayout = await entryLayout.inputValue();
 	const initialFormat = await entryFormat.locator( 'input[type="radio"]:checked' ).inputValue();
 	const initialEmphasis = await entryEmphasis.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
 	const initialAccent = ( await entryAccent.inputValue() ).toLowerCase();
+	const initialReviewDate = await entryReviewDate.inputValue();
+	const initialPriority = await entryPriority.inputValue();
+	const initialScore = await entryScore.inputValue();
 	const initialNewsletter = await newsletterChannel.isChecked();
 	const discardSlug = initialSlug === 'discard-check' ? 'discard-check-next' : 'discard-check';
 	const discardLayout = initialLayout === 'wide' ? 'compact' : 'wide';
 	const discardFormat = initialFormat === 'editorial' ? 'alert' : 'editorial';
 	const discardEmphasis = initialEmphasis === 'spotlight' ? 'quiet' : 'spotlight';
 	const discardAccent = initialAccent === '#445566' ? '#665544' : '#445566';
+	const discardReviewDate = initialReviewDate === '2026-05-01' ? '2026-05-02' : '2026-05-01';
+	const discardPriority = initialPriority === '5' ? '4' : '5';
+	const discardScore = initialScore === '10' ? '9' : '10';
 	const savedSlug = initialSlug === 'block-panel-valid' ? 'block-panel-valid-next' : 'block-panel-valid';
 	const savedLayout = initialLayout === 'feature' ? 'compact' : 'feature';
 	const savedFormat = initialFormat === 'alert' ? 'editorial' : 'alert';
 	const savedEmphasis = initialEmphasis === 'quiet' ? 'spotlight' : 'quiet';
 	const savedAccent = initialAccent === '#13579b' ? '#2468ac' : '#13579b';
+	const savedReviewDate = initialReviewDate === '2026-05-03' ? '2026-05-04' : '2026-05-03';
+	const savedPriority = initialPriority === '4' ? '3' : '4';
+	const savedScore = initialScore === '7' ? '6' : '7';
 
 	await entrySlug.fill( discardSlug );
 	await entryLayout.selectOption( discardLayout );
 	await entryFormat.getByRole( 'radio', { name: new RegExp( `^${ discardFormat }$`, 'i' ) } ).check();
 	await entryEmphasis.locator( `button[data-value="${ discardEmphasis }"]` ).click();
-	await setColorValue( entryAccent, discardAccent );
+	await setInputValue( entryAccent, discardAccent );
+	await setInputValue( entryReviewDate, discardReviewDate );
+	await setInputValue( entryPriority, discardPriority );
+	await entryScore.fill( discardScore );
 	await newsletterChannel.setChecked( ! initialNewsletter );
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
@@ -176,6 +194,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryFormat.locator( 'input[type="radio"]:checked' ) ).toHaveValue( initialFormat );
 	await expect( entryEmphasis.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialEmphasis || '' );
 	await expect( entryAccent ).toHaveValue( initialAccent );
+	await expect( entryReviewDate ).toHaveValue( initialReviewDate );
+	await expect( entryPriority ).toHaveValue( initialPriority );
+	await expect( entryScore ).toHaveValue( initialScore );
 	await expect( newsletterChannel ).toBeChecked( { checked: initialNewsletter } );
 
 	await entrySlug.fill( 'x' );
@@ -199,7 +220,10 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryLayout.selectOption( savedLayout );
 	await entryFormat.locator( `input[type="radio"][value="${ savedFormat }"]` ).check();
 	await entryEmphasis.locator( `button[data-value="${ savedEmphasis }"]` ).click();
-	await setColorValue( entryAccent, savedAccent );
+	await setInputValue( entryAccent, savedAccent );
+	await setInputValue( entryReviewDate, savedReviewDate );
+	await setInputValue( entryPriority, savedPriority );
+	await entryScore.fill( savedScore );
 	await newsletterChannel.setChecked( ! initialNewsletter );
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
@@ -217,6 +241,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryFormat.locator( 'input[type="radio"]:checked' ) ).toHaveValue( savedFormat );
 	await expect( entryEmphasis.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedEmphasis );
 	await expect( entryAccent ).toHaveValue( savedAccent );
+	await expect( entryReviewDate ).toHaveValue( savedReviewDate );
+	await expect( entryPriority ).toHaveValue( savedPriority );
+	await expect( entryScore ).toHaveValue( savedScore );
 	await expect( newsletterChannel ).toBeChecked( { checked: ! initialNewsletter } );
 
 	const reloadSchemaRequest = page.waitForResponse( ( reloadResponse ) => isMetaboxSchemaResponse( reloadResponse ), { timeout: 30_000 } );
@@ -234,6 +261,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.locator( '[data-field-id="entry_format"] input[type="radio"]:checked' ) ).toHaveValue( savedFormat );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_emphasis"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedEmphasis );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_accent"] input[type="color"]' ) ).toHaveValue( savedAccent );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_review_date"] input[type="date"]' ) ).toHaveValue( savedReviewDate );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_priority"] input[type="range"]' ) ).toHaveValue( savedPriority );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_score"] input[type="number"]' ) ).toHaveValue( savedScore );
 	await expect( reloadedPanel.getByRole( 'checkbox', { name: /^Newsletter$/i } ) ).toBeChecked(
 		{ checked: ! initialNewsletter }
 	);

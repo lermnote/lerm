@@ -42,6 +42,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   fields, including `radio`, `button_set`, and `color`.
 - Block editor panel unsupported-control notices so advanced or structured
   fields do not silently disappear from the editor panel.
+- Block editor field-status matrix and editable coverage for `date`, `slider`,
+  and `spinner` fields.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.

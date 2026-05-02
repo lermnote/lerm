@@ -76,7 +76,7 @@ classic admin regression coverage green.
 
 ## Phase 3 Current Step
 
-Phase 3 now has an editor-side editing slice for REST-safe basic fields. The
+Phase 3 now has an editor-side editing slice for REST-safe fields. The
 metabox container mounts `assets/build/block-panel.js` during
 `enqueue_block_editor_assets`; the PHP boot config includes the matched schema
 ID, REST root, nonce, post type, and `post_id` context. The editor entry
@@ -85,12 +85,15 @@ section-aware controls, tracks dirty state, supports local discard, saves
 through REST, replays validation errors, and rehydrates from the server response
 after save.
 
-Supported controls in this slice:
+Editable controls in this slice:
 
 - `text`
 - `url`
 - `textarea`
 - `number`
+- `slider`
+- `spinner`
+- `date`
 - `color`
 - `select`
 - `radio`
@@ -100,6 +103,9 @@ Supported controls in this slice:
 - `toggle`
 - `checkbox`
 - `checkbox_list`
+
+See `docs/block-editor-field-matrix.md` for the complete
+`editable` / `read-only` / `unsupported` status contract.
 
 Acceptance for this slice:
 
@@ -112,11 +118,11 @@ Acceptance for this slice:
   storage.
 - Saved values persist after a block-editor reload.
 - No AdminConfig `admin-ajax.php` request is made by the block-editor panel.
-- Unsupported controls remain visible as read-only field notices instead of
+- Read-only and unsupported controls remain visible as field notices instead of
   silently disappearing from the panel.
 - The classic metabox and options-page E2E coverage still passes.
-- Advanced, structured, media, async, reset, and import/export controls stay
-  read-only or out of scope for this slice.
+- Advanced, structured, media, async, reset, and import/export controls remain
+  outside the editable contract for this slice.
 
 ## Non-Goals For The Current Block-Panel Slice
 
