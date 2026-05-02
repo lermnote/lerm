@@ -41,12 +41,11 @@ class Breadcrumb {
 			'echo'          => true,
 		);
 
-		self::$args = (array) apply_filters( 'lerm_breadcrumb_args', wp_parse_args( $params, $default_args ) );
+		self::$args = apply_filters( 'lerm_breadcrumb_args', wp_parse_args( $params, $default_args ) );
 
 		self::set_labels();
 		self::set_post_taxonomy();
 		self::add_items();
-		self::trail();
 	}
 
 	public function __toString(): string {
@@ -75,7 +74,7 @@ class Breadcrumb {
 			'archive_year'   => '%s',
 			'archive_author' => '%s',
 		);
-		self::$labels = (array) apply_filters( 'lerm_breadcrumb_labels', wp_parse_args( self::$args['labels'], $defaults ) );
+		self::$labels = apply_filters( 'lerm_breadcrumb_labels', wp_parse_args( self::$args['labels'], $defaults ) );
 	}
 
 	/**
@@ -90,7 +89,7 @@ class Breadcrumb {
 
 		// Open the list.
 		$breadcrumb .= sprintf(
-			'<%s style="--bs-breadcrumb-divider: \'%s\';" class="breadcrumb small mb-0 py-1" itemscope itemtype="http://schema.org/BreadcrumbList">',
+			'<%s style="--bs-breadcrumb-divider: \'%s\';" class="breadcrumb small mb-0 py-1" itemscope itemtype="https://schema.org/BreadcrumbList">',
 			tag_escape( self::$args['list_tag'] ),
 			esc_attr( self::$args['separator'] )
 		);
@@ -110,7 +109,7 @@ class Breadcrumb {
 
 			// Add item classes and attributes.
 			$item_class = 'breadcrumb-item' . ( $item_count === $item_position ? ' active' : '' );
-			$attributes = 'itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="' . esc_attr( $item_class ) . '"';
+			$attributes = 'itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="' . esc_attr( $item_class ) . '"';
 			$meta       = sprintf( '<meta itemprop="position" content="%s" />', absint( $item_position ) );
 
 			// Build list item.
@@ -130,13 +129,7 @@ class Breadcrumb {
 			self::$args['after']
 		);
 
-		$breadcrumb = (string) apply_filters( 'lerm_breadcrumb', $breadcrumb, self::$args );
-
-		//if ( false === self::$args['echo'] ) {
-			return $breadcrumb;
-		//}
-
-		//echo $breadcrumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		return (string) apply_filters( 'lerm_breadcrumb', $breadcrumb, self::$args );
 	}
 
 	/**
@@ -144,7 +137,7 @@ class Breadcrumb {
 	 */
 	private static function set_post_taxonomy(): void {
 		$defaults            = array( 'post' => 'category' );
-		self::$post_taxonomy = (array) apply_filters( 'lerm_breadcrumb_post_taxonomy', wp_parse_args( self::$args['post_taxonomy'], $defaults ) );
+		self::$post_taxonomy = apply_filters( 'lerm_breadcrumb_post_taxonomy', wp_parse_args( self::$args['post_taxonomy'], $defaults ) );
 	}
 
 	/**
@@ -172,7 +165,7 @@ class Breadcrumb {
 
 		self::add_paged_items();
 
-		self::$items = array_unique( (array) apply_filters( 'lerm_breadcrumb_items', self::$items, self::$args ) );
+		self::$items = array_unique( apply_filters( 'lerm_breadcrumb_items', self::$items, self::$args ) );
 	}
 
 	/**
@@ -293,7 +286,9 @@ class Breadcrumb {
 			$parent_id = $parent->post_parent;
 		}
 
-		self::add_post_hierarchy( $parent_id );
+		if ( $parent_id > 0 ) {
+			self::add_post_hierarchy( $parent_id );
+		}
 
 		if ( ! empty( $parents ) ) {
 			self::$items = array_merge( self::$items, array_reverse( $parents ) );
