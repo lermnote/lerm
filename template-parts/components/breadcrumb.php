@@ -8,7 +8,7 @@ use Lerm\View\Breadcrumb;
 
 $template_options = lerm_get_template_options();
 
-Breadcrumb::instance(
+$breadcrumb = Breadcrumb::instance(
 	array(
 		'container'     => $template_options['breadcrumb_container'],
 		'before'        => $template_options['breadcrumb_before'],
@@ -21,6 +21,8 @@ Breadcrumb::instance(
 		'show_title'    => ! empty( $template_options['breadcrumb_show_title'] ),
 		'labels'        => array(),
 		'post_taxonomy' => array(),
-		'echo'          => true,
+		'echo'          => false,
 	)
 );
+
+echo $breadcrumb; //ignore:WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter
