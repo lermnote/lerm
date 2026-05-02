@@ -1,12 +1,6 @@
 // @ts-check
 
-/**
- * @param {unknown} value
- * @returns {Record<string, unknown>}
- */
-const asRecord = (value) => value && typeof value === 'object'
-	? /** @type {Record<string, unknown>} */ (value)
-	: {};
+const { asRecord } = require('./records');
 
 /**
  * @param {unknown} responseData

@@ -1,7 +1,8 @@
 // @ts-check
 
-const { createAdminConfigRestClient } = require('../core/rest-client');
+const { createAdminConfigRestClient, normalizeRestError } = require('../core/rest-client');
 const { contextFromConfig, contextQueryString } = require('../core/context');
+const { asRecord, asRecordArray } = require('../core/records');
 const {
 	createSchemaState,
 	hydrateSchemaResponse,
@@ -16,7 +17,6 @@ const { createDefaultControlRegistry } = require('../controls');
 const { STORE_NAME } = require('../store');
 
 const BLOCK_PANEL_CONFIG_GLOBAL = 'lermAdminConfigBlockPanelConfigs';
-const LEGACY_BLOCK_PANEL_CONFIG_GLOBAL = 'lermAdminConfigBlockPanelConfig';
 const panelInstances = new Map();
 const registeredPanelNames = new Set();
 const READ_ONLY_CONTROL_TYPES = new Set([
@@ -68,21 +68,6 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 		return queryString ? `${path}?${queryString}` : path;
 	};
 
-	/**
-	 * @param {unknown} response
-	 * @returns {{ success: boolean, data: Record<string, unknown> }}
-	 */
-	const normalizeResponse = (response) => {
-		const candidate = /** @type {{ success?: unknown, data?: unknown }} */ (response || {});
-
-		return {
-			success: candidate.success === true,
-			data: candidate.data && typeof candidate.data === 'object'
-				? /** @type {Record<string, unknown>} */ (candidate.data)
-				: {},
-		};
-	};
-
 	return {
 		controls,
 		rest,
@@ -115,7 +100,13 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 			context = contextFromConfig(nextContext);
 			state = withStatus({ ...state, context, schemaId }, 'loading');
 
-			const response = normalizeResponse(await rest.request(withContext(`schema/${schemaId}`)));
+			let response;
+
+			try {
+				response = await rest.request(withContext(`schema/${schemaId}`));
+			} catch (error) {
+				response = normalizeRestError(error, 'Unable to load the schema.');
+			}
 
 			if (!response.success) {
 				state = withRestError(state, response.data, 'Unable to load the schema.');
@@ -149,15 +140,19 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 		async save(values = state.values) {
 			state = withStatus(state, 'saving');
 
-			const response = normalizeResponse(
-				await rest.request(
+			let response;
+
+			try {
+				response = await rest.request(
 					withContext(`schema/${schemaId}/save`),
 					{
 						data: serializeSavePayload(state, values),
 						method: 'POST',
 					}
-				)
-			);
+				);
+			} catch (error) {
+				response = normalizeRestError(error, 'Unable to save the schema.');
+			}
 
 			if (!response.success) {
 				state = withRestError(state, response.data, 'Unable to save the schema.');
@@ -173,22 +168,6 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 		},
 	};
 };
-
-/**
- * @param {unknown} value
- * @returns {Record<string, unknown>}
- */
-const asRecord = (value) => value && typeof value === 'object' && !Array.isArray(value)
-	? /** @type {Record<string, unknown>} */ (value)
-	: {};
-
-/**
- * @param {unknown} value
- * @returns {Array<Record<string, unknown>>}
- */
-const asRecordArray = (value) => Array.isArray(value)
-	? value.map(asRecord).filter((record) => Object.keys(record).length > 0)
-	: [];
 
 /**
  * @param {Record<string, unknown>} base
@@ -214,11 +193,9 @@ const blockPanelConfigsFromWindow = () => {
 	if (typeof window === 'undefined') return [];
 
 	const groupedConfigs = asRecordArray(window[BLOCK_PANEL_CONFIG_GLOBAL]);
-	const legacyConfig = asRecord(window[LEGACY_BLOCK_PANEL_CONFIG_GLOBAL]);
-	const groups = groupedConfigs.length ? groupedConfigs : (Object.keys(legacyConfig).length ? [ legacyConfig ] : []);
 	const configs = [];
 
-	for (const group of groups) {
+	for (const group of groupedConfigs) {
 		const schemas = asRecordArray(group.schemas);
 
 		if (!schemas.length) {
@@ -503,6 +480,25 @@ const createPanelComponent = (config, Panel, element) => {
 		const Button = components.Button;
 		const Spinner = components.Spinner;
 		const fieldBody = [];
+		const syncPanelState = () => setState(runtime.getState());
+		const saveChanges = () => {
+			const savePromise = runtime.save();
+
+			syncPanelState();
+			savePromise.then(syncPanelState, syncPanelState);
+		};
+		const discardChanges = () => {
+			const shouldDiscard = typeof window === 'undefined' ||
+				typeof window.confirm !== 'function' ||
+				window.confirm('Discard unsaved AdminConfig changes?');
+
+			if (!shouldDiscard) {
+				return;
+			}
+
+			runtime.discardChanges();
+			syncPanelState();
+		};
 		let hasEditableFields = false;
 
 		if (status === 'loading' && typeof Spinner === 'function') {
@@ -610,12 +606,7 @@ const createPanelComponent = (config, Panel, element) => {
 								disabled: isBusy || !dirty,
 								isBusy: status === 'saving',
 								key: 'save',
-								onClick: () => {
-									setState(runtime.getState());
-									runtime.save().then(() => {
-										setState(runtime.getState());
-									});
-								},
+								onClick: saveChanges,
 								variant: 'primary',
 							},
 							status === 'saving' ? 'Saving' : 'Save'
@@ -625,12 +616,7 @@ const createPanelComponent = (config, Panel, element) => {
 							{
 								disabled: isBusy || !dirty,
 								key: 'save',
-								onClick: () => {
-									setState(runtime.getState());
-									runtime.save().then(() => {
-										setState(runtime.getState());
-									});
-								},
+								onClick: saveChanges,
 								type: 'button',
 							},
 							status === 'saving' ? 'Saving' : 'Save'
@@ -641,10 +627,7 @@ const createPanelComponent = (config, Panel, element) => {
 							{
 								disabled: isBusy || !dirty,
 								key: 'discard',
-								onClick: () => {
-									runtime.discardChanges();
-									setState(runtime.getState());
-								},
+								onClick: discardChanges,
 								variant: 'secondary',
 							},
 							'Discard'
@@ -654,10 +637,7 @@ const createPanelComponent = (config, Panel, element) => {
 							{
 								disabled: isBusy || !dirty,
 								key: 'discard',
-								onClick: () => {
-									runtime.discardChanges();
-									setState(runtime.getState());
-								},
+								onClick: discardChanges,
 								type: 'button',
 							},
 							'Discard'

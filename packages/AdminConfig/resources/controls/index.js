@@ -1,16 +1,10 @@
 // @ts-check
 
+const { asRecord } = require('../core/records');
+
 /**
  * @typedef {(props: Record<string, unknown>) => unknown} FieldControl
  */
-
-/**
- * @param {unknown} value
- * @returns {Record<string, unknown>}
- */
-const asRecord = (value) => value && typeof value === 'object' && !Array.isArray(value)
-	? /** @type {Record<string, unknown>} */ (value)
-	: {};
 
 /**
  * @param {unknown} value
@@ -28,9 +22,7 @@ const stringValue = (value) => value === null || typeof value === 'undefined' ? 
  * @param {unknown} value
  * @returns {boolean}
  */
-const boolValue = (value) => ! [ false, 0, '', '0', 'false', null, undefined ].includes(
-	/** @type {false|0|''|'0'|'false'|null|undefined} */ (value)
-);
+const boolValue = (value) => value !== 'false' && value !== '0' && !!value;
 
 /**
  * @param {unknown} value
@@ -148,6 +140,10 @@ const sharedControlProps = (props) => {
 const numericValue = (value, field) => {
 	const current = stringValue(value);
 
+	if (value === '') {
+		return '';
+	}
+
 	return current !== '' ? current : stringValue(field.default || 0);
 };
 
@@ -255,7 +251,6 @@ const RangeControl = (props) => {
 		'aria-label': label,
 		max: stringValue(field.max || 100),
 		min: stringValue(field.min || 0),
-		onChange: (event) => onChange(stringValue(changeValue(event))),
 		onInput: (event) => onChange(stringValue(changeValue(event))),
 		step: stringValue(field.step || 1),
 		value: current,
@@ -318,7 +313,6 @@ const DateControl = (props) => {
 					createElement('input', {
 						...inputProps,
 						key: 'input',
-						onChange: (event) => updateRange('from', event),
 						onInput: (event) => updateRange('from', event),
 						value: stringValue(current.from),
 					}),
@@ -328,7 +322,6 @@ const DateControl = (props) => {
 					createElement('input', {
 						...inputProps,
 						key: 'input',
-						onChange: (event) => updateRange('to', event),
 						onInput: (event) => updateRange('to', event),
 						value: stringValue(current.to),
 					}),
@@ -348,7 +341,6 @@ const DateControl = (props) => {
 				...inputProps,
 				'aria-label': label,
 				key: 'input',
-				onChange: (event) => onChange(stringValue(changeValue(event))),
 				onInput: (event) => onChange(stringValue(changeValue(event))),
 				value: stringValue(value),
 			}),
@@ -524,7 +516,6 @@ const ColorControl = (props) => {
 			createElement('input', {
 				'aria-label': label,
 				key: 'input',
-				onChange: (event) => onChange(stringValue(changeValue(event))),
 				onInput: (event) => onChange(stringValue(changeValue(event))),
 				type: 'color',
 				value: current,
