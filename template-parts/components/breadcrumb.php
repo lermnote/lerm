@@ -25,4 +25,4 @@ $breadcrumb = Breadcrumb::instance(
 	)
 );
 
-echo $breadcrumb; //ignore:WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter
+echo $breadcrumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
