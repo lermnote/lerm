@@ -8,7 +8,7 @@
 use Lerm\View\LikeButton;
 use function Lerm\View\lerm_social_icons;
 
-global $post;
+$current_post_id = get_the_ID();
 
 $template_options = lerm_get_template_options();
 ?>
@@ -16,20 +16,20 @@ $template_options = lerm_get_template_options();
 	<div class="line-text d-flex justify-content-center align-items-center">
 		<?php esc_html_e( 'If this post helped you, please like and share it.', 'lerm' ); ?>
 	</div>
-	<div class="btn-toolbar d-flex justify-content-center mt-4 mb-3">
-		<div class="text-center">
+	<div class="btn-toolbar d-flex justify-content-center gap-2 my-3">
 		<?php
 			LikeButton::render(
-				(int) $post->ID,
+				(int) $current_post_id,
 				false,
 				array( 'class' => 'btn btn-sm' )
 			);
 			?>
+		<?php if ( comments_open() || get_comments_number() ) : ?>
 			<a href="<?php comments_link(); ?>" class="btn btn-custom btn-sm entry-comment-btn btn-outline-secondary">
 				<i class="fa fa-comment"></i>
 				<?php echo esc_html( number_format_i18n( get_comments_number() ) ); ?>
 			</a>
-		</div><!-- like -->
+		<?php endif; ?>
 	</div><!-- toolbar -->
 	<?php if ( in_array( (string) ( $template_options['share_position'] ?? 'bottom' ), array( 'bottom', 'both' ), true ) ) : ?>
 		<?php lerm_social_icons( (array) $template_options['social_share'] ); ?>
