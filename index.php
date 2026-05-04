@@ -11,12 +11,12 @@
  */
 
 get_header();
-
+use function Lerm\Support\lerm_breadcrumb;
 $template_options = lerm_get_template_options();
 
 ?>
 	<?php
-	get_template_part( 'template-parts/components/breadcrumb' );
+	lerm_breadcrumb();
 
 	if ( 'under_navbar' === $template_options['slide_position'] ) {
 		get_template_part( 'template-parts/components/carousel' );

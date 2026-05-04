@@ -5,8 +5,8 @@
  * @package lerm
  * @since  3.5.0
  */
+$template_options = lerm_get_template_options();
 ?>
-<?php $template_options = lerm_get_template_options(); ?>
 <div class="navbar-brand d-flex align-items-center">
 	<?php the_custom_logo(); ?>
 

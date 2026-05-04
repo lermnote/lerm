@@ -206,6 +206,186 @@ function link_pagination(): void {
 }
 
 /**
+ * Render post thumbnail with optional width/height attributes.
+ *
+ * @param array $args {
+ *     Optional. Arguments for the thumbnail.
+ *     @type string $classes  CSS classes for the img tag.
+ *     @type string $height   Height attribute value.
+ *     @type string $width    Width attribute value.
+ *     @type string $size     Image size name. Default 'home-thumb'.
+ *     @type string $lazy     Loading attribute. Default 'lazy'.
+ * }
+ */
+function lerm_thumbnail( array $args = array() ): void {
+	$args = wp_parse_args(
+		$args,
+		array(
+			'classes' => '',
+			'height'  => '',
+			'width'   => '',
+			'size'    => 'home-thumb',
+			'lazy'    => 'lazy',
+		)
+	);
+
+	$image = new Image(
+		array(
+			'post_id' => get_the_ID(),
+			'size'    => $args['size'],
+			'lazy'    => $args['lazy'],
+			'order'   => array( 'featured', 'block', 'scan', 'default' ),
+		)
+	);
+
+	if ( ! $image->found ) {
+		return;
+	}
+
+	$extra_attr = array();
+	if ( '' !== $args['height'] ) {
+		$extra_attr['height'] = $args['height'];
+	}
+	if ( '' !== $args['width'] ) {
+		$extra_attr['width'] = $args['width'];
+	}
+
+	echo $image->render( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		array(
+			'classes' => $args['classes'],
+			'size'    => $args['size'],
+			'lazy'    => $args['lazy'],
+		),
+		$extra_attr
+	);
+}
+
+/**
+ * Render the featured image for the current post in The Loop.
+ *
+ * @param array{
+ *   post_id?:    int,
+ *   size?:       string,
+ *   lazy?:       string,
+ *   max_height?: int,
+ *   class?:      string,
+ *   order?:      string[],
+ *   echo?:       bool,
+ * } $args
+ */
+function lerm_featured_image( array $args = array() ): string {
+	$args = wp_parse_args(
+		$args,
+		array(
+			'post_id'    => get_the_ID(),
+			'size'       => 'home-thumb',
+			'lazy'       => 'lazy',
+			'max_height' => 115,
+			'class'      => '',
+			'order'      => array( 'featured', 'block', 'scan', 'default' ),
+			'echo'       => true,
+		)
+	);
+
+	$template_options = lerm_get_template_options();
+
+	$image = new \Lerm\Support\Image(
+		array(
+			'post_id' => (int) $args['post_id'],
+			'size'    => $args['size'],
+			'lazy'    => $args['lazy'],
+			'order'   => $args['order'],
+			'default' => $template_options['thumbnail_gallery'] ?? array(),
+			'class'   => $args['class'],
+		)
+	);
+
+	if ( ! $image->found() ) {
+		return '';
+	}
+
+	$style = $args['max_height'] > 0
+		? sprintf( ' style="max-height:%dpx;overflow:hidden"', (int) $args['max_height'] )
+		: '';
+
+	$html = sprintf(
+		'<figure class="figure w-100 m-0"%s>%s</figure>',
+		$style,
+		$image->generate_image_html()
+	);
+
+	if ( $args['echo'] ) {
+		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput
+	}
+
+	return $html;
+}
+
+/**
+ * Breadcrumb helper function.
+ *
+ * Drop this in functions.php (or a dedicated helpers file loaded by bootstrap).
+ *
+ * Usage in templates:
+ *   <?php lerm_breadcrumb(); ?>
+ *
+ * With custom args:
+ *   <?php lerm_breadcrumb( array( 'separator' => '›', 'show_title' => false ) ); ?>
+ *
+ * Capture without echoing:
+ *   $html = lerm_breadcrumb( array( 'echo' => false ) );
+ *
+ * @param array{
+ *   container?:     string,
+ *   before?:        string,
+ *   after?:         string,
+ *   list_tag?:      string,
+ *   item_tag?:      string,
+ *   separator?:     string,
+ *   show_on_front?: bool,
+ *   network?:       bool,
+ *   show_title?:    bool,
+ *   labels?:        array,
+ *   post_taxonomy?: array,
+ *   echo?:          bool,
+ * } $args
+ *
+ * @return string The rendered HTML (always returned; also echoed unless echo=false).
+ */
+if ( ! function_exists( 'lerm_breadcrumb' ) ) {
+	function lerm_breadcrumb( array $args = array() ): string {
+		$template_options = lerm_get_template_options();
+
+		$defaults = array(
+			'container'     => $template_options['breadcrumb_container'] ?? 'nav',
+			'before'        => $template_options['breadcrumb_before'] ?? '',
+			'after'         => $template_options['breadcrumb_after'] ?? '',
+			'list_tag'      => $template_options['breadcrumb_list_tag'] ?? 'ol',
+			'item_tag'      => $template_options['breadcrumb_item_tag'] ?? 'li',
+			'separator'     => $template_options['breadcrumb_separator'] ?? '/',
+			'show_on_front' => $template_options['breadcrumb_front_show'] ?? false,
+			'show_title'    => ! empty( $template_options['breadcrumb_show_title'] ),
+			'network'       => false,
+			'labels'        => array(),
+			'post_taxonomy' => array(),
+			'echo'          => true,
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+		$echo = (bool) $args['echo'];
+		unset( $args['echo'] );   // Breadcrumb class doesn't need this key.
+
+		$html = ( new \Lerm\View\Breadcrumb( $args ) )->render();
+
+		if ( $echo ) {
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput
+		}
+
+		return $html;
+	}
+}
+
+/**
  * Apply search/replace bootstrap classes to block content.
  */
 function apply_bootstrap_classes( string $block_content, array $block, array $search_replace = array() ): string {

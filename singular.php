@@ -6,7 +6,7 @@
  */
 
 get_header();
-
+use function Lerm\Support\lerm_breadcrumb;
 $template_options = lerm_get_template_options();
 
 // ── Copyright notice toggle ────────────────────────────────────────────────
@@ -15,7 +15,7 @@ $copyright_text = ! empty( $template_options['post_copyright_text'] )
 	? $template_options['post_copyright_text']
 	: '';
 ?>
-<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+<?php lerm_breadcrumb(); ?>
 <div <?php lerm_row_class(); ?>><!--.row-->
 	<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 		<div class="site-main">

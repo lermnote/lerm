@@ -10,55 +10,36 @@ use Lerm\Support\Image;
 use Lerm\View\PostMeta;
 use function Lerm\Support\link_pagination;
 
-$current_post_id  = get_the_ID(); // 缓存 ID，避免多次调用
-$card_classes     = 'card';
+$current_post_id  = get_the_ID();
 $card_classes     = 'card';
 $template_options = lerm_get_template_options();
-global $post;
 
-		$show_thumbnail = ! isset( $template_options['show_thumbnail'] ) || ! empty( $template_options['show_thumbnail'] );
-		$image          = null;
-		$has_image      = false;
+$show_thumbnail = ! isset( $template_options['show_thumbnail'] ) || ! empty( $template_options['show_thumbnail'] );
+$image          = null;
 if ( $show_thumbnail ) {
-	$image     = new Image(
+	$image = new Image(
 		array(
 			'post_id' => $current_post_id,
 			'size'    => 'thumbnail',
 			'lazy'    => 'lazy',
 			'order'   => array( 'featured', 'block', 'scan', 'default' ),
-			'default' => $template_options['thumbnail_gallery'],
+			'default' => $template_options['thumbnail_gallery'] ?? array(),
 		)
 	);
-	$has_image = ! empty( $image->attachment_id );
 }
-		$content_col_class = $has_image ? 'col-md-9' : 'col-md-12';
-		$summary_mode      = (string) ( $template_options['summary_or_full'] ?? 'content_summary' );
-
+$has_image         = $image && $image->found();
+$content_col_class = $has_image ? 'col-md-9' : 'col-md-12';
+$summary_mode      = (string) ( $template_options['summary_or_full'] ?? 'content_summary' );
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'card' ); ?>>
-		<?php
-		$show_thumbnail = ! isset( $template_options['show_thumbnail'] ) || ! empty( $template_options['show_thumbnail'] );
-		$image          = null;
-		$has_image      = false;
-		if ( $show_thumbnail ) {
-			$image     = new Image(
-				array(
-					'post_id' => $current_post_id,
-					'size'    => 'thumbnail',
-					'lazy'    => 'lazy',
-					'order'   => array( 'featured', 'block', 'scan', 'default' ),
-					'default' => $template_options['thumbnail_gallery'],
-				)
-			);
-			$has_image = ! empty( $image->attachment_id );
-		}
-		$content_col_class = $has_image ? 'col-md-9' : 'col-md-12';
-		$summary_mode      = (string) ( $template_options['summary_or_full'] ?? 'content_summary' );
-		?>
 		<div class="row g-0 align-items-md-center">
 			<?php if ( $has_image ) : ?>
 				<div class="col-md-3">
-					<?php get_template_part( 'template-parts/components/featured-image' ); ?>
+					<figure class="figure w-100 m-0" style="max-height:115px;overflow:hidden">
+						<?php
+						echo $image->generate_image_html(); // phpcs:ignore WordPress.Security.EscapeOutput
+						?>
+					</figure>
 				</div>
 			<?php endif; ?>
 
