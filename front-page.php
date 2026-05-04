@@ -28,7 +28,7 @@ if ( ! empty( $template_options['slide_enable'] ) ) :
 endif;
 ?>
 
-<div class="row">
+<div class="row front-page">
 <main id="main" class="col-lg-8 pe-lg-0">
 
 <?php
@@ -68,7 +68,7 @@ $featured_query = new WP_Query( $featured_args );
 if ( $featured_query->have_posts() ) :
 	$has_sticky = ! empty( $sticky_ids ) && is_array( $sticky_ids );
 	?>
-	<section class="py-4">
+	<section class="featured-grid py-4">
 		<h2 class="h5 mb-3">
 			<?php if ( $has_sticky ) : ?>
 				<i class="fa fa-thumb-tack me-1" aria-hidden="true"></i><?php esc_html_e( 'Featured', 'lerm' ); ?>
@@ -135,7 +135,7 @@ if ( ! empty( $featured_cat_ids ) && ! is_wp_error( $featured_cat_ids ) ) :
 		$cat_color_meta = get_term_meta( $category->term_id, 'cc_color', true );
 		$cat_color      = ! empty( $cat_color_meta ) ? $cat_color_meta : 'var(--lerm-color-primary)';
 		?>
-		<section class="py-4">
+		<section class="category-section py-4">
 			<h2 class="h5 mb-3">
 				<a href="<?php echo esc_url( get_category_link( $category ) ); ?>" class="text-decoration-none">
 					<i class="fa fa-folder-o me-1" aria-hidden="true"></i><?php echo esc_html( $category->name ); ?>
@@ -212,7 +212,7 @@ $main_query = new WP_Query( $main_args );
 
 if ( $main_query->have_posts() ) :
 	?>
-	<section class="py-4">
+	<section class="main-loop py-4">
 		<h2 class="h5 mb-3"><?php esc_html_e( 'Recent Articles', 'lerm' ); ?></h2>
 		<?php
 		while ( $main_query->have_posts() ) :

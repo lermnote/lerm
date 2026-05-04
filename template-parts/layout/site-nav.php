@@ -8,16 +8,17 @@
 
 use Lerm\Core\Menu;
 
-$theme_location        = 'primary';
-$template_options      = lerm_get_template_options();
-$navbar_align          = trim( (string) ( $template_options['navbar_align'] ?? 'justify-content-md-end' ) );
-$show_navbar_search    = ! empty( $template_options['navbar_search'] );
-$show_social_in_header = in_array(
+$theme_location          = 'primary';
+$template_options        = lerm_get_template_options();
+$navbar_align            = trim( (string) ( $template_options['navbar_align'] ?? 'justify-content-md-end' ) );
+$show_navbar_search      = ! empty( $template_options['navbar_search'] );
+$menu_login_item_enabled = ! empty( $template_options['menu_login_item'] );
+$show_social_in_header   = in_array(
 	'header',
 	(array) ( $template_options['social_profiles_position'] ?? array( 'footer', 'author_bio' ) ),
 	true
 );
-$show_darkmode_navbar  =
+$show_darkmode_navbar    =
 	! empty( $template_options['dark_mode_enable'] )
 	&& ( $template_options['dark_mode_toggle_position'] ?? 'navbar' ) === 'navbar';
 
@@ -102,7 +103,7 @@ $current_user_object = wp_get_current_user();
 
 					<li class="nav-item menu-item-login">
 						<?php
-						if ( is_user_logged_in() ) :
+						if ( $menu_login_item_enabled && is_user_logged_in() ) :
 							$current_user_object = wp_get_current_user();
 							?>
 							<a class="nav-link d-flex align-items-center gap-2" href="<?php echo esc_url( home_url( '/' ) ); ?>">
@@ -153,11 +154,7 @@ $current_user_object = wp_get_current_user();
 	endif;
 	?>
 
-	<?php if ( $show_navbar_search ) : ?>
-		<div class="navbar-search-wrapper d-none d-lg-flex">
-			<?php get_search_form(); ?>
-		</div>
-	<?php endif; ?>
+
 
 	<?php if ( has_nav_menu( 'secondary' ) && $show_social_in_header ) : ?>
 		<?php
@@ -176,8 +173,13 @@ $current_user_object = wp_get_current_user();
 		?>
 	<?php endif; ?>
 
-	<?php if ( $show_darkmode_navbar || is_user_logged_in() ) : ?>
-		<div class="navbar-utility d-none d-lg-flex align-items-center">
+	<?php if ( $show_darkmode_navbar || $show_navbar_search || $menu_login_item_enabled ) : ?>
+		<div class="navbar-utility d-none d-lg-flex align-items-center gap-2">
+			<?php if ( $show_navbar_search ) : ?>
+				<div class="navbar-search-wrapper d-none d-lg-flex">
+					<?php get_search_form(); ?>
+				</div>
+			<?php endif; ?>
 
 			<?php if ( $show_darkmode_navbar ) : ?>
 				<button

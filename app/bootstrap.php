@@ -268,6 +268,7 @@ if ( ! empty( $options ) ) {
 		'404_button_url'            => (string) ( $options['404_button_url'] ?? '' ),
 		'404_image_id'              => (string) ( $options['404_image']['id'] ?? '' ),
 		'404_show_search'           => ! isset( $options['404_show_search'] ) || ! empty( $options['404_show_search'] ),
+		'menu_login_item'           => (bool) ( $options['menu_login_item'] ?? false ),
 	);
 }
 if ( is_admin() ) {
