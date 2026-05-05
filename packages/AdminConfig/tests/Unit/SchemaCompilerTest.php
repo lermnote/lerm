@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Tests\Unit;
 
 use Lerm\AdminConfig\Compiler\SchemaCompiler;
+use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Tests\Support\TestCase;
 
 final class SchemaCompilerTest extends TestCase {
@@ -156,6 +157,57 @@ final class SchemaCompilerTest extends TestCase {
 			),
 			$compiled->dependency_graph()['dependent_field']
 		);
+	}
+
+	public function testMergesRegisteredFieldTypeClientMetadata(): void {
+		$field_types = new FieldTypeRegistry();
+		$field_types->register(
+			'custom_text',
+			array(
+				'client' => array(
+					'control'  => 'text',
+					'settings' => array(
+						'rows'       => 2,
+						'spellcheck' => true,
+					),
+				),
+			)
+		);
+
+		$compiled = ( new SchemaCompiler( $field_types ) )->compile(
+			array(
+				'id'       => 'field_type_client',
+				'sections' => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id'   => 'registered_control',
+								'type' => 'custom_text',
+							),
+							array(
+								'id'     => 'field_override',
+								'type'   => 'custom_text',
+								'client' => array(
+									'control'  => 'textarea',
+									'settings' => array(
+										'rows' => 4,
+									),
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$fields = $compiled->client_config()['fields'];
+
+		$this->assertSame( 'text', $fields['registered_control']['client']['control'] );
+		$this->assertSame( 2, $fields['registered_control']['client']['settings']['rows'] );
+		$this->assertTrue( $fields['registered_control']['client']['settings']['spellcheck'] );
+		$this->assertSame( 'textarea', $fields['field_override']['client']['control'] );
+		$this->assertSame( 4, $fields['field_override']['client']['settings']['rows'] );
+		$this->assertTrue( $fields['field_override']['client']['settings']['spellcheck'] );
 	}
 
 	public function testStoreKeyFallsBackToOptionNameThenSchemaId(): void {

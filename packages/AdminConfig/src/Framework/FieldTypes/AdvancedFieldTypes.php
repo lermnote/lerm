@@ -59,7 +59,7 @@ final class AdvancedFieldTypes {
 					$value,
 					$field_name,
 					(string) $field['id'],
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {

@@ -59,6 +59,11 @@ final class OptionsPage {
 	private array $render_path_stack = array();
 
 	/**
+	 * @var array<string, bool>|null
+	 */
+	private ?array $dependency_controller_fields = null;
+
+	/**
 	 * @param array<string, mixed> $definition Page definition.
 	 */
 	public function __construct( array $definition, OptionStore $store, FieldTypeRegistry $field_types, AssetResolver $asset_resolver, bool $register_hooks = true, ?FieldModuleRegistry $field_modules = null ) {
@@ -982,8 +987,7 @@ final class OptionsPage {
 		$description = (string) ( $field['description'] ?? '' );
 		$field_error = $this->field_error_message( $field_errors, $field_id );
 		$has_errors  = $this->field_has_errors( $field_errors, $field_id, true );
-		$dependency  = (string) ( $field['dependency_field'] ?? '' );
-		$dep_value   = (string) ( $field['dependency_value'] ?? '1' );
+		$dependency  = $this->field_dependency( $field );
 		$label       = isset( $field['label'] ) ? (string) $field['label'] : '';
 		$row_attrs   = array(
 			'class="lerm-settings-row' . ( $has_errors ? ' is-invalid' : '' ) . '"',
@@ -992,9 +996,10 @@ final class OptionsPage {
 			'data-field-type="' . esc_attr( $field_type ) . '"',
 		);
 
-		if ( '' !== $dependency ) {
-			$row_attrs[] = 'data-dependency-field="' . esc_attr( $dependency ) . '"';
-			$row_attrs[] = 'data-dependency-value="' . esc_attr( $dep_value ) . '"';
+		if ( ! empty( $dependency ) ) {
+			$row_attrs[] = 'data-dependency-field="' . esc_attr( (string) $dependency['field'] ) . '"';
+			$row_attrs[] = 'data-dependency-operator="' . esc_attr( (string) $dependency['operator'] ) . '"';
+			$row_attrs[] = 'data-dependency-value="' . esc_attr( $this->dependency_attribute_value( $dependency['value'] ) ) . '"';
 
 			if ( ! $this->dependency_is_satisfied( $field, $values ) ) {
 				$row_attrs[] = 'hidden';
@@ -1049,7 +1054,7 @@ final class OptionsPage {
 					esc_attr( $field_id ),
 					esc_attr( $field_name ),
 					esc_attr( $this->scalar_string( $field_value ) ),
-					$dependency ? 'data-lerm-controller="1"' : '',
+					$this->dependency_controller_attribute( $field ),
 					esc_attr( (string) ( $field['placeholder'] ?? '' ) )
 				);
 			}
@@ -2241,6 +2246,23 @@ final class OptionsPage {
 	}
 
 	/**
+	 * Return the change-listener attribute for fields that control dependencies.
+	 *
+	 * @param array<string, mixed> $field Field definition.
+	 */
+	public function dependency_controller_attribute( array $field ): string {
+		$field_id = isset( $field['id'] ) ? sanitize_key( (string) $field['id'] ) : '';
+
+		if ( '' === $field_id ) {
+			return '';
+		}
+
+		return isset( $this->dependency_controller_fields()[ $field_id ] )
+			? ' data-lerm-controller="1"'
+			: '';
+	}
+
+	/**
 	 * Resolve whether a field's dependency chain is currently satisfied.
 	 *
 	 * @param array<string, mixed> $field  Field definition.
@@ -2248,34 +2270,162 @@ final class OptionsPage {
 	 * @param array<string, bool>  $seen   Recursion guard for malformed cycles.
 	 */
 	private function dependency_is_satisfied( array $field, array $values, array $seen = array() ): bool {
-		$dependency = isset( $field['dependency_field'] ) ? sanitize_key( (string) $field['dependency_field'] ) : '';
+		$dependency = $this->field_dependency( $field );
 
-		if ( '' === $dependency ) {
+		if ( empty( $dependency ) ) {
 			return true;
 		}
 
-		if ( isset( $seen[ $dependency ] ) ) {
+		$field_id = isset( $field['id'] ) ? sanitize_key( (string) $field['id'] ) : '';
+
+		if ( '' !== $field_id && isset( $seen[ $field_id ] ) ) {
 			return false;
 		}
 
-		$controller = PageSchema::field( $this->definition, $dependency );
+		$controller_id = (string) $dependency['field'];
+		$controller    = PageSchema::field( $this->definition, $controller_id );
 
 		if ( ! is_array( $controller ) ) {
 			return false;
 		}
 
-		$seen[ $dependency ] = true;
+		if ( '' !== $field_id ) {
+			$seen[ $field_id ] = true;
+		}
 
 		if ( ! $this->dependency_is_satisfied( $controller, $values, $seen ) ) {
 			return false;
 		}
 
-		$expected = (string) ( $field['dependency_value'] ?? '1' );
-		$actual   = array_key_exists( $dependency, $values )
-			? $this->dependency_scalar( $values[ $dependency ] )
-			: $this->dependency_scalar( $controller['default'] ?? '' );
+		$actual = array_key_exists( $controller_id, $values )
+			? $values[ $controller_id ]
+			: ( $controller['default'] ?? '' );
 
-		return $actual === $expected;
+		return $this->dependency_matches(
+			$actual,
+			(string) $dependency['operator'],
+			$dependency['value']
+		);
+	}
+
+	/**
+	 * @return array<string, bool>
+	 */
+	private function dependency_controller_fields(): array {
+		if ( null !== $this->dependency_controller_fields ) {
+			return $this->dependency_controller_fields;
+		}
+
+		$controllers = array();
+
+		foreach ( PageSchema::fields( $this->definition ) as $field ) {
+			$dependency = $this->field_dependency( $field );
+
+			if ( empty( $dependency ) ) {
+				continue;
+			}
+
+			$controllers[ (string) $dependency['field'] ] = true;
+		}
+
+		$this->dependency_controller_fields = $controllers;
+
+		return $controllers;
+	}
+
+	/**
+	 * @param array<string, mixed> $field Field definition.
+	 * @return array<string, mixed>
+	 */
+	private function field_dependency( array $field ): array {
+		$dependency = $field['dependency'] ?? null;
+
+		if ( ! is_array( $dependency ) || empty( $dependency[0] ) ) {
+			return array();
+		}
+
+		$controller = sanitize_key( (string) $dependency[0] );
+		$operator   = isset( $dependency[1] ) && is_scalar( $dependency[1] ) ? trim( (string) $dependency[1] ) : '==';
+
+		if ( '' === $controller ) {
+			return array();
+		}
+
+		return array(
+			'field'    => $controller,
+			'operator' => '' !== $operator ? $operator : '==',
+			'value'    => $dependency[2] ?? true,
+		);
+	}
+
+	/**
+	 * @param mixed $actual Actual controller value.
+	 * @param mixed $expected Expected dependency value.
+	 */
+	private function dependency_matches( $actual, string $operator, $expected ): bool {
+		$operator        = '' !== trim( $operator ) ? trim( $operator ) : '==';
+		$actual_values   = $this->dependency_scalar_list( $actual );
+		$expected_values = $this->dependency_scalar_list( $expected );
+		$expected_value  = (string) ( $expected_values[0] ?? '' );
+
+		if ( '!=' === $operator || '!==' === $operator ) {
+			return ! in_array( $expected_value, $actual_values, true );
+		}
+
+		if ( 'in' === $operator ) {
+			return count( array_intersect( $actual_values, $expected_values ) ) > 0;
+		}
+
+		if ( 'not_in' === $operator || 'not in' === $operator ) {
+			return 0 === count( array_intersect( $actual_values, $expected_values ) );
+		}
+
+		if ( in_array( $operator, array( '>', '>=', '<', '<=' ), true ) ) {
+			$actual_number   = isset( $actual_values[0] ) && is_numeric( $actual_values[0] ) ? (float) $actual_values[0] : null;
+			$expected_number = is_numeric( $expected_value ) ? (float) $expected_value : null;
+
+			if ( null === $actual_number || null === $expected_number ) {
+				return false;
+			}
+
+			if ( '>' === $operator ) {
+				return $actual_number > $expected_number;
+			}
+
+			if ( '>=' === $operator ) {
+				return $actual_number >= $expected_number;
+			}
+
+			if ( '<' === $operator ) {
+				return $actual_number < $expected_number;
+			}
+
+			return $actual_number <= $expected_number;
+		}
+
+		return in_array( $expected_value, $actual_values, true );
+	}
+
+	private function dependency_attribute_value( $value ): string {
+		if ( is_array( $value ) ) {
+			$encoded = wp_json_encode( array_values( $this->dependency_scalar_list( $value ) ) );
+
+			return false !== $encoded ? $encoded : '';
+		}
+
+		return $this->dependency_scalar( $value );
+	}
+
+	/**
+	 * @param mixed $value Controller value.
+	 * @return array<int, string>
+	 */
+	private function dependency_scalar_list( $value ): array {
+		if ( is_array( $value ) ) {
+			return array_map( array( $this, 'dependency_scalar' ), $value );
+		}
+
+		return array( $this->dependency_scalar( $value ) );
 	}
 
 	/**

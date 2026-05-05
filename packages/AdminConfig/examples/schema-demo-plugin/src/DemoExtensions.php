@@ -110,7 +110,7 @@ final class DemoExtensions {
 						esc_attr( $field_name ),
 						esc_attr( is_scalar( $value ) ? (string) $value : '' ),
 						esc_attr( (string) ( $field['placeholder'] ?? 'spring-launch' ) ),
-						! empty( $field['dependency_field'] ) ? 'data-lerm-controller="1"' : ''
+						$page->dependency_controller_attribute( $field )
 					);
 				},
 				'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {

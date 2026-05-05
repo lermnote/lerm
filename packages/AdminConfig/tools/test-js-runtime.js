@@ -15,7 +15,7 @@ const {
 	withRestError,
 } = require('../resources/core/schema-state');
 const { createDefaultControlRegistry } = require('../resources/controls');
-const { blockPanelReadOnlyControlTypes, createBlockPanelRuntime } = require('../resources/block-panel');
+const { blockPanelReadOnlyControlTypes, createBlockPanelRuntime, isFieldDependencySatisfied } = require('../resources/block-panel');
 
 function testRecordHelpers() {
 	const record = { title: 'Loaded' };
@@ -357,6 +357,78 @@ function testBlockPanelFieldStatusContract() {
 	}
 }
 
+function testBlockPanelDependencyVisibility() {
+	const fields = {
+		feature_enabled: {
+			default: false,
+			id: 'feature_enabled',
+		},
+		entry_accent: {
+			dependency: {
+				field: 'feature_enabled',
+				operator: '==',
+				value: true,
+			},
+			id: 'entry_accent',
+		},
+		entry_hint: {
+			dependency: {
+				field: 'entry_accent',
+				operator: '!=',
+				value: '',
+			},
+			id: 'entry_hint',
+		},
+		newsletter_summary: {
+			dependency: {
+				field: 'entry_channels',
+				operator: '==',
+				value: 'newsletter',
+			},
+			id: 'newsletter_summary',
+		},
+		entry_channels: {
+			default: [],
+			id: 'entry_channels',
+		},
+		cycle_a: {
+			dependency: {
+				field: 'cycle_b',
+			},
+			id: 'cycle_a',
+		},
+		cycle_b: {
+			dependency: {
+				field: 'cycle_a',
+			},
+			id: 'cycle_b',
+		},
+	};
+	const dependencies = Object.fromEntries(
+		Object.entries(fields)
+			.filter((entry) => entry[1].dependency)
+			.map(([ fieldId, field ]) => [ fieldId, field.dependency ])
+	);
+
+	assert.equal(isFieldDependencySatisfied('feature_enabled', fields, {}, dependencies), true);
+	assert.equal(isFieldDependencySatisfied('entry_accent', fields, {}, dependencies), false);
+	assert.equal(isFieldDependencySatisfied('entry_accent', fields, { feature_enabled: true }, dependencies), true);
+	assert.equal(
+		isFieldDependencySatisfied('entry_hint', fields, { feature_enabled: false, entry_accent: '#13579b' }, dependencies),
+		false
+	);
+	assert.equal(
+		isFieldDependencySatisfied('entry_hint', fields, { feature_enabled: true, entry_accent: '#13579b' }, dependencies),
+		true
+	);
+	assert.equal(
+		isFieldDependencySatisfied('newsletter_summary', fields, { entry_channels: [ 'homepage', 'newsletter' ] }, dependencies),
+		true
+	);
+	assert.equal(isFieldDependencySatisfied('missing_controller', fields, {}, { missing_controller: { field: 'missing' } }), false);
+	assert.equal(isFieldDependencySatisfied('cycle_a', fields, {}, dependencies), false);
+}
+
 async function testBlockPanelRuntime() {
 	const requests = [];
 	const restClient = {
@@ -489,6 +561,7 @@ async function main() {
 	testSchemaStateHelpers();
 	testDefaultControlRegistry();
 	testBlockPanelFieldStatusContract();
+	testBlockPanelDependencyVisibility();
 	await testBlockPanelRuntime();
 	await testBlockPanelRuntimeRejectedSave();
 	console.log('JS runtime tests passed.');

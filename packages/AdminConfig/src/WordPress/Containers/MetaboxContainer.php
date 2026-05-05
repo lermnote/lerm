@@ -47,7 +47,7 @@ final class MetaboxContainer implements Container {
 			return;
 		}
 
-		add_action( 'add_meta_boxes', array( $this, 'register_meta_boxes' ) );
+		add_action( 'add_meta_boxes', array( $this, 'register_meta_boxes' ), 10, 2 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		$this->hooks_registered = true;
@@ -96,7 +96,11 @@ final class MetaboxContainer implements Container {
 		);
 	}
 
-	public function register_meta_boxes( string $post_type ): void {
+	public function register_meta_boxes( string $post_type, $post = null ): void {
+		if ( $this->post_context_uses_block_editor( $post_type, $post instanceof \WP_Post ? $post : null ) ) {
+			return;
+		}
+
 		foreach ( $this->schemas as $schema ) {
 			$container  = $schema->container();
 			$post_types = $this->normalize_post_types( $container['post_types'] ?? array() );
@@ -413,5 +417,15 @@ final class MetaboxContainer implements Container {
 		}
 
 		return array_values( array_unique( $normalized ) );
+	}
+
+	private function post_context_uses_block_editor( string $post_type, ?\WP_Post $post = null ): bool {
+		if ( null !== $post && function_exists( 'use_block_editor_for_post' ) ) {
+			return use_block_editor_for_post( $post );
+		}
+
+		return '' !== $post_type
+			&& function_exists( 'use_block_editor_for_post_type' )
+			&& use_block_editor_for_post_type( $post_type );
 	}
 }

@@ -51,7 +51,7 @@ final class BuiltinFieldTypes {
 					$field_name,
 					(string) $field['id'],
 					'text',
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -88,7 +88,7 @@ final class BuiltinFieldTypes {
 					$field_name,
 					(string) $field['id'],
 					'url',
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -124,7 +124,7 @@ final class BuiltinFieldTypes {
 					$value,
 					$field_name,
 					(string) $field['id'],
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -159,7 +159,7 @@ final class BuiltinFieldTypes {
 					$value,
 					$field_name,
 					(string) $field['id'],
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -188,10 +188,11 @@ final class BuiltinFieldTypes {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
 				printf(
-					'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text lerm-color-field">',
+					'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text lerm-color-field"%4$s>',
 					esc_attr( (string) $field['id'] ),
 					esc_attr( $field_name ),
-					esc_attr( PageSchema::scalar_value( $value ) )
+					esc_attr( PageSchema::scalar_value( $value ) ),
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -300,7 +301,7 @@ final class BuiltinFieldTypes {
 	private static function checkbox_list_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				self::render_checkbox_list( $field, $value, $field_name, true );
+				self::render_checkbox_list( $field, $value, $field_name, true, '', $page->dependency_controller_attribute( $field ) );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
 				self::render_checkbox_list( $field, $value, $field_name, false, $name_template );
@@ -458,10 +459,11 @@ final class BuiltinFieldTypes {
 	/**
 	 * @param mixed $value
 	 */
-	private static function render_checkbox_list( array $field, $value, string $field_name, bool $is_root, string $name_template = '' ): void {
-		$choices   = PageSchema::choices( $field );
-		$current   = is_array( $value ) ? array_map( 'strval', $value ) : array();
-		$name_attr = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template . '[]' ) . '"' : '';
+	private static function render_checkbox_list( array $field, $value, string $field_name, bool $is_root, string $name_template = '', string $extra_attrs = '' ): void {
+		$choices     = PageSchema::choices( $field );
+		$current     = is_array( $value ) ? array_map( 'strval', $value ) : array();
+		$name_attr   = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template . '[]' ) . '"' : '';
+		$input_attrs = $extra_attrs . $name_attr;
 
 		if ( $is_root ) {
 			echo '<fieldset class="lerm-checkbox-list"><legend class="screen-reader-text">' . esc_html( (string) ( $field['label'] ?? '' ) ) . '</legend>';
@@ -475,7 +477,7 @@ final class BuiltinFieldTypes {
 				esc_attr( $field_name ),
 				esc_attr( $choice_value ),
 				checked( in_array( (string) $choice_value, $current, true ), true, false ),
-				$name_attr,
+				$input_attrs,
 				esc_html( $choice_label )
 			);
 		}

@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Compiler;
 
+use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,6 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SchemaCompiler {
+
+	public function __construct(
+		private ?FieldTypeRegistry $field_types = null
+	) {
+	}
 
 	public function compile( array $schema ): CompiledSchema {
 		$id                      = $this->schema_id( $schema );
@@ -131,9 +137,11 @@ final class SchemaCompiler {
 	 * @return array<string, mixed>
 	 */
 	private function compile_field_metadata( array $field ): array {
+		$type = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+
 		$metadata = array(
 			'id'      => (string) $field['id'],
-			'type'    => sanitize_key( (string) ( $field['type'] ?? 'text' ) ),
+			'type'    => $type,
 			'default' => $field['default'] ?? '',
 			'label'   => $this->first_string( $field, array( 'label' ) ),
 		);
@@ -151,8 +159,12 @@ final class SchemaCompiler {
 			$metadata['ui'] = $field['ui'];
 		}
 
-		if ( isset( $field['client'] ) && is_array( $field['client'] ) ) {
-			$metadata['client'] = $field['client'];
+		$type_client  = null !== $this->field_types ? $this->field_types->client_config( $type ) : array();
+		$field_client = isset( $field['client'] ) && is_array( $field['client'] ) ? $field['client'] : array();
+		$client       = array_replace_recursive( $type_client, $field_client );
+
+		if ( ! empty( $client ) ) {
+			$metadata['client'] = $client;
 		}
 
 		$this->copy_scalar_field_props(
