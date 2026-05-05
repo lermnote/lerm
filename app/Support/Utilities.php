@@ -783,3 +783,31 @@ function lerm_carousel_shortcode( array $atts ): string {
 	return (string) ob_get_clean();
 }
 add_shortcode( 'lerm_carousel', 'lerm_carousel_shortcode' );
+
+/**
+ * 归档页 Transient 缓存自动清除钩子
+ *
+ * 请将此段代码添加到 functions.php 末尾（而非页面模板中），
+ * 确保在所有请求下都能正确响应文章的增删改。
+ *
+ */
+
+// 发布/更新文章时清除缓存
+add_action(
+	'save_post_post',
+	function ( int $post_id, WP_Post $post ): void {
+		if ( 'publish' === $post->post_status || 'trash' === $post->post_status ) {
+			delete_transient( 'lerm_archives_v1' );
+		}
+	},
+	10,
+	2
+);
+
+// 彻底删除文章时清除缓存
+add_action(
+	'delete_post',
+	function (): void {
+		delete_transient( 'lerm_archives_v1' );
+	}
+);
