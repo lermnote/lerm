@@ -25,6 +25,53 @@ final class BlockEditorPanelTest extends TestCase {
 		$this->assertArrayHasKey( 'enqueue_block_editor_assets', $GLOBALS['lerm_admin_config_actions'] );
 	}
 
+	public function testMetaboxRuntimeDoesNotRegisterClassicMetaboxesInBlockEditor(): void {
+		$runtime = $this->runtime_with_metabox_schema();
+
+		$runtime->boot();
+		$GLOBALS['lerm_admin_config_use_block_editor_for_post_type'] = array(
+			'post' => true,
+		);
+
+		$container = $runtime->containers()['metabox'];
+
+		$this->assertInstanceOf( MetaboxContainer::class, $container );
+		$container->register_meta_boxes( 'post' );
+
+		$this->assertSame( array(), $GLOBALS['lerm_admin_config_meta_boxes'] );
+	}
+
+	public function testMetaboxRuntimeStillRegistersClassicMetaboxesOutsideBlockEditor(): void {
+		$runtime = $this->runtime_with_metabox_schema();
+
+		$runtime->boot();
+		$GLOBALS['lerm_admin_config_use_block_editor_for_post_type'] = array(
+			'post' => false,
+		);
+
+		$container = $runtime->containers()['metabox'];
+
+		$this->assertInstanceOf( MetaboxContainer::class, $container );
+		$container->register_meta_boxes( 'post' );
+
+		$this->assertCount( 1, $GLOBALS['lerm_admin_config_meta_boxes'] );
+		$this->assertSame( 'lerm-admin-config-metabox-unit-post-metabox', $GLOBALS['lerm_admin_config_meta_boxes'][0]['id'] );
+		$this->assertSame( 'post', $GLOBALS['lerm_admin_config_meta_boxes'][0]['screen'] );
+	}
+
+	public function testMetaboxRegistrationAcceptsNonPostAddMetaBoxesContexts(): void {
+		$runtime = $this->runtime_with_metabox_schema();
+
+		$runtime->boot();
+
+		$container = $runtime->containers()['metabox'];
+
+		$this->assertInstanceOf( MetaboxContainer::class, $container );
+		$container->register_meta_boxes( 'comment', (object) array( 'comment_ID' => 123 ) );
+
+		$this->assertSame( array(), $GLOBALS['lerm_admin_config_meta_boxes'] );
+	}
+
 	public function testMetaboxRuntimeEnqueuesBlockPanelWithPostContext(): void {
 		$runtime = $this->runtime_with_metabox_schema();
 

@@ -137,6 +137,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryBadgeReadOnly = panel.locator( '[data-field-id="entry_badge"][data-read-only-control="true"]' );
 	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
 
+	await expect( page.locator( '#lerm-admin-config-metabox-acme-demo-post-metabox' ) ).toHaveCount( 0 );
 	await expect( featuredToggle ).toBeVisible();
 	await expect( entrySlug ).toBeVisible();
 	await expect( entryLayout ).toBeVisible();

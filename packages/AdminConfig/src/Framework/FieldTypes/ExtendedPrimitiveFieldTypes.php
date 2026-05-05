@@ -44,7 +44,7 @@ final class ExtendedPrimitiveFieldTypes {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
 				if ( self::checkbox_uses_choices( $field ) ) {
-					self::render_checkbox_group( $field, $value, $field_name, true );
+					self::render_checkbox_group( $field, $value, $field_name, true, $page->dependency_controller_attribute( $field ) );
 					return;
 				}
 
@@ -53,7 +53,7 @@ final class ExtendedPrimitiveFieldTypes {
 					$value,
 					$field_name,
 					(string) $field['id'],
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -97,7 +97,7 @@ final class ExtendedPrimitiveFieldTypes {
 					$value,
 					$field_name,
 					(string) $field['id'],
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -132,7 +132,7 @@ final class ExtendedPrimitiveFieldTypes {
 					$value,
 					$field_name,
 					(string) $field['id'],
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -168,7 +168,7 @@ final class ExtendedPrimitiveFieldTypes {
 					$value,
 					$field_name,
 					(string) $field['id'],
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -203,7 +203,7 @@ final class ExtendedPrimitiveFieldTypes {
 					$value,
 					$field_name,
 					(string) $field['id'],
-					! empty( $field['dependency_field'] ) ? ' data-lerm-controller="1"' : ''
+					$page->dependency_controller_attribute( $field )
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
@@ -340,7 +340,7 @@ final class ExtendedPrimitiveFieldTypes {
 				esc_attr( $field_name ),
 				esc_attr( $choice_value ),
 				checked( in_array( (string) $choice_value, $current, true ), true, false ),
-				$is_root ? '' : $name_attr,
+				$name_attr,
 				esc_html( $choice_label )
 			);
 		}

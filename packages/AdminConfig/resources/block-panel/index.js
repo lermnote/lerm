@@ -2,6 +2,7 @@
 
 const { createAdminConfigRestClient, normalizeRestError } = require('../core/rest-client');
 const { contextFromConfig, contextQueryString } = require('../core/context');
+const { isFieldDependencySatisfied } = require('../core/dependencies');
 const { asRecord, asRecordArray } = require('../core/records');
 const {
 	createSchemaState,
@@ -474,6 +475,8 @@ const createPanelComponent = (config, Panel, element) => {
 
 		const components = asRecord((typeof window !== 'undefined' && window.wp && window.wp.components) || {});
 		const sections = orderedSections(state.schema);
+		const fieldsById = asRecord(state.schema.fields);
+		const dependencies = asRecord(state.schema.dependencies);
 		const dirty = isSchemaStateDirty(state);
 		const isBusy = status === 'loading' || status === 'saving';
 		const canRenderFields = status === 'ready' || (status === 'error' && Object.keys(state.schema || {}).length > 0);
@@ -515,6 +518,10 @@ const createPanelComponent = (config, Panel, element) => {
 					const controlStatus = fieldControlStatus(controlType, control);
 
 					if (!fieldId) {
+						return null;
+					}
+
+					if (!isFieldDependencySatisfied(fieldId, fieldsById, asRecord(state.values), dependencies)) {
 						return null;
 					}
 
@@ -741,5 +748,6 @@ if (typeof window !== 'undefined') {
 module.exports = {
 	blockPanelReadOnlyControlTypes,
 	createBlockPanelRuntime,
+	isFieldDependencySatisfied,
 	registerBlockEditorPanels,
 };

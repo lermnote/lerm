@@ -245,6 +245,74 @@ const { createAdminConfigTransport } = require('./transport');
 
 	// ─── Dependencies ─────────────────────────────────────────────────────────
 
+	/** @param {unknown} value */
+	const dependencyScalar = (value) => {
+		if (typeof value === 'boolean') return value ? '1' : '0';
+		if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'string') return String(value);
+		return '';
+	};
+
+	/** @param {unknown} value */
+	const dependencyScalarList = (value) => Array.isArray(value)
+		? value.map(dependencyScalar)
+		: [ dependencyScalar(value) ];
+
+	/** @param {unknown} value */
+	const dependencyExpectedValue = (value) => {
+		const raw = String(value ?? '');
+
+		if (!raw.startsWith('[')) {
+			return raw;
+		}
+
+		try {
+			const parsed = JSON.parse(raw);
+			return Array.isArray(parsed) ? parsed : raw;
+		} catch (error) {
+			return raw;
+		}
+	};
+
+	/**
+	 * @param {unknown} actual
+	 * @param {unknown} operator
+	 * @param {unknown} expected
+	 */
+	const dependencyMatches = (actual, operator = '==', expected = '1') => {
+		const op = String(operator || '==').trim() || '==';
+		const actualValues = dependencyScalarList(actual);
+		const expectedValues = dependencyScalarList(expected);
+		const expectedValue = expectedValues[0] || '';
+
+		if (op === '!=' || op === '!==') {
+			return !actualValues.includes(expectedValue);
+		}
+
+		if (op === 'in') {
+			return actualValues.some(value => expectedValues.includes(value));
+		}
+
+		if (op === 'not_in' || op === 'not in') {
+			return !actualValues.some(value => expectedValues.includes(value));
+		}
+
+		if ([ '>', '>=', '<', '<=' ].includes(op)) {
+			const actualNumber = Number(actualValues[0] || '');
+			const expectedNumber = Number(expectedValue);
+
+			if (!Number.isFinite(actualNumber) || !Number.isFinite(expectedNumber)) {
+				return false;
+			}
+
+			if (op === '>') return actualNumber > expectedNumber;
+			if (op === '>=') return actualNumber >= expectedNumber;
+			if (op === '<') return actualNumber < expectedNumber;
+			return actualNumber <= expectedNumber;
+		}
+
+		return actualValues.includes(expectedValue);
+	};
+
 	/** @param {HTMLFormElement} form */
 	const toggleDependencies = (form) => {
 		/** @type {Map<string, HTMLElement>} */
@@ -262,12 +330,13 @@ const { createAdminConfigTransport } = require('./transport');
 
 			dependentRows.forEach((row) => {
 				const dependencyField = getData(row, 'dependency-field') || '';
-				const dependencyValue = getData(row, 'dependency-value');
+				const dependencyOperator = getData(row, 'dependency-operator') || '==';
+				const dependencyValue = dependencyExpectedValue(getData(row, 'dependency-value'));
 				const controllerRow = rowsByFieldId.get(dependencyField);
 				const shouldHide = (
 					!controllerRow
 					|| controllerRow.hidden
-					|| getControllerValue(form, dependencyField) !== dependencyValue
+					|| !dependencyMatches(getControllerValue(form, dependencyField), dependencyOperator, dependencyValue)
 				);
 
 				if (row.hidden !== shouldHide) {

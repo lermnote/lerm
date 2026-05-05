@@ -77,6 +77,15 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   updates.
 - Block editor number controls now preserve an explicitly cleared empty value
   instead of redisplaying the field default before save.
+- Block editor metabox schemas now skip classic metabox registration on
+  Gutenberg screens so normal post saves cannot overwrite REST panel changes.
+- Schema compilation now merges registered field-type client metadata into
+  each field's client payload, with per-field client config still taking
+  precedence.
+- Classic admin and block editor panels now share the `dependency` metadata
+  format for conditional field visibility.
+- Legacy Ajax compatibility now remains enabled by default until the documented
+  `0.3.0` removal gate disables it.
 
 ### Removed
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.

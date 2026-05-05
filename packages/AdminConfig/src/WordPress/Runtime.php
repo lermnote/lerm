@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\WordPress;
 
 use Lerm\AdminConfig\Compiler\CompiledSchema;
+use Lerm\AdminConfig\Compiler\SchemaCompiler;
 use Lerm\AdminConfig\Contracts\Container;
 use Lerm\AdminConfig\Contracts\FieldModule;
 use Lerm\AdminConfig\Registry\ContainerRegistry;
@@ -63,7 +64,7 @@ final class Runtime {
 
 	public function __construct( ?SchemaRegistry $registry = null, ?Framework $framework = null ) {
 		$this->framework    = $framework ?? new Framework();
-		$this->registry     = $registry ?? new SchemaRegistry();
+		$this->registry     = $registry ?? new SchemaRegistry( new SchemaCompiler( $this->framework->field_types() ) );
 		$this->stores       = new StoreResolver( $this->framework );
 		$this->containers   = new ContainerRegistry();
 		$this->data_sources = new DataSourceRegistry();

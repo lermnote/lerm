@@ -223,9 +223,45 @@ if ( ! function_exists( '__' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_attr' ) ) {
+	function esc_attr( $text ): string {
+		return htmlspecialchars( is_scalar( $text ) ? (string) $text : '', ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'esc_html' ) ) {
+	function esc_html( $text ): string {
+		return htmlspecialchars( is_scalar( $text ) ? (string) $text : '', ENT_QUOTES, 'UTF-8' );
+	}
+}
+
 if ( ! function_exists( 'esc_html__' ) ) {
 	function esc_html__( string $text ): string {
 		return $text;
+	}
+}
+
+if ( ! function_exists( 'checked' ) ) {
+	function checked( $checked, $current = true, bool $display = true ): string {
+		$result = (string) $checked === (string) $current ? ' checked="checked"' : '';
+
+		if ( $display ) {
+			echo $result;
+		}
+
+		return $result;
+	}
+}
+
+if ( ! function_exists( 'selected' ) ) {
+	function selected( $selected, $current = true, bool $display = true ): string {
+		$result = (string) $selected === (string) $current ? ' selected="selected"' : '';
+
+		if ( $display ) {
+			echo $result;
+		}
+
+		return $result;
 	}
 }
 
@@ -499,12 +535,48 @@ if ( ! function_exists( 'get_post_type' ) ) {
 	}
 }
 
+if ( ! function_exists( 'use_block_editor_for_post_type' ) ) {
+	function use_block_editor_for_post_type( string $post_type ): bool {
+		$setting = $GLOBALS['lerm_admin_config_use_block_editor_for_post_type'] ?? false;
+
+		if ( is_array( $setting ) && array_key_exists( $post_type, $setting ) ) {
+			return (bool) $setting[ $post_type ];
+		}
+
+		return is_bool( $setting ) ? $setting : false;
+	}
+}
+
+if ( ! function_exists( 'use_block_editor_for_post' ) ) {
+	function use_block_editor_for_post( $post ): bool {
+		$post_type = is_object( $post ) && isset( $post->post_type ) && is_scalar( $post->post_type )
+			? (string) $post->post_type
+			: '';
+
+		return '' !== $post_type && use_block_editor_for_post_type( $post_type );
+	}
+}
+
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		$GLOBALS['lerm_admin_config_actions'][ $hook ][] = array(
 			'callback'      => $callback,
 			'priority'      => $priority,
 			'accepted_args' => $accepted_args,
+		);
+	}
+}
+
+if ( ! function_exists( 'add_meta_box' ) ) {
+	function add_meta_box( string $id, string $title, callable $callback, $screen = null, string $context = 'advanced', string $priority = 'default', ?array $callback_args = null ): void {
+		$GLOBALS['lerm_admin_config_meta_boxes'][] = array(
+			'id'            => $id,
+			'title'         => $title,
+			'callback'      => $callback,
+			'screen'        => $screen,
+			'context'       => $context,
+			'priority'      => $priority,
+			'callback_args' => $callback_args,
 		);
 	}
 }

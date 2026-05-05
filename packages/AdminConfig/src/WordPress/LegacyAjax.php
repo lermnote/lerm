@@ -21,7 +21,7 @@ final class LegacyAjax {
 	public static function enabled(): bool {
 		$enabled = defined( 'LERM_ADMIN_CONFIG_ENABLE_LEGACY_AJAX' )
 			? (bool) constant( 'LERM_ADMIN_CONFIG_ENABLE_LEGACY_AJAX' )
-			: false;
+			: true;
 
 		if ( function_exists( 'apply_filters' ) ) {
 			$enabled = (bool) apply_filters( 'lerm_admin_config_legacy_ajax_enabled', $enabled );
