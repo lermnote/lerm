@@ -7,6 +7,7 @@
  * @since lerm 2.0
  */
 get_header();
+use function Lerm\Support\lerm_breadcrumb;
 $img_link   = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=2&mkt=';
 $resolution = '1920x1080';
 // language options
@@ -37,32 +38,32 @@ foreach ( $langs as $lang ) {
 $row_class    = ( 'layout-1c-narrow' === lerm_site_layout() ) ? 'justify-content-md-center' : '';
 $colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_site_layout() ) ? 'col-md-12' : 'col-lg-8';
 ?>
-	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
-	<div class="row <?php echo esc_attr( $row_class ); ?> "><!--.row-->
-		<div class="<?php echo esc_attr( $colunm_class ); ?> px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
+<?php lerm_breadcrumb(); ?>
+<div class="row <?php echo esc_attr( $row_class ); ?> "><!--.row-->
+	<div class="<?php echo esc_attr( $colunm_class ); ?> px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
 
-	<div class="card site-main">
-		<?php
-		if ( have_posts() ) :
-			while ( have_posts() ) :
-				the_post();
+		<div class="card site-main">
+			<?php
+			if ( have_posts() ) :
+				while ( have_posts() ) :
+					the_post();
+					?>
+					<figure class="figure">
+						<img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $copyright ); ?>" class="figure-img img-fluid rounded">
+						<figcaption  class="figure-caption text-center">
+							<?php echo esc_html( $copyright ); ?>
+						</figcaption>
+					</figure>
+					<?php
+					if ( comments_open() || get_comments_number() ) :
+						comments_template();
+					endif;
+				endwhile;
 				?>
-				<figure class="figure">
-					<img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $copyright ); ?>" class="figure-img img-fluid rounded">
-					<figcaption  class="figure-caption text-center">
-						<?php echo esc_html( $copyright ); ?>
-					</figcaption>
-				</figure>
-				<?php
-				if ( comments_open() || get_comments_number() ) :
-					comments_template();
-				endif;
-			endwhile;
-			?>
-		<?php endif; ?>
+			<?php endif; ?>
+		</div>
 	</div>
-</div>
 <?php get_sidebar(); ?>
-		</div><!--.row-->
+</div><!--.row-->
 <?php
 get_footer();

@@ -17,9 +17,9 @@ $summary_col     = $post_title ? 'col-sm-9' : 'col-sm-12';
 			<?php
 			lerm_featured_image(
 				array(
-					'classes' => 'card-img-top post-thumbnail',
-					'height'  => '110',
-					'width'   => '180',
+					'class'  => 'card-img-top post-thumbnail',
+					'height' => '110',
+					'width'  => '180',
 				)
 			);
 			?>

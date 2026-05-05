@@ -13,7 +13,8 @@
  */
 
 use Lerm\Support\Image;
-
+use function Lerm\Support\lerm_render_homepage_carousel;
+use function Lerm\Support\lerm_featured_image;
 get_header();
 
 $template_options  = lerm_get_template_options();
@@ -24,11 +25,11 @@ $cat_exclude       = (array) ( $template_options['cat_exclude'] ?? array() );
 
 // ─── Section 1: Carousel ────────────────────────────────────────────────
 if ( ! empty( $template_options['slide_enable'] ) ) :
-	get_template_part( 'template-parts/components/carousel' );
+	lerm_render_homepage_carousel( $template_options );
 endif;
 ?>
 
-<div class="row">
+<div class="row front-page">
 <main id="main" class="col-lg-8 pe-lg-0">
 
 <?php
@@ -68,7 +69,7 @@ $featured_query = new WP_Query( $featured_args );
 if ( $featured_query->have_posts() ) :
 	$has_sticky = ! empty( $sticky_ids ) && is_array( $sticky_ids );
 	?>
-	<section class="py-4">
+	<section class="featured-grid py-4">
 		<h2 class="h5 mb-3">
 			<?php if ( $has_sticky ) : ?>
 				<i class="fa fa-thumb-tack me-1" aria-hidden="true"></i><?php esc_html_e( 'Featured', 'lerm' ); ?>
@@ -86,7 +87,7 @@ if ( $featured_query->have_posts() ) :
 						<?php if ( $show_thumbnail ) : ?>
 							<a href="<?php the_permalink(); ?>" class="card-img-top overflow-hidden" aria-hidden="true" tabindex="-1">
 								<?php
-								get_template_part( 'template-parts/components/featured-image' );
+								lerm_featured_image();
 								?>
 							</a>
 						<?php endif; ?>
@@ -135,7 +136,7 @@ if ( ! empty( $featured_cat_ids ) && ! is_wp_error( $featured_cat_ids ) ) :
 		$cat_color_meta = get_term_meta( $category->term_id, 'cc_color', true );
 		$cat_color      = ! empty( $cat_color_meta ) ? $cat_color_meta : 'var(--lerm-color-primary)';
 		?>
-		<section class="py-4">
+		<section class="category-section py-4">
 			<h2 class="h5 mb-3">
 				<a href="<?php echo esc_url( get_category_link( $category ) ); ?>" class="text-decoration-none">
 					<i class="fa fa-folder-o me-1" aria-hidden="true"></i><?php echo esc_html( $category->name ); ?>
@@ -150,7 +151,7 @@ if ( ! empty( $featured_cat_ids ) && ! is_wp_error( $featured_cat_ids ) ) :
 					<article <?php post_class( 'card h-100' ); ?> style="border-left:3px solid <?php echo esc_attr( $cat_color ); ?>">
 						<?php if ( $show_thumbnail ) : ?>
 							<a href="<?php the_permalink(); ?>" class="card-img-top overflow-hidden" aria-hidden="true" tabindex="-1">
-								<?php get_template_part( 'template-parts/components/featured-image' ); ?>
+								<?php lerm_featured_image(); ?>
 							</a>
 						<?php endif; ?>
 						<div class="card-body">
@@ -171,7 +172,7 @@ if ( ! empty( $featured_cat_ids ) && ! is_wp_error( $featured_cat_ids ) ) :
 										<?php if ( $show_thumbnail ) : ?>
 											<div class="col-4 col-sm-3">
 												<a href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1">
-													<?php get_template_part( 'template-parts/components/featured-image' ); ?>
+													<?php lerm_featured_image(); ?>
 												</a>
 											</div>
 										<?php endif; ?>
@@ -212,7 +213,7 @@ $main_query = new WP_Query( $main_args );
 
 if ( $main_query->have_posts() ) :
 	?>
-	<section class="py-4">
+	<section class="main-loop py-4">
 		<h2 class="h5 mb-3"><?php esc_html_e( 'Recent Articles', 'lerm' ); ?></h2>
 		<?php
 		while ( $main_query->have_posts() ) :
@@ -245,4 +246,5 @@ endif;
 <?php get_sidebar(); ?>
 </div>
 
-<?php get_footer();
+<?php
+get_footer();

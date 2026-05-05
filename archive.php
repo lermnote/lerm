@@ -6,8 +6,8 @@
  * @package Lerm
  */
 
-get_header();
 use function Lerm\Support\lerm_breadcrumb;
+
 $lerm_term = get_queried_object();
 if ( $lerm_term ) {
 	$meta = get_term_meta( $lerm_term->term_id, 'lerm_taxonomy_options', true );
@@ -16,6 +16,8 @@ $bg_color       = isset( $meta['archive_color']['bg_color'] ) ? $meta['archive_c
 $font_color     = isset( $meta['archive_color']['font_color'] ) ? $meta['archive_color']['font_color'] : '#5d6777';
 $bg_image       = isset( $meta['archive_header_image'] ) ? 'url(' . $meta['archive_header_image']['url'] . ')' : '';
 $archive_header = sprintf( 'background: %s %s ; color: %s', $bg_image, $bg_color, $font_color );
+
+get_header();
 ?>
 <?php lerm_breadcrumb(); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->

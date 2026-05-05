@@ -4,8 +4,6 @@
  *
  * @package Lerm
  */
-
-get_header();
 use function Lerm\Support\lerm_breadcrumb;
 $template_options = lerm_get_template_options();
 
@@ -14,6 +12,8 @@ $show_copyright = ! isset( $template_options['post_copyright_enable'] ) || ! emp
 $copyright_text = ! empty( $template_options['post_copyright_text'] )
 	? $template_options['post_copyright_text']
 	: '';
+
+get_header();
 ?>
 <?php lerm_breadcrumb(); ?>
 <div <?php lerm_row_class(); ?>><!--.row-->
@@ -77,7 +77,7 @@ $copyright_text = ! empty( $template_options['post_copyright_text'] )
 							get_template_part( 'template-parts/components/post-navigation' );
 						}
 
-					endif; // is_singular('post')
+					endif;
 
 					if ( comments_open() || get_comments_number() ) {
 						comments_template();

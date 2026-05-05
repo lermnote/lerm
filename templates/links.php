@@ -7,6 +7,7 @@
  * @since   lerm 2.0
  */
 use function Lerm\Support\link_pagination;
+use function Lerm\Support\lerm_breadcrumb;
 get_header();
 $link_categories = get_terms(
 	array(
@@ -15,7 +16,7 @@ $link_categories = get_terms(
 );
 
 ?>
-	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+	<?php lerm_breadcrumb(); ?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">
@@ -69,7 +70,7 @@ $link_categories = get_terms(
 												$link_image       = sprintf( '<img src="%s" class="me-auto p-2 border rounded-3 " alt="%s" style="height:3rem;width:3rem;overflow: hidden;">%s', '$grap_favicon', esc_html( $link_term->link_name ), $link_name );
 												$link_card       .= sprintf( '<li class="col-3 col-sm-3 col-md-3 col-lg-auto text-center my-2 py-2"><a class="text-dark h-100" href="%s" target="%s">%s</a></li>', esc_html( $link_term->link_url ), esc_html( $link_term->link_target ), $link_image, $link_description );
 											}
-											echo sprintf( '<ul class="row list-unstyled card-body">%s</ul>', $link_card ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+											printf( '<ul class="row list-unstyled card-body">%s</ul>', $link_card ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 											?>
 											</div>
 										<?php

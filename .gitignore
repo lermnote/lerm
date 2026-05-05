@@ -1,6 +1,7 @@
 node_modules
 .vscode/
 .workbuddy/
+.claude/
 assets/avatar/
 vendor
 /composer.lock

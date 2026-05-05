@@ -478,9 +478,9 @@ body {
 }
 
 .navbar-search-wrapper {
-  padding-top:    var(--lerm-nav-link-padding-y);
+  padding-top: var(--lerm-nav-link-padding-y);
   padding-bottom: var(--lerm-nav-link-padding-y);
-  align-items:    center;
+  align-items: center;
 }
 
 .navbar-brand {
@@ -542,7 +542,7 @@ body {
   box-shadow: none;
 }
 
-@media (max-width: 991.9px) {
+@media (max-width: 991.98px) {
   .offcanvas-end {
     width: 70%;
   }
@@ -554,7 +554,7 @@ body {
   padding: 3px 0;
 }
 
-@media (max-width: 991.9px) {
+@media (max-width: 991.98px) {
   .custom-logo {
     width: auto;
     height: 2rem;
@@ -1891,9 +1891,9 @@ Media
 
 @media (max-width: 767.98px) {
   .nav-link {
-    padding-top:    var(--lerm-nav-link-padding-y);
+    padding-top: var(--lerm-nav-link-padding-y);
     padding-bottom: var(--lerm-nav-link-padding-y);
-    padding-left:   1rem;
+    padding-left: 1rem;
   }
 
   .page-numbers {
@@ -1968,9 +1968,11 @@ body {
   box-shadow: none;
   padding-left: 1rem;
 }
+
 .offcanvas .dropdown-toggle::after {
   transition: transform 0.2s ease;
 }
+
 .offcanvas .dropdown-toggle[aria-expanded="true"]::after {
   transform: rotate(180deg);
 }
@@ -2011,9 +2013,9 @@ body {
 }
 
 .nav-link {
-  padding-top:    var(--lerm-nav-link-padding-y);
+  padding-top: var(--lerm-nav-link-padding-y);
   padding-bottom: var(--lerm-nav-link-padding-y);
-  transition:     padding-top 0.25s ease, padding-bottom 0.25s ease;
+  transition: padding-top 0.25s ease, padding-bottom 0.25s ease;
 }
 
 /* ── Links ────────────────────────────────────────────────── */
@@ -2148,7 +2150,7 @@ a[id="cancel-comment-reply-link"]:hover {
 }
 
 .site-header.is-shrunk .nav-link {
-  padding-top:    0.5rem;
+  padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
 
@@ -2178,6 +2180,18 @@ a[id="cancel-comment-reply-link"]:hover {
 /*--------------------------------------------------------------
  CMS Front Page
 --------------------------------------------------------------*/
+
+/* ── Shared card refinements ────────────────────────────────── */
+.front-page .card {
+  border: 1px solid var(--lerm-color-border);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.front-page .card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: transparent;
+}
+
 .card-img-top {
   border-radius: var(--lerm-radius-card) var(--lerm-radius-card) 0 0;
 }
@@ -2188,9 +2202,103 @@ a[id="cancel-comment-reply-link"]:hover {
 }
 
 .card-img-top .figure img {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
 }
 
 .card:hover .card-img-top img {
   transform: scale(1.03);
+}
+
+/* ── Section header ─────────────────────────────────────────── */
+.front-page section > h2,
+.front-page section > .section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--lerm-color-border);
+}
+
+.front-page section > h2 i,
+.front-page section > .section-header i {
+  color: var(--lerm-color-primary);
+  font-size: 0.9em;
+}
+
+.front-page section > h2 a {
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.front-page section > h2 a:hover {
+  color: var(--lerm-color-primary);
+}
+
+/* ── Section 1: Carousel wrapper ─────────────────────────────── */
+.front-page .carousel {
+  margin-bottom: var(--lerm-section-gap);
+}
+
+/* ── Section 2: Featured posts grid ─────────────────────────── */
+.front-page .featured-grid .card-title a {
+  color: var(--lerm-color-text);
+  transition: color 0.2s ease;
+}
+
+.front-page .featured-grid .card-title a:hover {
+  color: var(--lerm-color-primary);
+}
+
+/* ── Section 3: Category rows ───────────────────────────────── */
+
+.front-page .category-section .card-title a {
+  color: var(--lerm-color-text);
+  transition: color 0.2s ease;
+}
+
+.front-page .category-section .card-title a:hover {
+  color: var(--lerm-color-primary);
+}
+
+.front-page .category-section .card .card-body.py-2 {
+  padding-left: 0.75rem;
+}
+
+/* Small thumbnail hover in category sidebar */
+.front-page .category-section .figure img {
+  border-radius: var(--lerm-radius-card);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.front-page .category-section .card:hover .figure img {
+  transform: scale(1.04);
+  opacity: 0.9;
+}
+
+/* ── Section 4: Main post loop ──────────────────────────────── */
+.front-page .main-loop .card {
+  margin-bottom: var(--lerm-section-gap);
+}
+
+.front-page .main-loop .entry-title a {
+  color: var(--lerm-color-text);
+  transition: color 0.2s ease;
+}
+
+.front-page .main-loop .entry-title a:hover {
+  color: var(--lerm-color-primary);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+  .front-page section > h2 {
+    font-size: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .front-page .category-section .card-body.py-2 {
+    padding-left: 0.5rem;
+  }
 }

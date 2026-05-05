@@ -5,176 +5,203 @@
  * @package Lerm
  */
 
-get_header();
+use function Lerm\Support\lerm_breadcrumb;
 
-$args  = array(
-	'post_type'           => 'post',
-	'posts_per_page'      => -1,
-	'ignore_sticky_posts' => 1,
-	'orderby'             => 'date',
-	'order'               => 'DESC',
-);
-$query = new WP_Query( $args );
+/**
+ * 归档数据结构：
+ * [
+ *   'Y' => [
+ *     'm' => [
+ *       ['title'=>string, 'url'=>string, 'day'=>string, 'comments'=>int],
+ *       …
+ *     ],
+ *   ],
+ * ]
+ *
+ * @return array<string, array<string, list<array{title:string, url:string, day:string, comments:int}>>>
+ */
+function lerm_build_archive_data(): array {
+	$cache_key = 'lerm_archives_v1';
+	$cached    = get_transient( $cache_key );
+
+	if ( is_array( $cached ) && ! empty( $cached ) ) {
+		return $cached;
+	}
+
+	$query = new WP_Query(
+		array(
+			'post_type'              => 'post',
+			'post_status'            => 'publish',
+			'posts_per_page'         => -1,
+			'ignore_sticky_posts'    => true,
+			'orderby'                => 'date',
+			'order'                  => 'DESC',
+			'no_found_rows'          => true,  // 跳过 SQL COUNT(*)，不需要分页
+			'update_post_meta_cache' => false, // 不读取 post meta 缓存
+			'update_post_term_cache' => false, // 不读取 term 缓存
+		)
+	);
+
+	$data = array();
+
+	foreach ( $query->posts as $post ) {
+		$year  = get_the_date( 'Y', $post );
+		$month = get_the_date( 'm', $post );
+
+		// 仅存储原始数据，HTML 在渲染时生成，保持数据与视图分离
+		$data[ $year ][ $month ][] = array(
+			'title'    => get_the_title( $post ),
+			'url'      => get_permalink( $post ),
+			'day'      => get_the_date( 'd', $post ),
+			'comments' => (int) get_comments_number( $post ),
+		);
+	}
+
+	set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
+
+	return $data;
+}
+
+$archive_data = lerm_build_archive_data();
+
+get_header();
+lerm_breadcrumb();
 ?>
-<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+
 <div <?php lerm_row_class(); ?>>
 	<div id="primary" <?php lerm_column_class(); ?>>
 		<div class="site-main">
+
 			<?php
 			if ( have_posts() ) :
-				while ( have_posts() ) :
-					the_post();
-					?>
+				the_post();
+				?>
 
-			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-				<header class="entry-header d-flex flex-column text-center mb-md-2">
-					<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
-					<small class="entry-meta text-muted">
-						<?php esc_html_e( 'Tip: click a month to expand it.', 'lerm' ); ?>
-					</small>
-				</header>
+				<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+
+					<header class="entry-header d-flex flex-column text-center mb-md-2">
+						<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+						<small class="entry-meta text-muted">
+							<?php esc_html_e( 'Tip: click a month to expand it.', 'lerm' ); ?>
+						</small>
+					</header>
 
 					<?php the_content(); ?>
 
-				<div id="archives" class="archives-page">
-					<?php
-							$posts_rebuild = array();
+					<div id="archives" class="archives-page">
 
-					while ( $query->have_posts() ) :
-						$query->the_post();
+						<?php if ( empty( $archive_data ) ) : ?>
 
-						$year  = get_the_date( 'Y' );
-						$month = get_the_date( 'm' );
+							<p class="text-muted"><?php esc_html_e( 'No posts found.', 'lerm' ); ?></p>
 
-						$posts_rebuild[ $year ][ $month ][] = sprintf(
-							'<span class="entry-published me-2 text-muted small">%s</span>'
-							. '<a href="%s" class="flex-grow-1">%s</a>'
-							. '%s',
-							esc_html( get_the_date( 'd' ) ),
-							esc_url( get_permalink() ),
-							esc_html( get_the_title() ),
-							get_comments_number() > 0
-								? sprintf(
-									'<span class="badge rounded-pill text-bg-primary ms-1">%s</span>',
-									esc_html( (string) get_comments_number() )
-								)
-								: ''
-						);
-											endwhile;
-							wp_reset_postdata();
+						<?php else : ?>
 
-					foreach ( $posts_rebuild as $key_y => $months ) :
-						$year_count = array_sum( array_map( 'count', $months ) );
-						?>
-					<section class="archives-year card mb-3">
-						<h2 class="card-header mb-0 d-flex justify-content-between align-items-center fs-5">
-							<span><?php echo esc_html( $key_y ); ?></span>
-							<span class="badge text-bg-secondary">
-								<?php echo esc_html( (string) $year_count ); ?>
-								<?php esc_html_e( '篇', 'lerm' ); ?>
-							</span>
-						</h2>
-						<ul class="list-unstyled card-body py-2 mb-0">
 							<?php
-							foreach ( $months as $key_m => $posts ) :
-									$list_id    = sprintf(
-										'archives-%s-%s',
-										sanitize_html_class( $key_y ),
-										sanitize_html_class( $key_m )
-									);
-									$month_name = date_i18n( 'F', mktime( 0, 0, 0, (int) $key_m, 1 ) );
-									$post_count = count( $posts );
+							foreach ( $archive_data as $year => $months ) :
+								$year_count = array_sum( array_map( 'count', $months ) );
 								?>
-							<li class="mb-1">
 
-								<button type="button"
-									class="archives-month-btn btn btn-link p-0 w-100 text-start text-decoration-none d-flex align-items-center"
-									data-archives-toggle data-bs-toggle="collapse"
-									data-bs-target="#<?php echo esc_attr( $list_id ); ?>" aria-expanded="false"
-									aria-controls="<?php echo esc_attr( $list_id ); ?>">
-									<span class="month-name"><?php echo esc_html( $month_name ); ?></span>
-									<span class="archives-toggle-icon"></span>
-									<span class="badge rounded-pill text-bg-danger ms-auto">
-										<?php echo esc_html( (string) $post_count ); ?>
-										<?php esc_html_e( '篇', 'lerm' ); ?>
-									</span>
-								</button>
-								<ul class=" post-list collapse mt-1 ps-3" id="<?php echo esc_attr( $list_id ); ?>">
-									<?php foreach ( $posts as $post_item ) : ?>
-									<li class="archives-post d-flex align-items-center">
-										<?php echo wp_kses_post( $post_item ); ?>
-									</li>
-									<?php endforeach; ?>
-								</ul>
-							</li>
+								<section class="archives-year card mb-3">
+
+									<h2 class="card-header mb-0 d-flex justify-content-between align-items-center fs-5">
+										<span><?php echo esc_html( (string) $year ); ?></span>
+										<span class="badge text-bg-secondary">
+											<?php
+											echo esc_html(
+												sprintf(
+													/* translators: %d: post count in a year. */
+													_n( '%d post', '%d posts', $year_count, 'lerm' ),
+													$year_count
+												)
+											);
+											?>
+										</span>
+									</h2>
+
+									<ul class="list-unstyled card-body py-2 mb-0">
+
+										<?php
+										foreach ( $months as $month_num => $posts ) :
+											$list_id    = sprintf(
+												'archives-%s-%s',
+												sanitize_html_class( (string) $year ),
+												sanitize_html_class( (string) $month_num )
+											);
+											$month_name = date_i18n( 'F', mktime( 0, 0, 0, (int) $month_num, 1 ) );
+											$post_count = count( $posts );
+											?>
+
+											<li class="mb-1">
+
+												<button
+													type="button"
+													class="archives-month-btn btn btn-link p-0 w-100 text-start text-decoration-none d-flex align-items-center"
+													data-archives-toggle
+													data-bs-toggle="collapse"
+													data-bs-target="#<?php echo esc_attr( $list_id ); ?>"
+													aria-expanded="false"
+													aria-controls="<?php echo esc_attr( $list_id ); ?>">
+													<span class="month-name"><?php echo esc_html( $month_name ); ?></span>
+													<span class="archives-toggle-icon" aria-hidden="true"></span>
+													<span class="badge rounded-pill text-bg-danger ms-auto">
+														<?php
+														echo esc_html(
+															sprintf(
+																/* translators: %d: post count in a month. */
+																_n( '%d post', '%d posts', $post_count, 'lerm' ),
+																$post_count
+															)
+														);
+														?>
+													</span>
+												</button>
+
+												<ul class="post-list collapse mt-1 ps-3" id="<?php echo esc_attr( $list_id ); ?>">
+													<?php foreach ( $posts as $post_item ) : ?>
+														<li class="archives-post d-flex align-items-center">
+															<span class="entry-published me-2 text-muted small">
+																<?php echo esc_html( $post_item['day'] ); ?>
+															</span>
+															<a href="<?php echo esc_url( $post_item['url'] ); ?>" class="flex-grow-1">
+																<?php echo esc_html( $post_item['title'] ); ?>
+															</a>
+															<?php if ( $post_item['comments'] > 0 ) : ?>
+																<span class="badge rounded-pill text-bg-primary ms-1">
+																	<?php echo esc_html( (string) $post_item['comments'] ); ?>
+																</span>
+															<?php endif; ?>
+														</li>
+													<?php endforeach; ?>
+												</ul>
+
+											</li>
+
+										<?php endforeach; ?>
+
+									</ul>
+
+								</section>
+
 							<?php endforeach; ?>
-						</ul>
-					</section>
-					<?php endforeach; ?>
 
-				</div><!-- #archives -->
-			</article>
+						<?php endif; ?>
 
-					<?php
-					if ( comments_open() || get_comments_number() ) :
-						comments_template();
+					</div><!-- #archives -->
+
+				</article>
+
+				<?php
+				if ( comments_open() || get_comments_number() ) :
+					comments_template();
 				endif;
-					?>
 
-					<?php
-				endwhile;
-		endif;
+			endif;
 			?>
+
 		</div>
 	</div>
 	<?php get_sidebar(); ?>
 </div>
-
-<style>
-/* 用伪元素画 + / - */
-.archives-toggle-icon {
-	position: relative;
-	display: inline-block;
-	width: 14px;
-	height: 14px;
-	flex-shrink: 0;
-}
-
-/* 横线（始终存在） */
-.archives-toggle-icon::before,
-.archives-toggle-icon::after {
-	content: "";
-	position: absolute;
-	background-color: var(--bs-primary, #0d6efd);
-	border-radius: 2px;
-	transition: transform 0.25s ease, opacity 0.25s ease;
-}
-
-/* 横线 */
-.archives-toggle-icon::before {
-	top: 50%;
-	left: 0;
-	width: 100%;
-	height: 2px;
-	transform: translateY(-50%);
-}
-
-/* 竖线 */
-.archives-toggle-icon::after {
-	top: 0;
-	left: 50%;
-	width: 2px;
-	height: 100%;
-	transform: translateX(-50%);
-	/* 展开时旋转 90deg 并淡出 */
-}
-
-/* 展开状态：竖线旋转 90° 变成横线（视觉上消失，呈现 - ） */
-[data-archives-toggle][aria-expanded="true"] .archives-toggle-icon::after {
-	transform: translateX(-50%) rotate(90deg);
-	opacity: 0;
-}
-</style>
 
 <?php
 get_footer();

@@ -4,9 +4,10 @@
  *
  * @package Lerm
  */
+use function Lerm\Support\lerm_breadcrumb;
 
 get_header();
-use function Lerm\Support\lerm_breadcrumb;
+
 ?>
 <?php lerm_breadcrumb(); ?>
 <div <?php lerm_row_class( 'py-3' ); ?>><!--.row-->

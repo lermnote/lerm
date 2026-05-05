@@ -54,7 +54,7 @@ foreach ( $archive_data as $key => $value ) {
 	$archive_data_attrs .= sprintf( ' data-%1$s="%2$s"', esc_attr( $key ), esc_attr( (string) $value ) );
 }
 
-$_lm_next_page = ( get_query_var( 'paged' ) ? (int) get_query_var( 'paged' ) : 1 ) + 1;
+$_lm_next_page    = ( get_query_var( 'paged' ) ? (int) get_query_var( 'paged' ) : 1 ) + 1;
 $template_options = lerm_get_template_options();
 
 if ( $wp_query->max_num_pages > 1 ) :
