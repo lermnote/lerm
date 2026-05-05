@@ -13,7 +13,8 @@
  */
 
 use Lerm\Support\Image;
-
+use function Lerm\Support\lerm_render_homepage_carousel;
+use function Lerm\Support\lerm_featured_image;
 get_header();
 
 $template_options  = lerm_get_template_options();
@@ -24,7 +25,7 @@ $cat_exclude       = (array) ( $template_options['cat_exclude'] ?? array() );
 
 // ─── Section 1: Carousel ────────────────────────────────────────────────
 if ( ! empty( $template_options['slide_enable'] ) ) :
-	get_template_part( 'template-parts/components/carousel' );
+	lerm_render_homepage_carousel( $template_options );
 endif;
 ?>
 
@@ -86,7 +87,7 @@ if ( $featured_query->have_posts() ) :
 						<?php if ( $show_thumbnail ) : ?>
 							<a href="<?php the_permalink(); ?>" class="card-img-top overflow-hidden" aria-hidden="true" tabindex="-1">
 								<?php
-								get_template_part( 'template-parts/components/featured-image' );
+								lerm_featured_image();
 								?>
 							</a>
 						<?php endif; ?>
@@ -150,7 +151,7 @@ if ( ! empty( $featured_cat_ids ) && ! is_wp_error( $featured_cat_ids ) ) :
 					<article <?php post_class( 'card h-100' ); ?> style="border-left:3px solid <?php echo esc_attr( $cat_color ); ?>">
 						<?php if ( $show_thumbnail ) : ?>
 							<a href="<?php the_permalink(); ?>" class="card-img-top overflow-hidden" aria-hidden="true" tabindex="-1">
-								<?php get_template_part( 'template-parts/components/featured-image' ); ?>
+								<?php lerm_featured_image(); ?>
 							</a>
 						<?php endif; ?>
 						<div class="card-body">
@@ -171,7 +172,7 @@ if ( ! empty( $featured_cat_ids ) && ! is_wp_error( $featured_cat_ids ) ) :
 										<?php if ( $show_thumbnail ) : ?>
 											<div class="col-4 col-sm-3">
 												<a href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1">
-													<?php get_template_part( 'template-parts/components/featured-image' ); ?>
+													<?php lerm_featured_image(); ?>
 												</a>
 											</div>
 										<?php endif; ?>
@@ -245,4 +246,5 @@ endif;
 <?php get_sidebar(); ?>
 </div>
 
-<?php get_footer();
+<?php
+get_footer();

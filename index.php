@@ -9,24 +9,24 @@
  *
  * @since  1.0
  */
-
-get_header();
+use function Lerm\Support\lerm_render_homepage_carousel;
 use function Lerm\Support\lerm_breadcrumb;
 $template_options = lerm_get_template_options();
 
+get_header();
 ?>
 	<?php
 	lerm_breadcrumb();
 
 	if ( 'under_navbar' === $template_options['slide_position'] ) {
-		get_template_part( 'template-parts/components/carousel' );
+		lerm_render_homepage_carousel( $template_options );
 	}
 	?>
 	<div <?php lerm_row_class(); ?>><!--.row-->
 		<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 			<?php
 			if ( 'under_primary' === $template_options['slide_position'] ) {
-				get_template_part( 'template-parts/components/carousel' );
+				lerm_render_homepage_carousel( $template_options );
 			}
 			?>
 			<div id="main" class="site-main ajax-posts" data-page="<?php echo get_query_var( 'paged' ) ? esc_attr( get_query_var( 'paged' ) ) : 1; ?>" data-max="<?php echo esc_attr( $wp_query->max_num_pages ); ?>">

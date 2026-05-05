@@ -4,18 +4,26 @@ namespace Lerm\View;
 use Lerm\Traits\Singleton;
 
 /**
- * Carousel renderer (Bootstrap 5)
+ * Carousel renderer (Bootstrap 5).
+ *
+ * Usage:
+ *   Carousel::instance( $params );   // 实例化并自动渲染（slide_enable=true 时）
+ *   Carousel::render( $params );     // 直接静态渲染，无需实例化
+ *
+ * @package Lerm
  */
 class Carousel {
 
 	use Singleton;
 
-	/**
-	 * Default args.
-	 *
-	 * @var array
-	 */
-	private static $args = array(
+	/** 允许的动画 class 白名单。 */
+	private const ALLOWED_ANIMATIONS = array( 'carousel-fade', '' );
+
+	/** 实例持有的参数（非静态，避免多次调用互相污染）。 */
+	private array $args;
+
+	/** 默认参数。 */
+	private static array $defaults = array(
 		'slide_enable' => false,
 		'slides'       => array(),
 		'indicators'   => false,
@@ -23,208 +31,209 @@ class Carousel {
 		'animation'    => 'carousel-fade',
 	);
 
-	/**
-	 * Constructor.
-	 *
-	 * @param array $params Optional args.
-	 */
-	public function __construct( $params = array() ) {
-		self::$args = apply_filters( 'lerm_slide_args', wp_parse_args( $params, self::$args ) );
+	/** wp_kses 允许的标签与属性。 */
+	private const ALLOWED_HTML = array(
+		'div'    => array(
+			'id'               => true,
+			'class'            => true,
+			'data-bs-ride'     => true,
+			'data-bs-interval' => true,
+		),
+		'button' => array(
+			'type'             => true,
+			'class'            => true,
+			'data-bs-target'   => true,
+			'data-bs-slide'    => true,
+			'data-bs-slide-to' => true,
+			'aria-current'     => true,
+			'aria-label'       => true,
+		),
+		'img'    => array(
+			'src'     => true,
+			'alt'     => true,
+			'width'   => true,
+			'height'  => true,
+			'class'   => true,
+			'loading' => true,
+		),
+		'a'      => array(
+			'href'  => true,
+			'title' => true,
+			'class' => true,
+		),
+		'span'   => array(
+			'class'       => true,
+			'aria-hidden' => true,
+		),
+		'h5'     => array(),
+		'p'      => array(),
+	);
 
-		if ( ! empty( self::$args['slide_enable'] ) ) {
-			self::render();
+	// ── 构造器 ────────────────────────────────────────────────────────────────
+
+	/**
+	 * @param array $params 覆盖默认参数的选项数组。
+	 */
+	public function __construct( array $params = array() ) {
+		$this->args = apply_filters(
+			'lerm_slide_args',
+			wp_parse_args( $params, self::$defaults )
+		);
+
+		if ( ! empty( $this->args['slide_enable'] ) ) {
+			$this->output();
 		}
 	}
 
-	/**
-	 * Render the carousel.
-	 *
-	 * @param array $args Optional override args.
-	 */
-	public static function render( $args = array() ) {
-		$args   = wp_parse_args( $args, self::$args );
-		$slides = is_array( $args['slides'] ) ? $args['slides'] : array();
+	// ── 公开 API ──────────────────────────────────────────────────────────────
 
+	/**
+	 * 静态渲染入口（无需先实例化）。
+	 *
+	 * @param array $params 完整参数数组。
+	 */
+	public static function render( array $params = array() ): void {
+		$args = apply_filters(
+			'lerm_slide_args',
+			wp_parse_args( $params, self::$defaults )
+		);
+		self::build_and_echo( $args );
+	}
+
+	// ── 私有渲染 ──────────────────────────────────────────────────────────────
+
+	/**
+	 * 从实例 args 输出轮播（由构造器调用）。
+	 */
+	private function output(): void {
+		self::build_and_echo( $this->args );
+	}
+
+	/**
+	 * 核心渲染逻辑：构建并输出轮播 HTML。
+	 *
+	 * @param array $args 完整参数数组。
+	 */
+	private static function build_and_echo( array $args ): void {
+		$slides = is_array( $args['slides'] ) ? array_values( $args['slides'] ) : array();
 		if ( empty( $slides ) ) {
 			return;
 		}
 
-		$animation          = self::sanitize_animation( $args['animation'] );
-		$indicators_enabled = ! empty( $args['indicators'] );
-		$controls_enabled   = ! empty( $args['control'] );
+		$animation       = self::sanitize_animation( (string) ( $args['animation'] ?? '' ) );
+		$show_indicators = ! empty( $args['indicators'] );
+		$show_controls   = ! empty( $args['control'] );
 
-		$indicator_html = array();
-		$carousel_html  = array();
+		$indicator_items = array();
+		$slide_items     = array();
+		$render_index    = 0; // 仅计已成功渲染的帧，与 data-bs-slide-to 对应
 
-		foreach ( $slides as $key => $slide ) {
-
+		foreach ( $slides as $slide ) {
 			if ( ! is_array( $slide ) ) {
 				continue;
 			}
 
 			$image = isset( $slide['image'] ) && is_array( $slide['image'] ) ? $slide['image'] : array();
-
-			// skip slides without a usable image url.
 			if ( empty( $image['url'] ) ) {
-				continue;
+				continue; // 跳过无效帧，同时不递增 render_index
 			}
 
-			$active = ( 0 === $key ) ? ' active' : '';
+			$is_first = ( 0 === $render_index );
+			$active   = $is_first ? ' active' : '';
 
-			// Indicator (only build if indicators might be output)
+			// ── Indicator ──────────────────────────────────────────────────
 			/* translators: %d: Slide number (1-based). */
-			$aria_label       = esc_attr( sprintf( __( 'Slide %d', 'lerm' ), $key + 1 ) );
-			$indicator_html[] = sprintf(
-				'<button type="button" data-bs-target="#lermSlides" data-bs-slide-to="%d" class="%s" %s aria-label="%s"></button>',
-				intval( $key ),
-				$active,
-				$active ? 'aria-current="true"' : '',
+			$aria_label        = esc_attr( sprintf( __( 'Slide %d', 'lerm' ), $render_index + 1 ) );
+			$indicator_items[] = sprintf(
+				'<button type="button" data-bs-target="#lermSlides" data-bs-slide-to="%d" class="%s"%s aria-label="%s"></button>',
+				$render_index,
+				trim( $active ),
+				$is_first ? ' aria-current="true"' : '',
 				$aria_label
 			);
 
-			// Image tag
-			$img_alt    = isset( $image['alt'] ) ? $image['alt'] : ( isset( $slide['title'] ) ? $slide['title'] : '' );
-			$img_width  = isset( $image['width'] ) ? $image['width'] : '';
-			$img_height = isset( $image['height'] ) ? $image['height'] : '';
+			// ── Image ──────────────────────────────────────────────────────
+			$alt    = (string) ( $image['alt'] ?? $slide['title'] ?? '' );
+			$width  = ! empty( $image['width'] ) ? ' width="' . esc_attr( (string) $image['width'] ) . '"' : '';
+			$height = ! empty( $image['height'] ) ? ' height="' . esc_attr( (string) $image['height'] ) . '"' : '';
 
 			$image_tag = sprintf(
 				'<img class="d-block img-fluid w-100 rounded slider" src="%s" alt="%s"%s%s loading="lazy">',
 				esc_url( $image['url'] ),
-				esc_attr( $img_alt ),
-				$img_width ? ' width="' . esc_attr( $img_width ) . '"' : '',
-				$img_height ? ' height="' . esc_attr( $img_height ) . '"' : ''
+				esc_attr( $alt ),
+				$width,
+				$height
 			);
 
-			// Wrap in link if provided
-			$link = ( ! empty( $slide['url'] ) ) ? sprintf(
-				'<a href="%s" title="%s">%s</a>',
-				esc_url( $slide['url'] ),
-				esc_attr( isset( $slide['title'] ) ? $slide['title'] : '' ),
-				$image_tag
-			) : $image_tag;
+			// ── Optional link wrapper ──────────────────────────────────────
+			$inner = ! empty( $slide['url'] )
+				? sprintf(
+					'<a href="%s" title="%s">%s</a>',
+					esc_url( $slide['url'] ),
+					esc_attr( (string) ( $slide['title'] ?? '' ) ),
+					$image_tag
+				)
+				: $image_tag;
 
-			// Caption
+			// ── Optional caption ───────────────────────────────────────────
 			$caption = '';
 			if ( ! empty( $slide['title'] ) || ! empty( $slide['description'] ) ) {
-				$caption  = '<div class="carousel-caption d-none d-md-block">';
-				$caption .= ! empty( $slide['title'] ) ? '<h5>' . esc_html( $slide['title'] ) . '</h5>' : '';
-				$caption .= ! empty( $slide['description'] ) ? '<p>' . esc_html( $slide['description'] ) . '</p>' : '';
-				$caption .= '</div>';
+				$caption = '<div class="carousel-caption d-none d-md-block">'
+					. ( ! empty( $slide['title'] ) ? '<h5>' . esc_html( $slide['title'] ) . '</h5>' : '' )
+					. ( ! empty( $slide['description'] ) ? '<p>' . esc_html( $slide['description'] ) . '</p>' : '' )
+					. '</div>';
 			}
 
-			$carousel_html[] = sprintf(
+			$slide_items[] = sprintf(
 				'<div class="carousel-item%s" data-bs-interval="10000">%s%s</div>',
 				$active,
-				$link,
+				$inner,
 				$caption
 			);
+
+			++$render_index;
 		}
 
-		// Nothing to show
-		if ( empty( $carousel_html ) ) {
+		if ( empty( $slide_items ) ) {
 			return;
 		}
 
-		$output   = array();
-		$output[] = '<div id="lermSlides" class="carousel slide ' . esc_attr( $animation ) . ' mb-3" data-bs-ride="carousel">';
+		// ── Assemble ───────────────────────────────────────────────────────
+		$out   = array();
+		$out[] = '<div id="lermSlides" class="carousel slide ' . esc_attr( $animation ) . ' mb-3" data-bs-ride="carousel">';
 
-		if ( $indicators_enabled ) {
-			$output[] = '<div class="carousel-indicators mb-0">';
-			$output[] = implode( '', $indicator_html );
-			$output[] = '</div>';
+		if ( $show_indicators ) {
+			$out[] = '<div class="carousel-indicators mb-0">' . implode( '', $indicator_items ) . '</div>';
 		}
 
-		$output[] = '<div class="carousel-inner">';
-		$output[] = implode( '', $carousel_html );
-		$output[] = '</div>';
+		$out[] = '<div class="carousel-inner">' . implode( '', $slide_items ) . '</div>';
 
-		if ( $controls_enabled ) {
-			$output[] = '<button class="carousel-control-prev d-none d-md-flex" type="button" data-bs-target="#lermSlides" data-bs-slide="prev">';
-			$output[] = '<span class="carousel-control-prev-icon" aria-hidden="true"></span>';
-			$output[] = '<span class="visually-hidden">' . esc_html__( 'Previous', 'lerm' ) . '</span>';
-			$output[] = '</button>';
+		if ( $show_controls ) {
+			$out[] = '<button class="carousel-control-prev d-none d-md-flex" type="button" data-bs-target="#lermSlides" data-bs-slide="prev">'
+				. '<span class="carousel-control-prev-icon" aria-hidden="true"></span>'
+				. '<span class="visually-hidden">' . esc_html__( 'Previous', 'lerm' ) . '</span>'
+				. '</button>';
 
-			$output[] = '<button class="carousel-control-next d-none d-md-flex" type="button" data-bs-target="#lermSlides" data-bs-slide="next">';
-			$output[] = '<span class="carousel-control-next-icon" aria-hidden="true"></span>';
-			$output[] = '<span class="visually-hidden">' . esc_html__( 'Next', 'lerm' ) . '</span>';
-			$output[] = '</button>';
+			$out[] = '<button class="carousel-control-next d-none d-md-flex" type="button" data-bs-target="#lermSlides" data-bs-slide="next">'
+				. '<span class="carousel-control-next-icon" aria-hidden="true"></span>'
+				. '<span class="visually-hidden">' . esc_html__( 'Next', 'lerm' ) . '</span>'
+				. '</button>';
 		}
 
-		$output[] = '</div>';
+		$out[] = '</div><!-- #lermSlides -->';
 
-		$html = implode( '', $output );
-
-		// allow only specific tags + attributes so data-* & aria-* survive
-		$allowed = array(
-			'div'    => array(
-				'id'               => true,
-				'class'            => true,
-				'data-bs-ride'     => true,
-				'data-bs-interval' => true,
-			),
-			'button' => array(
-				'type'           => true,
-				'class'          => true,
-				'data-bs-target' => true,
-				'data-bs-slide'  => true,
-				'aria-current'   => true,
-				'aria-label'     => true,
-			),
-			'img'    => array(
-				'src'     => true,
-				'alt'     => true,
-				'width'   => true,
-				'height'  => true,
-				'class'   => true,
-				'loading' => true,
-			),
-			'a'      => array(
-				'href'  => true,
-				'title' => true,
-				'class' => true,
-			),
-			'span'   => array(
-				'class'       => true,
-				'aria-hidden' => true,
-			),
-			'h5'     => array(),
-			'p'      => array(),
-		);
-
-		echo wp_kses( $html, $allowed ); // safe output
+		echo wp_kses( implode( '', $out ), self::ALLOWED_HTML );
 	}
 
-	/**
-	 * Return true if array is empty or not an array or contains only empty values.
-	 *
-	 * @param mixed $candidate Candidate.
-	 * @return bool
-	 */
-	protected static function is_array_empty( $candidate ) {
-		if ( ! is_array( $candidate ) ) {
-			return true;
-		}
-		$non_empty = array_filter(
-			$candidate,
-			function ( $item ) {
-				return ! empty( $item );
-			}
-		);
-		return empty( $non_empty );
-	}
+	// ── 辅助方法 ──────────────────────────────────────────────────────────────
 
 	/**
-	 * Ensure animation is an allowed/whitelisted class.
+	 * 校验动画 class，不在白名单内则返回空字符串。
 	 *
-	 * @param string $animation Input animation.
-	 * @return string Sanitized animation class.
+	 * @param string $animation 输入值。
+	 * @return string
 	 */
-	protected static function sanitize_animation( $animation ) {
-		$allowed   = array(
-			'carousel-fade',
-			'', // no animation
-		);
-		$animation = (string) $animation;
-		return in_array( $animation, $allowed, true ) ? $animation : '';
+	private static function sanitize_animation( string $animation ): string {
+		return in_array( $animation, self::ALLOWED_ANIMATIONS, true ) ? $animation : '';
 	}
 }

@@ -9,6 +9,7 @@
 
 namespace Lerm\Support;
 
+use Lerm\View\Carousel;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -206,61 +207,6 @@ function link_pagination(): void {
 }
 
 /**
- * Render post thumbnail with optional width/height attributes.
- *
- * @param array $args {
- *     Optional. Arguments for the thumbnail.
- *     @type string $classes  CSS classes for the img tag.
- *     @type string $height   Height attribute value.
- *     @type string $width    Width attribute value.
- *     @type string $size     Image size name. Default 'home-thumb'.
- *     @type string $lazy     Loading attribute. Default 'lazy'.
- * }
- */
-function lerm_thumbnail( array $args = array() ): void {
-	$args = wp_parse_args(
-		$args,
-		array(
-			'classes' => '',
-			'height'  => '',
-			'width'   => '',
-			'size'    => 'home-thumb',
-			'lazy'    => 'lazy',
-		)
-	);
-
-	$image = new Image(
-		array(
-			'post_id' => get_the_ID(),
-			'size'    => $args['size'],
-			'lazy'    => $args['lazy'],
-			'order'   => array( 'featured', 'block', 'scan', 'default' ),
-		)
-	);
-
-	if ( ! $image->found ) {
-		return;
-	}
-
-	$extra_attr = array();
-	if ( '' !== $args['height'] ) {
-		$extra_attr['height'] = $args['height'];
-	}
-	if ( '' !== $args['width'] ) {
-		$extra_attr['width'] = $args['width'];
-	}
-
-	echo $image->render( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		array(
-			'classes' => $args['classes'],
-			'size'    => $args['size'],
-			'lazy'    => $args['lazy'],
-		),
-		$extra_attr
-	);
-}
-
-/**
  * Render the featured image for the current post in The Loop.
  *
  * @param array{
@@ -384,6 +330,9 @@ if ( ! function_exists( 'lerm_breadcrumb' ) ) {
 		return $html;
 	}
 }
+
+
+
 
 /**
  * Apply search/replace bootstrap classes to block content.
@@ -533,3 +482,304 @@ add_action(
 	},
 	99
 );
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 1. 主入口：从主题配置渲染首页轮播
+// ══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * 从主题后台配置读取参数并渲染首页轮播。
+ *
+ * 典型用法（在模板顶部）：
+ *
+ *   lerm_render_homepage_carousel();
+ *
+ * @return void
+ */
+function lerm_render_homepage_carousel(): void {
+	// 仅首页第一页显示
+	if ( ! ( is_home() || is_front_page() ) || is_paged() ) {
+		return;
+	}
+
+	$opts = lerm_get_template_options();
+
+	// slide_enable 未开启则提前退出，节省 Carousel::instance() 的开销
+	if ( empty( $opts['slide_enable'] ) ) {
+		return;
+	}
+
+	Carousel::instance(
+		array(
+			'slide_enable' => true,
+			'slides'       => (array) ( $opts['slide_images'] ?? array() ),
+			'indicators'   => ! empty( $opts['slide_indicators'] ),
+			'control'      => ! empty( $opts['slide_control'] ),
+			'animation'    => (string) ( $opts['slide_animation'] ?? 'carousel-fade' ),
+		)
+	);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 2. 从 WP_Query 文章列表动态构建轮播
+// ══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * 从文章查询结果中提取特色图并渲染轮播。
+ *
+ * 用法示例：
+ *
+ *   // 渲染最新 5 篇文章的特色图轮播
+ *   lerm_render_posts_carousel(
+ *       array( 'posts_per_page' => 5, 'post_status' => 'publish' ),
+ *       array( 'indicators' => true, 'control' => true, 'size' => 'large' )
+ *   );
+ *
+ * @param array  $query_args WP_Query 参数。
+ * @param array  $carousel_args {
+ *     可选 Carousel 参数。
+ *     @type bool   $indicators 是否显示指示器。   默认 false。
+ *     @type bool   $control    是否显示前后按钮。 默认 false。
+ *     @type string $animation  动画 class。       默认 'carousel-fade'。
+ *     @type string $size       特色图尺寸。       默认 'large'。
+ * }
+ * @return void
+ */
+function lerm_render_posts_carousel( array $query_args = array(), array $carousel_args = array() ): void {
+	$query_args = wp_parse_args(
+		$query_args,
+		array(
+			'post_type'      => 'post',
+			'post_status'    => 'publish',
+			'posts_per_page' => 6,
+			'no_found_rows'  => true, // 不需要分页，跳过 SQL COUNT(*)
+		)
+	);
+
+	$size  = (string) ( $carousel_args['size'] ?? 'large' );
+	$query = new WP_Query( $query_args );
+
+	if ( ! $query->have_posts() ) {
+		return;
+	}
+
+	$slides = array();
+
+	foreach ( $query->posts as $post ) {
+		$post_id = (int) $post->ID;
+
+		if ( ! has_post_thumbnail( $post_id ) ) {
+			continue;
+		}
+
+		$thumb_id  = get_post_thumbnail_id( $post_id );
+		$thumb_src = wp_get_attachment_image_src( $thumb_id, $size );
+
+		if ( empty( $thumb_src[0] ) ) {
+			continue;
+		}
+
+		$slides[] = array(
+			'image'       => array(
+				'url'    => $thumb_src[0],
+				'width'  => $thumb_src[1] ?? '',
+				'height' => $thumb_src[2] ?? '',
+				'alt'    => get_the_title( $post_id ),
+			),
+			'title'       => get_the_title( $post_id ),
+			'url'         => get_permalink( $post_id ),
+			'description' => has_excerpt( $post_id )
+				? wp_trim_words( get_the_excerpt( $post_id ), 15 )
+				: '',
+		);
+	}
+
+	wp_reset_postdata();
+
+	if ( empty( $slides ) ) {
+		return;
+	}
+
+	Carousel::render(
+		array(
+			'slide_enable' => true,
+			'slides'       => $slides,
+			'indicators'   => ! empty( $carousel_args['indicators'] ),
+			'control'      => ! empty( $carousel_args['control'] ),
+			'animation'    => (string) ( $carousel_args['animation'] ?? 'carousel-fade' ),
+		)
+	);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 3. 从附件 ID 列表构建轮播（图片库场景）
+// ══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * 将媒体库附件 ID 列表渲染为轮播。
+ *
+ * 用法示例（如产品图集、相册页）：
+ *
+ *   $ids = get_post_meta( get_the_ID(), 'gallery_ids', true ); // e.g. [101, 205, 309]
+ *   lerm_render_attachment_carousel( $ids, 'large', array( 'control' => true ) );
+ *
+ * @param int[]  $attachment_ids 附件 ID 数组。
+ * @param string $size           图片尺寸，默认 'large'。
+ * @param array  $carousel_args  可选 Carousel 参数（indicators/control/animation）。
+ * @return void
+ */
+function lerm_render_attachment_carousel( array $attachment_ids, string $size = 'large', array $carousel_args = array() ): void {
+	$slides = array();
+
+	foreach ( $attachment_ids as $id ) {
+		$id  = absint( $id );
+		$src = wp_get_attachment_image_src( $id, $size );
+
+		if ( empty( $src[0] ) ) {
+			continue;
+		}
+
+		$alt = (string) get_post_meta( $id, '_wp_attachment_image_alt', true );
+		if ( empty( $alt ) ) {
+			$alt = get_the_title( $id );
+		}
+
+		$slides[] = array(
+			'image'       => array(
+				'url'    => $src[0],
+				'width'  => $src[1] ?? '',
+				'height' => $src[2] ?? '',
+				'alt'    => $alt,
+			),
+			'title'       => $alt,
+			'url'         => '',          // 图库幻灯片通常不需要跳转
+			'description' => '',
+		);
+	}
+
+	if ( empty( $slides ) ) {
+		return;
+	}
+
+	Carousel::render(
+		array(
+			'slide_enable' => true,
+			'slides'       => $slides,
+			'indicators'   => ! empty( $carousel_args['indicators'] ),
+			'control'      => ! empty( $carousel_args['control'] ),
+			'animation'    => (string) ( $carousel_args['animation'] ?? 'carousel-fade' ),
+		)
+	);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 4. 分类归档页顶部轮播（展示该分类下最新文章）
+// ══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * 在分类归档页顶部渲染该分类最新文章轮播（仅第一页显示）。
+ *
+ * 用法（在 category.php 或 archive.php 顶部）：
+ *
+ *   lerm_render_category_carousel();
+ *
+ * @param int    $count        最多展示文章数。默认 5。
+ * @param string $size         特色图尺寸。    默认 'large'。
+ * @param array  $carousel_args 可选 Carousel 参数。
+ * @return void
+ */
+function lerm_render_category_carousel( int $count = 5, string $size = 'large', array $carousel_args = array() ): void {
+	if ( ! is_category() || is_paged() ) {
+		return;
+	}
+
+	$term = get_queried_object();
+	if ( ! ( $term instanceof WP_Term ) ) {
+		return;
+	}
+
+	lerm_render_posts_carousel(
+		array(
+			'cat'            => $term->term_id,
+			'posts_per_page' => $count,
+		),
+		array_merge(
+			array(
+				'size'       => $size,
+				'indicators' => true,
+			),
+			$carousel_args
+		)
+	);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 5. Shortcode：在任意内容区域嵌入轮播
+// ══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * 注册 [lerm_carousel] shortcode。
+ *
+ * 属性：
+ *   ids         — 逗号分隔的附件 ID（与 cat/tag 互斥，附件模式优先）
+ *   cat         — 分类 ID 或 slug（文章模式）
+ *   tag         — 标签 slug（文章模式）
+ *   count       — 最多展示数量，默认 5
+ *   size        — 图片尺寸，默认 large
+ *   indicators  — 是否显示指示器，1/0，默认 0
+ *   control     — 是否显示控制按钮，1/0，默认 0
+ *   animation   — carousel-fade 或留空，默认 carousel-fade
+ *
+ * 用法示例：
+ *   [lerm_carousel ids="101,205,309" control="1"]
+ *   [lerm_carousel cat="12" count="4" indicators="1" control="1"]
+ *   [lerm_carousel tag="featured" size="medium" animation=""]
+ */
+function lerm_carousel_shortcode( array $atts ): string {
+	$atts = shortcode_atts(
+		array(
+			'ids'        => '',
+			'cat'        => '',
+			'tag'        => '',
+			'count'      => 5,
+			'size'       => 'large',
+			'indicators' => 0,
+			'control'    => 0,
+			'animation'  => 'carousel-fade',
+		),
+		$atts,
+		'lerm_carousel'
+	);
+
+	$carousel_args = array(
+		'indicators' => (bool) $atts['indicators'],
+		'control'    => (bool) $atts['control'],
+		'animation'  => sanitize_key( $atts['animation'] ),
+		'size'       => sanitize_key( $atts['size'] ),
+	);
+
+	ob_start();
+
+	// 模式一：附件 ID 列表
+	if ( ! empty( $atts['ids'] ) ) {
+		$ids = array_filter( array_map( 'absint', explode( ',', (string) $atts['ids'] ) ) );
+		lerm_render_attachment_carousel( $ids, $carousel_args['size'], $carousel_args );
+
+		// 模式二：文章查询
+	} else {
+		$query_args = array( 'posts_per_page' => (int) $atts['count'] );
+		if ( ! empty( $atts['cat'] ) ) {
+			// 支持 ID 或 slug
+			is_numeric( $atts['cat'] )
+				? $query_args['cat']           = (int) $atts['cat']
+				: $query_args['category_name'] = sanitize_key( $atts['cat'] );
+		}
+		if ( ! empty( $atts['tag'] ) ) {
+			$query_args['tag'] = sanitize_key( $atts['tag'] );
+		}
+		lerm_render_posts_carousel( $query_args, $carousel_args );
+	}
+
+	return (string) ob_get_clean();
+}
+add_shortcode( 'lerm_carousel', 'lerm_carousel_shortcode' );

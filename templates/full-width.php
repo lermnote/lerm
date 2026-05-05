@@ -7,8 +7,10 @@
  * @date   2016-10-26
  * @since lerm 3.0
  */
-get_header();?>
-	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+get_header();
+use function Lerm\Support\lerm_breadcrumb;
+?>
+	<?php lerm_breadcrumb(); ?>
 	<div class="row justify-content-md-center"><!--.row-->
 		<div class="col-md-12 px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
 			<div class="site-main">

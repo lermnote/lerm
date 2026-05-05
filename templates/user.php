@@ -24,10 +24,10 @@ $profile_data = array(
 	'user_email'  => get_the_author_meta( 'user_email', $user_id ),
 	'description' => get_the_author_meta( 'description', $user_id ),
 );
-
+use function Lerm\Support\lerm_breadcrumb;
 get_header();
 ?>
-<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+<?php lerm_breadcrumb(); ?>
 <div <?php lerm_row_class(); ?>><!--.row-->
 	<div id="primary" <?php lerm_column_class(); ?>><!--.col-md-12 .col-lg-8-->
 		<div class="site-main card mb-3" aria-hidden="true">

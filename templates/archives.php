@@ -6,7 +6,7 @@
  */
 
 get_header();
-
+use function Lerm\Support\lerm_breadcrumb;
 $args  = array(
 	'post_type'           => 'post',
 	'posts_per_page'      => -1,
@@ -16,7 +16,7 @@ $args  = array(
 );
 $query = new WP_Query( $args );
 ?>
-<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+<?php lerm_breadcrumb(); ?>
 <div <?php lerm_row_class(); ?>>
 	<div id="primary" <?php lerm_column_class(); ?>>
 		<div class="site-main">

@@ -7,9 +7,10 @@
 
 get_header();
 
+use function Lerm\Support\lerm_breadcrumb;
 $template_options = lerm_get_template_options();
 
-$title       = ! empty( $template_options['404_title'] )
+$page_title  = ! empty( $template_options['404_title'] )
 	? $template_options['404_title']
 	: __( '404 Not Found', 'lerm' );
 $message     = ! empty( $template_options['404_message'] )
@@ -27,16 +28,16 @@ $show_search = ! isset( $template_options['404_show_search'] ) || ! empty( $temp
 $custom_img_id  = $template_options['404_image_id'] ?? 0;
 $custom_img_url = $custom_img_id ? wp_get_attachment_image_url( (int) $custom_img_id, 'large' ) : '';
 $default_img    = LERM_URI . 'assets/img/notfound.gif';
-$img_url        = $custom_img_url ?: $default_img;
+$img_url        = $custom_img_url ? $custom_img_url : $default_img;
 ?>
 
-<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+<?php lerm_breadcrumb(); ?>
 <div class="text-center py-5">
 	<img src="<?php echo esc_url( $img_url ); ?>"
-		alt="<?php echo esc_attr( $title ); ?>"
+		alt="<?php echo esc_attr( $page_title ); ?>"
 		class="img-fluid mb-4"
 		style="max-height:300px;">
-	<h1 class="display-5 fw-bold mb-3"><?php echo esc_html( $title ); ?></h1>
+	<h1 class="display-5 fw-bold mb-3"><?php echo esc_html( $page_title ); ?></h1>
 	<p class="text-muted mb-4"><?php echo esc_html( $message ); ?></p>
 	<?php if ( $show_search ) : ?>
 		<div class="mx-auto mb-4" style="max-width:480px;">

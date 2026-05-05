@@ -8,6 +8,7 @@
  *
  * @since  1.0
  */
+use function Lerm\Support\lerm_render_homepage_carousel;
 ?>
 <?php $template_options = lerm_get_template_options(); ?>
 <!DOCTYPE html>
@@ -39,7 +40,7 @@
 		</header>
 		<?php
 		if ( 'full_width' === $template_options['slide_position'] ) {
-			get_template_part( 'template-parts/components/carousel' );
+			lerm_render_homepage_carousel( $template_options );
 		}
 		?>
 		<main role="main" class="container" id="page-ajax"><!--.container-->

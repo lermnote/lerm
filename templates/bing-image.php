@@ -7,6 +7,7 @@
  * @since lerm 2.0
  */
 get_header();
+use function Lerm\Support\lerm_breadcrumb;
 $img_link   = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=2&mkt=';
 $resolution = '1920x1080';
 // language options
@@ -37,7 +38,7 @@ foreach ( $langs as $lang ) {
 $row_class    = ( 'layout-1c-narrow' === lerm_site_layout() ) ? 'justify-content-md-center' : '';
 $colunm_class = ( wp_is_mobile() || 'layout-1c' === lerm_site_layout() ) ? 'col-md-12' : 'col-lg-8';
 ?>
-	<?php get_template_part( 'template-parts/components/breadcrumb' ); ?>
+	<?php lerm_breadcrumb(); ?>
 	<div class="row <?php echo esc_attr( $row_class ); ?> "><!--.row-->
 		<div class="<?php echo esc_attr( $colunm_class ); ?> px-1 px-md-0" ><!--.col-md-12 .col-lg-8-->
 
