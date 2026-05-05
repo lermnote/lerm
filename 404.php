@@ -4,31 +4,30 @@
  *
  * @package Lerm
  */
-
-get_header();
-
 use function Lerm\Support\lerm_breadcrumb;
-$template_options = lerm_get_template_options();
 
-$page_title  = ! empty( $template_options['404_title'] )
+$template_options = lerm_get_template_options();
+$page_title       = ! empty( $template_options['404_title'] )
 	? $template_options['404_title']
 	: __( '404 Not Found', 'lerm' );
-$message     = ! empty( $template_options['404_message'] )
+$message          = ! empty( $template_options['404_message'] )
 	? $template_options['404_message']
 	: __( 'Sorry, the page you are looking for could not be found.', 'lerm' );
-$btn_text    = ! empty( $template_options['404_button_text'] )
+$btn_text         = ! empty( $template_options['404_button_text'] )
 	? $template_options['404_button_text']
 	: __( 'Back to home', 'lerm' );
-$btn_url     = ! empty( $template_options['404_button_url'] )
+$btn_url          = ! empty( $template_options['404_button_url'] )
 	? $template_options['404_button_url']
 	: home_url( '/' );
-$show_search = ! isset( $template_options['404_show_search'] ) || ! empty( $template_options['404_show_search'] );
+$show_search      = ! isset( $template_options['404_show_search'] ) || ! empty( $template_options['404_show_search'] );
 
 // Custom illustration
 $custom_img_id  = $template_options['404_image_id'] ?? 0;
 $custom_img_url = $custom_img_id ? wp_get_attachment_image_url( (int) $custom_img_id, 'large' ) : '';
 $default_img    = LERM_URI . 'assets/img/notfound.gif';
 $img_url        = $custom_img_url ? $custom_img_url : $default_img;
+
+get_header();
 ?>
 
 <?php lerm_breadcrumb(); ?>

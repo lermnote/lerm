@@ -9,8 +9,9 @@
  * @since  1.0
  */
 use function Lerm\Support\lerm_render_homepage_carousel;
+
+$template_options = lerm_get_template_options();
 ?>
-<?php $template_options = lerm_get_template_options(); ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
