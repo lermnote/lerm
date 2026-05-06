@@ -795,7 +795,7 @@ add_shortcode( 'lerm_carousel', 'lerm_carousel_shortcode' );
 // 发布/更新文章时清除缓存
 add_action(
 	'save_post_post',
-	function ( int $post_id, WP_Post $post ): void {
+	function ( int $post_id, \WP_Post $post ): void {
 		if ( 'publish' === $post->post_status || 'trash' === $post->post_status ) {
 			delete_transient( 'lerm_archives_v1' );
 		}
