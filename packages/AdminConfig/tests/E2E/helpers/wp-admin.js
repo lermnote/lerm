@@ -33,28 +33,18 @@ function acceptNextDialog( page ) {
 	} );
 }
 
-async function waitForAdminAjax( page, actionFragment = '' ) {
-	return page.waitForResponse(
-		( response ) =>
-			response.url().includes( 'admin-ajax.php' ) &&
-			response.request().method() === 'POST' &&
-			( actionFragment === '' || response.request().postData()?.includes( actionFragment ) ),
-		{ timeout: 20_000 }
-	);
-}
-
-function restRouteForAction( actionFragment = '' ) {
-	if ( actionFragment.includes( 'save_' ) ) return '/save';
-	if ( actionFragment.includes( 'reset_' ) ) return '/reset';
-	if ( actionFragment.includes( 'export_' ) ) return '/export';
-	if ( actionFragment.includes( 'import_' ) ) return '/import';
-	if ( actionFragment.includes( 'data_source' ) ) return '/data-source';
+function restRouteForEndpoint( endpoint = '' ) {
+	if ( endpoint === 'save' ) return '/save';
+	if ( endpoint === 'reset' ) return '/reset';
+	if ( endpoint === 'export' ) return '/export';
+	if ( endpoint === 'import' ) return '/import';
+	if ( endpoint === 'data-source' ) return '/data-source';
 
 	return '';
 }
 
-function isAdminConfigRestResponse( response, actionFragment = '' ) {
-	const route = restRouteForAction( actionFragment );
+function isAdminConfigRestResponse( response, endpoint = '' ) {
+	const route = restRouteForEndpoint( endpoint );
 	let url = response.url();
 
 	try {
@@ -72,29 +62,9 @@ function isAdminConfigRestResponse( response, actionFragment = '' ) {
 	);
 }
 
-function isAdminConfigAjaxResponse( response, actionFragment = '' ) {
-	return (
-		response.url().includes( 'admin-ajax.php' ) &&
-		response.request().method() === 'POST' &&
-		( actionFragment === '' || response.request().postData()?.includes( actionFragment ) )
-	);
-}
-
-async function waitForAdminConfigTransport( page, actionFragment = '', options = {} ) {
-	const transport = options.transport || 'any';
-
+async function waitForAdminConfigTransport( page, endpoint = '', options = {} ) {
 	return page.waitForResponse(
-		( response ) => {
-			if ( transport === 'rest' ) {
-				return isAdminConfigRestResponse( response, actionFragment );
-			}
-
-			if ( transport === 'ajax' ) {
-				return isAdminConfigAjaxResponse( response, actionFragment );
-			}
-
-			return isAdminConfigRestResponse( response, actionFragment ) || isAdminConfigAjaxResponse( response, actionFragment );
-		},
+		( response ) => isAdminConfigRestResponse( response, endpoint ),
 		{ timeout: options.timeout || 20_000 }
 	);
 }
@@ -117,16 +87,15 @@ function collectAdminConfigAjaxRequests( page ) {
 	return requests;
 }
 
-async function expectRestOnlyConfig( page ) {
+async function expectRestContractConfig( page ) {
 	await expect
 		.poll(
 			() => page.evaluate( () => {
 				const config = window.lermAdminConfig || {};
-				const legacyFlag = config.legacyAjaxEnabled ?? true;
 
 				return {
-					ajaxUrl: config.ajaxUrl || '',
-					legacyAjaxEnabled: ! [ false, 0, '', '0', 'false' ].includes( legacyFlag ),
+					hasAjaxUrl: Object.prototype.hasOwnProperty.call( config, 'ajaxUrl' ),
+					hasLegacyAjaxEnabled: Object.prototype.hasOwnProperty.call( config, 'legacyAjaxEnabled' ),
 					restUrl: config.restUrl || '',
 					restNonce: config.restNonce || '',
 				};
@@ -134,8 +103,8 @@ async function expectRestOnlyConfig( page ) {
 			{ timeout: 10_000 }
 		)
 		.toMatchObject( {
-			ajaxUrl: '',
-			legacyAjaxEnabled: false,
+			hasAjaxUrl: false,
+			hasLegacyAjaxEnabled: false,
 		} );
 
 	const config = await page.evaluate( () => window.lermAdminConfig || {} );
@@ -197,7 +166,7 @@ async function saveOptionsPage( page, options = {} ) {
 	const saveButton = page.locator( '[data-lerm-save]:visible' ).first();
 
 	await expect( saveButton ).toBeVisible();
-	const saveRequest = waitForAdminConfigTransport( page, 'lerm_admin_config_ajax_save_', options );
+	const saveRequest = waitForAdminConfigTransport( page, 'save', options );
 	await saveButton.click();
 	const response = await saveRequest;
 	await expect( page.locator( '[data-lerm-status]' ).first() ).toContainText( /Synced|Saved/ );
@@ -205,16 +174,12 @@ async function saveOptionsPage( page, options = {} ) {
 	return response;
 }
 
-async function clickAndWaitForAdminConfigTransport( page, locator, actionFragment = '', options = {} ) {
-	const request = waitForAdminConfigTransport( page, actionFragment, options );
+async function clickAndWaitForAdminConfigTransport( page, locator, endpoint = '', options = {} ) {
+	const request = waitForAdminConfigTransport( page, endpoint, options );
 
 	await locator.click();
 
 	return request;
-}
-
-async function clickAndWaitForAjax( page, locator, actionFragment = '', options = {} ) {
-	return clickAndWaitForAdminConfigTransport( page, locator, actionFragment, options );
 }
 
 async function resetOptionsPage( page, scope = 'section', options = {} ) {
@@ -223,14 +188,14 @@ async function resetOptionsPage( page, scope = 'section', options = {} ) {
 	await expect( resetButton ).toBeVisible();
 	acceptNextDialog( page );
 
-	return clickAndWaitForAdminConfigTransport( page, resetButton, 'lerm_admin_config_ajax_reset_', options );
+	return clickAndWaitForAdminConfigTransport( page, resetButton, 'reset', options );
 }
 
 async function exportBackupSnapshot( page, options = {} ) {
 	const exportButton = page.locator( '[data-lerm-backup-export]' ).first();
 
 	await expect( exportButton ).toBeVisible();
-	const response = await clickAndWaitForAdminConfigTransport( page, exportButton, 'lerm_admin_config_ajax_export_', options );
+	const response = await clickAndWaitForAdminConfigTransport( page, exportButton, 'export', options );
 
 	const output = page.locator( '[data-lerm-backup-export-output]' ).first();
 
@@ -249,7 +214,7 @@ async function importBackupSnapshot( page, json, options = {} ) {
 	await input.fill( json );
 	acceptNextDialog( page );
 
-	return clickAndWaitForAdminConfigTransport( page, button, 'lerm_admin_config_ajax_import_', options );
+	return clickAndWaitForAdminConfigTransport( page, button, 'import', options );
 }
 
 async function submitClassicForm( page, submitSelector = '#submit' ) {
@@ -320,7 +285,7 @@ async function selectAjaxOption( page, fieldId, searchText, optionLabel, options
 	const search = container.locator( '.lerm-ajax-select__search' );
 
 	await expect( container ).toBeVisible();
-	const request = waitForAdminConfigTransport( page, 'lerm_admin_config_data_source', options );
+	const request = waitForAdminConfigTransport( page, 'data-source', options );
 	await search.fill( searchText );
 	const response = await request;
 
@@ -335,9 +300,8 @@ async function selectAjaxOption( page, fieldId, searchText, optionLabel, options
 module.exports = {
 	acceptNextDialog,
 	clickAndWaitForAdminConfigTransport,
-	clickAndWaitForAjax,
 	collectAdminConfigAjaxRequests,
-	expectRestOnlyConfig,
+	expectRestContractConfig,
 	exportBackupSnapshot,
 	importBackupSnapshot,
 	login,
@@ -351,5 +315,4 @@ module.exports = {
 	selectAjaxOption,
 	waitForAdminConfigTransport,
 	submitClassicForm,
-	waitForAdminAjax,
 };

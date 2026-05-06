@@ -93,8 +93,8 @@ render path.
 ### Async select fields
 
 The built-in `ajax_select` field uses the same data-source registry at request
-time. The browser uses the REST data-source endpoint first; the deprecated
-`admin-ajax.php` path is only a rollout fallback.
+time. The browser uses the REST data-source endpoint; AdminConfig 0.3.0 removed
+the deprecated `admin-ajax.php` rollout fallback.
 
 ```php
 $runtime->register_data_source(

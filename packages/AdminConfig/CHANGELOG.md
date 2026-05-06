@@ -7,10 +7,12 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 ## [Unreleased]
 
 ### Added
+- REST contract browser smoke coverage that exercises save, reset, import,
+  export, and async data-source requests without toggling legacy Ajax.
 - Package-local test bootstrap, unit coverage, and smoke coverage for the bundled plugin and embedded examples.
 - Portable CI entry points for recursive PHP syntax checks, JavaScript syntax checks, and example registration smoke tests.
 - Contributor-facing release docs, support matrix, and workflow notes for the extracted package.
-- AJAX-backed `ajax_select` fields powered by the runtime data-source registry.
+- Async `ajax_select` fields powered by the REST data-source registry.
 - Debug-mode runtime panel with schema, store, module, and data-source summaries for options pages.
 - Complete plugin-mode and embedded-mode examples for async data sources.
 - PHPUnit-based package test runner with dedicated unit/smoke and integration configurations.
@@ -23,11 +25,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Contributor-facing alpha release checklist for package hardening and cut verification.
 - A minimal runnable extension example plugin plus focused extension recipes for custom fields, validators, and data sources.
 - REST contract coverage for permission errors, missing schema/context errors, validation envelopes, import JSON failures, and isolated-runtime dispatch.
-- A centralized legacy Ajax gate for removal rehearsals, covering options-page actions and async data-source fallback registration.
-- REST-only wp-env rehearsal scripts and browser coverage for legacy Ajax disabled mode.
 - `@wordpress/scripts` build pipeline for the classic admin script, including committed `assets/build` output and asset metadata.
-- A REST-only CI job that runs single-site and multisite browser rehearsals with legacy Ajax disabled.
-- Initial client-side boundaries for config resolution, REST/Ajax transport, and classic form-state tracking ahead of the block-editor migration.
+- Initial client-side boundaries for config resolution, REST transport, and classic form-state tracking ahead of the block-editor migration.
 - A Phase 2 `resources/` JavaScript source tree with core, controls, store,
   classic admin, and block-panel entry boundaries.
 - Block-panel runtime helpers for schema loading, local value updates, save
@@ -53,10 +52,13 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - CI `wp-env` jobs now wait for the WordPress login screen before fixture setup or browser checks run.
 - Plugin-mode asset resolution now falls back to the package assets when an extension/demo plugin does not bundle its own `assets/` directory.
 - REST routes now dispatch by schema ID across isolated runtimes instead of binding the global route table to whichever runtime registered first.
-- The deprecated async data-source AJAX fallback now uses the same schema-ID runtime dispatch path as REST.
-- Legacy `admin-ajax.php` handlers now emit WordPress deprecation notices when used, and JavaScript stops falling back to `admin-ajax.php` when the legacy gate is disabled.
+- AdminConfig 0.3.0 now uses REST as the only enhanced JavaScript transport for
+  classic admin screens.
+- REST contract smoke coverage replaces the legacy Ajax disable/enable rehearsal
+  scripts; `test:wp:rest-only` remains a temporary alias for
+  `test:wp:rest-contract`.
 - The Ajax retirement plan now has documented `0.3.0` removal criteria and deletion candidates.
-- Admin pages now prefer the built `assets/build/admin-config.js` bundle while retaining the legacy unbuilt script fallback for source checkouts.
+- Admin pages now prefer the built `assets/build/admin-config.js` bundle while retaining a packaged browser-file fallback for source checkouts.
 - The REST client path now uses WordPress `@wordpress/api-fetch` through the build dependency extraction pipeline.
 - The admin script source now builds from `resources/admin/index.js`, and the
   build pipeline emits a `block-panel` bundle for the future editor panel.
@@ -84,9 +86,17 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   precedence.
 - Classic admin and block editor panels now share the `dependency` metadata
   format for conditional field visibility.
-- Legacy Ajax compatibility now remains enabled by default until the documented
-  `0.3.0` removal gate disables it.
+- AdminConfig 0.3.0 removes the legacy Ajax compatibility gate and requires REST
+  for enhanced JavaScript clients.
 
 ### Removed
+- The AdminConfig `admin-ajax.php` JavaScript transport and all package
+  `wp_ajax_lerm_admin_config_*` registrations.
+- `src/WordPress/LegacyAjax.php` and the old options-page/data-source Ajax
+  fallback handlers.
+- Ajax-only localized client keys: `ajaxUrl`, `legacyAjaxEnabled`,
+  `saveAction`, `resetAction`, `exportAction`, `importAction`,
+  `dataSourceAction`, and `dataSourceNonce`.
+- The wp-env fixtures that disabled and re-enabled legacy Ajax for rehearsals.
 - The deprecated `Runtime::instance()` and test-only `Runtime::reset_instance()` singleton helpers.
 - The unused legacy single-config block-panel global fallback.

@@ -542,37 +542,6 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertSame( 20, $seen_args['per_page'] );
 	}
 
-	public function testLegacyAjaxDataSourceClampsPerPage(): void {
-		$runtime   = $this->runtime_with_schema();
-		$seen_args = array();
-
-		$runtime->register_data_source(
-			'campaigns',
-			static function ( array $args ) use ( &$seen_args ): array {
-				$seen_args = $args;
-
-				return array();
-			}
-		);
-
-		$_REQUEST = array(
-			'schema_id' => 'rest_test',
-			'field_id'  => 'campaign',
-			'per_page'  => '9999',
-			'nonce'     => 'nonce',
-		);
-
-		$this->assertThrows(
-			\RuntimeException::class,
-			static function (): void {
-				Runtime::handle_ajax_data_source();
-			}
-		);
-
-		$this->assertSame( Runtime::MAX_DATA_SOURCE_PER_PAGE, $seen_args['per_page'] );
-		$this->assertTrue( $GLOBALS['lerm_admin_config_json_response']['success'] );
-	}
-
 	public function testMissingSchemaReturnsRestError(): void {
 		$response = ( new SchemaController( new Runtime() ) )->schema( $this->request( array( 'id' => 'missing' ) ) );
 

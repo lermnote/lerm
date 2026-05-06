@@ -201,11 +201,9 @@ $admin_user_id  = lerm_admin_config_ensure_admin_user();
 
 lerm_admin_config_normalize_site_url();
 
-delete_option( 'lerm_admin_config_e2e_rest_only' );
 delete_option( 'lerm_admin_config_e2e_block_editor' );
 
 if ( is_multisite() ) {
-	delete_site_option( 'lerm_admin_config_e2e_rest_only' );
 	delete_site_option( 'lerm_admin_config_e2e_block_editor' );
 }
 

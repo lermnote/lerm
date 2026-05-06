@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const {
 	clickAndWaitForAdminConfigTransport,
 	collectAdminConfigAjaxRequests,
-	expectRestOnlyConfig,
+	expectRestContractConfig,
 	login,
 	openNetworkOptionsPage,
 	saveOptionsPage,
@@ -19,8 +19,8 @@ test( 'network options page replays nested validation errors and saves network s
 	await login( page );
 	await openNetworkOptionsPage( page, 'acme-demo-network-settings' );
 
-	if ( process.env.LERM_ADMIN_CONFIG_REST_ONLY === '1' ) {
-		await expectRestOnlyConfig( page );
+	if ( process.env.LERM_ADMIN_CONFIG_REST_CONTRACT === '1' ) {
+		await expectRestContractConfig( page );
 	}
 
 	await expect( page.locator( '[data-lerm-save]:visible' ).first() ).toBeVisible();
@@ -31,7 +31,7 @@ test( 'network options page replays nested validation errors and saves network s
 	const validationResponse = await clickAndWaitForAdminConfigTransport(
 		page,
 		page.locator( '[data-lerm-save]:visible' ).first(),
-		'lerm_admin_config_ajax_save_',
+		'save',
 		{ transport: 'rest' }
 	);
 
@@ -56,7 +56,7 @@ test( 'network options page replays nested validation errors and saves network s
 	await expect( page.locator( `input[name="${ fieldName }[template_endpoint]"]` ) ).toHaveValue( 'https://example.com/network-templates.json' );
 	await expect( feedSlug ).toHaveValue( 'shared-library-hub' );
 
-	if ( process.env.LERM_ADMIN_CONFIG_REST_ONLY === '1' ) {
+	if ( process.env.LERM_ADMIN_CONFIG_REST_CONTRACT === '1' ) {
 		expect( legacyAjaxRequests, JSON.stringify( legacyAjaxRequests, null, 2 ) ).toHaveLength( 0 );
 	}
 } );

@@ -211,5 +211,13 @@ final class BootstrapTest extends TestCase {
 			'https://example.test/wp-json/lerm-admin-config/v1/',
 			$GLOBALS['lerm_admin_config_localized_scripts']['lerm-admin-config-js-unit-build-asset']['lermAdminConfig']['restUrl']
 		);
+		$this->assertArrayNotHasKey(
+			'ajaxUrl',
+			$GLOBALS['lerm_admin_config_localized_scripts']['lerm-admin-config-js-unit-build-asset']['lermAdminConfig']
+		);
+		$this->assertArrayNotHasKey(
+			'legacyAjaxEnabled',
+			$GLOBALS['lerm_admin_config_localized_scripts']['lerm-admin-config-js-unit-build-asset']['lermAdminConfig']
+		);
 	}
 }

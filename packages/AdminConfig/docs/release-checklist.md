@@ -20,7 +20,8 @@ When Docker is available, also run:
 npm run test:integration
 npm run test:e2e
 npm run test:wp:multisite
-npm run test:wp:rest-only
+npm run test:wp:rest-contract
+npm run test:e2e:block-editor
 ```
 
 ## Manual Sanity Pass
@@ -31,7 +32,7 @@ npm run test:wp:rest-only
   when the built asset is intentionally absent in a source checkout.
 - Confirm the built asset metadata includes `wp-api-fetch` after transport
   changes.
-- Confirm `npm run audit:ajax` reports only approved compatibility references.
+- Confirm `npm run audit:ajax` reports no production legacy Ajax references.
 - Confirm `npm run test:js-runtime` covers block-panel runtime load/save
   behavior when front-end runtime helpers change.
 - Check options-page global save across multiple sections.
@@ -39,6 +40,7 @@ npm run test:wp:rest-only
 - Check import/export on the schema demo plugin.
 - Check one validation failure path each for metabox, profile, taxonomy, comment, and network settings.
 - Check at least one async field, one typography field, one accordion field, and one tabbed field.
+- Confirm browser traces contain no AdminConfig `admin-ajax.php` requests.
 
 ## Docs and Examples
 
@@ -53,3 +55,5 @@ npm run test:wp:rest-only
 - Call out any schema-facing or runtime-facing breaking changes.
 - Link migration guidance when behavior or naming changed.
 - Mention known limitations that remain intentionally out of scope for the release.
+- For 0.3.0 and later, call out that AdminConfig `admin-ajax.php` transport
+  actions were removed and JavaScript clients must use REST.

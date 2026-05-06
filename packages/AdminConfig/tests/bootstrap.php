@@ -478,10 +478,7 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 
 if ( ! function_exists( 'check_ajax_referer' ) ) {
 	function check_ajax_referer( string $action, string $query_arg = '_ajax_nonce' ): bool {
-		$GLOBALS['lerm_admin_config_ajax_nonce_checks'][] = array(
-			'action' => $action,
-			'arg'    => $query_arg,
-		);
+		unset( $action, $query_arg );
 
 		return true;
 	}
