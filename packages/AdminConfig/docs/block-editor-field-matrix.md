@@ -63,7 +63,7 @@ Phase 3 is complete when:
 
 - All built-in field families are classified in this matrix.
 - Editable fields have browser coverage for render, dirty/discard/save, reload,
-  validation-error replay, and no AdminConfig legacy Ajax requests.
+  validation-error replay, and no AdminConfig `admin-ajax.php` requests.
 - Read-only and unsupported fields are visible in the panel instead of silently
   disappearing.
 - Complex fields remain out of the editable contract until their specific state

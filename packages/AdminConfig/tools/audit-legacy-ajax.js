@@ -11,29 +11,6 @@ const scanRoots = [
 
 const legacyPattern = /admin-ajax\.php|wp_ajax_lerm_admin_config|lerm_admin_config_ajax_|lerm_admin_config_data_source|legacyAjaxEnabled|ajaxUrl|dataSourceAction|dataSourceNonce|hasLegacyAjaxTransport|requestLegacyAjax/;
 
-const allowedFiles = new Map([
-	[
-		'resources/admin/admin-config.js',
-		'classic admin fallback branches until 0.3.0 removal',
-	],
-	[
-		'resources/admin/transport.js',
-		'isolated deprecated Ajax transport wrapper',
-	],
-	[
-		'src/Framework/Admin/OptionsPage.php',
-		'classic options-page fallback handlers and localized rollout flags',
-	],
-	[
-		'src/WordPress/LegacyAjax.php',
-		'single gate for deprecated legacy Ajax compatibility',
-	],
-	[
-		'src/WordPress/Runtime.php',
-		'deprecated async field data-source fallback handler',
-	],
-]);
-
 const skipDirs = new Set([
 	'.git',
 	'artifacts',
@@ -92,20 +69,12 @@ for (const root of scanRoots) {
 	}
 }
 
-const unexpected = matches.filter((match) => !allowedFiles.has(match.file));
-
-if (unexpected.length) {
-	console.error('Unexpected legacy Ajax references found outside the approved rollout surface:');
-	for (const match of unexpected) {
+if (matches.length) {
+	console.error('Legacy Ajax references are not allowed in production sources:');
+	for (const match of matches) {
 		console.error(`- ${match.file}:${match.line}: ${match.text}`);
 	}
 	process.exit(1);
 }
 
-const presentAllowedFiles = Array.from(new Set(matches.map((match) => match.file))).sort();
-
-console.log('Legacy Ajax audit passed.');
-console.log('Approved production references:');
-for (const file of presentAllowedFiles) {
-	console.log(`- ${file}: ${allowedFiles.get(file)}`);
-}
+console.log('Legacy Ajax audit passed: no production references remain.');

@@ -313,8 +313,8 @@ jobs:
         if: always()
         run: npm run wp-env:stop:multisite
 
-  wordpress-rest-only:
-    name: WordPress REST-only
+  wordpress-rest-contract:
+    name: WordPress REST contract
     runs-on: ubuntu-latest
 
     steps:
@@ -337,9 +337,9 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ~/.composer/cache/files
-          key: composer-${{ runner.os }}-rest-only-${{ hashFiles('composer.lock') }}
+          key: composer-${{ runner.os }}-rest-contract-${{ hashFiles('composer.lock') }}
           restore-keys: |
-            composer-${{ runner.os }}-rest-only-
+            composer-${{ runner.os }}-rest-contract-
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
@@ -350,23 +350,23 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Run REST-only browser suite
-        run: npm run test:wp:rest-only
+      - name: Run REST contract browser suite
+        run: npm run test:wp:rest-contract
 
-      - name: Capture REST-only wp-env logs
+      - name: Capture REST contract wp-env logs
         if: always()
         run: |
           mkdir -p artifacts/wp-env
-          npm run wp-env:logs > artifacts/wp-env/rest-only-development.log 2>&1 || true
-          npm run wp-env:logs:tests > artifacts/wp-env/rest-only-tests.log 2>&1 || true
-          npm run wp-env:logs:multisite > artifacts/wp-env/rest-only-multisite-development.log 2>&1 || true
-          npm run wp-env:logs:tests:multisite > artifacts/wp-env/rest-only-multisite-tests.log 2>&1 || true
+          npm run wp-env:logs > artifacts/wp-env/rest-contract-development.log 2>&1 || true
+          npm run wp-env:logs:tests > artifacts/wp-env/rest-contract-tests.log 2>&1 || true
+          npm run wp-env:logs:multisite > artifacts/wp-env/rest-contract-multisite-development.log 2>&1 || true
+          npm run wp-env:logs:tests:multisite > artifacts/wp-env/rest-contract-multisite-tests.log 2>&1 || true
 
-      - name: Upload REST-only artifacts
+      - name: Upload REST contract artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: wp-env-rest-only-artifacts
+          name: wp-env-rest-contract-artifacts
           path: |
             artifacts/wp-env/
             playwright-report/

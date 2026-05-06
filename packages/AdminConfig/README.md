@@ -260,7 +260,7 @@ when embedded inside a theme:
 
 - `composer lint:php` runs the lightweight PHP syntax/import checker
 - `composer lint:wpcs` runs WPCS through `tools/phpcs-runner.php`
-- `composer lint:js` validates `resources/`, the legacy script fallback,
+- `composer lint:js` validates `resources/`, the packaged script fallback,
   webpack config, and Playwright specs
 - `composer test` runs the PHPUnit unit and smoke suites
 - `composer test:integration` runs the real-WordPress integration suite when a
@@ -272,7 +272,7 @@ when embedded inside a theme:
 - `npm run build:check` rebuilds and fails if the committed build output drifts
 - `npm run test:js-runtime` checks the core schema state, context, error, and
   block-panel runtime helpers
-- `npm run check:phase2` runs build drift, legacy Ajax, and JS runtime checks
+- `npm run check:phase2` runs build drift, legacy Ajax removal, and JS runtime checks
 
 The PHPCS and PHPStan runners prepend `tools/wp-tool-stubs.php`, so they can be
 executed from an embedded theme workspace without fatalling on eager theme
@@ -291,6 +291,8 @@ and Playwright scaffolding:
 - `npm run test:e2e` runs the Playwright smoke suite against plugin mode,
   embedded mode, and the classic metabox/profile/taxonomy/comment containers
 - `npm run test:e2e:multisite` runs the multisite network settings smoke suite
+- `npm run test:wp:rest-contract` runs REST contract smoke coverage for
+  single-site and multisite AdminConfig actions
 
 The `tests/fixtures/wp-env/` directory contains the setup script and fixture
 theme used by those jobs. The fixture bootstrap also creates deterministic page,
@@ -326,7 +328,7 @@ admin, also set `LERM_ADMIN_CONFIG_MULTISITE=1` and pass the spec path after `--
 - Breaking runtime changes should land with changelog notes, migration guidance,
   and updated examples
 
-See [docs/support-matrix.md](/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [docs/rest-api.md](/packages/AdminConfig/docs/rest-api.md) for the REST API contract, [docs/ajax-retirement.md](/packages/AdminConfig/docs/ajax-retirement.md) for the legacy Ajax removal checklist, [docs/block-editor-migration.md](/packages/AdminConfig/docs/block-editor-migration.md) for the block-editor migration path, [CONTRIBUTING.md](/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
+See [docs/support-matrix.md](/packages/AdminConfig/docs/support-matrix.md) for the compatibility snapshot, [docs/rest-api.md](/packages/AdminConfig/docs/rest-api.md) for the REST API contract, [docs/ajax-retirement.md](/packages/AdminConfig/docs/ajax-retirement.md) for the completed legacy Ajax removal notes, [docs/block-editor-migration.md](/packages/AdminConfig/docs/block-editor-migration.md) for the block-editor migration path, [CONTRIBUTING.md](/packages/AdminConfig/CONTRIBUTING.md) for the local development flow, and [release-checklist.md](/packages/AdminConfig/docs/release-checklist.md) for the alpha cut process.
 
 ## Reading meta-backed schemas
 

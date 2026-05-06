@@ -1,8 +1,9 @@
 # Phase 1 Acceptance
 
-Phase 1 is complete when REST is the primary JavaScript contract, the legacy
-Ajax fallback is isolated behind one removal gate, and the build pipeline
-produces a reusable client boundary for the future block-editor UI.
+Phase 1 completed when REST became the primary JavaScript contract, the legacy
+Ajax fallback was isolated behind one removal gate, and the build pipeline
+produced a reusable client boundary for the future block-editor UI. AdminConfig
+0.3.0 has since removed that fallback.
 
 ## Scope
 
@@ -10,8 +11,8 @@ produces a reusable client boundary for the future block-editor UI.
   import, export, and async data-source requests.
 - PHP schema compilation, storage resolution, validation, and permissions remain
   the source of truth.
-- Classic admin screens keep working in compatibility mode while REST-only
-  rehearsals prove that legacy Ajax can be disabled.
+- Classic admin screens keep working through REST-enhanced JavaScript and the
+  no-JavaScript `admin-post.php` save path.
 - Block-editor work starts from the shared REST client, not from classic-admin
   DOM form parsing.
 
@@ -25,17 +26,14 @@ produces a reusable client boundary for the future block-editor UI.
 - Data-source pagination defaults to `20` and is capped at `100`.
 - Multiple `Runtime` instances can register schemas without route callbacks
   leaking state across runtimes or tests.
-- Legacy Ajax registration is controlled only by `LegacyAjax::enabled()`.
-- Legacy Ajax handlers emit deprecation notices while they remain available.
-- REST-only browser rehearsals pass with legacy Ajax disabled for single-site
-  and multisite.
+- AdminConfig no longer registers package `wp_ajax_*` handlers.
+- REST contract browser smoke passes for single-site and multisite.
 - `@wordpress/scripts` builds `resources/admin/index.js` into
   `assets/build/admin-config.js` with `wp-api-fetch` listed in the asset
   metadata.
 - `resources/core/rest-client.js` is the reusable REST client boundary for classic
   admin and the future block-editor entry.
-- `npm run audit:ajax` passes and keeps production legacy Ajax references
-  limited to the approved rollout surface.
+- `npm run audit:ajax` passes and rejects production legacy Ajax references.
 
 ## Required Local Commands
 
@@ -46,7 +44,7 @@ composer validate --strict
 php tools/sync-version.php --check
 composer ci
 npm run check:phase1
-npm run test:wp:rest-only
+npm run test:wp:rest-contract
 ```
 
 When touching classic admin behavior, also run:
@@ -60,5 +58,5 @@ npm run test:wp:multisite
 
 After Phase 1, new JavaScript clients must use REST through
 `resources/core/rest-client.js` or a small wrapper around it. New production code
-must not call `admin-ajax.php` directly. The remaining Ajax fallback is
-compatibility-only and is scheduled for removal in `0.3.0`.
+must not call `admin-ajax.php` directly. AdminConfig 0.3.0 removed the remaining
+Ajax fallback.

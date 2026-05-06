@@ -21,8 +21,8 @@ client boundaries that a React/Gutenberg client can reuse.
 - `resources/core/rest-client.js`: reusable REST client built on WordPress
   `@wordpress/api-fetch`; this is the client boundary for classic admin and the
   future block-editor entry.
-- `resources/admin/transport.js`: maps classic admin form actions to REST endpoints
-  and owns the deprecated Ajax fallback for the `0.2.x` compatibility window.
+- `resources/admin/transport.js`: maps classic admin form actions to REST
+  endpoints.
 - `resources/admin/form-state.js`: reads and compares classic form values. This is a
   temporary bridge until React state owns values directly.
 - `resources/admin/admin-config.js`: classic admin mounting, field widgets, DOM
@@ -49,8 +49,8 @@ client boundaries that a React/Gutenberg client can reuse.
    of importing classic admin transport fallback code.
 4. Keep classic admin E2E as regression coverage while adding a small editor
    smoke test for schema load, save, validation error replay, and reset.
-5. Remove the Ajax fallback in `0.3.0` only after REST-only CI is consistently
-   green and the block-editor entry no longer references localized Ajax keys.
+5. Keep the 0.3.0 REST transport contract green after removing localized
+   Ajax keys and fallback code.
 
 ## Current Status
 
@@ -61,7 +61,7 @@ PRs:
 - `resources/block-panel/index.js` builds into `assets/build/block-panel.js`.
 - The block-panel runtime can load schema data, update local values, save via
   REST, and replay validation errors into state.
-- `npm run check:phase2` verifies build drift, legacy Ajax references, and
+- `npm run check:phase2` verifies build drift, legacy Ajax removal, and
   JavaScript runtime contracts.
 
 See `docs/phase-2-stabilization.md` for the mainline audit and stable-point

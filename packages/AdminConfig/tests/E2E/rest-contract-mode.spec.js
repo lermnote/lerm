@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const {
 	collectAdminConfigAjaxRequests,
-	expectRestOnlyConfig,
+	expectRestContractConfig,
 	exportBackupSnapshot,
 	importBackupSnapshot,
 	login,
@@ -11,16 +11,16 @@ const {
 	selectAjaxOption,
 } = require( './helpers/wp-admin' );
 
-const isRestOnly = process.env.LERM_ADMIN_CONFIG_REST_ONLY === '1';
+const isRestContract = process.env.LERM_ADMIN_CONFIG_REST_CONTRACT === '1';
 
-test.skip( ! isRestOnly, 'REST-only transport rehearsal only runs when legacy Ajax is disabled.' );
+test.skip( ! isRestContract, 'REST contract smoke only runs in the dedicated REST contract suite.' );
 
-test( 'plugin mode works with legacy admin-ajax fallback disabled', async ( { page } ) => {
+test( 'plugin mode exercises AdminConfig REST save, import, export, reset, and data-source contracts', async ( { page } ) => {
 	const legacyAjaxRequests = collectAdminConfigAjaxRequests( page );
 
 	await login( page );
 	await page.goto( '/wp-admin/options-general.php?page=acme-demo-settings' );
-	await expectRestOnlyConfig( page );
+	await expectRestContractConfig( page );
 
 	await openSettingsSection( page, /Extension API/i );
 
@@ -37,7 +37,7 @@ test( 'plugin mode works with legacy admin-ajax fallback disabled', async ( { pa
 		'lerm-admin-config/v1/schema/acme-demo-settings/data-source'
 	);
 
-	await page.locator( 'input[name="acme_demo_settings[release_slug]"]' ).fill( 'rest-only-save' );
+	await page.locator( 'input[name="acme_demo_settings[release_slug]"]' ).fill( 'rest-contract-save' );
 
 	const saveResponse = await saveOptionsPage( page, { transport: 'rest' } );
 
@@ -55,9 +55,9 @@ test( 'plugin mode works with legacy admin-ajax fallback disabled', async ( { pa
 	expect( decodeURIComponent( exportResult.response.url() ) ).toContain(
 		'lerm-admin-config/v1/schema/acme-demo-settings/export'
 	);
-	expect( snapshot.release_slug ).toBe( 'rest-only-save' );
+	expect( snapshot.release_slug ).toBe( 'rest-contract-save' );
 
-	snapshot.release_slug = 'rest-only-import';
+	snapshot.release_slug = 'rest-contract-import';
 	snapshot.featured_campaign = 'studio-preview';
 
 	const importResponse = await importBackupSnapshot( page, JSON.stringify( snapshot, null, 2 ), { transport: 'rest' } );
@@ -68,9 +68,9 @@ test( 'plugin mode works with legacy admin-ajax fallback disabled', async ( { pa
 	);
 
 	await page.reload();
-	await expectRestOnlyConfig( page );
+	await expectRestContractConfig( page );
 	await openSettingsSection( page, /Extension API/i );
-	await expect( page.locator( 'input[name="acme_demo_settings[release_slug]"]' ) ).toHaveValue( 'rest-only-import' );
+	await expect( page.locator( 'input[name="acme_demo_settings[release_slug]"]' ) ).toHaveValue( 'rest-contract-import' );
 	await expect( page.locator( 'input[name="acme_demo_settings[featured_campaign]"]' ) ).toHaveValue( 'studio-preview' );
 
 	await openSettingsSection( page, /General/i );

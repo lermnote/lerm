@@ -20,7 +20,7 @@ AdminConfig changes in the range include:
 - `assets/build/block-panel.js` and `assets/build/block-panel.asset.php`.
 - Block-panel runtime helpers for schema loading, local value updates, save
   payloads, context query strings, and REST validation-error replay.
-- `npm run check:phase2`, including build drift, legacy Ajax reference audit,
+- `npm run check:phase2`, including build drift, legacy Ajax removal audit,
   and JavaScript runtime contract tests.
 
 Non-AdminConfig files also changed in the same merge range:
@@ -49,22 +49,22 @@ composer ci
 composer validate --strict
 php tools/sync-version.php --check
 npm run check:phase2
-npm run test:wp:rest-only
+npm run test:wp:rest-contract
 npm run test:wp
 npm run test:wp:multisite
 ```
 
 Local verification on 2026-05-01 passed this full set. The wp-env coverage
-included REST-only single-site, REST-only multisite, default single-site, and
+included REST contract single-site, REST contract multisite, default single-site, and
 default multisite runs.
 
 Passing this set means:
 
 - Classic admin still builds and runs from `resources/admin/index.js`.
 - The build-only block-panel bundle is reproducible.
-- Legacy Ajax references remain isolated to the approved compatibility surface.
+- Legacy Ajax references remain absent from production sources.
 - Core JavaScript runtime helpers are covered by lightweight contract tests.
-- REST-only, default single-site, and multisite wp-env rehearsals remain green.
+- REST contract, default single-site, and multisite wp-env smoke coverage remain green.
 
 ## Phase 3 Handoff
 

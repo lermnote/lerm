@@ -18,11 +18,7 @@ const { createAdminConfigTransport } = require('./transport');
 
 	/**
 	 * @typedef {{
-	 *   ajaxUrl: string,
-	 *   legacyAjaxEnabled?: boolean|string|number,
 	 *   restUrl?: string, restNonce?: string,
-	 *   saveAction: string, resetAction: string, exportAction: string, importAction: string,
-	 *   dataSourceAction: string, dataSourceNonce: string,
 	 *   codeEditor: object|null,
 	 *   selectMedia: string, useMedia: string, noMedia: string,
 	 *   selectImages: string, useImages: string, noGallery: string,
@@ -171,10 +167,8 @@ const { createAdminConfigTransport } = require('./transport');
 	});
 
 	const hasRestTransport = () => transport.hasRestTransport();
-	const hasLegacyAjaxTransport = () => transport.hasLegacyAjaxTransport();
-	const restActionPath = (form, action) => transport.restActionPath(form, action);
+	const restActionPath = (form, endpoint) => transport.restActionPath(form, endpoint);
 	const requestRest = (path, options = {}) => transport.requestRest(path, options);
-	const requestLegacyAjax = (body) => transport.requestLegacyAjax(body);
 
 	/**
 	 * @returns {{ tab: string, subsection: string }}
@@ -1064,13 +1058,6 @@ const { createAdminConfigTransport } = require('./transport');
 			return requestRest(`schema/${params.schemaId}/data-source`, { method: 'POST', body });
 		}
 
-		body.set('action', cfg.dataSourceAction);
-		body.set('nonce', cfg.dataSourceNonce);
-
-		if (hasLegacyAjaxTransport()) {
-			return requestLegacyAjax(body);
-		}
-
 		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
 	};
 
@@ -1301,7 +1288,7 @@ const { createAdminConfigTransport } = require('./transport');
 	 * @param {boolean} [append]
 	 */
 	const loadAjaxSelectOptions = (instance, query, page = 1, append = false) => {
-		if ((!hasRestTransport() && (!hasLegacyAjaxTransport() || !cfg.dataSourceAction)) || !instance.schemaId || !instance.source) return Promise.resolve();
+		if (!hasRestTransport() || !instance.schemaId || !instance.source) return Promise.resolve();
 
 		instance.currentQuery = query;
 		setAjaxSelectStatus(instance, cfg.loadingResults);
@@ -2468,30 +2455,25 @@ const { createAdminConfigTransport } = require('./transport');
 		setDirty(form, dirty);
 	};
 
-	// ─── AJAX ─────────────────────────────────────────────────────────────────
+	// ─── REST Actions ──────────────────────────────────────────────────────────
 
 	/**
 	 * @param {HTMLFormElement} form
-	 * @param {string} action
+	 * @param {string} endpoint
 	 * @param {Record<string, string>} [extras]
 	 * @returns {Promise<AjaxResponse>}
 	 */
-	const request = (form, action, extras = {}) => {
+	const request = (form, endpoint, extras = {}) => {
 		const body = new FormData(form);
-		body.set('action', action);
 		for (const [k, v] of Object.entries(extras)) body.set(k, v);
 
-		const path = restActionPath(form, action);
+		const path = restActionPath(form, endpoint);
 		if (hasRestTransport() && path) {
-			if (action === cfg.exportAction) {
+			if (endpoint === 'export') {
 				return requestRest(path, { method: 'GET' });
 			}
 
 			return requestRest(path, { method: 'POST', body });
-		}
-
-		if (hasLegacyAjaxTransport()) {
-			return requestLegacyAjax(body);
 		}
 
 		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
@@ -2514,13 +2496,12 @@ const { createAdminConfigTransport } = require('./transport');
 	 * Build a full-page request body that includes option fields from every tab.
 	 *
 	 * @param {HTMLFormElement} form
-	 * @param {string} action
+	 * @param {string} endpoint
 	 * @param {Record<string, string>} [extras]
 	 * @returns {Promise<AjaxResponse>}
 	 */
-	const requestPage = (form, action, extras = {}) => {
+	const requestPage = (form, endpoint, extras = {}) => {
 		const body = new FormData(form);
-		body.set('action', action);
 		for (const [k, v] of Object.entries(extras)) body.set(k, v);
 
 		pageForms(form).forEach((pageForm) => {
@@ -2528,13 +2509,9 @@ const { createAdminConfigTransport } = require('./transport');
 			appendOptionEntries(body, pageForm);
 		});
 
-		const path = restActionPath(form, action);
+		const path = restActionPath(form, endpoint);
 		if (hasRestTransport() && path) {
 			return requestRest(path, { method: 'POST', body });
-		}
-
-		if (hasLegacyAjaxTransport()) {
-			return requestLegacyAjax(body);
 		}
 
 		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
@@ -3036,7 +3013,7 @@ const { createAdminConfigTransport } = require('./transport');
 		if (exportBtn) {
 			exportBtn.addEventListener('click', (e) => {
 				e.preventDefault();
-				request(form, cfg.exportAction).then(response => {
+				request(form, 'export').then(response => {
 					if (!response?.success) {
 						setStatus(form, 'error', response?.data?.message || cfg.saveError);
 						return;
@@ -3057,7 +3034,7 @@ const { createAdminConfigTransport } = require('./transport');
 				pageForms(form).forEach((pageForm) => clearFieldErrors(pageForm));
 				setBusyAcrossPage(form, true, cfg.resetting);
 				setStatus(form, 'saving', cfg.statusSaving);
-				request(form, cfg.importAction, { backup_json: json })
+				request(form, 'import', { backup_json: json })
 					.then(response => handlePageSaveResponse(form, response, cfg.importSuccess))
 					.catch(() => setStatus(form, 'error', cfg.importError))
 					.finally(() => setBusyAcrossPage(form, false, cfg.resetting));
@@ -3065,7 +3042,7 @@ const { createAdminConfigTransport } = require('./transport');
 		}
 	};
 
-	// ─── AJAX Form ────────────────────────────────────────────────────────────
+	// ─── REST Form ────────────────────────────────────────────────────────────
 
 	/**
 	 * @param {HTMLFormElement} form
@@ -3118,7 +3095,7 @@ const { createAdminConfigTransport } = require('./transport');
 			pageForms(form).forEach((pageForm) => clearFieldErrors(pageForm));
 			setBusyAcrossPage(form, true, cfg.saving);
 			setStatus(form, 'saving', cfg.statusSaving);
-			requestPage(form, cfg.saveAction)
+			requestPage(form, 'save')
 				.then(r => handlePageSaveResponse(form, r, cfg.saveSuccess))
 				.catch(() => setStatus(form, 'error', cfg.saveError))
 				.finally(() => setBusyAcrossPage(form, false, cfg.saving));
@@ -3133,7 +3110,7 @@ const { createAdminConfigTransport } = require('./transport');
 				clearFieldErrors(form);
 				setBusy(form, true, cfg.resetting);
 				setStatus(form, 'resetting', cfg.statusResetting);
-				request(form, cfg.resetAction, { reset_scope: scope })
+				request(form, 'reset', { reset_scope: scope })
 					.then(r => {
 						const partialFieldIds = r?.data?.scope === 'subsection'
 							? Object.keys(/** @type {Record<string, unknown>} */ (r.data.values ?? {}))
@@ -3145,7 +3122,7 @@ const { createAdminConfigTransport } = require('./transport');
 								const otherForm = /** @type {HTMLFormElement} */ (otherEl);
 								if (otherForm === form) return;
 								// Silently re-fetch defaults for this tab.
-								request(otherForm, cfg.resetAction, { reset_scope: 'fetch_only' })
+								request(otherForm, 'reset', { reset_scope: 'fetch_only' })
 									.then(r2 => {
 										if (!r2?.success) return;
 										applyFieldValues(otherForm, r2.data.values ?? {});

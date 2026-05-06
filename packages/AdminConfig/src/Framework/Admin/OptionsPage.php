@@ -14,7 +14,6 @@ use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Registry\FieldModuleRegistry;
-use Lerm\AdminConfig\WordPress\LegacyAjax;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -80,12 +79,6 @@ final class OptionsPage {
 		if ( $register_hooks ) {
 			add_action( $this->menu_action(), array( $this, 'register_menu' ) );
 			add_action( 'admin_post_' . $this->save_action(), array( $this, 'handle_save' ) );
-			if ( LegacyAjax::enabled() ) {
-				add_action( 'wp_ajax_' . $this->ajax_save_action(), array( $this, 'handle_ajax_save' ) );
-				add_action( 'wp_ajax_' . $this->ajax_reset_action(), array( $this, 'handle_ajax_reset' ) );
-				add_action( 'wp_ajax_' . $this->ajax_export_action(), array( $this, 'handle_ajax_export' ) );
-				add_action( 'wp_ajax_' . $this->ajax_import_action(), array( $this, 'handle_ajax_import' ) );
-			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		}
 	}
@@ -178,230 +171,6 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Save the full settings page without a full reload.
-	 *
-	 * Security note: the AJAX UI submits values from every rendered tab form but
-	 * still verifies the nonce of the currently active tab. This mirrors the
-	 * reset-all flow: the same capability gates access to every tab on the page,
-	 * so the active-tab nonce is sufficient for a full-page save request.
-	 */
-	public function handle_ajax_save(): void {
-		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST save endpoint' );
-
-		if ( ! current_user_can( $this->capability() ) ) {
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
-				403
-			);
-		}
-
-		$tab = $this->posted_tab();
-		check_ajax_referer( $this->nonce_action( $tab ) );
-
-		$submitted = isset( $_POST[ $this->option_name() ] ) && is_array( $_POST[ $this->option_name() ] )
-			? wp_unslash( $_POST[ $this->option_name() ] )
-			: array();
-
-		if ( ! $this->store->save_all( $submitted ) ) {
-			if ( $this->store->has_validation_errors() ) {
-				$error_target = $this->first_validation_target( $this->store->validation_errors() );
-
-				wp_send_json_error(
-					array(
-						'message'     => esc_html__( 'Please review the highlighted fields and try again.', 'lerm' ),
-						'fieldErrors' => $this->collapse_field_errors( $this->store->validation_errors() ),
-						'errors'      => $this->store->validation_errors(),
-						'tab'         => $error_target['tab'],
-						'subsection'  => $error_target['subsection'],
-					),
-					422
-				);
-			}
-
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'Unable to save these settings right now.', 'lerm' ) ),
-				500
-			);
-		}
-
-		wp_send_json_success(
-			array(
-				'message' => esc_html__( 'Settings saved.', 'lerm' ),
-				'values'  => $this->store->all(),
-			)
-		);
-	}
-
-	/**
-	 * Reset the current tab or the whole page without a full reload.
-	 *
-	 * Security note: for both "section" and "all" scopes we verify the nonce
-	 * of the currently active tab. This is intentional: the user is on that
-	 * tab's page and the nonce was issued for the current session. A per-tab
-	 * nonce for a cross-tab "reset all" action would give no additional security
-	 * benefit because an attacker would need the same capability to reach
-	 * any tab at all.
-	 */
-	public function handle_ajax_reset(): void {
-		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST reset endpoint' );
-
-		if ( ! current_user_can( $this->capability() ) ) {
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
-				403
-			);
-		}
-
-		$tab        = $this->posted_tab();
-		$scope      = isset( $_POST['reset_scope'] ) ? sanitize_key( wp_unslash( $_POST['reset_scope'] ) ) : 'section';
-		$subsection = $this->posted_subsection();
-
-		check_ajax_referer( $this->nonce_action( $tab ) );
-
-		// 'fetch_only' is a JS-internal scope used to refresh other tab values
-		// after a full reset: it skips the actual reset and just returns current values.
-		if ( 'fetch_only' === $scope ) {
-			wp_send_json_success( array( 'values' => $this->store->section_values( $tab ) ) );
-		}
-
-		$response_scope = 'all';
-		$success        = false;
-		$values         = array();
-		$message        = '';
-
-		if ( 'all' === $scope ) {
-			$response_scope = 'all';
-			$success        = $this->store->reset_all_sections();
-			$values         = $this->store->all();
-			$message        = esc_html__( 'All sections have been reset to defaults.', 'lerm' );
-		} elseif ( '' !== $subsection && $this->store->has_section_group( $tab, $subsection ) ) {
-			$response_scope = 'subsection';
-			$success        = $this->store->reset_section_group( $tab, $subsection );
-			$values         = $this->store->section_group_values( $tab, $subsection );
-			$message        = esc_html__( 'The current page has been reset to defaults.', 'lerm' );
-		} else {
-			$response_scope = 'section';
-			$success        = $this->store->reset_section( $tab );
-			$values         = $this->store->section_values( $tab );
-			$message        = esc_html__( 'This section has been reset to defaults.', 'lerm' );
-		}
-
-		if ( ! $success ) {
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'Unable to reset the requested settings.', 'lerm' ) ),
-				500
-			);
-		}
-
-		wp_send_json_success(
-			array(
-				'message' => $message,
-				'scope'   => $response_scope,
-				'values'  => $values,
-			)
-		);
-	}
-
-	/**
-	 * Export all settings as JSON for backup workflows.
-	 */
-	public function handle_ajax_export(): void {
-		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST export endpoint' );
-
-		if ( ! current_user_can( $this->capability() ) ) {
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
-				403
-			);
-		}
-
-		$tab = $this->posted_tab();
-		check_ajax_referer( $this->nonce_action( $tab ) );
-
-		$json = wp_json_encode( $this->store->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-
-		if ( false === $json ) {
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'Unable to export the current settings snapshot.', 'lerm' ) ),
-				500
-			);
-		}
-
-		wp_send_json_success(
-			array(
-				'message' => esc_html__( 'Current settings snapshot generated.', 'lerm' ),
-				'json'    => $json,
-			)
-		);
-	}
-
-	/**
-	 * Import a full JSON payload from the backup tools UI.
-	 */
-	public function handle_ajax_import(): void {
-		LegacyAjax::deprecate( __METHOD__, 'lerm-admin-config/v1 REST import endpoint' );
-
-		if ( ! current_user_can( $this->capability() ) ) {
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) ),
-				403
-			);
-		}
-
-		$tab = $this->posted_tab();
-		check_ajax_referer( $this->nonce_action( $tab ) );
-
-		$json = isset( $_POST['backup_json'] ) && is_scalar( $_POST['backup_json'] )
-			? trim( (string) wp_unslash( $_POST['backup_json'] ) )
-			: '';
-
-		if ( '' === $json ) {
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'Paste a JSON snapshot before importing.', 'lerm' ) ),
-				400
-			);
-		}
-
-		$decoded = json_decode( $json, true );
-
-		if ( ! is_array( $decoded ) ) {
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'The backup JSON is invalid.', 'lerm' ) ),
-				400
-			);
-		}
-
-		if ( ! $this->store->import_all( $decoded ) ) {
-			if ( $this->store->has_validation_errors() ) {
-				$error_target = $this->first_validation_target( $this->store->validation_errors() );
-
-				wp_send_json_error(
-					array(
-						'message'     => esc_html__( 'Please review the highlighted fields before importing again.', 'lerm' ),
-						'fieldErrors' => $this->collapse_field_errors( $this->store->validation_errors() ),
-						'errors'      => $this->store->validation_errors(),
-						'tab'         => $error_target['tab'],
-						'subsection'  => $error_target['subsection'],
-					),
-					422
-				);
-			}
-
-			wp_send_json_error(
-				array( 'message' => esc_html__( 'Unable to import the provided settings JSON.', 'lerm' ) ),
-				500
-			);
-		}
-
-		wp_send_json_success(
-			array(
-				'message' => esc_html__( 'Settings imported successfully.', 'lerm' ),
-				'values'  => $this->store->all(),
-			)
-		);
-	}
-
-	/**
 	 * Enqueue page assets.
 	 */
 	public function enqueue_assets( string $hook_suffix ): void {
@@ -445,22 +214,13 @@ final class OptionsPage {
 			$script['version'],
 			true
 		);
-		$legacy_ajax_enabled = LegacyAjax::enabled();
 
 		wp_localize_script(
 			$js_handle,
 			$this->js_global,
 			array(
-				'ajaxUrl'             => $legacy_ajax_enabled ? admin_url( 'admin-ajax.php' ) : '',
-				'legacyAjaxEnabled'   => $legacy_ajax_enabled,
 				'restUrl'             => rest_url( 'lerm-admin-config/v1/' ),
 				'restNonce'           => wp_create_nonce( 'wp_rest' ),
-				'saveAction'          => $this->ajax_save_action(),
-				'resetAction'         => $this->ajax_reset_action(),
-				'exportAction'        => $this->ajax_export_action(),
-				'importAction'        => $this->ajax_import_action(),
-				'dataSourceAction'    => 'lerm_admin_config_data_source',
-				'dataSourceNonce'     => wp_create_nonce( 'lerm_admin_config_data_source' ),
 				'codeEditor'          => $code_editor_settings,
 				'selectMedia'         => __( 'Choose image', 'lerm' ),
 				'useMedia'            => __( 'Use this image', 'lerm' ),
@@ -1918,37 +1678,6 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Collapse dotted nested error paths into top-level field messages.
-	 *
-	 * @param array<string, array<int, string>> $errors
-	 * @return array<string, string>
-	 */
-	private function collapse_field_errors( array $errors ): array {
-		$collapsed = array();
-
-		foreach ( $errors as $path => $messages ) {
-			if ( ! is_array( $messages ) || empty( $messages ) ) {
-				continue;
-			}
-
-			$field_id = sanitize_key( (string) strtok( (string) $path, '.' ) );
-			$message  = trim( implode( ' ', array_filter( array_map( 'strval', $messages ) ) ) );
-
-			if ( '' === $field_id || '' === $message ) {
-				continue;
-			}
-
-			if ( isset( $collapsed[ $field_id ] ) ) {
-				continue;
-			}
-
-			$collapsed[ $field_id ] = $message;
-		}
-
-		return $collapsed;
-	}
-
-	/**
 	 * Resolve the first tab/subsection that contains a validation error.
 	 *
 	 * @param array<string, array<int, string>> $errors
@@ -2204,34 +1933,6 @@ final class OptionsPage {
 	 */
 	private function save_action(): string {
 		return 'lerm_admin_config_save_' . $this->page_slug();
-	}
-
-	/**
-	 * AJAX save action.
-	 */
-	private function ajax_save_action(): string {
-		return 'lerm_admin_config_ajax_save_' . $this->page_slug();
-	}
-
-	/**
-	 * AJAX reset action.
-	 */
-	private function ajax_reset_action(): string {
-		return 'lerm_admin_config_ajax_reset_' . $this->page_slug();
-	}
-
-	/**
-	 * AJAX export action.
-	 */
-	private function ajax_export_action(): string {
-		return 'lerm_admin_config_ajax_export_' . $this->page_slug();
-	}
-
-	/**
-	 * AJAX import action.
-	 */
-	private function ajax_import_action(): string {
-		return 'lerm_admin_config_ajax_import_' . $this->page_slug();
 	}
 
 	/**
@@ -2508,13 +2209,13 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Resolve the built JavaScript asset metadata, falling back to the legacy
-	 * unbuilt file for source checkouts that have not run the build yet.
+	 * Resolve the built JavaScript asset metadata, falling back to the packaged
+	 * browser file for source checkouts that have not run the build yet.
 	 *
 	 * @return array{file: string, dependencies: array<int, string>, version: string}
 	 */
 	private function script_asset(): array {
-		$dependencies = array( 'wp-theme-plugin-editor' );
+		$dependencies = array( 'wp-theme-plugin-editor', 'wp-api-fetch' );
 		$fallback     = array(
 			'file'         => 'admin-config.js',
 			'dependencies' => $dependencies,
