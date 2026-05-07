@@ -36,6 +36,11 @@ Field type definitions can provide:
 
 Field registrations are merged by default, so later calls can extend an existing type with extra validators or client metadata. Use `replace => true` to replace a custom type definition, or `override_builtin => true` to intentionally replace a built-in type.
 
+Field-type `client` metadata is merged into each compiled field payload before
+field-level `client` overrides are applied. Use this for reusable protocol hints
+such as `array( 'control' => 'text' )` when a custom PHP field type should reuse
+an existing JavaScript control.
+
 ## Validators
 
 Validators receive:

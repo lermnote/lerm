@@ -34,7 +34,7 @@ test( 'plugin mode exercises AdminConfig REST save, import, export, reset, and d
 
 	expect( dataSourceResponse.ok() ).toBe( true );
 	expect( decodeURIComponent( dataSourceResponse.url() ) ).toContain(
-		'lerm-admin-config/v1/schema/acme-demo-settings/data-source'
+		'lerm-admin-config/v1/schemas/acme-demo-settings/data-source'
 	);
 
 	await page.locator( 'input[name="acme_demo_settings[release_slug]"]' ).fill( 'rest-contract-save' );
@@ -43,7 +43,7 @@ test( 'plugin mode exercises AdminConfig REST save, import, export, reset, and d
 
 	expect( saveResponse.ok() ).toBe( true );
 	expect( decodeURIComponent( saveResponse.url() ) ).toContain(
-		'lerm-admin-config/v1/schema/acme-demo-settings/save'
+		'lerm-admin-config/v1/schemas/acme-demo-settings/values'
 	);
 
 	await openSettingsSection( page, /Tools/i );
@@ -53,7 +53,7 @@ test( 'plugin mode exercises AdminConfig REST save, import, export, reset, and d
 
 	expect( exportResult.response.ok() ).toBe( true );
 	expect( decodeURIComponent( exportResult.response.url() ) ).toContain(
-		'lerm-admin-config/v1/schema/acme-demo-settings/export'
+		'lerm-admin-config/v1/schemas/acme-demo-settings/export'
 	);
 	expect( snapshot.release_slug ).toBe( 'rest-contract-save' );
 
@@ -64,7 +64,7 @@ test( 'plugin mode exercises AdminConfig REST save, import, export, reset, and d
 
 	expect( importResponse.ok() ).toBe( true );
 	expect( decodeURIComponent( importResponse.url() ) ).toContain(
-		'lerm-admin-config/v1/schema/acme-demo-settings/import'
+		'lerm-admin-config/v1/schemas/acme-demo-settings/import'
 	);
 
 	await page.reload();
@@ -79,7 +79,7 @@ test( 'plugin mode exercises AdminConfig REST save, import, export, reset, and d
 
 	expect( resetResponse.ok() ).toBe( true );
 	expect( decodeURIComponent( resetResponse.url() ) ).toContain(
-		'lerm-admin-config/v1/schema/acme-demo-settings/reset'
+		'lerm-admin-config/v1/schemas/acme-demo-settings/reset'
 	);
 	expect( legacyAjaxRequests, JSON.stringify( legacyAjaxRequests, null, 2 ) ).toHaveLength( 0 );
 } );

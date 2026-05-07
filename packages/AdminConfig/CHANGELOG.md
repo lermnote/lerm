@@ -43,6 +43,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   fields do not silently disappear from the editor panel.
 - Block editor field-status matrix and editable coverage for `date`, `slider`,
   and `spinner` fields.
+- Schema protocol v1 documents at canonical `/schemas/{schema_id}` REST routes,
+  plus a `/schemas` index for schemas available to the current user.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -88,6 +90,11 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   format for conditional field visibility.
 - AdminConfig 0.3.0 removes the legacy Ajax compatibility gate and requires REST
   for enhanced JavaScript clients.
+- REST clients now use canonical plural `/schemas/*` routes. Singular
+  `/schema/*` routes remain compatibility aliases for 0.2.x clients.
+- REST values responses now include client-safe defaults and action flags, and
+  validation errors include a stable `target.section/group` pointer alongside
+  classic `tab/subsection` aliases.
 
 ### Removed
 - The AdminConfig `admin-ajax.php` JavaScript transport and all package

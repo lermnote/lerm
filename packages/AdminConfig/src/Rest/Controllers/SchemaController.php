@@ -9,7 +9,7 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Rest\Controllers;
 
-use Lerm\AdminConfig\Client\SchemaClientConfig;
+use Lerm\AdminConfig\Client\SchemaSerializer;
 use Lerm\AdminConfig\Compiler\CompiledSchema;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Rest\Support\ContextResolver;
@@ -44,10 +44,51 @@ final class SchemaController {
 
 		return rest_ensure_response(
 			array(
-				'schema' => SchemaClientConfig::from_compiled( $schema ),
+				'schema' => SchemaSerializer::legacy_client_config( $schema ),
 				'values' => $values,
 			)
 		);
+	}
+
+	public function schema_document( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+		$schema = $this->schema_from_request( $request );
+
+		if ( is_wp_error( $schema ) ) {
+			return $schema;
+		}
+
+		return ResponseFactory::success(
+			SchemaSerializer::document( $schema, $this->schema_actions( $schema, $request ) )
+		);
+	}
+
+	public function schemas( \WP_REST_Request $request ): \WP_REST_Response {
+		return ResponseFactory::success(
+			array(
+				'schemas' => $this->schema_summaries( $request ),
+			)
+		);
+	}
+
+	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function schema_summaries( \WP_REST_Request $request ): array {
+		$summaries = array();
+		$context   = ContextResolver::from_request( $request );
+
+		foreach ( $this->runtime->schemas() as $schema ) {
+			if ( ! $this->runtime->current_user_can_schema( $schema, $context ) ) {
+				continue;
+			}
+
+			$summaries[] = SchemaSerializer::summary(
+				$schema,
+				$this->actions_from_allowed( true )
+			);
+		}
+
+		return $summaries;
 	}
 
 	public function values( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
@@ -64,9 +105,7 @@ final class SchemaController {
 		}
 
 		return ResponseFactory::success(
-			array(
-				'values' => $values,
-			)
+			SchemaSerializer::values( $schema, $values, $this->schema_actions( $schema, $request ) )
 		);
 	}
 
@@ -98,6 +137,7 @@ final class SchemaController {
 						'errors'      => $store->validation_errors(),
 						'tab'         => $target['tab'],
 						'subsection'  => $target['subsection'],
+						'target'      => $this->target_payload( $target ),
 					)
 				);
 			}
@@ -110,9 +150,11 @@ final class SchemaController {
 		}
 
 		return ResponseFactory::success(
-			array(
-				'message' => esc_html__( 'Settings saved.', 'lerm' ),
-				'values'  => $store->all(),
+			array_merge(
+				array(
+					'message' => esc_html__( 'Settings saved.', 'lerm' ),
+				),
+				SchemaSerializer::values( $schema, $store->all(), $this->schema_actions( $schema, $request ) )
 			)
 		);
 	}
@@ -136,9 +178,7 @@ final class SchemaController {
 
 		if ( 'fetch_only' === $scope ) {
 			return ResponseFactory::success(
-				array(
-					'values' => $store->section_values( $section ),
-				)
+				SchemaSerializer::values( $schema, $store->section_values( $section ), $this->schema_actions( $schema, $request ) )
 			);
 		}
 
@@ -168,10 +208,12 @@ final class SchemaController {
 		}
 
 		return ResponseFactory::success(
-			array(
-				'message' => $message,
-				'scope'   => $scope,
-				'values'  => $values,
+			array_merge(
+				array(
+					'message' => $message,
+					'scope'   => $scope,
+				),
+				SchemaSerializer::values( $schema, $values, $this->schema_actions( $schema, $request ) )
 			)
 		);
 	}
@@ -253,6 +295,7 @@ final class SchemaController {
 						'errors'      => $store->validation_errors(),
 						'tab'         => $target['tab'],
 						'subsection'  => $target['subsection'],
+						'target'      => $this->target_payload( $target ),
 					)
 				);
 			}
@@ -265,9 +308,11 @@ final class SchemaController {
 		}
 
 		return ResponseFactory::success(
-			array(
-				'message' => esc_html__( 'Settings imported successfully.', 'lerm' ),
-				'values'  => $store->all(),
+			array_merge(
+				array(
+					'message' => esc_html__( 'Settings imported successfully.', 'lerm' ),
+				),
+				SchemaSerializer::values( $schema, $store->all(), $this->schema_actions( $schema, $request ) )
 			)
 		);
 	}
@@ -348,6 +393,40 @@ final class SchemaController {
 		}
 
 		return $this->runtime->compiled( $schema_id );
+	}
+
+	/**
+	 * @return array{read: bool, edit: bool, reset: bool, export: bool, import: bool, dataSource: bool}
+	 */
+	private function schema_actions( CompiledSchema $schema, \WP_REST_Request $request ): array {
+		return $this->actions_from_allowed(
+			$this->runtime->current_user_can_schema( $schema, ContextResolver::from_request( $request ) )
+		);
+	}
+
+	/**
+	 * @return array{read: bool, edit: bool, reset: bool, export: bool, import: bool, dataSource: bool}
+	 */
+	private function actions_from_allowed( bool $allowed ): array {
+		return array(
+			'read'       => $allowed,
+			'edit'       => $allowed,
+			'reset'      => $allowed,
+			'export'     => $allowed,
+			'import'     => $allowed,
+			'dataSource' => $allowed,
+		);
+	}
+
+	/**
+	 * @param array{tab: string, subsection: string} $target
+	 * @return array{section: string, group: string}
+	 */
+	private function target_payload( array $target ): array {
+		return array(
+			'section' => $target['tab'],
+			'group'   => $target['subsection'],
+		);
 	}
 
 	private function posted_section( \WP_REST_Request $request, CompiledSchema $schema ): string {

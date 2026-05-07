@@ -101,22 +101,48 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 			context = contextFromConfig(nextContext);
 			state = withStatus({ ...state, context, schemaId }, 'loading');
 
-			let response;
+			let schemaResponse;
+			let valuesResponse;
 
 			try {
-				response = await rest.request(withContext(`schema/${schemaId}`));
+				schemaResponse = await rest.request(withContext(`schemas/${schemaId}`));
 			} catch (error) {
-				response = normalizeRestError(error, 'Unable to load the schema.');
+				schemaResponse = normalizeRestError(error, 'Unable to load the schema.');
 			}
 
-			if (!response.success) {
-				state = withRestError(state, response.data, 'Unable to load the schema.');
-				return response;
+			if (!schemaResponse.success) {
+				state = withRestError(state, schemaResponse.data, 'Unable to load the schema.');
+				return schemaResponse;
 			}
 
-			state = hydrateSchemaResponse(state, response.data, context, schemaId);
+			try {
+				valuesResponse = await rest.request(withContext(`schemas/${schemaId}/values`));
+			} catch (error) {
+				valuesResponse = normalizeRestError(error, 'Unable to load the schema values.');
+			}
 
-			return response;
+			if (!valuesResponse.success) {
+				state = withRestError(state, valuesResponse.data, 'Unable to load the schema values.');
+				return valuesResponse;
+			}
+
+			state = hydrateSchemaResponse(
+				state,
+				{
+					schema: schemaResponse.data,
+					values: valuesResponse.data.values,
+				},
+				context,
+				schemaId
+			);
+
+			return {
+				success: true,
+				data: {
+					schema: schemaResponse.data,
+					values: valuesResponse.data.values,
+				},
+			};
 		},
 
 		/**
@@ -145,7 +171,7 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 
 			try {
 				response = await rest.request(
-					withContext(`schema/${schemaId}/save`),
+					withContext(`schemas/${schemaId}/values`),
 					{
 						data: serializeSavePayload(state, values),
 						method: 'POST',
@@ -256,7 +282,7 @@ const fieldCount = (schema) => {
 const fieldControlType = (field) => {
 	const client = asRecord(field.client);
 
-	return String(client.control || field.type || 'text');
+	return String(field.control || client.control || field.type || 'text');
 };
 
 /**
@@ -324,7 +350,15 @@ const fieldValue = (values, fieldId, fallback = '') => (
  * @param {unknown} control
  * @returns {'editable'|'read-only'|'unsupported'}
  */
-const fieldControlStatus = (controlType, control) => {
+const fieldControlStatus = (field, controlType, control) => {
+	if (field.supported === false) {
+		return 'unsupported';
+	}
+
+	if (field.readOnly === true) {
+		return 'read-only';
+	}
+
 	if (typeof control === 'function') {
 		return 'editable';
 	}
@@ -515,7 +549,7 @@ const createPanelComponent = (config, Panel, element) => {
 					const fieldId = String(field.id || '');
 					const controlType = fieldControlType(field);
 					const control = runtime.controls.get(controlType);
-					const controlStatus = fieldControlStatus(controlType, control);
+					const controlStatus = fieldControlStatus(field, controlType, control);
 
 					if (!fieldId) {
 						return null;

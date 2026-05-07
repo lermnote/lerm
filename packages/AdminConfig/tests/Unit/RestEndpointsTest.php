@@ -17,7 +17,7 @@ use Lerm\AdminConfig\WordPress\Runtime;
 
 final class RestEndpointsTest extends TestCase {
 
-	public function testRegistersSchemaRestRoutes(): void {
+	public function testRegistersCanonicalAndLegacySchemaRestRoutes(): void {
 		$runtime = new Runtime();
 		unset( $runtime );
 
@@ -28,6 +28,13 @@ final class RestEndpointsTest extends TestCase {
 			$GLOBALS['lerm_admin_config_rest_routes'] ?? array()
 		);
 
+		$this->assertContains( 'lerm-admin-config/v1/schemas', $routes );
+		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)', $routes );
+		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/values', $routes );
+		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/reset', $routes );
+		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/import', $routes );
+		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/export', $routes );
+		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/data-source', $routes );
 		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)', $routes );
 		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/values', $routes );
 		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/save', $routes );
@@ -51,6 +58,75 @@ final class RestEndpointsTest extends TestCase {
 
 		$this->assertSame( 'rest_test', $data['schema']['schemaId'] );
 		$this->assertSame( 'Stored title', $data['values']['site_title'] );
+	}
+
+	public function testCanonicalSchemaEndpointReturnsProtocolDocument(): void {
+		$runtime = $this->runtime_with_schema();
+
+		$response = ( new SchemaController( $runtime ) )->schema_document( $this->request( array( 'id' => 'rest_test' ) ) );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $response );
+
+		$data = $response->get_data()['data'];
+
+		$this->assertSame( 1, $data['protocolVersion'] );
+		$this->assertSame( 'rest_test', $data['id'] );
+		$this->assertSame( 'rest_test', $data['schemaId'] );
+		$this->assertSame( 'REST Test Settings', $data['title'] );
+		$this->assertSame( 'option', $data['store']['type'] );
+		$this->assertSame( 'site', $data['store']['scope'] );
+		$this->assertSame( 'options_page', $data['container']['type'] );
+		$this->assertSame( 'admin', $data['container']['surface'] );
+		$this->assertSame( 'values', basename( $data['links']['values'] ) );
+		$this->assertTrue( $data['actions']['edit'] );
+		$this->assertArrayNotHasKey( 'capability', $data['container'] );
+		$this->assertArrayNotHasKey( 'capability', $data['fields']['site_title'] );
+		$this->assertSame( 'site_title', $data['fields']['site_title']['path'] );
+		$this->assertSame( 'text', $data['fields']['site_title']['control'] );
+		$this->assertSame( 'general', $data['fields']['site_title']['section'] );
+		$this->assertSame( 'general', $data['fields']['site_title']['group'] );
+		$this->assertFalse( $data['fields']['site_title']['readOnly'] );
+		$this->assertTrue( $data['fields']['site_title']['supported'] );
+		$this->assertSame( 'campaigns', $data['fields']['campaign']['source'] );
+	}
+
+	public function testCanonicalSchemaIndexListsAccessibleSummaries(): void {
+		$runtime = $this->runtime_with_schema();
+
+		$private = new Runtime();
+		$private->register(
+			array(
+				'id'       => 'private_index_schema',
+				'menu'     => array(
+					'capability' => 'manage_private_index_schema',
+				),
+				'sections' => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id' => 'title',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$GLOBALS['lerm_admin_config_current_user_can'] = array(
+			'manage_options'              => true,
+			'manage_private_index_schema' => false,
+		);
+
+		$response = RestEndpoints::schemas( $this->request( array() ) );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $response );
+
+		$schemas = $response->get_data()['data']['schemas'];
+
+		$this->assertSame( array( 'rest_test' ), array_column( $schemas, 'id' ) );
+		$this->assertSame( 'REST Test Settings', $schemas[0]['title'] );
+		$this->assertArrayNotHasKey( 'capability', $schemas[0]['container'] );
+		$this->assertTrue( $schemas[0]['actions']['edit'] );
 	}
 
 	public function testSchemaEndpointDoesNotExposeServerCapabilitiesToClient(): void {
@@ -126,7 +202,7 @@ final class RestEndpointsTest extends TestCase {
 
 		do_action( 'rest_api_init' );
 
-		$route   = $this->registered_route( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/save' );
+		$route   = $this->registered_route( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/values' )[1];
 		$request = $this->request(
 			array( 'id' => 'rest_test' ),
 			array(
@@ -270,6 +346,13 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertSame( array( 'Site title is too short.' ), $data['data']['errors']['site_title'] );
 		$this->assertSame( 'general', $data['data']['tab'] );
 		$this->assertSame( 'general', $data['data']['subsection'] );
+		$this->assertSame(
+			array(
+				'section' => 'general',
+				'group'   => 'general',
+			),
+			$data['data']['target']
+		);
 		$this->assertSame( 'Please review the highlighted fields and try again.', $data['data']['message'] );
 	}
 
@@ -555,6 +638,10 @@ final class RestEndpointsTest extends TestCase {
 		$runtime->register(
 			array(
 				'id'       => 'rest_test',
+				'view'     => array(
+					'title'       => 'REST Test Settings',
+					'description' => 'Settings exposed through REST.',
+				),
 				'store'    => array(
 					'type' => 'option',
 					'key'  => 'rest_test_settings',
@@ -646,7 +733,7 @@ final class RestEndpointsTest extends TestCase {
 	}
 
 	/**
-	 * @return array<string, mixed>
+	 * @return array<int|string, mixed>
 	 */
 	private function registered_route( string $route ): array {
 		foreach ( $GLOBALS['lerm_admin_config_rest_routes'] ?? array() as $registered ) {
