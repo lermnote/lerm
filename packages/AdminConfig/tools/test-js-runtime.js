@@ -141,6 +141,36 @@ function testSchemaStateHelpers() {
 		message: 'Please review.',
 	});
 	const recovered = withFieldValue(errored, 'group.heading', 'Long enough');
+	const mediaState = createSchemaState(
+		{
+			fields: {
+				entry_upload: {
+					control: 'upload',
+					id: 'entry_upload',
+				},
+				entry_media: {
+					control: 'media',
+					id: 'entry_media',
+				},
+				entry_gallery: {
+					control: 'gallery',
+					id: 'entry_gallery',
+				},
+			},
+		},
+		{
+			entry_gallery: [
+				{ id: 12, url: 'https://example.test/two.png' },
+				'13',
+			],
+			entry_media: {
+				id: 11,
+				thumbnail: 'https://example.test/one-150x150.png',
+				url: 'https://example.test/one.png',
+			},
+			entry_upload: 'https://example.test/upload.png',
+		}
+	);
 
 	assert.equal(hydrated.status, 'ready');
 	assert.equal(isSchemaStateDirty(hydrated), false);
@@ -161,6 +191,15 @@ function testSchemaStateHelpers() {
 			group: {
 				heading: 'Next',
 			},
+		},
+	});
+	assert.deepEqual(serializeSavePayload(mediaState), {
+		values: {
+			entry_gallery: [ 12, 13 ],
+			entry_media: {
+				id: 11,
+			},
+			entry_upload: 'https://example.test/upload.png',
 		},
 	});
 	assert.equal(errored.status, 'error');
@@ -184,8 +223,11 @@ function testDefaultControlRegistry() {
 	assert(types.includes('button_set'));
 	assert(types.includes('color'));
 	assert(types.includes('date'));
+	assert(types.includes('gallery'));
+	assert(types.includes('media'));
 	assert(types.includes('slider'));
 	assert(types.includes('spinner'));
+	assert(types.includes('upload'));
 
 	const rendered = registry.get('text')({
 		components: {},
@@ -332,13 +374,11 @@ function testBlockPanelFieldStatusContract() {
 		'content',
 		'dimensions',
 		'fieldset',
-		'gallery',
 		'group',
 		'heading',
 		'icon',
 		'image_select',
 		'link_color',
-		'media',
 		'notice',
 		'palette',
 		'sorter',
@@ -346,7 +386,6 @@ function testBlockPanelFieldStatusContract() {
 		'subheading',
 		'tabbed',
 		'typography',
-		'upload',
 		'wp_editor',
 	]) {
 		assert(readOnlyTypes.includes(type), `${type} should be read-only in the block panel`);

@@ -46,6 +46,9 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   and `spinner` fields.
 - Schema protocol v1 documents at canonical `/schemas/{schema_id}` REST routes,
   plus a `/schemas` index for schemas available to the current user.
+- Block editor panel media controls for `upload`, `media`, and `gallery`
+  fields, including media-library selection, REST save serialization, and
+  browser persistence coverage.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -78,6 +81,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   duplicating validation metadata at two levels.
 - Block editor schema state now preserves array containers when setting nested
   values by path.
+- Block editor field metadata now exposes media control labels and library
+  constraints through the client schema payload.
 - Block editor color/date/range controls now avoid duplicate input/change state
   updates.
 - Block editor number controls now preserve an explicitly cleared empty value

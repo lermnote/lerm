@@ -170,7 +170,7 @@ final class SchemaCompiler {
 		$this->copy_scalar_field_props(
 			$field,
 			$metadata,
-			array( 'placeholder', 'input_type', 'min', 'max', 'step', 'rows', 'source', 'data_source' )
+			array( 'placeholder', 'input_type', 'min', 'max', 'step', 'rows', 'source', 'data_source', 'library', 'button_text', 'remove_text' )
 		);
 
 		foreach ( array( 'multiple' ) as $key ) {

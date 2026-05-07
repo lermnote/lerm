@@ -10,6 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 require_once ABSPATH . 'wp-admin/includes/theme.php';
 require_once ABSPATH . 'wp-admin/includes/user.php';
+require_once ABSPATH . 'wp-admin/includes/file.php';
+require_once ABSPATH . 'wp-admin/includes/image.php';
 
 /**
  * Keep wp-env URLs aligned with the active mapped port.
@@ -194,6 +196,70 @@ function lerm_admin_config_ensure_term( string $name, string $taxonomy ): int {
 	return is_array( $created ) ? (int) $created['term_id'] : 0;
 }
 
+/**
+ * Ensure a deterministic PNG attachment exists for media-picker E2E flows.
+ */
+function lerm_admin_config_ensure_attachment( string $slug, string $title, string $filename ): int {
+	$existing = get_posts(
+		array(
+			'name'           => $slug,
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+		)
+	);
+
+	if ( ! empty( $existing ) ) {
+		wp_update_post(
+			array(
+				'ID'         => (int) $existing[0],
+				'post_title' => $title,
+				'post_name'  => $slug,
+			)
+		);
+
+		return (int) $existing[0];
+	}
+
+	$image_bytes = base64_decode(
+		'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',
+		true
+	);
+
+	if ( false === $image_bytes ) {
+		return 0;
+	}
+
+	$upload = wp_upload_bits( $filename, null, $image_bytes );
+
+	if ( ! empty( $upload['error'] ) || empty( $upload['file'] ) ) {
+		return 0;
+	}
+
+	$attachment_id = wp_insert_attachment(
+		array(
+			'post_mime_type' => 'image/png',
+			'post_name'      => $slug,
+			'post_title'     => $title,
+			'post_status'    => 'inherit',
+		),
+		(string) $upload['file']
+	);
+
+	if ( $attachment_id <= 0 ) {
+		return 0;
+	}
+
+	$metadata = wp_generate_attachment_metadata( (int) $attachment_id, (string) $upload['file'] );
+
+	if ( is_array( $metadata ) ) {
+		wp_update_attachment_metadata( (int) $attachment_id, $metadata );
+	}
+
+	return (int) $attachment_id;
+}
+
 $package_plugin = lerm_admin_config_find_plugin_file( 'lerm-admin-config.php' );
 $demo_plugin    = lerm_admin_config_find_plugin_file( 'schema-demo-plugin.php' );
 $network_wide   = is_multisite();
@@ -221,20 +287,26 @@ if ( $network_wide && 0 !== $admin_user_id && function_exists( 'grant_super_admi
 
 switch_theme( 'admin-config-embedded' );
 
-$term_id    = lerm_admin_config_ensure_term( 'Admin Config Smoke', 'category' );
-$page_id    = lerm_admin_config_ensure_post(
+$term_id     = lerm_admin_config_ensure_term( 'Admin Config Smoke', 'category' );
+$page_id     = lerm_admin_config_ensure_post(
 	'admin-config-smoke',
 	'Admin Config Smoke',
 	'page',
 	'Smoke fixture page for Admin Config end-to-end tests.'
 );
-$post_id    = lerm_admin_config_ensure_post(
+$post_id     = lerm_admin_config_ensure_post(
 	'admin-config-smoke-post',
 	'Admin Config Smoke Post',
 	'post',
 	'Smoke fixture post for Admin Config classic-editor metabox tests.'
 );
-$comment_id = lerm_admin_config_ensure_comment( $post_id, 'Admin Config Smoke Comment' );
+$comment_id  = lerm_admin_config_ensure_comment( $post_id, 'Admin Config Smoke Comment' );
+$media_one   = lerm_admin_config_ensure_attachment( 'admin-config-media-one', 'Admin Config Media One', 'admin-config-media-one.png' );
+$media_two   = lerm_admin_config_ensure_attachment( 'admin-config-media-two', 'Admin Config Media Two', 'admin-config-media-two.png' );
+$media_three = lerm_admin_config_ensure_attachment( 'admin-config-media-three', 'Admin Config Media Three', 'admin-config-media-three.png' );
+
+delete_post_meta( $post_id, '_acme_demo_entry_settings' );
+delete_post_meta( $page_id, '_acme_demo_entry_settings' );
 
 update_option(
 	'lerm_admin_config_e2e_fixtures',
@@ -247,6 +319,9 @@ update_option(
 		'post_slug'         => 'admin-config-smoke-post',
 		'category_name'     => 'Admin Config Smoke',
 		'comment_signature' => 'Admin Config Smoke Comment',
+		'media_one_id'      => $media_one,
+		'media_two_id'      => $media_two,
+		'media_three_id'    => $media_three,
 	),
 	false
 );
