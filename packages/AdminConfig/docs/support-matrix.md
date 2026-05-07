@@ -10,7 +10,7 @@
 ## Automated Matrix
 
 - PHP quality gate: PHP `8.0`, `8.1`, `8.2`, `8.3`
-- Asset build gate: `@wordpress/scripts` compiles `resources/admin/index.js` and `resources/block-panel/index.js`, verifies committed `assets/build` output, and runs the legacy Ajax removal audit
+- Asset build gate: `@wordpress/scripts` compiles `resources/admin/index.js` and `resources/block-panel/index.js`, verifies generated `assets/build` output, and runs the legacy Ajax removal audit
 - WordPress integration: default stable `wp-env` environment on PHP `8.2`
 - WordPress multisite automation: dedicated `wp-env` run on ports `8890/8891`
 - Browser smoke coverage: Playwright against plugin mode, embedded mode, classic admin containers, and multisite network settings in `wp-env`
@@ -57,9 +57,11 @@
 - JavaScript syntax checks
 - JavaScript runtime contract checks for core schema state, context, error,
   default controls, dirty tracking, and block-panel REST orchestration helpers
-- Reproducible admin script build checks
+- Reproducible admin and block-panel script build checks
 - Legacy Ajax removal audit through `npm run audit:ajax`
 - Built asset dependency extraction for `wp-api-fetch`
+- CI uploads generated `assets/build/` as an artifact for WordPress browser and
+  integration jobs; build output is not tracked in git
 - WPCS and PHPStan gates
 - PHPUnit unit coverage for compiler, schema helpers, registries, and diagnostics
 - PHPUnit smoke coverage for the bundled plugin and embedded examples

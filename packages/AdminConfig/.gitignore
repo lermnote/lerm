@@ -1,0 +1,6 @@
+/assets/build/
+/artifacts/
+/.wp-env-multisite/
+/.wp-env.override.json
+/playwright-report/
+/test-results/

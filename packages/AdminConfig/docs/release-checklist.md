@@ -30,6 +30,9 @@ npm run test:e2e:block-editor
 - Confirm the embedded fixture theme still boots in embedded mode.
 - Confirm WordPress loads `assets/build/admin-config.js` and falls back only
   when the built asset is intentionally absent in a source checkout.
+- Confirm the release archive or GitHub Release attachment includes
+  `assets/build/admin-config.js`, `assets/build/admin-config.asset.php`,
+  `assets/build/block-panel.js`, and `assets/build/block-panel.asset.php`.
 - Confirm the built asset metadata includes `wp-api-fetch` after transport
   changes.
 - Confirm `npm run audit:ajax` reports no production legacy Ajax references.
@@ -61,3 +64,5 @@ npm run test:e2e:block-editor
   actions were removed and JavaScript clients must use REST.
 - For schema protocol changes, call out the protocol version, route aliases,
   and any field payload additions.
+- For source releases, call out that contributors must run `npm ci` and
+  `npm run build` before using block-editor panel assets locally.

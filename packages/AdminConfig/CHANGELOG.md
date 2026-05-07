@@ -25,7 +25,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Contributor-facing alpha release checklist for package hardening and cut verification.
 - A minimal runnable extension example plugin plus focused extension recipes for custom fields, validators, and data sources.
 - REST contract coverage for permission errors, missing schema/context errors, validation envelopes, import JSON failures, and isolated-runtime dispatch.
-- `@wordpress/scripts` build pipeline for the classic admin script, including committed `assets/build` output and asset metadata.
+- `@wordpress/scripts` build pipeline for the classic admin script and generated
+  `assets/build` output with asset metadata.
 - Initial client-side boundaries for config resolution, REST transport, and classic form-state tracking ahead of the block-editor migration.
 - A Phase 2 `resources/` JavaScript source tree with core, controls, store,
   classic admin, and block-panel entry boundaries.
@@ -65,7 +66,7 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - The admin script source now builds from `resources/admin/index.js`, and the
   build pipeline emits a `block-panel` bundle for the future editor panel.
 - CI asset verification now runs the Phase 2 JavaScript runtime contract check
-  alongside build drift and legacy Ajax reference audits.
+  alongside generated asset validation and legacy Ajax reference audits.
 - The client schema payload now includes section metadata and client-safe field
   control metadata for the block editor panel.
 - Block editor controls now normalize WordPress component change events before
@@ -95,6 +96,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - REST values responses now include client-safe defaults and action flags, and
   validation errors include a stable `target.section/group` pointer alongside
   classic `tab/subsection` aliases.
+- Generated `assets/build/` bundles are now ignored in git and produced by
+  `npm run build`; CI uploads them as build artifacts for WordPress jobs.
 
 ### Removed
 - The AdminConfig `admin-ajax.php` JavaScript transport and all package

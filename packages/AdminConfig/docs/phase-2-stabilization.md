@@ -17,10 +17,11 @@ AdminConfig changes in the range include:
 
 - `resources/` JavaScript source layout with `core`, `controls`, `store`,
   `admin`, and `block-panel` boundaries.
-- `assets/build/block-panel.js` and `assets/build/block-panel.asset.php`.
+- Reproducible `assets/build/block-panel.js` and
+  `assets/build/block-panel.asset.php` generation.
 - Block-panel runtime helpers for schema loading, local value updates, save
   payloads, context query strings, and REST validation-error replay.
-- `npm run check:phase2`, including build drift, legacy Ajax removal audit,
+- `npm run check:phase2`, including build verification, legacy Ajax removal audit,
   and JavaScript runtime contract tests.
 
 Non-AdminConfig files also changed in the same merge range:

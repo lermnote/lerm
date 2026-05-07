@@ -199,12 +199,24 @@ final class BootstrapTest extends TestCase {
 
 		$page->enqueue_support_assets( 'unit-build-asset' );
 
-		$script = $GLOBALS['lerm_admin_config_enqueued_scripts']['lerm-admin-config-js-unit-build-asset'] ?? null;
-		$asset  = require dirname( __DIR__, 2 ) . '/assets/build/admin-config.asset.php';
+		$script           = $GLOBALS['lerm_admin_config_enqueued_scripts']['lerm-admin-config-js-unit-build-asset'] ?? null;
+		$asset_file       = dirname( __DIR__, 2 ) . '/assets/build/admin-config.asset.php';
+		$expected_src     = 'https://example.test/assets/admin-config.js';
+		$expected_version = 'unit-version';
+
+		if ( is_readable( $asset_file ) ) {
+			$asset            = require $asset_file;
+			$expected_src     = 'https://example.test/assets/build/admin-config.js';
+			$expected_version = (string) $asset['version'];
+		}
 
 		$this->assertIsArray( $script );
-		$this->assertSame( 'https://example.test/assets/build/admin-config.js', $script['src'] );
-		$this->assertSame( (string) $asset['version'], $script['version'] );
+		$this->assertSame( $expected_src, $script['src'] );
+		if ( is_readable( $asset_file ) ) {
+			$this->assertSame( $expected_version, $script['version'] );
+		} else {
+			$this->assertStringStartsWith( $expected_version, (string) $script['version'] );
+		}
 		$this->assertContains( 'wp-theme-plugin-editor', $script['dependencies'] );
 		$this->assertContains( 'wp-api-fetch', $script['dependencies'] );
 		$this->assertSame(
