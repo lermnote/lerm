@@ -4,7 +4,7 @@
   "scripts": {
     "audit:ajax": "node tools/audit-legacy-ajax.js",
     "build": "wp-scripts build",
-    "build:check": "npm run build && git diff --exit-code -- assets/build/admin-config.js assets/build/admin-config.asset.php assets/build/block-panel.js assets/build/block-panel.asset.php",
+    "build:check": "npm run build && node tools/check-build-assets.js",
     "check:phase1": "npm run build:check && npm run audit:ajax",
     "check:phase2": "npm run check:phase1 && npm run test:js-runtime",
     "start": "wp-scripts start",

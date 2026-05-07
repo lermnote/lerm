@@ -89,13 +89,19 @@ final class BlockEditorPanelTest extends TestCase {
 		$this->assertInstanceOf( MetaboxContainer::class, $container );
 		$container->enqueue_block_editor_assets();
 
-		$script = $GLOBALS['lerm_admin_config_enqueued_scripts']['lerm-admin-config-block-panel'] ?? null;
-		$inline = $GLOBALS['lerm_admin_config_inline_scripts']['lerm-admin-config-block-panel'][0] ?? null;
-		$asset  = require dirname( __DIR__, 2 ) . '/assets/build/block-panel.asset.php';
+		$script           = $GLOBALS['lerm_admin_config_enqueued_scripts']['lerm-admin-config-block-panel'] ?? null;
+		$inline           = $GLOBALS['lerm_admin_config_inline_scripts']['lerm-admin-config-block-panel'][0] ?? null;
+		$asset_file       = dirname( __DIR__, 2 ) . '/assets/build/block-panel.asset.php';
+		$expected_version = 'unit-version';
+
+		if ( is_readable( $asset_file ) ) {
+			$asset            = require $asset_file;
+			$expected_version = (string) $asset['version'];
+		}
 
 		$this->assertIsArray( $script );
 		$this->assertSame( 'https://example.test/assets/build/block-panel.js', $script['src'] );
-		$this->assertSame( (string) $asset['version'], $script['version'] );
+		$this->assertSame( $expected_version, $script['version'] );
 		$this->assertContains( 'wp-api-fetch', $script['dependencies'] );
 		$this->assertContains( 'wp-edit-post', $script['dependencies'] );
 		$this->assertContains( 'wp-element', $script['dependencies'] );

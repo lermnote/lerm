@@ -20,8 +20,9 @@ This repository now contains the first extraction slice:
 - `src/WordPress`: embedded bootstrap, plugin bootstrap, runtime, REST endpoints, and container adapters
 - `resources`: JavaScript source entry points and client boundaries for core,
   controls, store, classic admin, and the future block-editor panel
-- `assets/build`: generated WordPress script bundles and `*.asset.php` metadata
-- `assets`: reusable admin UI styles plus legacy unbuilt script fallback
+- `assets/build`: generated WordPress script bundles and `*.asset.php` metadata;
+  ignored in source control and produced by `npm run build`
+- `assets`: reusable admin UI styles plus packaged classic-admin script fallback
 - `lerm-admin-config.php`: plugin entry point for standalone installs
 - `examples/schema-demo-plugin`: reference plugin using the package in plugin-install mode
 - `examples/minimal-extension-plugin`: smallest runnable extension-author example
@@ -198,8 +199,10 @@ Embedded mode follows the same shape through `EmbeddedBootstrap::boot(...)`.
 
 In plugin-install mode, the asset resolver uses the passed plugin file when
 that plugin bundles the AdminConfig assets. Built script bundles are loaded from
-`assets/build/*.js` with `*.asset.php` metadata when present; source checkouts
-fall back to `assets/admin-config.js` before a build has run.
+`assets/build/*.js` with `*.asset.php` metadata when present. Source checkouts
+fall back to `assets/admin-config.js` for classic admin screens before a build
+has run; block-editor panel work requires `npm run build` so
+`assets/build/block-panel.js` exists.
 Extension/demo plugins that only register schemas fall back to the package
 assets.
 
@@ -269,10 +272,20 @@ when embedded inside a theme:
 - `composer analyse:phpstan` runs PHPStan when the binary is available
 - `npm run build` compiles `resources/admin/index.js` and
   `resources/block-panel/index.js` to `assets/build/*.js` plus asset metadata
-- `npm run build:check` rebuilds and fails if the committed build output drifts
+- `npm run build:check` rebuilds and verifies generated assets and metadata
 - `npm run test:js-runtime` checks the core schema state, context, error, and
   block-panel runtime helpers
-- `npm run check:phase2` runs build drift, legacy Ajax removal, and JS runtime checks
+- `npm run check:phase2` runs build verification, legacy Ajax removal, and JS runtime checks
+
+After a fresh source checkout, run:
+
+```bash
+npm ci
+npm run build
+```
+
+Release archives and CI browser jobs must include `assets/build/`; the directory
+is intentionally not committed to git.
 
 The PHPCS and PHPStan runners prepend `tools/wp-tool-stubs.php`, so they can be
 executed from an embedded theme workspace without fatalling on eager theme

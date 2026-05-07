@@ -61,7 +61,7 @@ PRs:
 - `resources/block-panel/index.js` builds into `assets/build/block-panel.js`.
 - The block-panel runtime can load schema data, update local values, save via
   REST, and replay validation errors into state.
-- `npm run check:phase2` verifies build drift, legacy Ajax removal, and
+- `npm run check:phase2` verifies generated assets, legacy Ajax removal, and
   JavaScript runtime contracts.
 
 See `docs/phase-2-stabilization.md` for the mainline audit and stable-point

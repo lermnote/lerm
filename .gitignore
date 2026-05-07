@@ -29,5 +29,6 @@ Thumbs.db
 !packages/AdminConfig/phpunit.xml.dist
 packages/AdminConfig/.wp-env.override.json
 packages/AdminConfig/.wp-env-multisite/
+packages/AdminConfig/assets/build/
 packages/AdminConfig/playwright-report/
 packages/AdminConfig/test-results/
