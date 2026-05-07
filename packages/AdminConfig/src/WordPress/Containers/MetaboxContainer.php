@@ -66,6 +66,8 @@ final class MetaboxContainer implements Container {
 			return;
 		}
 
+		wp_enqueue_media();
+
 		$script = $this->block_panel_script_asset();
 		$handle = 'lerm-admin-config-block-panel';
 
@@ -348,6 +350,7 @@ final class MetaboxContainer implements Container {
 	private function block_panel_script_asset(): array {
 		$dependencies = array(
 			'wp-api-fetch',
+			'wp-block-editor',
 			'wp-components',
 			'wp-edit-post',
 			'wp-element',

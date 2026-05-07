@@ -67,6 +67,15 @@ final class SchemaCompilerTest extends TestCase {
 								'step'    => 1,
 								'default' => 2,
 							),
+							array(
+								'id'          => 'hero_image',
+								'type'        => 'media',
+								'label'       => 'Hero image',
+								'library'     => 'image',
+								'button_text' => 'Choose hero',
+								'remove_text' => 'Remove hero',
+								'default'     => array(),
+							),
 						),
 					),
 				),
@@ -78,7 +87,7 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertArrayHasKey( 'accent_color', $compiled->dependency_graph() );
 		$this->assertSame( 'feature_enabled', $compiled->dependency_graph()['accent_color']['field'] );
 		$this->assertSame( 'demo_settings', $compiled->client_config()['optionName'] );
-		$this->assertSame( array( 'feature_enabled', 'accent_color', 'layout', 'columns' ), $compiled->client_config()['sections']['general']['fields'] );
+		$this->assertSame( array( 'feature_enabled', 'accent_color', 'layout', 'columns', 'hero_image' ), $compiled->client_config()['sections']['general']['fields'] );
 		$this->assertSame( 'General settings.', $compiled->client_config()['sections']['general']['description'] );
 		$this->assertSame(
 			array(
@@ -90,6 +99,9 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertSame( 'Choose a layout', $compiled->client_config()['fields']['layout']['placeholder'] );
 		$this->assertSame( 1, $compiled->client_config()['fields']['columns']['min'] );
 		$this->assertSame( 4, $compiled->client_config()['fields']['columns']['max'] );
+		$this->assertSame( 'image', $compiled->client_config()['fields']['hero_image']['library'] );
+		$this->assertSame( 'Choose hero', $compiled->client_config()['fields']['hero_image']['button_text'] );
+		$this->assertSame( 'Remove hero', $compiled->client_config()['fields']['hero_image']['remove_text'] );
 		$this->assertSame( 'option', $compiled->store()['type'] );
 	}
 

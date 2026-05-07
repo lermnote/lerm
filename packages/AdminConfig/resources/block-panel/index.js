@@ -30,13 +30,11 @@ const READ_ONLY_CONTROL_TYPES = new Set([
 	'content',
 	'dimensions',
 	'fieldset',
-	'gallery',
 	'group',
 	'heading',
 	'icon',
 	'image_select',
 	'link_color',
-	'media',
 	'notice',
 	'palette',
 	'sorter',
@@ -44,7 +42,6 @@ const READ_ONLY_CONTROL_TYPES = new Set([
 	'subheading',
 	'tabbed',
 	'typography',
-	'upload',
 	'wp_editor',
 ]);
 

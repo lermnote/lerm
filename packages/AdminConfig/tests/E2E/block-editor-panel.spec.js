@@ -70,6 +70,52 @@ const setInputValue = async ( locator, value ) => {
 	}, value );
 };
 
+const currentBlockPanelMediaValues = async ( page ) => page.evaluate( () => {
+	const instances = window.lermAdminConfigBlockPanel?.getInstances?.() || [];
+	const instance = instances.find( ( candidate ) => candidate.schemaId === 'acme-demo-post-metabox' ) || {};
+	const values = instance.state?.values || {};
+	const media = values.entry_media || {};
+	const gallery = Array.isArray( values.entry_gallery ) ? values.entry_gallery : [];
+
+	return {
+		galleryIds: gallery.map( ( item ) => Number( item?.id || item ) ).filter( ( id ) => id > 0 ),
+		mediaId: Number( media?.id || media || 0 ),
+		upload: String( values.entry_upload || '' ),
+	};
+} );
+
+const selectMediaAttachments = async ( page, trigger, titles ) => {
+	await trigger.click();
+
+	const modal = page.locator( '.media-modal' ).last();
+
+	await expect( modal ).toBeVisible( { timeout: 20_000 } );
+	await modal.getByRole( 'tab', { name: /Media Library/i } ).click().catch( () => {} );
+
+	for ( const title of titles ) {
+		const checkbox = modal.getByRole( 'checkbox', { name: new RegExp( `^${ escapeRegExp( title ) }$` ) } ).first();
+
+		await expect( checkbox, `Media attachment "${ title }" should be selectable` ).toBeVisible( { timeout: 20_000 } );
+		await checkbox.click();
+	}
+
+	for ( let attempt = 0; attempt < 3; attempt += 1 ) {
+		const button = modal.getByRole( 'button', {
+			name: /Select|Choose|Create a new gallery|Insert gallery|Add to gallery|Update gallery/i,
+		} ).last();
+
+		await expect( button ).toBeEnabled( { timeout: 10_000 } );
+		await button.click();
+		await page.waitForTimeout( 500 );
+
+		if ( ! await modal.isVisible().catch( () => false ) ) {
+			break;
+		}
+	}
+
+	await expect( modal ).toBeHidden( { timeout: 20_000 } );
+};
+
 test.skip(
 	process.env.LERM_ADMIN_CONFIG_BLOCK_EDITOR !== '1',
 	'Block editor smoke runs through npm run test:e2e:block-editor so the fixture can temporarily enable the editor.'
@@ -133,6 +179,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryReviewDate = panel.locator( '[data-field-id="entry_review_date"] input[type="date"]' );
 	const entryPriority = panel.locator( '[data-field-id="entry_priority"] input[type="range"]' );
 	const entryScore = panel.locator( '[data-field-id="entry_score"] input[type="number"]' );
+	const entryUpload = panel.locator( '[data-field-id="entry_upload"]' );
+	const entryMedia = panel.locator( '[data-field-id="entry_media"]' );
+	const entryGallery = panel.locator( '[data-field-id="entry_gallery"]' );
 	const entryIconReadOnly = panel.locator( '[data-field-id="entry_icon"][data-read-only-control="true"]' );
 	const entryBadgeReadOnly = panel.locator( '[data-field-id="entry_badge"][data-read-only-control="true"]' );
 	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
@@ -147,6 +196,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryReviewDate ).toBeVisible();
 	await expect( entryPriority ).toBeVisible();
 	await expect( entryScore ).toBeVisible();
+	await expect( entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ) ).toBeVisible();
+	await expect( entryMedia.getByRole( 'button', { name: /^Choose image$/i } ) ).toBeVisible();
+	await expect( entryGallery.getByRole( 'button', { name: /^Choose gallery images$/i } ) ).toBeVisible();
 	await expect( newsletterChannel ).toBeVisible();
 	await expect( entryIconReadOnly ).toContainText( /Field type "icon" is read-only/i );
 	await expect( entryBadgeReadOnly ).toContainText( /Field type "fieldset" is read-only/i );
@@ -233,6 +285,18 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await setInputValue( entryPriority, savedPriority );
 	await entryScore.fill( savedScore );
 	await newsletterChannel.setChecked( ! initialNewsletter );
+	await selectMediaAttachments( page, entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ), [ 'Admin Config Media One' ] );
+	await selectMediaAttachments( page, entryMedia.getByRole( 'button', { name: /^Choose image$/i } ), [ 'Admin Config Media Two' ] );
+	await selectMediaAttachments( page, entryGallery.getByRole( 'button', { name: /^Choose gallery images$/i } ), [
+		'Admin Config Media One',
+		'Admin Config Media Three',
+	] );
+
+	const selectedMedia = await currentBlockPanelMediaValues( page );
+
+	expect( selectedMedia.upload ).toContain( 'admin-config-media-one' );
+	expect( selectedMedia.mediaId ).toBeGreaterThan( 0 );
+	expect( selectedMedia.galleryIds ).toHaveLength( 2 );
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
 	const saveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
@@ -253,6 +317,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryPriority ).toHaveValue( savedPriority );
 	await expect( entryScore ).toHaveValue( savedScore );
 	await expect( newsletterChannel ).toBeChecked( { checked: ! initialNewsletter } );
+	await expect( entryUpload.locator( '.lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
+	await expect( entryMedia.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
+	await expect( entryGallery.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );
 
 	const reloadSchemaRequest = page.waitForResponse( ( reloadResponse ) => isMetaboxSchemaResponse( reloadResponse ), { timeout: 30_000 } );
 
@@ -272,6 +339,12 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.locator( '[data-field-id="entry_review_date"] input[type="date"]' ) ).toHaveValue( savedReviewDate );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_priority"] input[type="range"]' ) ).toHaveValue( savedPriority );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_score"] input[type="number"]' ) ).toHaveValue( savedScore );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_upload"] .lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_media"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_gallery"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );
+	await expect
+		.poll( () => currentBlockPanelMediaValues( page ), { timeout: 30_000 } )
+		.toMatchObject( selectedMedia );
 	await expect( reloadedPanel.getByRole( 'checkbox', { name: /^Newsletter$/i } ) ).toBeChecked(
 		{ checked: ! initialNewsletter }
 	);

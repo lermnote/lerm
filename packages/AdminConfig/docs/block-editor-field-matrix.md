@@ -36,13 +36,15 @@ the AdminConfig block-panel runtime has migrated each field family.
 | `switcher` | Boolean toggle. |
 | `toggle` | Boolean toggle alias. |
 | `slug_text` | Custom scalar text control from the demo extension. |
+| `upload` | URL-backed media-library selection. |
+| `media` | Single attachment selection saved through REST by attachment ID. |
+| `gallery` | Ordered attachment ID list with media-library selection. |
 
 ## Read-Only
 
 | Field type | Reason |
 | --- | --- |
 | `heading`, `subheading`, `content`, `notice` | Presentation-only fields; no persisted value should enter the save payload. |
-| `upload`, `media`, `gallery` | Needs WordPress media library integration in React before editing. |
 | `image_select`, `palette`, `icon` | Needs richer visual picker UI before editing. |
 | `fieldset`, `group`, `typography` | Needs nested value-path updates and nested validation-error replay. |
 | `background`, `border`, `dimensions`, `link_color`, `spacing` | Needs composite design-control editing and nested value-path updates. |

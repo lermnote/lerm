@@ -99,6 +99,122 @@ const withoutErrorAtPath = (errors, path) => {
 };
 
 /**
+ * @param {unknown} value
+ * @returns {number}
+ */
+const positiveInteger = (value) => {
+	const parsed = Number.parseInt(String(value || ''), 10);
+
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
+
+/**
+ * @param {unknown} value
+ * @returns {number}
+ */
+const mediaAttachmentId = (value) => {
+	if (Array.isArray(value)) {
+		return mediaAttachmentId(value[0]);
+	}
+
+	const record = asRecord(value);
+
+	return positiveInteger(record.id || record.ID || value);
+};
+
+/**
+ * @param {unknown} value
+ * @returns {Array<number>}
+ */
+const galleryAttachmentIds = (value) => {
+	let candidates = value;
+
+	if (typeof value === 'string') {
+		candidates = value.split(',');
+	}
+
+	const record = asRecord(value);
+
+	if (typeof record.ids === 'string') {
+		candidates = record.ids.split(',');
+	} else if (Array.isArray(record.ids)) {
+		candidates = record.ids;
+	}
+
+	if (!Array.isArray(candidates)) {
+		candidates = [];
+	}
+
+	const ids = [];
+
+	for (const candidate of candidates) {
+		const id = mediaAttachmentId(candidate);
+
+		if (id > 0 && !ids.includes(id)) {
+			ids.push(id);
+		}
+	}
+
+	return ids;
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {string}
+ */
+const fieldControlType = (field) => {
+	const client = asRecord(field.client);
+
+	return String(field.control || client.control || field.type || '');
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const serializeFieldValue = (field, value) => {
+	switch (fieldControlType(field)) {
+		case 'media':
+			return { id: mediaAttachmentId(value) };
+
+		case 'gallery':
+			return galleryAttachmentIds(value);
+
+		case 'upload':
+			return typeof value === 'undefined' || value === null ? '' : String(value);
+
+		default:
+			return value;
+	}
+};
+
+/**
+ * @param {Record<string, unknown>} schema
+ * @param {Record<string, unknown>} values
+ * @returns {Record<string, unknown>}
+ */
+const serializeValuesForSchema = (schema, values) => {
+	const fields = asRecord(schema.fields);
+
+	if (!Object.keys(fields).length) {
+		return values;
+	}
+
+	const payload = { ...values };
+
+	for (const [ fieldId, field ] of Object.entries(fields)) {
+		if (!Object.prototype.hasOwnProperty.call(values, fieldId)) {
+			continue;
+		}
+
+		payload[fieldId] = serializeFieldValue(asRecord(field), values[fieldId]);
+	}
+
+	return payload;
+};
+
+/**
  * @param {Record<string, unknown>} schema
  * @param {Record<string, unknown>} values
  * @param {Record<string, number>} context
@@ -228,7 +344,7 @@ const withRestError = (state, responseData, fallbackMessage = '') => ({
  * @returns {{ values: Record<string, unknown> }}
  */
 const serializeSavePayload = (state, values = state.values) => ({
-	values,
+	values: serializeValuesForSchema(state.schema, values),
 });
 
 /**
@@ -244,6 +360,7 @@ module.exports = {
 	hydrateSchemaResponse,
 	isSchemaStateDirty,
 	serializeSavePayload,
+	serializeValuesForSchema,
 	setValueAtPath,
 	withoutErrorAtPath,
 	withErrors,

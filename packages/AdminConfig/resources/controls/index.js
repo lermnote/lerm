@@ -148,6 +148,342 @@ const numericValue = (value, field) => {
 };
 
 /**
+ * @param {unknown} value
+ * @returns {number}
+ */
+const positiveInteger = (value) => {
+	const parsed = Number.parseInt(stringValue(value), 10);
+
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
+
+/**
+ * @param {unknown} value
+ * @returns {number}
+ */
+const attachmentId = (value) => {
+	if (Array.isArray(value)) {
+		return attachmentId(value[0]);
+	}
+
+	const record = asRecord(value);
+
+	return positiveInteger(record.id || record.ID || value);
+};
+
+/**
+ * @param {unknown} value
+ * @returns {Array<unknown>}
+ */
+const selectionItems = (value) => {
+	if (Array.isArray(value)) {
+		return value;
+	}
+
+	const record = asRecord(value);
+
+	if (Array.isArray(record.models)) {
+		return record.models.map((model) => {
+			const modelRecord = asRecord(model);
+
+			return typeof modelRecord.toJSON === 'function' ? modelRecord.toJSON() : model;
+		});
+	}
+
+	if (typeof record.toJSON === 'function') {
+		const json = record.toJSON();
+
+		return Array.isArray(json) ? json : [ json ];
+	}
+
+	return Object.keys(record).length ? [ record ] : [];
+};
+
+/**
+ * @param {unknown} value
+ * @returns {Array<number>}
+ */
+const galleryIds = (value) => {
+	let candidates = value;
+	const record = asRecord(value);
+
+	if (typeof value === 'string') {
+		candidates = value.split(',');
+	} else if (typeof record.ids === 'string') {
+		candidates = record.ids.split(',');
+	} else if (Array.isArray(record.ids)) {
+		candidates = record.ids;
+	}
+
+	if (!Array.isArray(candidates)) {
+		return [];
+	}
+
+	const ids = [];
+
+	for (const candidate of candidates) {
+		const id = attachmentId(candidate);
+
+		if (id > 0 && !ids.includes(id)) {
+			ids.push(id);
+		}
+	}
+
+	return ids;
+};
+
+/**
+ * @param {Record<string, unknown>} record
+ * @returns {string}
+ */
+const attachmentPreviewUrl = (record) => {
+	const mediaDetails = asRecord(record.media_details);
+	const sizes = asRecord(mediaDetails.sizes || record.sizes);
+	const thumbnail = asRecord(sizes.thumbnail);
+	const medium = asRecord(sizes.medium);
+
+	return stringValue(record.thumbnail || thumbnail.source_url || thumbnail.url || medium.source_url || medium.url || record.source_url || record.url);
+};
+
+/**
+ * @param {unknown} value
+ * @returns {Record<string, unknown>}
+ */
+const attachmentRecord = (value) => {
+	const record = asRecord(value);
+	const id = attachmentId(record);
+
+	if (id <= 0) {
+		return {};
+	}
+
+	const title = asRecord(record.title);
+	const rawTitle = typeof record.title === 'string' ? record.title : '';
+
+	return {
+		...record,
+		id,
+		title: stringValue(title.rendered || rawTitle || record.filename || `#${ id }`),
+		url: stringValue(record.url || record.source_url),
+		thumbnail: attachmentPreviewUrl(record),
+	};
+};
+
+/**
+ * @param {unknown} value
+ * @returns {Array<Record<string, unknown>>}
+ */
+const attachmentRecords = (value) => selectionItems(value)
+	.map(attachmentRecord)
+	.filter((record) => attachmentId(record) > 0);
+
+const attachmentCache = new Map();
+
+/**
+ * @param {Array<Record<string, unknown>>} records
+ */
+const cacheAttachmentRecords = (records) => {
+	for (const record of records) {
+		const id = attachmentId(record);
+
+		if (id > 0) {
+			attachmentCache.set(id, record);
+		}
+	}
+};
+
+/**
+ * @returns {Function|null}
+ */
+const apiFetch = () => {
+	if (typeof window === 'undefined' || !window.wp || typeof window.wp.apiFetch !== 'function') {
+		return null;
+	}
+
+	return window.wp.apiFetch;
+};
+
+/**
+ * @returns {Record<string, Function>}
+ */
+const blockEditorComponents = () => {
+	if (typeof window === 'undefined' || !window.wp) {
+		return {};
+	}
+
+	return /** @type {Record<string, Function>} */ (asRecord(window.wp.blockEditor || window.wp.editor));
+};
+
+/**
+ * @returns {Record<string, Function>}
+ */
+const wpElement = () => {
+	if (typeof window === 'undefined' || !window.wp) {
+		return {};
+	}
+
+	return /** @type {Record<string, Function>} */ (asRecord(window.wp.element));
+};
+
+/**
+ * @param {number[]} ids
+ * @returns {Array<number[]>}
+ */
+const attachmentIdChunks = (ids) => {
+	const chunks = [];
+
+	for (let index = 0; index < ids.length; index += 100) {
+		chunks.push(ids.slice(index, index + 100));
+	}
+
+	return chunks;
+};
+
+/**
+ * @param {Array<number>} ids
+ * @param {Array<Record<string, unknown>>} inlineRecords
+ * @returns {Array<Record<string, unknown>>}
+ */
+const useAttachmentRecords = (ids, inlineRecords = []) => {
+	const element = wpElement();
+	const useState = element.useState;
+	const useEffect = element.useEffect;
+
+	cacheAttachmentRecords(inlineRecords);
+
+	const recordsForIds = () => ids
+		.map((id) => attachmentCache.get(id) || {})
+		.filter((record) => attachmentId(record) > 0);
+
+	if (typeof useState !== 'function' || typeof useEffect !== 'function') {
+		return recordsForIds();
+	}
+
+	const [ records, setRecords ] = useState(recordsForIds);
+
+	useEffect(() => {
+		let active = true;
+		const fetch = apiFetch();
+		const missingIds = ids.filter((id) => !attachmentCache.has(id));
+
+		if (!missingIds.length || typeof fetch !== 'function') {
+			setRecords(recordsForIds());
+			return () => {
+				active = false;
+			};
+		}
+
+		Promise.all(attachmentIdChunks(missingIds).map((chunk) => fetch({
+			path: `/wp/v2/media?include=${ chunk.join(',') }&orderby=include&per_page=${ chunk.length }&_fields=id,source_url,media_details,alt_text,title,mime_type`,
+		}))).then((responses) => {
+			if (!active) {
+				return;
+			}
+
+			cacheAttachmentRecords(responses.flatMap((response) => attachmentRecords(response)));
+			setRecords(recordsForIds());
+		}).catch(() => {
+			if (active) {
+				setRecords(recordsForIds());
+			}
+		});
+
+		return () => {
+			active = false;
+		};
+	}, [ ids.join(',') ]);
+
+	return records;
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {string[]} fallback
+ * @returns {string[]|undefined}
+ */
+const allowedMediaTypes = (field, fallback = []) => {
+	const library = field.library;
+	const values = Array.isArray(library) ? library : (stringValue(library) ? [ stringValue(library) ] : fallback);
+	const allowed = values.map(stringValue).filter(Boolean);
+
+	return allowed.length ? allowed : undefined;
+};
+
+/**
+ * @param {Function|undefined} Button
+ * @param {Function} createElement
+ * @param {Record<string, unknown>} props
+ * @param {string} label
+ * @returns {unknown}
+ */
+const renderButton = (Button, createElement, props, label) => typeof Button === 'function'
+	? createElement(Button, props, label)
+	: createElement('button', { ...props, type: 'button' }, label);
+
+/**
+ * @param {Function} createElement
+ * @param {string} url
+ * @param {string} key
+ * @returns {unknown}
+ */
+const renderUrlPreview = (createElement, url, key = 'preview') => {
+	if (!url) {
+		return null;
+	}
+
+	if (/\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?.*)?$/i.test(url)) {
+		return createElement('img', { alt: '', key, src: url });
+	}
+
+	return createElement('a', { href: url, key, rel: 'noopener noreferrer', target: '_blank' }, url.split('/').pop() || url);
+};
+
+/**
+ * @param {Function} createElement
+ * @param {Array<Record<string, unknown>>} records
+ * @param {boolean} multiple
+ * @returns {unknown}
+ */
+const renderAttachmentPreview = (createElement, records, multiple = false) => {
+	const items = records.map((record) => {
+		const id = attachmentId(record);
+		const url = attachmentPreviewUrl(record);
+		const label = stringValue(record.title || `Attachment ${ id }`);
+
+		return createElement(
+			'li',
+			{
+				className: 'lerm-admin-config-block-panel__media-preview-item',
+				key: String(id),
+			},
+			url
+				? createElement('img', { alt: label, src: url })
+				: createElement('span', {}, label)
+		);
+	});
+
+	if (!items.length) {
+		return createElement(
+			'p',
+			{
+				className: 'lerm-admin-config-block-panel__media-empty',
+				key: 'empty',
+			},
+			multiple ? 'No images selected.' : 'No media selected.'
+		);
+	}
+
+	return createElement(
+		'ul',
+		{
+			className: 'lerm-admin-config-block-panel__media-preview',
+			key: 'preview',
+		},
+		items
+	);
+};
+
+/**
  * @param {Record<string, unknown>} props
  * @param {string} type
  * @returns {unknown}
@@ -585,6 +921,272 @@ const CheckboxControl = (props) => {
 };
 
 /**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @returns {unknown}
+ */
+const UploadControlComponent = (normalized) => {
+	const { components, createElement, field, inputId, onChange, value } = normalized;
+	const { MediaUpload, MediaUploadCheck } = blockEditorComponents();
+	const Button = components.Button;
+	const url = stringValue(value);
+	const label = stringValue(field.label || field.id);
+	const description = stringValue(field.description);
+	const chooseText = stringValue(field.button_text || 'Choose file');
+	const removeText = stringValue(field.remove_text || 'Remove');
+	const fallbackInput = createElement('input', {
+		'aria-label': label,
+		className: 'lerm-admin-config-block-panel__media-url',
+		id: inputId,
+		key: 'input',
+		onInput: (event) => onChange(stringValue(changeValue(event))),
+		placeholder: stringValue(field.placeholder),
+		type: 'url',
+		value: url,
+	});
+	const preview = renderUrlPreview(createElement, url);
+	const body = (open) => createElement(
+		'div',
+		{
+			className: 'lerm-admin-config-block-panel__media-control lerm-admin-config-block-panel__media-control--upload',
+		},
+		[
+			createElement('strong', { key: 'label' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			createElement('label', { key: 'url' }, [
+				createElement('span', { key: 'label' }, 'URL'),
+				fallbackInput,
+			]),
+			createElement(
+				'div',
+				{
+					className: 'lerm-admin-config-block-panel__media-actions',
+					key: 'actions',
+				},
+				[
+					typeof open === 'function'
+						? renderButton(Button, createElement, { key: 'choose', onClick: open, variant: 'secondary' }, chooseText)
+						: null,
+					url
+						? renderButton(Button, createElement, { key: 'remove', onClick: () => onChange(''), variant: 'secondary' }, removeText)
+						: null,
+				].filter(Boolean)
+			),
+			preview
+				? createElement(
+					'div',
+					{
+						className: 'lerm-admin-config-block-panel__media-url-preview',
+						key: 'preview',
+					},
+					preview
+				)
+				: null,
+		].filter(Boolean)
+	);
+
+	if (typeof MediaUpload !== 'function') {
+		return body(null);
+	}
+
+	const mediaUpload = createElement(MediaUpload, {
+		allowedTypes: allowedMediaTypes(field),
+		onSelect: (selection) => {
+			const selected = attachmentRecord(selectionItems(selection)[0]);
+
+			onChange(stringValue(selected.url || selected.source_url));
+		},
+		render: ({ open }) => body(open),
+	});
+
+	return typeof MediaUploadCheck === 'function'
+		? createElement(MediaUploadCheck, {}, mediaUpload)
+		: mediaUpload;
+};
+
+/**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @returns {unknown}
+ */
+const MediaControlComponent = (normalized) => {
+	const { components, createElement, field, inputId, onChange, value } = normalized;
+	const { MediaUpload, MediaUploadCheck } = blockEditorComponents();
+	const Button = components.Button;
+	const id = attachmentId(value);
+	const inlineRecords = attachmentRecords(value);
+	const records = useAttachmentRecords(id > 0 ? [ id ] : [], inlineRecords);
+	const label = stringValue(field.label || field.id);
+	const description = stringValue(field.description);
+	const chooseText = stringValue(field.button_text || 'Choose image');
+	const removeText = stringValue(field.remove_text || 'Remove');
+	const body = (open) => createElement(
+		'div',
+		{
+			className: 'lerm-admin-config-block-panel__media-control',
+		},
+		[
+			createElement('strong', { key: 'label' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			renderAttachmentPreview(createElement, records, false),
+			createElement(
+				'div',
+				{
+					className: 'lerm-admin-config-block-panel__media-actions',
+					key: 'actions',
+				},
+				[
+					typeof open === 'function'
+						? renderButton(Button, createElement, { key: 'choose', onClick: open, variant: 'secondary' }, chooseText)
+						: null,
+					id > 0
+						? renderButton(Button, createElement, { key: 'remove', onClick: () => onChange({}), variant: 'secondary' }, removeText)
+						: null,
+				].filter(Boolean)
+			),
+			typeof open !== 'function'
+				? createElement('label', { key: 'fallback' }, [
+					createElement('span', { key: 'label' }, 'Attachment ID'),
+					createElement('input', {
+						'aria-label': `${ label } attachment ID`,
+						id: inputId,
+						key: 'input',
+						min: '0',
+						onInput: (event) => onChange({ id: positiveInteger(changeValue(event)) }),
+						type: 'number',
+						value: id > 0 ? String(id) : '',
+					}),
+				])
+				: null,
+		].filter(Boolean)
+	);
+
+	if (typeof MediaUpload !== 'function') {
+		return body(null);
+	}
+
+	const mediaUpload = createElement(MediaUpload, {
+		allowedTypes: allowedMediaTypes(field, [ 'image' ]),
+		multiple: false,
+		onSelect: (selection) => onChange(attachmentRecord(selectionItems(selection)[0])),
+		render: ({ open }) => body(open),
+		value: id > 0 ? id : undefined,
+	});
+
+	return typeof MediaUploadCheck === 'function'
+		? createElement(MediaUploadCheck, {}, mediaUpload)
+		: mediaUpload;
+};
+
+/**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @returns {unknown}
+ */
+const GalleryControlComponent = (normalized) => {
+	const { components, createElement, field, inputId, onChange, value } = normalized;
+	const { MediaUpload, MediaUploadCheck } = blockEditorComponents();
+	const Button = components.Button;
+	const ids = galleryIds(value);
+	const inlineRecords = attachmentRecords(value);
+	const records = useAttachmentRecords(ids, inlineRecords);
+	const label = stringValue(field.label || field.id);
+	const description = stringValue(field.description);
+	const chooseText = stringValue(field.button_text || 'Choose images');
+	const removeText = stringValue(field.remove_text || 'Clear gallery');
+	const body = (open) => createElement(
+		'div',
+		{
+			className: 'lerm-admin-config-block-panel__media-control lerm-admin-config-block-panel__media-control--gallery',
+		},
+		[
+			createElement('strong', { key: 'label' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			renderAttachmentPreview(createElement, records, true),
+			createElement(
+				'div',
+				{
+					className: 'lerm-admin-config-block-panel__media-actions',
+					key: 'actions',
+				},
+				[
+					typeof open === 'function'
+						? renderButton(Button, createElement, { key: 'choose', onClick: open, variant: 'secondary' }, chooseText)
+						: null,
+					ids.length
+						? renderButton(Button, createElement, { key: 'remove', onClick: () => onChange([]), variant: 'secondary' }, removeText)
+						: null,
+				].filter(Boolean)
+			),
+			typeof open !== 'function'
+				? createElement('label', { key: 'fallback' }, [
+					createElement('span', { key: 'label' }, 'Attachment IDs'),
+					createElement('input', {
+						'aria-label': `${ label } attachment IDs`,
+						id: inputId,
+						key: 'input',
+						onInput: (event) => onChange(galleryIds(changeValue(event))),
+						type: 'text',
+						value: ids.join(','),
+					}),
+				])
+				: null,
+		].filter(Boolean)
+	);
+
+	if (typeof MediaUpload !== 'function') {
+		return body(null);
+	}
+
+	const mediaUpload = createElement(MediaUpload, {
+		addToGallery: true,
+		allowedTypes: allowedMediaTypes(field, [ 'image' ]),
+		gallery: true,
+		multiple: true,
+		onSelect: (selection) => onChange(attachmentRecords(selection)),
+		render: ({ open }) => body(open),
+		value: ids,
+	});
+
+	return typeof MediaUploadCheck === 'function'
+		? createElement(MediaUploadCheck, {}, mediaUpload)
+		: mediaUpload;
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const UploadControl = (props) => {
+	const normalized = normalizeProps(props);
+
+	return normalized.createElement(UploadControlComponent, normalized);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const MediaControl = (props) => {
+	const normalized = normalizeProps(props);
+
+	return normalized.createElement(MediaControlComponent, normalized);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const GalleryControl = (props) => {
+	const normalized = normalizeProps(props);
+
+	return normalized.createElement(GalleryControlComponent, normalized);
+};
+
+/**
  * @param {Record<string, FieldControl>} initialControls
  */
 const createControlRegistry = (initialControls = {}) => {
@@ -627,6 +1229,8 @@ const createDefaultControlRegistry = () => createControlRegistry({
 	checkbox_list: CheckboxListControl,
 	color: ColorControl,
 	date: DateControl,
+	gallery: GalleryControl,
+	media: MediaControl,
 	number: NumberControl,
 	radio: RadioControl,
 	select: SelectControl,
@@ -637,6 +1241,7 @@ const createDefaultControlRegistry = () => createControlRegistry({
 	text: TextControl,
 	textarea: TextareaControl,
 	toggle: ToggleControl,
+	upload: UploadControl,
 	url: UrlControl,
 });
 

@@ -35,13 +35,11 @@ final class SchemaSerializer {
 		'content',
 		'dimensions',
 		'fieldset',
-		'gallery',
 		'group',
 		'heading',
 		'icon',
 		'image_select',
 		'link_color',
-		'media',
 		'notice',
 		'palette',
 		'sorter',
@@ -49,7 +47,6 @@ final class SchemaSerializer {
 		'subheading',
 		'tabbed',
 		'typography',
-		'upload',
 		'wp_editor',
 	);
 
@@ -57,11 +54,14 @@ final class SchemaSerializer {
 	 * @var array<int, string>
 	 */
 	private const FIELD_SCALAR_KEYS = array(
+		'button_text',
 		'data_source',
 		'input_type',
+		'library',
 		'max',
 		'min',
 		'placeholder',
+		'remove_text',
 		'rows',
 		'source',
 		'step',
