@@ -22,9 +22,9 @@ const isMetaboxSchemaResponse = ( response, schemaId = 'acme-demo-post-metabox' 
 
 	return (
 		response.request().method() === 'GET' &&
-		(
-			url.includes( `/wp-json/lerm-admin-config/v1/schema/${ schemaId }` ) ||
-			url.includes( `rest_route=/lerm-admin-config/v1/schema/${ schemaId }` )
+			(
+			url.includes( `/wp-json/lerm-admin-config/v1/schemas/${ schemaId }` ) ||
+			url.includes( `rest_route=/lerm-admin-config/v1/schemas/${ schemaId }` )
 		)
 	);
 };
@@ -34,9 +34,9 @@ const isMetaboxSaveResponse = ( response, schemaId ) => {
 
 	return (
 		response.request().method() === 'POST' &&
-		(
-			url.includes( `/wp-json/lerm-admin-config/v1/schema/${ schemaId }/save` ) ||
-			url.includes( `rest_route=/lerm-admin-config/v1/schema/${ schemaId }/save` )
+			(
+			url.includes( `/wp-json/lerm-admin-config/v1/schemas/${ schemaId }/values` ) ||
+			url.includes( `rest_route=/lerm-admin-config/v1/schemas/${ schemaId }/values` )
 		)
 	);
 };

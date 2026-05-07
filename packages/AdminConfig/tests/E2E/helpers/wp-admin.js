@@ -34,7 +34,7 @@ function acceptNextDialog( page ) {
 }
 
 function restRouteForEndpoint( endpoint = '' ) {
-	if ( endpoint === 'save' ) return '/save';
+	if ( endpoint === 'save' ) return '/values';
 	if ( endpoint === 'reset' ) return '/reset';
 	if ( endpoint === 'export' ) return '/export';
 	if ( endpoint === 'import' ) return '/import';
@@ -55,8 +55,8 @@ function isAdminConfigRestResponse( response, endpoint = '' ) {
 
 	return (
 		(
-			url.includes( '/wp-json/lerm-admin-config/v1/schema/' ) ||
-			url.includes( 'rest_route=/lerm-admin-config/v1/schema/' )
+			url.includes( '/wp-json/lerm-admin-config/v1/schemas/' ) ||
+			url.includes( 'rest_route=/lerm-admin-config/v1/schemas/' )
 		) &&
 		( route === '' || url.includes( route ) )
 	);

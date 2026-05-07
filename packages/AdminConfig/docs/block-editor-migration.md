@@ -11,9 +11,9 @@ client boundaries that a React/Gutenberg client can reuse.
 - PHP schema compilation and storage stay server-side sources of truth.
 - Classic admin screens keep working until the block-editor UI reaches feature
   parity.
-- Block-editor clients consume `client_config` plus values from
-  `GET /schema/{id}` and submit mutations through the same REST endpoints as
-  classic admin.
+- Block-editor clients consume schema protocol v1 from
+  `GET /schemas/{schema_id}` and submit mutations through the same REST
+  endpoints as classic admin.
 
 ## Current Client Boundaries
 
@@ -109,9 +109,10 @@ See `docs/block-editor-field-matrix.md` for the complete
 
 Acceptance for this slice:
 
-- The block editor requests `GET /schema/{id}?post_id={post_id}`.
+- The block editor requests `GET /schemas/{schema_id}?post_id={post_id}` and
+  `GET /schemas/{schema_id}/values?post_id={post_id}`.
 - The panel can edit supported field values and save them with
-  `POST /schema/{id}/save`.
+  `POST /schemas/{schema_id}/values`.
 - Validation failures keep the panel mounted, expose field errors, and clear the
   stale field error when the field changes.
 - Local discard reverts unsaved edits to the last saved values without touching

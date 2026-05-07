@@ -98,16 +98,16 @@ test( 'plugin mode uses REST transport for async options page actions', async ( 
 	await openSettingsSection( page, /Extension API/i );
 	const dataSourceResponse = await selectAjaxOption( page, 'featured_campaign', 'studio', 'Studio Preview', { transport: 'rest' } );
 	expect( dataSourceResponse.ok() ).toBe( true );
-	expect( decodeURIComponent( dataSourceResponse.url() ) ).toContain( 'lerm-admin-config/v1/schema/acme-demo-settings/data-source' );
+	expect( decodeURIComponent( dataSourceResponse.url() ) ).toContain( 'lerm-admin-config/v1/schemas/acme-demo-settings/data-source' );
 
 	await page.locator( 'input[name="acme_demo_settings[release_slug]"]' ).fill( 'rest-transport-check' );
 	const saveResponse = await saveOptionsPage( page, { transport: 'rest' } );
 	expect( saveResponse.ok() ).toBe( true );
-	expect( decodeURIComponent( saveResponse.url() ) ).toContain( 'lerm-admin-config/v1/schema/acme-demo-settings/save' );
+	expect( decodeURIComponent( saveResponse.url() ) ).toContain( 'lerm-admin-config/v1/schemas/acme-demo-settings/values' );
 
 	await openSettingsSection( page, /Tools/i );
 	const exportResult = await exportBackupSnapshot( page, { transport: 'rest' } );
 	expect( exportResult.response.ok() ).toBe( true );
-	expect( decodeURIComponent( exportResult.response.url() ) ).toContain( 'lerm-admin-config/v1/schema/acme-demo-settings/export' );
+	expect( decodeURIComponent( exportResult.response.url() ) ).toContain( 'lerm-admin-config/v1/schemas/acme-demo-settings/export' );
 	expect( JSON.parse( exportResult.json ).release_slug ).toBe( 'rest-transport-check' );
 } );

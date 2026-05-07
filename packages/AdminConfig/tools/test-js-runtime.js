@@ -60,15 +60,15 @@ function testErrorHelpers() {
 function testRestUrlHelpers() {
 	const plain = restUrl(
 		{ restUrl: 'https://example.test/wp-json/lerm-admin-config/v1/' },
-		'schema/demo?post_id=77'
+		'schemas/demo?post_id=77'
 	);
 	const fallback = new URL(restUrl(
 		{ restUrl: 'https://example.test/index.php?rest_route=/lerm-admin-config/v1/' },
-		'schema/demo?post_id=77'
+		'schemas/demo?post_id=77'
 	));
 
-	assert.equal(plain, 'https://example.test/wp-json/lerm-admin-config/v1/schema/demo?post_id=77');
-	assert.equal(fallback.searchParams.get('rest_route'), '/lerm-admin-config/v1/schema/demo');
+	assert.equal(plain, 'https://example.test/wp-json/lerm-admin-config/v1/schemas/demo?post_id=77');
+	assert.equal(fallback.searchParams.get('rest_route'), '/lerm-admin-config/v1/schemas/demo');
 	assert.equal(fallback.searchParams.get('post_id'), '77');
 
 	assert.deepEqual(
@@ -436,7 +436,7 @@ async function testBlockPanelRuntime() {
 		request: async (path, options = {}) => {
 			requests.push({ path, options });
 
-			if (path.includes('/save')) {
+			if (path.includes('/values') && options.method === 'POST') {
 				if (options.data.values.title === 'Bad') {
 					return {
 						success: false,
@@ -457,15 +457,22 @@ async function testBlockPanelRuntime() {
 				};
 			}
 
+			if (path.includes('/values')) {
+				return {
+					success: true,
+					data: {
+						values: {
+							title: 'Loaded',
+						},
+					},
+				};
+			}
+
 			return {
 				success: true,
 				data: {
-					schema: {
-						schemaId: 'demo',
-					},
-					values: {
-						title: 'Loaded',
-					},
+					protocolVersion: 1,
+					schemaId: 'demo',
 				},
 			};
 		},
@@ -490,10 +497,11 @@ async function testBlockPanelRuntime() {
 	runtime.updateValue('title', 'Saved');
 	await runtime.save();
 
-	assert.equal(requests[0].path, 'schema/demo?post_id=77');
-	assert.equal(requests[1].path, 'schema/demo/save?post_id=77');
-	assert.equal(requests[1].options.method, 'POST');
-	assert.deepEqual(requests[1].options.data, {
+	assert.equal(requests[0].path, 'schemas/demo?post_id=77');
+	assert.equal(requests[1].path, 'schemas/demo/values?post_id=77');
+	assert.equal(requests[2].path, 'schemas/demo/values?post_id=77');
+	assert.equal(requests[2].options.method, 'POST');
+	assert.deepEqual(requests[2].options.data, {
 		values: {
 			title: 'Saved',
 		},
@@ -514,20 +522,27 @@ async function testBlockPanelRuntime() {
 async function testBlockPanelRuntimeRejectedSave() {
 	const restClient = {
 		hasTransport: () => true,
-		request: async (path) => {
-			if (path.includes('/save')) {
+		request: async (path, options = {}) => {
+			if (path.includes('/values') && options.method === 'POST') {
 				throw new Error('Network failed.');
+			}
+
+			if (path.includes('/values')) {
+				return {
+					success: true,
+					data: {
+						values: {
+							title: 'Loaded',
+						},
+					},
+				};
 			}
 
 			return {
 				success: true,
 				data: {
-					schema: {
-						schemaId: 'demo',
-					},
-					values: {
-						title: 'Loaded',
-					},
+					protocolVersion: 1,
+					schemaId: 'demo',
 				},
 			};
 		},

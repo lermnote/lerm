@@ -37,7 +37,7 @@ test( 'network options page replays nested validation errors and saves network s
 
 	expect( validationResponse.status() ).toBe( 422 );
 	expect( decodeURIComponent( validationResponse.url() ) ).toContain(
-		'lerm-admin-config/v1/schema/acme-demo-network-settings/save'
+		'lerm-admin-config/v1/schemas/acme-demo-network-settings/values'
 	);
 
 	await expect( page.locator( `.lerm-fieldset__item.is-invalid input[name="${ fieldName }[shared_library][feed_slug]"]` ) ).toHaveValue( 'x' );
@@ -49,7 +49,7 @@ test( 'network options page replays nested validation errors and saves network s
 
 	expect( saveResponse.ok() ).toBe( true );
 	expect( decodeURIComponent( saveResponse.url() ) ).toContain(
-		'lerm-admin-config/v1/schema/acme-demo-network-settings/save'
+		'lerm-admin-config/v1/schemas/acme-demo-network-settings/values'
 	);
 
 	await page.reload();

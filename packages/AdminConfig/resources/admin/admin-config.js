@@ -1055,7 +1055,7 @@ const { createAdminConfigTransport } = require('./transport');
 		}
 
 		if (hasRestTransport()) {
-			return requestRest(`schema/${params.schemaId}/data-source`, { method: 'POST', body });
+			return requestRest(`schemas/${params.schemaId}/data-source`, { method: 'POST', body });
 		}
 
 		return Promise.resolve({ success: false, data: { message: cfg.saveError } });

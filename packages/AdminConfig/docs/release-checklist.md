@@ -41,6 +41,8 @@ npm run test:e2e:block-editor
 - Check one validation failure path each for metabox, profile, taxonomy, comment, and network settings.
 - Check at least one async field, one typography field, one accordion field, and one tabbed field.
 - Confirm browser traces contain no AdminConfig `admin-ajax.php` requests.
+- Confirm schema protocol examples still match `GET /schemas`,
+  `GET /schemas/{schema_id}`, and `GET|POST /schemas/{schema_id}/values`.
 
 ## Docs and Examples
 
@@ -57,3 +59,5 @@ npm run test:e2e:block-editor
 - Mention known limitations that remain intentionally out of scope for the release.
 - For 0.3.0 and later, call out that AdminConfig `admin-ajax.php` transport
   actions were removed and JavaScript clients must use REST.
+- For schema protocol changes, call out the protocol version, route aliases,
+  and any field payload additions.

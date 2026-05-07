@@ -44,6 +44,76 @@ final class RestEndpoints {
 	public static function register_routes(): void {
 		register_rest_route(
 			self::NAMESPACE,
+			'/schemas',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( self::class, 'schemas' ),
+				'permission_callback' => array( self::class, 'can_list_schemas' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/schemas/(?P<id>[a-z0-9_-]+)',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( self::class, 'schema_document' ),
+				'permission_callback' => array( self::class, 'can_access_schema' ),
+				'args'                => self::schema_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/schemas/(?P<id>[a-z0-9_-]+)/values',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( self::class, 'values' ),
+					'permission_callback' => array( self::class, 'can_access_schema' ),
+					'args'                => self::schema_args(),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( self::class, 'save' ),
+					'permission_callback' => array( self::class, 'can_access_schema' ),
+					'args'                => self::schema_args(),
+				),
+			)
+		);
+
+		foreach ( self::canonical_mutation_routes() as $route => $callback ) {
+			register_rest_route(
+				self::NAMESPACE,
+				'/schemas/(?P<id>[a-z0-9_-]+)/' . $route,
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( self::class, $callback ),
+					'permission_callback' => array( self::class, 'can_access_schema' ),
+					'args'                => self::schema_args(),
+				)
+			);
+		}
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/schemas/(?P<id>[a-z0-9_-]+)/export',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( self::class, 'export' ),
+				'permission_callback' => array( self::class, 'can_access_schema' ),
+				'args'                => self::schema_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/schemas/(?P<id>[a-z0-9_-]+)/data-source',
+			self::data_source_route_args()
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/schema/(?P<id>[a-z0-9_-]+)',
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
@@ -91,21 +161,32 @@ final class RestEndpoints {
 		register_rest_route(
 			self::NAMESPACE,
 			'/schema/(?P<id>[a-z0-9_-]+)/data-source',
+			self::data_source_route_args()
+		);
+	}
+
+	public static function schemas( \WP_REST_Request $request ): \WP_REST_Response {
+		$schemas = array();
+
+		foreach ( array_reverse( self::live_runtimes(), true ) as $runtime ) {
+			foreach ( ( new SchemaController( $runtime ) )->schema_summaries( $request ) as $summary ) {
+				$schema_id = sanitize_key( (string) ( $summary['id'] ?? '' ) );
+
+				if ( '' !== $schema_id && ! isset( $schemas[ $schema_id ] ) ) {
+					$schemas[ $schema_id ] = $summary;
+				}
+			}
+		}
+
+		return ResponseFactory::success(
 			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( self::class, 'data_source' ),
-					'permission_callback' => array( self::class, 'can_access_schema' ),
-					'args'                => self::schema_args(),
-				),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( self::class, 'data_source' ),
-					'permission_callback' => array( self::class, 'can_access_schema' ),
-					'args'                => self::schema_args(),
-				),
+				'schemas' => array_values( $schemas ),
 			)
 		);
+	}
+
+	public static function schema_document( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+		return self::dispatch( $request, 'schema_document' );
 	}
 
 	public static function schema( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
@@ -146,6 +227,22 @@ final class RestEndpoints {
 		return ( new SchemaController( $runtime ) )->can_access_schema( $request );
 	}
 
+	public static function can_list_schemas( \WP_REST_Request $request ): bool {
+		unset( $request );
+
+		return true;
+	}
+
+	/**
+	 * @return array<string, string>
+	 */
+	private static function canonical_mutation_routes(): array {
+		return array(
+			'reset'  => 'reset',
+			'import' => 'import',
+		);
+	}
+
 	/**
 	 * @return array<string, string>
 	 */
@@ -154,6 +251,26 @@ final class RestEndpoints {
 			'save'   => 'save',
 			'reset'  => 'reset',
 			'import' => 'import',
+		);
+	}
+
+	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function data_source_route_args(): array {
+		return array(
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( self::class, 'data_source' ),
+				'permission_callback' => array( self::class, 'can_access_schema' ),
+				'args'                => self::schema_args(),
+			),
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( self::class, 'data_source' ),
+				'permission_callback' => array( self::class, 'can_access_schema' ),
+				'args'                => self::schema_args(),
+			),
 		);
 	}
 
@@ -205,6 +322,26 @@ final class RestEndpoints {
 		}
 
 		return null;
+	}
+
+	/**
+	 * @return array<int, Runtime>
+	 */
+	private static function live_runtimes(): array {
+		$runtimes = array();
+
+		foreach ( self::$runtimes as $runtime_id => $runtime_ref ) {
+			$runtime = $runtime_ref->get();
+
+			if ( null === $runtime ) {
+				unset( self::$runtimes[ $runtime_id ] );
+				continue;
+			}
+
+			$runtimes[] = $runtime;
+		}
+
+		return $runtimes;
 	}
 
 	private static function schema_not_found_error(): \WP_Error {

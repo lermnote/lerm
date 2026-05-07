@@ -35,8 +35,9 @@ Do not rely on these removed localized keys:
 - `dataSourceAction`
 - `dataSourceNonce`
 
-Use fixed REST endpoints instead: `/schema/{id}/save`, `/reset`, `/export`,
-`/import`, and `/data-source`.
+Use fixed REST endpoints instead: `/schemas/{schema_id}/values`,
+`/reset`, `/export`, `/import`, and `/data-source`. The singular
+`/schema/{schema_id}` aliases are kept only for 0.2.x compatibility.
 
 ## Verification
 

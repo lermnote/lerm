@@ -30,8 +30,9 @@ const createAdminConfigTransport = ({ getConfig, getData }) => {
 	const restActionPath = (form, endpoint) => {
 		const schemaId = form ? getData(form, 'schema-id') : '';
 		const normalizedEndpoint = String(endpoint || '').replace(/^\/+|\/+$/g, '');
+		const routeEndpoint = normalizedEndpoint === 'save' ? 'values' : normalizedEndpoint;
 
-		return schemaId && normalizedEndpoint ? `schema/${schemaId}/${normalizedEndpoint}` : '';
+		return schemaId && routeEndpoint ? `schemas/${schemaId}/${routeEndpoint}` : '';
 	};
 
 	return {
