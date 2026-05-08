@@ -25,13 +25,11 @@ const READ_ONLY_CONTROL_TYPES = new Set([
 	'ajax_select',
 	'background',
 	'backup_tools',
-	'border',
 	'code_editor',
 	'content',
 	'heading',
 	'icon',
 	'image_select',
-	'link_color',
 	'notice',
 	'palette',
 	'sorter',
@@ -586,6 +584,7 @@ const createPanelComponent = (config, Panel, element) => {
 									runtime.updateValue(path, value);
 									setState(runtime.getState());
 								},
+								path: [ fieldId ],
 								value: fieldValue(state.values || {}, fieldId, field.default),
 							}),
 							error

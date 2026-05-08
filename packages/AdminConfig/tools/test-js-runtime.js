@@ -249,6 +249,7 @@ function testDefaultControlRegistry() {
 
 	assert(types.includes('text'));
 	assert(types.includes('textarea'));
+	assert(types.includes('border'));
 	assert(types.includes('switcher'));
 	assert(types.includes('select'));
 	assert(types.includes('number'));
@@ -261,6 +262,7 @@ function testDefaultControlRegistry() {
 	assert(types.includes('fieldset'));
 	assert(types.includes('gallery'));
 	assert(types.includes('group'));
+	assert(types.includes('link_color'));
 	assert(types.includes('media'));
 	assert(types.includes('slider'));
 	assert(types.includes('spinner'));
@@ -407,13 +409,11 @@ function testBlockPanelFieldStatusContract() {
 		'ajax_select',
 		'background',
 		'backup_tools',
-		'border',
 		'code_editor',
 		'content',
 		'heading',
 		'icon',
 		'image_select',
-		'link_color',
 		'notice',
 		'palette',
 		'sorter',

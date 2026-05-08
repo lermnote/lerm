@@ -52,6 +52,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Block editor panel structured controls for `fieldset`, `group`,
   `dimensions`, and `spacing`, including nested value paths and validation-error
   replay coverage.
+- Block editor panel design controls for `border` and `link_color`, including
+  composite color/style editing and REST persistence coverage.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -88,6 +90,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   constraints through the client schema payload.
 - The client schema payload now exposes nested field metadata and design-control
   flags needed by structured block-panel controls.
+- Nested block editor controls now receive full dotted paths, so composite
+  controls remain saveable inside `fieldset` and `group` containers.
 - Block editor color/date/range controls now avoid duplicate input/change state
   updates.
 - Block editor number controls now preserve an explicitly cleared empty value

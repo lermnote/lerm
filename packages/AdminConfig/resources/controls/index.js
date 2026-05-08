@@ -105,6 +105,7 @@ const errorMessage = (error) => asArray(error).length
  *   inputId: string,
  *   onChange: Function,
  *   onPathChange: Function,
+ *   path: string[],
  *   value: unknown
  * }}
  */
@@ -118,6 +119,7 @@ const normalizeProps = (props) => ({
 	inputId: stringValue(props.inputId),
 	onChange: /** @type {Function} */ (props.onChange),
 	onPathChange: /** @type {Function} */ (props.onPathChange || (() => {})),
+	path: pathTokens(props.path || asRecord(props.field).id),
 	value: props.value,
 });
 
@@ -293,6 +295,7 @@ const renderNestedField = (normalized, field, path, value) => {
 				inputId: `${ inputId }-${ path.map((token) => token.replace(/[^a-z0-9_-]+/gi, '-')).join('-') }`,
 				onChange: (nextValue) => onPathChange(path, nextValue),
 				onPathChange,
+				path,
 				value: fieldValue(field, value),
 			}),
 			error
@@ -1105,6 +1108,67 @@ const fieldFlag = (field, key, fallback) => Object.prototype.hasOwnProperty.call
 	? boolValue(field[key])
 	: fallback;
 
+const BORDER_STYLE_OPTIONS = [
+	{ label: 'Solid', value: 'solid' },
+	{ label: 'Dashed', value: 'dashed' },
+	{ label: 'Dotted', value: 'dotted' },
+	{ label: 'Double', value: 'double' },
+	{ label: 'Inset', value: 'inset' },
+	{ label: 'Outset', value: 'outset' },
+	{ label: 'Groove', value: 'groove' },
+	{ label: 'Ridge', value: 'ridge' },
+	{ label: 'None', value: 'none' },
+];
+
+const LINK_COLOR_FIELDS = [
+	{ fallback: true, key: 'color', label: 'Normal' },
+	{ fallback: true, key: 'hover', label: 'Hover' },
+	{ fallback: false, key: 'active', label: 'Active' },
+	{ fallback: false, key: 'visited', label: 'Visited' },
+	{ fallback: false, key: 'focus', label: 'Focus' },
+];
+
+/**
+ * @param {unknown} value
+ * @param {string} fallback
+ * @returns {string}
+ */
+const nativeColorValue = (value, fallback = '#000000') => {
+	const color = stringValue(value).trim().toLowerCase();
+	const shortHex = color.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i);
+
+	if (shortHex) {
+		return `#${ shortHex[1] }${ shortHex[1] }${ shortHex[2] }${ shortHex[2] }${ shortHex[3] }${ shortHex[3] }`.toLowerCase();
+	}
+
+	return /^#[0-9a-f]{6}$/i.test(color) ? color : fallback;
+};
+
+/**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @returns {string[]}
+ */
+const compositeBasePath = (normalized) => normalized.path.length
+	? normalized.path
+	: [ stringValue(normalized.field.id) ].filter(Boolean);
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {Record<string, unknown>} current
+ * @param {string} key
+ * @param {unknown} fallback
+ * @returns {unknown}
+ */
+const compositeValue = (field, current, key, fallback = '') => {
+	if (Object.prototype.hasOwnProperty.call(current, key)) {
+		return current[key];
+	}
+
+	const defaults = asRecord(field.default);
+
+	return Object.prototype.hasOwnProperty.call(defaults, key) ? defaults[key] : fallback;
+};
+
 /**
  * @param {ReturnType<typeof normalizeProps>} normalized
  * @param {Array<{ key: string, label: string }>} fields
@@ -1113,6 +1177,7 @@ const fieldFlag = (field, key, fallback) => Object.prototype.hasOwnProperty.call
 const CompositeBoxControl = (normalized, fields) => {
 	const { createElement, field, inputId, onPathChange, value } = normalized;
 	const fieldId = stringValue(field.id);
+	const basePath = compositeBasePath(normalized);
 	const current = asRecord(value);
 	const units = fieldUnits(field);
 	const showUnits = fieldFlag(field, 'unit', true) && fieldFlag(field, 'show_units', true) && units.length > 1;
@@ -1124,7 +1189,7 @@ const CompositeBoxControl = (normalized, fields) => {
 			? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
 			: null,
 		...fields.map((item) => {
-			const path = [ fieldId, item.key ];
+			const path = [ ...basePath, item.key ];
 			const error = errorForPath(normalized.errors, path);
 
 			return createElement(
@@ -1170,7 +1235,7 @@ const CompositeBoxControl = (normalized, fields) => {
 							'aria-label': `${ label } unit`,
 							id: `${ inputId }-unit`,
 							key: 'select',
-							onChange: (event) => onPathChange([ fieldId, 'unit' ], stringValue(changeValue(event))),
+							onChange: (event) => onPathChange([ ...basePath, 'unit' ], stringValue(changeValue(event))),
 							value: stringValue(current.unit || field.default?.unit || units[0]),
 						},
 						units.map((unit) => createElement('option', { key: unit, value: unit }, unit))
@@ -1225,6 +1290,183 @@ const SpacingControl = (props) => {
  * @param {Record<string, unknown>} props
  * @returns {unknown}
  */
+const BorderControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, inputId, onPathChange, value } = normalized;
+	const fieldId = stringValue(field.id);
+	const basePath = compositeBasePath(normalized);
+	const current = asRecord(value);
+	const label = stringValue(field.label || fieldId);
+	const description = stringValue(field.description);
+	const unit = field.unit === false ? '' : stringValue(field.unit || 'px');
+	const sideFields = fieldFlag(field, 'all', false)
+		? [ { key: 'all', label: 'All' } ]
+		: [
+			fieldFlag(field, 'top', true) ? { key: 'top', label: 'Top' } : null,
+			fieldFlag(field, 'right', true) ? { key: 'right', label: 'Right' } : null,
+			fieldFlag(field, 'bottom', true) ? { key: 'bottom', label: 'Bottom' } : null,
+			fieldFlag(field, 'left', true) ? { key: 'left', label: 'Left' } : null,
+		].filter(Boolean);
+	const children = [
+		createElement('legend', { key: 'legend' }, label),
+		description
+			? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+			: null,
+		...sideFields.map((item) => {
+			const path = [ ...basePath, item.key ];
+			const error = errorForPath(normalized.errors, path);
+
+			return createElement(
+				'label',
+				{
+					className: `lerm-admin-config-block-panel__composite-item${ error ? ' is-error' : '' }`,
+					key: item.key,
+				},
+				[
+					createElement('span', { key: 'label' }, item.label),
+					createElement('input', {
+						'aria-invalid': error ? 'true' : undefined,
+						'aria-label': `${ label } ${ item.label }`,
+						id: `${ inputId }-${ item.key }`,
+						key: 'input',
+						onInput: (event) => onPathChange(path, stringValue(changeValue(event))),
+						step: 'any',
+						type: 'number',
+						value: stringValue(compositeValue(field, current, item.key)),
+					}),
+					unit ? createElement('span', { key: 'unit' }, unit) : null,
+					error
+						? createElement('span', {
+							className: 'lerm-admin-config-block-panel__field-error',
+							'data-field-error': pathKey(path),
+							key: 'error',
+						}, error)
+						: null,
+				].filter(Boolean)
+			);
+		}),
+		fieldFlag(field, 'style', true)
+			? createElement(
+				'label',
+				{
+					className: 'lerm-admin-config-block-panel__composite-item',
+					key: 'style',
+				},
+				[
+					createElement('span', { key: 'label' }, 'Style'),
+					createElement(
+						'select',
+						{
+							'aria-label': `${ label } Style`,
+							id: `${ inputId }-style`,
+							key: 'select',
+							onChange: (event) => onPathChange([ ...basePath, 'style' ], stringValue(changeValue(event))),
+							value: stringValue(compositeValue(field, current, 'style', 'solid') || 'solid'),
+						},
+						BORDER_STYLE_OPTIONS.map((option) => createElement('option', { key: option.value, value: option.value }, option.label))
+					),
+				]
+			)
+			: null,
+		fieldFlag(field, 'color', true)
+			? createElement(
+				'label',
+				{
+					className: 'lerm-admin-config-block-panel__composite-item',
+					key: 'color',
+				},
+				[
+					createElement('span', { key: 'label' }, 'Color'),
+					createElement('input', {
+						'aria-label': `${ label } Color`,
+						id: `${ inputId }-color`,
+						key: 'input',
+						onInput: (event) => onPathChange([ ...basePath, 'color' ], stringValue(changeValue(event))),
+						type: 'color',
+						value: nativeColorValue(compositeValue(field, current, 'color')),
+					}),
+					createElement('code', { key: 'value' }, stringValue(compositeValue(field, current, 'color'))),
+				]
+			)
+			: null,
+	];
+
+	return createElement(
+		'fieldset',
+		{
+			className: 'lerm-admin-config-block-panel__composite-field',
+		},
+		children.filter(Boolean)
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const LinkColorControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, inputId, onPathChange, value } = normalized;
+	const fieldId = stringValue(field.id);
+	const basePath = compositeBasePath(normalized);
+	const current = asRecord(value);
+	const label = stringValue(field.label || fieldId);
+	const description = stringValue(field.description);
+	const children = [
+		createElement('legend', { key: 'legend' }, label),
+		description
+			? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+			: null,
+		...LINK_COLOR_FIELDS
+			.filter((item) => fieldFlag(field, item.key, item.fallback))
+			.map((item) => {
+				const path = [ ...basePath, item.key ];
+				const error = errorForPath(normalized.errors, path);
+				const currentValue = compositeValue(field, current, item.key);
+
+				return createElement(
+					'label',
+					{
+						className: `lerm-admin-config-block-panel__composite-item${ error ? ' is-error' : '' }`,
+						key: item.key,
+					},
+					[
+						createElement('span', { key: 'label' }, item.label),
+						createElement('input', {
+							'aria-invalid': error ? 'true' : undefined,
+							'aria-label': `${ label } ${ item.label }`,
+							id: `${ inputId }-${ item.key }`,
+							key: 'input',
+							onInput: (event) => onPathChange(path, stringValue(changeValue(event))),
+							type: 'color',
+							value: nativeColorValue(currentValue),
+						}),
+						createElement('code', { key: 'value' }, stringValue(currentValue)),
+						error
+							? createElement('span', {
+								className: 'lerm-admin-config-block-panel__field-error',
+								'data-field-error': pathKey(path),
+								key: 'error',
+							}, error)
+							: null,
+					].filter(Boolean)
+				);
+			}),
+	];
+
+	return createElement(
+		'fieldset',
+		{
+			className: 'lerm-admin-config-block-panel__composite-field',
+		},
+		children.filter(Boolean)
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
 const FieldsetControl = (props) => {
 	const normalized = normalizeProps(props);
 	const { createElement, field, value } = normalized;
@@ -1233,6 +1475,7 @@ const FieldsetControl = (props) => {
 	const current = asRecord(value);
 	const label = stringValue(field.label || fieldId);
 	const description = stringValue(field.description);
+	const basePath = compositeBasePath(normalized);
 
 	return createElement(
 		'fieldset',
@@ -1247,7 +1490,7 @@ const FieldsetControl = (props) => {
 			...fields.map((child) => renderNestedField(
 				normalized,
 				child,
-				[ fieldId, stringValue(child.id) ],
+				[ ...basePath, stringValue(child.id) ],
 				childValue(child, current)
 			)),
 		].filter(Boolean)
@@ -1267,6 +1510,7 @@ const GroupControl = (props) => {
 	const items = groupItems(value);
 	const label = stringValue(field.label || fieldId);
 	const description = stringValue(field.description);
+	const basePath = compositeBasePath(normalized);
 	const addItem = () => onChange([ ...items, defaultNestedValue(fields) ]);
 	const removeItem = (index) => onChange(items.filter((_, itemIndex) => itemIndex !== index));
 	const renderActionButton = (props, text) => typeof Button === 'function'
@@ -1295,7 +1539,7 @@ const GroupControl = (props) => {
 					...fields.map((child) => renderNestedField(
 						normalized,
 						child,
-						[ fieldId, String(index), stringValue(child.id) ],
+						[ ...basePath, String(index), stringValue(child.id) ],
 						childValue(child, item)
 					)),
 					renderActionButton(
@@ -1625,6 +1869,7 @@ const createControlRegistry = (initialControls = {}) => {
  */
 const createDefaultControlRegistry = () => createControlRegistry({
 	button_set: ButtonSetControl,
+	border: BorderControl,
 	checkbox: CheckboxControl,
 	checkbox_list: CheckboxListControl,
 	color: ColorControl,
@@ -1633,6 +1878,7 @@ const createDefaultControlRegistry = () => createControlRegistry({
 	fieldset: FieldsetControl,
 	gallery: GalleryControl,
 	group: GroupControl,
+	link_color: LinkColorControl,
 	media: MediaControl,
 	number: NumberControl,
 	radio: RadioControl,
