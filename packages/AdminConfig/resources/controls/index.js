@@ -1128,6 +1128,34 @@ const LINK_COLOR_FIELDS = [
 	{ fallback: false, key: 'focus', label: 'Focus' },
 ];
 
+const FONT_WEIGHT_OPTIONS = [
+	{ label: '300', value: '300' },
+	{ label: '400', value: '400' },
+	{ label: '500', value: '500' },
+	{ label: '600', value: '600' },
+	{ label: '700', value: '700' },
+	{ label: '800', value: '800' },
+];
+
+const FONT_STYLE_OPTIONS = [
+	{ label: 'Normal', value: 'normal' },
+	{ label: 'Italic', value: 'italic' },
+];
+
+const TEXT_TRANSFORM_OPTIONS = [
+	{ label: 'None', value: 'none' },
+	{ label: 'Uppercase', value: 'uppercase' },
+	{ label: 'Lowercase', value: 'lowercase' },
+	{ label: 'Capitalize', value: 'capitalize' },
+];
+
+const TEXT_ALIGN_OPTIONS = [
+	{ label: 'Left', value: 'left' },
+	{ label: 'Center', value: 'center' },
+	{ label: 'Right', value: 'right' },
+	{ label: 'Justify', value: 'justify' },
+];
+
 /**
  * @param {unknown} value
  * @param {string} fallback
@@ -1167,6 +1195,142 @@ const compositeValue = (field, current, key, fallback = '') => {
 	const defaults = asRecord(field.default);
 
 	return Object.prototype.hasOwnProperty.call(defaults, key) ? defaults[key] : fallback;
+};
+
+/**
+ * @param {string[]} units
+ * @returns {Record<string, string>}
+ */
+const choicesFromUnits = (units) => units.reduce((choices, unit) => ({
+	...choices,
+	[unit]: unit,
+}), {});
+
+/**
+ * @param {Array<{ label: string, value: string }>} options
+ * @returns {Record<string, string>}
+ */
+const choicesFromOptions = (options) => options.reduce((choices, option) => ({
+	...choices,
+	[option.value]: option.label,
+}), {});
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {string} key
+ * @param {unknown} fallback
+ * @returns {unknown}
+ */
+const typographyDefault = (field, key, fallback = '') => compositeValue(field, {}, key, fallback);
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {Array<Record<string, unknown>>}
+ */
+const typographyFields = (field) => {
+	const units = fieldUnits(field);
+	const fields = [];
+
+	if (fieldFlag(field, 'family', true)) {
+		fields.push({
+			default: typographyDefault(field, 'font-family'),
+			id: 'font-family',
+			label: 'Family',
+			placeholder: stringValue(field.family_placeholder || 'Inter, system-ui, sans-serif'),
+			type: 'text',
+		});
+	}
+
+	if (fieldFlag(field, 'weight', true)) {
+		fields.push({
+			choices: choicesFromOptions(FONT_WEIGHT_OPTIONS),
+			default: typographyDefault(field, 'font-weight', '400'),
+			id: 'font-weight',
+			label: 'Weight',
+			type: 'select',
+		});
+	}
+
+	if (fieldFlag(field, 'style', false)) {
+		fields.push({
+			choices: choicesFromOptions(FONT_STYLE_OPTIONS),
+			default: typographyDefault(field, 'font-style', 'normal'),
+			id: 'font-style',
+			label: 'Style',
+			type: 'button_set',
+		});
+	}
+
+	if (fieldFlag(field, 'size', true)) {
+		fields.push({
+			default: typographyDefault(field, 'font-size'),
+			id: 'font-size',
+			label: 'Size',
+			placeholder: stringValue(field.size_placeholder || '1'),
+			type: 'text',
+		});
+	}
+
+	if (fieldFlag(field, 'unit', true)) {
+		fields.push({
+			choices: choicesFromUnits(units),
+			default: typographyDefault(field, 'unit', units[0] || 'px'),
+			id: 'unit',
+			label: 'Unit',
+			type: 'select',
+		});
+	}
+
+	if (fieldFlag(field, 'line_height', true)) {
+		fields.push({
+			default: typographyDefault(field, 'line-height'),
+			id: 'line-height',
+			label: 'Line height',
+			placeholder: stringValue(field.line_height_placeholder || '1.5'),
+			type: 'text',
+		});
+	}
+
+	if (fieldFlag(field, 'letter_spacing', false)) {
+		fields.push({
+			default: typographyDefault(field, 'letter-spacing'),
+			id: 'letter-spacing',
+			label: 'Letter spacing',
+			placeholder: stringValue(field.letter_spacing_placeholder || '0'),
+			type: 'text',
+		});
+	}
+
+	if (fieldFlag(field, 'transform', false)) {
+		fields.push({
+			choices: choicesFromOptions(TEXT_TRANSFORM_OPTIONS),
+			default: typographyDefault(field, 'text-transform', 'none'),
+			id: 'text-transform',
+			label: 'Transform',
+			type: 'select',
+		});
+	}
+
+	if (fieldFlag(field, 'align', false)) {
+		fields.push({
+			choices: choicesFromOptions(TEXT_ALIGN_OPTIONS),
+			default: typographyDefault(field, 'text-align', 'left'),
+			id: 'text-align',
+			label: 'Align',
+			type: 'button_set',
+		});
+	}
+
+	if (fieldFlag(field, 'color', true)) {
+		fields.push({
+			default: typographyDefault(field, 'color'),
+			id: 'color',
+			label: 'Color',
+			type: 'color',
+		});
+	}
+
+	return fields;
 };
 
 /**
@@ -1460,6 +1624,40 @@ const LinkColorControl = (props) => {
 			className: 'lerm-admin-config-block-panel__composite-field',
 		},
 		children.filter(Boolean)
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const TypographyControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, value } = normalized;
+	const fieldId = stringValue(field.id);
+	const fields = typographyFields(field);
+	const current = asRecord(value);
+	const label = stringValue(field.label || fieldId);
+	const description = stringValue(field.description);
+	const basePath = compositeBasePath(normalized);
+
+	return createElement(
+		'fieldset',
+		{
+			className: 'lerm-admin-config-block-panel__fieldset lerm-admin-config-block-panel__typography',
+		},
+		[
+			createElement('legend', { key: 'legend' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			...fields.map((child) => renderNestedField(
+				normalized,
+				child,
+				[ ...basePath, stringValue(child.id) ],
+				childValue(child, current)
+			)),
+		].filter(Boolean)
 	);
 };
 
@@ -1891,6 +2089,7 @@ const createDefaultControlRegistry = () => createControlRegistry({
 	text: TextControl,
 	textarea: TextareaControl,
 	toggle: ToggleControl,
+	typography: TypographyControl,
 	upload: UploadControl,
 	url: UrlControl,
 });

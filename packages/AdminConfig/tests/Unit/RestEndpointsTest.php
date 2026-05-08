@@ -99,6 +99,11 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertFalse( $data['fields']['link_colors']['readOnly'] );
 		$this->assertTrue( $data['fields']['link_colors']['hover'] );
 		$this->assertFalse( $data['fields']['link_colors']['visited'] );
+		$this->assertFalse( $data['fields']['brand_typography']['readOnly'] );
+		$this->assertTrue( $data['fields']['brand_typography']['style'] );
+		$this->assertTrue( $data['fields']['brand_typography']['letter_spacing'] );
+		$this->assertTrue( $data['fields']['brand_typography']['align'] );
+		$this->assertSame( array( 'px', 'rem' ), $data['fields']['brand_typography']['units'] );
 	}
 
 	public function testCanonicalSchemaIndexListsAccessibleSummaries(): void {
@@ -197,29 +202,40 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertSame( 'Updated title', $response->get_data()['data']['values']['site_title'] );
 		$this->assertSame(
 			array(
-				'site_title'    => 'Updated title',
-				'items_per_row' => 4,
-				'campaign'      => '',
-				'badge'         => array(
+				'site_title'       => 'Updated title',
+				'items_per_row'    => 4,
+				'campaign'         => '',
+				'badge'            => array(
 					'label' => '',
 				),
-				'card_spacing'  => array(
+				'card_spacing'     => array(
 					'unit'   => 'px',
 					'top'    => '8',
 					'right'  => '',
 					'bottom' => '',
 					'left'   => '',
 				),
-				'card_border'   => array(
+				'card_border'      => array(
 					'style'  => 'solid',
 					'color'  => '#2271b1',
 					'top'    => '1',
 					'right'  => '',
 					'bottom' => '',
 				),
-				'link_colors'   => array(
+				'link_colors'      => array(
 					'color' => '#2271b1',
 					'hover' => '#135e96',
+				),
+				'brand_typography' => array(
+					'font-family'    => '',
+					'font-weight'    => '700',
+					'font-style'     => 'normal',
+					'font-size'      => '',
+					'unit'           => 'rem',
+					'line-height'    => '',
+					'letter-spacing' => '',
+					'text-align'     => 'left',
+					'color'          => '#2271b1',
 				),
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
@@ -520,58 +536,80 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertInstanceOf( \WP_REST_Response::class, $response );
 		$this->assertSame(
 			array(
-				'site_title'    => 'Default title',
-				'items_per_row' => 4,
-				'campaign'      => '',
-				'badge'         => array(
+				'site_title'       => 'Default title',
+				'items_per_row'    => 4,
+				'campaign'         => '',
+				'badge'            => array(
 					'label' => 'Featured',
 				),
-				'card_spacing'  => array(
+				'card_spacing'     => array(
 					'unit'   => 'px',
 					'top'    => '8',
 					'right'  => '',
 					'bottom' => '',
 					'left'   => '',
 				),
-				'card_border'   => array(
+				'card_border'      => array(
 					'style'  => 'solid',
 					'color'  => '#2271b1',
 					'top'    => '1',
 					'right'  => '',
 					'bottom' => '',
 				),
-				'link_colors'   => array(
+				'link_colors'      => array(
 					'color' => '#2271b1',
 					'hover' => '#135e96',
+				),
+				'brand_typography' => array(
+					'font-family'    => 'Inter, system-ui, sans-serif',
+					'font-weight'    => '700',
+					'font-style'     => 'normal',
+					'font-size'      => '2',
+					'unit'           => 'rem',
+					'line-height'    => '1.2',
+					'letter-spacing' => '0',
+					'text-align'     => 'left',
+					'color'          => '#2271b1',
 				),
 			),
 			$response->get_data()['data']['values']
 		);
 		$this->assertSame(
 			array(
-				'site_title'    => 'Default title',
-				'items_per_row' => 4,
-				'campaign'      => '',
-				'badge'         => array(
+				'site_title'       => 'Default title',
+				'items_per_row'    => 4,
+				'campaign'         => '',
+				'badge'            => array(
 					'label' => 'Featured',
 				),
-				'card_spacing'  => array(
+				'card_spacing'     => array(
 					'unit'   => 'px',
 					'top'    => '8',
 					'right'  => '',
 					'bottom' => '',
 					'left'   => '',
 				),
-				'card_border'   => array(
+				'card_border'      => array(
 					'style'  => 'solid',
 					'color'  => '#2271b1',
 					'top'    => '1',
 					'right'  => '',
 					'bottom' => '',
 				),
-				'link_colors'   => array(
+				'link_colors'      => array(
 					'color' => '#2271b1',
 					'hover' => '#135e96',
+				),
+				'brand_typography' => array(
+					'font-family'    => 'Inter, system-ui, sans-serif',
+					'font-weight'    => '700',
+					'font-style'     => 'normal',
+					'font-size'      => '2',
+					'unit'           => 'rem',
+					'line-height'    => '1.2',
+					'letter-spacing' => '0',
+					'text-align'     => 'left',
+					'color'          => '#2271b1',
 				),
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
@@ -786,6 +824,25 @@ final class RestEndpointsTest extends TestCase {
 								'default' => array(
 									'color' => '#2271b1',
 									'hover' => '#135e96',
+								),
+							),
+							array(
+								'id'             => 'brand_typography',
+								'type'           => 'typography',
+								'style'          => true,
+								'letter_spacing' => true,
+								'align'          => true,
+								'units'          => array( 'px', 'rem' ),
+								'default'        => array(
+									'font-family'    => 'Inter, system-ui, sans-serif',
+									'font-weight'    => '700',
+									'font-style'     => 'normal',
+									'font-size'      => '2',
+									'unit'           => 'rem',
+									'line-height'    => '1.2',
+									'letter-spacing' => '0',
+									'text-align'     => 'left',
+									'color'          => '#2271b1',
 								),
 							),
 						),

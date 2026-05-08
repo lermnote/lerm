@@ -267,6 +267,7 @@ function testDefaultControlRegistry() {
 	assert(types.includes('slider'));
 	assert(types.includes('spinner'));
 	assert(types.includes('spacing'));
+	assert(types.includes('typography'));
 	assert(types.includes('upload'));
 
 	const rendered = registry.get('text')({
@@ -419,7 +420,6 @@ function testBlockPanelFieldStatusContract() {
 		'sorter',
 		'subheading',
 		'tabbed',
-		'typography',
 		'wp_editor',
 	]) {
 		assert(readOnlyTypes.includes(type), `${type} should be read-only in the block panel`);
