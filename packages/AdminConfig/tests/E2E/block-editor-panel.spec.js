@@ -182,8 +182,21 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryUpload = panel.locator( '[data-field-id="entry_upload"]' );
 	const entryMedia = panel.locator( '[data-field-id="entry_media"]' );
 	const entryGallery = panel.locator( '[data-field-id="entry_gallery"]' );
+	const entryDimensions = panel.locator( '[data-field-id="entry_dimensions"]' );
+	const entrySpacing = panel.locator( '[data-field-id="entry_spacing"]' );
+	const entryLinks = panel.locator( '[data-field-id="entry_links"]' );
 	const entryIconReadOnly = panel.locator( '[data-field-id="entry_icon"][data-read-only-control="true"]' );
-	const entryBadgeReadOnly = panel.locator( '[data-field-id="entry_badge"][data-read-only-control="true"]' );
+	const entryBadge = panel.locator( '[data-field-id="entry_badge"]' );
+	const entryBadgeLabel = entryBadge.getByRole( 'textbox', { name: /^Label$/i } );
+	const entryBadgeSlug = entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } );
+	const entryDimensionsWidth = entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Width/i } );
+	const entryDimensionsHeight = entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Height/i } );
+	const entryDimensionsUnit = entryDimensions.getByRole( 'combobox', { name: /Entry card size unit/i } );
+	const entrySpacingTop = entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Top/i } );
+	const entrySpacingRight = entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Right/i } );
+	const entrySpacingUnit = entrySpacing.getByRole( 'combobox', { name: /Entry card spacing unit/i } );
+	const entryLinkLabel = entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first();
+	const entryLinkUrl = entryLinks.getByRole( 'textbox', { name: /^Link URL$/i } ).first();
 	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
 
 	await expect( page.locator( '#lerm-admin-config-metabox-acme-demo-post-metabox' ) ).toHaveCount( 0 );
@@ -199,9 +212,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ) ).toBeVisible();
 	await expect( entryMedia.getByRole( 'button', { name: /^Choose image$/i } ) ).toBeVisible();
 	await expect( entryGallery.getByRole( 'button', { name: /^Choose gallery images$/i } ) ).toBeVisible();
+	await expect( entryBadgeLabel ).toBeVisible();
+	await expect( entryBadgeSlug ).toBeVisible();
+	await expect( entryDimensionsWidth ).toBeVisible();
+	await expect( entryDimensionsHeight ).toBeVisible();
+	await expect( entrySpacingTop ).toBeVisible();
+	await expect( entrySpacingRight ).toBeVisible();
+	await expect( entryLinkLabel ).toBeVisible();
+	await expect( entryLinkUrl ).toBeVisible();
 	await expect( newsletterChannel ).toBeVisible();
 	await expect( entryIconReadOnly ).toContainText( /Field type "icon" is read-only/i );
-	await expect( entryBadgeReadOnly ).toContainText( /Field type "fieldset" is read-only/i );
 	const initialChecked = await featuredToggle.isChecked();
 	const initialSlug = await entrySlug.inputValue();
 	const initialLayout = await entryLayout.inputValue();
@@ -211,6 +231,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const initialReviewDate = await entryReviewDate.inputValue();
 	const initialPriority = await entryPriority.inputValue();
 	const initialScore = await entryScore.inputValue();
+	const initialBadgeLabel = await entryBadgeLabel.inputValue();
+	const initialBadgeSlug = await entryBadgeSlug.inputValue();
+	const initialDimensionsWidth = await entryDimensionsWidth.inputValue();
+	const initialDimensionsHeight = await entryDimensionsHeight.inputValue();
+	const initialDimensionsUnit = await entryDimensionsUnit.inputValue();
+	const initialSpacingTop = await entrySpacingTop.inputValue();
+	const initialSpacingRight = await entrySpacingRight.inputValue();
+	const initialSpacingUnit = await entrySpacingUnit.inputValue();
+	const initialLinkLabel = await entryLinkLabel.inputValue();
+	const initialLinkUrl = await entryLinkUrl.inputValue();
 	const initialNewsletter = await newsletterChannel.isChecked();
 	const discardSlug = initialSlug === 'discard-check' ? 'discard-check-next' : 'discard-check';
 	const discardLayout = initialLayout === 'wide' ? 'compact' : 'wide';
@@ -220,6 +250,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const discardReviewDate = initialReviewDate === '2026-05-01' ? '2026-05-02' : '2026-05-01';
 	const discardPriority = initialPriority === '5' ? '4' : '5';
 	const discardScore = initialScore === '10' ? '9' : '10';
+	const discardBadgeLabel = initialBadgeLabel === 'Draft Badge' ? 'Draft Badge Next' : 'Draft Badge';
+	const discardBadgeSlug = initialBadgeSlug === 'draft-badge' ? 'draft-badge-next' : 'draft-badge';
+	const discardDimensionsWidth = initialDimensionsWidth === '480' ? '420' : '480';
+	const discardDimensionsHeight = initialDimensionsHeight === '260' ? '240' : '260';
+	const discardDimensionsUnit = initialDimensionsUnit === '%' ? 'px' : '%';
+	const discardSpacingTop = initialSpacingTop === '20' ? '18' : '20';
+	const discardSpacingRight = initialSpacingRight === '24' ? '22' : '24';
+	const discardSpacingUnit = initialSpacingUnit === 'rem' ? 'px' : 'rem';
+	const discardLinkLabel = initialLinkLabel === 'Discard Link' ? 'Discard Link Next' : 'Discard Link';
+	const discardLinkUrl = initialLinkUrl === 'https://example.test/discard' ? 'https://example.test/discard-next' : 'https://example.test/discard';
 	const savedSlug = initialSlug === 'block-panel-valid' ? 'block-panel-valid-next' : 'block-panel-valid';
 	const savedLayout = initialLayout === 'feature' ? 'compact' : 'feature';
 	const savedFormat = initialFormat === 'alert' ? 'editorial' : 'alert';
@@ -228,6 +268,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const savedReviewDate = initialReviewDate === '2026-05-03' ? '2026-05-04' : '2026-05-03';
 	const savedPriority = initialPriority === '4' ? '3' : '4';
 	const savedScore = initialScore === '7' ? '6' : '7';
+	const savedBadgeLabel = initialBadgeLabel === 'Published Badge' ? 'Published Badge Next' : 'Published Badge';
+	const savedBadgeSlug = initialBadgeSlug === 'published-badge' ? 'published-badge-next' : 'published-badge';
+	const savedDimensionsWidth = initialDimensionsWidth === '640' ? '560' : '640';
+	const savedDimensionsHeight = initialDimensionsHeight === '360' ? '320' : '360';
+	const savedDimensionsUnit = initialDimensionsUnit === 'rem' ? 'px' : 'rem';
+	const savedSpacingTop = initialSpacingTop === '16' ? '14' : '16';
+	const savedSpacingRight = initialSpacingRight === '18' ? '14' : '18';
+	const savedSpacingUnit = initialSpacingUnit === 'rem' ? 'px' : 'rem';
+	const savedLinkLabel = initialLinkLabel === 'Continue reading' ? 'Read the update' : 'Continue reading';
+	const savedLinkUrl = initialLinkUrl === 'https://example.test/update' ? 'https://example.test/story' : 'https://example.test/update';
 
 	await entrySlug.fill( discardSlug );
 	await entryLayout.selectOption( discardLayout );
@@ -237,6 +287,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await setInputValue( entryReviewDate, discardReviewDate );
 	await setInputValue( entryPriority, discardPriority );
 	await entryScore.fill( discardScore );
+	await entryBadgeLabel.fill( discardBadgeLabel );
+	await entryBadgeSlug.fill( discardBadgeSlug );
+	await entryDimensionsWidth.fill( discardDimensionsWidth );
+	await entryDimensionsHeight.fill( discardDimensionsHeight );
+	await entryDimensionsUnit.selectOption( discardDimensionsUnit );
+	await entrySpacingTop.fill( discardSpacingTop );
+	await entrySpacingRight.fill( discardSpacingRight );
+	await entrySpacingUnit.selectOption( discardSpacingUnit );
+	await entryLinkLabel.fill( discardLinkLabel );
+	await entryLinkUrl.fill( discardLinkUrl );
 	await newsletterChannel.setChecked( ! initialNewsletter );
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
@@ -257,6 +317,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryReviewDate ).toHaveValue( initialReviewDate );
 	await expect( entryPriority ).toHaveValue( initialPriority );
 	await expect( entryScore ).toHaveValue( initialScore );
+	await expect( entryBadgeLabel ).toHaveValue( initialBadgeLabel );
+	await expect( entryBadgeSlug ).toHaveValue( initialBadgeSlug );
+	await expect( entryDimensionsWidth ).toHaveValue( initialDimensionsWidth );
+	await expect( entryDimensionsHeight ).toHaveValue( initialDimensionsHeight );
+	await expect( entryDimensionsUnit ).toHaveValue( initialDimensionsUnit );
+	await expect( entrySpacingTop ).toHaveValue( initialSpacingTop );
+	await expect( entrySpacingRight ).toHaveValue( initialSpacingRight );
+	await expect( entrySpacingUnit ).toHaveValue( initialSpacingUnit );
+	await expect( entryLinkLabel ).toHaveValue( initialLinkLabel );
+	await expect( entryLinkUrl ).toHaveValue( initialLinkUrl );
 	await expect( newsletterChannel ).toBeChecked( { checked: initialNewsletter } );
 
 	await entrySlug.fill( 'x' );
@@ -276,6 +346,24 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entrySlug.fill( savedSlug );
 	await expect( panel ).toHaveAttribute( 'data-status', 'ready' );
 	await expect( panel ).toHaveAttribute( 'data-error-count', '0' );
+
+	await entryBadgeSlug.fill( 'x' );
+
+	const invalidNestedSaveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
+
+	await panel.getByRole( 'button', { name: /^Save$/ } ).click();
+
+	const invalidNestedSaveResponse = await invalidNestedSaveRequest;
+
+	expect( invalidNestedSaveResponse.status() ).toBe( 422 );
+	await expect( panel ).toHaveAttribute( 'data-status', 'error' );
+	await expect( panel ).toHaveAttribute( 'data-error-count', '1' );
+	await expect( panel.locator( '[data-field-error="entry_badge.slug"]' ) ).toContainText( /between 3 and 32/i );
+
+	await entryBadgeSlug.fill( savedBadgeSlug );
+	await expect( panel ).toHaveAttribute( 'data-status', 'ready' );
+	await expect( panel ).toHaveAttribute( 'data-error-count', '0' );
+
 	await featuredToggle.setChecked( ! initialChecked );
 	await entryLayout.selectOption( savedLayout );
 	await entryFormat.locator( `input[type="radio"][value="${ savedFormat }"]` ).check();
@@ -284,6 +372,15 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await setInputValue( entryReviewDate, savedReviewDate );
 	await setInputValue( entryPriority, savedPriority );
 	await entryScore.fill( savedScore );
+	await entryBadgeLabel.fill( savedBadgeLabel );
+	await entryDimensionsWidth.fill( savedDimensionsWidth );
+	await entryDimensionsHeight.fill( savedDimensionsHeight );
+	await entryDimensionsUnit.selectOption( savedDimensionsUnit );
+	await entrySpacingTop.fill( savedSpacingTop );
+	await entrySpacingRight.fill( savedSpacingRight );
+	await entrySpacingUnit.selectOption( savedSpacingUnit );
+	await entryLinkLabel.fill( savedLinkLabel );
+	await entryLinkUrl.fill( savedLinkUrl );
 	await newsletterChannel.setChecked( ! initialNewsletter );
 	await selectMediaAttachments( page, entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ), [ 'Admin Config Media One' ] );
 	await selectMediaAttachments( page, entryMedia.getByRole( 'button', { name: /^Choose image$/i } ), [ 'Admin Config Media Two' ] );
@@ -316,6 +413,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryReviewDate ).toHaveValue( savedReviewDate );
 	await expect( entryPriority ).toHaveValue( savedPriority );
 	await expect( entryScore ).toHaveValue( savedScore );
+	await expect( entryBadgeLabel ).toHaveValue( savedBadgeLabel );
+	await expect( entryBadgeSlug ).toHaveValue( savedBadgeSlug );
+	await expect( entryDimensionsWidth ).toHaveValue( savedDimensionsWidth );
+	await expect( entryDimensionsHeight ).toHaveValue( savedDimensionsHeight );
+	await expect( entryDimensionsUnit ).toHaveValue( savedDimensionsUnit );
+	await expect( entrySpacingTop ).toHaveValue( savedSpacingTop );
+	await expect( entrySpacingRight ).toHaveValue( savedSpacingRight );
+	await expect( entrySpacingUnit ).toHaveValue( savedSpacingUnit );
+	await expect( entryLinkLabel ).toHaveValue( savedLinkLabel );
+	await expect( entryLinkUrl ).toHaveValue( savedLinkUrl );
 	await expect( newsletterChannel ).toBeChecked( { checked: ! initialNewsletter } );
 	await expect( entryUpload.locator( '.lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
 	await expect( entryMedia.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
@@ -339,6 +446,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.locator( '[data-field-id="entry_review_date"] input[type="date"]' ) ).toHaveValue( savedReviewDate );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_priority"] input[type="range"]' ) ).toHaveValue( savedPriority );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_score"] input[type="number"]' ) ).toHaveValue( savedScore );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_badge"]' ).getByRole( 'textbox', { name: /^Label$/i } ) ).toHaveValue( savedBadgeLabel );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_badge"]' ).getByRole( 'textbox', { name: /^Badge slug$/i } ) ).toHaveValue( savedBadgeSlug );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_dimensions"]' ).getByRole( 'spinbutton', { name: /Entry card size Width/i } ) ).toHaveValue( savedDimensionsWidth );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_dimensions"]' ).getByRole( 'spinbutton', { name: /Entry card size Height/i } ) ).toHaveValue( savedDimensionsHeight );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_dimensions"]' ).getByRole( 'combobox', { name: /Entry card size unit/i } ) ).toHaveValue( savedDimensionsUnit );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_spacing"]' ).getByRole( 'spinbutton', { name: /Entry card spacing Top/i } ) ).toHaveValue( savedSpacingTop );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_spacing"]' ).getByRole( 'spinbutton', { name: /Entry card spacing Right/i } ) ).toHaveValue( savedSpacingRight );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_spacing"]' ).getByRole( 'combobox', { name: /Entry card spacing unit/i } ) ).toHaveValue( savedSpacingUnit );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link label$/i } ).first() ).toHaveValue( savedLinkLabel );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link URL$/i } ).first() ).toHaveValue( savedLinkUrl );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_upload"] .lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_media"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_gallery"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );

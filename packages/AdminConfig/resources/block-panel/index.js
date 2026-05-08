@@ -28,9 +28,6 @@ const READ_ONLY_CONTROL_TYPES = new Set([
 	'border',
 	'code_editor',
 	'content',
-	'dimensions',
-	'fieldset',
-	'group',
 	'heading',
 	'icon',
 	'image_select',
@@ -38,7 +35,6 @@ const READ_ONLY_CONTROL_TYPES = new Set([
 	'notice',
 	'palette',
 	'sorter',
-	'spacing',
 	'subheading',
 	'tabbed',
 	'typography',
@@ -576,12 +572,18 @@ const createPanelComponent = (config, Panel, element) => {
 						[
 							control({
 								components,
+								controls: runtime.controls,
 								createElement,
 								error,
+								errors: state.errors || {},
 								field,
 								inputId: `${ panelSlug(String(config.schemaId || 'schema')) }-${ fieldId }`,
 								onChange: (value) => {
 									runtime.updateValue(fieldId, value);
+									setState(runtime.getState());
+								},
+								onPathChange: (path, value) => {
+									runtime.updateValue(path, value);
 									setState(runtime.getState());
 								},
 								value: fieldValue(state.values || {}, fieldId, field.default),

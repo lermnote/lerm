@@ -138,6 +138,61 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertArrayNotHasKey( 'dependency', $compiled->client_config()['fields']['empty_controller'] );
 	}
 
+	public function testCompilesNestedFieldMetadataForStructuredControls(): void {
+		$compiled = ( new SchemaCompiler() )->compile(
+			array(
+				'id'       => 'structured_controls',
+				'sections' => array(
+					'general' => array(
+						'fields' => array(
+							array(
+								'id'      => 'badge',
+								'type'    => 'fieldset',
+								'fields'  => array(
+									array(
+										'id'      => 'label',
+										'type'    => 'text',
+										'default' => 'Featured',
+									),
+								),
+								'default' => array(
+									'label' => 'Featured',
+								),
+							),
+							array(
+								'id'      => 'links',
+								'type'    => 'group',
+								'fields'  => array(
+									array(
+										'id'   => 'url',
+										'type' => 'url',
+									),
+								),
+								'default' => array(),
+							),
+							array(
+								'id'    => 'spacing',
+								'type'  => 'spacing',
+								'units' => array( 'px', 'rem' ),
+								'top'   => true,
+								'left'  => false,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$fields = $compiled->client_config()['fields'];
+
+		$this->assertSame( 'badge.label', $fields['badge']['fields'][0]['path'] );
+		$this->assertSame( 'text', $fields['badge']['fields'][0]['client']['control'] ?? $fields['badge']['fields'][0]['type'] );
+		$this->assertSame( 'links.*.url', $fields['links']['fields'][0]['path'] );
+		$this->assertSame( array( 'px', 'rem' ), $fields['spacing']['units'] );
+		$this->assertTrue( $fields['spacing']['top'] );
+		$this->assertFalse( $fields['spacing']['left'] );
+	}
+
 	public function testDependencyDefaultsEmptyOperatorToEquality(): void {
 		$compiled = ( new SchemaCompiler() )->compile(
 			array(

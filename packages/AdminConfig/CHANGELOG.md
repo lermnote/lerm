@@ -49,6 +49,9 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Block editor panel media controls for `upload`, `media`, and `gallery`
   fields, including media-library selection, REST save serialization, and
   browser persistence coverage.
+- Block editor panel structured controls for `fieldset`, `group`,
+  `dimensions`, and `spacing`, including nested value paths and validation-error
+  replay coverage.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -83,6 +86,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   values by path.
 - Block editor field metadata now exposes media control labels and library
   constraints through the client schema payload.
+- The client schema payload now exposes nested field metadata and design-control
+  flags needed by structured block-panel controls.
 - Block editor color/date/range controls now avoid duplicate input/change state
   updates.
 - Block editor number controls now preserve an explicitly cleared empty value

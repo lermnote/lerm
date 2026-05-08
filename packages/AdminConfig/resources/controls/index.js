@@ -1,6 +1,6 @@
 // @ts-check
 
-const { asRecord } = require('../core/records');
+const { asRecord, asRecordArray } = require('../core/records');
 
 /**
  * @typedef {(props: Record<string, unknown>) => unknown} FieldControl
@@ -97,21 +97,27 @@ const errorMessage = (error) => asArray(error).length
  * @param {Record<string, unknown>} props
  * @returns {{
  *   components: Record<string, Function>,
+ *   controls: { get: (type: string) => FieldControl|null },
  *   createElement: Function,
  *   error: string,
+ *   errors: Record<string, string|string[]>,
  *   field: Record<string, unknown>,
  *   inputId: string,
  *   onChange: Function,
+ *   onPathChange: Function,
  *   value: unknown
  * }}
  */
 const normalizeProps = (props) => ({
 	components: /** @type {Record<string, Function>} */ (asRecord(props.components)),
+	controls: /** @type {{ get: (type: string) => FieldControl|null }} */ (props.controls || { get: () => null }),
 	createElement: /** @type {Function} */ (props.createElement),
 	error: errorMessage(props.error),
+	errors: /** @type {Record<string, string|string[]>} */ (asRecord(props.errors)),
 	field: asRecord(props.field),
 	inputId: stringValue(props.inputId),
 	onChange: /** @type {Function} */ (props.onChange),
+	onPathChange: /** @type {Function} */ (props.onPathChange || (() => {})),
 	value: props.value,
 });
 
@@ -145,6 +151,159 @@ const numericValue = (value, field) => {
 	}
 
 	return current !== '' ? current : stringValue(field.default || 0);
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {string}
+ */
+const fieldControlType = (field) => {
+	const client = asRecord(field.client);
+
+	return stringValue(field.control || client.control || field.type || 'text') || 'text';
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {Array<Record<string, unknown>>}
+ */
+const childFields = (field) => asRecordArray(field.fields);
+
+/**
+ * @param {string|string[]} path
+ * @returns {string[]}
+ */
+const pathTokens = (path) => (Array.isArray(path) ? path : stringValue(path).split('.'))
+	.map((token) => stringValue(token).trim())
+	.filter(Boolean);
+
+/**
+ * @param {string[]} path
+ * @returns {string}
+ */
+const pathKey = (path) => path.join('.');
+
+/**
+ * @param {Record<string, string|string[]>} errors
+ * @param {string|string[]} path
+ * @returns {string}
+ */
+const errorForPath = (errors, path) => errorMessage(errors[pathKey(pathTokens(path))]);
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const fieldValue = (field, value) => typeof value === 'undefined' ? field.default : value;
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {Record<string, unknown>} parentValue
+ * @returns {unknown}
+ */
+const childValue = (field, parentValue) => {
+	const fieldId = stringValue(field.id);
+
+	return Object.prototype.hasOwnProperty.call(parentValue, fieldId)
+		? parentValue[fieldId]
+		: field.default;
+};
+
+/**
+ * @param {Array<Record<string, unknown>>} fields
+ * @returns {Record<string, unknown>}
+ */
+const defaultNestedValue = (fields) => fields.reduce((values, field) => {
+	const fieldId = stringValue(field.id);
+
+	if (fieldId) {
+		values[fieldId] = Object.prototype.hasOwnProperty.call(field, 'default') ? field.default : '';
+	}
+
+	return values;
+}, {});
+
+/**
+ * @param {unknown} value
+ * @returns {Array<Record<string, unknown>>}
+ */
+const groupItems = (value) => Array.isArray(value) ? value.map(asRecord) : [];
+
+/**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @param {Record<string, unknown>} field
+ * @param {string[]} path
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const renderNestedField = (normalized, field, path, value) => {
+	const { components, controls, createElement, errors, inputId, onPathChange } = normalized;
+	const fieldId = stringValue(field.id);
+	const controlType = fieldControlType(field);
+	const control = controls.get(controlType);
+	const exactPath = pathKey(path);
+	const error = errorForPath(errors, path);
+	const label = stringValue(field.label || fieldId);
+
+	if (!fieldId) {
+		return null;
+	}
+
+	if (typeof control !== 'function') {
+		return createElement(
+			'div',
+			{
+				className: 'lerm-admin-config-block-panel__nested-field lerm-admin-config-block-panel__nested-field--unavailable',
+				'data-field-path': exactPath,
+				key: exactPath,
+				role: 'note',
+			},
+			[
+				createElement('strong', { key: 'label' }, label),
+				createElement('p', { key: 'message' }, `Field type "${ controlType }" is not available in this composite field yet.`),
+				error
+					? createElement('p', {
+						className: 'lerm-admin-config-block-panel__field-error',
+						'data-field-error': exactPath,
+						key: 'error',
+					}, error)
+					: null,
+			].filter(Boolean)
+		);
+	}
+
+	return createElement(
+		'div',
+		{
+			className: `lerm-admin-config-block-panel__nested-field${ error ? ' is-error' : '' }`,
+			'data-control-status': 'editable',
+			'data-field-path': exactPath,
+			'data-field-type': controlType,
+			key: exactPath,
+		},
+		[
+			control({
+				components,
+				controls,
+				createElement,
+				error,
+				errors,
+				field,
+				inputId: `${ inputId }-${ path.map((token) => token.replace(/[^a-z0-9_-]+/gi, '-')).join('-') }`,
+				onChange: (nextValue) => onPathChange(path, nextValue),
+				onPathChange,
+				value: fieldValue(field, value),
+			}),
+			error
+				? createElement('p', {
+					className: 'lerm-admin-config-block-panel__field-error',
+					'data-field-error': exactPath,
+					key: 'error',
+				}, error)
+				: null,
+		].filter(Boolean)
+	);
 };
 
 /**
@@ -921,6 +1080,247 @@ const CheckboxControl = (props) => {
 };
 
 /**
+ * @param {Record<string, unknown>} field
+ * @returns {string[]}
+ */
+const fieldUnits = (field) => {
+	const unit = field.unit;
+
+	if (typeof unit === 'string' && unit !== '') {
+		return [ unit ];
+	}
+
+	const units = Array.isArray(field.units) ? field.units.map(stringValue).filter(Boolean) : [ 'px', '%', 'em' ];
+
+	return units.length ? units : [ 'px' ];
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {string} key
+ * @param {boolean} fallback
+ * @returns {boolean}
+ */
+const fieldFlag = (field, key, fallback) => Object.prototype.hasOwnProperty.call(field, key)
+	? boolValue(field[key])
+	: fallback;
+
+/**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @param {Array<{ key: string, label: string }>} fields
+ * @returns {unknown}
+ */
+const CompositeBoxControl = (normalized, fields) => {
+	const { createElement, field, inputId, onPathChange, value } = normalized;
+	const fieldId = stringValue(field.id);
+	const current = asRecord(value);
+	const units = fieldUnits(field);
+	const showUnits = fieldFlag(field, 'unit', true) && fieldFlag(field, 'show_units', true) && units.length > 1;
+	const label = stringValue(field.label || fieldId);
+	const description = stringValue(field.description);
+	const children = [
+		createElement('legend', { key: 'legend' }, label),
+		description
+			? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+			: null,
+		...fields.map((item) => {
+			const path = [ fieldId, item.key ];
+			const error = errorForPath(normalized.errors, path);
+
+			return createElement(
+				'label',
+				{
+					className: `lerm-admin-config-block-panel__composite-item${ error ? ' is-error' : '' }`,
+					key: item.key,
+				},
+				[
+					createElement('span', { key: 'label' }, item.label),
+					createElement('input', {
+						'aria-invalid': error ? 'true' : undefined,
+						'aria-label': `${ label } ${ item.label }`,
+						id: `${ inputId }-${ item.key }`,
+						key: 'input',
+						onInput: (event) => onPathChange(path, stringValue(changeValue(event))),
+						step: 'any',
+						type: 'number',
+						value: stringValue(current[item.key]),
+					}),
+					error
+						? createElement('span', {
+							className: 'lerm-admin-config-block-panel__field-error',
+							'data-field-error': pathKey(path),
+							key: 'error',
+						}, error)
+						: null,
+				].filter(Boolean)
+			);
+		}),
+		showUnits
+			? createElement(
+				'label',
+				{
+					className: 'lerm-admin-config-block-panel__composite-item',
+					key: 'unit',
+				},
+				[
+					createElement('span', { key: 'label' }, 'Unit'),
+					createElement(
+						'select',
+						{
+							'aria-label': `${ label } unit`,
+							id: `${ inputId }-unit`,
+							key: 'select',
+							onChange: (event) => onPathChange([ fieldId, 'unit' ], stringValue(changeValue(event))),
+							value: stringValue(current.unit || field.default?.unit || units[0]),
+						},
+						units.map((unit) => createElement('option', { key: unit, value: unit }, unit))
+					),
+				]
+			)
+			: null,
+	];
+
+	return createElement(
+		'fieldset',
+		{
+			className: 'lerm-admin-config-block-panel__composite-field',
+		},
+		children.filter(Boolean)
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const DimensionsControl = (props) => {
+	const normalized = normalizeProps(props);
+	const fields = [
+		fieldFlag(normalized.field, 'width', true) ? { key: 'width', label: 'Width' } : null,
+		fieldFlag(normalized.field, 'height', true) ? { key: 'height', label: 'Height' } : null,
+	].filter(Boolean);
+
+	return CompositeBoxControl(normalized, fields);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const SpacingControl = (props) => {
+	const normalized = normalizeProps(props);
+	const fields = fieldFlag(normalized.field, 'all', false)
+		? [ { key: 'all', label: 'All' } ]
+		: [
+			fieldFlag(normalized.field, 'top', true) ? { key: 'top', label: 'Top' } : null,
+			fieldFlag(normalized.field, 'right', true) ? { key: 'right', label: 'Right' } : null,
+			fieldFlag(normalized.field, 'bottom', true) ? { key: 'bottom', label: 'Bottom' } : null,
+			fieldFlag(normalized.field, 'left', true) ? { key: 'left', label: 'Left' } : null,
+		].filter(Boolean);
+
+	return CompositeBoxControl(normalized, fields);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const FieldsetControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, value } = normalized;
+	const fieldId = stringValue(field.id);
+	const fields = childFields(field);
+	const current = asRecord(value);
+	const label = stringValue(field.label || fieldId);
+	const description = stringValue(field.description);
+
+	return createElement(
+		'fieldset',
+		{
+			className: 'lerm-admin-config-block-panel__fieldset',
+		},
+		[
+			createElement('legend', { key: 'legend' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			...fields.map((child) => renderNestedField(
+				normalized,
+				child,
+				[ fieldId, stringValue(child.id) ],
+				childValue(child, current)
+			)),
+		].filter(Boolean)
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const GroupControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { components, createElement, field, onChange, value } = normalized;
+	const Button = components.Button;
+	const fieldId = stringValue(field.id);
+	const fields = childFields(field);
+	const items = groupItems(value);
+	const label = stringValue(field.label || fieldId);
+	const description = stringValue(field.description);
+	const addItem = () => onChange([ ...items, defaultNestedValue(fields) ]);
+	const removeItem = (index) => onChange(items.filter((_, itemIndex) => itemIndex !== index));
+	const renderActionButton = (props, text) => typeof Button === 'function'
+		? createElement(Button, props, text)
+		: createElement('button', { ...props, type: 'button' }, text);
+
+	return createElement(
+		'div',
+		{
+			className: 'lerm-admin-config-block-panel__group',
+			role: 'group',
+		},
+		[
+			createElement('strong', { key: 'label' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			...items.map((item, index) => createElement(
+				'fieldset',
+				{
+					className: 'lerm-admin-config-block-panel__group-item',
+					key: `${ fieldId }-${ index }`,
+				},
+				[
+					createElement('legend', { key: 'legend' }, `Item ${ index + 1 }`),
+					...fields.map((child) => renderNestedField(
+						normalized,
+						child,
+						[ fieldId, String(index), stringValue(child.id) ],
+						childValue(child, item)
+					)),
+					renderActionButton(
+						{
+							key: 'remove',
+							onClick: () => removeItem(index),
+							variant: 'secondary',
+						},
+						'Remove item'
+					),
+				].filter(Boolean)
+			)),
+			renderActionButton(
+				{
+					key: 'add',
+					onClick: addItem,
+					variant: 'secondary',
+				},
+				'Add item'
+			),
+		].filter(Boolean)
+	);
+};
+
+/**
  * @param {ReturnType<typeof normalizeProps>} normalized
  * @returns {unknown}
  */
@@ -1229,7 +1629,10 @@ const createDefaultControlRegistry = () => createControlRegistry({
 	checkbox_list: CheckboxListControl,
 	color: ColorControl,
 	date: DateControl,
+	dimensions: DimensionsControl,
+	fieldset: FieldsetControl,
 	gallery: GalleryControl,
+	group: GroupControl,
 	media: MediaControl,
 	number: NumberControl,
 	radio: RadioControl,
@@ -1237,6 +1640,7 @@ const createDefaultControlRegistry = () => createControlRegistry({
 	slug_text: TextControl,
 	slider: RangeControl,
 	spinner: NumberControl,
+	spacing: SpacingControl,
 	switcher: ToggleControl,
 	text: TextControl,
 	textarea: TextareaControl,

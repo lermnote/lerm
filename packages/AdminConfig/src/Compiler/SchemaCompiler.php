@@ -18,6 +18,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class SchemaCompiler {
 
+	/**
+	 * @var array<int, string>
+	 */
+	private const SCALAR_FIELD_PROPS = array(
+		'placeholder',
+		'input_type',
+		'min',
+		'max',
+		'step',
+		'rows',
+		'source',
+		'data_source',
+		'library',
+		'button_text',
+		'remove_text',
+		'unit',
+	);
+
+	/**
+	 * @var array<int, string>
+	 */
+	private const BOOLEAN_FIELD_PROPS = array(
+		'all',
+		'bottom',
+		'height',
+		'left',
+		'right',
+		'show_units',
+		'top',
+		'width',
+	);
+
+	/**
+	 * @var array<int, string>
+	 */
+	private const ARRAY_FIELD_PROPS = array(
+		'units',
+	);
+
 	public function __construct(
 		private ?FieldTypeRegistry $field_types = null
 	) {
@@ -41,7 +80,7 @@ final class SchemaCompiler {
 			}
 
 			$field_id                    = (string) $field['id'];
-			$field_metadata[ $field_id ] = $this->compile_field_metadata( $field );
+			$field_metadata[ $field_id ] = $this->compile_field_metadata( $field, $field_id );
 
 			if ( ! empty( $field_metadata[ $field_id ]['dependency'] ) ) {
 				$dependency_graph[ $field_id ] = $field_metadata[ $field_id ]['dependency'];
@@ -136,11 +175,14 @@ final class SchemaCompiler {
 	 * @param array<string, mixed> $field
 	 * @return array<string, mixed>
 	 */
-	private function compile_field_metadata( array $field ): array {
-		$type = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+	private function compile_field_metadata( array $field, string $path = '' ): array {
+		$type     = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+		$field_id = (string) $field['id'];
+		$path     = '' !== $path ? $path : $field_id;
 
 		$metadata = array(
-			'id'      => (string) $field['id'],
+			'id'      => $field_id,
+			'path'    => $path,
 			'type'    => $type,
 			'default' => $field['default'] ?? '',
 			'label'   => $this->first_string( $field, array( 'label' ) ),
@@ -167,11 +209,9 @@ final class SchemaCompiler {
 			$metadata['client'] = $client;
 		}
 
-		$this->copy_scalar_field_props(
-			$field,
-			$metadata,
-			array( 'placeholder', 'input_type', 'min', 'max', 'step', 'rows', 'source', 'data_source', 'library', 'button_text', 'remove_text' )
-		);
+		$this->copy_scalar_field_props( $field, $metadata, self::SCALAR_FIELD_PROPS );
+		$this->copy_boolean_field_props( $field, $metadata, self::BOOLEAN_FIELD_PROPS );
+		$this->copy_array_field_props( $field, $metadata, self::ARRAY_FIELD_PROPS );
 
 		foreach ( array( 'multiple' ) as $key ) {
 			if ( array_key_exists( $key, $field ) ) {
@@ -181,6 +221,11 @@ final class SchemaCompiler {
 
 		if ( array_key_exists( 'choices', $field ) ) {
 			$metadata['choices'] = PageSchema::choices( $field );
+		}
+
+		$nested_fields = $this->compile_nested_field_metadata( $field, $path, 'group' === $type );
+		if ( ! empty( $nested_fields ) ) {
+			$metadata['fields'] = $nested_fields;
 		}
 
 		$dependency = $this->compile_dependency( $field );
@@ -247,6 +292,53 @@ final class SchemaCompiler {
 				$metadata[ $key ] = $field[ $key ];
 			}
 		}
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param array<string, mixed> $metadata
+	 * @param array<int, string>   $keys
+	 */
+	private function copy_boolean_field_props( array $field, array &$metadata, array $keys ): void {
+		foreach ( $keys as $key ) {
+			if ( array_key_exists( $key, $field ) ) {
+				$metadata[ $key ] = (bool) $field[ $key ];
+			}
+		}
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param array<string, mixed> $metadata
+	 * @param array<int, string>   $keys
+	 */
+	private function copy_array_field_props( array $field, array &$metadata, array $keys ): void {
+		foreach ( $keys as $key ) {
+			if ( isset( $field[ $key ] ) && is_array( $field[ $key ] ) ) {
+				$metadata[ $key ] = $field[ $key ];
+			}
+		}
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function compile_nested_field_metadata( array $field, string $path, bool $is_group ): array {
+		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
+		$nested = array();
+
+		foreach ( $fields as $child ) {
+			if ( ! is_array( $child ) || empty( $child['id'] ) || ! is_scalar( $child['id'] ) ) {
+				continue;
+			}
+
+			$child_id   = (string) $child['id'];
+			$child_path = $is_group ? $path . '.*.' . $child_id : $path . '.' . $child_id;
+			$nested[]   = $this->compile_field_metadata( $child, $child_path );
+		}
+
+		return $nested;
 	}
 
 	/**
