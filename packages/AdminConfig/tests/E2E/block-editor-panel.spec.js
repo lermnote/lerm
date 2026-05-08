@@ -75,9 +75,12 @@ const currentBlockPanelMediaValues = async ( page ) => page.evaluate( () => {
 	const instance = instances.find( ( candidate ) => candidate.schemaId === 'acme-demo-post-metabox' ) || {};
 	const values = instance.state?.values || {};
 	const media = values.entry_media || {};
+	const background = values.entry_background || {};
+	const backgroundImage = background[ 'background-image' ] || {};
 	const gallery = Array.isArray( values.entry_gallery ) ? values.entry_gallery : [];
 
 	return {
+		backgroundMediaId: Number( backgroundImage?.id || backgroundImage || 0 ),
 		galleryIds: gallery.map( ( item ) => Number( item?.id || item ) ).filter( ( id ) => id > 0 ),
 		mediaId: Number( media?.id || media || 0 ),
 		upload: String( values.entry_upload || '' ),
@@ -96,7 +99,9 @@ const selectMediaAttachments = async ( page, trigger, titles ) => {
 		const checkbox = modal.getByRole( 'checkbox', { name: new RegExp( `^${ escapeRegExp( title ) }$` ) } ).first();
 
 		await expect( checkbox, `Media attachment "${ title }" should be selectable` ).toBeVisible( { timeout: 20_000 } );
-		await checkbox.click();
+		if ( ! await checkbox.isChecked().catch( () => false ) ) {
+			await checkbox.click();
+		}
 	}
 
 	for ( let attempt = 0; attempt < 3; attempt += 1 ) {
@@ -187,6 +192,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryBorder = panel.locator( '[data-field-id="entry_border"]' );
 	const entryLinkColors = panel.locator( '[data-field-id="entry_link_colors"]' );
 	const entryTypography = panel.locator( '[data-field-id="entry_typography"]' );
+	const entryBackground = panel.locator( '[data-field-id="entry_background"]' );
 	const entryLinks = panel.locator( '[data-field-id="entry_links"]' );
 	const entryIconReadOnly = panel.locator( '[data-field-id="entry_icon"][data-read-only-control="true"]' );
 	const entryBadge = panel.locator( '[data-field-id="entry_badge"]' );
@@ -215,6 +221,17 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryTypographyAlignLeft = entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="left"]' );
 	const entryTypographyAlignCenter = entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="center"]' );
 	const entryTypographyColor = entryTypography.locator( '[data-field-path="entry_typography.color"] input[type="color"]' );
+	const entryBackgroundColor = entryBackground.locator( '[data-field-path="entry_background.background-color"] input[type="color"]' );
+	const entryBackgroundGradientColor = entryBackground.locator( '[data-field-path="entry_background.background-gradient-color"] input[type="color"]' );
+	const entryBackgroundGradientDirection = entryBackground.locator( '[data-field-path="entry_background.background-gradient-direction"] select' );
+	const entryBackgroundImage = entryBackground.locator( '[data-field-path="entry_background.background-image"]' );
+	const entryBackgroundPosition = entryBackground.locator( '[data-field-path="entry_background.background-position"] select' );
+	const entryBackgroundRepeat = entryBackground.locator( '[data-field-path="entry_background.background-repeat"] select' );
+	const entryBackgroundAttachment = entryBackground.locator( '[data-field-path="entry_background.background-attachment"] select' );
+	const entryBackgroundSize = entryBackground.locator( '[data-field-path="entry_background.background-size"] select' );
+	const entryBackgroundOrigin = entryBackground.locator( '[data-field-path="entry_background.background-origin"] select' );
+	const entryBackgroundClip = entryBackground.locator( '[data-field-path="entry_background.background-clip"] select' );
+	const entryBackgroundBlendMode = entryBackground.locator( '[data-field-path="entry_background.background-blend-mode"] select' );
 	const entryLinkLabel = entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first();
 	const entryLinkUrl = entryLinks.getByRole( 'textbox', { name: /^Link URL$/i } ).first();
 	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
@@ -253,6 +270,17 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryTypographyLetterSpacing ).toBeVisible();
 	await expect( entryTypographyAlignLeft ).toBeVisible();
 	await expect( entryTypographyColor ).toBeVisible();
+	await expect( entryBackgroundColor ).toBeVisible();
+	await expect( entryBackgroundGradientColor ).toBeVisible();
+	await expect( entryBackgroundGradientDirection ).toBeVisible();
+	await expect( entryBackgroundImage.getByRole( 'button', { name: /^Choose background image$/i } ) ).toBeVisible();
+	await expect( entryBackgroundPosition ).toBeVisible();
+	await expect( entryBackgroundRepeat ).toBeVisible();
+	await expect( entryBackgroundAttachment ).toBeVisible();
+	await expect( entryBackgroundSize ).toBeVisible();
+	await expect( entryBackgroundOrigin ).toBeVisible();
+	await expect( entryBackgroundClip ).toBeVisible();
+	await expect( entryBackgroundBlendMode ).toBeVisible();
 	await expect( entryLinkLabel ).toBeVisible();
 	await expect( entryLinkUrl ).toBeVisible();
 	await expect( newsletterChannel ).toBeVisible();
@@ -289,6 +317,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const initialTypographyLetterSpacing = await entryTypographyLetterSpacing.inputValue();
 	const initialTypographyAlign = await entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ).getAttribute( 'data-value' );
 	const initialTypographyColor = ( await entryTypographyColor.inputValue() ).toLowerCase();
+	const initialBackgroundColor = ( await entryBackgroundColor.inputValue() ).toLowerCase();
+	const initialBackgroundGradientColor = ( await entryBackgroundGradientColor.inputValue() ).toLowerCase();
+	const initialBackgroundGradientDirection = await entryBackgroundGradientDirection.inputValue();
+	const initialBackgroundPosition = await entryBackgroundPosition.inputValue();
+	const initialBackgroundRepeat = await entryBackgroundRepeat.inputValue();
+	const initialBackgroundAttachment = await entryBackgroundAttachment.inputValue();
+	const initialBackgroundSize = await entryBackgroundSize.inputValue();
+	const initialBackgroundOrigin = await entryBackgroundOrigin.inputValue();
+	const initialBackgroundClip = await entryBackgroundClip.inputValue();
+	const initialBackgroundBlendMode = await entryBackgroundBlendMode.inputValue();
 	const initialLinkLabel = await entryLinkLabel.inputValue();
 	const initialLinkUrl = await entryLinkUrl.inputValue();
 	const initialNewsletter = await newsletterChannel.isChecked();
@@ -323,6 +361,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const discardTypographyLetterSpacing = initialTypographyLetterSpacing === '0.02' ? '0.01' : '0.02';
 	const discardTypographyAlign = initialTypographyAlign === 'center' ? 'left' : 'center';
 	const discardTypographyColor = initialTypographyColor === '#665544' ? '#445566' : '#665544';
+	const discardBackgroundColor = initialBackgroundColor === '#eeffee' ? '#ffeeee' : '#eeffee';
+	const discardBackgroundGradientColor = initialBackgroundGradientColor === '#ddeeff' ? '#ffeedd' : '#ddeeff';
+	const discardBackgroundGradientDirection = initialBackgroundGradientDirection === '135deg' ? 'to bottom' : '135deg';
+	const discardBackgroundPosition = initialBackgroundPosition === 'right bottom' ? 'left top' : 'right bottom';
+	const discardBackgroundRepeat = initialBackgroundRepeat === 'repeat-x' ? 'repeat-y' : 'repeat-x';
+	const discardBackgroundAttachment = initialBackgroundAttachment === 'fixed' ? 'scroll' : 'fixed';
+	const discardBackgroundSize = initialBackgroundSize === 'contain' ? 'auto' : 'contain';
+	const discardBackgroundOrigin = initialBackgroundOrigin === 'border-box' ? 'content-box' : 'border-box';
+	const discardBackgroundClip = initialBackgroundClip === 'padding-box' ? 'content-box' : 'padding-box';
+	const discardBackgroundBlendMode = initialBackgroundBlendMode === 'screen' ? 'overlay' : 'screen';
 	const discardLinkLabel = initialLinkLabel === 'Discard Link' ? 'Discard Link Next' : 'Discard Link';
 	const discardLinkUrl = initialLinkUrl === 'https://example.test/discard' ? 'https://example.test/discard-next' : 'https://example.test/discard';
 	const savedSlug = initialSlug === 'block-panel-valid' ? 'block-panel-valid-next' : 'block-panel-valid';
@@ -356,6 +404,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const savedTypographyLetterSpacing = initialTypographyLetterSpacing === '0.03' ? '0.02' : '0.03';
 	const savedTypographyAlign = initialTypographyAlign === 'center' ? 'left' : 'center';
 	const savedTypographyColor = initialTypographyColor === '#8844aa' ? '#aa4488' : '#8844aa';
+	const savedBackgroundColor = initialBackgroundColor === '#fafafa' ? '#f0f9ff' : '#fafafa';
+	const savedBackgroundGradientColor = initialBackgroundGradientColor === '#dbeafe' ? '#fef3c7' : '#dbeafe';
+	const savedBackgroundGradientDirection = initialBackgroundGradientDirection === '-135deg' ? 'to right' : '-135deg';
+	const savedBackgroundPosition = initialBackgroundPosition === 'center top' ? 'center bottom' : 'center top';
+	const savedBackgroundRepeat = initialBackgroundRepeat === 'no-repeat' ? 'repeat' : 'no-repeat';
+	const savedBackgroundAttachment = initialBackgroundAttachment === 'fixed' ? 'scroll' : 'fixed';
+	const savedBackgroundSize = initialBackgroundSize === 'cover' ? 'contain' : 'cover';
+	const savedBackgroundOrigin = initialBackgroundOrigin === 'padding-box' ? 'border-box' : 'padding-box';
+	const savedBackgroundClip = initialBackgroundClip === 'border-box' ? 'padding-box' : 'border-box';
+	const savedBackgroundBlendMode = initialBackgroundBlendMode === 'multiply' ? 'normal' : 'multiply';
 	const savedLinkLabel = initialLinkLabel === 'Continue reading' ? 'Read the update' : 'Continue reading';
 	const savedLinkUrl = initialLinkUrl === 'https://example.test/update' ? 'https://example.test/story' : 'https://example.test/update';
 
@@ -390,6 +448,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryTypographyLetterSpacing.fill( discardTypographyLetterSpacing );
 	await ( discardTypographyAlign === 'center' ? entryTypographyAlignCenter : entryTypographyAlignLeft ).click();
 	await setInputValue( entryTypographyColor, discardTypographyColor );
+	await setInputValue( entryBackgroundColor, discardBackgroundColor );
+	await setInputValue( entryBackgroundGradientColor, discardBackgroundGradientColor );
+	await entryBackgroundGradientDirection.selectOption( discardBackgroundGradientDirection );
+	await entryBackgroundPosition.selectOption( discardBackgroundPosition );
+	await entryBackgroundRepeat.selectOption( discardBackgroundRepeat );
+	await entryBackgroundAttachment.selectOption( discardBackgroundAttachment );
+	await entryBackgroundSize.selectOption( discardBackgroundSize );
+	await entryBackgroundOrigin.selectOption( discardBackgroundOrigin );
+	await entryBackgroundClip.selectOption( discardBackgroundClip );
+	await entryBackgroundBlendMode.selectOption( discardBackgroundBlendMode );
 	await entryLinkLabel.fill( discardLinkLabel );
 	await entryLinkUrl.fill( discardLinkUrl );
 	await newsletterChannel.setChecked( ! initialNewsletter );
@@ -435,6 +503,16 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryTypographyLetterSpacing ).toHaveValue( initialTypographyLetterSpacing );
 	await expect( entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialTypographyAlign || '' );
 	await expect( entryTypographyColor ).toHaveValue( initialTypographyColor );
+	await expect( entryBackgroundColor ).toHaveValue( initialBackgroundColor );
+	await expect( entryBackgroundGradientColor ).toHaveValue( initialBackgroundGradientColor );
+	await expect( entryBackgroundGradientDirection ).toHaveValue( initialBackgroundGradientDirection );
+	await expect( entryBackgroundPosition ).toHaveValue( initialBackgroundPosition );
+	await expect( entryBackgroundRepeat ).toHaveValue( initialBackgroundRepeat );
+	await expect( entryBackgroundAttachment ).toHaveValue( initialBackgroundAttachment );
+	await expect( entryBackgroundSize ).toHaveValue( initialBackgroundSize );
+	await expect( entryBackgroundOrigin ).toHaveValue( initialBackgroundOrigin );
+	await expect( entryBackgroundClip ).toHaveValue( initialBackgroundClip );
+	await expect( entryBackgroundBlendMode ).toHaveValue( initialBackgroundBlendMode );
 	await expect( entryLinkLabel ).toHaveValue( initialLinkLabel );
 	await expect( entryLinkUrl ).toHaveValue( initialLinkUrl );
 	await expect( newsletterChannel ).toBeChecked( { checked: initialNewsletter } );
@@ -504,11 +582,22 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryTypographyLetterSpacing.fill( savedTypographyLetterSpacing );
 	await ( savedTypographyAlign === 'center' ? entryTypographyAlignCenter : entryTypographyAlignLeft ).click();
 	await setInputValue( entryTypographyColor, savedTypographyColor );
+	await setInputValue( entryBackgroundColor, savedBackgroundColor );
+	await setInputValue( entryBackgroundGradientColor, savedBackgroundGradientColor );
+	await entryBackgroundGradientDirection.selectOption( savedBackgroundGradientDirection );
+	await entryBackgroundPosition.selectOption( savedBackgroundPosition );
+	await entryBackgroundRepeat.selectOption( savedBackgroundRepeat );
+	await entryBackgroundAttachment.selectOption( savedBackgroundAttachment );
+	await entryBackgroundSize.selectOption( savedBackgroundSize );
+	await entryBackgroundOrigin.selectOption( savedBackgroundOrigin );
+	await entryBackgroundClip.selectOption( savedBackgroundClip );
+	await entryBackgroundBlendMode.selectOption( savedBackgroundBlendMode );
 	await entryLinkLabel.fill( savedLinkLabel );
 	await entryLinkUrl.fill( savedLinkUrl );
 	await newsletterChannel.setChecked( ! initialNewsletter );
 	await selectMediaAttachments( page, entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ), [ 'Admin Config Media One' ] );
 	await selectMediaAttachments( page, entryMedia.getByRole( 'button', { name: /^Choose image$/i } ), [ 'Admin Config Media Two' ] );
+	await selectMediaAttachments( page, entryBackgroundImage.getByRole( 'button', { name: /^Choose background image$/i } ), [ 'Admin Config Media Three' ] );
 	await selectMediaAttachments( page, entryGallery.getByRole( 'button', { name: /^Choose gallery images$/i } ), [
 		'Admin Config Media One',
 		'Admin Config Media Three',
@@ -518,6 +607,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 
 	expect( selectedMedia.upload ).toContain( 'admin-config-media-one' );
 	expect( selectedMedia.mediaId ).toBeGreaterThan( 0 );
+	expect( selectedMedia.backgroundMediaId ).toBeGreaterThan( 0 );
 	expect( selectedMedia.galleryIds ).toHaveLength( 2 );
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
@@ -561,11 +651,22 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryTypographyLetterSpacing ).toHaveValue( savedTypographyLetterSpacing );
 	await expect( entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyAlign );
 	await expect( entryTypographyColor ).toHaveValue( savedTypographyColor );
+	await expect( entryBackgroundColor ).toHaveValue( savedBackgroundColor );
+	await expect( entryBackgroundGradientColor ).toHaveValue( savedBackgroundGradientColor );
+	await expect( entryBackgroundGradientDirection ).toHaveValue( savedBackgroundGradientDirection );
+	await expect( entryBackgroundPosition ).toHaveValue( savedBackgroundPosition );
+	await expect( entryBackgroundRepeat ).toHaveValue( savedBackgroundRepeat );
+	await expect( entryBackgroundAttachment ).toHaveValue( savedBackgroundAttachment );
+	await expect( entryBackgroundSize ).toHaveValue( savedBackgroundSize );
+	await expect( entryBackgroundOrigin ).toHaveValue( savedBackgroundOrigin );
+	await expect( entryBackgroundClip ).toHaveValue( savedBackgroundClip );
+	await expect( entryBackgroundBlendMode ).toHaveValue( savedBackgroundBlendMode );
 	await expect( entryLinkLabel ).toHaveValue( savedLinkLabel );
 	await expect( entryLinkUrl ).toHaveValue( savedLinkUrl );
 	await expect( newsletterChannel ).toBeChecked( { checked: ! initialNewsletter } );
 	await expect( entryUpload.locator( '.lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
 	await expect( entryMedia.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
+	await expect( entryBackgroundImage.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
 	await expect( entryGallery.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );
 
 	const reloadSchemaRequest = page.waitForResponse( ( reloadResponse ) => isMetaboxSchemaResponse( reloadResponse ), { timeout: 30_000 } );
@@ -609,10 +710,21 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'textbox', { name: /^Letter spacing$/i } ) ).toHaveValue( savedTypographyLetterSpacing );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyAlign );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.color"] input[type="color"]' ) ).toHaveValue( savedTypographyColor );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-color"] input[type="color"]' ) ).toHaveValue( savedBackgroundColor );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-gradient-color"] input[type="color"]' ) ).toHaveValue( savedBackgroundGradientColor );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-gradient-direction"] select' ) ).toHaveValue( savedBackgroundGradientDirection );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-position"] select' ) ).toHaveValue( savedBackgroundPosition );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-repeat"] select' ) ).toHaveValue( savedBackgroundRepeat );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-attachment"] select' ) ).toHaveValue( savedBackgroundAttachment );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-size"] select' ) ).toHaveValue( savedBackgroundSize );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-origin"] select' ) ).toHaveValue( savedBackgroundOrigin );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-clip"] select' ) ).toHaveValue( savedBackgroundClip );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-blend-mode"] select' ) ).toHaveValue( savedBackgroundBlendMode );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link label$/i } ).first() ).toHaveValue( savedLinkLabel );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link URL$/i } ).first() ).toHaveValue( savedLinkUrl );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_upload"] .lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_media"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-image"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_gallery"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );
 	await expect
 		.poll( () => currentBlockPanelMediaValues( page ), { timeout: 30_000 } )

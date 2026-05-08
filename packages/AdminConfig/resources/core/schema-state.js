@@ -225,6 +225,16 @@ const serializeFieldValue = (field, value) => {
 		case 'upload':
 			return typeof value === 'undefined' || value === null ? '' : String(value);
 
+		case 'background': {
+			const payload = { ...asRecord(value) };
+
+			if (Object.prototype.hasOwnProperty.call(payload, 'background-image')) {
+				payload['background-image'] = { id: mediaAttachmentId(payload['background-image']) };
+			}
+
+			return payload;
+		}
+
 		default:
 			return value;
 	}

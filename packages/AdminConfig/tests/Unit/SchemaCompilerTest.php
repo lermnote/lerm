@@ -198,6 +198,14 @@ final class SchemaCompilerTest extends TestCase {
 								'align'          => true,
 								'units'          => array( 'px', 'rem' ),
 							),
+							array(
+								'id'                    => 'background',
+								'type'                  => 'background',
+								'background_gradient'   => true,
+								'background_origin'     => true,
+								'background_blend_mode' => true,
+								'background_image_button_text' => 'Choose background',
+							),
 						),
 					),
 				),
@@ -221,6 +229,10 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertTrue( $fields['typography']['letter_spacing'] );
 		$this->assertTrue( $fields['typography']['align'] );
 		$this->assertSame( array( 'px', 'rem' ), $fields['typography']['units'] );
+		$this->assertTrue( $fields['background']['background_gradient'] );
+		$this->assertTrue( $fields['background']['background_origin'] );
+		$this->assertTrue( $fields['background']['background_blend_mode'] );
+		$this->assertSame( 'Choose background', $fields['background']['background_image_button_text'] );
 	}
 
 	public function testDependencyDefaultsEmptyOperatorToEquality(): void {

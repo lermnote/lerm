@@ -104,6 +104,11 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertTrue( $data['fields']['brand_typography']['letter_spacing'] );
 		$this->assertTrue( $data['fields']['brand_typography']['align'] );
 		$this->assertSame( array( 'px', 'rem' ), $data['fields']['brand_typography']['units'] );
+		$this->assertFalse( $data['fields']['brand_background']['readOnly'] );
+		$this->assertTrue( $data['fields']['brand_background']['background_gradient'] );
+		$this->assertTrue( $data['fields']['brand_background']['background_origin'] );
+		$this->assertTrue( $data['fields']['brand_background']['background_blend_mode'] );
+		$this->assertSame( 'Choose background image', $data['fields']['brand_background']['background_image_button_text'] );
 	}
 
 	public function testCanonicalSchemaIndexListsAccessibleSummaries(): void {
@@ -236,6 +241,19 @@ final class RestEndpointsTest extends TestCase {
 					'letter-spacing' => '',
 					'text-align'     => 'left',
 					'color'          => '#2271b1',
+				),
+				'brand_background' => array(
+					'background-color'              => '',
+					'background-gradient-color'     => '',
+					'background-gradient-direction' => '',
+					'background-image'              => array(),
+					'background-position'           => '',
+					'background-repeat'             => '',
+					'background-attachment'         => '',
+					'background-size'               => '',
+					'background-origin'             => '',
+					'background-clip'               => '',
+					'background-blend-mode'         => '',
 				),
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
@@ -571,6 +589,19 @@ final class RestEndpointsTest extends TestCase {
 					'text-align'     => 'left',
 					'color'          => '#2271b1',
 				),
+				'brand_background' => array(
+					'background-color'              => '#f8fafc',
+					'background-gradient-color'     => '#e0f2fe',
+					'background-gradient-direction' => 'to right',
+					'background-image'              => array(),
+					'background-position'           => 'center center',
+					'background-repeat'             => 'no-repeat',
+					'background-attachment'         => 'scroll',
+					'background-size'               => 'cover',
+					'background-origin'             => 'padding-box',
+					'background-clip'               => 'border-box',
+					'background-blend-mode'         => 'normal',
+				),
 			),
 			$response->get_data()['data']['values']
 		);
@@ -610,6 +641,19 @@ final class RestEndpointsTest extends TestCase {
 					'letter-spacing' => '0',
 					'text-align'     => 'left',
 					'color'          => '#2271b1',
+				),
+				'brand_background' => array(
+					'background-color'              => '#f8fafc',
+					'background-gradient-color'     => '#e0f2fe',
+					'background-gradient-direction' => 'to right',
+					'background-image'              => array(),
+					'background-position'           => 'center center',
+					'background-repeat'             => 'no-repeat',
+					'background-attachment'         => 'scroll',
+					'background-size'               => 'cover',
+					'background-origin'             => 'padding-box',
+					'background-clip'               => 'border-box',
+					'background-blend-mode'         => 'normal',
 				),
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
@@ -843,6 +887,28 @@ final class RestEndpointsTest extends TestCase {
 									'letter-spacing' => '0',
 									'text-align'     => 'left',
 									'color'          => '#2271b1',
+								),
+							),
+							array(
+								'id'                    => 'brand_background',
+								'type'                  => 'background',
+								'background_gradient'   => true,
+								'background_origin'     => true,
+								'background_clip'       => true,
+								'background_blend_mode' => true,
+								'background_image_button_text' => 'Choose background image',
+								'default'               => array(
+									'background-color'    => '#f8fafc',
+									'background-gradient-color' => '#e0f2fe',
+									'background-gradient-direction' => 'to right',
+									'background-image'    => array(),
+									'background-position' => 'center center',
+									'background-repeat'   => 'no-repeat',
+									'background-attachment' => 'scroll',
+									'background-size'     => 'cover',
+									'background-origin'   => 'padding-box',
+									'background-clip'     => 'border-box',
+									'background-blend-mode' => 'normal',
 								),
 							),
 						),
