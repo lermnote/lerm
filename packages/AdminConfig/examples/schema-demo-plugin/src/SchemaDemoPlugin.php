@@ -490,6 +490,58 @@ final class SchemaDemoPlugin {
 							'default'     => array(),
 						),
 						array(
+							'id'          => 'entry_dimensions',
+							'type'        => 'dimensions',
+							'label'       => __( 'Entry card size', 'lerm-admin-config-demo' ),
+							'description' => __( 'A nested dimensions object rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'units'       => array( 'px', '%', 'rem' ),
+							'default'     => array(
+								'width'  => '320',
+								'height' => '180',
+								'unit'   => 'px',
+							),
+						),
+						array(
+							'id'          => 'entry_spacing',
+							'type'        => 'spacing',
+							'label'       => __( 'Entry card spacing', 'lerm-admin-config-demo' ),
+							'description' => __( 'A nested spacing object rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'units'       => array( 'px', 'rem' ),
+							'default'     => array(
+								'top'    => '8',
+								'right'  => '12',
+								'bottom' => '8',
+								'left'   => '12',
+								'unit'   => 'px',
+							),
+						),
+						array(
+							'id'          => 'entry_links',
+							'type'        => 'group',
+							'label'       => __( 'Entry links', 'lerm-admin-config-demo' ),
+							'description' => __( 'A repeatable group rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'fields'      => array(
+								array(
+									'id'      => 'label',
+									'type'    => 'text',
+									'label'   => __( 'Link label', 'lerm-admin-config-demo' ),
+									'default' => __( 'Read more', 'lerm-admin-config-demo' ),
+								),
+								array(
+									'id'      => 'url',
+									'type'    => 'url',
+									'label'   => __( 'Link URL', 'lerm-admin-config-demo' ),
+									'default' => 'https://example.test/read-more',
+								),
+							),
+							'default'     => array(
+								array(
+									'label' => __( 'Read more', 'lerm-admin-config-demo' ),
+									'url'   => 'https://example.test/read-more',
+								),
+							),
+						),
+						array(
 							'id'          => 'entry_icon',
 							'type'        => 'icon',
 							'label'       => __( 'Entry icon', 'lerm-admin-config-demo' ),

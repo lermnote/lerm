@@ -88,6 +88,11 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertFalse( $data['fields']['site_title']['readOnly'] );
 		$this->assertTrue( $data['fields']['site_title']['supported'] );
 		$this->assertSame( 'campaigns', $data['fields']['campaign']['source'] );
+		$this->assertFalse( $data['fields']['badge']['readOnly'] );
+		$this->assertSame( 'badge.label', $data['fields']['badge']['fields'][0]['path'] );
+		$this->assertSame( 'text', $data['fields']['badge']['fields'][0]['control'] );
+		$this->assertFalse( $data['fields']['card_spacing']['readOnly'] );
+		$this->assertSame( array( 'px', 'rem' ), $data['fields']['card_spacing']['units'] );
 	}
 
 	public function testCanonicalSchemaIndexListsAccessibleSummaries(): void {
@@ -189,6 +194,16 @@ final class RestEndpointsTest extends TestCase {
 				'site_title'    => 'Updated title',
 				'items_per_row' => 4,
 				'campaign'      => '',
+				'badge'         => array(
+					'label' => '',
+				),
+				'card_spacing'  => array(
+					'unit'   => 'px',
+					'top'    => '8',
+					'right'  => '',
+					'bottom' => '',
+					'left'   => '',
+				),
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
 		);
@@ -491,6 +506,16 @@ final class RestEndpointsTest extends TestCase {
 				'site_title'    => 'Default title',
 				'items_per_row' => 4,
 				'campaign'      => '',
+				'badge'         => array(
+					'label' => 'Featured',
+				),
+				'card_spacing'  => array(
+					'unit'   => 'px',
+					'top'    => '8',
+					'right'  => '',
+					'bottom' => '',
+					'left'   => '',
+				),
 			),
 			$response->get_data()['data']['values']
 		);
@@ -499,6 +524,16 @@ final class RestEndpointsTest extends TestCase {
 				'site_title'    => 'Default title',
 				'items_per_row' => 4,
 				'campaign'      => '',
+				'badge'         => array(
+					'label' => 'Featured',
+				),
+				'card_spacing'  => array(
+					'unit'   => 'px',
+					'top'    => '8',
+					'right'  => '',
+					'bottom' => '',
+					'left'   => '',
+				),
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
 		);
@@ -669,6 +704,29 @@ final class RestEndpointsTest extends TestCase {
 								'type'    => 'ajax_select',
 								'source'  => 'campaigns',
 								'default' => '',
+							),
+							array(
+								'id'      => 'badge',
+								'type'    => 'fieldset',
+								'default' => array(
+									'label' => 'Featured',
+								),
+								'fields'  => array(
+									array(
+										'id'      => 'label',
+										'type'    => 'text',
+										'default' => 'Featured',
+									),
+								),
+							),
+							array(
+								'id'      => 'card_spacing',
+								'type'    => 'spacing',
+								'units'   => array( 'px', 'rem' ),
+								'default' => array(
+									'top'  => '8',
+									'unit' => 'px',
+								),
 							),
 						),
 					),

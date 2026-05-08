@@ -49,11 +49,14 @@ function testErrorHelpers() {
 			fieldErrors: {
 				title: 'Required.',
 			},
+			errors: {
+				'group.title': [ 'Nested required.' ],
+			},
 			message: 'Validation failed.',
 		},
 	};
 
-	assert.deepEqual(fieldErrorsFromResponse(response), { title: 'Required.' });
+	assert.deepEqual(fieldErrorsFromResponse(response), { 'group.title': [ 'Nested required.' ] });
 	assert.equal(messageFromResponse(response), 'Validation failed.');
 }
 
@@ -156,6 +159,20 @@ function testSchemaStateHelpers() {
 					control: 'gallery',
 					id: 'entry_gallery',
 				},
+				entry_group: {
+					control: 'group',
+					fields: [
+						{
+							control: 'media',
+							id: 'image',
+						},
+						{
+							control: 'text',
+							id: 'label',
+						},
+					],
+					id: 'entry_group',
+				},
 			},
 		},
 		{
@@ -168,6 +185,15 @@ function testSchemaStateHelpers() {
 				thumbnail: 'https://example.test/one-150x150.png',
 				url: 'https://example.test/one.png',
 			},
+			entry_group: [
+				{
+					image: {
+						id: 14,
+						url: 'https://example.test/group.png',
+					},
+					label: 'Group image',
+				},
+			],
 			entry_upload: 'https://example.test/upload.png',
 		}
 	);
@@ -199,6 +225,14 @@ function testSchemaStateHelpers() {
 			entry_media: {
 				id: 11,
 			},
+			entry_group: [
+				{
+					image: {
+						id: 14,
+					},
+					label: 'Group image',
+				},
+			],
 			entry_upload: 'https://example.test/upload.png',
 		},
 	});
@@ -223,10 +257,14 @@ function testDefaultControlRegistry() {
 	assert(types.includes('button_set'));
 	assert(types.includes('color'));
 	assert(types.includes('date'));
+	assert(types.includes('dimensions'));
+	assert(types.includes('fieldset'));
 	assert(types.includes('gallery'));
+	assert(types.includes('group'));
 	assert(types.includes('media'));
 	assert(types.includes('slider'));
 	assert(types.includes('spinner'));
+	assert(types.includes('spacing'));
 	assert(types.includes('upload'));
 
 	const rendered = registry.get('text')({
@@ -372,9 +410,6 @@ function testBlockPanelFieldStatusContract() {
 		'border',
 		'code_editor',
 		'content',
-		'dimensions',
-		'fieldset',
-		'group',
 		'heading',
 		'icon',
 		'image_select',
@@ -382,7 +417,6 @@ function testBlockPanelFieldStatusContract() {
 		'notice',
 		'palette',
 		'sorter',
-		'spacing',
 		'subheading',
 		'tabbed',
 		'typography',

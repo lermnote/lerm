@@ -6,6 +6,10 @@ This matrix defines the Phase 3 block-panel contract for AdminConfig field
 types. The block editor is not the limiting factor; the status describes how far
 the AdminConfig block-panel runtime has migrated each field family.
 
+Metabox and post-meta schema fields use custom Panel UI as the default block
+editor surface. `InnerBlocks` remains reserved for future content-structure
+features where values belong in block content rather than AdminConfig storage.
+
 ## Status Definitions
 
 - `editable`: rendered in the block panel, updates client state, participates in
@@ -39,6 +43,10 @@ the AdminConfig block-panel runtime has migrated each field family.
 | `upload` | URL-backed media-library selection. |
 | `media` | Single attachment selection saved through REST by attachment ID. |
 | `gallery` | Ordered attachment ID list with media-library selection. |
+| `fieldset` | Nested object editing with child controls and dotted validation paths. |
+| `group` | Repeatable object list editing with child controls. |
+| `dimensions` | Width/height numeric object editing with unit selection. |
+| `spacing` | Box-side numeric object editing with unit selection. |
 
 ## Read-Only
 
@@ -46,8 +54,8 @@ the AdminConfig block-panel runtime has migrated each field family.
 | --- | --- |
 | `heading`, `subheading`, `content`, `notice` | Presentation-only fields; no persisted value should enter the save payload. |
 | `image_select`, `palette`, `icon` | Needs richer visual picker UI before editing. |
-| `fieldset`, `group`, `typography` | Needs nested value-path updates and nested validation-error replay. |
-| `background`, `border`, `dimensions`, `link_color`, `spacing` | Needs composite design-control editing and nested value-path updates. |
+| `typography` | Needs full typography-specific UI before editing. |
+| `background`, `border`, `link_color` | Needs composite design-control editing beyond numeric box values. |
 | `accordion`, `tabbed`, `sorter` | Needs structured collection state and ordering semantics. |
 | `code_editor`, `wp_editor` | Needs editor-specific component integration and sanitization-aware UX. |
 | `ajax_select` | Needs REST data-source search, pagination, and async selection UX in the block panel. |

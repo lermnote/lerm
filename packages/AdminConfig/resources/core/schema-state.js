@@ -1,7 +1,7 @@
 // @ts-check
 
 const { fieldErrorsFromResponse, messageFromResponse } = require('./errors');
-const { asRecord } = require('./records');
+const { asRecord, asRecordArray } = require('./records');
 
 /**
  * @typedef {{
@@ -170,11 +170,52 @@ const fieldControlType = (field) => {
 
 /**
  * @param {Record<string, unknown>} field
+ * @returns {Array<Record<string, unknown>>}
+ */
+const nestedFields = (field) => asRecordArray(field.fields);
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {Record<string, unknown>} value
+ * @returns {Record<string, unknown>}
+ */
+const serializeNestedRecord = (field, value) => {
+	const fields = nestedFields(field);
+
+	if (!fields.length) {
+		return value;
+	}
+
+	const payload = { ...value };
+
+	for (const child of fields) {
+		const childId = String(child.id || '');
+
+		if (!childId || !Object.prototype.hasOwnProperty.call(value, childId)) {
+			continue;
+		}
+
+		payload[childId] = serializeFieldValue(child, value[childId]);
+	}
+
+	return payload;
+};
+
+/**
+ * @param {Record<string, unknown>} field
  * @param {unknown} value
  * @returns {unknown}
  */
 const serializeFieldValue = (field, value) => {
 	switch (fieldControlType(field)) {
+		case 'fieldset':
+			return serializeNestedRecord(field, asRecord(value));
+
+		case 'group':
+			return Array.isArray(value)
+				? value.map((item) => serializeNestedRecord(field, asRecord(item)))
+				: [];
+
 		case 'media':
 			return { id: mediaAttachmentId(value) };
 

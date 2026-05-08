@@ -22,11 +22,12 @@ const normalizeErrorData = (responseData) => {
  */
 const fieldErrorsFromResponse = (responseData) => {
 	const data = normalizeErrorData(responseData);
-	const errors = data.fieldErrors || data.errors || {};
+	const errors = data.errors && typeof data.errors === 'object' ? data.errors : {};
+	const fieldErrors = data.fieldErrors && typeof data.fieldErrors === 'object' ? data.fieldErrors : {};
 
-	return errors && typeof errors === 'object'
-		? /** @type {Record<string, string|string[]>} */ (errors)
-		: {};
+	return /** @type {Record<string, string|string[]>} */ (
+		Object.keys(errors).length ? errors : fieldErrors
+	);
 };
 
 /**

@@ -33,9 +33,6 @@ final class SchemaSerializer {
 		'border',
 		'code_editor',
 		'content',
-		'dimensions',
-		'fieldset',
-		'group',
 		'heading',
 		'icon',
 		'image_select',
@@ -43,7 +40,6 @@ final class SchemaSerializer {
 		'notice',
 		'palette',
 		'sorter',
-		'spacing',
 		'subheading',
 		'tabbed',
 		'typography',
@@ -65,6 +61,29 @@ final class SchemaSerializer {
 		'rows',
 		'source',
 		'step',
+		'unit',
+	);
+
+	/**
+	 * @var array<int, string>
+	 */
+	private const FIELD_BOOLEAN_KEYS = array(
+		'all',
+		'bottom',
+		'height',
+		'left',
+		'right',
+		'show_units',
+		'top',
+		'width',
+	);
+
+	/**
+	 * @var array<int, string>
+	 */
+	private const FIELD_ARRAY_KEYS = array(
+		'fields',
+		'units',
 	);
 
 	/**
@@ -197,44 +216,104 @@ final class SchemaSerializer {
 		$fields    = array();
 
 		foreach ( $schema->field_metadata() as $field_id => $metadata ) {
-			$field_id = (string) $field_id;
-			$type     = sanitize_key( (string) ( $metadata['type'] ?? 'text' ) );
-			$client   = self::without_server_only_keys( isset( $metadata['client'] ) && is_array( $metadata['client'] ) ? $metadata['client'] : array() );
-			$control  = sanitize_key( (string) ( $client['control'] ?? $type ) );
-
-			if ( '' === $control ) {
-				$control = $type;
-			}
-
-			$field = array(
-				'id'          => $field_id,
-				'path'        => isset( $metadata['path'] ) && is_scalar( $metadata['path'] ) ? (string) $metadata['path'] : $field_id,
-				'type'        => '' !== $type ? $type : 'text',
-				'control'     => $control,
-				'label'       => isset( $metadata['label'] ) && is_scalar( $metadata['label'] ) ? (string) $metadata['label'] : '',
-				'description' => isset( $metadata['description'] ) && is_scalar( $metadata['description'] ) ? (string) $metadata['description'] : '',
-				'default'     => $metadata['default'] ?? null,
-				'section'     => $locations[ $field_id ]['section'] ?? '',
-				'group'       => $locations[ $field_id ]['group'] ?? '',
-				'choices'     => isset( $metadata['choices'] ) && is_array( $metadata['choices'] ) ? self::without_server_only_keys( $metadata['choices'] ) : array(),
-				'dependency'  => isset( $metadata['dependency'] ) && is_array( $metadata['dependency'] ) ? self::without_server_only_keys( $metadata['dependency'] ) : null,
-				'multiple'    => ! empty( $metadata['multiple'] ),
-				'readOnly'    => self::field_is_read_only( $control, $client ),
-				'supported'   => '' !== $control,
-				'ui'          => isset( $metadata['ui'] ) && is_array( $metadata['ui'] ) ? self::without_server_only_keys( $metadata['ui'] ) : array(),
-				'client'      => $client,
+			$field_id            = (string) $field_id;
+			$fields[ $field_id ] = self::field_payload(
+				$field_id,
+				$metadata,
+				$locations[ $field_id ] ?? array(
+					'section' => '',
+					'group'   => '',
+				)
 			);
-
-			foreach ( self::FIELD_SCALAR_KEYS as $key ) {
-				if ( isset( $metadata[ $key ] ) && is_scalar( $metadata[ $key ] ) ) {
-					$field[ $key ] = $metadata[ $key ];
-				}
-			}
-
-			$fields[ $field_id ] = $field;
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * @param array<string, mixed> $metadata
+	 * @param array{section: string, group: string} $location
+	 * @return array<string, mixed>
+	 */
+	private static function field_payload( string $field_id, array $metadata, array $location ): array {
+		$type    = sanitize_key( (string) ( $metadata['type'] ?? 'text' ) );
+		$client  = self::without_server_only_keys( isset( $metadata['client'] ) && is_array( $metadata['client'] ) ? $metadata['client'] : array() );
+		$control = sanitize_key( (string) ( $client['control'] ?? $type ) );
+
+		if ( '' === $control ) {
+			$control = $type;
+		}
+
+		$field = array(
+			'id'          => $field_id,
+			'path'        => isset( $metadata['path'] ) && is_scalar( $metadata['path'] ) ? (string) $metadata['path'] : $field_id,
+			'type'        => '' !== $type ? $type : 'text',
+			'control'     => $control,
+			'label'       => isset( $metadata['label'] ) && is_scalar( $metadata['label'] ) ? (string) $metadata['label'] : '',
+			'description' => isset( $metadata['description'] ) && is_scalar( $metadata['description'] ) ? (string) $metadata['description'] : '',
+			'default'     => $metadata['default'] ?? null,
+			'section'     => $location['section'],
+			'group'       => $location['group'],
+			'choices'     => isset( $metadata['choices'] ) && is_array( $metadata['choices'] ) ? self::without_server_only_keys( $metadata['choices'] ) : array(),
+			'dependency'  => isset( $metadata['dependency'] ) && is_array( $metadata['dependency'] ) ? self::without_server_only_keys( $metadata['dependency'] ) : null,
+			'multiple'    => ! empty( $metadata['multiple'] ),
+			'readOnly'    => self::field_is_read_only( $control, $client ),
+			'supported'   => '' !== $control,
+			'ui'          => isset( $metadata['ui'] ) && is_array( $metadata['ui'] ) ? self::without_server_only_keys( $metadata['ui'] ) : array(),
+			'client'      => $client,
+		);
+
+		foreach ( self::FIELD_SCALAR_KEYS as $key ) {
+			if ( isset( $metadata[ $key ] ) && is_scalar( $metadata[ $key ] ) ) {
+				$field[ $key ] = $metadata[ $key ];
+			}
+		}
+
+		foreach ( self::FIELD_BOOLEAN_KEYS as $key ) {
+			if ( array_key_exists( $key, $metadata ) ) {
+				$field[ $key ] = (bool) $metadata[ $key ];
+			}
+		}
+
+		foreach ( self::FIELD_ARRAY_KEYS as $key ) {
+			if ( ! isset( $metadata[ $key ] ) || ! is_array( $metadata[ $key ] ) ) {
+				continue;
+			}
+
+			if ( 'fields' === $key ) {
+				$field[ $key ] = self::nested_fields( $metadata[ $key ] );
+				continue;
+			}
+
+			$field[ $key ] = self::without_server_only_keys( $metadata[ $key ] );
+		}
+
+		return $field;
+	}
+
+	/**
+	 * @param array<int, array<string, mixed>> $fields
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function nested_fields( array $fields ): array {
+		$nested = array();
+
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) || empty( $field['id'] ) || ! is_scalar( $field['id'] ) ) {
+				continue;
+			}
+
+			$nested[] = self::field_payload(
+				(string) $field['id'],
+				$field,
+				array(
+					'section' => '',
+					'group'   => '',
+				)
+			);
+		}
+
+		return $nested;
 	}
 
 	/**
