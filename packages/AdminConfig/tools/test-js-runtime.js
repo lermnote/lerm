@@ -159,6 +159,10 @@ function testSchemaStateHelpers() {
 					control: 'gallery',
 					id: 'entry_gallery',
 				},
+				entry_background: {
+					control: 'background',
+					id: 'entry_background',
+				},
 				entry_group: {
 					control: 'group',
 					fields: [
@@ -184,6 +188,14 @@ function testSchemaStateHelpers() {
 				id: 11,
 				thumbnail: 'https://example.test/one-150x150.png',
 				url: 'https://example.test/one.png',
+			},
+			entry_background: {
+				'background-color': '#2271b1',
+				'background-image': {
+					id: 15,
+					url: 'https://example.test/background.png',
+				},
+				'background-position': 'center center',
 			},
 			entry_group: [
 				{
@@ -225,6 +237,13 @@ function testSchemaStateHelpers() {
 			entry_media: {
 				id: 11,
 			},
+			entry_background: {
+				'background-color': '#2271b1',
+				'background-image': {
+					id: 15,
+				},
+				'background-position': 'center center',
+			},
 			entry_group: [
 				{
 					image: {
@@ -247,6 +266,7 @@ function testDefaultControlRegistry() {
 	const registry = createDefaultControlRegistry();
 	const types = registry.types();
 
+	assert(types.includes('background'));
 	assert(types.includes('text'));
 	assert(types.includes('textarea'));
 	assert(types.includes('border'));
@@ -408,7 +428,6 @@ function testBlockPanelFieldStatusContract() {
 	for (const type of [
 		'accordion',
 		'ajax_select',
-		'background',
 		'backup_tools',
 		'code_editor',
 		'content',

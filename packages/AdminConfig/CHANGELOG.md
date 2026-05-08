@@ -56,6 +56,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   composite color/style editing and REST persistence coverage.
 - Block editor panel typography control for family, weight, style, size, unit,
   line height, letter spacing, alignment, and color values.
+- Block editor panel background control for color, gradient, image, CSS choice
+  values, REST serialization, and browser persistence coverage.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -98,6 +100,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   by the block editor panel.
 - Block editor color/date/range controls now avoid duplicate input/change state
   updates.
+- The client schema payload now exposes background flags and image picker labels
+  used by the block editor panel.
 - Block editor number controls now preserve an explicitly cleared empty value
   instead of redisplaying the field default before save.
 - Block editor metabox schemas now skip classic metabox registration on

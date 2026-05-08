@@ -23,7 +23,6 @@ const registeredPanelNames = new Set();
 const READ_ONLY_CONTROL_TYPES = new Set([
 	'accordion',
 	'ajax_select',
-	'background',
 	'backup_tools',
 	'code_editor',
 	'content',

@@ -1156,6 +1156,72 @@ const TEXT_ALIGN_OPTIONS = [
 	{ label: 'Justify', value: 'justify' },
 ];
 
+const BACKGROUND_GRADIENT_DIRECTION_OPTIONS = [
+	{ label: 'Default', value: '' },
+	{ label: 'Top to Bottom', value: 'to bottom' },
+	{ label: 'Left to Right', value: 'to right' },
+	{ label: 'Top Left to Bottom Right', value: '135deg' },
+	{ label: 'Top Right to Bottom Left', value: '-135deg' },
+];
+
+const BACKGROUND_POSITION_OPTIONS = [
+	{ label: 'Default', value: '' },
+	{ label: 'Left Top', value: 'left top' },
+	{ label: 'Left Center', value: 'left center' },
+	{ label: 'Left Bottom', value: 'left bottom' },
+	{ label: 'Center Top', value: 'center top' },
+	{ label: 'Center Center', value: 'center center' },
+	{ label: 'Center Bottom', value: 'center bottom' },
+	{ label: 'Right Top', value: 'right top' },
+	{ label: 'Right Center', value: 'right center' },
+	{ label: 'Right Bottom', value: 'right bottom' },
+];
+
+const BACKGROUND_REPEAT_OPTIONS = [
+	{ label: 'Default', value: '' },
+	{ label: 'Repeat', value: 'repeat' },
+	{ label: 'No Repeat', value: 'no-repeat' },
+	{ label: 'Repeat Horizontally', value: 'repeat-x' },
+	{ label: 'Repeat Vertically', value: 'repeat-y' },
+];
+
+const BACKGROUND_ATTACHMENT_OPTIONS = [
+	{ label: 'Default', value: '' },
+	{ label: 'Scroll', value: 'scroll' },
+	{ label: 'Fixed', value: 'fixed' },
+];
+
+const BACKGROUND_SIZE_OPTIONS = [
+	{ label: 'Default', value: '' },
+	{ label: 'Cover', value: 'cover' },
+	{ label: 'Contain', value: 'contain' },
+	{ label: 'Auto', value: 'auto' },
+];
+
+const BACKGROUND_ORIGIN_OPTIONS = [
+	{ label: 'Default', value: '' },
+	{ label: 'Padding Box', value: 'padding-box' },
+	{ label: 'Border Box', value: 'border-box' },
+	{ label: 'Content Box', value: 'content-box' },
+];
+
+const BACKGROUND_CLIP_OPTIONS = [
+	{ label: 'Default', value: '' },
+	{ label: 'Border Box', value: 'border-box' },
+	{ label: 'Padding Box', value: 'padding-box' },
+	{ label: 'Content Box', value: 'content-box' },
+];
+
+const BACKGROUND_BLEND_MODE_OPTIONS = [
+	{ label: 'Default', value: '' },
+	{ label: 'Normal', value: 'normal' },
+	{ label: 'Multiply', value: 'multiply' },
+	{ label: 'Screen', value: 'screen' },
+	{ label: 'Overlay', value: 'overlay' },
+	{ label: 'Darken', value: 'darken' },
+	{ label: 'Lighten', value: 'lighten' },
+];
+
 /**
  * @param {unknown} value
  * @param {string} fallback
@@ -1222,6 +1288,14 @@ const choicesFromOptions = (options) => options.reduce((choices, option) => ({
  * @returns {unknown}
  */
 const typographyDefault = (field, key, fallback = '') => compositeValue(field, {}, key, fallback);
+
+/**
+ * @param {Record<string, unknown>} field
+ * @param {string} key
+ * @param {unknown} fallback
+ * @returns {unknown}
+ */
+const backgroundDefault = (field, key, fallback = '') => compositeValue(field, {}, key, fallback);
 
 /**
  * @param {Record<string, unknown>} field
@@ -1328,6 +1402,119 @@ const typographyFields = (field) => {
 			label: 'Color',
 			type: 'color',
 		});
+	}
+
+	return fields;
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {Array<Record<string, unknown>>}
+ */
+const backgroundFields = (field) => {
+	const fields = [];
+	const selectFields = [
+		{
+			fallback: true,
+			id: 'background-position',
+			key: 'background_position',
+			label: 'Position',
+			options: BACKGROUND_POSITION_OPTIONS,
+		},
+		{
+			fallback: true,
+			id: 'background-repeat',
+			key: 'background_repeat',
+			label: 'Repeat',
+			options: BACKGROUND_REPEAT_OPTIONS,
+		},
+		{
+			fallback: true,
+			id: 'background-attachment',
+			key: 'background_attachment',
+			label: 'Attachment',
+			options: BACKGROUND_ATTACHMENT_OPTIONS,
+		},
+		{
+			fallback: true,
+			id: 'background-size',
+			key: 'background_size',
+			label: 'Size',
+			options: BACKGROUND_SIZE_OPTIONS,
+		},
+		{
+			fallback: false,
+			id: 'background-origin',
+			key: 'background_origin',
+			label: 'Origin',
+			options: BACKGROUND_ORIGIN_OPTIONS,
+		},
+		{
+			fallback: false,
+			id: 'background-clip',
+			key: 'background_clip',
+			label: 'Clip',
+			options: BACKGROUND_CLIP_OPTIONS,
+		},
+		{
+			fallback: false,
+			id: 'background-blend-mode',
+			key: 'background_blend_mode',
+			label: 'Blend Mode',
+			options: BACKGROUND_BLEND_MODE_OPTIONS,
+		},
+	];
+
+	if (fieldFlag(field, 'background_color', true)) {
+		fields.push({
+			default: backgroundDefault(field, 'background-color'),
+			id: 'background-color',
+			label: 'Color',
+			type: 'color',
+		});
+	}
+
+	if (fieldFlag(field, 'background_gradient', false) && fieldFlag(field, 'background_gradient_color', true)) {
+		fields.push({
+			default: backgroundDefault(field, 'background-gradient-color'),
+			id: 'background-gradient-color',
+			label: 'Gradient To',
+			type: 'color',
+		});
+	}
+
+	if (fieldFlag(field, 'background_gradient', false) && fieldFlag(field, 'background_gradient_direction', true)) {
+		fields.push({
+			choices: choicesFromOptions(BACKGROUND_GRADIENT_DIRECTION_OPTIONS),
+			default: backgroundDefault(field, 'background-gradient-direction'),
+			id: 'background-gradient-direction',
+			label: 'Gradient Direction',
+			type: 'select',
+		});
+	}
+
+	if (fieldFlag(field, 'background_image', true)) {
+		fields.push({
+			button_text: stringValue(field.background_image_button_text || 'Choose image'),
+			default: backgroundDefault(field, 'background-image', {}),
+			id: 'background-image',
+			label: 'Image',
+			library: 'image',
+			remove_text: 'Remove image',
+			type: 'media',
+		});
+	}
+
+	for (const item of selectFields) {
+		if (fieldFlag(field, item.key, item.fallback)) {
+			fields.push({
+				choices: choicesFromOptions(item.options),
+				default: backgroundDefault(field, item.id),
+				id: item.id,
+				label: item.label,
+				type: 'select',
+			});
+		}
 	}
 
 	return fields;
@@ -1645,6 +1832,40 @@ const TypographyControl = (props) => {
 		'fieldset',
 		{
 			className: 'lerm-admin-config-block-panel__fieldset lerm-admin-config-block-panel__typography',
+		},
+		[
+			createElement('legend', { key: 'legend' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			...fields.map((child) => renderNestedField(
+				normalized,
+				child,
+				[ ...basePath, stringValue(child.id) ],
+				childValue(child, current)
+			)),
+		].filter(Boolean)
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const BackgroundControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement, field, value } = normalized;
+	const fieldId = stringValue(field.id);
+	const fields = backgroundFields(field);
+	const current = asRecord(value);
+	const label = stringValue(field.label || fieldId);
+	const description = stringValue(field.description);
+	const basePath = compositeBasePath(normalized);
+
+	return createElement(
+		'fieldset',
+		{
+			className: 'lerm-admin-config-block-panel__fieldset lerm-admin-config-block-panel__background',
 		},
 		[
 			createElement('legend', { key: 'legend' }, label),
@@ -2066,6 +2287,7 @@ const createControlRegistry = (initialControls = {}) => {
  * @returns {ReturnType<typeof createControlRegistry>}
  */
 const createDefaultControlRegistry = () => createControlRegistry({
+	background: BackgroundControl,
 	button_set: ButtonSetControl,
 	border: BorderControl,
 	checkbox: CheckboxControl,
