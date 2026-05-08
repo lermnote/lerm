@@ -41,12 +41,18 @@ final class SchemaCompiler {
 	 */
 	private const BOOLEAN_FIELD_PROPS = array(
 		'all',
+		'active',
 		'bottom',
+		'color',
+		'focus',
 		'height',
+		'hover',
 		'left',
 		'right',
 		'show_units',
+		'style',
 		'top',
+		'visited',
 		'width',
 	);
 

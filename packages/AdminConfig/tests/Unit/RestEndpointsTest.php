@@ -93,6 +93,12 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertSame( 'text', $data['fields']['badge']['fields'][0]['control'] );
 		$this->assertFalse( $data['fields']['card_spacing']['readOnly'] );
 		$this->assertSame( array( 'px', 'rem' ), $data['fields']['card_spacing']['units'] );
+		$this->assertFalse( $data['fields']['card_border']['readOnly'] );
+		$this->assertFalse( $data['fields']['card_border']['left'] );
+		$this->assertTrue( $data['fields']['card_border']['style'] );
+		$this->assertFalse( $data['fields']['link_colors']['readOnly'] );
+		$this->assertTrue( $data['fields']['link_colors']['hover'] );
+		$this->assertFalse( $data['fields']['link_colors']['visited'] );
 	}
 
 	public function testCanonicalSchemaIndexListsAccessibleSummaries(): void {
@@ -203,6 +209,17 @@ final class RestEndpointsTest extends TestCase {
 					'right'  => '',
 					'bottom' => '',
 					'left'   => '',
+				),
+				'card_border'   => array(
+					'style'  => 'solid',
+					'color'  => '#2271b1',
+					'top'    => '1',
+					'right'  => '',
+					'bottom' => '',
+				),
+				'link_colors'   => array(
+					'color' => '#2271b1',
+					'hover' => '#135e96',
 				),
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
@@ -516,6 +533,17 @@ final class RestEndpointsTest extends TestCase {
 					'bottom' => '',
 					'left'   => '',
 				),
+				'card_border'   => array(
+					'style'  => 'solid',
+					'color'  => '#2271b1',
+					'top'    => '1',
+					'right'  => '',
+					'bottom' => '',
+				),
+				'link_colors'   => array(
+					'color' => '#2271b1',
+					'hover' => '#135e96',
+				),
 			),
 			$response->get_data()['data']['values']
 		);
@@ -533,6 +561,17 @@ final class RestEndpointsTest extends TestCase {
 					'right'  => '',
 					'bottom' => '',
 					'left'   => '',
+				),
+				'card_border'   => array(
+					'style'  => 'solid',
+					'color'  => '#2271b1',
+					'top'    => '1',
+					'right'  => '',
+					'bottom' => '',
+				),
+				'link_colors'   => array(
+					'color' => '#2271b1',
+					'hover' => '#135e96',
 				),
 			),
 			$GLOBALS['lerm_admin_config_options']['rest_test_settings']
@@ -726,6 +765,27 @@ final class RestEndpointsTest extends TestCase {
 								'default' => array(
 									'top'  => '8',
 									'unit' => 'px',
+								),
+							),
+							array(
+								'id'      => 'card_border',
+								'type'    => 'border',
+								'left'    => false,
+								'style'   => true,
+								'default' => array(
+									'top'   => '1',
+									'style' => 'solid',
+									'color' => '#2271b1',
+								),
+							),
+							array(
+								'id'      => 'link_colors',
+								'type'    => 'link_color',
+								'hover'   => true,
+								'visited' => false,
+								'default' => array(
+									'color' => '#2271b1',
+									'hover' => '#135e96',
 								),
 							),
 						),

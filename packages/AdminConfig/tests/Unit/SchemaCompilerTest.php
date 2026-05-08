@@ -177,6 +177,19 @@ final class SchemaCompilerTest extends TestCase {
 								'top'   => true,
 								'left'  => false,
 							),
+							array(
+								'id'    => 'border',
+								'type'  => 'border',
+								'left'  => false,
+								'style' => true,
+								'color' => false,
+							),
+							array(
+								'id'      => 'link_colors',
+								'type'    => 'link_color',
+								'active'  => true,
+								'visited' => false,
+							),
 						),
 					),
 				),
@@ -191,6 +204,11 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertSame( array( 'px', 'rem' ), $fields['spacing']['units'] );
 		$this->assertTrue( $fields['spacing']['top'] );
 		$this->assertFalse( $fields['spacing']['left'] );
+		$this->assertFalse( $fields['border']['left'] );
+		$this->assertTrue( $fields['border']['style'] );
+		$this->assertFalse( $fields['border']['color'] );
+		$this->assertTrue( $fields['link_colors']['active'] );
+		$this->assertFalse( $fields['link_colors']['visited'] );
 	}
 
 	public function testDependencyDefaultsEmptyOperatorToEquality(): void {

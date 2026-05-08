@@ -47,6 +47,8 @@ features where values belong in block content rather than AdminConfig storage.
 | `group` | Repeatable object list editing with child controls. |
 | `dimensions` | Width/height numeric object editing with unit selection. |
 | `spacing` | Box-side numeric object editing with unit selection. |
+| `border` | Box-side border width, style, and color object editing. |
+| `link_color` | Normal/hover link color object editing. |
 
 ## Read-Only
 
@@ -55,7 +57,7 @@ features where values belong in block content rather than AdminConfig storage.
 | `heading`, `subheading`, `content`, `notice` | Presentation-only fields; no persisted value should enter the save payload. |
 | `image_select`, `palette`, `icon` | Needs richer visual picker UI before editing. |
 | `typography` | Needs full typography-specific UI before editing. |
-| `background`, `border`, `link_color` | Needs composite design-control editing beyond numeric box values. |
+| `background` | Needs media-backed background image and background-specific choice controls. |
 | `accordion`, `tabbed`, `sorter` | Needs structured collection state and ordering semantics. |
 | `code_editor`, `wp_editor` | Needs editor-specific component integration and sanitization-aware UX. |
 | `ajax_select` | Needs REST data-source search, pagination, and async selection UX in the block panel. |

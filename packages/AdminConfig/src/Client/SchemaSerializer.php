@@ -30,13 +30,11 @@ final class SchemaSerializer {
 		'ajax_select',
 		'background',
 		'backup_tools',
-		'border',
 		'code_editor',
 		'content',
 		'heading',
 		'icon',
 		'image_select',
-		'link_color',
 		'notice',
 		'palette',
 		'sorter',
@@ -69,12 +67,18 @@ final class SchemaSerializer {
 	 */
 	private const FIELD_BOOLEAN_KEYS = array(
 		'all',
+		'active',
 		'bottom',
+		'color',
+		'focus',
 		'height',
+		'hover',
 		'left',
 		'right',
 		'show_units',
+		'style',
 		'top',
+		'visited',
 		'width',
 	);
 

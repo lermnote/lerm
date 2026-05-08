@@ -516,6 +516,30 @@ final class SchemaDemoPlugin {
 							),
 						),
 						array(
+							'id'          => 'entry_border',
+							'type'        => 'border',
+							'label'       => __( 'Entry card border', 'lerm-admin-config-demo' ),
+							'description' => __( 'A composite border object rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'default'     => array(
+								'top'    => '1',
+								'right'  => '1',
+								'bottom' => '1',
+								'left'   => '1',
+								'style'  => 'solid',
+								'color'  => '#2271b1',
+							),
+						),
+						array(
+							'id'          => 'entry_link_colors',
+							'type'        => 'link_color',
+							'label'       => __( 'Entry link colors', 'lerm-admin-config-demo' ),
+							'description' => __( 'Normal and hover link colors rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'default'     => array(
+								'color' => '#2271b1',
+								'hover' => '#135e96',
+							),
+						),
+						array(
 							'id'          => 'entry_links',
 							'type'        => 'group',
 							'label'       => __( 'Entry links', 'lerm-admin-config-demo' ),
