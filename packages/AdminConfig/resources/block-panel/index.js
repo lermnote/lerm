@@ -35,7 +35,6 @@ const READ_ONLY_CONTROL_TYPES = new Set([
 	'sorter',
 	'subheading',
 	'tabbed',
-	'typography',
 	'wp_editor',
 ]);
 

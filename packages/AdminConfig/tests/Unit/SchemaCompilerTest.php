@@ -190,6 +190,14 @@ final class SchemaCompilerTest extends TestCase {
 								'active'  => true,
 								'visited' => false,
 							),
+							array(
+								'id'             => 'typography',
+								'type'           => 'typography',
+								'style'          => true,
+								'letter_spacing' => true,
+								'align'          => true,
+								'units'          => array( 'px', 'rem' ),
+							),
 						),
 					),
 				),
@@ -209,6 +217,10 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertFalse( $fields['border']['color'] );
 		$this->assertTrue( $fields['link_colors']['active'] );
 		$this->assertFalse( $fields['link_colors']['visited'] );
+		$this->assertTrue( $fields['typography']['style'] );
+		$this->assertTrue( $fields['typography']['letter_spacing'] );
+		$this->assertTrue( $fields['typography']['align'] );
+		$this->assertSame( array( 'px', 'rem' ), $fields['typography']['units'] );
 	}
 
 	public function testDependencyDefaultsEmptyOperatorToEquality(): void {

@@ -30,9 +30,13 @@ final class SchemaCompiler {
 		'rows',
 		'source',
 		'data_source',
+		'family_placeholder',
 		'library',
+		'letter_spacing_placeholder',
+		'line_height_placeholder',
 		'button_text',
 		'remove_text',
+		'size_placeholder',
 		'unit',
 	);
 
@@ -42,17 +46,24 @@ final class SchemaCompiler {
 	private const BOOLEAN_FIELD_PROPS = array(
 		'all',
 		'active',
+		'align',
 		'bottom',
 		'color',
+		'family',
 		'focus',
 		'height',
 		'hover',
+		'letter_spacing',
+		'line_height',
 		'left',
 		'right',
 		'show_units',
+		'size',
 		'style',
 		'top',
+		'transform',
 		'visited',
+		'weight',
 		'width',
 	);
 
