@@ -88,6 +88,11 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertFalse( $data['fields']['site_title']['readOnly'] );
 		$this->assertTrue( $data['fields']['site_title']['supported'] );
 		$this->assertSame( 'campaigns', $data['fields']['campaign']['source'] );
+		$this->assertFalse( $data['fields']['campaign']['readOnly'] );
+		$this->assertSame( 2, $data['fields']['campaign']['min_search_length'] );
+		$this->assertSame( 4, $data['fields']['campaign']['per_page'] );
+		$this->assertSame( 'Search campaigns', $data['fields']['campaign']['search_label'] );
+		$this->assertTrue( $data['fields']['campaign']['allow_clear'] );
 		$this->assertFalse( $data['fields']['badge']['readOnly'] );
 		$this->assertSame( 'badge.label', $data['fields']['badge']['fields'][0]['path'] );
 		$this->assertSame( 'text', $data['fields']['badge']['fields'][0]['control'] );
@@ -836,10 +841,14 @@ final class RestEndpointsTest extends TestCase {
 								'max'     => 6,
 							),
 							array(
-								'id'      => 'campaign',
-								'type'    => 'ajax_select',
-								'source'  => 'campaigns',
-								'default' => '',
+								'id'                => 'campaign',
+								'type'              => 'ajax_select',
+								'source'            => 'campaigns',
+								'allow_clear'       => true,
+								'min_search_length' => 2,
+								'per_page'          => 4,
+								'search_label'      => 'Search campaigns',
+								'default'           => '',
 							),
 							array(
 								'id'      => 'badge',

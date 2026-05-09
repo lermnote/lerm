@@ -41,6 +41,18 @@ const isMetaboxSaveResponse = ( response, schemaId ) => {
 	);
 };
 
+const isMetaboxDataSourceResponse = ( response, schemaId = 'acme-demo-post-metabox' ) => {
+	const url = decodedUrl( response );
+
+	return (
+		response.request().method() === 'POST' &&
+		(
+			url.includes( `/wp-json/lerm-admin-config/v1/schemas/${ schemaId }/data-source` ) ||
+			url.includes( `rest_route=/lerm-admin-config/v1/schemas/${ schemaId }/data-source` )
+		)
+	);
+};
+
 const escapeRegExp = ( value ) => value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 
 const expandBlockPanel = async ( page, schemaId, title ) => {
@@ -121,6 +133,22 @@ const selectMediaAttachments = async ( page, trigger, titles ) => {
 	await expect( modal ).toBeHidden( { timeout: 20_000 } );
 };
 
+const selectAjaxOption = async ( page, field, search, value, label ) => {
+	const input = field.getByRole( 'searchbox', { name: /Search entry campaign/i } );
+	const responsePromise = page.waitForResponse(
+		( response ) => isMetaboxDataSourceResponse( response ),
+		{ timeout: 20_000 }
+	);
+
+	await input.fill( search );
+
+	const response = await responsePromise;
+
+	expect( response.ok() ).toBe( true );
+	await expect( field.locator( `button[data-value="${ value }"]` ) ).toContainText( label, { timeout: 20_000 } );
+	await field.locator( `button[data-value="${ value }"]` ).click();
+};
+
 test.skip(
 	process.env.LERM_ADMIN_CONFIG_BLOCK_EDITOR !== '1',
 	'Block editor smoke runs through npm run test:e2e:block-editor so the fixture can temporarily enable the editor.'
@@ -195,6 +223,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryBackground = panel.locator( '[data-field-id="entry_background"]' );
 	const entryPalette = panel.locator( '[data-field-id="entry_palette"]' );
 	const entryImageStyle = panel.locator( '[data-field-id="entry_image_style"]' );
+	const entryCampaign = panel.locator( '[data-field-id="entry_campaign"]' );
 	const entryLinks = panel.locator( '[data-field-id="entry_links"]' );
 	const entryIcon = panel.locator( '[data-field-id="entry_icon"]' );
 	const entryBadge = panel.locator( '[data-field-id="entry_badge"]' );
@@ -238,6 +267,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryPaletteWarm = entryPalette.locator( 'button[data-value="warm"]' );
 	const entryImageCover = entryImageStyle.locator( 'button[data-value="cover"]' );
 	const entryImageSplit = entryImageStyle.locator( 'button[data-value="split"]' );
+	const entryCampaignSearch = entryCampaign.getByRole( 'searchbox', { name: /Search entry campaign/i } );
 	const entryIconAside = entryIcon.locator( 'button[data-value="dashicons-format-aside"]' );
 	const entryIconAnnouncement = entryIcon.locator( 'button[data-value="dashicons-megaphone"]' );
 	const entryLinkLabel = entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first();
@@ -293,6 +323,8 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryPaletteWarm ).toBeVisible();
 	await expect( entryImageCover ).toBeVisible();
 	await expect( entryImageSplit ).toBeVisible();
+	await expect( entryCampaignSearch ).toBeVisible();
+	await expect( entryCampaign.locator( '[data-selected-value="spring-launch"]' ) ).toContainText( /Spring Launch|spring-launch/i );
 	await expect( entryIconAside ).toBeVisible();
 	await expect( entryIconAnnouncement ).toBeVisible();
 	await expect( entryLinkLabel ).toBeVisible();
@@ -342,6 +374,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const initialBackgroundBlendMode = await entryBackgroundBlendMode.inputValue();
 	const initialPalette = await entryPalette.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
 	const initialImageStyle = await entryImageStyle.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
+	const initialCampaign = await entryCampaign.locator( '[data-selected-value]' ).first().getAttribute( 'data-selected-value' );
 	const initialIcon = await entryIcon.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
 	const initialLinkLabel = await entryLinkLabel.inputValue();
 	const initialLinkUrl = await entryLinkUrl.inputValue();
@@ -389,6 +422,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const discardBackgroundBlendMode = initialBackgroundBlendMode === 'screen' ? 'overlay' : 'screen';
 	const discardPalette = initialPalette === 'warm' ? 'cool' : 'warm';
 	const discardImageStyle = initialImageStyle === 'split' ? 'cover' : 'split';
+	const discardCampaign = initialCampaign === 'studio-preview' ? 'design-sprint' : 'studio-preview';
+	const discardCampaignSearch = discardCampaign === 'studio-preview' ? 'studio' : 'design';
+	const discardCampaignLabel = discardCampaign === 'studio-preview' ? 'Studio Preview' : 'Design Sprint';
 	const discardIcon = initialIcon === 'dashicons-star-filled' ? 'dashicons-format-aside' : 'dashicons-star-filled';
 	const discardLinkLabel = initialLinkLabel === 'Discard Link' ? 'Discard Link Next' : 'Discard Link';
 	const discardLinkUrl = initialLinkUrl === 'https://example.test/discard' ? 'https://example.test/discard-next' : 'https://example.test/discard';
@@ -435,6 +471,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const savedBackgroundBlendMode = initialBackgroundBlendMode === 'multiply' ? 'normal' : 'multiply';
 	const savedPalette = initialPalette === 'mono' ? 'cool' : 'mono';
 	const savedImageStyle = initialImageStyle === 'poster' ? 'cover' : 'poster';
+	const savedCampaign = initialCampaign === 'pro-tools' ? 'community-notes' : 'pro-tools';
+	const savedCampaignSearch = savedCampaign === 'pro-tools' ? 'pro' : 'community';
+	const savedCampaignLabel = savedCampaign === 'pro-tools' ? 'Pro Tools' : 'Community Notes';
 	const savedIcon = initialIcon === 'dashicons-megaphone' ? 'dashicons-format-aside' : 'dashicons-megaphone';
 	const savedLinkLabel = initialLinkLabel === 'Continue reading' ? 'Read the update' : 'Continue reading';
 	const savedLinkUrl = initialLinkUrl === 'https://example.test/update' ? 'https://example.test/story' : 'https://example.test/update';
@@ -482,6 +521,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryBackgroundBlendMode.selectOption( discardBackgroundBlendMode );
 	await entryPalette.locator( `button[data-value="${ discardPalette }"]` ).click();
 	await entryImageStyle.locator( `button[data-value="${ discardImageStyle }"]` ).click();
+	await selectAjaxOption( page, entryCampaign, discardCampaignSearch, discardCampaign, discardCampaignLabel );
 	await entryIcon.locator( `button[data-value="${ discardIcon }"]` ).click();
 	await entryLinkLabel.fill( discardLinkLabel );
 	await entryLinkUrl.fill( discardLinkUrl );
@@ -540,6 +580,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryBackgroundBlendMode ).toHaveValue( initialBackgroundBlendMode );
 	await expect( entryPalette.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialPalette || '' );
 	await expect( entryImageStyle.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialImageStyle || '' );
+	await expect( entryCampaign.locator( '[data-selected-value]' ).first() ).toHaveAttribute( 'data-selected-value', initialCampaign || '' );
 	await expect( entryIcon.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialIcon || '' );
 	await expect( entryLinkLabel ).toHaveValue( initialLinkLabel );
 	await expect( entryLinkUrl ).toHaveValue( initialLinkUrl );
@@ -622,6 +663,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryBackgroundBlendMode.selectOption( savedBackgroundBlendMode );
 	await entryPalette.locator( `button[data-value="${ savedPalette }"]` ).click();
 	await entryImageStyle.locator( `button[data-value="${ savedImageStyle }"]` ).click();
+	await selectAjaxOption( page, entryCampaign, savedCampaignSearch, savedCampaign, savedCampaignLabel );
 	await entryIcon.locator( `button[data-value="${ savedIcon }"]` ).click();
 	await entryLinkLabel.fill( savedLinkLabel );
 	await entryLinkUrl.fill( savedLinkUrl );
@@ -694,6 +736,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryBackgroundBlendMode ).toHaveValue( savedBackgroundBlendMode );
 	await expect( entryPalette.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedPalette );
 	await expect( entryImageStyle.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedImageStyle );
+	await expect( entryCampaign.locator( '[data-selected-value]' ).first() ).toHaveAttribute( 'data-selected-value', savedCampaign );
 	await expect( entryIcon.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedIcon );
 	await expect( entryLinkLabel ).toHaveValue( savedLinkLabel );
 	await expect( entryLinkUrl ).toHaveValue( savedLinkUrl );
@@ -756,6 +799,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-blend-mode"] select' ) ).toHaveValue( savedBackgroundBlendMode );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_palette"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedPalette );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_image_style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedImageStyle );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_campaign"] [data-selected-value]' ).first() ).toHaveAttribute( 'data-selected-value', savedCampaign );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_icon"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedIcon );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link label$/i } ).first() ).toHaveValue( savedLinkLabel );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link URL$/i } ).first() ).toHaveValue( savedLinkUrl );

@@ -291,6 +291,7 @@ function testDefaultControlRegistry() {
 	const types = registry.types();
 
 	assert(types.includes('background'));
+	assert(types.includes('ajax_select'));
 	assert(types.includes('text'));
 	assert(types.includes('textarea'));
 	assert(types.includes('border'));
@@ -484,6 +485,20 @@ function testDefaultControlRegistry() {
 		onChange: (value) => changes.push(value),
 		value: 'dashicons-format-aside',
 	});
+	const renderedAjaxSelect = registry.get('ajax_select')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		dataSourceRequest: () => Promise.resolve({ success: true, data: { items: [] } }),
+		field: {
+			id: 'campaign',
+			label: 'Campaign',
+			source: 'campaign_library',
+			type: 'ajax_select',
+		},
+		inputId: 'demo-campaign',
+		onChange: (value) => changes.push(value),
+		value: 'spring-launch',
+	});
 
 	renderedSelect.props.onChange({ target: { value: 'feature' } });
 	renderedColor.children[0][1].props.onInput({ target: { value: '#13579b' } });
@@ -506,6 +521,7 @@ function testDefaultControlRegistry() {
 	assert.equal(renderedColor.children[0][1].props.onChange, undefined);
 	assert.equal(renderedDate.children[0][1].props.onChange, undefined);
 	assert.equal(renderedRange.children[0][1].props.onChange, undefined);
+	assert.equal(typeof renderedAjaxSelect.type, 'function');
 }
 
 function testBlockPanelFieldStatusContract() {
@@ -514,7 +530,6 @@ function testBlockPanelFieldStatusContract() {
 
 	for (const type of [
 		'accordion',
-		'ajax_select',
 		'backup_tools',
 		'code_editor',
 		'content',
