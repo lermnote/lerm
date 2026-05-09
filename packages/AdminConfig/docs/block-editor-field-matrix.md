@@ -54,6 +54,7 @@ features where values belong in block content rather than AdminConfig storage.
 | `palette` | Swatch-backed palette choice editing. |
 | `image_select` | Image-backed single choice editing. |
 | `icon` | Dashicons choice editing. |
+| `ajax_select` | REST data-source search and async single/multiple value editing. |
 
 ## Read-Only
 
@@ -62,7 +63,6 @@ features where values belong in block content rather than AdminConfig storage.
 | `heading`, `subheading`, `content`, `notice` | Presentation-only fields; no persisted value should enter the save payload. |
 | `accordion`, `tabbed`, `sorter` | Needs structured collection state and ordering semantics. |
 | `code_editor`, `wp_editor` | Needs editor-specific component integration and sanitization-aware UX. |
-| `ajax_select` | Needs REST data-source search, pagination, and async selection UX in the block panel. |
 | `backup_tools` | Options-page utility action; not suitable for block-panel editing. |
 
 ## Unsupported

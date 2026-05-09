@@ -22,7 +22,6 @@ const panelInstances = new Map();
 const registeredPanelNames = new Set();
 const READ_ONLY_CONTROL_TYPES = new Set([
 	'accordion',
-	'ajax_select',
 	'backup_tools',
 	'code_editor',
 	'content',
@@ -55,9 +54,33 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 		return queryString ? `${path}?${queryString}` : path;
 	};
 
+	/**
+	 * @param {Record<string, unknown>} params
+	 * @returns {Promise<{ success: boolean, data: Record<string, unknown> }>}
+	 */
+	const requestDataSource = (params = {}) => {
+		const body = new FormData();
+		const selected = Array.isArray(params.selected) ? params.selected : [];
+
+		body.set('field_id', String(params.fieldId || ''));
+		body.set('search', String(params.search || ''));
+		body.set('page', String(params.page || 1));
+		body.set('per_page', String(params.perPage || 20));
+
+		selected.map(String).filter(Boolean).forEach((value) => {
+			body.append('selected[]', value);
+		});
+
+		return rest.request(withContext(`schemas/${ schemaId }/data-source`), {
+			body,
+			method: 'POST',
+		});
+	};
+
 	return {
 		controls,
 		rest,
+		requestDataSource,
 		storeName: STORE_NAME,
 
 		getContext: () => ({ ...context }),
@@ -567,6 +590,7 @@ const createPanelComponent = (config, Panel, element) => {
 								components,
 								controls: runtime.controls,
 								createElement,
+								dataSourceRequest: runtime.requestDataSource,
 								error,
 								errors: state.errors || {},
 								field,
