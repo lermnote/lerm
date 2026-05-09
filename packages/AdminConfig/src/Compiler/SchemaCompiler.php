@@ -249,7 +249,9 @@ final class SchemaCompiler {
 			}
 		}
 
-		if ( array_key_exists( 'choices', $field ) ) {
+		if ( 'palette' === $type ) {
+			$metadata['choices'] = $this->compile_palette_choices( $field );
+		} elseif ( array_key_exists( 'choices', $field ) ) {
 			$metadata['choices'] = PageSchema::choices( $field );
 		}
 
@@ -264,6 +266,46 @@ final class SchemaCompiler {
 		}
 
 		return $metadata;
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @return array<string, array<int, string>>
+	 */
+	private function compile_palette_choices( array $field ): array {
+		$choices = $field['choices'] ?? array();
+
+		if ( is_callable( $choices ) ) {
+			$choices = call_user_func( $choices );
+		}
+
+		if ( ! is_array( $choices ) ) {
+			return array();
+		}
+
+		$compiled = array();
+
+		foreach ( $choices as $key => $colors ) {
+			if ( ! is_scalar( $key ) || ! is_array( $colors ) ) {
+				continue;
+			}
+
+			$swatches = array();
+
+			foreach ( $colors as $color ) {
+				$sanitized = sanitize_hex_color( PageSchema::scalar_value( $color ) );
+
+				if ( $sanitized ) {
+					$swatches[] = $sanitized;
+				}
+			}
+
+			if ( array() !== $swatches ) {
+				$compiled[ (string) $key ] = $swatches;
+			}
+		}
+
+		return $compiled;
 	}
 
 	/**

@@ -1027,6 +1027,87 @@ const ColorControl = (props) => {
  * @param {Record<string, unknown>} props
  * @returns {unknown}
  */
+const PaletteControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement } = normalized;
+	const options = paletteOptions(normalized.field);
+
+	return VisualChoiceControl(normalized, 'palette', options, (option) => [
+		createElement(
+			'span',
+			{
+				className: 'lerm-admin-config-block-panel__palette-swatches',
+				key: 'swatches',
+				style: {
+					display: 'inline-flex',
+					gap: '2px',
+				},
+			},
+			option.colors.map((color) => createElement('span', {
+				key: color,
+				style: {
+					backgroundColor: color,
+					border: '1px solid rgba(0,0,0,.2)',
+					borderRadius: '2px',
+					display: 'inline-block',
+					height: '16px',
+					width: '16px',
+				},
+			}))
+		),
+		createElement('span', { key: 'label' }, option.label),
+	]);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const ImageSelectControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement } = normalized;
+	const options = imageSelectOptions(normalized.field);
+
+	return VisualChoiceControl(normalized, 'image-select', options, (option) => [
+		option.url
+			? createElement('img', {
+				alt: option.label,
+				key: 'image',
+				src: option.url,
+				style: {
+					height: '32px',
+					objectFit: 'cover',
+					width: '48px',
+				},
+			})
+			: null,
+		createElement('span', { key: 'label' }, option.label),
+	].filter(Boolean));
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const IconControl = (props) => {
+	const normalized = normalizeProps(props);
+	const { createElement } = normalized;
+	const options = iconOptions(normalized.field);
+
+	return VisualChoiceControl(normalized, 'icon', options, (option) => [
+		createElement('span', {
+			'aria-hidden': 'true',
+			className: `dashicons ${ option.value }`,
+			key: 'icon',
+		}),
+		createElement('span', { key: 'label' }, option.label),
+	]);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
 const CheckboxListControl = (props) => {
 	const normalized = normalizeProps(props);
 	const { components, createElement, field, onChange, value } = normalized;
@@ -1220,6 +1301,29 @@ const BACKGROUND_BLEND_MODE_OPTIONS = [
 	{ label: 'Overlay', value: 'overlay' },
 	{ label: 'Darken', value: 'darken' },
 	{ label: 'Lighten', value: 'lighten' },
+];
+
+const DEFAULT_ICON_OPTIONS = [
+	{ label: 'Site', value: 'dashicons-admin-site-alt3' },
+	{ label: 'Appearance', value: 'dashicons-admin-appearance' },
+	{ label: 'Settings', value: 'dashicons-admin-generic' },
+	{ label: 'Users', value: 'dashicons-admin-users' },
+	{ label: 'Comments', value: 'dashicons-admin-comments' },
+	{ label: 'Links', value: 'dashicons-admin-links' },
+	{ label: 'Image', value: 'dashicons-format-image' },
+	{ label: 'Gallery', value: 'dashicons-format-gallery' },
+	{ label: 'Audio', value: 'dashicons-format-audio' },
+	{ label: 'Video', value: 'dashicons-format-video' },
+	{ label: 'Star', value: 'dashicons-star-filled' },
+	{ label: 'Heart', value: 'dashicons-heart' },
+	{ label: 'Idea', value: 'dashicons-lightbulb' },
+	{ label: 'Check', value: 'dashicons-yes-alt' },
+	{ label: 'Warning', value: 'dashicons-warning' },
+	{ label: 'Announcement', value: 'dashicons-megaphone' },
+	{ label: 'Chart', value: 'dashicons-chart-bar' },
+	{ label: 'Lifestyle', value: 'dashicons-palmtree' },
+	{ label: 'Store', value: 'dashicons-store' },
+	{ label: 'Portfolio', value: 'dashicons-portfolio' },
 ];
 
 /**
@@ -1518,6 +1622,108 @@ const backgroundFields = (field) => {
 	}
 
 	return fields;
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {Array<{ colors: string[], label: string, value: string }>}
+ */
+const paletteOptions = (field) => Object.entries(asRecord(field.choices))
+	.map(([ value, colors ]) => ({
+		colors: asArray(colors).map(stringValue).filter(Boolean),
+		label: stringValue(value),
+		value: stringValue(value),
+	}))
+	.filter((option) => option.value && option.colors.length);
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {Array<{ label: string, url: string, value: string }>}
+ */
+const imageSelectOptions = (field) => Object.entries(asRecord(field.choices))
+	.map(([ value, url ]) => ({
+		label: stringValue(value),
+		url: stringValue(url),
+		value: stringValue(value),
+	}))
+	.filter((option) => option.value);
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {Array<{ label: string, value: string }>}
+ */
+const iconOptions = (field) => {
+	const configured = choiceOptions(field);
+
+	return configured.length ? configured : DEFAULT_ICON_OPTIONS;
+};
+
+/**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @param {string} modifier
+ * @param {Array<{ label: string, value: string }>} options
+ * @param {(option: { label: string, value: string }) => unknown} renderPreview
+ * @returns {unknown}
+ */
+const VisualChoiceControl = (normalized, modifier, options, renderPreview) => {
+	const { components, createElement, field, onChange, value } = normalized;
+	const Button = components.Button;
+	const selected = stringValue(value);
+	const label = stringValue(field.label || field.id);
+	const description = stringValue(field.description);
+	const buttons = options.map((option) => {
+		const isPressed = selected === option.value;
+		const buttonProps = {
+			'aria-label': `${ label } ${ option.label }`,
+			'aria-pressed': isPressed ? 'true' : 'false',
+			'data-value': option.value,
+			key: option.value,
+			onClick: () => onChange(option.value),
+			style: {
+				alignItems: 'center',
+				display: 'inline-flex',
+				gap: '6px',
+				height: 'auto',
+				margin: '0 4px 4px 0',
+			},
+			type: 'button',
+		};
+		const content = renderPreview(option);
+
+		return typeof Button === 'function'
+			? createElement(
+				Button,
+				{
+					...buttonProps,
+					isPressed,
+					variant: isPressed ? 'primary' : 'secondary',
+				},
+				content
+			)
+			: createElement('button', buttonProps, content);
+	});
+
+	return createElement(
+		'fieldset',
+		{
+			'aria-label': label,
+			className: `lerm-admin-config-block-panel__visual-choice lerm-admin-config-block-panel__visual-choice--${ modifier }`,
+		},
+		[
+			createElement('legend', { key: 'legend' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			createElement(
+				'div',
+				{
+					className: 'lerm-admin-config-block-panel__visual-choice-options',
+					key: 'options',
+				},
+				buttons
+			),
+		].filter(Boolean)
+	);
 };
 
 /**
@@ -2298,9 +2504,12 @@ const createDefaultControlRegistry = () => createControlRegistry({
 	fieldset: FieldsetControl,
 	gallery: GalleryControl,
 	group: GroupControl,
+	icon: IconControl,
+	image_select: ImageSelectControl,
 	link_color: LinkColorControl,
 	media: MediaControl,
 	number: NumberControl,
+	palette: PaletteControl,
 	radio: RadioControl,
 	select: SelectControl,
 	slug_text: TextControl,

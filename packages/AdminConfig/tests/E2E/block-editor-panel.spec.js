@@ -193,8 +193,10 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryLinkColors = panel.locator( '[data-field-id="entry_link_colors"]' );
 	const entryTypography = panel.locator( '[data-field-id="entry_typography"]' );
 	const entryBackground = panel.locator( '[data-field-id="entry_background"]' );
+	const entryPalette = panel.locator( '[data-field-id="entry_palette"]' );
+	const entryImageStyle = panel.locator( '[data-field-id="entry_image_style"]' );
 	const entryLinks = panel.locator( '[data-field-id="entry_links"]' );
-	const entryIconReadOnly = panel.locator( '[data-field-id="entry_icon"][data-read-only-control="true"]' );
+	const entryIcon = panel.locator( '[data-field-id="entry_icon"]' );
 	const entryBadge = panel.locator( '[data-field-id="entry_badge"]' );
 	const entryBadgeLabel = entryBadge.getByRole( 'textbox', { name: /^Label$/i } );
 	const entryBadgeSlug = entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } );
@@ -232,6 +234,12 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryBackgroundOrigin = entryBackground.locator( '[data-field-path="entry_background.background-origin"] select' );
 	const entryBackgroundClip = entryBackground.locator( '[data-field-path="entry_background.background-clip"] select' );
 	const entryBackgroundBlendMode = entryBackground.locator( '[data-field-path="entry_background.background-blend-mode"] select' );
+	const entryPaletteCool = entryPalette.locator( 'button[data-value="cool"]' );
+	const entryPaletteWarm = entryPalette.locator( 'button[data-value="warm"]' );
+	const entryImageCover = entryImageStyle.locator( 'button[data-value="cover"]' );
+	const entryImageSplit = entryImageStyle.locator( 'button[data-value="split"]' );
+	const entryIconAside = entryIcon.locator( 'button[data-value="dashicons-format-aside"]' );
+	const entryIconAnnouncement = entryIcon.locator( 'button[data-value="dashicons-megaphone"]' );
 	const entryLinkLabel = entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first();
 	const entryLinkUrl = entryLinks.getByRole( 'textbox', { name: /^Link URL$/i } ).first();
 	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
@@ -281,10 +289,15 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryBackgroundOrigin ).toBeVisible();
 	await expect( entryBackgroundClip ).toBeVisible();
 	await expect( entryBackgroundBlendMode ).toBeVisible();
+	await expect( entryPaletteCool ).toBeVisible();
+	await expect( entryPaletteWarm ).toBeVisible();
+	await expect( entryImageCover ).toBeVisible();
+	await expect( entryImageSplit ).toBeVisible();
+	await expect( entryIconAside ).toBeVisible();
+	await expect( entryIconAnnouncement ).toBeVisible();
 	await expect( entryLinkLabel ).toBeVisible();
 	await expect( entryLinkUrl ).toBeVisible();
 	await expect( newsletterChannel ).toBeVisible();
-	await expect( entryIconReadOnly ).toContainText( /Field type "icon" is read-only/i );
 	const initialChecked = await featuredToggle.isChecked();
 	const initialSlug = await entrySlug.inputValue();
 	const initialLayout = await entryLayout.inputValue();
@@ -327,6 +340,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const initialBackgroundOrigin = await entryBackgroundOrigin.inputValue();
 	const initialBackgroundClip = await entryBackgroundClip.inputValue();
 	const initialBackgroundBlendMode = await entryBackgroundBlendMode.inputValue();
+	const initialPalette = await entryPalette.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
+	const initialImageStyle = await entryImageStyle.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
+	const initialIcon = await entryIcon.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
 	const initialLinkLabel = await entryLinkLabel.inputValue();
 	const initialLinkUrl = await entryLinkUrl.inputValue();
 	const initialNewsletter = await newsletterChannel.isChecked();
@@ -371,6 +387,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const discardBackgroundOrigin = initialBackgroundOrigin === 'border-box' ? 'content-box' : 'border-box';
 	const discardBackgroundClip = initialBackgroundClip === 'padding-box' ? 'content-box' : 'padding-box';
 	const discardBackgroundBlendMode = initialBackgroundBlendMode === 'screen' ? 'overlay' : 'screen';
+	const discardPalette = initialPalette === 'warm' ? 'cool' : 'warm';
+	const discardImageStyle = initialImageStyle === 'split' ? 'cover' : 'split';
+	const discardIcon = initialIcon === 'dashicons-star-filled' ? 'dashicons-format-aside' : 'dashicons-star-filled';
 	const discardLinkLabel = initialLinkLabel === 'Discard Link' ? 'Discard Link Next' : 'Discard Link';
 	const discardLinkUrl = initialLinkUrl === 'https://example.test/discard' ? 'https://example.test/discard-next' : 'https://example.test/discard';
 	const savedSlug = initialSlug === 'block-panel-valid' ? 'block-panel-valid-next' : 'block-panel-valid';
@@ -414,6 +433,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const savedBackgroundOrigin = initialBackgroundOrigin === 'padding-box' ? 'border-box' : 'padding-box';
 	const savedBackgroundClip = initialBackgroundClip === 'border-box' ? 'padding-box' : 'border-box';
 	const savedBackgroundBlendMode = initialBackgroundBlendMode === 'multiply' ? 'normal' : 'multiply';
+	const savedPalette = initialPalette === 'mono' ? 'cool' : 'mono';
+	const savedImageStyle = initialImageStyle === 'poster' ? 'cover' : 'poster';
+	const savedIcon = initialIcon === 'dashicons-megaphone' ? 'dashicons-format-aside' : 'dashicons-megaphone';
 	const savedLinkLabel = initialLinkLabel === 'Continue reading' ? 'Read the update' : 'Continue reading';
 	const savedLinkUrl = initialLinkUrl === 'https://example.test/update' ? 'https://example.test/story' : 'https://example.test/update';
 
@@ -458,6 +480,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryBackgroundOrigin.selectOption( discardBackgroundOrigin );
 	await entryBackgroundClip.selectOption( discardBackgroundClip );
 	await entryBackgroundBlendMode.selectOption( discardBackgroundBlendMode );
+	await entryPalette.locator( `button[data-value="${ discardPalette }"]` ).click();
+	await entryImageStyle.locator( `button[data-value="${ discardImageStyle }"]` ).click();
+	await entryIcon.locator( `button[data-value="${ discardIcon }"]` ).click();
 	await entryLinkLabel.fill( discardLinkLabel );
 	await entryLinkUrl.fill( discardLinkUrl );
 	await newsletterChannel.setChecked( ! initialNewsletter );
@@ -513,6 +538,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryBackgroundOrigin ).toHaveValue( initialBackgroundOrigin );
 	await expect( entryBackgroundClip ).toHaveValue( initialBackgroundClip );
 	await expect( entryBackgroundBlendMode ).toHaveValue( initialBackgroundBlendMode );
+	await expect( entryPalette.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialPalette || '' );
+	await expect( entryImageStyle.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialImageStyle || '' );
+	await expect( entryIcon.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialIcon || '' );
 	await expect( entryLinkLabel ).toHaveValue( initialLinkLabel );
 	await expect( entryLinkUrl ).toHaveValue( initialLinkUrl );
 	await expect( newsletterChannel ).toBeChecked( { checked: initialNewsletter } );
@@ -592,6 +620,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryBackgroundOrigin.selectOption( savedBackgroundOrigin );
 	await entryBackgroundClip.selectOption( savedBackgroundClip );
 	await entryBackgroundBlendMode.selectOption( savedBackgroundBlendMode );
+	await entryPalette.locator( `button[data-value="${ savedPalette }"]` ).click();
+	await entryImageStyle.locator( `button[data-value="${ savedImageStyle }"]` ).click();
+	await entryIcon.locator( `button[data-value="${ savedIcon }"]` ).click();
 	await entryLinkLabel.fill( savedLinkLabel );
 	await entryLinkUrl.fill( savedLinkUrl );
 	await newsletterChannel.setChecked( ! initialNewsletter );
@@ -661,6 +692,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryBackgroundOrigin ).toHaveValue( savedBackgroundOrigin );
 	await expect( entryBackgroundClip ).toHaveValue( savedBackgroundClip );
 	await expect( entryBackgroundBlendMode ).toHaveValue( savedBackgroundBlendMode );
+	await expect( entryPalette.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedPalette );
+	await expect( entryImageStyle.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedImageStyle );
+	await expect( entryIcon.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedIcon );
 	await expect( entryLinkLabel ).toHaveValue( savedLinkLabel );
 	await expect( entryLinkUrl ).toHaveValue( savedLinkUrl );
 	await expect( newsletterChannel ).toBeChecked( { checked: ! initialNewsletter } );
@@ -720,6 +754,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-origin"] select' ) ).toHaveValue( savedBackgroundOrigin );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-clip"] select' ) ).toHaveValue( savedBackgroundClip );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-blend-mode"] select' ) ).toHaveValue( savedBackgroundBlendMode );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_palette"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedPalette );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_image_style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedImageStyle );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_icon"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedIcon );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link label$/i } ).first() ).toHaveValue( savedLinkLabel );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link URL$/i } ).first() ).toHaveValue( savedLinkUrl );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_upload"] .lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );

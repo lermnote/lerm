@@ -107,6 +107,30 @@ function testRestUrlHelpers() {
 	);
 }
 
+function visualChoiceButton(node, value) {
+	if (!node || typeof node !== 'object') {
+		return null;
+	}
+
+	if (node.props?.['data-value'] === value) {
+		return node;
+	}
+
+	for (const child of node.children || []) {
+		const candidates = Array.isArray(child) ? child : [ child ];
+
+		for (const candidate of candidates) {
+			const match = visualChoiceButton(candidate, value);
+
+			if (match) {
+				return match;
+			}
+		}
+	}
+
+	return null;
+}
+
 function testSchemaStateHelpers() {
 	const state = createSchemaState({}, {}, { post_id: 12 }, 'demo');
 	const hydrated = hydrateSchemaResponse(
@@ -282,11 +306,14 @@ function testDefaultControlRegistry() {
 	assert(types.includes('fieldset'));
 	assert(types.includes('gallery'));
 	assert(types.includes('group'));
+	assert(types.includes('icon'));
+	assert(types.includes('image_select'));
 	assert(types.includes('link_color'));
 	assert(types.includes('media'));
 	assert(types.includes('slider'));
 	assert(types.includes('spinner'));
 	assert(types.includes('spacing'));
+	assert(types.includes('palette'));
 	assert(types.includes('typography'));
 	assert(types.includes('upload'));
 
@@ -409,13 +436,73 @@ function testDefaultControlRegistry() {
 		onChange: (value) => changes.push(value),
 		value: [],
 	});
+	const renderedPalette = registry.get('palette')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			choices: {
+				cool: [ '#0f172a', '#38bdf8' ],
+				warm: [ '#7c2d12', '#fed7aa' ],
+			},
+			id: 'palette',
+			label: 'Palette',
+			type: 'palette',
+		},
+		inputId: 'demo-palette',
+		onChange: (value) => changes.push(value),
+		value: 'cool',
+	});
+	const renderedImageSelect = registry.get('image_select')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			choices: {
+				cover: 'https://example.test/cover.png',
+				split: 'https://example.test/split.png',
+			},
+			id: 'image_style',
+			label: 'Image style',
+			type: 'image_select',
+		},
+		inputId: 'demo-image-style',
+		onChange: (value) => changes.push(value),
+		value: 'cover',
+	});
+	const renderedIcon = registry.get('icon')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		field: {
+			choices: {
+				'dashicons-format-aside': 'Aside',
+				'dashicons-megaphone': 'Announcement',
+			},
+			id: 'icon',
+			label: 'Icon',
+			type: 'icon',
+		},
+		inputId: 'demo-icon',
+		onChange: (value) => changes.push(value),
+		value: 'dashicons-format-aside',
+	});
 
 	renderedSelect.props.onChange({ target: { value: 'feature' } });
 	renderedColor.children[0][1].props.onInput({ target: { value: '#13579b' } });
 	renderedDate.children[0][1].props.onInput({ target: { value: '2026-05-03' } });
 	renderedRange.children[0][1].props.onInput({ target: { value: '4' } });
 	renderedCheckboxChoices.children[0][1].children[0][0].props.onChange({ target: { checked: true } });
-	assert.deepEqual(changes, [ 'feature', '#13579b', '2026-05-03', '4', [ 'newsletter' ] ]);
+	visualChoiceButton(renderedPalette, 'warm').props.onClick();
+	visualChoiceButton(renderedImageSelect, 'split').props.onClick();
+	visualChoiceButton(renderedIcon, 'dashicons-megaphone').props.onClick();
+	assert.deepEqual(changes, [
+		'feature',
+		'#13579b',
+		'2026-05-03',
+		'4',
+		[ 'newsletter' ],
+		'warm',
+		'split',
+		'dashicons-megaphone',
+	]);
 	assert.equal(renderedColor.children[0][1].props.onChange, undefined);
 	assert.equal(renderedDate.children[0][1].props.onChange, undefined);
 	assert.equal(renderedRange.children[0][1].props.onChange, undefined);
@@ -432,10 +519,7 @@ function testBlockPanelFieldStatusContract() {
 		'code_editor',
 		'content',
 		'heading',
-		'icon',
-		'image_select',
 		'notice',
-		'palette',
 		'sorter',
 		'subheading',
 		'tabbed',

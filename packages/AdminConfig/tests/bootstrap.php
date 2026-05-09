@@ -326,6 +326,15 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 	}
 }
 
+if ( ! function_exists( 'sanitize_html_class' ) ) {
+	function sanitize_html_class( $classname, string $fallback = '' ): string {
+		$classname = is_scalar( $classname ) ? (string) $classname : '';
+		$sanitized = preg_replace( '/[^A-Za-z0-9_\-]/', '', $classname ) ?? '';
+
+		return '' !== $sanitized ? $sanitized : $fallback;
+	}
+}
+
 if ( ! function_exists( 'sanitize_title' ) ) {
 	function sanitize_title( $title ): string {
 		$title = is_scalar( $title ) ? strtolower( trim( (string) $title ) ) : '';

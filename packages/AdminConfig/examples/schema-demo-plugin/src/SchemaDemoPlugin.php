@@ -585,6 +585,30 @@ final class SchemaDemoPlugin {
 							),
 						),
 						array(
+							'id'          => 'entry_palette',
+							'type'        => 'palette',
+							'label'       => __( 'Entry palette', 'lerm-admin-config-demo' ),
+							'description' => __( 'A palette selector rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'choices'     => array(
+								'cool' => array( '#0f172a', '#38bdf8', '#e0f2fe' ),
+								'warm' => array( '#7c2d12', '#fb923c', '#fed7aa' ),
+								'mono' => array( '#111827', '#6b7280', '#f9fafb' ),
+							),
+							'default'     => 'cool',
+						),
+						array(
+							'id'          => 'entry_image_style',
+							'type'        => 'image_select',
+							'label'       => __( 'Entry image style', 'lerm-admin-config-demo' ),
+							'description' => __( 'An image-backed choice selector rendered by the block editor panel.', 'lerm-admin-config-demo' ),
+							'choices'     => array(
+								'cover'  => 'https://example.test/admin-config-cover.png',
+								'split'  => 'https://example.test/admin-config-split.png',
+								'poster' => 'https://example.test/admin-config-poster.png',
+							),
+							'default'     => 'cover',
+						),
+						array(
 							'id'          => 'entry_links',
 							'type'        => 'group',
 							'label'       => __( 'Entry links', 'lerm-admin-config-demo' ),
