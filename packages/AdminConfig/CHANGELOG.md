@@ -58,6 +58,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   line height, letter spacing, alignment, and color values.
 - Block editor panel background control for color, gradient, image, CSS choice
   values, REST serialization, and browser persistence coverage.
+- Block editor panel visual choice controls for `palette`, `image_select`, and
+  `icon` fields, including discard/save/reload browser coverage.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
@@ -102,6 +104,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   updates.
 - The client schema payload now exposes background flags and image picker labels
   used by the block editor panel.
+- Palette fields now preserve swatch arrays in the client schema protocol
+  instead of dropping non-scalar `choices` values.
 - Block editor number controls now preserve an explicitly cleared empty value
   instead of redisplaying the field default before save.
 - Block editor metabox schemas now skip classic metabox registration on

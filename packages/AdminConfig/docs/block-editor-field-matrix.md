@@ -51,13 +51,15 @@ features where values belong in block content rather than AdminConfig storage.
 | `link_color` | Normal/hover link color object editing. |
 | `typography` | Typography object editing for family, weight, style, size, unit, line height, letter spacing, alignment, and color. |
 | `background` | Background color, gradient, image, position, repeat, attachment, size, origin, clip, and blend-mode object editing. |
+| `palette` | Swatch-backed palette choice editing. |
+| `image_select` | Image-backed single choice editing. |
+| `icon` | Dashicons choice editing. |
 
 ## Read-Only
 
 | Field type | Reason |
 | --- | --- |
 | `heading`, `subheading`, `content`, `notice` | Presentation-only fields; no persisted value should enter the save payload. |
-| `image_select`, `palette`, `icon` | Needs richer visual picker UI before editing. |
 | `accordion`, `tabbed`, `sorter` | Needs structured collection state and ordering semantics. |
 | `code_editor`, `wp_editor` | Needs editor-specific component integration and sanitization-aware UX. |
 | `ajax_select` | Needs REST data-source search, pagination, and async selection UX in the block panel. |

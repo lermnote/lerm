@@ -206,6 +206,28 @@ final class SchemaCompilerTest extends TestCase {
 								'background_blend_mode' => true,
 								'background_image_button_text' => 'Choose background',
 							),
+							array(
+								'id'      => 'palette',
+								'type'    => 'palette',
+								'choices' => array(
+									'cool'    => array( '#0f172a', '#38bdf8' ),
+									'invalid' => array( 'not-a-color' ),
+								),
+							),
+							array(
+								'id'      => 'image_style',
+								'type'    => 'image_select',
+								'choices' => array(
+									'cover' => 'https://example.test/cover.png',
+								),
+							),
+							array(
+								'id'      => 'icon',
+								'type'    => 'icon',
+								'choices' => array(
+									'dashicons-lightbulb' => 'Idea',
+								),
+							),
 						),
 					),
 				),
@@ -233,6 +255,10 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertTrue( $fields['background']['background_origin'] );
 		$this->assertTrue( $fields['background']['background_blend_mode'] );
 		$this->assertSame( 'Choose background', $fields['background']['background_image_button_text'] );
+		$this->assertSame( array( '#0f172a', '#38bdf8' ), $fields['palette']['choices']['cool'] );
+		$this->assertArrayNotHasKey( 'invalid', $fields['palette']['choices'] );
+		$this->assertSame( 'https://example.test/cover.png', $fields['image_style']['choices']['cover'] );
+		$this->assertSame( 'Idea', $fields['icon']['choices']['dashicons-lightbulb'] );
 	}
 
 	public function testDependencyDefaultsEmptyOperatorToEquality(): void {
