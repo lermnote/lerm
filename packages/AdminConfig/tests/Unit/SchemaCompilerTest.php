@@ -228,6 +228,16 @@ final class SchemaCompilerTest extends TestCase {
 									'dashicons-lightbulb' => 'Idea',
 								),
 							),
+							array(
+								'id'                => 'campaign',
+								'type'              => 'ajax_select',
+								'source'            => 'campaigns',
+								'multiple'          => true,
+								'allow_clear'       => false,
+								'min_search_length' => 2,
+								'per_page'          => 7,
+								'search_label'      => 'Search campaigns',
+							),
 						),
 					),
 				),
@@ -259,6 +269,12 @@ final class SchemaCompilerTest extends TestCase {
 		$this->assertArrayNotHasKey( 'invalid', $fields['palette']['choices'] );
 		$this->assertSame( 'https://example.test/cover.png', $fields['image_style']['choices']['cover'] );
 		$this->assertSame( 'Idea', $fields['icon']['choices']['dashicons-lightbulb'] );
+		$this->assertSame( 'campaigns', $fields['campaign']['source'] );
+		$this->assertTrue( $fields['campaign']['multiple'] );
+		$this->assertFalse( $fields['campaign']['allow_clear'] );
+		$this->assertSame( 2, $fields['campaign']['min_search_length'] );
+		$this->assertSame( 7, $fields['campaign']['per_page'] );
+		$this->assertSame( 'Search campaigns', $fields['campaign']['search_label'] );
 	}
 
 	public function testDependencyDefaultsEmptyOperatorToEquality(): void {

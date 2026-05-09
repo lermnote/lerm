@@ -609,6 +609,18 @@ final class SchemaDemoPlugin {
 							'default'     => 'cover',
 						),
 						array(
+							'id'                => 'entry_campaign',
+							'type'              => 'ajax_select',
+							'source'            => 'campaign_library',
+							'label'             => __( 'Entry campaign', 'lerm-admin-config-demo' ),
+							'description'       => __( 'An async campaign selector rendered through the block editor panel REST data-source endpoint.', 'lerm-admin-config-demo' ),
+							'placeholder'       => __( 'Search campaigns...', 'lerm-admin-config-demo' ),
+							'search_label'      => __( 'Search entry campaign', 'lerm-admin-config-demo' ),
+							'min_search_length' => 1,
+							'per_page'          => 4,
+							'default'           => 'spring-launch',
+						),
+						array(
 							'id'          => 'entry_links',
 							'type'        => 'group',
 							'label'       => __( 'Entry links', 'lerm-admin-config-demo' ),

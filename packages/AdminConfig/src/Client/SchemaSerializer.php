@@ -27,7 +27,6 @@ final class SchemaSerializer {
 	 */
 	private const READ_ONLY_CONTROLS = array(
 		'accordion',
-		'ajax_select',
 		'backup_tools',
 		'code_editor',
 		'content',
@@ -53,9 +52,12 @@ final class SchemaSerializer {
 		'line_height_placeholder',
 		'max',
 		'min',
+		'min_search_length',
+		'per_page',
 		'placeholder',
 		'remove_text',
 		'rows',
+		'search_label',
 		'size_placeholder',
 		'source',
 		'step',
@@ -68,6 +70,7 @@ final class SchemaSerializer {
 	private const FIELD_BOOLEAN_KEYS = array(
 		'all',
 		'active',
+		'allow_clear',
 		'align',
 		'background_attachment',
 		'background_blend_mode',

@@ -60,6 +60,9 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   values, REST serialization, and browser persistence coverage.
 - Block editor panel visual choice controls for `palette`, `image_select`, and
   `icon` fields, including discard/save/reload browser coverage.
+- Block editor panel async `ajax_select` controls backed by the REST
+  data-source endpoint, including selected-value hydration and browser
+  persistence coverage.
 
 ### Changed
 - The package is now documented as an open-source runtime with a clearer contributor onboarding path and explicit support expectations.
