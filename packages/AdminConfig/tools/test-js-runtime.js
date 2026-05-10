@@ -1,6 +1,8 @@
 /* eslint-env node */
 
 const assert = require('assert/strict');
+const fs = require('fs');
+const path = require('path');
 
 const { contextFromConfig, contextQueryString } = require('../resources/core/context');
 const { fieldErrorsFromResponse, messageFromResponse } = require('../resources/core/errors');
@@ -16,6 +18,30 @@ const {
 } = require('../resources/core/schema-state');
 const { createDefaultControlRegistry } = require('../resources/controls');
 const { blockPanelReadOnlyControlTypes, createBlockPanelRuntime, isFieldDependencySatisfied } = require('../resources/block-panel');
+
+const FIELD_MATRIX_PATH = path.resolve(__dirname, '../docs/block-editor-field-matrix.md');
+
+function blockPanelFieldMatrixSection(sectionTitle) {
+	const content = fs.readFileSync(FIELD_MATRIX_PATH, 'utf8');
+	const marker = `## ${ sectionTitle }`;
+	const start = content.indexOf(marker);
+
+	assert.notEqual(start, -1, `${marker} should exist in the block editor field matrix`);
+
+	const bodyStart = start + marker.length;
+	const nextSection = content.indexOf('\n## ', bodyStart);
+	const body = content.slice(bodyStart, nextSection === -1 ? content.length : nextSection);
+	const types = body.split(/\r?\n/)
+		.map((line) => line.trim())
+		.filter((line) => line.startsWith('| `'))
+		.flatMap((line) => {
+			const firstCell = line.split('|')[1] || '';
+
+			return Array.from(firstCell.matchAll(/`([a-z0-9_]+)`/g)).map((match) => match[1]);
+		});
+
+	return Array.from(new Set(types)).sort();
+}
 
 function testRecordHelpers() {
 	const record = { title: 'Loaded' };
@@ -291,6 +317,7 @@ function testDefaultControlRegistry() {
 	const types = registry.types();
 
 	assert(types.includes('background'));
+	assert(types.includes('ajax_select'));
 	assert(types.includes('text'));
 	assert(types.includes('textarea'));
 	assert(types.includes('border'));
@@ -484,6 +511,20 @@ function testDefaultControlRegistry() {
 		onChange: (value) => changes.push(value),
 		value: 'dashicons-format-aside',
 	});
+	const renderedAjaxSelect = registry.get('ajax_select')({
+		components: {},
+		createElement: (type, props, ...children) => ({ type, props, children }),
+		dataSourceRequest: () => Promise.resolve({ success: true, data: { items: [] } }),
+		field: {
+			id: 'campaign',
+			label: 'Campaign',
+			source: 'campaign_library',
+			type: 'ajax_select',
+		},
+		inputId: 'demo-campaign',
+		onChange: (value) => changes.push(value),
+		value: 'spring-launch',
+	});
 
 	renderedSelect.props.onChange({ target: { value: 'feature' } });
 	renderedColor.children[0][1].props.onInput({ target: { value: '#13579b' } });
@@ -506,30 +547,29 @@ function testDefaultControlRegistry() {
 	assert.equal(renderedColor.children[0][1].props.onChange, undefined);
 	assert.equal(renderedDate.children[0][1].props.onChange, undefined);
 	assert.equal(renderedRange.children[0][1].props.onChange, undefined);
+	assert.equal(typeof renderedAjaxSelect.type, 'function');
 }
 
 function testBlockPanelFieldStatusContract() {
 	const readOnlyTypes = blockPanelReadOnlyControlTypes();
 	const editableTypes = createDefaultControlRegistry().types();
+	const matrixEditableTypes = blockPanelFieldMatrixSection('Editable');
+	const matrixReadOnlyTypes = blockPanelFieldMatrixSection('Read-Only');
+	const matrixPhase4Types = blockPanelFieldMatrixSection('Phase 4');
+	const matrixReadOnlyRuntimeTypes = Array.from(new Set([
+		...matrixReadOnlyTypes,
+		...matrixPhase4Types,
+	])).sort();
 
-	for (const type of [
-		'accordion',
-		'ajax_select',
-		'backup_tools',
-		'code_editor',
-		'content',
-		'heading',
-		'notice',
-		'sorter',
-		'subheading',
-		'tabbed',
-		'wp_editor',
-	]) {
-		assert(readOnlyTypes.includes(type), `${type} should be read-only in the block panel`);
-	}
+	assert.deepEqual(editableTypes, matrixEditableTypes);
+	assert.deepEqual(readOnlyTypes, matrixReadOnlyRuntimeTypes);
 
 	for (const type of readOnlyTypes) {
 		assert(! editableTypes.includes(type), `${type} should not be registered as an editable control`);
+	}
+
+	for (const type of matrixPhase4Types) {
+		assert(readOnlyTypes.includes(type), `${type} should stay read-only until Phase 4`);
 	}
 }
 
@@ -684,6 +724,22 @@ async function testBlockPanelRuntime() {
 	});
 	assert.equal(runtime.getState().values.title, 'Saved');
 	assert.equal(runtime.isDirty(), false);
+
+	await runtime.requestDataSource({
+		fieldId: 'campaign',
+		page: 2,
+		perPage: 7,
+		search: 'launch',
+		selected: [ 'spring-launch', 'summer-launch' ],
+	});
+
+	assert.equal(requests[3].path, 'schemas/demo/data-source?post_id=77');
+	assert.equal(requests[3].options.method, 'POST');
+	assert.equal(requests[3].options.body.get('field_id'), 'campaign');
+	assert.equal(requests[3].options.body.get('search'), 'launch');
+	assert.equal(requests[3].options.body.get('page'), '2');
+	assert.equal(requests[3].options.body.get('per_page'), '7');
+	assert.deepEqual(requests[3].options.body.getAll('selected[]'), [ 'spring-launch', 'summer-launch' ]);
 
 	runtime.updateValue('title', 'Bad');
 	await runtime.save();

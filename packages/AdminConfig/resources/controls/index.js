@@ -86,6 +86,44 @@ const choiceOptions = (field) => Object.entries(asRecord(field.choices)).map(([ 
 }));
 
 /**
+ * @param {Record<string, unknown>} item
+ * @returns {{ label: string, value: string }}
+ */
+const dataSourceOption = (item) => ({
+	label: stringValue(item.label || item.value),
+	value: stringValue(item.value),
+});
+
+/**
+ * @param {unknown} response
+ * @returns {Array<{ label: string, value: string }>}
+ */
+const dataSourceOptions = (response) => {
+	const data = asRecord(response);
+	const items = asArray(data.items);
+
+	return items.map(asRecord).map(dataSourceOption).filter((option) => option.value && option.label);
+};
+
+/**
+ * @param {Array<{ label: string, value: string }>} options
+ * @param {Array<{ label: string, value: string }>} selected
+ * @returns {Array<{ label: string, value: string }>}
+ */
+const mergeOptions = (options, selected = []) => {
+	const seen = new Set();
+	const merged = [];
+
+	for (const option of [ ...selected, ...options ]) {
+		if (!option.value || seen.has(option.value)) continue;
+		seen.add(option.value);
+		merged.push(option);
+	}
+
+	return merged;
+};
+
+/**
  * @param {unknown} error
  * @returns {string}
  */
@@ -99,6 +137,7 @@ const errorMessage = (error) => asArray(error).length
  *   components: Record<string, Function>,
  *   controls: { get: (type: string) => FieldControl|null },
  *   createElement: Function,
+ *   dataSourceRequest: Function,
  *   error: string,
  *   errors: Record<string, string|string[]>,
  *   field: Record<string, unknown>,
@@ -113,6 +152,7 @@ const normalizeProps = (props) => ({
 	components: /** @type {Record<string, Function>} */ (asRecord(props.components)),
 	controls: /** @type {{ get: (type: string) => FieldControl|null }} */ (props.controls || { get: () => null }),
 	createElement: /** @type {Function} */ (props.createElement),
+	dataSourceRequest: /** @type {Function} */ (props.dataSourceRequest || (() => Promise.resolve({ success: false, data: { message: 'Data-source transport is unavailable.' } }))),
 	error: errorMessage(props.error),
 	errors: /** @type {Record<string, string|string[]>} */ (asRecord(props.errors)),
 	field: asRecord(props.field),
@@ -240,7 +280,7 @@ const groupItems = (value) => Array.isArray(value) ? value.map(asRecord) : [];
  * @returns {unknown}
  */
 const renderNestedField = (normalized, field, path, value) => {
-	const { components, controls, createElement, errors, inputId, onPathChange } = normalized;
+	const { components, controls, createElement, dataSourceRequest, errors, inputId, onPathChange } = normalized;
 	const fieldId = stringValue(field.id);
 	const controlType = fieldControlType(field);
 	const control = controls.get(controlType);
@@ -289,6 +329,7 @@ const renderNestedField = (normalized, field, path, value) => {
 				components,
 				controls,
 				createElement,
+				dataSourceRequest,
 				error,
 				errors,
 				field,
@@ -1024,6 +1065,250 @@ const ColorControl = (props) => {
 };
 
 /**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @returns {unknown}
+ */
+const AjaxSelectControlComponent = (normalized) => {
+	const { components, createElement, dataSourceRequest, field, onChange, value } = normalized;
+	const element = typeof window !== 'undefined' && window.wp ? asRecord(window.wp.element) : {};
+	const useEffect = /** @type {Function|undefined} */ (element.useEffect);
+	const useState = /** @type {Function|undefined} */ (element.useState);
+	const Button = components.Button;
+	const Spinner = components.Spinner;
+	const fieldId = stringValue(field.id);
+	const multiple = field.multiple === true;
+	const allowClear = !Object.prototype.hasOwnProperty.call(field, 'allow_clear') || field.allow_clear !== false;
+	const minLength = ajaxMinSearchLength(field);
+	const perPage = ajaxPerPage(field);
+	const selectedValues = ajaxSelectedValues(value, field);
+	const selectedKey = selectedValues.join('\u0001');
+	const label = stringValue(field.label || fieldId);
+	const description = stringValue(field.description);
+	const placeholder = stringValue(field.placeholder || 'Search...');
+	const searchLabel = stringValue(field.search_label || `Search ${ label }`);
+	const renderButton = (props, content) => typeof Button === 'function'
+		? createElement(Button, props, content)
+		: createElement('button', { ...props, type: 'button' }, content);
+
+	if (typeof useState !== 'function' || typeof useEffect !== 'function') {
+		return createElement('p', { className: 'lerm-admin-config-block-panel__field-description' }, 'Async select requires the WordPress element runtime.');
+	}
+
+	const [ search, setSearch ] = useState('');
+	const [ options, setOptions ] = useState([]);
+	const [ selectedOptions, setSelectedOptions ] = useState(
+		() => selectedValues.map((item) => selectedOptionForValue(item, []))
+	);
+	const [ status, setStatus ] = useState(
+		minLength > 0 ? `Type ${ minLength } or more characters to search.` : 'Start typing to search.'
+	);
+	const [ isLoading, setIsLoading ] = useState(false);
+
+	useEffect(() => {
+		let active = true;
+
+		if (!selectedValues.length) {
+			setSelectedOptions([]);
+			return () => {
+				active = false;
+			};
+		}
+
+		dataSourceRequest({
+			fieldId,
+			page: 1,
+			perPage: Math.max(perPage, selectedValues.length),
+			search: '',
+			selected: selectedValues,
+		}).then((response) => {
+			if (!active) return;
+
+			const data = asRecord(response && response.data);
+			const fetchedOptions = response && response.success ? dataSourceOptions(data) : [];
+
+			setSelectedOptions(selectedValues.map((item) => selectedOptionForValue(item, fetchedOptions)));
+		});
+
+		return () => {
+			active = false;
+		};
+	}, [ fieldId, perPage, selectedKey ]);
+
+	useEffect(() => {
+		const term = stringValue(search).trim();
+		let active = true;
+
+		if (term.length < minLength) {
+			setOptions([]);
+			setIsLoading(false);
+			setStatus(minLength > 0 ? `Type ${ minLength } or more characters to search.` : 'Start typing to search.');
+			return () => {
+				active = false;
+			};
+		}
+
+		setIsLoading(true);
+		setStatus('Searching...');
+
+		const timer = setTimeout(() => {
+			dataSourceRequest({
+				fieldId,
+				page: 1,
+				perPage,
+				search: term,
+				selected: selectedValues,
+			}).then((response) => {
+				if (!active) return;
+
+				const data = asRecord(response && response.data);
+
+				if (!response || !response.success) {
+					setOptions([]);
+					setStatus(stringValue(data.message || 'Unable to load options.'));
+					return;
+				}
+
+				const nextOptions = dataSourceOptions(data);
+
+				setOptions(nextOptions);
+				setStatus(nextOptions.length ? 'Select an option.' : 'No options found.');
+			}).finally(() => {
+				if (active) setIsLoading(false);
+			});
+		}, 250);
+
+		return () => {
+			active = false;
+			clearTimeout(timer);
+		};
+	}, [ fieldId, minLength, perPage, search, selectedKey ]);
+
+	const selected = selectedValues.map((item) => selectedOptionForValue(item, selectedOptions));
+	const chooseOption = (option) => {
+		const nextSelectedOptions = mergeOptions([ option ], selectedOptions);
+
+		setSelectedOptions(nextSelectedOptions);
+
+		if (multiple) {
+			onChange(Array.from(new Set([ ...selectedValues, option.value ])));
+			return;
+		}
+
+		onChange(option.value);
+		setSearch('');
+		setOptions([]);
+	};
+	const removeValue = (item) => {
+		if (multiple) {
+			onChange(selectedValues.filter((candidate) => candidate !== item));
+			return;
+		}
+
+		onChange('');
+	};
+	const resultOptions = options.filter((option) => !multiple || !selectedValues.includes(option.value));
+
+	return createElement(
+		'fieldset',
+		{
+			className: 'lerm-admin-config-block-panel__ajax-select',
+		},
+		[
+			createElement('legend', { key: 'legend' }, label),
+			description
+				? createElement('p', { className: 'lerm-admin-config-block-panel__field-description', key: 'description' }, description)
+				: null,
+			createElement(
+				'div',
+				{
+					className: 'lerm-admin-config-block-panel__ajax-select-selected',
+					key: 'selected',
+				},
+				selected.length
+					? selected.map((option) => (
+						allowClear
+							? renderButton(
+								{
+									'data-selected-value': option.value,
+									key: option.value,
+									onClick: () => removeValue(option.value),
+									type: 'button',
+									variant: 'secondary',
+								},
+								`${ option.label } x`
+							)
+							: createElement('span', { 'data-selected-value': option.value, key: option.value }, option.label)
+					))
+					: createElement('span', { key: 'empty' }, 'No option selected.')
+			),
+			createElement(
+				'label',
+				{
+					className: 'lerm-admin-config-block-panel__ajax-select-search',
+					key: 'search',
+				},
+				[
+					createElement('span', { key: 'label' }, searchLabel),
+					createElement('input', {
+						'aria-label': searchLabel,
+						autoComplete: 'off',
+						key: 'input',
+						onInput: (event) => setSearch(stringValue(changeValue(event))),
+						placeholder,
+						type: 'search',
+						value: search,
+					}),
+				]
+			),
+			createElement(
+				'p',
+				{
+					className: 'lerm-admin-config-block-panel__ajax-select-status',
+					key: 'status',
+					role: 'status',
+				},
+				[
+					isLoading && typeof Spinner === 'function' ? createElement(Spinner, { key: 'spinner' }) : null,
+					createElement('span', { key: 'text' }, status),
+				].filter(Boolean)
+			),
+			resultOptions.length
+				? createElement(
+					'div',
+					{
+						className: 'lerm-admin-config-block-panel__ajax-select-results',
+						key: 'results',
+						role: 'listbox',
+					},
+					resultOptions.map((option) => renderButton(
+						{
+							'aria-selected': selectedValues.includes(option.value) ? 'true' : 'false',
+							'data-value': option.value,
+							key: option.value,
+							onClick: () => chooseOption(option),
+							role: 'option',
+							type: 'button',
+							variant: 'secondary',
+						},
+						option.label
+					))
+				)
+				: null,
+		].filter(Boolean)
+	);
+};
+
+/**
+ * @param {Record<string, unknown>} props
+ * @returns {unknown}
+ */
+const AjaxSelectControl = (props) => {
+	const normalized = normalizeProps(props);
+
+	return normalized.createElement(AjaxSelectControlComponent, normalized);
+};
+
+/**
  * @param {Record<string, unknown>} props
  * @returns {unknown}
  */
@@ -1647,6 +1932,44 @@ const imageSelectOptions = (field) => Object.entries(asRecord(field.choices))
 		value: stringValue(value),
 	}))
 	.filter((option) => option.value);
+
+/**
+ * @param {unknown} value
+ * @param {Record<string, unknown>} field
+ * @returns {string[]}
+ */
+const ajaxSelectedValues = (value, field) => field.multiple === true
+	? asArray(value).map(stringValue).filter(Boolean)
+	: [ stringValue(value) ].filter(Boolean);
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {number}
+ */
+const ajaxPerPage = (field) => {
+	const perPage = Number.parseInt(stringValue(field.per_page || 20), 10);
+
+	return Number.isFinite(perPage) && perPage > 0 ? perPage : 20;
+};
+
+/**
+ * @param {Record<string, unknown>} field
+ * @returns {number}
+ */
+const ajaxMinSearchLength = (field) => {
+	const minLength = Number.parseInt(stringValue(field.min_search_length || 0), 10);
+
+	return Number.isFinite(minLength) && minLength > 0 ? minLength : 0;
+};
+
+/**
+ * @param {string} value
+ * @param {Array<{ label: string, value: string }>} options
+ * @returns {{ label: string, value: string }}
+ */
+const selectedOptionForValue = (value, options) => (
+	options.find((option) => option.value === value) || { label: value, value }
+);
 
 /**
  * @param {Record<string, unknown>} field
@@ -2493,6 +2816,7 @@ const createControlRegistry = (initialControls = {}) => {
  * @returns {ReturnType<typeof createControlRegistry>}
  */
 const createDefaultControlRegistry = () => createControlRegistry({
+	ajax_select: AjaxSelectControl,
 	background: BackgroundControl,
 	button_set: ButtonSetControl,
 	border: BorderControl,

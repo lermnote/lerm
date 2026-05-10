@@ -17,6 +17,9 @@ features where values belong in block content rather than AdminConfig storage.
 - `read-only`: visible in the block panel as a non-editable notice. The schema
   field is acknowledged, but editing remains in the classic admin UI until the
   required React/state infrastructure lands.
+- `phase-4`: visible as read-only in the Phase 3 block panel, with editable
+  support intentionally deferred to Phase 4 because the field needs collection
+  or ordering-specific UI.
 - `unsupported`: not part of the Phase 3 capability contract. Unknown custom
   controls fall here unless an extension registers a block-panel control.
 
@@ -54,16 +57,21 @@ features where values belong in block content rather than AdminConfig storage.
 | `palette` | Swatch-backed palette choice editing. |
 | `image_select` | Image-backed single choice editing. |
 | `icon` | Dashicons choice editing. |
+| `ajax_select` | REST data-source search and async single/multiple value editing. |
 
 ## Read-Only
 
 | Field type | Reason |
 | --- | --- |
 | `heading`, `subheading`, `content`, `notice` | Presentation-only fields; no persisted value should enter the save payload. |
-| `accordion`, `tabbed`, `sorter` | Needs structured collection state and ordering semantics. |
 | `code_editor`, `wp_editor` | Needs editor-specific component integration and sanitization-aware UX. |
-| `ajax_select` | Needs REST data-source search, pagination, and async selection UX in the block panel. |
 | `backup_tools` | Options-page utility action; not suitable for block-panel editing. |
+
+## Phase 4
+
+| Field type | Reason |
+| --- | --- |
+| `accordion`, `tabbed`, `sorter` | Needs structured collection state and ordering semantics. |
 
 ## Unsupported
 
@@ -80,5 +88,5 @@ Phase 3 is complete when:
   validation-error replay, and no AdminConfig `admin-ajax.php` requests.
 - Read-only and unsupported fields are visible in the panel instead of silently
   disappearing.
-- Complex fields remain out of the editable contract until their specific state
-  and UI infrastructure is implemented in later slices.
+- Phase 4 fields remain visible as read-only until their collection and ordering
+  UI infrastructure lands.

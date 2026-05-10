@@ -24,8 +24,11 @@ final class SchemaCompiler {
 	private const SCALAR_FIELD_PROPS = array(
 		'placeholder',
 		'input_type',
+		'min_search_length',
 		'min',
 		'max',
+		'per_page',
+		'search_label',
 		'step',
 		'rows',
 		'source',
@@ -47,6 +50,7 @@ final class SchemaCompiler {
 	private const BOOLEAN_FIELD_PROPS = array(
 		'all',
 		'active',
+		'allow_clear',
 		'align',
 		'background_attachment',
 		'background_blend_mode',
