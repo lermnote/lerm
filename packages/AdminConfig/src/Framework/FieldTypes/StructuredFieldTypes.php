@@ -41,7 +41,9 @@ final class StructuredFieldTypes {
 	private static function notice_definition(): array {
 		return array(
 			'render'   => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_notice_field( $field );
+				unset( $value, $field_name, $page );
+
+				self::render_notice_field( $field );
 			},
 			'sanitize' => static function () {
 				return '';
@@ -137,7 +139,9 @@ final class StructuredFieldTypes {
 	private static function sorter_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_sorter_field( $field, $value );
+				unset( $page );
+
+				self::render_sorter_field( $field, $value, $field_name );
 			},
 			'render_nested' => static function (): void {
 				self::render_nested_warning( __( 'Sorter fields cannot be nested inside a fieldset or group.', 'lerm' ) );
@@ -191,6 +195,126 @@ final class StructuredFieldTypes {
 				'control' => 'wp_editor',
 				'nested'  => true,
 			),
+		);
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 */
+	private static function render_notice_field( array $field ): void {
+		$html = isset( $field['html'] ) && is_scalar( $field['html'] ) ? (string) $field['html'] : '';
+
+		if ( '' === trim( $html ) ) {
+			return;
+		}
+
+		echo '<div class="lerm-settings-notice">';
+		echo wp_kses(
+			$html,
+			array(
+				'a'      => array(
+					'href'   => true,
+					'target' => true,
+					'rel'    => true,
+					'class'  => true,
+				),
+				'br'     => array(),
+				'code'   => array(),
+				'em'     => array(),
+				'p'      => array(
+					'class' => true,
+				),
+				'span'   => array(
+					'class' => true,
+				),
+				'strong' => array(),
+			)
+		);
+		echo '</div>';
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param mixed                $value
+	 */
+	private static function render_sorter_field( array $field, $value, string $field_name ): void {
+		$state      = self::sorter_state( $field, $value );
+		$field_id   = (string) $field['id'];
+		$order      = $state['order'];
+		$enabled    = $state['enabled'];
+		$label_text = (string) ( $field['label'] ?? '' );
+
+		echo '<div class="lerm-sorter" data-target="' . esc_attr( $field_id ) . '">';
+		echo '<p class="description">' . esc_html__( 'Drag to reorder. Checked items stay enabled; unchecked items are hidden.', 'lerm' ) . '</p>';
+		echo '<ul class="lerm-sorter-list">';
+
+		foreach ( $order as $key => $label ) {
+			$is_enabled = in_array( $key, $enabled, true );
+			echo '<li class="lerm-sorter-item">';
+			echo '<span class="lerm-sorter-handle" aria-hidden="true">&#8645;</span>';
+			echo '<input type="hidden" name="' . esc_attr( $field_name . '[order][]' ) . '" value="' . esc_attr( $key ) . '">';
+			echo '<label>';
+			echo '<input type="checkbox" name="' . esc_attr( $field_name . '[enabled][]' ) . '" value="' . esc_attr( $key ) . '" ' . checked( $is_enabled, true, false ) . '>';
+			echo '<span>' . esc_html( $label ) . '</span>';
+			echo '</label>';
+			echo '</li>';
+		}
+
+		echo '</ul>';
+		echo '<span class="screen-reader-text">' . esc_html( $label_text ) . '</span>';
+		echo '</div>';
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param mixed                $value
+	 * @return array{order: array<string, string>, enabled: array<int, string>}
+	 */
+	private static function sorter_state( array $field, $value ): array {
+		$choices = PageSchema::choices( $field );
+		$order   = array();
+		$enabled = array();
+
+		if ( is_array( $value ) ) {
+			if ( isset( $value['order'] ) && is_array( $value['order'] ) ) {
+				$order_keys = array_map( 'strval', $value['order'] );
+				$enabled    = isset( $value['enabled'] ) && is_array( $value['enabled'] )
+					? array_map( 'strval', $value['enabled'] )
+					: array();
+
+				foreach ( $order_keys as $key ) {
+					if ( isset( $choices[ $key ] ) ) {
+						$order[ $key ] = $choices[ $key ];
+					}
+				}
+			} else {
+				$enabled_values  = is_array( $value['enabled'] ?? null ) ? $value['enabled'] : array();
+				$disabled_values = is_array( $value['disabled'] ?? null ) ? $value['disabled'] : array();
+
+				foreach ( array_keys( $enabled_values ) as $key ) {
+					if ( isset( $choices[ $key ] ) ) {
+						$order[ $key ] = $choices[ $key ];
+						$enabled[]     = $key;
+					}
+				}
+
+				foreach ( array_keys( $disabled_values ) as $key ) {
+					if ( isset( $choices[ $key ] ) && ! isset( $order[ $key ] ) ) {
+						$order[ $key ] = $choices[ $key ];
+					}
+				}
+			}
+		}
+
+		foreach ( $choices as $key => $label ) {
+			if ( ! isset( $order[ $key ] ) ) {
+				$order[ $key ] = $label;
+			}
+		}
+
+		return array(
+			'order'   => $order,
+			'enabled' => $enabled,
 		);
 	}
 
