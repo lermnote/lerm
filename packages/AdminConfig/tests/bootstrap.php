@@ -241,6 +241,14 @@ if ( ! function_exists( 'esc_html__' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_kses' ) ) {
+	function wp_kses( string $content, array $allowed_html ): string {
+		unset( $allowed_html );
+
+		return $content;
+	}
+}
+
 if ( ! function_exists( 'checked' ) ) {
 	function checked( $checked, $current = true, bool $display = true ): string {
 		$result = (string) $checked === (string) $current ? ' checked="checked"' : '';

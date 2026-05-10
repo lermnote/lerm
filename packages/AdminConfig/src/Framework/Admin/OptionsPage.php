@@ -840,71 +840,6 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Render read-only notice / helper HTML.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 */
-	public function render_notice_field( array $field ): void {
-		$html = isset( $field['html'] ) && is_scalar( $field['html'] ) ? (string) $field['html'] : '';
-
-		if ( '' === trim( $html ) ) {
-			return;
-		}
-
-		echo '<div class="lerm-settings-notice">';
-		echo wp_kses(
-			$html,
-			array(
-				'a'      => array(
-					'href'   => true,
-					'target' => true,
-					'rel'    => true,
-					'class'  => true,
-				),
-				'br'     => array(),
-				'code'   => array(),
-				'em'     => array(),
-				'p'      => array(
-					'class' => true,
-				),
-				'span'   => array(
-					'class' => true,
-				),
-				'strong' => array(),
-			)
-		);
-		echo '</div>';
-	}
-
-	/**
-	 * Render backup export/import controls.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 */
-	public function render_backup_tools_field( array $field ): void {
-		$export_label = (string) ( $field['export_label'] ?? __( 'Export current settings', 'lerm' ) );
-		$import_label = (string) ( $field['import_label'] ?? __( 'Import settings JSON', 'lerm' ) );
-		$placeholder  = (string) ( $field['placeholder'] ?? __( '{ "example": "Paste a backup snapshot here" }', 'lerm' ) );
-
-		echo '<div class="lerm-backup-tools">';
-		echo '<div class="lerm-backup-tools__block">';
-		echo '<div class="lerm-backup-tools__header">';
-		echo '<strong>' . esc_html( $export_label ) . '</strong>';
-		echo '<button type="button" class="button button-secondary" data-lerm-backup-export>' . esc_html__( 'Generate snapshot', 'lerm' ) . '</button>';
-		echo '</div>';
-		echo '<textarea class="large-text code lerm-backup-tools__export" rows="10" readonly data-lerm-backup-export-output></textarea>';
-		echo '</div>';
-		echo '<div class="lerm-backup-tools__block">';
-		echo '<div class="lerm-backup-tools__header">';
-		echo '<strong>' . esc_html( $import_label ) . '</strong>';
-		echo '<button type="button" class="button button-primary" data-lerm-backup-import>' . esc_html__( 'Import snapshot', 'lerm' ) . '</button>';
-		echo '</div>';
-		echo '<textarea class="large-text code lerm-backup-tools__import" rows="10" data-lerm-backup-import-input placeholder="' . esc_attr( $placeholder ) . '"></textarea>';
-		echo '</div>';
-		echo '</div>';
-	}
-
-	/**
 	 * Render fieldsets as a compact grid of nested controls.
 	 *
 	 * @param array<string, mixed> $field      Field definition.
@@ -1299,32 +1234,6 @@ final class OptionsPage {
 	}
 
 	/**
-	 * Render a radio or button-set field.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Field value.
-	 */
-	public function render_choice_field( array $field, $value, string $field_name ): void {
-		$choices = PageSchema::choices( $field );
-		$current = is_scalar( $value ) ? (string) $value : '';
-		$class   = ( ( $field['type'] ?? 'radio' ) === 'button_set' ) ? 'lerm-button-set' : 'lerm-radio-list';
-
-		echo '<fieldset class="' . esc_attr( $class ) . '"><legend class="screen-reader-text">' . esc_html( (string) $field['label'] ) . '</legend>';
-
-		foreach ( $choices as $choice_value => $choice_label ) {
-			printf(
-				'<label><input type="radio" name="%1$s" value="%2$s" %3$s data-lerm-controller="1"> <span>%4$s</span></label>',
-				esc_attr( $field_name ),
-				esc_attr( $choice_value ),
-				checked( $current, (string) $choice_value, false ),
-				esc_html( $choice_label )
-			);
-		}
-
-		echo '</fieldset>';
-	}
-
-	/**
 	 * Render a gallery field.
 	 *
 	 * @param array<string, mixed> $field Field definition.
@@ -1358,96 +1267,6 @@ final class OptionsPage {
 		echo '<button type="button" class="button button-secondary button-link-delete lerm-gallery-remove" ' . ( empty( $ids ) ? 'hidden' : '' ) . '>' . esc_html__( 'Clear gallery', 'lerm' ) . '</button>';
 		echo '</div>';
 		echo '</div>';
-	}
-
-	/**
-	 * Render a sorter field.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Field value.
-	 */
-	public function render_sorter_field( array $field, $value ): void {
-		$state      = $this->sorter_state( $field, $value );
-		$field_id   = (string) $field['id'];
-		$name_base  = $this->option_name() . '[' . $field_id . ']';
-		$order      = $state['order'];
-		$enabled    = $state['enabled'];
-		$label_text = (string) $field['label'];
-
-		echo '<div class="lerm-sorter" data-target="' . esc_attr( $field_id ) . '">';
-		echo '<p class="description">' . esc_html__( 'Drag to reorder. Checked items stay enabled; unchecked items are hidden.', 'lerm' ) . '</p>';
-		echo '<ul class="lerm-sorter-list">';
-
-		foreach ( $order as $key => $label ) {
-			$is_enabled = in_array( $key, $enabled, true );
-			echo '<li class="lerm-sorter-item">';
-			echo '<span class="lerm-sorter-handle" aria-hidden="true">&#8645;</span>';
-			echo '<input type="hidden" name="' . esc_attr( $name_base . '[order][]' ) . '" value="' . esc_attr( $key ) . '">';
-			echo '<label>';
-			echo '<input type="checkbox" name="' . esc_attr( $name_base . '[enabled][]' ) . '" value="' . esc_attr( $key ) . '" ' . checked( $is_enabled, true, false ) . '>';
-			echo '<span>' . esc_html( $label ) . '</span>';
-			echo '</label>';
-			echo '</li>';
-		}
-
-		echo '</ul>';
-		echo '<span class="screen-reader-text">' . esc_html( $label_text ) . '</span>';
-		echo '</div>';
-	}
-
-	/**
-	 * Normalize sorter values into ordered labels and enabled keys.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Field value.
-	 * @return array{order: array<string, string>, enabled: array<int, string>}
-	 */
-	public function sorter_state( array $field, $value ): array {
-		$choices = PageSchema::choices( $field );
-		$order   = array();
-		$enabled = array();
-
-		if ( is_array( $value ) ) {
-			if ( isset( $value['order'] ) && is_array( $value['order'] ) ) {
-				$order_keys = array_map( 'strval', $value['order'] );
-				$enabled    = isset( $value['enabled'] ) && is_array( $value['enabled'] )
-					? array_map( 'strval', $value['enabled'] )
-					: array();
-
-				foreach ( $order_keys as $key ) {
-					if ( isset( $choices[ $key ] ) ) {
-						$order[ $key ] = $choices[ $key ];
-					}
-				}
-			} else {
-				$enabled_values  = is_array( $value['enabled'] ?? null ) ? $value['enabled'] : array();
-				$disabled_values = is_array( $value['disabled'] ?? null ) ? $value['disabled'] : array();
-
-				foreach ( array_keys( $enabled_values ) as $key ) {
-					if ( isset( $choices[ $key ] ) ) {
-						$order[ $key ] = $choices[ $key ];
-						$enabled[]     = $key;
-					}
-				}
-
-				foreach ( array_keys( $disabled_values ) as $key ) {
-					if ( isset( $choices[ $key ] ) && ! isset( $order[ $key ] ) ) {
-						$order[ $key ] = $choices[ $key ];
-					}
-				}
-			}
-		}
-
-		foreach ( $choices as $key => $label ) {
-			if ( ! isset( $order[ $key ] ) ) {
-				$order[ $key ] = $label;
-			}
-		}
-
-		return array(
-			'order'   => $order,
-			'enabled' => $enabled,
-		);
 	}
 
 	/**
