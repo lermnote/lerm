@@ -12,8 +12,10 @@ namespace Lerm\AdminConfig\WordPress\Containers;
 use Lerm\AdminConfig\Compiler\CompiledSchema;
 use Lerm\AdminConfig\Contracts\Container;
 use Lerm\AdminConfig\Stores\StoreResolver;
+use Lerm\AdminConfig\Framework\Contracts\AssetPathResolver;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Framework;
+use Lerm\AdminConfig\Framework\Support\PackageAssets;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
@@ -361,9 +363,8 @@ final class MetaboxContainer implements Container {
 			'dependencies' => $dependencies,
 			'version'      => $this->asset_version(),
 		);
-		$asset_dir    = dirname( __DIR__, 3 ) . '/assets';
-		$script_file  = $asset_dir . '/build/block-panel.js';
-		$asset_file   = $asset_dir . '/build/block-panel.asset.php';
+		$script_file  = $this->asset_path( 'build/block-panel.js' );
+		$asset_file   = $this->asset_path( 'build/block-panel.asset.php' );
 
 		if ( ! is_readable( $script_file ) || ! is_readable( $asset_file ) ) {
 			return $fallback;
@@ -392,6 +393,16 @@ final class MetaboxContainer implements Container {
 
 	private function asset_url( string $asset ): string {
 		return $this->framework->asset_resolver()->url( $asset );
+	}
+
+	private function asset_path( string $asset ): string {
+		$resolver = $this->framework->asset_resolver();
+
+		if ( $resolver instanceof AssetPathResolver ) {
+			return $resolver->path( $asset );
+		}
+
+		return PackageAssets::path( $asset );
 	}
 
 	private function asset_version(): string {
