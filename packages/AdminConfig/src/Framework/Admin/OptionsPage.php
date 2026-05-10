@@ -11,7 +11,10 @@ namespace Lerm\AdminConfig\Framework\Admin;
 
 use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
+use Lerm\AdminConfig\Framework\Contracts\AssetPathResolver;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
+use Lerm\AdminConfig\Framework\Support\I18nStrings;
+use Lerm\AdminConfig\Framework\Support\PackageAssets;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Registry\FieldModuleRegistry;
 
@@ -218,55 +221,7 @@ final class OptionsPage {
 		wp_localize_script(
 			$js_handle,
 			$this->js_global,
-			array(
-				'restUrl'             => rest_url( 'lerm-admin-config/v1/' ),
-				'restNonce'           => wp_create_nonce( 'wp_rest' ),
-				'codeEditor'          => $code_editor_settings,
-				'selectMedia'         => __( 'Choose image', 'lerm' ),
-				'useMedia'            => __( 'Use this image', 'lerm' ),
-				'selectFile'          => __( 'Choose file', 'lerm' ),
-				'useFile'             => __( 'Use this file', 'lerm' ),
-				'selectImages'        => __( 'Choose images', 'lerm' ),
-				'useImages'           => __( 'Use these images', 'lerm' ),
-				'removeMedia'         => __( 'Remove image', 'lerm' ),
-				'clearGallery'        => __( 'Clear gallery', 'lerm' ),
-				'noMedia'             => __( 'No image selected.', 'lerm' ),
-				'noGallery'           => __( 'No gallery images selected.', 'lerm' ),
-				'searchPrompt'        => __( 'Start typing to search.', 'lerm' ),
-				'searchMinPrompt'     => __( 'Type more characters to search.', 'lerm' ),
-				'loadingResults'      => __( 'Loading results...', 'lerm' ),
-				'noResults'           => __( 'No matching results found.', 'lerm' ),
-				'loadMoreResults'     => __( 'Load more', 'lerm' ),
-				'clearSelection'      => __( 'Clear selection', 'lerm' ),
-				'removeSelection'     => __( 'Remove selection', 'lerm' ),
-				'saving'              => __( 'Saving...', 'lerm' ),
-				'saveSuccess'         => __( 'Settings saved.', 'lerm' ),
-				'saveError'           => __( 'Unable to save the settings right now.', 'lerm' ),
-				'resetting'           => __( 'Resetting...', 'lerm' ),
-				'resetSectionSuccess' => __( 'The current page has been reset to defaults.', 'lerm' ),
-				'resetAllSuccess'     => __( 'All sections have been reset to defaults.', 'lerm' ),
-				'resetError'          => __( 'Unable to reset the settings right now.', 'lerm' ),
-				'confirmResetSection' => __( 'Reset the current page back to its default values?', 'lerm' ),
-				'confirmResetAll'     => __( 'Reset every section on this page back to default values?', 'lerm' ),
-				'confirmNavigate'     => __( 'You have unsaved changes in this tab. Leave without saving?', 'lerm' ),
-				'confirmLeave'        => __( 'You have unsaved changes that have not been saved yet.', 'lerm' ),
-				'statusReady'         => __( 'Synced', 'lerm' ),
-				'statusDirty'         => __( 'Unsaved changes', 'lerm' ),
-				'statusSaving'        => __( 'Saving...', 'lerm' ),
-				'statusResetting'     => __( 'Resetting...', 'lerm' ),
-				'statusSaved'         => __( 'Saved', 'lerm' ),
-				'statusError'         => __( 'Error', 'lerm' ),
-				'groupAdd'            => __( 'Add item', 'lerm' ),
-				'groupRemove'         => __( 'Remove', 'lerm' ),
-				'groupEmpty'          => __( 'No items added yet.', 'lerm' ),
-				'confirmRemoveItem'   => __( 'Remove this item?', 'lerm' ),
-				'exportSuccess'       => __( 'Current settings snapshot generated.', 'lerm' ),
-				'importSuccess'       => __( 'Settings imported successfully.', 'lerm' ),
-				'importError'         => __( 'Unable to import the provided settings JSON.', 'lerm' ),
-				'confirmImport'       => __( 'Importing will overwrite the current saved settings. Continue?', 'lerm' ),
-				'debugCopy'           => __( 'Copy JSON', 'lerm' ),
-				'debugCopied'         => __( 'Copied', 'lerm' ),
-			)
+			I18nStrings::for_admin_page( $code_editor_settings )
 		);
 	}
 
@@ -342,8 +297,7 @@ final class OptionsPage {
 
 						<?php
 						$active_section_definition = is_array( $active_section ) ? $active_section : array();
-						$active_section_fields     = PageSchema::section_fields( $active_section_definition );
-						$active_section_groups     = $this->group_fields( $active_section_definition, $active_section_fields );
+						$active_section_groups     = PageSchema::section_groups( $active_section_definition );
 						$current_subsection        = $this->section_uses_subsections( $active_section_definition, $active_section_groups )
 							? $this->current_subsection_for_section( (string) $current_tab, $active_section_groups )
 							: '';
@@ -362,7 +316,7 @@ final class OptionsPage {
 							<?php foreach ( $sections as $section_id => $section ) : ?>
 								<?php
 								$section_fields     = PageSchema::section_fields( $section );
-								$section_groups     = $this->group_fields( $section, $section_fields );
+								$section_groups     = PageSchema::section_groups( $section );
 								$use_subsections    = $this->section_uses_subsections( $section, $section_groups );
 								$current_subsection = $use_subsections ? $this->current_subsection_for_section( (string) $section_id, $section_groups ) : '';
 								$section_errors     = $this->section_flash_errors( $flash, (string) $section_id );
@@ -601,19 +555,6 @@ final class OptionsPage {
 				$this->collect_data_sources_from_fields( $item['fields'], $sources );
 			}
 		}
-	}
-
-	/**
-	 * Group fields by their configured subsection definition.
-	 *
-	 * @param array<string, mixed>             $section Section definition.
-	 * @param array<int, array<string, mixed>> $fields  Field definitions.
-	 * @return array<int, array<string, mixed>>
-	 */
-	private function group_fields( array $section, array $fields ): array {
-		unset( $fields );
-
-		return PageSchema::section_groups( $section );
 	}
 
 	/**
@@ -1717,7 +1658,7 @@ final class OptionsPage {
 
 		foreach ( PageSchema::sections( $this->definition ) as $section_id => $section ) {
 			$section_fields  = PageSchema::section_fields( $section );
-			$section_groups  = $this->group_fields( $section, $section_fields );
+			$section_groups  = PageSchema::section_groups( $section );
 			$use_subsections = $this->section_uses_subsections( $section, $section_groups );
 
 			foreach ( $section_fields as $field ) {
@@ -2209,6 +2150,17 @@ final class OptionsPage {
 	}
 
 	/**
+	 * Asset path, delegated to resolvers that expose filesystem locations.
+	 */
+	private function asset_path( string $asset ): string {
+		if ( $this->asset_resolver instanceof AssetPathResolver ) {
+			return $this->asset_resolver->path( $asset );
+		}
+
+		return PackageAssets::path( $asset );
+	}
+
+	/**
 	 * Resolve the built JavaScript asset metadata, falling back to the packaged
 	 * browser file for source checkouts that have not run the build yet.
 	 *
@@ -2221,9 +2173,8 @@ final class OptionsPage {
 			'dependencies' => $dependencies,
 			'version'      => $this->asset_version(),
 		);
-		$asset_dir    = dirname( __DIR__, 3 ) . '/assets';
-		$script_file  = $asset_dir . '/build/admin-config.js';
-		$asset_file   = $asset_dir . '/build/admin-config.asset.php';
+		$script_file  = $this->asset_path( 'build/admin-config.js' );
+		$asset_file   = $this->asset_path( 'build/admin-config.asset.php' );
 
 		if ( ! is_readable( $script_file ) || ! is_readable( $asset_file ) ) {
 			return $fallback;
@@ -2256,8 +2207,8 @@ final class OptionsPage {
 	private function asset_version(): string {
 		$version = $this->asset_resolver->version();
 		$assets  = array(
-			dirname( __DIR__, 3 ) . '/assets/admin-config.css',
-			dirname( __DIR__, 3 ) . '/assets/admin-config.js',
+			$this->asset_path( 'admin-config.css' ),
+			$this->asset_path( 'admin-config.js' ),
 		);
 		$mtime   = 0;
 

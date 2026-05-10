@@ -73,6 +73,7 @@ final class SchemaCompiler {
 		'letter_spacing',
 		'line_height',
 		'left',
+		'multiple',
 		'right',
 		'show_units',
 		'size',
@@ -243,15 +244,9 @@ final class SchemaCompiler {
 			$metadata['client'] = $client;
 		}
 
-		$this->copy_scalar_field_props( $field, $metadata, self::SCALAR_FIELD_PROPS );
-		$this->copy_boolean_field_props( $field, $metadata, self::BOOLEAN_FIELD_PROPS );
-		$this->copy_array_field_props( $field, $metadata, self::ARRAY_FIELD_PROPS );
-
-		foreach ( array( 'multiple' ) as $key ) {
-			if ( array_key_exists( $key, $field ) ) {
-				$metadata[ $key ] = (bool) $field[ $key ];
-			}
-		}
+		$this->copy_field_props( $field, $metadata, self::SCALAR_FIELD_PROPS, 'scalar' );
+		$this->copy_field_props( $field, $metadata, self::BOOLEAN_FIELD_PROPS, 'boolean' );
+		$this->copy_field_props( $field, $metadata, self::ARRAY_FIELD_PROPS, 'array' );
 
 		if ( 'palette' === $type ) {
 			$metadata['choices'] = $this->compile_palette_choices( $field );
@@ -362,35 +357,19 @@ final class SchemaCompiler {
 	 * @param array<string, mixed> $metadata
 	 * @param array<int, string>   $keys
 	 */
-	private function copy_scalar_field_props( array $field, array &$metadata, array $keys ): void {
+	private function copy_field_props( array $field, array &$metadata, array $keys, string $type ): void {
 		foreach ( $keys as $key ) {
-			if ( isset( $field[ $key ] ) && is_scalar( $field[ $key ] ) ) {
-				$metadata[ $key ] = $field[ $key ];
-			}
-		}
-	}
-
-	/**
-	 * @param array<string, mixed> $field
-	 * @param array<string, mixed> $metadata
-	 * @param array<int, string>   $keys
-	 */
-	private function copy_boolean_field_props( array $field, array &$metadata, array $keys ): void {
-		foreach ( $keys as $key ) {
-			if ( array_key_exists( $key, $field ) ) {
+			if ( 'boolean' === $type && array_key_exists( $key, $field ) ) {
 				$metadata[ $key ] = (bool) $field[ $key ];
+				continue;
 			}
-		}
-	}
 
-	/**
-	 * @param array<string, mixed> $field
-	 * @param array<string, mixed> $metadata
-	 * @param array<int, string>   $keys
-	 */
-	private function copy_array_field_props( array $field, array &$metadata, array $keys ): void {
-		foreach ( $keys as $key ) {
-			if ( isset( $field[ $key ] ) && is_array( $field[ $key ] ) ) {
+			if ( 'array' === $type && isset( $field[ $key ] ) && is_array( $field[ $key ] ) ) {
+				$metadata[ $key ] = $field[ $key ];
+				continue;
+			}
+
+			if ( 'scalar' === $type && isset( $field[ $key ] ) && is_scalar( $field[ $key ] ) ) {
 				$metadata[ $key ] = $field[ $key ];
 			}
 		}

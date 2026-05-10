@@ -78,6 +78,9 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   scripts; `test:wp:rest-only` remains a temporary alias for
   `test:wp:rest-contract`.
 - The Ajax retirement plan now has documented `0.3.0` removal criteria and deletion candidates.
+- Admin asset localization, asset file path resolution, and schema field
+  metadata copying now use smaller shared helpers instead of page-local
+  duplicate logic.
 - The block editor field matrix now separates Phase 4 collection fields from
   read-only fields and is checked against JS/PHP field contracts.
 - Admin pages now prefer the built `assets/build/admin-config.js` bundle while retaining a packaged browser-file fallback for source checkouts.

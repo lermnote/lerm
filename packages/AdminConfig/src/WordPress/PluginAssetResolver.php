@@ -10,13 +10,13 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\WordPress;
 
 use Lerm\AdminConfig\Version;
-use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
+use Lerm\AdminConfig\Framework\Contracts\AssetPathResolver;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class PluginAssetResolver implements AssetResolver {
+final class PluginAssetResolver implements AssetPathResolver {
 
 	private string $asset_plugin_file;
 	private string $version_constant;
@@ -32,6 +32,10 @@ final class PluginAssetResolver implements AssetResolver {
 
 	public function version(): string {
 		return Version::from_constant( $this->version_constant );
+	}
+
+	public function path( string $filename ): string {
+		return dirname( $this->asset_plugin_file ) . '/assets/' . ltrim( $filename, '/\\' );
 	}
 
 	private function resolve_asset_plugin_file( string $plugin_file ): string {
