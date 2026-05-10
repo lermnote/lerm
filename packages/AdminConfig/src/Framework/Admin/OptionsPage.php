@@ -16,6 +16,7 @@ use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Support\I18nStrings;
 use Lerm\AdminConfig\Framework\Support\PackageAssets;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\Support\ScriptAssetMetadata;
 use Lerm\AdminConfig\Registry\FieldModuleRegistry;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -681,6 +682,82 @@ final class OptionsPage {
 	 * @param string               $layout Layout mode.
 	 */
 	public function render_field( array $field, array $values, string $section_id = '', string $layout = 'table', array $field_errors = array() ): void {
+		unset( $section_id );
+
+		if ( 'stack' === $layout ) {
+			$this->render_stack_field_row( $field, $values, $field_errors );
+			return;
+		}
+
+		$this->render_table_field_row( $field, $values, $field_errors );
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param array<string, mixed> $values
+	 * @param array<string, mixed> $field_errors
+	 */
+	private function render_stack_field_row( array $field, array $values, array $field_errors ): void {
+		$context   = $this->field_row_context( $field, $values, $field_errors );
+		$row_attrs = $context['row_attrs'];
+
+		if ( '' === $context['label'] ) {
+			$row_attrs[0] = 'class="lerm-settings-row lerm-settings-row--nolabel' . ( $context['has_errors'] ? ' is-invalid' : '' ) . '"';
+		}
+
+		echo '<div ' . implode( ' ', $row_attrs ) . '>';
+
+		if ( '' !== $context['label'] ) {
+			printf(
+				'<div class="lerm-settings-row__head"><label for="%1$s">%2$s</label></div>',
+				esc_attr( $context['field_id'] ),
+				esc_html( $context['label'] )
+			);
+		}
+
+		echo '<div class="lerm-settings-row__body">';
+
+		$this->render_field_control( $field, $context, $field_errors );
+		$this->render_field_notes( $context['description'], $context['field_error'] );
+
+		echo '</div></div>';
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param array<string, mixed> $values
+	 * @param array<string, mixed> $field_errors
+	 */
+	private function render_table_field_row( array $field, array $values, array $field_errors ): void {
+		$context = $this->field_row_context( $field, $values, $field_errors );
+
+		echo '<tr ' . implode( ' ', $context['row_attrs'] ) . '>';
+
+		if ( '' !== $context['label'] ) {
+			printf(
+				'<th scope="row"><label for="%1$s">%2$s</label></th>',
+				esc_attr( $context['field_id'] ),
+				esc_html( $context['label'] )
+			);
+		} else {
+			echo '<th scope="row"></th>';
+		}
+
+		echo '<td>';
+
+		$this->render_field_control( $field, $context, $field_errors );
+		$this->render_field_notes( $context['description'], $context['field_error'] );
+
+		echo '</td></tr>';
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param array<string, mixed> $values
+	 * @param array<string, mixed> $field_errors
+	 * @return array{field_id: string, field_type: string, field_name: string, field_value: mixed, description: string, field_error: string, has_errors: bool, label: string, row_attrs: array<int, string>}
+	 */
+	private function field_row_context( array $field, array $values, array $field_errors ): array {
 		$field_id    = (string) $field['id'];
 		$field_type  = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
 		$field_name  = $this->option_name() . '[' . $field_id . ']';
@@ -707,54 +784,41 @@ final class OptionsPage {
 			}
 		}
 
-		if ( 'stack' === $layout ) {
-			if ( '' === $label ) {
-				$row_attrs[0] = 'class="lerm-settings-row lerm-settings-row--nolabel' . ( $has_errors ? ' is-invalid' : '' ) . '"';
-			}
+		return array(
+			'field_id'    => $field_id,
+			'field_type'  => $field_type,
+			'field_name'  => $field_name,
+			'field_value' => $field_value,
+			'description' => $description,
+			'field_error' => $field_error,
+			'has_errors'  => $has_errors,
+			'label'       => $label,
+			'row_attrs'   => $row_attrs,
+		);
+	}
 
-			echo '<div ' . implode( ' ', $row_attrs ) . '>';
-
-			if ( '' !== $label ) {
-				printf(
-					'<div class="lerm-settings-row__head"><label for="%1$s">%2$s</label></div>',
-					esc_attr( $field_id ),
-					esc_html( $label )
-				);
-			}
-
-			echo '<div class="lerm-settings-row__body">';
-		} else {
-			echo '<tr ' . implode( ' ', $row_attrs ) . '>';
-
-			if ( '' !== $label ) {
-				printf(
-					'<th scope="row"><label for="%1$s">%2$s</label></th>',
-					esc_attr( $field_id ),
-					esc_html( $label )
-				);
-			} else {
-				echo '<th scope="row"></th>';
-			}
-
-			echo '<td>';
-		}
-
-		$custom_render = $this->field_types->render_callback( $field_type );
+	/**
+	 * @param array<string, mixed> $field
+	 * @param array{field_id: string, field_type: string, field_name: string, field_value: mixed} $context
+	 * @param array<string, mixed> $field_errors
+	 */
+	private function render_field_control( array $field, array $context, array $field_errors ): void {
+		$custom_render = $this->field_types->render_callback( $context['field_type'] );
 
 		$previous_errors           = $this->render_field_errors;
 		$this->render_field_errors = $field_errors;
-		$this->render_path_stack[] = $field_id;
+		$this->render_path_stack[] = $context['field_id'];
 
 		try {
 			if ( is_callable( $custom_render ) ) {
-				call_user_func( $custom_render, $field, $field_value, $field_name, $this );
+				call_user_func( $custom_render, $field, $context['field_value'], $context['field_name'], $this );
 			} else {
 				printf(
 					'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" %5$s placeholder="%6$s">',
 					esc_attr( (string) ( $field['input_type'] ?? 'text' ) ),
-					esc_attr( $field_id ),
-					esc_attr( $field_name ),
-					esc_attr( $this->scalar_string( $field_value ) ),
+					esc_attr( $context['field_id'] ),
+					esc_attr( $context['field_name'] ),
+					esc_attr( $this->scalar_string( $context['field_value'] ) ),
 					$this->dependency_controller_attribute( $field ),
 					esc_attr( (string) ( $field['placeholder'] ?? '' ) )
 				);
@@ -763,7 +827,9 @@ final class OptionsPage {
 			array_pop( $this->render_path_stack );
 			$this->render_field_errors = $previous_errors;
 		}
+	}
 
+	private function render_field_notes( string $description, string $field_error ): void {
 		if ( $description ) {
 			printf( '<p class="description">%s</p>', esc_html( $description ) );
 		}
@@ -771,13 +837,6 @@ final class OptionsPage {
 		if ( '' !== $field_error ) {
 			printf( '<p class="lerm-field-error" data-lerm-field-error-message>%s</p>', esc_html( $field_error ) );
 		}
-
-		if ( 'stack' === $layout ) {
-			echo '</div></div>';
-			return;
-		}
-
-		echo '</td></tr>';
 	}
 
 	/**
@@ -2167,37 +2226,14 @@ final class OptionsPage {
 	 * @return array{file: string, dependencies: array<int, string>, version: string}
 	 */
 	private function script_asset(): array {
-		$dependencies = array( 'wp-theme-plugin-editor', 'wp-api-fetch' );
-		$fallback     = array(
-			'file'         => 'admin-config.js',
-			'dependencies' => $dependencies,
-			'version'      => $this->asset_version(),
-		);
-		$script_file  = $this->asset_path( 'build/admin-config.js' );
-		$asset_file   = $this->asset_path( 'build/admin-config.asset.php' );
-
-		if ( ! is_readable( $script_file ) || ! is_readable( $asset_file ) ) {
-			return $fallback;
-		}
-
-		$asset = include $asset_file;
-
-		if ( ! is_array( $asset ) ) {
-			return $fallback;
-		}
-
-		foreach ( (array) ( $asset['dependencies'] ?? array() ) as $dependency ) {
-			if ( is_string( $dependency ) && '' !== $dependency ) {
-				$dependencies[] = $dependency;
+		return ScriptAssetMetadata::resolve(
+			'admin-config',
+			'admin-config.js',
+			array( 'wp-theme-plugin-editor', 'wp-api-fetch' ),
+			$this->asset_version(),
+			function ( string $asset ): string {
+				return $this->asset_path( $asset );
 			}
-		}
-
-		return array(
-			'file'         => 'build/admin-config.js',
-			'dependencies' => array_values( array_unique( $dependencies ) ),
-			'version'      => isset( $asset['version'] ) && is_scalar( $asset['version'] )
-				? (string) $asset['version']
-				: $fallback['version'],
 		);
 	}
 

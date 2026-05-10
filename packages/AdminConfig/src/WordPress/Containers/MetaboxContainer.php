@@ -17,6 +17,7 @@ use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Support\PackageAssets;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\Support\ScriptAssetMetadata;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -350,44 +351,21 @@ final class MetaboxContainer implements Container {
 	 * @return array{file: string, dependencies: array<int, string>, version: string}
 	 */
 	private function block_panel_script_asset(): array {
-		$dependencies = array(
-			'wp-api-fetch',
-			'wp-block-editor',
-			'wp-components',
-			'wp-edit-post',
-			'wp-element',
-			'wp-plugins',
-		);
-		$fallback     = array(
-			'file'         => 'build/block-panel.js',
-			'dependencies' => $dependencies,
-			'version'      => $this->asset_version(),
-		);
-		$script_file  = $this->asset_path( 'build/block-panel.js' );
-		$asset_file   = $this->asset_path( 'build/block-panel.asset.php' );
-
-		if ( ! is_readable( $script_file ) || ! is_readable( $asset_file ) ) {
-			return $fallback;
-		}
-
-		$asset = include $asset_file;
-
-		if ( ! is_array( $asset ) ) {
-			return $fallback;
-		}
-
-		foreach ( (array) ( $asset['dependencies'] ?? array() ) as $dependency ) {
-			if ( is_string( $dependency ) && '' !== $dependency ) {
-				$dependencies[] = $dependency;
+		return ScriptAssetMetadata::resolve(
+			'block-panel',
+			'build/block-panel.js',
+			array(
+				'wp-api-fetch',
+				'wp-block-editor',
+				'wp-components',
+				'wp-edit-post',
+				'wp-element',
+				'wp-plugins',
+			),
+			$this->asset_version(),
+			function ( string $asset ): string {
+				return $this->asset_path( $asset );
 			}
-		}
-
-		return array(
-			'file'         => 'build/block-panel.js',
-			'dependencies' => array_values( array_unique( $dependencies ) ),
-			'version'      => isset( $asset['version'] ) && is_scalar( $asset['version'] )
-				? (string) $asset['version']
-				: $fallback['version'],
 		);
 	}
 
