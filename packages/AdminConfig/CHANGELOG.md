@@ -78,6 +78,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   scripts; `test:wp:rest-only` remains a temporary alias for
   `test:wp:rest-contract`.
 - The Ajax retirement plan now has documented `0.3.0` removal criteria and deletion candidates.
+- The block editor field matrix now separates Phase 4 collection fields from
+  read-only fields and is checked against JS/PHP field contracts.
 - Admin pages now prefer the built `assets/build/admin-config.js` bundle while retaining a packaged browser-file fallback for source checkouts.
 - The REST client path now uses WordPress `@wordpress/api-fetch` through the build dependency extraction pipeline.
 - The admin script source now builds from `resources/admin/index.js`, and the
