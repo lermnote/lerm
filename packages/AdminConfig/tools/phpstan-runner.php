@@ -10,6 +10,7 @@ $php_binary   = PHP_BINARY;
 $stub_file    = __DIR__ . '/wp-tool-stubs.php';
 $config_file  = $package_root . '/phpstan.neon.dist';
 $extra_args   = array_slice( $_SERVER['argv'] ?? array(), 1 );
+$memory_limit = getenv( 'LERM_ADMIN_CONFIG_PHPSTAN_MEMORY_LIMIT' ) ?: '2G';
 
 $candidates = array(
 	$package_root . '/vendor/bin/phpstan',
@@ -32,10 +33,11 @@ if ( null === $phpstan ) {
 }
 
 $command = sprintf(
-	'"%s" -d auto_prepend_file="%s" "%s" analyse --memory-limit=1G --configuration="%s"%s',
+	'"%s" -d auto_prepend_file="%s" "%s" analyse --memory-limit=%s --configuration="%s"%s',
 	$php_binary,
 	$stub_file,
 	$phpstan,
+	escapeshellarg( $memory_limit ),
 	$config_file,
 	empty( $extra_args )
 		? ''
