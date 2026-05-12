@@ -80,6 +80,103 @@ final class FieldRendererCallbacksTest extends TestCase {
 		$this->assertStringContainsString( '<span>Footer</span>', $output );
 	}
 
+	public function testStructuredMediaRendererRendersFromFieldTypeCallback(): void {
+		$page  = $this->options_page();
+		$field = array(
+			'id'          => 'hero_image',
+			'type'        => 'media',
+			'label'       => 'Hero image',
+			'button_text' => 'Choose hero',
+		);
+
+		$output = $this->render_field(
+			$page,
+			$field,
+			array(
+				'hero_image' => array(
+					'id' => 42,
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'class="lerm-media-field"', $output );
+		$this->assertStringContainsString( 'name="options_framework[hero_image][id]" value="42"', $output );
+		$this->assertStringContainsString( 'src="https://example.test/uploads/medium/42.jpg"', $output );
+		$this->assertStringContainsString( 'class="button lerm-media-select">Choose hero</button>', $output );
+	}
+
+	public function testStructuredGalleryRendererRendersFromFieldTypeCallback(): void {
+		$page  = $this->options_page();
+		$field = array(
+			'id'    => 'gallery_items',
+			'type'  => 'gallery',
+			'label' => 'Gallery items',
+		);
+
+		$output = $this->render_field(
+			$page,
+			$field,
+			array(
+				'gallery_items' => array(
+					'ids' => '3,5',
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'class="lerm-gallery-field"', $output );
+		$this->assertStringContainsString( 'name="options_framework[gallery_items][ids]" value="3,5"', $output );
+		$this->assertStringContainsString( 'src="https://example.test/uploads/thumbnail/3.jpg"', $output );
+		$this->assertStringContainsString( 'src="https://example.test/uploads/thumbnail/5.jpg"', $output );
+	}
+
+	public function testStructuredCodeEditorRendererRendersFromFieldTypeCallback(): void {
+		$page  = $this->options_page();
+		$field = array(
+			'id'          => 'custom_css',
+			'type'        => 'code_editor',
+			'label'       => 'Custom CSS',
+			'rows'        => 4,
+			'placeholder' => '<style>',
+		);
+
+		$output = $this->render_field(
+			$page,
+			$field,
+			array(
+				'custom_css' => '<script>alert(1)</script>',
+			)
+		);
+
+		$this->assertStringContainsString( 'id="custom_css"', $output );
+		$this->assertStringContainsString( 'name="options_framework[custom_css]"', $output );
+		$this->assertStringContainsString( 'class="large-text lerm-code-editor"', $output );
+		$this->assertStringContainsString( 'rows="4"', $output );
+		$this->assertStringContainsString( 'placeholder="&lt;style&gt;"', $output );
+		$this->assertStringContainsString( '&lt;script&gt;alert(1)&lt;/script&gt;', $output );
+	}
+
+	public function testStructuredWpEditorRendererRendersFromFieldTypeCallback(): void {
+		$page  = $this->options_page();
+		$field = array(
+			'id'    => 'body_copy',
+			'type'  => 'wp_editor',
+			'label' => 'Body copy',
+		);
+
+		$output = $this->render_field(
+			$page,
+			$field,
+			array(
+				'body_copy' => '<p>Hello</p>',
+			)
+		);
+
+		$this->assertStringContainsString( 'id="lerm-body_copy"', $output );
+		$this->assertStringContainsString( 'name="options_framework[body_copy]"', $output );
+		$this->assertStringContainsString( 'rows="6"', $output );
+		$this->assertStringContainsString( '&lt;p&gt;Hello&lt;/p&gt;', $output );
+	}
+
 	private function options_page(): OptionsPage {
 		$field_types = new FieldTypeRegistry();
 
