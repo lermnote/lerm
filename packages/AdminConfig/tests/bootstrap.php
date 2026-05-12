@@ -229,6 +229,12 @@ if ( ! function_exists( 'esc_attr' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_attr__' ) ) {
+	function esc_attr__( string $text ): string {
+		return esc_attr( $text );
+	}
+}
+
 if ( ! function_exists( 'esc_html' ) ) {
 	function esc_html( $text ): string {
 		return htmlspecialchars( is_scalar( $text ) ? (string) $text : '', ENT_QUOTES, 'UTF-8' );
@@ -246,6 +252,12 @@ if ( ! function_exists( 'wp_kses' ) ) {
 		unset( $allowed_html );
 
 		return $content;
+	}
+}
+
+if ( ! function_exists( 'esc_textarea' ) ) {
+	function esc_textarea( $text ): string {
+		return htmlspecialchars( is_scalar( $text ) ? (string) $text : '', ENT_QUOTES, 'UTF-8' );
 	}
 }
 
@@ -387,6 +399,37 @@ if ( ! function_exists( 'sanitize_hex_color' ) ) {
 if ( ! function_exists( 'esc_url_raw' ) ) {
 	function esc_url_raw( $url ): string {
 		return is_scalar( $url ) ? trim( (string) $url ) : '';
+	}
+}
+
+if ( ! function_exists( 'esc_url' ) ) {
+	function esc_url( $url ): string {
+		return esc_attr( is_scalar( $url ) ? trim( (string) $url ) : '' );
+	}
+}
+
+if ( ! function_exists( 'wp_get_attachment_image_url' ) ) {
+	function wp_get_attachment_image_url( int $attachment_id, string $size = 'thumbnail' ) {
+		if ( $attachment_id <= 0 ) {
+			return false;
+		}
+
+		return 'https://example.test/uploads/' . $size . '/' . (string) $attachment_id . '.jpg';
+	}
+}
+
+if ( ! function_exists( 'wp_editor' ) ) {
+	function wp_editor( string $content, string $editor_id, array $settings = array() ): void {
+		$textarea_name = is_scalar( $settings['textarea_name'] ?? null ) ? (string) $settings['textarea_name'] : $editor_id;
+		$rows          = is_scalar( $settings['textarea_rows'] ?? null ) ? (string) $settings['textarea_rows'] : '6';
+
+		printf(
+			'<textarea id="%1$s" name="%2$s" rows="%3$s">%4$s</textarea>',
+			esc_attr( $editor_id ),
+			esc_attr( $textarea_name ),
+			esc_attr( $rows ),
+			esc_textarea( $content )
+		);
 	}
 }
 

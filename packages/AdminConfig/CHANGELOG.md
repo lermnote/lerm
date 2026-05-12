@@ -85,6 +85,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   helpers to reduce branching and duplicated enqueue plumbing.
 - Low-coupling classic admin field renderers for notices, backup tools, and
   sorters now live in field type definitions instead of `OptionsPage`.
+- Classic admin renderers for media, gallery, code editor, and WordPress editor
+  fields now live in structured field type definitions instead of `OptionsPage`.
 - The block editor field matrix now separates Phase 4 collection fields from
   read-only fields and is checked against JS/PHP field contracts.
 - Admin pages now prefer the built `assets/build/admin-config.js` bundle while retaining a packaged browser-file fallback for source checkouts.

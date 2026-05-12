@@ -122,10 +122,14 @@ final class DesignFieldTypes {
 	private static function background_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				self::render_background_field( $field, $value, $field_name, (string) $field['id'], $page );
+				unset( $page );
+
+				self::render_background_field( $field, $value, $field_name, (string) $field['id'] );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-				self::render_background_field( $field, $value, $field_name, $input_id, $page, $name_template, $id_template );
+				unset( $page );
+
+				self::render_background_field( $field, $value, $field_name, $input_id, $name_template, $id_template );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				return self::sanitize_background_value( $field, $value );
@@ -247,7 +251,7 @@ final class DesignFieldTypes {
 	/**
 	 * @param mixed $value
 	 */
-	private static function render_background_field( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
+	private static function render_background_field( array $field, $value, string $field_name, string $input_id, string $name_template = '', string $id_template = '' ): void {
 		$data     = is_array( $value ) ? $value : array();
 		$defaults = self::default_background( $field );
 		$values   = wp_parse_args( $data, $defaults );
@@ -264,7 +268,7 @@ final class DesignFieldTypes {
 		}
 		if ( self::flag( $field, 'background_image', true ) ) {
 			echo '<div class="lerm-composite__item lerm-composite__item--full"><span class="lerm-composite__label">' . esc_html__( 'Image', 'lerm' ) . '</span>';
-			$page->render_media_field(
+			StructuredFieldTypes::render_media_control(
 				array(
 					'id'          => 'background-image',
 					'button_text' => (string) ( $field['background_image_button_text'] ?? __( 'Choose image', 'lerm' ) ),

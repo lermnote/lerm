@@ -95,11 +95,21 @@ final class StructuredFieldTypes {
 	private static function media_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_media_field( $field, $value, $field_name );
+				unset( $page );
+
+				self::render_media_control( $field, $value, $field_name, (string) $field['id'] );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-				$name_attr = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template . '[id]' ) . '"' : '';
-				$page->render_media_field( $field, $value, $field_name, $input_id, $name_attr, self::id_attr( $id_template ) );
+				unset( $page );
+
+				self::render_media_control(
+					$field,
+					$value,
+					$field_name,
+					$input_id,
+					self::name_attr( '' !== $name_template ? $name_template . '[id]' : '' ),
+					self::id_attr( $id_template )
+				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				return $store->sanitize_media_field( $value );
@@ -117,11 +127,21 @@ final class StructuredFieldTypes {
 	private static function gallery_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_gallery_field( $field, $value, $field_name );
+				unset( $page );
+
+				self::render_gallery_field( $field, $value, $field_name, (string) $field['id'] );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-				$name_attr = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template . '[ids]' ) . '"' : '';
-				$page->render_gallery_field( $field, $value, $field_name, $input_id, $name_attr, self::id_attr( $id_template ) );
+				unset( $page );
+
+				self::render_gallery_field(
+					$field,
+					$value,
+					$field_name,
+					$input_id,
+					self::name_attr( '' !== $name_template ? $name_template . '[ids]' : '' ),
+					self::id_attr( $id_template )
+				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				return $store->sanitize_gallery_field( $value );
@@ -162,10 +182,14 @@ final class StructuredFieldTypes {
 	private static function code_editor_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_code_editor_field( $field, $value, $field_name, (string) $field['id'] );
+				unset( $page );
+
+				self::render_code_editor_field( $field, $value, $field_name, (string) $field['id'] );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-				$page->render_code_editor_field( $field, $value, $field_name, $input_id, $name_template, $id_template );
+				unset( $page );
+
+				self::render_code_editor_field( $field, $value, $field_name, $input_id, $name_template, $id_template );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
 				return $store->sanitize_code_editor_field( $value );
@@ -183,10 +207,14 @@ final class StructuredFieldTypes {
 	private static function wp_editor_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_wp_editor_field( $field, $value, $field_name, (string) $field['id'] );
+				unset( $page );
+
+				self::render_wp_editor_field( $field, $value, $field_name, (string) $field['id'] );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-				$page->render_wp_editor_field( $field, $value, $field_name, $input_id, false, $name_template, $id_template );
+				unset( $page );
+
+				self::render_wp_editor_field( $field, $value, $field_name, $input_id, false, $name_template, $id_template );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
 				return $store->sanitize_wp_editor_field( $value );
@@ -318,11 +346,155 @@ final class StructuredFieldTypes {
 		);
 	}
 
+	/**
+	 * @param array<string, mixed> $field
+	 * @param mixed                $value
+	 */
+	private static function render_code_editor_field( array $field, $value, string $field_name, string $input_id, string $name_template = '', string $id_template = '' ): void {
+		printf(
+			'<textarea id="%1$s" name="%2$s" class="large-text lerm-code-editor" rows="%3$s" placeholder="%4$s"%5$s%6$s>%7$s</textarea>',
+			esc_attr( $input_id ),
+			esc_attr( $field_name ),
+			esc_attr( (string) ( $field['rows'] ?? 10 ) ),
+			esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
+			self::name_attr( $name_template ),
+			self::id_attr( $id_template ),
+			esc_textarea( PageSchema::scalar_value( $value ) )
+		);
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param mixed                $value
+	 */
+	private static function render_wp_editor_field( array $field, $value, string $field_name, string $input_id, bool $rich_editor = true, string $name_template = '', string $id_template = '' ): void {
+		if ( ! $rich_editor ) {
+			printf(
+				'<textarea id="%1$s" name="%2$s" class="large-text" rows="%3$s"%4$s%5$s>%6$s</textarea>',
+				esc_attr( $input_id ),
+				esc_attr( $field_name ),
+				esc_attr( (string) ( $field['rows'] ?? 6 ) ),
+				self::name_attr( $name_template ),
+				self::id_attr( $id_template ),
+				esc_textarea( PageSchema::scalar_value( $value ) )
+			);
+			return;
+		}
+
+		$editor_args = array_merge(
+			array(
+				'textarea_name' => $field_name,
+				'textarea_rows' => 6,
+			),
+			(array) ( $field['editor_args'] ?? array() )
+		);
+
+		wp_editor(
+			PageSchema::scalar_value( $value ),
+			sanitize_html_class( 'lerm-' . $input_id ),
+			$editor_args
+		);
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param mixed                $value
+	 */
+	public static function render_media_control( array $field, $value, string $field_name, string $target, string $name_attr = '', string $id_attr = '' ): void {
+		$attachment_id = is_array( $value ) ? absint( $value['id'] ?? 0 ) : absint( $value );
+		$image_url     = '';
+
+		if ( $attachment_id > 0 ) {
+			$image_url = (string) wp_get_attachment_image_url( $attachment_id, 'medium' );
+		}
+
+		if ( '' === $image_url && is_array( $value ) ) {
+			$image_url = PageSchema::scalar_value( $value['thumbnail'] ?? $value['url'] ?? '' );
+		}
+
+		$button_text = (string) ( $field['button_text'] ?? __( 'Choose image', 'lerm' ) );
+
+		printf(
+			'<div class="lerm-media-field" data-target="%1$s"><input type="hidden" name="%2$s[id]" value="%3$s"%8$s%9$s><div class="lerm-media-preview" %10$s>%4$s</div><div class="lerm-media-actions"><button type="button" class="button lerm-media-select">%5$s</button><button type="button" class="button button-secondary button-link-delete lerm-media-remove" %6$s>%7$s</button></div></div>',
+			esc_attr( $target ),
+			esc_attr( $field_name ),
+			esc_attr( (string) $attachment_id ),
+			$image_url ? '<img src="' . esc_url( $image_url ) . '" alt="">' : '',
+			esc_html( $button_text ),
+			$attachment_id > 0 ? '' : 'hidden',
+			esc_html__( 'Remove', 'lerm' ),
+			$name_attr,
+			$id_attr,
+			$image_url ? '' : 'hidden'
+		);
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param mixed                $value
+	 */
+	private static function render_gallery_field( array $field, $value, string $field_name, string $target, string $name_attr = '', string $id_attr = '' ): void {
+		unset( $field );
+
+		$ids = self::normalize_gallery_ids( $value );
+
+		echo '<div class="lerm-gallery-field" data-target="' . esc_attr( $target ) . '">';
+		echo '<input type="hidden" name="' . esc_attr( $field_name . '[ids]' ) . '" value="' . esc_attr( implode( ',', $ids ) ) . '"' . $name_attr . $id_attr . '>';
+		echo '<div class="lerm-gallery-preview" ' . ( empty( $ids ) ? 'hidden' : '' ) . '>';
+
+		if ( ! empty( $ids ) ) {
+			foreach ( $ids as $attachment_id ) {
+				$thumbnail = wp_get_attachment_image_url( $attachment_id, 'thumbnail' );
+
+				if ( ! $thumbnail ) {
+					continue;
+				}
+
+				echo '<img src="' . esc_url( $thumbnail ) . '" alt="">';
+			}
+		}
+
+		echo '</div>';
+		echo '<div class="lerm-media-actions">';
+		echo '<button type="button" class="button lerm-gallery-select">' . esc_html__( 'Choose images', 'lerm' ) . '</button>';
+		echo '<button type="button" class="button button-secondary button-link-delete lerm-gallery-remove" ' . ( empty( $ids ) ? 'hidden' : '' ) . '>' . esc_html__( 'Clear gallery', 'lerm' ) . '</button>';
+		echo '</div>';
+		echo '</div>';
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return array<int, int>
+	 */
+	private static function normalize_gallery_ids( $value ): array {
+		$ids = array();
+
+		if ( is_array( $value ) ) {
+			if ( isset( $value['ids'] ) && is_scalar( $value['ids'] ) ) {
+				$ids = explode( ',', (string) $value['ids'] );
+			} else {
+				$ids = $value;
+			}
+		} elseif ( is_scalar( $value ) ) {
+			$ids = explode( ',', (string) $value );
+		}
+
+		return array_values(
+			array_filter(
+				array_map( 'absint', $ids )
+			)
+		);
+	}
+
 	private static function render_nested_warning( string $message ): void {
 		printf(
 			'<p class="description" style="color:#b91c1c;font-style:italic">%s</p>',
 			esc_html( $message )
 		);
+	}
+
+	private static function name_attr( string $name_template ): string {
+		return '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
 	}
 
 	private static function id_attr( string $id_template ): string {
