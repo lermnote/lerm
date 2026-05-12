@@ -87,6 +87,12 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   sorters now live in field type definitions instead of `OptionsPage`.
 - Classic admin renderers for media, gallery, code editor, and WordPress editor
   fields now live in structured field type definitions instead of `OptionsPage`.
+- Classic admin structured container rendering now uses a dedicated
+  `ContainerFieldRenderer`, reducing `OptionsPage` to compatibility delegates
+  for fieldset, group, accordion, and tabbed fields.
+- PHPStan now runs with a 2G default memory limit, overridable through
+  `LERM_ADMIN_CONFIG_PHPSTAN_MEMORY_LIMIT`, to keep local and CI analysis
+  stable as package coverage grows.
 - The block editor field matrix now separates Phase 4 collection fields from
   read-only fields and is checked against JS/PHP field contracts.
 - Admin pages now prefer the built `assets/build/admin-config.js` bundle while retaining a packaged browser-file fallback for source checkouts.
