@@ -112,7 +112,9 @@ final class StructuredFieldTypes {
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
-				return $store->sanitize_media_field( $value );
+				unset( $field, $strict, $store );
+
+				return self::sanitize_media_value( $value );
 			},
 			'client'        => array(
 				'control' => 'media',
@@ -144,7 +146,9 @@ final class StructuredFieldTypes {
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
-				return $store->sanitize_gallery_field( $value );
+				unset( $field, $strict, $store );
+
+				return self::sanitize_gallery_value( $value );
 			},
 			'client'        => array(
 				'control' => 'gallery',
@@ -167,7 +171,9 @@ final class StructuredFieldTypes {
 				self::render_nested_warning( __( 'Sorter fields cannot be nested inside a fieldset or group.', 'lerm' ) );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
-				return $store->sanitize_sorter_field( $field, $value, $strict );
+				unset( $store );
+
+				return self::sanitize_sorter_value( $field, $value, $strict );
 			},
 			'client'        => array(
 				'control' => 'sorter',
@@ -192,7 +198,9 @@ final class StructuredFieldTypes {
 				self::render_code_editor_field( $field, $value, $field_name, $input_id, $name_template, $id_template );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
-				return $store->sanitize_code_editor_field( $value );
+				unset( $field, $strict, $store );
+
+				return self::sanitize_code_editor_value( $value );
 			},
 			'client'        => array(
 				'control' => 'code_editor',
@@ -217,7 +225,9 @@ final class StructuredFieldTypes {
 				self::render_wp_editor_field( $field, $value, $field_name, $input_id, false, $name_template, $id_template );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
-				return $store->sanitize_wp_editor_field( $value );
+				unset( $field, $strict, $store );
+
+				return self::sanitize_wp_editor_value( $value );
 			},
 			'client'        => array(
 				'control' => 'wp_editor',
@@ -484,6 +494,147 @@ final class StructuredFieldTypes {
 				array_map( 'absint', $ids )
 			)
 		);
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return array<string, mixed>
+	 */
+	private static function sanitize_media_value( $value ): array {
+		$attachment_id = is_array( $value ) ? absint( $value['id'] ?? 0 ) : absint( $value );
+
+		if ( $attachment_id <= 0 ) {
+			return array();
+		}
+
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+
+		if ( ! $attachment_url ) {
+			return array();
+		}
+
+		$thumbnail_url = wp_get_attachment_image_url( $attachment_id, 'thumbnail' );
+
+		return array_filter(
+			array(
+				'id'        => $attachment_id,
+				'url'       => $attachment_url,
+				'thumbnail' => $thumbnail_url ? $thumbnail_url : '',
+			)
+		);
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return array<int, int>
+	 */
+	private static function sanitize_gallery_value( $value ): array {
+		return array_values( array_unique( self::normalize_gallery_ids( $value ) ) );
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 * @param mixed                $value
+	 * @return array<string, array<string, string>>
+	 */
+	private static function sanitize_sorter_value( array $field, $value, bool $strict ): array {
+		$choices = PageSchema::choices( $field );
+		$default = is_array( $field['default'] ?? null ) ? $field['default'] : array(
+			'enabled'  => array(),
+			'disabled' => array(),
+		);
+
+		if ( ! is_array( $value ) ) {
+			return $default;
+		}
+
+		$order   = array();
+		$enabled = array();
+
+		if ( array_key_exists( 'order', $value ) ) {
+			$order   = is_array( $value['order'] ?? null ) ? $value['order'] : array();
+			$enabled = is_array( $value['enabled'] ?? null ) ? $value['enabled'] : array();
+		} else {
+			$enabled  = array_keys( is_array( $value['enabled'] ?? null ) ? $value['enabled'] : array() );
+			$disabled = array_keys( is_array( $value['disabled'] ?? null ) ? $value['disabled'] : array() );
+			$order    = array_merge( $enabled, $disabled );
+		}
+
+		$ordered_keys = array();
+
+		foreach ( $order as $key ) {
+			$key = is_scalar( $key ) ? (string) $key : '';
+
+			if ( '' === $key || isset( $ordered_keys[ $key ] ) ) {
+				continue;
+			}
+
+			if ( $strict && ! array_key_exists( $key, $choices ) ) {
+				continue;
+			}
+
+			$ordered_keys[ $key ] = $key;
+		}
+
+		if ( ! $strict ) {
+			foreach ( array_keys( $choices ) as $key ) {
+				if ( ! isset( $ordered_keys[ $key ] ) ) {
+					$ordered_keys[ $key ] = $key;
+				}
+			}
+		}
+
+		if ( empty( $ordered_keys ) ) {
+			return $default;
+		}
+
+		$enabled_lookup = array();
+
+		foreach ( $enabled as $key ) {
+			$key = is_scalar( $key ) ? (string) $key : '';
+
+			if ( '' === $key ) {
+				continue;
+			}
+
+			if ( $strict && ! array_key_exists( $key, $choices ) ) {
+				continue;
+			}
+
+			$enabled_lookup[ $key ] = true;
+		}
+
+		$result = array(
+			'enabled'  => array(),
+			'disabled' => array(),
+		);
+
+		foreach ( $ordered_keys as $key ) {
+			$label = $choices[ $key ] ?? (string) $key;
+
+			if ( isset( $enabled_lookup[ $key ] ) ) {
+				$result['enabled'][ $key ] = $label;
+				continue;
+			}
+
+			$result['disabled'][ $key ] = $label;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param mixed $value
+	 */
+	private static function sanitize_code_editor_value( $value ): string {
+		return PageSchema::scalar_value( $value, '', true );
+	}
+
+	/**
+	 * @param mixed $value
+	 */
+	private static function sanitize_wp_editor_value( $value ): string {
+		return wp_kses_post( PageSchema::scalar_value( $value ) );
 	}
 
 	private static function render_nested_warning( string $message ): void {
