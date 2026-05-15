@@ -90,6 +90,9 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Classic admin structured container rendering now uses a dedicated
   `ContainerFieldRenderer`, reducing `OptionsPage` to compatibility delegates
   for fieldset, group, accordion, and tabbed fields.
+- Structured and advanced field definitions now call
+  `OptionsPage::container_field_renderer()` directly, and the temporary
+  `OptionsPage` container delegate methods have been removed.
 - PHPStan now runs with a 2G default memory limit, overridable through
   `LERM_ADMIN_CONFIG_PHPSTAN_MEMORY_LIMIT`, to keep local and CI analysis
   stable as package coverage grows.
