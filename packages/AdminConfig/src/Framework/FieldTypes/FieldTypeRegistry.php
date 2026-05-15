@@ -53,14 +53,15 @@ final class FieldTypeRegistry {
 		$this->types[ $type ] = wp_parse_args(
 			$definition,
 			array(
-				'render'        => null,
-				'render_nested' => null,
-				'sanitize'      => null,
-				'validate'      => null,
-				'serialize'     => null,
-				'client'        => array(),
-				'persist'       => true,
-				'builtin'       => false,
+				'render'             => null,
+				'render_nested'      => null,
+				'sanitize'           => null,
+				'missing_submission' => null,
+				'validate'           => null,
+				'serialize'          => null,
+				'client'             => array(),
+				'persist'            => true,
+				'builtin'            => false,
 			)
 		);
 	}
@@ -129,6 +130,21 @@ final class FieldTypeRegistry {
 		}
 
 		return $this->types[ $type ]['sanitize'];
+	}
+
+	/**
+	 * Return the missing-submission callback for a field type.
+	 *
+	 * @return callable|null
+	 */
+	public function missing_submission_callback( string $type ): ?callable {
+		$type = sanitize_key( $type );
+
+		if ( ! isset( $this->types[ $type ]['missing_submission'] ) || ! is_callable( $this->types[ $type ]['missing_submission'] ) ) {
+			return null;
+		}
+
+		return $this->types[ $type ]['missing_submission'];
 	}
 
 	/**

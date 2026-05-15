@@ -425,41 +425,6 @@ final class OptionStore {
 						$value = esc_url_raw( $this->string_value( $value, '', true ) );
 						break;
 
-					case 'button_set':
-					case 'radio':
-					case 'select':
-						$value = $this->sanitize_select_field( $field, $value, $strict );
-						break;
-
-					case 'checkbox_list':
-						$choices = $strict ? PageSchema::choices( $field ) : array();
-						$values  = is_array( $value ) ? $value : array();
-						$clean   = array();
-
-						foreach ( $values as $item ) {
-							$item = is_scalar( $item ) ? (string) $item : '';
-
-							if ( '' === $item ) {
-								continue;
-							}
-
-							if ( ! $strict ) {
-								$clean[] = $item;
-								continue;
-							}
-
-							if ( array_key_exists( $item, $choices ) ) {
-								$clean[] = $item;
-							}
-						}
-
-						$value = array_values( array_unique( $clean ) );
-						break;
-
-					case 'number':
-						$value = $this->sanitize_number_field( $field, $value, $default );
-						break;
-
 					case 'textarea':
 						$value = sanitize_textarea_field( $this->string_value( $value ) );
 						break;
@@ -624,82 +589,6 @@ final class OptionStore {
 	}
 
 	/**
-	 * Sanitize select-like fields, including multi-select payloads.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Submitted value.
-	 * @return mixed
-	 */
-	private function sanitize_select_field( array $field, $value, bool $strict ) {
-		$default  = $field['default'] ?? '';
-		$cast     = (string) ( $field['cast'] ?? '' );
-		$multiple = ! empty( $field['multiple'] );
-
-		if ( $multiple ) {
-			$values  = is_array( $value ) ? $value : array();
-			$choices = $strict ? PageSchema::choices( $field ) : array();
-			$clean   = array();
-
-			foreach ( $values as $item ) {
-				$item = is_scalar( $item ) ? (string) $item : '';
-
-				if ( '' === $item ) {
-					continue;
-				}
-
-				if ( $strict && ! array_key_exists( $item, $choices ) ) {
-					continue;
-				}
-
-				$clean[] = $this->cast_scalar_value( $item, $cast );
-			}
-
-			return array_values( array_unique( $clean, SORT_REGULAR ) );
-		}
-
-		$choice = is_scalar( $value ) ? (string) $value : '';
-
-		if ( $strict ) {
-			$choices = PageSchema::choices( $field );
-
-			if ( ! array_key_exists( $choice, $choices ) ) {
-				return $default;
-			}
-		}
-
-		return $this->cast_scalar_value( $choice, $cast );
-	}
-
-	/**
-	 * Sanitize numeric fields while preserving optional float support.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Submitted value.
-	 * @param mixed                $fallback Default value.
-	 * @return int|float
-	 */
-	private function sanitize_number_field( array $field, $value, $fallback ) {
-		$cast   = (string) ( $field['cast'] ?? 'int' );
-		$number = is_numeric( $value ) ? (float) $value : (float) $fallback;
-		$min    = isset( $field['min'] ) && is_numeric( $field['min'] ) ? (float) $field['min'] : null;
-		$max    = isset( $field['max'] ) && is_numeric( $field['max'] ) ? (float) $field['max'] : null;
-
-		if ( null !== $min && $number < $min ) {
-			$number = $min;
-		}
-
-		if ( null !== $max && $number > $max ) {
-			$number = $max;
-		}
-
-		if ( 'float' === $cast ) {
-			return $number;
-		}
-
-		return (int) round( $number );
-	}
-
-	/**
 	 * Sanitize nested child field definitions.
 	 *
 	 * @param array<int, array<string, mixed>> $fields Child fields.
@@ -845,24 +734,6 @@ final class OptionStore {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Cast scalar values according to field preferences.
-	 *
-	 * @param string $value Scalar value.
-	 * @return string|int|float
-	 */
-	private function cast_scalar_value( string $value, string $cast ) {
-		if ( 'int' === $cast ) {
-			return (int) $value;
-		}
-
-		if ( 'float' === $cast ) {
-			return (float) $value;
-		}
-
-		return $value;
 	}
 
 	/**

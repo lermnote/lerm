@@ -279,16 +279,29 @@ final class BuiltinFieldTypes {
 	 */
 	private static function select_definition(): array {
 		return array(
-			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
+			'render'             => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
 				self::render_select( $field, $value, $field_name, (string) $field['id'], true );
 			},
-			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
+			'render_nested'      => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
 				self::render_select( $field, $value, $field_name, $input_id, false, $name_template, $id_template );
 			},
-			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
+			'sanitize'           => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				return self::sanitize_select_like( $field, $value, $strict );
 			},
-			'client'        => array(
+			'missing_submission' => static function ( array $field ): array {
+				if ( empty( $field['multiple'] ) ) {
+					return array(
+						'apply' => false,
+						'value' => null,
+					);
+				}
+
+				return array(
+					'apply' => true,
+					'value' => array(),
+				);
+			},
+			'client'             => array(
 				'control' => 'select',
 				'nested'  => true,
 			),
@@ -300,16 +313,22 @@ final class BuiltinFieldTypes {
 	 */
 	private static function checkbox_list_definition(): array {
 		return array(
-			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
+			'render'             => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
 				self::render_checkbox_list( $field, $value, $field_name, true, '', $page->dependency_controller_attribute( $field ) );
 			},
-			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
+			'render_nested'      => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
 				self::render_checkbox_list( $field, $value, $field_name, false, $name_template );
 			},
-			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
+			'sanitize'           => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				return self::sanitize_checkbox_list( $field, $value, $strict );
 			},
-			'client'        => array(
+			'missing_submission' => static function (): array {
+				return array(
+					'apply' => true,
+					'value' => array(),
+				);
+			},
+			'client'             => array(
 				'control' => 'checkbox_list',
 				'nested'  => true,
 			),

@@ -77,13 +77,19 @@ final class StructuredFieldTypes {
 	 */
 	private static function group_definition(): array {
 		return array(
-			'render'   => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
+			'render'             => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
 				$page->container_field_renderer()->render_group( $field, $value, $field_name );
 			},
-			'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
+			'sanitize'           => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				return $store->sanitize_group_field( $field, $value, $strict );
 			},
-			'client'   => array(
+			'missing_submission' => static function (): array {
+				return array(
+					'apply' => true,
+					'value' => array(),
+				);
+			},
+			'client'             => array(
 				'control' => 'group',
 			),
 		);
