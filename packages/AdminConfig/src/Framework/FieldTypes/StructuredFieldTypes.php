@@ -61,7 +61,7 @@ final class StructuredFieldTypes {
 	private static function fieldset_definition(): array {
 		return array(
 			'render'   => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_fieldset_field( $field, $value, $field_name );
+				$page->container_field_renderer()->render_fieldset( $field, $value, $field_name );
 			},
 			'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				return $store->sanitize_fieldset_field( $field, $value, $strict );
@@ -78,7 +78,7 @@ final class StructuredFieldTypes {
 	private static function group_definition(): array {
 		return array(
 			'render'   => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_group_field( $field, $value, $field_name );
+				$page->container_field_renderer()->render_group( $field, $value, $field_name );
 			},
 			'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				return $store->sanitize_group_field( $field, $value, $strict );

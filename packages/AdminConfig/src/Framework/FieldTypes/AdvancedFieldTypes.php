@@ -37,7 +37,7 @@ final class AdvancedFieldTypes {
 	private static function typography_definition(): array {
 		return array(
 			'render'   => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_fieldset_field( self::typography_field( $field ), $value, $field_name );
+				$page->container_field_renderer()->render_fieldset( self::typography_field( $field ), $value, $field_name );
 			},
 			'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				return $store->sanitize_fieldset_field( self::typography_field( $field ), $value, $strict );
@@ -89,7 +89,7 @@ final class AdvancedFieldTypes {
 	private static function accordion_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_accordion_field( $field, $value, $field_name );
+				$page->container_field_renderer()->render_accordion( $field, $value, $field_name );
 			},
 			'render_nested' => static function (): void {
 				self::render_nested_warning( __( 'Accordion fields cannot be nested inside a fieldset or group.', 'lerm' ) );
@@ -109,7 +109,7 @@ final class AdvancedFieldTypes {
 	private static function tabbed_definition(): array {
 		return array(
 			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
-				$page->render_tabbed_field( $field, $value, $field_name );
+				$page->container_field_renderer()->render_tabbed( $field, $value, $field_name );
 			},
 			'render_nested' => static function (): void {
 				self::render_nested_warning( __( 'Tabbed fields cannot be nested inside a fieldset or group.', 'lerm' ) );

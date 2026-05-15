@@ -839,56 +839,13 @@ final class OptionsPage {
 		}
 	}
 
-	private function container_renderer(): ContainerFieldRenderer {
+	public function container_field_renderer(): ContainerFieldRenderer {
 		return new ContainerFieldRenderer(
 			$this->field_types,
 			$this,
 			$this->render_field_errors,
 			$this->current_render_path()
 		);
-	}
-
-	/**
-	 * Render fieldsets as a compact grid of nested controls.
-	 *
-	 * @param array<string, mixed> $field      Field definition.
-	 * @param mixed                $value      Field value.
-	 * @param string               $section_id Current section ID.
-	 */
-	public function render_fieldset_field( array $field, $value, string $field_name, string $section_id = '' ): void {
-		unset( $section_id );
-
-		$this->container_renderer()->render_fieldset( $field, $value, $field_name );
-	}
-
-	/**
-	 * Render accordion field panels.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Field value.
-	 */
-	public function render_accordion_field( array $field, $value, string $field_name ): void {
-		$this->container_renderer()->render_accordion( $field, $value, $field_name );
-	}
-
-	/**
-	 * Render tabbed field panels.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Field value.
-	 */
-	public function render_tabbed_field( array $field, $value, string $field_name ): void {
-		$this->container_renderer()->render_tabbed( $field, $value, $field_name );
-	}
-
-	/**
-	 * Render repeatable groups.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Field value.
-	 */
-	public function render_group_field( array $field, $value, string $field_name ): void {
-		$this->container_renderer()->render_group( $field, $value, $field_name );
 	}
 
 	/**
