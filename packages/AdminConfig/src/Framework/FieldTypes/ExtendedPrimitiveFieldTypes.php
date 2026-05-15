@@ -42,7 +42,7 @@ final class ExtendedPrimitiveFieldTypes {
 	 */
 	private static function checkbox_definition(): array {
 		return array(
-			'render'        => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
+			'render'             => static function ( array $field, $value, string $field_name, OptionsPage $page ): void {
 				if ( self::checkbox_uses_choices( $field ) ) {
 					self::render_checkbox_group( $field, $value, $field_name, true, $page->dependency_controller_attribute( $field ) );
 					return;
@@ -56,7 +56,7 @@ final class ExtendedPrimitiveFieldTypes {
 					$page->dependency_controller_attribute( $field )
 				);
 			},
-			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
+			'render_nested'      => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
 				if ( self::checkbox_uses_choices( $field ) ) {
 					self::render_checkbox_group( $field, $value, $field_name, false, self::name_attr( self::multiple_name_template( $name_template ) ) );
 					return;
@@ -72,14 +72,27 @@ final class ExtendedPrimitiveFieldTypes {
 					self::id_attr( $id_template )
 				);
 			},
-			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
+			'sanitize'           => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				if ( self::checkbox_uses_choices( $field ) ) {
 					return self::sanitize_checkbox_choices( $field, $value, $strict );
 				}
 
 				return ! empty( $value );
 			},
-			'client'        => array(
+			'missing_submission' => static function ( array $field ): array {
+				if ( ! self::checkbox_uses_choices( $field ) ) {
+					return array(
+						'apply' => false,
+						'value' => null,
+					);
+				}
+
+				return array(
+					'apply' => true,
+					'value' => array(),
+				);
+			},
+			'client'             => array(
 				'control' => 'checkbox',
 				'nested'  => true,
 			),

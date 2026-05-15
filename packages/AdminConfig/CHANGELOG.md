@@ -96,6 +96,11 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 - Low-risk structured field sanitizers for media, gallery, sorter, code
   editor, and WordPress editor fields now live in structured field type
   definitions instead of `OptionStore`.
+- Missing-submission retry handling for multi-select, checkbox-list,
+  checkbox-choice, and group fields now comes from field type metadata instead
+  of `OptionsPage` hardcoded type checks.
+- `OptionStore` no longer carries duplicate `select` and `number` fallback
+  sanitizers once core field definitions are registered.
 - PHPStan now runs with a 2G default memory limit, overridable through
   `LERM_ADMIN_CONFIG_PHPSTAN_MEMORY_LIMIT`, to keep local and CI analysis
   stable as package coverage grows.

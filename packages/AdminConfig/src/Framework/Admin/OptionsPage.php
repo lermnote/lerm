@@ -915,8 +915,6 @@ final class OptionsPage {
 	 * @return array{apply: bool, value: mixed}
 	 */
 	private function missing_submission_render_value( array $field ): array {
-		$type = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
-
 		if ( array_key_exists( 'missing_submission_value', $field ) ) {
 			return array(
 				'apply' => true,
@@ -924,25 +922,18 @@ final class OptionsPage {
 			);
 		}
 
-		if ( 'select' === $type && ! empty( $field['multiple'] ) ) {
-			return array(
-				'apply' => true,
-				'value' => array(),
-			);
-		}
+		$type     = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+		$callback = $this->field_types->missing_submission_callback( $type );
 
-		if ( 'checkbox_list' === $type || 'group' === $type ) {
-			return array(
-				'apply' => true,
-				'value' => array(),
-			);
-		}
+		if ( is_callable( $callback ) ) {
+			$missing = call_user_func( $callback, $field );
 
-		if ( 'checkbox' === $type && ! empty( PageSchema::choices( $field ) ) ) {
-			return array(
-				'apply' => true,
-				'value' => array(),
-			);
+			if ( is_array( $missing ) ) {
+				return array(
+					'apply' => ! empty( $missing['apply'] ),
+					'value' => $missing['value'] ?? null,
+				);
+			}
 		}
 
 		return array(
