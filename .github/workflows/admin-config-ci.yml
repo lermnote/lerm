@@ -91,8 +91,8 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Verify asset build
-        run: npm run check:phase2
+      - name: Run JavaScript gate
+        run: npm run check
 
       - name: Validate composer.json
         run: composer validate --strict
