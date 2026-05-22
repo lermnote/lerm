@@ -101,9 +101,12 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
   of `OptionsPage` hardcoded type checks.
 - `OptionStore` no longer carries duplicate `select` and `number` fallback
   sanitizers once core field definitions are registered.
-- Package JavaScript gates now use the stable `npm run check` entrypoint;
-  the old phase-named scripts and dedicated legacy-Ajax audit script have been
-  removed.
+- Nested `fieldset`, `group`, `typography`, `accordion`, and `tabbed`
+  sanitization now lives in shared field-type helpers instead of
+  `OptionStore` field-type-specific methods.
+- Native WordPress metabox, taxonomy, profile, and comment containers now
+  share a save support helper for posted payload extraction and validation
+  flash handling.
 - PHPStan now runs with a 2G default memory limit, overridable through
   `LERM_ADMIN_CONFIG_PHPSTAN_MEMORY_LIMIT`, to keep local and CI analysis
   stable as package coverage grows.

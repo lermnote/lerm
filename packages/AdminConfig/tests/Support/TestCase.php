@@ -42,6 +42,8 @@ abstract class TestCase extends BaseTestCase {
 		$GLOBALS['lerm_admin_config_meta_boxes']        = array();
 		$GLOBALS['lerm_admin_config_current_screen']    = null;
 		$GLOBALS['lerm_admin_config_current_post_type'] = '';
+		$GLOBALS['lerm_admin_config_current_user_id']   = 1;
+		$GLOBALS['lerm_admin_config_transients']        = array();
 
 		$GLOBALS['lerm_admin_config_use_block_editor_for_post_type'] = false;
 
