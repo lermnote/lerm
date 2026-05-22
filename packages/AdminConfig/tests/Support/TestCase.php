@@ -19,7 +19,6 @@ abstract class TestCase extends BaseTestCase {
 
 	protected function runtime(): Runtime {
 		return new Runtime(
-			null,
 			new Framework(
 				new DefaultAssetResolver( 'https://example.test/admin-config/assets/' )
 			)

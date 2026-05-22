@@ -61,7 +61,7 @@ final class Runtime {
 
 	private bool $boot_requested = false;
 
-	public function __construct( ?SchemaRegistry $registry = null, Framework $framework ) {
+	public function __construct( Framework $framework, ?SchemaRegistry $registry = null ) {
 		$this->framework    = $framework;
 		$this->registry     = $registry ?? new SchemaRegistry( new SchemaCompiler( $this->framework->field_types() ) );
 		$this->stores       = new StoreResolver( $this->framework );

@@ -19,7 +19,6 @@ final class PluginBootstrap {
 
 	public static function boot( string $plugin_file, ?callable $registrar = null ): Runtime {
 		$runtime = new Runtime(
-			null,
 			new Framework(
 				new PluginAssetResolver( $plugin_file )
 			)

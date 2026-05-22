@@ -20,7 +20,6 @@ final class EmbeddedBootstrap {
 
 	public static function boot( string $assets_url, string $version_constant = 'LERM_VERSION', ?callable $registrar = null ): Runtime {
 		$runtime = new Runtime(
-			null,
 			new Framework(
 				new DefaultAssetResolver( $assets_url, $version_constant )
 			)
