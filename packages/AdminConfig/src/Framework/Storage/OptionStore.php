@@ -458,6 +458,22 @@ final class OptionStore {
 	}
 
 	/**
+	 * @param array<string, mixed> $field
+	 * @param mixed                $value
+	 * @return mixed
+	 */
+	public function sanitize_nested_field( array $field, $value, bool $strict, string $path ) {
+		return $this->sanitize_field_internal( $field, $value, $strict, $path );
+	}
+
+	/**
+	 * @param array<string, mixed> $field
+	 */
+	public function field_container_path( array $field, string $base_path = '' ): string {
+		return $this->container_path( $field, $base_path );
+	}
+
+	/**
 	 * Run an optional field-level validator after sanitization.
 	 *
 	 * Validators should return the validated value. Returning WP_Error records
@@ -542,77 +558,6 @@ final class OptionStore {
 		$this->raw_options        = $previous;
 		$this->normalized_options = null;
 		return false;
-	}
-
-	/**
-	 * Sanitize fieldsets into keyed arrays of sanitized child values.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Submitted value.
-	 * @return array<string, mixed>
-	 */
-	public function sanitize_fieldset_field( array $field, $value, bool $strict, string $base_path = '' ): array {
-		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
-		$data   = is_array( $value ) ? $value : array();
-
-		return $this->sanitize_nested_fields( $fields, $data, $strict, $this->container_path( $field, $base_path ) );
-	}
-
-	/**
-	 * Sanitize repeatable group fields.
-	 *
-	 * @param array<string, mixed> $field Field definition.
-	 * @param mixed                $value Submitted value.
-	 * @return array<int, array<string, mixed>>
-	 */
-	public function sanitize_group_field( array $field, $value, bool $strict, string $base_path = '' ): array {
-		$fields = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
-		$items  = is_array( $value ) ? array_values( $value ) : array();
-		$clean  = array();
-		$path   = $this->container_path( $field, $base_path );
-
-		foreach ( $items as $index => $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
-			}
-
-			$sanitized = $this->sanitize_nested_fields( $fields, $item, $strict, $this->compose_path( $path, (string) $index ) );
-
-			if ( $this->nested_values_empty( $sanitized ) ) {
-				continue;
-			}
-
-			$clean[] = $sanitized;
-		}
-
-		return $clean;
-	}
-
-	/**
-	 * Sanitize nested child field definitions.
-	 *
-	 * @param array<int, array<string, mixed>> $fields Child fields.
-	 * @param array<string, mixed>             $submitted Submitted child values.
-	 * @return array<string, mixed>
-	 */
-	private function sanitize_nested_fields( array $fields, array $submitted, bool $strict, string $base_path = '' ): array {
-		$clean = array();
-
-		foreach ( $fields as $child ) {
-			if ( ! is_array( $child ) || ! isset( $child['id'] ) ) {
-				continue;
-			}
-
-			$child_id           = (string) $child['id'];
-			$clean[ $child_id ] = $this->sanitize_field_internal(
-				$child,
-				$submitted[ $child_id ] ?? null,
-				$strict,
-				$this->compose_path( $base_path, $child_id )
-			);
-		}
-
-		return $clean;
 	}
 
 	private function begin_validation_capture(): void {
@@ -703,37 +648,6 @@ final class OptionStore {
 
 			$this->validation_errors[ $path ][] = $message;
 		}
-	}
-
-	/**
-	 * Determine whether a nested group item only contains empty values.
-	 *
-	 * @param array<string, mixed> $values Nested values.
-	 */
-	private function nested_values_empty( array $values ): bool {
-		foreach ( $values as $value ) {
-			if ( is_array( $value ) ) {
-				if ( ! empty( $value ) && ! $this->nested_values_empty( $value ) ) {
-					return false;
-				}
-
-				continue;
-			}
-
-			if ( is_bool( $value ) ) {
-				if ( $value ) {
-					return false;
-				}
-
-				continue;
-			}
-
-			if ( '' !== $this->string_value( $value, '', true ) ) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	/**

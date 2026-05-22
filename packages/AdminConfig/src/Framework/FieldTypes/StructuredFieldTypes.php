@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Framework\FieldTypes;
 
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\NestedFieldSanitizer;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
@@ -64,7 +65,7 @@ final class StructuredFieldTypes {
 				$page->container_field_renderer()->render_fieldset( $field, $value, $field_name );
 			},
 			'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
-				return $store->sanitize_fieldset_field( $field, $value, $strict );
+				return NestedFieldSanitizer::sanitize_fieldset( $field, $value, $strict, $store );
 			},
 			'client'   => array(
 				'control' => 'fieldset',
@@ -81,7 +82,7 @@ final class StructuredFieldTypes {
 				$page->container_field_renderer()->render_group( $field, $value, $field_name );
 			},
 			'sanitize'           => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
-				return $store->sanitize_group_field( $field, $value, $strict );
+				return NestedFieldSanitizer::sanitize_group( $field, $value, $strict, $store );
 			},
 			'missing_submission' => static function (): array {
 				return array(
