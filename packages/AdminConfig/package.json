@@ -2,11 +2,9 @@
   "name": "lerm-admin-config-tooling",
   "private": true,
   "scripts": {
-    "audit:ajax": "node tools/audit-legacy-ajax.js",
     "build": "wp-scripts build",
     "build:check": "npm run build && node tools/check-build-assets.js",
-    "check:phase1": "npm run build:check && npm run audit:ajax",
-    "check:phase2": "npm run check:phase1 && npm run test:js-runtime",
+    "check": "npm run build:check && npm run test:js-runtime",
     "start": "wp-scripts start",
     "test:js-runtime": "node tools/test-js-runtime.js",
     "wp-env:start": "wp-env start",

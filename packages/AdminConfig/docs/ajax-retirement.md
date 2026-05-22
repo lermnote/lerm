@@ -41,15 +41,13 @@ Use fixed REST endpoints instead: `/schemas/{schema_id}/values`,
 
 ## Verification
 
-Run the production reference audit before changing transport code:
+Run the standard package JavaScript gate after transport changes:
 
 ```sh
-npm run audit:ajax
+npm run check
 ```
 
-The audit scans `src/` and `resources/` and fails if any AdminConfig legacy Ajax
-transport reference returns. The dedicated REST contract smoke now runs without
-flipping a legacy Ajax switch:
+The dedicated REST contract smoke runs without flipping a legacy Ajax switch:
 
 ```sh
 npm run test:wp:rest-contract
@@ -57,7 +55,8 @@ npm run test:wp:rest-contract
 
 `npm run test:wp:rest-only` is kept as a temporary alias for downstream CI, but
 it no longer disables or re-enables Ajax. New automation should use
-`test:wp:rest-contract`.
+`test:wp:rest-contract`. Browser coverage remains the main regression guard
+against accidental `admin-ajax.php` requests.
 
 ## 0.3.0 Removal Checklist
 

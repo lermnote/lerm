@@ -33,7 +33,8 @@ produced a reusable client boundary for the future block-editor UI. AdminConfig
   metadata.
 - `resources/core/rest-client.js` is the reusable REST client boundary for classic
   admin and the future block-editor entry.
-- `npm run audit:ajax` passes and rejects production legacy Ajax references.
+- Local and CI browser coverage keep accidental AdminConfig
+  `admin-ajax.php` regressions visible.
 
 ## Required Local Commands
 
@@ -43,7 +44,7 @@ Run from `packages/AdminConfig`:
 composer validate --strict
 php tools/sync-version.php --check
 composer ci
-npm run check:phase1
+npm run check
 npm run test:wp:rest-contract
 ```
 

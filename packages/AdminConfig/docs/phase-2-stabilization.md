@@ -21,8 +21,8 @@ AdminConfig changes in the range include:
   `assets/build/block-panel.asset.php` generation.
 - Block-panel runtime helpers for schema loading, local value updates, save
   payloads, context query strings, and REST validation-error replay.
-- `npm run check:phase2`, including build verification, legacy Ajax removal audit,
-  and JavaScript runtime contract tests.
+- `npm run check`, including build verification and JavaScript runtime contract
+  tests.
 
 Non-AdminConfig files also changed in the same merge range:
 
@@ -49,7 +49,7 @@ from `packages/AdminConfig`:
 composer ci
 composer validate --strict
 php tools/sync-version.php --check
-npm run check:phase2
+npm run check
 npm run test:wp:rest-contract
 npm run test:wp
 npm run test:wp:multisite
@@ -63,7 +63,6 @@ Passing this set means:
 
 - Classic admin still builds and runs from `resources/admin/index.js`.
 - The build-only block-panel bundle is reproducible.
-- Legacy Ajax references remain absent from production sources.
 - Core JavaScript runtime helpers are covered by lightweight contract tests.
 - REST contract, default single-site, and multisite wp-env smoke coverage remain green.
 

@@ -275,7 +275,7 @@ when embedded inside a theme:
 - `npm run build:check` rebuilds and verifies generated assets and metadata
 - `npm run test:js-runtime` checks the core schema state, context, error, and
   block-panel runtime helpers
-- `npm run check:phase2` runs build verification, legacy Ajax removal, and JS runtime checks
+- `npm run check` runs build verification and JS runtime checks
 
 After a fresh source checkout, run:
 
