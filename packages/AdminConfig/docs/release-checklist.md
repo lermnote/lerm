@@ -10,7 +10,7 @@ Run from the package root:
 composer validate --strict
 composer ci
 npm ci
-npm run check:phase2
+npm run check
 composer test:integration
 ```
 
@@ -35,7 +35,6 @@ npm run test:e2e:block-editor
   `assets/build/block-panel.js`, and `assets/build/block-panel.asset.php`.
 - Confirm the built asset metadata includes `wp-api-fetch` after transport
   changes.
-- Confirm `npm run audit:ajax` reports no production legacy Ajax references.
 - Confirm `npm run test:js-runtime` covers block-panel runtime load/save
   behavior when front-end runtime helpers change.
 - Check options-page global save across multiple sections.

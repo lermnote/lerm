@@ -327,5 +327,5 @@ AdminConfig `admin-ajax.php` actions directly must migrate to the REST routes
 above. The no-JavaScript `admin-post.php` save path remains available for
 classic options pages.
 
-See `docs/ajax-retirement.md` for the completed removal checklist and migration
-notes.
+AdminConfig 0.3.0 removed its `admin-ajax.php` transport. JavaScript clients
+must use the REST routes documented here.
