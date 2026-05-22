@@ -15,9 +15,11 @@ use Lerm\AdminConfig\Stores\StoreResolver;
 use Lerm\AdminConfig\Framework\Contracts\AssetPathResolver;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Framework;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PackageAssets;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Framework\Support\ScriptAssetMetadata;
+use Lerm\AdminConfig\WordPress\Support\ContainerSaveSupport;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -195,10 +197,7 @@ final class MetaboxContainer implements Container {
 				continue;
 			}
 
-			$nonce_name = $this->nonce_name( $schema );
-			$nonce      = isset( $_POST[ $nonce_name ] ) && is_scalar( $_POST[ $nonce_name ] )
-				? (string) wp_unslash( $_POST[ $nonce_name ] )
-				: '';
+			$nonce = ContainerSaveSupport::posted_nonce( $this->nonce_name( $schema ) );
 
 			if ( '' === $nonce || ! wp_verify_nonce( $nonce, $this->nonce_action( $schema ) ) ) {
 				continue;
@@ -210,49 +209,25 @@ final class MetaboxContainer implements Container {
 				continue;
 			}
 
-			$store       = $this->stores->store( $schema, array( 'post_id' => $post_id ) );
-			$storage_key = $store->storage_key();
-			$submitted   = isset( $_POST[ $storage_key ] ) && is_array( $_POST[ $storage_key ] )
-				? wp_unslash( $_POST[ $storage_key ] )
-				: array();
-			$sections    = PageSchema::sections( $schema->definition() );
-			$section_id  = (string) array_key_first( $sections );
+			$store      = $this->stores->store( $schema, array( 'post_id' => $post_id ) );
+			$submitted  = ContainerSaveSupport::submitted_values( $store );
+			$sections   = PageSchema::sections( $schema->definition() );
+			$section_id = (string) array_key_first( $sections );
 
 			if ( '' === $section_id ) {
 				continue;
 			}
 
-			$success = $store->save_section( $section_id, $submitted );
-
-			if ( $store->has_validation_errors() ) {
-				ValidationFlash::store(
-					'metabox',
-					$schema->id(),
-					(string) $post_id,
-					array(
-						'class'     => 'notice-error',
-						'message'   => __( 'Please review the highlighted metabox fields before saving again.', 'lerm' ),
-						'errors'    => $store->validation_errors(),
-						'submitted' => $submitted,
-					)
-				);
-				continue;
-			}
-
-			if ( ! $success ) {
-				ValidationFlash::store(
-					'metabox',
-					$schema->id(),
-					(string) $post_id,
-					array(
-						'class'   => 'notice-warning',
-						'message' => __( 'Unable to save these metabox settings right now.', 'lerm' ),
-					)
-				);
-				continue;
-			}
-
-			ValidationFlash::clear( 'metabox', $schema->id(), (string) $post_id );
+			ContainerSaveSupport::persist(
+				'metabox',
+				$schema->id(),
+				(string) $post_id,
+				$store,
+				$submitted,
+				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->save_section( $section_id, $payload ),
+				__( 'Please review the highlighted metabox fields before saving again.', 'lerm' ),
+				__( 'Unable to save these metabox settings right now.', 'lerm' )
+			);
 		}
 	}
 

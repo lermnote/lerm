@@ -15,7 +15,9 @@ use Lerm\AdminConfig\Stores\StoreResolver;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Backends\ArrayBackend;
 use Lerm\AdminConfig\Framework\Framework;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\WordPress\Support\ContainerSaveSupport;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -199,10 +201,7 @@ final class TaxonomyContainer implements Container {
 
 	public function save_term( int $term_id, string $taxonomy ): void {
 		foreach ( $this->schemas_for_taxonomy( $taxonomy ) as $schema ) {
-			$nonce_name = $this->nonce_name( $schema );
-			$nonce      = isset( $_POST[ $nonce_name ] ) && is_scalar( $_POST[ $nonce_name ] )
-				? (string) wp_unslash( $_POST[ $nonce_name ] )
-				: '';
+			$nonce = ContainerSaveSupport::posted_nonce( $this->nonce_name( $schema ) );
 
 			if ( '' === $nonce || ! wp_verify_nonce( $nonce, $this->nonce_action( $schema ) ) ) {
 				continue;
@@ -212,43 +211,20 @@ final class TaxonomyContainer implements Container {
 				continue;
 			}
 
-			$store       = $this->stores->store( $schema, array( 'term_id' => $term_id ) );
-			$storage_key = $store->storage_key();
-			$submitted   = isset( $_POST[ $storage_key ] ) && is_array( $_POST[ $storage_key ] )
-				? wp_unslash( $_POST[ $storage_key ] )
-				: array();
-			$resource    = $this->current_flash_resource( $taxonomy, $term_id );
-			$success     = $store->import_all( $submitted );
+			$store     = $this->stores->store( $schema, array( 'term_id' => $term_id ) );
+			$submitted = ContainerSaveSupport::submitted_values( $store );
+			$resource  = $this->current_flash_resource( $taxonomy, $term_id );
 
-			if ( $store->has_validation_errors() ) {
-				ValidationFlash::store(
-					'taxonomy',
-					$schema->id(),
-					$resource,
-					array(
-						'class'     => 'notice-error',
-						'message'   => __( 'Please review the highlighted term fields before saving again.', 'lerm' ),
-						'errors'    => $store->validation_errors(),
-						'submitted' => $submitted,
-					)
-				);
-				continue;
-			}
-
-			if ( ! $success ) {
-				ValidationFlash::store(
-					'taxonomy',
-					$schema->id(),
-					$resource,
-					array(
-						'class'   => 'notice-warning',
-						'message' => __( 'Unable to save these term settings right now.', 'lerm' ),
-					)
-				);
-				continue;
-			}
-
-			ValidationFlash::clear( 'taxonomy', $schema->id(), $resource );
+			ContainerSaveSupport::persist(
+				'taxonomy',
+				$schema->id(),
+				$resource,
+				$store,
+				$submitted,
+				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
+				__( 'Please review the highlighted term fields before saving again.', 'lerm' ),
+				__( 'Unable to save these term settings right now.', 'lerm' )
+			);
 		}
 	}
 

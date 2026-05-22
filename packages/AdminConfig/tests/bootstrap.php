@@ -552,6 +552,28 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 	}
 }
 
+if ( ! function_exists( 'set_transient' ) ) {
+	function set_transient( string $transient, $value, int $expiration ): bool {
+		unset( $expiration );
+
+		$GLOBALS['lerm_admin_config_transients'][ $transient ] = $value;
+		return true;
+	}
+}
+
+if ( ! function_exists( 'get_transient' ) ) {
+	function get_transient( string $transient ) {
+		return $GLOBALS['lerm_admin_config_transients'][ $transient ] ?? false;
+	}
+}
+
+if ( ! function_exists( 'delete_transient' ) ) {
+	function delete_transient( string $transient ): bool {
+		unset( $GLOBALS['lerm_admin_config_transients'][ $transient ] );
+		return true;
+	}
+}
+
 if ( ! function_exists( 'check_ajax_referer' ) ) {
 	function check_ajax_referer( string $action, string $query_arg = '_ajax_nonce' ): bool {
 		unset( $action, $query_arg );
@@ -712,6 +734,12 @@ if ( ! function_exists( 'current_user_can' ) ) {
 		}
 
 		return true;
+	}
+}
+
+if ( ! function_exists( 'get_current_user_id' ) ) {
+	function get_current_user_id(): int {
+		return (int) ( $GLOBALS['lerm_admin_config_current_user_id'] ?? 1 );
 	}
 }
 
