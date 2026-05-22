@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Framework\FieldTypes;
 
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\NestedFieldSanitizer;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
@@ -40,7 +41,7 @@ final class AdvancedFieldTypes {
 				$page->container_field_renderer()->render_fieldset( self::typography_field( $field ), $value, $field_name );
 			},
 			'sanitize' => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
-				return $store->sanitize_fieldset_field( self::typography_field( $field ), $value, $strict );
+				return NestedFieldSanitizer::sanitize_fieldset( self::typography_field( $field ), $value, $strict, $store );
 			},
 			'client'   => array(
 				'control' => 'typography',
@@ -205,13 +206,14 @@ final class AdvancedFieldTypes {
 			$item_id           = (string) $item['id'];
 			$item_fields       = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
 			$item_value        = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
-			$clean[ $item_id ] = $store->sanitize_fieldset_field(
+			$clean[ $item_id ] = NestedFieldSanitizer::sanitize_fieldset(
 				array(
 					'id'     => $item_id,
 					'fields' => $item_fields,
 				),
 				$item_value,
-				$strict
+				$strict,
+				$store
 			);
 		}
 
