@@ -2,7 +2,7 @@
 /**
  * Classic admin structured container field renderer.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

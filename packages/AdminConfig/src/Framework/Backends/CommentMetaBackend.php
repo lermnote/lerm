@@ -2,7 +2,7 @@
 /**
  * Storage backend backed by WordPress comment meta.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

@@ -5,7 +5,7 @@
  * Useful for rendering schema defaults in add/new forms before a persistent
  * object ID exists, such as taxonomy term creation screens.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

@@ -9,7 +9,7 @@
  * Backward-compatible: when no backend is supplied the store falls back to the
  * OptionBackend (get_option / update_option), preserving existing behaviour.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

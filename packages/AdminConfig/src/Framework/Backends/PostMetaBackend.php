@@ -8,7 +8,7 @@
  *   $backend = new PostMetaBackend( $post_id, 'my_cpt_settings' );
  *   $store   = new OptionStore( $definition, $field_types, $backend );
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

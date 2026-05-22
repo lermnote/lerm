@@ -10,7 +10,7 @@
  * matching the behaviour of the OptionBackend so that OptionStore can work
  * transparently with either backend.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );
