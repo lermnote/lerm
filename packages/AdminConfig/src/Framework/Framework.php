@@ -2,7 +2,7 @@
 /**
  * Core entry point for the admin config runtime.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

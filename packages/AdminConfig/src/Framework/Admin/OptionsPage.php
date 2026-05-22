@@ -2,7 +2,7 @@
 /**
  * Generic native options page container.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

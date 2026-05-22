@@ -2,7 +2,7 @@
 /**
  * Built-in field type definitions for the admin-config framework.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

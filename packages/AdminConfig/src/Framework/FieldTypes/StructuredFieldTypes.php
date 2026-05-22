@@ -2,7 +2,7 @@
 /**
  * Structured admin field definitions.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

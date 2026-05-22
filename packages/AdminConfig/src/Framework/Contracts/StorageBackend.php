@@ -16,7 +16,7 @@
  *   'storage' => [ 'type' => 'user_meta',  'object_id' => $user_id ]
  *   'storage' => [ 'type' => 'post_meta',  'object_id' => $post_id ]
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

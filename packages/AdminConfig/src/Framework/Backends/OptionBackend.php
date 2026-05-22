@@ -5,7 +5,7 @@
  * This is the default backend used by the admin config runtime for theme/plugin
  * settings pages.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

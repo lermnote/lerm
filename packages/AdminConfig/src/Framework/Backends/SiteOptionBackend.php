@@ -2,7 +2,7 @@
 /**
  * Storage backend backed by WordPress site options.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

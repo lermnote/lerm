@@ -2,7 +2,7 @@
 /**
  * Native design-oriented composite field controls.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

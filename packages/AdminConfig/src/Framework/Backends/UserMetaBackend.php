@@ -6,7 +6,7 @@
  *   $backend = new UserMetaBackend( $user_id, 'my_user_settings' );
  *   $store   = new OptionStore( $definition, $field_types, $backend );
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );

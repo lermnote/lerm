@@ -2,7 +2,7 @@
 /**
  * Extended native fields for controls and presentation.
  *
- * @package Lerm
+ * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );
