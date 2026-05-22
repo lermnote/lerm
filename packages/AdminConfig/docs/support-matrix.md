@@ -72,7 +72,6 @@
   context, and no AdminConfig `admin-ajax.php` requests
 - Block editor field-status matrix in `docs/block-editor-field-matrix.md`
 - REST contract Playwright coverage for plugin-mode actions and multisite network settings
-- Phase 2 mainline stabilization notes in `docs/phase-2-stabilization.md`
 
 ## Release Policy
 
