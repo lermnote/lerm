@@ -20,14 +20,14 @@ final class ExamplesTest extends TestCase {
 		require_once dirname( __DIR__, 2 ) . '/examples/schema-demo-plugin/src/DemoExtensions.php';
 		require_once dirname( __DIR__, 2 ) . '/examples/schema-demo-plugin/src/SchemaDemoPlugin.php';
 
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		SchemaDemoPlugin::register( $runtime );
 
 		self::assertFalse( $runtime->has( 'acme-demo-network-settings' ) );
 
 		$GLOBALS['lerm_admin_config_is_multisite'] = true;
 
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		SchemaDemoPlugin::register( $runtime );
 
 		self::assertTrue( $runtime->has( 'acme-demo-network-settings' ) );
@@ -36,7 +36,7 @@ final class ExamplesTest extends TestCase {
 	public function testEmbeddedThemeDemoRegistersExpectedSchemas(): void {
 		require_once dirname( __DIR__, 2 ) . '/examples/embedded-theme-demo/src/EmbeddedThemeDemo.php';
 
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		EmbeddedThemeDemo::register( $runtime );
 
 		self::assertTrue( $runtime->has( 'acme-theme-style-kit' ) );

@@ -17,7 +17,7 @@ final class StoreBackendsIntegrationTest extends WpIntegrationTestCase {
 		delete_option( 'lerm_integration_option' );
 		delete_site_option( 'lerm_integration_site_option' );
 
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register( self::make_store_schema( 'integration-option', 'option', 'lerm_integration_option' ) );
 		$runtime->register( self::make_store_schema( 'integration-site-option', 'site_option', 'lerm_integration_site_option' ) );
 
@@ -69,7 +69,7 @@ final class StoreBackendsIntegrationTest extends WpIntegrationTestCase {
 		delete_user_meta( $user_id, 'lerm_integration_user_meta' );
 		delete_comment_meta( $comment_id, 'lerm_integration_comment_meta' );
 
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register( self::make_store_schema( 'integration-post-meta', 'post_meta', 'lerm_integration_post_meta' ) );
 		$runtime->register( self::make_store_schema( 'integration-term-meta', 'term_meta', 'lerm_integration_term_meta' ) );
 		$runtime->register( self::make_store_schema( 'integration-user-meta', 'user_meta', 'lerm_integration_user_meta' ) );

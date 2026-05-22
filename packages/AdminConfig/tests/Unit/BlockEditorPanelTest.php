@@ -141,7 +141,6 @@ final class BlockEditorPanelTest extends TestCase {
 
 	private function runtime_with_metabox_schema(): Runtime {
 		$runtime = new Runtime(
-			null,
 			new Framework(
 				new class() implements AssetResolver {
 					public function url( string $filename ): string {

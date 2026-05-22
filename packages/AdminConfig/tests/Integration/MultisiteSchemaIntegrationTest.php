@@ -25,7 +25,7 @@ final class MultisiteSchemaIntegrationTest extends WpIntegrationTestCase {
 	public function testSchemaDemoRegistersAndPersistsNetworkSettings(): void {
 		delete_site_option( 'acme_demo_network_settings' );
 
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 
 		SchemaDemoPlugin::register( $runtime );
 

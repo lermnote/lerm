@@ -17,7 +17,7 @@ use Lerm\AdminConfig\WordPress\Runtime;
 final class ExamplesSmokeTest extends TestCase {
 
 	public function testExampleRegistrationsProduceExpectedSchemas(): void {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 
 		require_once dirname( __DIR__, 2 ) . '/examples/schema-demo-plugin/src/DemoExtensions.php';
 		require_once dirname( __DIR__, 2 ) . '/examples/schema-demo-plugin/src/SchemaDemoPlugin.php';

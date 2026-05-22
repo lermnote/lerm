@@ -15,7 +15,6 @@ use Lerm\AdminConfig\Framework\Contracts\FrameworkContract;
 use Lerm\AdminConfig\Framework\Contracts\StorageBackend;
 use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
-use Lerm\AdminConfig\Framework\Resolvers\DefaultAssetResolver;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Modules\AsyncFieldsModule;
 use Lerm\AdminConfig\Modules\AdvancedFieldsModule;
@@ -52,15 +51,11 @@ final class Framework implements FrameworkContract {
 
 	private AssetResolver $asset_resolver;
 
-	public function __construct( ?AssetResolver $resolver = null ) {
+	public function __construct( AssetResolver $resolver ) {
 		$this->field_types   = new FieldTypeRegistry();
 		$this->field_modules = new FieldModuleRegistry( $this->field_types );
 		$this->register_default_field_modules();
-		$this->asset_resolver = $resolver ?? new DefaultAssetResolver(
-			// When embedded in a theme/package tree, default to the bundled
-			// AdminConfig assets. Plugin bootstrap injects its own resolver.
-			trailingslashit( get_template_directory_uri() . '/packages/AdminConfig/assets' )
-		);
+		$this->asset_resolver = $resolver;
 	}
 
 	/**
