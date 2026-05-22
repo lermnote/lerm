@@ -9,7 +9,7 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Tests\Integration;
 
-use PHPUnit\Framework\TestCase;
+use Lerm\AdminConfig\Tests\Support\TestCase;
 
 abstract class WpIntegrationTestCase extends TestCase {
 

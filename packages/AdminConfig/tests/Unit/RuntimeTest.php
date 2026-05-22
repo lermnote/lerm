@@ -16,7 +16,7 @@ use Lerm\AdminConfig\WordPress\Runtime;
 final class RuntimeTest extends TestCase {
 
 	public function testRuntimeRegistersRestAndAdminPostWithoutAjaxHandlers(): void {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register(
 			array(
 				'id'       => 'rest_only_runtime',
@@ -44,7 +44,7 @@ final class RuntimeTest extends TestCase {
 	}
 
 	public function testAllFallsBackToDefaultsWhenMetaContextIsMissing(): void {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register(
 			array(
 				'id'        => 'entry_meta',
@@ -85,7 +85,7 @@ final class RuntimeTest extends TestCase {
 	}
 
 	public function testStoreStillThrowsWhenMetaContextIsMissing(): void {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register(
 			array(
 				'id'        => 'entry_meta',
@@ -119,7 +119,7 @@ final class RuntimeTest extends TestCase {
 	}
 
 	public function testBootReportsMissingContainerAdaptersInDebugMode(): void {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register(
 			array(
 				'id'        => 'missing_container_schema',
@@ -154,7 +154,7 @@ final class RuntimeTest extends TestCase {
 	}
 
 	public function testBootReportsInvalidStoreConfigurationWithoutThrowing(): void {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register(
 			array(
 				'id'        => 'invalid_store_schema',

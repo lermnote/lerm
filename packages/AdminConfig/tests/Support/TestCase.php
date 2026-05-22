@@ -9,10 +9,22 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Tests\Support;
 
+use Lerm\AdminConfig\Framework\Framework;
+use Lerm\AdminConfig\Framework\Resolvers\DefaultAssetResolver;
+use Lerm\AdminConfig\WordPress\Runtime;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Throwable;
 
 abstract class TestCase extends BaseTestCase {
+
+	protected function runtime(): Runtime {
+		return new Runtime(
+			null,
+			new Framework(
+				new DefaultAssetResolver( 'https://example.test/admin-config/assets/' )
+			)
+		);
+	}
 
 	protected function setUp(): void {
 		parent::setUp();

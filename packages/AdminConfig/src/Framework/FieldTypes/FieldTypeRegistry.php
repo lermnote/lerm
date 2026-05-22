@@ -38,16 +38,8 @@ final class FieldTypeRegistry {
 		$current = $this->types[ $type ] ?? array();
 		$replace = ! empty( $definition['replace'] );
 
-		if ( ! empty( $current ) && ! $replace ) {
-			// Existing field types are extended by default so public extension APIs
-			// can add validators, serializers, or client metadata incrementally.
-			// Pass `replace => true` to fully replace a custom type definition, or
-			// `override_builtin => true` to intentionally replace a built-in type.
-			if ( $this->is_builtin( $type ) && empty( $definition['override_builtin'] ) ) {
-				$definition = wp_parse_args( $definition, $current );
-			} elseif ( empty( $definition['override_builtin'] ) ) {
-				$definition = wp_parse_args( $definition, $current );
-			}
+		if ( ! empty( $current ) && ! $replace && empty( $definition['override_builtin'] ) ) {
+			$definition = wp_parse_args( $definition, $current );
 		}
 
 		$this->types[ $type ] = wp_parse_args(
@@ -87,94 +79,41 @@ final class FieldTypeRegistry {
 		return isset( $this->types[ sanitize_key( $type ) ] );
 	}
 
-	/**
-	 * Return the render callback for a field type.
-	 *
-	 * @return callable|null
-	 */
 	public function render_callback( string $type ): ?callable {
-		$type = sanitize_key( $type );
-
-		if ( ! isset( $this->types[ $type ]['render'] ) || ! is_callable( $this->types[ $type ]['render'] ) ) {
-			return null;
-		}
-
-		return $this->types[ $type ]['render'];
+		return $this->get_callable( $type, 'render' );
 	}
 
-	/**
-	 * Return the nested render callback for a field type.
-	 *
-	 * @return callable|null
-	 */
 	public function nested_render_callback( string $type ): ?callable {
-		$type = sanitize_key( $type );
-
-		if ( ! isset( $this->types[ $type ]['render_nested'] ) || ! is_callable( $this->types[ $type ]['render_nested'] ) ) {
-			return null;
-		}
-
-		return $this->types[ $type ]['render_nested'];
+		return $this->get_callable( $type, 'render_nested' );
 	}
 
-	/**
-	 * Return the sanitize callback for a field type.
-	 *
-	 * @return callable|null
-	 */
 	public function sanitize_callback( string $type ): ?callable {
-		$type = sanitize_key( $type );
-
-		if ( ! isset( $this->types[ $type ]['sanitize'] ) || ! is_callable( $this->types[ $type ]['sanitize'] ) ) {
-			return null;
-		}
-
-		return $this->types[ $type ]['sanitize'];
+		return $this->get_callable( $type, 'sanitize' );
 	}
 
-	/**
-	 * Return the missing-submission callback for a field type.
-	 *
-	 * @return callable|null
-	 */
 	public function missing_submission_callback( string $type ): ?callable {
-		$type = sanitize_key( $type );
-
-		if ( ! isset( $this->types[ $type ]['missing_submission'] ) || ! is_callable( $this->types[ $type ]['missing_submission'] ) ) {
-			return null;
-		}
-
-		return $this->types[ $type ]['missing_submission'];
+		return $this->get_callable( $type, 'missing_submission' );
 	}
 
-	/**
-	 * Return the validate callback for a field type.
-	 *
-	 * @return callable|null
-	 */
 	public function validate_callback( string $type ): ?callable {
-		$type = sanitize_key( $type );
+		return $this->get_callable( $type, 'validate' );
+	}
 
-		if ( ! isset( $this->types[ $type ]['validate'] ) || ! is_callable( $this->types[ $type ]['validate'] ) ) {
-			return null;
-		}
-
-		return $this->types[ $type ]['validate'];
+	public function serialize_callback( string $type ): ?callable {
+		return $this->get_callable( $type, 'serialize' );
 	}
 
 	/**
-	 * Return the serialize callback for a field type.
-	 *
 	 * @return callable|null
 	 */
-	public function serialize_callback( string $type ): ?callable {
+	private function get_callable( string $type, string $key ): ?callable {
 		$type = sanitize_key( $type );
 
-		if ( ! isset( $this->types[ $type ]['serialize'] ) || ! is_callable( $this->types[ $type ]['serialize'] ) ) {
+		if ( ! isset( $this->types[ $type ][ $key ] ) || ! is_callable( $this->types[ $type ][ $key ] ) ) {
 			return null;
 		}
 
-		return $this->types[ $type ]['serialize'];
+		return $this->types[ $type ][ $key ];
 	}
 
 	/**

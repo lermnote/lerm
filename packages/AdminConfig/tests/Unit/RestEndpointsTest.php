@@ -18,7 +18,7 @@ use Lerm\AdminConfig\WordPress\Runtime;
 final class RestEndpointsTest extends TestCase {
 
 	public function testRegistersCanonicalAndLegacySchemaRestRoutes(): void {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		unset( $runtime );
 
 		do_action( 'rest_api_init' );
@@ -125,7 +125,7 @@ final class RestEndpointsTest extends TestCase {
 	public function testCanonicalSchemaIndexListsAccessibleSummaries(): void {
 		$runtime = $this->runtime_with_schema();
 
-		$private = new Runtime();
+		$private = $this->runtime();
 		$private->register(
 			array(
 				'id'       => 'private_index_schema',
@@ -162,7 +162,7 @@ final class RestEndpointsTest extends TestCase {
 	}
 
 	public function testSchemaEndpointDoesNotExposeServerCapabilitiesToClient(): void {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register(
 			array(
 				'id'        => 'private_rest_test',
@@ -275,7 +275,7 @@ final class RestEndpointsTest extends TestCase {
 	}
 
 	public function testRegisteredRestRoutesDispatchToRuntimeOwningRequestedSchema(): void {
-		$empty_runtime = new Runtime();
+		$empty_runtime = $this->runtime();
 		unset( $empty_runtime );
 
 		$runtime = $this->runtime_with_schema();
@@ -315,7 +315,7 @@ final class RestEndpointsTest extends TestCase {
 	}
 
 	public function testRegisteredRestDispatchCoversResetImportExportAndDataSourceAcrossRuntimePool(): void {
-		$empty_runtime = new Runtime();
+		$empty_runtime = $this->runtime();
 		unset( $empty_runtime );
 
 		$runtime = $this->runtime_with_schema();
@@ -802,7 +802,7 @@ final class RestEndpointsTest extends TestCase {
 	}
 
 	public function testMissingSchemaReturnsRestError(): void {
-		$response = ( new SchemaController( new Runtime() ) )->schema( $this->request( array( 'id' => 'missing' ) ) );
+		$response = ( new SchemaController( $this->runtime() ) )->schema( $this->request( array( 'id' => 'missing' ) ) );
 
 		$this->assertInstanceOf( \WP_Error::class, $response );
 		$this->assertSame( 'schema_not_found', $response->get_error_code() );
@@ -810,7 +810,7 @@ final class RestEndpointsTest extends TestCase {
 	}
 
 	private function runtime_with_schema(): Runtime {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register(
 			array(
 				'id'       => 'rest_test',
@@ -972,7 +972,7 @@ final class RestEndpointsTest extends TestCase {
 	}
 
 	private function runtime_with_meta_schema(): Runtime {
-		$runtime = new Runtime();
+		$runtime = $this->runtime();
 		$runtime->register(
 			array(
 				'id'        => 'rest_meta',
