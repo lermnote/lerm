@@ -442,7 +442,7 @@ const renderUnavailableField = (createElement, field, controlType, status, error
  * @param {{ createElement: Function, useEffect: Function, useMemo: Function, useState: Function }} element
  */
 const createPanelComponent = (config, Panel, element) => {
-	const { createElement, useEffect, useMemo, useState } = element;
+	const { createElement, useEffect, useMemo, useRef, useState } = element;
 
 	return function AdminConfigBlockPanel() {
 		const runtime = useMemo(() => createBlockPanelRuntime(config), []);
@@ -521,10 +521,40 @@ const createPanelComponent = (config, Panel, element) => {
 		const fieldsById = asRecord(state.schema.fields);
 		const dependencies = asRecord(state.schema.dependencies);
 		const dirty = isSchemaStateDirty(state);
+		const dirtyRef = useRef(false);
+		dirtyRef.current = dirty;
+
+		useEffect(() => {
+			const handleBeforeUnload = (event) => {
+				if (dirtyRef.current) {
+					event.preventDefault();
+					event.returnValue = '';
+				}
+			};
+			window.addEventListener('beforeunload', handleBeforeUnload);
+			return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+		}, []);
+
+		useEffect(() => {
+			const wpData = window.wp && window.wp.data;
+			const editorDispatch = wpData && wpData.dispatch && wpData.dispatch('core/editor');
+			if (dirty && editorDispatch && typeof editorDispatch.lockPostSaving === 'function') {
+				editorDispatch.lockPostSaving('lerm-admin-config-unsaved');
+			} else if (!dirty && editorDispatch && typeof editorDispatch.unlockPostSaving === 'function') {
+				editorDispatch.unlockPostSaving('lerm-admin-config-unsaved');
+			}
+			return () => {
+				if (editorDispatch && typeof editorDispatch.unlockPostSaving === 'function') {
+					editorDispatch.unlockPostSaving('lerm-admin-config-unsaved');
+				}
+			};
+		}, [dirty]);
 		const isBusy = status === 'loading' || status === 'saving';
 		const canRenderFields = status === 'ready' || (status === 'error' && Object.keys(state.schema || {}).length > 0);
 		const Button = components.Button;
 		const Spinner = components.Spinner;
+		const Modal = components.Modal;
+		const [showDiscardDialog, setShowDiscardDialog] = useState(false);
 		const fieldBody = [];
 		const syncPanelState = () => setState(runtime.getState());
 		const saveChanges = () => {
@@ -534,6 +564,11 @@ const createPanelComponent = (config, Panel, element) => {
 			savePromise.then(syncPanelState, syncPanelState);
 		};
 		const discardChanges = () => {
+			if (typeof Modal === 'function') {
+				setShowDiscardDialog(true);
+				return;
+			}
+
 			const shouldDiscard = typeof window === 'undefined' ||
 				typeof window.confirm !== 'function' ||
 				window.confirm('Discard unsaved AdminConfig changes?');
@@ -542,6 +577,12 @@ const createPanelComponent = (config, Panel, element) => {
 				return;
 			}
 
+			runtime.discardChanges();
+			syncPanelState();
+		};
+
+		const handleConfirmDiscard = () => {
+			setShowDiscardDialog(false);
 			runtime.discardChanges();
 			syncPanelState();
 		};
@@ -650,6 +691,16 @@ const createPanelComponent = (config, Panel, element) => {
 		}
 
 		if (fieldBody.length && hasEditableFields) {
+			if (dirty) {
+				body.push(createElement(
+					'div',
+					{
+						className: 'lerm-admin-config-block-panel__save-notice',
+						key: 'save-notice',
+					},
+					'Save AdminConfig changes before updating the post — they are stored separately.'
+				))
+			}
 			body.push(createElement(
 				'div',
 				{
@@ -713,7 +764,7 @@ const createPanelComponent = (config, Panel, element) => {
 			));
 		}
 
-		return createElement(
+		const panelElement = createElement(
 			Panel,
 			{
 				className: 'lerm-admin-config-block-panel',
@@ -734,6 +785,60 @@ const createPanelComponent = (config, Panel, element) => {
 				body
 			)
 		);
+
+		if (showDiscardDialog && typeof Modal === 'function') {
+			return [
+				panelElement,
+				createElement(
+					Modal,
+					{
+						key: 'discard-dialog',
+						title: 'Discard changes?',
+						onRequestClose: () => setShowDiscardDialog(false),
+					},
+					createElement(
+						'div',
+						{ style: { padding: '0 0 16px' } },
+						createElement('p', null, 'Discard unsaved AdminConfig changes?')
+					),
+					createElement(
+						'div',
+						{
+							style: {
+								display: 'flex',
+								gap: '8px',
+								justifyContent: 'flex-end',
+							},
+						},
+						typeof Button === 'function'
+							? createElement(
+								Button,
+								{
+									key: 'cancel',
+									onClick: () => setShowDiscardDialog(false),
+									variant: 'secondary',
+								},
+								'Cancel'
+							)
+							: null,
+						typeof Button === 'function'
+							? createElement(
+								Button,
+								{
+									isDestructive: true,
+									key: 'confirm',
+									onClick: handleConfirmDiscard,
+									variant: 'primary',
+								},
+								'Discard'
+							)
+							: null
+					)
+				),
+			];
+		}
+
+		return panelElement;
 	};
 };
 
