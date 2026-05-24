@@ -107,14 +107,12 @@ final class TaxonomyContainer implements Container {
 			return;
 		}
 
-		$taxonomy = sanitize_key( (string) $screen->taxonomy );
-		$schema   = $this->first_schema_for_taxonomy( $taxonomy );
+		$taxonomy  = sanitize_key( (string) $screen->taxonomy );
+		$schemas   = $this->schemas_for_taxonomy( $taxonomy );
 
-		if ( ! $schema ) {
-			return;
+		foreach ( $schemas as $schema ) {
+			$this->renderer( $schema, null )->enqueue_support_assets( 'taxonomy-' . $schema->id() );
 		}
-
-		$this->renderer( $schema, null )->enqueue_support_assets( 'taxonomy-' . $schema->id() );
 	}
 
 	public function render_add_form_fields( string $taxonomy ): void {
@@ -257,14 +255,6 @@ final class TaxonomyContainer implements Container {
 		}
 
 		return $matched;
-	}
-
-	private function first_schema_for_taxonomy( string $taxonomy ): ?CompiledSchema {
-		foreach ( $this->schemas_for_taxonomy( $taxonomy ) as $schema ) {
-			return $schema;
-		}
-
-		return null;
 	}
 
 	/**
