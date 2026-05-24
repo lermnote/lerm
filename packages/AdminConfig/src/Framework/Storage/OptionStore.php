@@ -411,29 +411,7 @@ final class OptionStore {
 					$value = $default;
 				}
 			} else {
-				switch ( $type ) {
-					case 'switcher':
-						$value = ! empty( $value );
-						break;
-
-					case 'color':
-						$color = sanitize_hex_color( $this->string_value( $value ) );
-						$value = $color ? $color : $default;
-						break;
-
-					case 'url':
-						$value = esc_url_raw( $this->string_value( $value, '', true ) );
-						break;
-
-					case 'textarea':
-						$value = sanitize_textarea_field( $this->string_value( $value ) );
-						break;
-
-					case 'text':
-					default:
-						$value = sanitize_text_field( $this->string_value( $value ) );
-						break;
-				}
+				$value = sanitize_text_field( $this->string_value( $value ) );
 			}
 
 			$value = $this->validate_field_value( $field, $value, $strict );
