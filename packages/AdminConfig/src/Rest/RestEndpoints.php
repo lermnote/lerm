@@ -111,7 +111,6 @@ final class RestEndpoints {
 			'/schemas/(?P<id>[a-z0-9_-]+)/data-source',
 			self::data_source_route_args()
 		);
-
 	}
 
 	public static function schemas( \WP_REST_Request $request ): \WP_REST_Response {
