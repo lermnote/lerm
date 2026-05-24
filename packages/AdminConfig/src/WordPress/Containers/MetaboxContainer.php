@@ -84,6 +84,13 @@ final class MetaboxContainer implements Container {
 			true
 		);
 
+		wp_enqueue_style(
+			$handle,
+			$this->asset_url( 'block-panel.css' ),
+			array( 'wp-components' ),
+			$this->asset_version()
+		);
+
 		$payload = wp_json_encode(
 			array(
 				'restUrl'   => rest_url( 'lerm-admin-config/v1/' ),
