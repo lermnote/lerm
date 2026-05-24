@@ -112,57 +112,6 @@ final class RestEndpoints {
 			self::data_source_route_args()
 		);
 
-		register_rest_route(
-			self::NAMESPACE,
-			'/schema/(?P<id>[a-z0-9_-]+)',
-			array(
-				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => array( self::class, 'schema' ),
-				'permission_callback' => array( self::class, 'can_access_schema' ),
-				'args'                => self::schema_args(),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/schema/(?P<id>[a-z0-9_-]+)/values',
-			array(
-				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => array( self::class, 'values' ),
-				'permission_callback' => array( self::class, 'can_access_schema' ),
-				'args'                => self::schema_args(),
-			)
-		);
-
-		foreach ( self::mutation_routes() as $route => $callback ) {
-			register_rest_route(
-				self::NAMESPACE,
-				'/schema/(?P<id>[a-z0-9_-]+)/' . $route,
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( self::class, $callback ),
-					'permission_callback' => array( self::class, 'can_access_schema' ),
-					'args'                => self::schema_args(),
-				)
-			);
-		}
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/schema/(?P<id>[a-z0-9_-]+)/export',
-			array(
-				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => array( self::class, 'export' ),
-				'permission_callback' => array( self::class, 'can_access_schema' ),
-				'args'                => self::schema_args(),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/schema/(?P<id>[a-z0-9_-]+)/data-source',
-			self::data_source_route_args()
-		);
 	}
 
 	public static function schemas( \WP_REST_Request $request ): \WP_REST_Response {
@@ -187,10 +136,6 @@ final class RestEndpoints {
 
 	public static function schema_document( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
 		return self::dispatch( $request, 'schema_document' );
-	}
-
-	public static function schema( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		return self::dispatch( $request, 'schema' );
 	}
 
 	public static function values( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
@@ -238,17 +183,6 @@ final class RestEndpoints {
 	 */
 	private static function canonical_mutation_routes(): array {
 		return array(
-			'reset'  => 'reset',
-			'import' => 'import',
-		);
-	}
-
-	/**
-	 * @return array<string, string>
-	 */
-	private static function mutation_routes(): array {
-		return array(
-			'save'   => 'save',
 			'reset'  => 'reset',
 			'import' => 'import',
 		);
