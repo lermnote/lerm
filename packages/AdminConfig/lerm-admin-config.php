@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'LERM_ADMIN_CONFIG_VERSION' ) ) {
-	define( 'LERM_ADMIN_CONFIG_VERSION', '0.3.0' );
+	define( 'LERM_ADMIN_CONFIG_VERSION', '0.4.0' );
 }
 
 $autoload = __DIR__ . '/vendor/autoload.php';
