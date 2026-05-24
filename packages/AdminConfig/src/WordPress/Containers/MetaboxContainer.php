@@ -209,14 +209,8 @@ final class MetaboxContainer implements Container {
 				continue;
 			}
 
-			$store      = $this->stores->store( $schema, array( 'post_id' => $post_id ) );
-			$submitted  = ContainerSaveSupport::submitted_values( $store );
-			$sections   = PageSchema::sections( $schema->definition() );
-			$section_id = (string) array_key_first( $sections );
-
-			if ( '' === $section_id ) {
-				continue;
-			}
+			$store     = $this->stores->store( $schema, array( 'post_id' => $post_id ) );
+			$submitted = ContainerSaveSupport::submitted_values( $store );
 
 			ContainerSaveSupport::persist(
 				'metabox',
@@ -224,7 +218,7 @@ final class MetaboxContainer implements Container {
 				(string) $post_id,
 				$store,
 				$submitted,
-				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->save_section( $section_id, $payload ),
+				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
 				__( 'Please review the highlighted metabox fields before saving again.', 'lerm' ),
 				__( 'Unable to save these metabox settings right now.', 'lerm' )
 			);
