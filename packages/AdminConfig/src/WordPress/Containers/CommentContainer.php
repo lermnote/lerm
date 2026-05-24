@@ -84,13 +84,9 @@ final class CommentContainer implements Container {
 			return;
 		}
 
-		$schema = $this->first_schema();
-
-		if ( ! $schema ) {
-			return;
+		foreach ( $this->schemas as $schema ) {
+			$this->renderer( $schema )->enqueue_support_assets( 'comment-' . $schema->id() );
 		}
-
-		$this->renderer( $schema )->enqueue_support_assets( 'comment-' . $schema->id() );
 	}
 
 	public function render_meta_box( \WP_Comment $comment, array $callback_args ): void {
@@ -216,13 +212,5 @@ final class CommentContainer implements Container {
 
 	private function nonce_action( CompiledSchema $schema ): string {
 		return 'lerm_admin_config_comment_' . $schema->id();
-	}
-
-	private function first_schema(): ?CompiledSchema {
-		foreach ( $this->schemas as $schema ) {
-			return $schema;
-		}
-
-		return null;
 	}
 }

@@ -67,13 +67,9 @@ final class ProfileContainer implements Container {
 			return;
 		}
 
-		$schema = $this->first_schema();
-
-		if ( ! $schema ) {
-			return;
+		foreach ( $this->schemas as $schema ) {
+			$this->renderer( $schema, get_current_user_id() )->enqueue_support_assets( 'profile-' . $schema->id() );
 		}
-
-		$this->renderer( $schema, get_current_user_id() )->enqueue_support_assets( 'profile-' . $schema->id() );
 	}
 
 	public function render_user_profile( \WP_User $user ): void {
@@ -187,13 +183,5 @@ final class ProfileContainer implements Container {
 
 	private function nonce_action( CompiledSchema $schema ): string {
 		return 'lerm_admin_config_profile_' . $schema->id();
-	}
-
-	private function first_schema(): ?CompiledSchema {
-		foreach ( $this->schemas as $schema ) {
-			return $schema;
-		}
-
-		return null;
 	}
 }
