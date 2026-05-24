@@ -213,5 +213,4 @@ final class CommentContainer implements Container {
 	private function nonce_action( CompiledSchema $schema ): string {
 		return 'lerm_admin_config_comment_' . $schema->id();
 	}
-
 }

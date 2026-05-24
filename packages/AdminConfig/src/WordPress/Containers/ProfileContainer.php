@@ -184,5 +184,4 @@ final class ProfileContainer implements Container {
 	private function nonce_action( CompiledSchema $schema ): string {
 		return 'lerm_admin_config_profile_' . $schema->id();
 	}
-
 }

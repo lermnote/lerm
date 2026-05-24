@@ -107,8 +107,8 @@ final class TaxonomyContainer implements Container {
 			return;
 		}
 
-		$taxonomy  = sanitize_key( (string) $screen->taxonomy );
-		$schemas   = $this->schemas_for_taxonomy( $taxonomy );
+		$taxonomy = sanitize_key( (string) $screen->taxonomy );
+		$schemas  = $this->schemas_for_taxonomy( $taxonomy );
 
 		foreach ( $schemas as $schema ) {
 			$this->renderer( $schema, null )->enqueue_support_assets( 'taxonomy-' . $schema->id() );
