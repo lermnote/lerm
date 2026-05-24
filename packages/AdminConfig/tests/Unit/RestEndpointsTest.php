@@ -35,13 +35,6 @@ final class RestEndpointsTest extends TestCase {
 		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/import', $routes );
 		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/export', $routes );
 		$this->assertContains( 'lerm-admin-config/v1/schemas/(?P<id>[a-z0-9_-]+)/data-source', $routes );
-		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)', $routes );
-		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/values', $routes );
-		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/save', $routes );
-		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/reset', $routes );
-		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/import', $routes );
-		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/export', $routes );
-		$this->assertContains( 'lerm-admin-config/v1/schema/(?P<id>[a-z0-9_-]+)/data-source', $routes );
 	}
 
 	public function testSchemaEndpointReturnsClientConfigAndValues(): void {
