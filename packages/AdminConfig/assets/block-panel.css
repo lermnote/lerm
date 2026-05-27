@@ -1,0 +1,377 @@
+/**
+ * AdminConfig block editor panel styles.
+ * Matches native WordPress editor panel visual conventions.
+ */
+
+/* ---- Status / Message / Meta ---- */
+
+.lerm-admin-config-block-panel__status {
+	display: none;
+}
+
+.lerm-admin-config-block-panel__message {
+	margin: 0 0 12px;
+	padding: 8px 12px;
+	font-size: 12px;
+	line-height: 1.4;
+	background: #f0f0f1;
+	border-left: 4px solid #007cba;
+	border-radius: 2px;
+}
+
+.lerm-admin-config-block-panel__message[data-error-count]:not([data-error-count="0"]),
+.lerm-admin-config-block-panel__message[role="alert"] {
+	background: #fcf0f1;
+	border-left-color: #cc1818;
+}
+
+.lerm-admin-config-block-panel__meta {
+	margin: 0 0 16px;
+	font-size: 11px;
+	color: #757575;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* ---- Save Notice ---- */
+
+.lerm-admin-config-block-panel__save-notice {
+	margin: 0 0 12px;
+	padding: 8px 12px;
+	font-size: 12px;
+	line-height: 1.4;
+	background: #fcf9e8;
+	border-left: 4px solid #dba617;
+	border-radius: 2px;
+	color: #755100;
+}
+
+/* ---- Sections ---- */
+
+.lerm-admin-config-block-panel__section {
+	margin: 0 0 24px;
+	padding: 0;
+	border: 0;
+}
+
+.lerm-admin-config-block-panel__section + .lerm-admin-config-block-panel__section {
+	padding-top: 20px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.lerm-admin-config-block-panel__section h3 {
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #1e1e1e;
+}
+
+.lerm-admin-config-block-panel__section-description {
+	margin: 0 0 16px;
+	font-size: 12px;
+	color: #757575;
+	line-height: 1.4;
+}
+
+/* ---- Fields ---- */
+
+.lerm-admin-config-block-panel__field {
+	margin: 0 0 20px;
+}
+
+.lerm-admin-config-block-panel__field:last-child {
+	margin-bottom: 0;
+}
+
+.lerm-admin-config-block-panel__field.is-error {
+	padding: 0 0 0 8px;
+	border-left: 3px solid #cc1818;
+}
+
+/* Field description text (rendered inside controls) is handled by controls */
+
+.lerm-admin-config-block-panel__field-description {
+	margin: 4px 0 0;
+	font-size: 12px;
+	color: #757575;
+	line-height: 1.4;
+}
+
+/* Field errors */
+
+.lerm-admin-config-block-panel__field-error {
+	margin: 6px 0 0;
+	font-size: 12px;
+	color: #cc1818;
+	line-height: 1.4;
+}
+
+/* ---- Read-only / Unsupported Fields ---- */
+
+.lerm-admin-config-block-panel__readonly-field,
+.lerm-admin-config-block-panel__unsupported-field {
+	margin-bottom: 16px;
+	padding: 12px;
+	background: #f9f9f9;
+	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+}
+
+.lerm-admin-config-block-panel__unsupported-field {
+	opacity: 0.65;
+}
+
+.lerm-admin-config-block-panel__unsupported-message {
+	margin: 6px 0 0;
+	font-size: 11px;
+	color: #757575;
+	font-style: italic;
+}
+
+/* ---- Actions Bar ---- */
+
+.lerm-admin-config-block-panel__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.lerm-admin-config-block-panel__dirty-state {
+	margin-left: auto;
+	font-size: 11px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	line-height: 18px;
+}
+
+.lerm-admin-config-block-panel__dirty-state[data-dirty="true"] {
+	color: #755100;
+	background: #fcf9e8;
+}
+
+.lerm-admin-config-block-panel__dirty-state[data-dirty="false"] {
+	color: #50575e;
+	background: #f0f0f1;
+}
+
+/* ---- Nested / Composite Fields ---- */
+
+.lerm-admin-config-block-panel__nested-field {
+	margin-bottom: 16px;
+	padding: 12px;
+	background: #f9f9f9;
+	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+}
+
+.lerm-admin-config-block-panel__nested-field--unavailable {
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+.lerm-admin-config-block-panel__composite-field {
+	margin-bottom: 16px;
+}
+
+.lerm-admin-config-block-panel__composite-item {
+	padding: 8px 0;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.lerm-admin-config-block-panel__composite-item:last-child {
+	border-bottom: 0;
+}
+
+.lerm-admin-config-block-panel__group {
+	margin-bottom: 20px;
+}
+
+.lerm-admin-config-block-panel__group-item {
+	margin-bottom: 12px;
+	padding: 12px;
+	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+}
+
+/* ---- Fieldset / Typography / Background ---- */
+
+.lerm-admin-config-block-panel__fieldset {
+	margin-bottom: 20px;
+	padding: 12px;
+	background: #f9f9f9;
+	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+}
+
+.lerm-admin-config-block-panel__typography,
+.lerm-admin-config-block-panel__background {
+	margin-bottom: 20px;
+}
+
+/* ---- Media Controls ---- */
+
+.lerm-admin-config-block-panel__media-preview {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.lerm-admin-config-block-panel__media-preview-item {
+	width: 80px;
+	height: 80px;
+	object-fit: cover;
+	border: 1px solid #ddd;
+	border-radius: 2px;
+	background: #f0f0f1;
+}
+
+.lerm-admin-config-block-panel__media-empty {
+	margin-top: 8px;
+	font-size: 12px;
+	color: #757575;
+	font-style: italic;
+}
+
+.lerm-admin-config-block-panel__media-control {
+	margin-bottom: 16px;
+}
+
+.lerm-admin-config-block-panel__media-actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.lerm-admin-config-block-panel__media-url {
+	margin-top: 8px;
+}
+
+.lerm-admin-config-block-panel__media-url-preview {
+	margin-top: 6px;
+	font-size: 12px;
+	color: #757575;
+	word-break: break-all;
+}
+
+/* ---- Range ---- */
+
+.lerm-admin-config-block-panel__range {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.lerm-admin-config-block-panel__range input[type="range"] {
+	flex: 1;
+}
+
+/* ---- Date ---- */
+
+.lerm-admin-config-block-panel__date {
+	max-width: 280px;
+}
+
+.lerm-admin-config-block-panel__date-range {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+/* ---- Radio / Checkbox List ---- */
+
+.lerm-admin-config-block-panel__radio {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.lerm-admin-config-block-panel__checkbox-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* ---- Button Set ---- */
+
+.lerm-admin-config-block-panel__button-set {
+	display: inline-flex;
+	gap: 0;
+	border: 1px solid #757575;
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.lerm-admin-config-block-panel__button-set .components-button {
+	border-radius: 0 !important;
+	border-right: 1px solid #757575;
+}
+
+.lerm-admin-config-block-panel__button-set .components-button:last-child {
+	border-right: 0;
+}
+
+/* ---- Color ---- */
+
+.lerm-admin-config-block-panel__color {
+	margin-bottom: 16px;
+}
+
+.lerm-admin-config-block-panel__palette-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 8px;
+}
+
+/* ---- AJAX Select ---- */
+
+.lerm-admin-config-block-panel__ajax-select {
+	margin-bottom: 16px;
+}
+
+.lerm-admin-config-block-panel__ajax-select-selected {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+
+.lerm-admin-config-block-panel__ajax-select-search {
+	margin-bottom: 8px;
+}
+
+.lerm-admin-config-block-panel__ajax-select-status {
+	margin-bottom: 4px;
+	font-size: 11px;
+	color: #757575;
+}
+
+.lerm-admin-config-block-panel__ajax-select-results {
+	max-height: 200px;
+	overflow-y: auto;
+	border: 1px solid #ddd;
+	border-radius: 2px;
+	background: #fff;
+}
+
+/* ---- Visual Choice ---- */
+
+.lerm-admin-config-block-panel__visual-choice {
+	margin-bottom: 16px;
+}
+
+.lerm-admin-config-block-panel__visual-choice-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+/* ---- Spinner ---- */
+
+.lerm-admin-config-block-panel .components-spinner {
+	margin: 12px auto;
+}
