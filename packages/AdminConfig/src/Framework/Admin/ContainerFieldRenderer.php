@@ -203,13 +203,13 @@ final class ContainerFieldRenderer {
 		$field_id    = (string) $field['id'];
 		$field_path  = $this->resolve_render_path( $field_id );
 		$items       = is_array( $value ) ? array_values( $value ) : array();
-		$button_text = (string) ( $field['button_text'] ?? __( 'Add item', 'lerm' ) );
+		$button_text = (string) ( $field['button_text'] ?? __( 'Add item', 'lerm-admin-config' ) );
 
 		echo '<div class="lerm-group' . ( $this->field_has_errors( $field_path, true ) ? ' is-invalid' : '' ) . '" data-target="' . esc_attr( $field_id ) . '" data-field-path="' . esc_attr( $field_path ) . '">';
 		echo '<div class="lerm-group__toolbar">';
 		echo '<button type="button" class="button button-secondary" data-lerm-group-add>' . esc_html( $button_text ) . '</button>';
 		echo '</div>';
-		echo '<div class="lerm-group__empty" ' . ( ! empty( $items ) ? 'hidden' : '' ) . '>' . esc_html__( 'No items added yet.', 'lerm' ) . '</div>';
+		echo '<div class="lerm-group__empty" ' . ( ! empty( $items ) ? 'hidden' : '' ) . '>' . esc_html__( 'No items added yet.', 'lerm-admin-config' ) . '</div>';
 		echo '<div class="lerm-group-list" data-lerm-group-list>';
 
 		foreach ( $items as $index => $item ) {
@@ -240,10 +240,10 @@ final class ContainerFieldRenderer {
 				<strong class="lerm-group-item__title">
 				<?php
 				// translators: %s is the item number in the group, starting from 1. For example: "Item 1", "Item 2", etc. Do not translate the number itself.
-				echo esc_html( sprintf( __( 'Item %s', 'lerm' ), is_numeric( $index ) ? (string) ( (int) $index + 1 ) : '#' ) );
+				echo esc_html( sprintf( __( 'Item %s', 'lerm-admin-config' ), is_numeric( $index ) ? (string) ( (int) $index + 1 ) : '#' ) );
 				?>
 				</strong>
-				<button type="button" class="button button-secondary button-link-delete" data-lerm-group-remove><?php echo esc_html__( 'Remove', 'lerm' ); ?></button>
+				<button type="button" class="button button-secondary button-link-delete" data-lerm-group-remove><?php echo esc_html__( 'Remove', 'lerm-admin-config' ); ?></button>
 			</div>
 			<div class="lerm-group-item__body">
 				<?php

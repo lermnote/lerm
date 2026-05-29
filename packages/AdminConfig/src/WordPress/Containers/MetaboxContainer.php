@@ -125,7 +125,7 @@ final class MetaboxContainer implements Container {
 
 			add_meta_box(
 				$this->meta_box_id( $schema ),
-				(string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Settings', 'lerm' ) ),
+				(string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Settings', 'lerm-admin-config' ) ),
 				array( $this, 'render_meta_box' ),
 				$post_type,
 				(string) ( $container['context'] ?? 'advanced' ),
@@ -226,8 +226,8 @@ final class MetaboxContainer implements Container {
 				$store,
 				$submitted,
 				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
-				__( 'Please review the highlighted metabox fields before saving again.', 'lerm' ),
-				__( 'Unable to save these metabox settings right now.', 'lerm' )
+				__( 'Please review the highlighted metabox fields before saving again.', 'lerm-admin-config' ),
+				__( 'Unable to save these metabox settings right now.', 'lerm-admin-config' )
 			);
 		}
 	}
@@ -311,7 +311,7 @@ final class MetaboxContainer implements Container {
 
 			$schemas[] = array(
 				'schemaId'      => $schema->id(),
-				'title'         => (string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Settings', 'lerm' ) ),
+				'title'         => (string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Settings', 'lerm-admin-config' ) ),
 				'containerType' => 'metabox',
 				'postType'      => $post_type,
 				'context'       => array(

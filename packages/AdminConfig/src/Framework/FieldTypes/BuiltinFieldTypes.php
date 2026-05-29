@@ -386,8 +386,8 @@ final class BuiltinFieldTypes {
 		);
 		printf(
 			'<span class="lerm-number-input__actions"><button type="button" class="lerm-number-input__button" data-lerm-number-step="up" aria-label="%1$s"><span aria-hidden="true">&#9650;</span></button><button type="button" class="lerm-number-input__button" data-lerm-number-step="down" aria-label="%2$s"><span aria-hidden="true">&#9660;</span></button></span>',
-			esc_attr__( 'Increase value', 'lerm' ),
-			esc_attr__( 'Decrease value', 'lerm' )
+			esc_attr__( 'Increase value', 'lerm-admin-config' ),
+			esc_attr__( 'Decrease value', 'lerm-admin-config' )
 		);
 		echo '</span>';
 	}
@@ -404,9 +404,9 @@ final class BuiltinFieldTypes {
 			$name_attr,
 			$id_attr,
 			$extra_attrs,
-			esc_attr__( 'on', 'lerm' ),
-			esc_attr__( 'off', 'lerm' ),
-			esc_html__( 'Enabled', 'lerm' )
+			esc_attr__( 'on', 'lerm-admin-config' ),
+			esc_attr__( 'off', 'lerm-admin-config' ),
+			esc_html__( 'Enabled', 'lerm-admin-config' )
 		);
 	}
 

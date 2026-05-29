@@ -130,7 +130,7 @@ final class SchemaController {
 
 				return ResponseFactory::error(
 					'validation_error',
-					esc_html__( 'Please review the highlighted fields and try again.', 'lerm' ),
+					esc_html__( 'Please review the highlighted fields and try again.', 'lerm-admin-config' ),
 					422,
 					array(
 						'fieldErrors' => $this->collapse_field_errors( $store->validation_errors() ),
@@ -144,7 +144,7 @@ final class SchemaController {
 
 			return ResponseFactory::error(
 				'save_failed',
-				esc_html__( 'Unable to save these settings right now.', 'lerm' ),
+				esc_html__( 'Unable to save these settings right now.', 'lerm-admin-config' ),
 				500
 			);
 		}
@@ -152,7 +152,7 @@ final class SchemaController {
 		return ResponseFactory::success(
 			array_merge(
 				array(
-					'message' => esc_html__( 'Settings saved.', 'lerm' ),
+					'message' => esc_html__( 'Settings saved.', 'lerm-admin-config' ),
 				),
 				SchemaSerializer::values( $schema, $store->all(), $this->schema_actions( $schema, $request ) )
 			)
@@ -185,24 +185,24 @@ final class SchemaController {
 		if ( 'all' === $scope ) {
 			$success = $store->reset_all_sections();
 			$values  = $store->all();
-			$message = esc_html__( 'All sections have been reset to defaults.', 'lerm' );
+			$message = esc_html__( 'All sections have been reset to defaults.', 'lerm-admin-config' );
 			$scope   = 'all';
 		} elseif ( '' !== $subsection && $store->has_section_group( $section, $subsection ) ) {
 			$success = $store->reset_section_group( $section, $subsection );
 			$values  = $store->section_group_values( $section, $subsection );
-			$message = esc_html__( 'The current page has been reset to defaults.', 'lerm' );
+			$message = esc_html__( 'The current page has been reset to defaults.', 'lerm-admin-config' );
 			$scope   = 'subsection';
 		} else {
 			$success = $store->reset_section( $section );
 			$values  = $store->section_values( $section );
-			$message = esc_html__( 'This section has been reset to defaults.', 'lerm' );
+			$message = esc_html__( 'This section has been reset to defaults.', 'lerm-admin-config' );
 			$scope   = 'section';
 		}
 
 		if ( ! $success ) {
 			return ResponseFactory::error(
 				'reset_failed',
-				esc_html__( 'Unable to reset the requested settings.', 'lerm' ),
+				esc_html__( 'Unable to reset the requested settings.', 'lerm-admin-config' ),
 				500
 			);
 		}
@@ -236,14 +236,14 @@ final class SchemaController {
 		if ( false === $json ) {
 			return ResponseFactory::error(
 				'export_failed',
-				esc_html__( 'Unable to export the current settings snapshot.', 'lerm' ),
+				esc_html__( 'Unable to export the current settings snapshot.', 'lerm-admin-config' ),
 				500
 			);
 		}
 
 		return ResponseFactory::success(
 			array(
-				'message' => esc_html__( 'Current settings snapshot generated.', 'lerm' ),
+				'message' => esc_html__( 'Current settings snapshot generated.', 'lerm-admin-config' ),
 				'json'    => $json,
 			)
 		);
@@ -267,7 +267,7 @@ final class SchemaController {
 		if ( '' === $json ) {
 			return ResponseFactory::error(
 				'missing_import_payload',
-				esc_html__( 'Paste a JSON snapshot before importing.', 'lerm' ),
+				esc_html__( 'Paste a JSON snapshot before importing.', 'lerm-admin-config' ),
 				400
 			);
 		}
@@ -277,7 +277,7 @@ final class SchemaController {
 		if ( ! is_array( $decoded ) ) {
 			return ResponseFactory::error(
 				'invalid_import_json',
-				esc_html__( 'The backup JSON is invalid.', 'lerm' ),
+				esc_html__( 'The backup JSON is invalid.', 'lerm-admin-config' ),
 				400
 			);
 		}
@@ -288,7 +288,7 @@ final class SchemaController {
 
 				return ResponseFactory::error(
 					'validation_error',
-					esc_html__( 'Please review the highlighted fields before importing again.', 'lerm' ),
+					esc_html__( 'Please review the highlighted fields before importing again.', 'lerm-admin-config' ),
 					422,
 					array(
 						'fieldErrors' => $this->collapse_field_errors( $store->validation_errors() ),
@@ -302,7 +302,7 @@ final class SchemaController {
 
 			return ResponseFactory::error(
 				'import_failed',
-				esc_html__( 'Unable to import the provided settings JSON.', 'lerm' ),
+				esc_html__( 'Unable to import the provided settings JSON.', 'lerm-admin-config' ),
 				500
 			);
 		}
@@ -310,7 +310,7 @@ final class SchemaController {
 		return ResponseFactory::success(
 			array_merge(
 				array(
-					'message' => esc_html__( 'Settings imported successfully.', 'lerm' ),
+					'message' => esc_html__( 'Settings imported successfully.', 'lerm-admin-config' ),
 				),
 				SchemaSerializer::values( $schema, $store->all(), $this->schema_actions( $schema, $request ) )
 			)
@@ -330,7 +330,7 @@ final class SchemaController {
 		if ( ! is_array( $field ) ) {
 			return ResponseFactory::error(
 				'field_not_found',
-				esc_html__( 'The requested field was not found.', 'lerm' ),
+				esc_html__( 'The requested field was not found.', 'lerm-admin-config' ),
 				404
 			);
 		}
@@ -340,7 +340,7 @@ final class SchemaController {
 		if ( '' === $source_id || ! $this->runtime->has_data_source( $source_id ) ) {
 			return ResponseFactory::error(
 				'data_source_not_found',
-				esc_html__( 'The requested data source is not registered.', 'lerm' ),
+				esc_html__( 'The requested data source is not registered.', 'lerm-admin-config' ),
 				404
 			);
 		}
@@ -373,7 +373,7 @@ final class SchemaController {
 		if ( ! $this->runtime->current_user_can_schema( $schema, ContextResolver::from_request( $request ) ) ) {
 			return ResponseFactory::error(
 				'forbidden',
-				esc_html__( 'You do not have permission to manage this schema.', 'lerm' ),
+				esc_html__( 'You do not have permission to manage this schema.', 'lerm-admin-config' ),
 				403
 			);
 		}
@@ -387,7 +387,7 @@ final class SchemaController {
 		if ( '' === $schema_id || ! $this->runtime->has( $schema_id ) ) {
 			return ResponseFactory::error(
 				'schema_not_found',
-				esc_html__( 'The requested schema was not found.', 'lerm' ),
+				esc_html__( 'The requested schema was not found.', 'lerm-admin-config' ),
 				404
 			);
 		}

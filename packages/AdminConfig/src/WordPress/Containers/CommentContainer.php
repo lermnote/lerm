@@ -65,7 +65,7 @@ final class CommentContainer implements Container {
 
 			add_meta_box(
 				$this->meta_box_id( $schema ),
-				(string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Comment Settings', 'lerm' ) ),
+				(string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Comment Settings', 'lerm-admin-config' ) ),
 				array( $this, 'render_meta_box' ),
 				'comment',
 				(string) ( $container['context'] ?? 'normal' ),
@@ -170,8 +170,8 @@ final class CommentContainer implements Container {
 				$store,
 				$submitted,
 				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
-				__( 'Please review the highlighted comment fields before saving again.', 'lerm' ),
-				__( 'Unable to save these comment settings right now.', 'lerm' )
+				__( 'Please review the highlighted comment fields before saving again.', 'lerm-admin-config' ),
+				__( 'Unable to save these comment settings right now.', 'lerm-admin-config' )
 			);
 		}
 	}

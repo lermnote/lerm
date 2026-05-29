@@ -366,8 +366,8 @@ final class ExtendedPrimitiveFieldTypes {
 	private static function render_upload_field( array $field, $value, string $field_name, string $input_id, string $extra_attrs = '', string $name_attr = '', string $id_attr = '' ): void {
 		$url         = esc_url( PageSchema::scalar_value( $value ) );
 		$library     = is_scalar( $field['library'] ?? null ) ? (string) $field['library'] : '';
-		$button_text = (string) ( $field['button_text'] ?? __( 'Choose file', 'lerm' ) );
-		$remove_text = (string) ( $field['remove_text'] ?? __( 'Remove', 'lerm' ) );
+		$button_text = (string) ( $field['button_text'] ?? __( 'Choose file', 'lerm-admin-config' ) );
+		$remove_text = (string) ( $field['remove_text'] ?? __( 'Remove', 'lerm-admin-config' ) );
 		$placeholder = (string) ( $field['placeholder'] ?? '' );
 
 		printf(
@@ -395,8 +395,8 @@ final class ExtendedPrimitiveFieldTypes {
 			$data = is_array( $value ) ? $value : array();
 
 			echo '<div class="lerm-date-range">';
-			self::render_date_input( self::sub_name( $field_name, 'from' ), self::sub_id( $input_id, 'from' ), PageSchema::scalar_value( $data['from'] ?? '' ), (string) ( $field['text_from'] ?? __( 'From', 'lerm' ) ), self::name_attr( self::sub_template( $name_template, 'from' ) ), self::id_attr( self::sub_id_template( $id_template, 'from' ) ), $extra_attrs );
-			self::render_date_input( self::sub_name( $field_name, 'to' ), self::sub_id( $input_id, 'to' ), PageSchema::scalar_value( $data['to'] ?? '' ), (string) ( $field['text_to'] ?? __( 'To', 'lerm' ) ), self::name_attr( self::sub_template( $name_template, 'to' ) ), self::id_attr( self::sub_id_template( $id_template, 'to' ) ) );
+			self::render_date_input( self::sub_name( $field_name, 'from' ), self::sub_id( $input_id, 'from' ), PageSchema::scalar_value( $data['from'] ?? '' ), (string) ( $field['text_from'] ?? __( 'From', 'lerm-admin-config' ) ), self::name_attr( self::sub_template( $name_template, 'from' ) ), self::id_attr( self::sub_id_template( $id_template, 'from' ) ), $extra_attrs );
+			self::render_date_input( self::sub_name( $field_name, 'to' ), self::sub_id( $input_id, 'to' ), PageSchema::scalar_value( $data['to'] ?? '' ), (string) ( $field['text_to'] ?? __( 'To', 'lerm-admin-config' ) ), self::name_attr( self::sub_template( $name_template, 'to' ) ), self::id_attr( self::sub_id_template( $id_template, 'to' ) ) );
 			echo '</div>';
 			return;
 		}
@@ -474,8 +474,8 @@ final class ExtendedPrimitiveFieldTypes {
 		);
 		printf(
 			'<span class="lerm-number-input__actions"><button type="button" class="lerm-number-input__button" data-lerm-number-step="up" aria-label="%1$s"><span aria-hidden="true">&#9650;</span></button><button type="button" class="lerm-number-input__button" data-lerm-number-step="down" aria-label="%2$s"><span aria-hidden="true">&#9660;</span></button></span>',
-			esc_attr__( 'Increase value', 'lerm' ),
-			esc_attr__( 'Decrease value', 'lerm' )
+			esc_attr__( 'Increase value', 'lerm-admin-config' ),
+			esc_attr__( 'Decrease value', 'lerm-admin-config' )
 		);
 		echo '</span>';
 	}

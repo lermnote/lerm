@@ -146,7 +146,7 @@ final class PageSchema {
 			return array(
 				array(
 					'id'     => 'general',
-					'label'  => (string) __( 'General', 'lerm' ),
+					'label'  => (string) __( 'General', 'lerm-admin-config' ),
 					'fields' => self::section_fields( $section ),
 				),
 			);
@@ -311,7 +311,7 @@ final class PageSchema {
 
 			$groups[ $group_id ] = array(
 				'id'     => $group_id,
-				'label'  => '' !== $group_label ? $group_label : (string) __( 'General', 'lerm' ),
+				'label'  => '' !== $group_label ? $group_label : (string) __( 'General', 'lerm-admin-config' ),
 				'fields' => $group_fields,
 			);
 		}

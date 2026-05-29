@@ -32,8 +32,16 @@ final class SiteOptionBackend implements StorageBackend {
 		$result = update_site_option( $this->option_name, $data );
 
 		if ( false === $result ) {
+			// Compare normalized JSON to avoid int/string type coercion
+			// and key-reordering false negatives from the serialize
+			// round-trip.
 			$stored = get_site_option( $this->option_name );
-			return is_array( $stored ) && $stored === $data;
+			if ( ! is_array( $stored ) ) {
+				return false;
+			}
+			$stored_json = wp_json_encode( $stored );
+			$data_json   = wp_json_encode( $data );
+			return is_string( $stored_json ) && $stored_json === $data_json;
 		}
 
 		return $result;

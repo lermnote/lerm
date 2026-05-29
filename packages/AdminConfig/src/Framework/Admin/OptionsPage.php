@@ -78,7 +78,9 @@ final class OptionsPage {
 		$menu                 = is_array( $this->definition['menu'] ?? null ) ? $this->definition['menu'] : array();
 		$this->network_admin  = ! empty( $menu['network_admin'] );
 		// JS global can be overridden per-instance via the definition.
-		$this->js_global = 'lermAdminConfig';
+		$this->js_global = isset( $this->definition['js_global'] ) && is_string( $this->definition['js_global'] )
+			? $this->definition['js_global']
+			: 'lermAdminConfig';
 
 		if ( $register_hooks ) {
 			add_action( $this->menu_action(), array( $this, 'register_menu' ) );
@@ -95,8 +97,8 @@ final class OptionsPage {
 
 		$this->page_hook = (string) add_submenu_page(
 			(string) ( $menu['parent_slug'] ?? 'themes.php' ),
-			(string) ( $menu['page_title'] ?? __( 'Admin Config', 'lerm' ) ),
-			(string) ( $menu['menu_title'] ?? __( 'Admin Config', 'lerm' ) ),
+			(string) ( $menu['page_title'] ?? __( 'Admin Config', 'lerm-admin-config' ) ),
+			(string) ( $menu['menu_title'] ?? __( 'Admin Config', 'lerm-admin-config' ) ),
 			$this->capability(),
 			$this->page_slug(),
 			array( $this, 'render_page' )
@@ -108,7 +110,7 @@ final class OptionsPage {
 	 */
 	public function handle_save(): void {
 		if ( ! current_user_can( $this->capability() ) ) {
-			wp_die( esc_html__( 'You are not allowed to manage these settings.', 'lerm' ) );
+			wp_die( esc_html__( 'You are not allowed to manage these settings.', 'lerm-admin-config' ) );
 		}
 
 		$tab        = $this->posted_tab();
@@ -136,7 +138,7 @@ final class OptionsPage {
 					'tab'        => $redirect_tab,
 					'subsection' => $redirect_subsection,
 					'global'     => true,
-					'message'    => __( 'Please review the highlighted fields before saving again.', 'lerm' ),
+					'message'    => __( 'Please review the highlighted fields before saving again.', 'lerm-admin-config' ),
 					'errors'     => $this->store->validation_errors(),
 					'submitted'  => $submitted,
 				)
@@ -148,7 +150,7 @@ final class OptionsPage {
 					'tab'        => $redirect_tab,
 					'subsection' => $redirect_subsection,
 					'global'     => true,
-					'message'    => __( 'Unable to save these settings right now.', 'lerm' ),
+					'message'    => __( 'Unable to save these settings right now.', 'lerm-admin-config' ),
 					'errors'     => array(),
 					'submitted'  => $submitted,
 				)
@@ -244,12 +246,12 @@ final class OptionsPage {
 			<div class="lerm-settings-shell">
 				<aside class="lerm-settings-sidebar">
 					<div class="lerm-settings-sidebar__brand">
-						<p class="lerm-settings-eyebrow"><?php echo esc_html( (string) ( $view['eyebrow'] ?? __( 'Native admin', 'lerm' ) ) ); ?></p>
-						<h1><?php echo esc_html( (string) ( $view['title'] ?? __( 'Admin Config', 'lerm' ) ) ); ?></h1>
-						<p><?php echo esc_html( (string) ( $view['description'] ?? __( 'A native, extensible settings page built on schema, storage, and reusable field renderers.', 'lerm' ) ) ); ?></p>
+						<p class="lerm-settings-eyebrow"><?php echo esc_html( (string) ( $view['eyebrow'] ?? __( 'Native admin', 'lerm-admin-config' ) ) ); ?></p>
+						<h1><?php echo esc_html( (string) ( $view['title'] ?? __( 'Admin Config', 'lerm-admin-config' ) ) ); ?></h1>
+						<p><?php echo esc_html( (string) ( $view['description'] ?? __( 'A native, extensible settings page built on schema, storage, and reusable field renderers.', 'lerm-admin-config' ) ) ); ?></p>
 					</div>
 
-					<nav class="lerm-settings-nav" aria-label="<?php esc_attr_e( 'Settings sections', 'lerm' ); ?>">
+					<nav class="lerm-settings-nav" aria-label="<?php esc_attr_e( 'Settings sections', 'lerm-admin-config' ); ?>">
 						<?php foreach ( $sections as $section_id => $section ) : ?>
 							<?php $section_field_count = count( PageSchema::section_fields( $section ) ); ?>
 									<a class="lerm-settings-nav__item <?php echo esc_attr( $section_id === $current_tab ? 'is-active' : '' ); ?>"
@@ -272,7 +274,7 @@ final class OptionsPage {
 									<?php
 									echo esc_html(
 										// translators: %s is the number of fields in the section, e.g. "5 fields". Do not translate the number itself.
-										sprintf( _n( '%s field', '%s fields', $section_field_count, 'lerm' ), number_format_i18n( $section_field_count ) )
+										sprintf( _n( '%s field', '%s fields', $section_field_count, 'lerm-admin-config' ), number_format_i18n( $section_field_count ) )
 									);
 									?>
 								</span>
@@ -290,7 +292,7 @@ final class OptionsPage {
 						?>
 						<div class="lerm-settings-panel__intro" data-lerm-tab-intro>
 							<div>
-								<p class="lerm-settings-eyebrow"><?php esc_html_e( 'Current section', 'lerm' ); ?></p>
+								<p class="lerm-settings-eyebrow"><?php esc_html_e( 'Current section', 'lerm-admin-config' ); ?></p>
 								<h2 data-lerm-tab-intro-title><?php echo esc_html( (string) ( $active_section['title'] ?? '' ) ); ?></h2>
 								<p data-lerm-tab-intro-desc><?php echo esc_html( (string) ( $active_section['description'] ?? '' ) ); ?></p>
 							</div>
@@ -339,20 +341,20 @@ final class OptionsPage {
 
 								<div class="lerm-settings-sticky-wrap" data-lerm-sticky-wrap>
 									<div class="lerm-settings-actions lerm-settings-actions--sticky lerm-settings-sticky-bar" data-lerm-sticky-bar>
-										<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
-										<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset current page', 'lerm' ); ?></button>
-										<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
+										<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm-admin-config' ); ?></button>
+										<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset current page', 'lerm-admin-config' ); ?></button>
+										<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm-admin-config' ); ?></button>
 										<span class="spinner lerm-settings-spinner"></span>
-										<span class="lerm-settings-actions__hint"><?php esc_html_e( 'Changes are saved instantly without reloading the page. Use Ctrl/Cmd + S to save faster.', 'lerm' ); ?></span>
+										<span class="lerm-settings-actions__hint"><?php esc_html_e( 'Changes are saved instantly without reloading the page. Use Ctrl/Cmd + S to save faster.', 'lerm-admin-config' ); ?></span>
 										<span class="lerm-settings-actions__spacer" aria-hidden="true"></span>
-										<span class="lerm-status-pill lerm-settings-actions__status" data-lerm-status="idle"><?php esc_html_e( 'Synced', 'lerm' ); ?></span>
+										<span class="lerm-status-pill lerm-settings-actions__status" data-lerm-status="idle"><?php esc_html_e( 'Synced', 'lerm-admin-config' ); ?></span>
 									</div>
 								</div>
 
 								<?php if ( $use_subsections ) : ?>
 									<div class="lerm-settings-sticky-wrap lerm-settings-sticky-wrap--subnav" data-lerm-sticky-wrap>
 										<?php /* translators: %s: section title. */ ?>
-										<nav class="lerm-settings-subnav lerm-settings-subnav--sticky lerm-settings-sticky-bar" data-lerm-sticky-bar aria-label="<?php echo esc_attr( sprintf( __( '%s groups', 'lerm' ), (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ) ); ?>">
+										<nav class="lerm-settings-subnav lerm-settings-subnav--sticky lerm-settings-sticky-bar" data-lerm-sticky-bar aria-label="<?php echo esc_attr( sprintf( __( '%s groups', 'lerm-admin-config' ), (string) ( $section['title'] ?? __( 'Section', 'lerm-admin-config' ) ) ) ); ?>">
 											<?php foreach ( $section_groups as $group_index => $group ) : ?>
 												<button type="button"
 													class="lerm-settings-subnav__item <?php echo esc_attr( (string) $group['id'] === $current_subsection ? 'is-active' : '' ); ?>"
@@ -373,22 +375,22 @@ final class OptionsPage {
 													<?php if ( ! empty( $group['fields'] ) ) : ?>
 														<?php $this->render_fields( (array) $group['fields'], $section_values, (string) $section_id, $this->subsection_uses_group_headings( (array) $group['fields'], (string) $group['label'] ), 'stack', $section_errors ); ?>
 													<?php else : ?>
-														<div class="lerm-settings-empty-group"><?php esc_html_e( 'No settings in this group yet.', 'lerm' ); ?></div>
+														<div class="lerm-settings-empty-group"><?php esc_html_e( 'No settings in this group yet.', 'lerm-admin-config' ); ?></div>
 													<?php endif; ?>
 												</div>
 											</section>
 										<?php endforeach; ?>
 									</div>
 								<?php else : ?>
-									<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) ( $section['title'] ?? __( 'Section', 'lerm' ) ) ); ?>">
+									<div class="lerm-settings-stack" role="group" aria-label="<?php echo esc_attr( (string) ( $section['title'] ?? __( 'Section', 'lerm-admin-config' ) ) ); ?>">
 										<?php $this->render_fields( $section_fields, $section_values, (string) $section_id, true, 'stack', $section_errors ); ?>
 									</div>
 								<?php endif; ?>
 
 								<div class="lerm-settings-actions lerm-settings-actions--footer">
-									<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm' ); ?></button>
-									<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset current page', 'lerm' ); ?></button>
-									<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm' ); ?></button>
+									<button type="submit" class="button button-primary button-large" data-lerm-save><?php esc_html_e( 'Save changes', 'lerm-admin-config' ); ?></button>
+									<button type="button" class="button button-secondary" data-lerm-reset="section"><?php esc_html_e( 'Reset current page', 'lerm-admin-config' ); ?></button>
+									<button type="button" class="button button-secondary button-link-delete" data-lerm-reset="all"><?php esc_html_e( 'Reset all tabs', 'lerm-admin-config' ); ?></button>
 								</div>
 							</div>
 							<?php endforeach; ?>
@@ -436,10 +438,10 @@ final class OptionsPage {
 		<section class="lerm-debug-panel" data-lerm-debug-panel>
 			<div class="lerm-debug-panel__header">
 				<div>
-					<h3><?php esc_html_e( 'Runtime Debug', 'lerm' ); ?></h3>
-					<p><?php esc_html_e( 'Schema, storage, module, and data-source summary for this admin screen.', 'lerm' ); ?></p>
+					<h3><?php esc_html_e( 'Runtime Debug', 'lerm-admin-config' ); ?></h3>
+					<p><?php esc_html_e( 'Schema, storage, module, and data-source summary for this admin screen.', 'lerm-admin-config' ); ?></p>
 				</div>
-				<button type="button" class="button button-secondary" data-lerm-debug-copy><?php esc_html_e( 'Copy JSON', 'lerm' ); ?></button>
+				<button type="button" class="button button-secondary" data-lerm-debug-copy><?php esc_html_e( 'Copy JSON', 'lerm-admin-config' ); ?></button>
 			</div>
 			<pre class="lerm-debug-panel__json" data-lerm-debug-json><?php echo esc_html( $json ); ?></pre>
 		</section>
@@ -978,7 +980,7 @@ final class OptionsPage {
 
 			return array(
 				'class'   => 'notice-success',
-				'message' => __( 'Settings saved.', 'lerm' ),
+				'message' => __( 'Settings saved.', 'lerm-admin-config' ),
 			);
 		}
 

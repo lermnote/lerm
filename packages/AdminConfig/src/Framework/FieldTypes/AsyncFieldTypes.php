@@ -56,8 +56,8 @@ final class AsyncFieldTypes {
 	private static function render_ajax_select( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
 		$multiple            = ! empty( $field['multiple'] );
 		$source_id           = sanitize_key( (string) ( $field['source'] ?? $field['data_source'] ?? '' ) );
-		$placeholder         = (string) ( $field['placeholder'] ?? __( 'Search...', 'lerm' ) );
-		$search_label        = (string) ( $field['search_label'] ?? __( 'Search options', 'lerm' ) );
+		$placeholder         = (string) ( $field['placeholder'] ?? __( 'Search...', 'lerm-admin-config' ) );
+		$search_label        = (string) ( $field['search_label'] ?? __( 'Search options', 'lerm-admin-config' ) );
 		$min_search_length   = max( 0, (int) ( $field['min_search_length'] ?? 0 ) );
 		$per_page            = max( 1, (int) ( $field['per_page'] ?? 20 ) );
 		$allow_clear         = ! array_key_exists( 'allow_clear', $field ) || ! empty( $field['allow_clear'] );
@@ -109,10 +109,10 @@ final class AsyncFieldTypes {
 			$min_search_length > 0
 				? sprintf(
 					/* translators: %d: minimum character count */
-					__( 'Type %d or more characters to search.', 'lerm' ),
+					__( 'Type %d or more characters to search.', 'lerm-admin-config' ),
 					$min_search_length
 				)
-				: __( 'Start typing to search.', 'lerm' )
+				: __( 'Start typing to search.', 'lerm-admin-config' )
 		);
 		echo '</div>';
 		echo '<div class="lerm-ajax-select__dropdown" data-lerm-ajax-select-dropdown hidden>';

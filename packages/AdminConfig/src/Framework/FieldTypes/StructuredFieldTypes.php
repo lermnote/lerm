@@ -175,7 +175,7 @@ final class StructuredFieldTypes {
 				self::render_sorter_field( $field, $value, $field_name );
 			},
 			'render_nested' => static function (): void {
-				self::render_nested_warning( __( 'Sorter fields cannot be nested inside a fieldset or group.', 'lerm' ) );
+				self::render_nested_warning( __( 'Sorter fields cannot be nested inside a fieldset or group.', 'lerm-admin-config' ) );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				unset( $store );
@@ -290,7 +290,7 @@ final class StructuredFieldTypes {
 		$label_text = (string) ( $field['label'] ?? '' );
 
 		echo '<div class="lerm-sorter" data-target="' . esc_attr( $field_id ) . '">';
-		echo '<p class="description">' . esc_html__( 'Drag to reorder. Checked items stay enabled; unchecked items are hidden.', 'lerm' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Drag to reorder. Checked items stay enabled; unchecked items are hidden.', 'lerm-admin-config' ) . '</p>';
 		echo '<ul class="lerm-sorter-list">';
 
 		foreach ( $order as $key => $label ) {
@@ -429,7 +429,7 @@ final class StructuredFieldTypes {
 			$image_url = PageSchema::scalar_value( $value['thumbnail'] ?? $value['url'] ?? '' );
 		}
 
-		$button_text = (string) ( $field['button_text'] ?? __( 'Choose image', 'lerm' ) );
+		$button_text = (string) ( $field['button_text'] ?? __( 'Choose image', 'lerm-admin-config' ) );
 
 		printf(
 			'<div class="lerm-media-field" data-target="%1$s"><input type="hidden" name="%2$s[id]" value="%3$s"%8$s%9$s><div class="lerm-media-preview" %10$s>%4$s</div><div class="lerm-media-actions"><button type="button" class="button lerm-media-select">%5$s</button><button type="button" class="button button-secondary button-link-delete lerm-media-remove" %6$s>%7$s</button></div></div>',
@@ -439,7 +439,7 @@ final class StructuredFieldTypes {
 			$image_url ? '<img src="' . esc_url( $image_url ) . '" alt="">' : '',
 			esc_html( $button_text ),
 			$attachment_id > 0 ? '' : 'hidden',
-			esc_html__( 'Remove', 'lerm' ),
+			esc_html__( 'Remove', 'lerm-admin-config' ),
 			$name_attr,
 			$id_attr,
 			$image_url ? '' : 'hidden'
@@ -473,8 +473,8 @@ final class StructuredFieldTypes {
 
 		echo '</div>';
 		echo '<div class="lerm-media-actions">';
-		echo '<button type="button" class="button lerm-gallery-select">' . esc_html__( 'Choose images', 'lerm' ) . '</button>';
-		echo '<button type="button" class="button button-secondary button-link-delete lerm-gallery-remove" ' . ( empty( $ids ) ? 'hidden' : '' ) . '>' . esc_html__( 'Clear gallery', 'lerm' ) . '</button>';
+		echo '<button type="button" class="button lerm-gallery-select">' . esc_html__( 'Choose images', 'lerm-admin-config' ) . '</button>';
+		echo '<button type="button" class="button button-secondary button-link-delete lerm-gallery-remove" ' . ( empty( $ids ) ? 'hidden' : '' ) . '>' . esc_html__( 'Clear gallery', 'lerm-admin-config' ) . '</button>';
 		echo '</div>';
 		echo '</div>';
 	}

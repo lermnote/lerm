@@ -93,7 +93,7 @@ final class AdvancedFieldTypes {
 				$page->container_field_renderer()->render_accordion( $field, $value, $field_name );
 			},
 			'render_nested' => static function (): void {
-				self::render_nested_warning( __( 'Accordion fields cannot be nested inside a fieldset or group.', 'lerm' ) );
+				self::render_nested_warning( __( 'Accordion fields cannot be nested inside a fieldset or group.', 'lerm-admin-config' ) );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				return self::sanitize_panel_value( $field, $value, $strict, $store );
@@ -113,7 +113,7 @@ final class AdvancedFieldTypes {
 				$page->container_field_renderer()->render_tabbed( $field, $value, $field_name );
 			},
 			'render_nested' => static function (): void {
-				self::render_nested_warning( __( 'Tabbed fields cannot be nested inside a fieldset or group.', 'lerm' ) );
+				self::render_nested_warning( __( 'Tabbed fields cannot be nested inside a fieldset or group.', 'lerm-admin-config' ) );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
 				return self::sanitize_panel_value( $field, $value, $strict, $store );
@@ -131,8 +131,8 @@ final class AdvancedFieldTypes {
 		$choices        = self::icon_choices( $field );
 		$current        = self::sanitize_icon_value( $field, $value, false );
 		$searchable     = ! array_key_exists( 'searchable', $field ) || ! empty( $field['searchable'] );
-		$search_label   = (string) ( $field['search_label'] ?? __( 'Filter icons', 'lerm' ) );
-		$empty_label    = (string) ( $field['empty_label'] ?? __( 'No icon selected', 'lerm' ) );
+		$search_label   = (string) ( $field['search_label'] ?? __( 'Filter icons', 'lerm-admin-config' ) );
+		$empty_label    = (string) ( $field['empty_label'] ?? __( 'No icon selected', 'lerm-admin-config' ) );
 		$selected_label = $choices[ $current ] ?? ( '' !== $current ? $current : $empty_label );
 
 		echo '<div class="lerm-icon-field" data-target="' . esc_attr( $input_id ) . '" data-empty-label="' . esc_attr( $empty_label ) . '">';
@@ -251,7 +251,7 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'          => 'font-family',
 				'type'        => 'text',
-				'label'       => __( 'Family', 'lerm' ),
+				'label'       => __( 'Family', 'lerm-admin-config' ),
 				'placeholder' => (string) ( $field['family_placeholder'] ?? 'Inter, system-ui, sans-serif' ),
 				'default'     => (string) ( $defaults['font-family'] ?? '' ),
 			);
@@ -261,7 +261,7 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'      => 'font-weight',
 				'type'    => 'select',
-				'label'   => __( 'Weight', 'lerm' ),
+				'label'   => __( 'Weight', 'lerm-admin-config' ),
 				'choices' => self::font_weight_choices(),
 				'default' => (string) ( $defaults['font-weight'] ?? '400' ),
 			);
@@ -271,10 +271,10 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'      => 'font-style',
 				'type'    => 'button_set',
-				'label'   => __( 'Style', 'lerm' ),
+				'label'   => __( 'Style', 'lerm-admin-config' ),
 				'choices' => array(
-					'normal' => __( 'Normal', 'lerm' ),
-					'italic' => __( 'Italic', 'lerm' ),
+					'normal' => __( 'Normal', 'lerm-admin-config' ),
+					'italic' => __( 'Italic', 'lerm-admin-config' ),
 				),
 				'default' => (string) ( $defaults['font-style'] ?? 'normal' ),
 			);
@@ -284,7 +284,7 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'          => 'font-size',
 				'type'        => 'text',
-				'label'       => __( 'Size', 'lerm' ),
+				'label'       => __( 'Size', 'lerm-admin-config' ),
 				'placeholder' => (string) ( $field['size_placeholder'] ?? '1' ),
 				'default'     => (string) ( $defaults['font-size'] ?? '' ),
 			);
@@ -294,7 +294,7 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'      => 'unit',
 				'type'    => 'select',
-				'label'   => __( 'Unit', 'lerm' ),
+				'label'   => __( 'Unit', 'lerm-admin-config' ),
 				'choices' => array_combine( $units, $units ),
 				'default' => (string) ( $defaults['unit'] ?? ( $units[0] ?? 'px' ) ),
 			);
@@ -304,7 +304,7 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'          => 'line-height',
 				'type'        => 'text',
-				'label'       => __( 'Line height', 'lerm' ),
+				'label'       => __( 'Line height', 'lerm-admin-config' ),
 				'placeholder' => (string) ( $field['line_height_placeholder'] ?? '1.5' ),
 				'default'     => (string) ( $defaults['line-height'] ?? '' ),
 			);
@@ -314,7 +314,7 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'          => 'letter-spacing',
 				'type'        => 'text',
-				'label'       => __( 'Letter spacing', 'lerm' ),
+				'label'       => __( 'Letter spacing', 'lerm-admin-config' ),
 				'placeholder' => (string) ( $field['letter_spacing_placeholder'] ?? '0' ),
 				'default'     => (string) ( $defaults['letter-spacing'] ?? '' ),
 			);
@@ -324,12 +324,12 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'      => 'text-transform',
 				'type'    => 'select',
-				'label'   => __( 'Transform', 'lerm' ),
+				'label'   => __( 'Transform', 'lerm-admin-config' ),
 				'choices' => array(
-					'none'       => __( 'None', 'lerm' ),
-					'uppercase'  => __( 'Uppercase', 'lerm' ),
-					'lowercase'  => __( 'Lowercase', 'lerm' ),
-					'capitalize' => __( 'Capitalize', 'lerm' ),
+					'none'       => __( 'None', 'lerm-admin-config' ),
+					'uppercase'  => __( 'Uppercase', 'lerm-admin-config' ),
+					'lowercase'  => __( 'Lowercase', 'lerm-admin-config' ),
+					'capitalize' => __( 'Capitalize', 'lerm-admin-config' ),
 				),
 				'default' => (string) ( $defaults['text-transform'] ?? 'none' ),
 			);
@@ -339,12 +339,12 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'      => 'text-align',
 				'type'    => 'button_set',
-				'label'   => __( 'Align', 'lerm' ),
+				'label'   => __( 'Align', 'lerm-admin-config' ),
 				'choices' => array(
-					'left'    => __( 'Left', 'lerm' ),
-					'center'  => __( 'Center', 'lerm' ),
-					'right'   => __( 'Right', 'lerm' ),
-					'justify' => __( 'Justify', 'lerm' ),
+					'left'    => __( 'Left', 'lerm-admin-config' ),
+					'center'  => __( 'Center', 'lerm-admin-config' ),
+					'right'   => __( 'Right', 'lerm-admin-config' ),
+					'justify' => __( 'Justify', 'lerm-admin-config' ),
 				),
 				'default' => (string) ( $defaults['text-align'] ?? 'left' ),
 			);
@@ -354,7 +354,7 @@ final class AdvancedFieldTypes {
 			$fields[] = array(
 				'id'      => 'color',
 				'type'    => 'color',
-				'label'   => __( 'Color', 'lerm' ),
+				'label'   => __( 'Color', 'lerm-admin-config' ),
 				'default' => (string) ( $defaults['color'] ?? '' ),
 			);
 		}
@@ -374,26 +374,26 @@ final class AdvancedFieldTypes {
 		}
 
 		return array(
-			'dashicons-admin-site-alt3'  => __( 'Site', 'lerm' ),
-			'dashicons-admin-appearance' => __( 'Appearance', 'lerm' ),
-			'dashicons-admin-generic'    => __( 'Settings', 'lerm' ),
-			'dashicons-admin-users'      => __( 'Users', 'lerm' ),
-			'dashicons-admin-comments'   => __( 'Comments', 'lerm' ),
-			'dashicons-admin-links'      => __( 'Links', 'lerm' ),
-			'dashicons-format-image'     => __( 'Image', 'lerm' ),
-			'dashicons-format-gallery'   => __( 'Gallery', 'lerm' ),
-			'dashicons-format-audio'     => __( 'Audio', 'lerm' ),
-			'dashicons-format-video'     => __( 'Video', 'lerm' ),
-			'dashicons-star-filled'      => __( 'Star', 'lerm' ),
-			'dashicons-heart'            => __( 'Heart', 'lerm' ),
-			'dashicons-lightbulb'        => __( 'Idea', 'lerm' ),
-			'dashicons-yes-alt'          => __( 'Check', 'lerm' ),
-			'dashicons-warning'          => __( 'Warning', 'lerm' ),
-			'dashicons-megaphone'        => __( 'Announcement', 'lerm' ),
-			'dashicons-chart-bar'        => __( 'Chart', 'lerm' ),
-			'dashicons-palmtree'         => __( 'Lifestyle', 'lerm' ),
-			'dashicons-store'            => __( 'Store', 'lerm' ),
-			'dashicons-portfolio'        => __( 'Portfolio', 'lerm' ),
+			'dashicons-admin-site-alt3'  => __( 'Site', 'lerm-admin-config' ),
+			'dashicons-admin-appearance' => __( 'Appearance', 'lerm-admin-config' ),
+			'dashicons-admin-generic'    => __( 'Settings', 'lerm-admin-config' ),
+			'dashicons-admin-users'      => __( 'Users', 'lerm-admin-config' ),
+			'dashicons-admin-comments'   => __( 'Comments', 'lerm-admin-config' ),
+			'dashicons-admin-links'      => __( 'Links', 'lerm-admin-config' ),
+			'dashicons-format-image'     => __( 'Image', 'lerm-admin-config' ),
+			'dashicons-format-gallery'   => __( 'Gallery', 'lerm-admin-config' ),
+			'dashicons-format-audio'     => __( 'Audio', 'lerm-admin-config' ),
+			'dashicons-format-video'     => __( 'Video', 'lerm-admin-config' ),
+			'dashicons-star-filled'      => __( 'Star', 'lerm-admin-config' ),
+			'dashicons-heart'            => __( 'Heart', 'lerm-admin-config' ),
+			'dashicons-lightbulb'        => __( 'Idea', 'lerm-admin-config' ),
+			'dashicons-yes-alt'          => __( 'Check', 'lerm-admin-config' ),
+			'dashicons-warning'          => __( 'Warning', 'lerm-admin-config' ),
+			'dashicons-megaphone'        => __( 'Announcement', 'lerm-admin-config' ),
+			'dashicons-chart-bar'        => __( 'Chart', 'lerm-admin-config' ),
+			'dashicons-palmtree'         => __( 'Lifestyle', 'lerm-admin-config' ),
+			'dashicons-store'            => __( 'Store', 'lerm-admin-config' ),
+			'dashicons-portfolio'        => __( 'Portfolio', 'lerm-admin-config' ),
 		);
 	}
 

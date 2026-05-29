@@ -75,7 +75,7 @@ final class ProfileContainer implements Container {
 	public function render_user_profile( \WP_User $user ): void {
 		foreach ( $this->schemas as $schema ) {
 			$container = $schema->container();
-			$title     = isset( $container['title'] ) && is_scalar( $container['title'] ) ? (string) $container['title'] : __( 'Profile Settings', 'lerm' );
+			$title     = isset( $container['title'] ) && is_scalar( $container['title'] ) ? (string) $container['title'] : __( 'Profile Settings', 'lerm-admin-config' );
 			$store     = $this->stores->store( $schema, array( 'user_id' => $user->ID ) );
 			$renderer  = $this->renderer( $schema, $user->ID );
 			$flash     = ValidationFlash::consume( 'profile', $schema->id(), (string) $user->ID );
@@ -150,8 +150,8 @@ final class ProfileContainer implements Container {
 				$store,
 				$submitted,
 				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
-				__( 'Please review the highlighted profile fields before saving again.', 'lerm' ),
-				__( 'Unable to save these profile settings right now.', 'lerm' )
+				__( 'Please review the highlighted profile fields before saving again.', 'lerm-admin-config' ),
+				__( 'Unable to save these profile settings right now.', 'lerm-admin-config' )
 			);
 		}
 	}

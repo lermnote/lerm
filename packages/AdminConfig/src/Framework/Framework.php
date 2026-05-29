@@ -55,7 +55,6 @@ final class Framework implements FrameworkContract {
 		$this->field_types   = new FieldTypeRegistry();
 		$this->field_modules = new FieldModuleRegistry( $this->field_types );
 		$this->register_default_field_modules();
-		$this->field_modules->enable_all();
 		$this->asset_resolver = $resolver;
 	}
 
