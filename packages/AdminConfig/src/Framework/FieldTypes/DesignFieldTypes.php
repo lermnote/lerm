@@ -152,13 +152,13 @@ final class DesignFieldTypes {
 
 		echo '<div class="lerm-composite"><div class="lerm-composite__grid lerm-composite__grid--compact">';
 		if ( self::flag( $field, 'width', true ) ) {
-			self::render_number_item( $field_name, $input_id, 'width', __( 'Width', 'lerm' ), $values, $name_template, $id_template );
+			self::render_number_item( $field_name, $input_id, 'width', __( 'Width', 'lerm-admin-config' ), $values, $name_template, $id_template );
 		}
 		if ( self::flag( $field, 'height', true ) ) {
-			self::render_number_item( $field_name, $input_id, 'height', __( 'Height', 'lerm' ), $values, $name_template, $id_template );
+			self::render_number_item( $field_name, $input_id, 'height', __( 'Height', 'lerm-admin-config' ), $values, $name_template, $id_template );
 		}
 		if ( self::show_unit_select( $field, $units ) ) {
-			self::render_select_item( $field_name, $input_id, 'unit', __( 'Unit', 'lerm' ), array_combine( $units, $units ), (string) ( $values['unit'] ?? $defaults['unit'] ), $name_template, $id_template );
+			self::render_select_item( $field_name, $input_id, 'unit', __( 'Unit', 'lerm-admin-config' ), array_combine( $units, $units ), (string) ( $values['unit'] ?? $defaults['unit'] ), $name_template, $id_template );
 		}
 		echo '</div></div>';
 	}
@@ -174,13 +174,13 @@ final class DesignFieldTypes {
 
 		echo '<div class="lerm-composite"><div class="lerm-composite__grid lerm-composite__grid--compact">';
 		if ( self::flag( $field, 'all', false ) ) {
-			self::render_number_item( $field_name, $input_id, 'all', __( 'All', 'lerm' ), $values, $name_template, $id_template );
+			self::render_number_item( $field_name, $input_id, 'all', __( 'All', 'lerm-admin-config' ), $values, $name_template, $id_template );
 		} else {
 			foreach ( array(
-				'top'    => __( 'Top', 'lerm' ),
-				'right'  => __( 'Right', 'lerm' ),
-				'bottom' => __( 'Bottom', 'lerm' ),
-				'left'   => __( 'Left', 'lerm' ),
+				'top'    => __( 'Top', 'lerm-admin-config' ),
+				'right'  => __( 'Right', 'lerm-admin-config' ),
+				'bottom' => __( 'Bottom', 'lerm-admin-config' ),
+				'left'   => __( 'Left', 'lerm-admin-config' ),
 			) as $key => $label ) {
 				if ( self::flag( $field, $key, true ) ) {
 					self::render_number_item( $field_name, $input_id, $key, $label, $values, $name_template, $id_template );
@@ -188,7 +188,7 @@ final class DesignFieldTypes {
 			}
 		}
 		if ( self::show_unit_select( $field, $units ) ) {
-			self::render_select_item( $field_name, $input_id, 'unit', __( 'Unit', 'lerm' ), array_combine( $units, $units ), (string) ( $values['unit'] ?? $defaults['unit'] ), $name_template, $id_template );
+			self::render_select_item( $field_name, $input_id, 'unit', __( 'Unit', 'lerm-admin-config' ), array_combine( $units, $units ), (string) ( $values['unit'] ?? $defaults['unit'] ), $name_template, $id_template );
 		}
 		echo '</div></div>';
 	}
@@ -203,13 +203,13 @@ final class DesignFieldTypes {
 
 		echo '<div class="lerm-composite"><div class="lerm-composite__grid lerm-composite__grid--compact">';
 		if ( self::flag( $field, 'all', false ) ) {
-			self::render_number_item( $field_name, $input_id, 'all', __( 'All', 'lerm' ), $values, $name_template, $id_template, (string) ( $field['unit'] ?? 'px' ) );
+			self::render_number_item( $field_name, $input_id, 'all', __( 'All', 'lerm-admin-config' ), $values, $name_template, $id_template, (string) ( $field['unit'] ?? 'px' ) );
 		} else {
 			foreach ( array(
-				'top'    => __( 'Top', 'lerm' ),
-				'right'  => __( 'Right', 'lerm' ),
-				'bottom' => __( 'Bottom', 'lerm' ),
-				'left'   => __( 'Left', 'lerm' ),
+				'top'    => __( 'Top', 'lerm-admin-config' ),
+				'right'  => __( 'Right', 'lerm-admin-config' ),
+				'bottom' => __( 'Bottom', 'lerm-admin-config' ),
+				'left'   => __( 'Left', 'lerm-admin-config' ),
 			) as $key => $label ) {
 				if ( self::flag( $field, $key, true ) ) {
 					self::render_number_item( $field_name, $input_id, $key, $label, $values, $name_template, $id_template, (string) ( $field['unit'] ?? 'px' ) );
@@ -217,10 +217,10 @@ final class DesignFieldTypes {
 			}
 		}
 		if ( self::flag( $field, 'style', true ) ) {
-			self::render_select_item( $field_name, $input_id, 'style', __( 'Style', 'lerm' ), self::border_styles(), (string) ( $values['style'] ?? 'solid' ), $name_template, $id_template );
+			self::render_select_item( $field_name, $input_id, 'style', __( 'Style', 'lerm-admin-config' ), self::border_styles(), (string) ( $values['style'] ?? 'solid' ), $name_template, $id_template );
 		}
 		if ( self::flag( $field, 'color', true ) ) {
-			self::render_color_item( $field_name, $input_id, 'color', __( 'Color', 'lerm' ), PageSchema::scalar_value( $values['color'] ?? '' ), $name_template, $id_template );
+			self::render_color_item( $field_name, $input_id, 'color', __( 'Color', 'lerm-admin-config' ), PageSchema::scalar_value( $values['color'] ?? '' ), $name_template, $id_template );
 		}
 		echo '</div></div>';
 	}
@@ -235,11 +235,11 @@ final class DesignFieldTypes {
 
 		echo '<div class="lerm-composite"><div class="lerm-composite__grid lerm-composite__grid--compact">';
 		foreach ( array(
-			'color'   => __( 'Normal', 'lerm' ),
-			'hover'   => __( 'Hover', 'lerm' ),
-			'active'  => __( 'Active', 'lerm' ),
-			'visited' => __( 'Visited', 'lerm' ),
-			'focus'   => __( 'Focus', 'lerm' ),
+			'color'   => __( 'Normal', 'lerm-admin-config' ),
+			'hover'   => __( 'Hover', 'lerm-admin-config' ),
+			'active'  => __( 'Active', 'lerm-admin-config' ),
+			'visited' => __( 'Visited', 'lerm-admin-config' ),
+			'focus'   => __( 'Focus', 'lerm-admin-config' ),
 		) as $key => $label ) {
 			if ( self::flag( $field, $key, 'color' === $key || 'hover' === $key ) ) {
 				self::render_color_item( $field_name, $input_id, $key, $label, PageSchema::scalar_value( $values[ $key ] ?? '' ), $name_template, $id_template );
@@ -258,20 +258,20 @@ final class DesignFieldTypes {
 
 		echo '<div class="lerm-composite"><div class="lerm-composite__grid">';
 		if ( self::flag( $field, 'background_color', true ) ) {
-			self::render_color_item( $field_name, $input_id, 'background-color', __( 'Color', 'lerm' ), PageSchema::scalar_value( $values['background-color'] ?? '' ), $name_template, $id_template );
+			self::render_color_item( $field_name, $input_id, 'background-color', __( 'Color', 'lerm-admin-config' ), PageSchema::scalar_value( $values['background-color'] ?? '' ), $name_template, $id_template );
 		}
 		if ( self::flag( $field, 'background_gradient', false ) && self::flag( $field, 'background_gradient_color', true ) ) {
-			self::render_color_item( $field_name, $input_id, 'background-gradient-color', __( 'Gradient To', 'lerm' ), PageSchema::scalar_value( $values['background-gradient-color'] ?? '' ), $name_template, $id_template );
+			self::render_color_item( $field_name, $input_id, 'background-gradient-color', __( 'Gradient To', 'lerm-admin-config' ), PageSchema::scalar_value( $values['background-gradient-color'] ?? '' ), $name_template, $id_template );
 		}
 		if ( self::flag( $field, 'background_gradient', false ) && self::flag( $field, 'background_gradient_direction', true ) ) {
-			self::render_select_item( $field_name, $input_id, 'background-gradient-direction', __( 'Gradient Direction', 'lerm' ), self::background_gradient_direction_choices(), PageSchema::scalar_value( $values['background-gradient-direction'] ?? '' ), $name_template, $id_template );
+			self::render_select_item( $field_name, $input_id, 'background-gradient-direction', __( 'Gradient Direction', 'lerm-admin-config' ), self::background_gradient_direction_choices(), PageSchema::scalar_value( $values['background-gradient-direction'] ?? '' ), $name_template, $id_template );
 		}
 		if ( self::flag( $field, 'background_image', true ) ) {
-			echo '<div class="lerm-composite__item lerm-composite__item--full"><span class="lerm-composite__label">' . esc_html__( 'Image', 'lerm' ) . '</span>';
+			echo '<div class="lerm-composite__item lerm-composite__item--full"><span class="lerm-composite__label">' . esc_html__( 'Image', 'lerm-admin-config' ) . '</span>';
 			StructuredFieldTypes::render_media_control(
 				array(
 					'id'          => 'background-image',
-					'button_text' => (string) ( $field['background_image_button_text'] ?? __( 'Choose image', 'lerm' ) ),
+					'button_text' => (string) ( $field['background_image_button_text'] ?? __( 'Choose image', 'lerm-admin-config' ) ),
 				),
 				$values['background-image'] ?? array(),
 				self::sub_name( $field_name, 'background-image' ),
@@ -284,37 +284,37 @@ final class DesignFieldTypes {
 		foreach ( array(
 			'background-position'   => array(
 				'flag'    => 'background_position',
-				'label'   => __( 'Position', 'lerm' ),
+				'label'   => __( 'Position', 'lerm-admin-config' ),
 				'choices' => self::background_position_choices(),
 			),
 			'background-repeat'     => array(
 				'flag'    => 'background_repeat',
-				'label'   => __( 'Repeat', 'lerm' ),
+				'label'   => __( 'Repeat', 'lerm-admin-config' ),
 				'choices' => self::background_repeat_choices(),
 			),
 			'background-attachment' => array(
 				'flag'    => 'background_attachment',
-				'label'   => __( 'Attachment', 'lerm' ),
+				'label'   => __( 'Attachment', 'lerm-admin-config' ),
 				'choices' => self::background_attachment_choices(),
 			),
 			'background-size'       => array(
 				'flag'    => 'background_size',
-				'label'   => __( 'Size', 'lerm' ),
+				'label'   => __( 'Size', 'lerm-admin-config' ),
 				'choices' => self::background_size_choices(),
 			),
 			'background-origin'     => array(
 				'flag'    => 'background_origin',
-				'label'   => __( 'Origin', 'lerm' ),
+				'label'   => __( 'Origin', 'lerm-admin-config' ),
 				'choices' => self::background_origin_choices(),
 			),
 			'background-clip'       => array(
 				'flag'    => 'background_clip',
-				'label'   => __( 'Clip', 'lerm' ),
+				'label'   => __( 'Clip', 'lerm-admin-config' ),
 				'choices' => self::background_clip_choices(),
 			),
 			'background-blend-mode' => array(
 				'flag'    => 'background_blend_mode',
-				'label'   => __( 'Blend Mode', 'lerm' ),
+				'label'   => __( 'Blend Mode', 'lerm-admin-config' ),
 				'choices' => self::background_blend_mode_choices(),
 			),
 		) as $key => $config ) {
@@ -646,97 +646,97 @@ final class DesignFieldTypes {
 
 	private static function border_styles(): array {
 		return array(
-			'solid'  => __( 'Solid', 'lerm' ),
-			'dashed' => __( 'Dashed', 'lerm' ),
-			'dotted' => __( 'Dotted', 'lerm' ),
-			'double' => __( 'Double', 'lerm' ),
-			'inset'  => __( 'Inset', 'lerm' ),
-			'outset' => __( 'Outset', 'lerm' ),
-			'groove' => __( 'Groove', 'lerm' ),
-			'ridge'  => __( 'Ridge', 'lerm' ),
-			'none'   => __( 'None', 'lerm' ),
+			'solid'  => __( 'Solid', 'lerm-admin-config' ),
+			'dashed' => __( 'Dashed', 'lerm-admin-config' ),
+			'dotted' => __( 'Dotted', 'lerm-admin-config' ),
+			'double' => __( 'Double', 'lerm-admin-config' ),
+			'inset'  => __( 'Inset', 'lerm-admin-config' ),
+			'outset' => __( 'Outset', 'lerm-admin-config' ),
+			'groove' => __( 'Groove', 'lerm-admin-config' ),
+			'ridge'  => __( 'Ridge', 'lerm-admin-config' ),
+			'none'   => __( 'None', 'lerm-admin-config' ),
 		);
 	}
 
 	private static function background_position_choices(): array {
 		return array(
-			''              => __( 'Default', 'lerm' ),
-			'left top'      => __( 'Left Top', 'lerm' ),
-			'left center'   => __( 'Left Center', 'lerm' ),
-			'left bottom'   => __( 'Left Bottom', 'lerm' ),
-			'center top'    => __( 'Center Top', 'lerm' ),
-			'center center' => __( 'Center Center', 'lerm' ),
-			'center bottom' => __( 'Center Bottom', 'lerm' ),
-			'right top'     => __( 'Right Top', 'lerm' ),
-			'right center'  => __( 'Right Center', 'lerm' ),
-			'right bottom'  => __( 'Right Bottom', 'lerm' ),
+			''              => __( 'Default', 'lerm-admin-config' ),
+			'left top'      => __( 'Left Top', 'lerm-admin-config' ),
+			'left center'   => __( 'Left Center', 'lerm-admin-config' ),
+			'left bottom'   => __( 'Left Bottom', 'lerm-admin-config' ),
+			'center top'    => __( 'Center Top', 'lerm-admin-config' ),
+			'center center' => __( 'Center Center', 'lerm-admin-config' ),
+			'center bottom' => __( 'Center Bottom', 'lerm-admin-config' ),
+			'right top'     => __( 'Right Top', 'lerm-admin-config' ),
+			'right center'  => __( 'Right Center', 'lerm-admin-config' ),
+			'right bottom'  => __( 'Right Bottom', 'lerm-admin-config' ),
 		);
 	}
 
 	private static function background_repeat_choices(): array {
 		return array(
-			''          => __( 'Default', 'lerm' ),
-			'repeat'    => __( 'Repeat', 'lerm' ),
-			'no-repeat' => __( 'No Repeat', 'lerm' ),
-			'repeat-x'  => __( 'Repeat Horizontally', 'lerm' ),
-			'repeat-y'  => __( 'Repeat Vertically', 'lerm' ),
+			''          => __( 'Default', 'lerm-admin-config' ),
+			'repeat'    => __( 'Repeat', 'lerm-admin-config' ),
+			'no-repeat' => __( 'No Repeat', 'lerm-admin-config' ),
+			'repeat-x'  => __( 'Repeat Horizontally', 'lerm-admin-config' ),
+			'repeat-y'  => __( 'Repeat Vertically', 'lerm-admin-config' ),
 		);
 	}
 
 	private static function background_attachment_choices(): array {
 		return array(
-			''       => __( 'Default', 'lerm' ),
-			'scroll' => __( 'Scroll', 'lerm' ),
-			'fixed'  => __( 'Fixed', 'lerm' ),
+			''       => __( 'Default', 'lerm-admin-config' ),
+			'scroll' => __( 'Scroll', 'lerm-admin-config' ),
+			'fixed'  => __( 'Fixed', 'lerm-admin-config' ),
 		);
 	}
 
 	private static function background_size_choices(): array {
 		return array(
-			''        => __( 'Default', 'lerm' ),
-			'cover'   => __( 'Cover', 'lerm' ),
-			'contain' => __( 'Contain', 'lerm' ),
-			'auto'    => __( 'Auto', 'lerm' ),
+			''        => __( 'Default', 'lerm-admin-config' ),
+			'cover'   => __( 'Cover', 'lerm-admin-config' ),
+			'contain' => __( 'Contain', 'lerm-admin-config' ),
+			'auto'    => __( 'Auto', 'lerm-admin-config' ),
 		);
 	}
 
 	private static function background_origin_choices(): array {
 		return array(
-			''            => __( 'Default', 'lerm' ),
-			'padding-box' => __( 'Padding Box', 'lerm' ),
-			'border-box'  => __( 'Border Box', 'lerm' ),
-			'content-box' => __( 'Content Box', 'lerm' ),
+			''            => __( 'Default', 'lerm-admin-config' ),
+			'padding-box' => __( 'Padding Box', 'lerm-admin-config' ),
+			'border-box'  => __( 'Border Box', 'lerm-admin-config' ),
+			'content-box' => __( 'Content Box', 'lerm-admin-config' ),
 		);
 	}
 
 	private static function background_clip_choices(): array {
 		return array(
-			''            => __( 'Default', 'lerm' ),
-			'border-box'  => __( 'Border Box', 'lerm' ),
-			'padding-box' => __( 'Padding Box', 'lerm' ),
-			'content-box' => __( 'Content Box', 'lerm' ),
+			''            => __( 'Default', 'lerm-admin-config' ),
+			'border-box'  => __( 'Border Box', 'lerm-admin-config' ),
+			'padding-box' => __( 'Padding Box', 'lerm-admin-config' ),
+			'content-box' => __( 'Content Box', 'lerm-admin-config' ),
 		);
 	}
 
 	private static function background_blend_mode_choices(): array {
 		return array(
-			''         => __( 'Default', 'lerm' ),
-			'normal'   => __( 'Normal', 'lerm' ),
-			'multiply' => __( 'Multiply', 'lerm' ),
-			'screen'   => __( 'Screen', 'lerm' ),
-			'overlay'  => __( 'Overlay', 'lerm' ),
-			'darken'   => __( 'Darken', 'lerm' ),
-			'lighten'  => __( 'Lighten', 'lerm' ),
+			''         => __( 'Default', 'lerm-admin-config' ),
+			'normal'   => __( 'Normal', 'lerm-admin-config' ),
+			'multiply' => __( 'Multiply', 'lerm-admin-config' ),
+			'screen'   => __( 'Screen', 'lerm-admin-config' ),
+			'overlay'  => __( 'Overlay', 'lerm-admin-config' ),
+			'darken'   => __( 'Darken', 'lerm-admin-config' ),
+			'lighten'  => __( 'Lighten', 'lerm-admin-config' ),
 		);
 	}
 
 	private static function background_gradient_direction_choices(): array {
 		return array(
-			''          => __( 'Default', 'lerm' ),
-			'to bottom' => __( 'Top to Bottom', 'lerm' ),
-			'to right'  => __( 'Left to Right', 'lerm' ),
-			'135deg'    => __( 'Top Left to Bottom Right', 'lerm' ),
-			'-135deg'   => __( 'Top Right to Bottom Left', 'lerm' ),
+			''          => __( 'Default', 'lerm-admin-config' ),
+			'to bottom' => __( 'Top to Bottom', 'lerm-admin-config' ),
+			'to right'  => __( 'Left to Right', 'lerm-admin-config' ),
+			'135deg'    => __( 'Top Left to Bottom Right', 'lerm-admin-config' ),
+			'-135deg'   => __( 'Top Right to Bottom Left', 'lerm-admin-config' ),
 		);
 	}
 }

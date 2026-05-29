@@ -280,7 +280,7 @@ final class RestEndpoints {
 	private static function schema_not_found_error(): \WP_Error {
 		return ResponseFactory::error(
 			'schema_not_found',
-			esc_html__( 'The requested schema was not found.', 'lerm' ),
+			esc_html__( 'The requested schema was not found.', 'lerm-admin-config' ),
 			404
 		);
 	}
