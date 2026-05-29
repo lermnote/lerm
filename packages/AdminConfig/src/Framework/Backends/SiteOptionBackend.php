@@ -32,8 +32,11 @@ final class SiteOptionBackend implements StorageBackend {
 		$result = update_site_option( $this->option_name, $data );
 
 		if ( false === $result ) {
+			// Use == (not ===) — strict comparison would fail on int/string
+			// type coercion or key-reordering introduced by the WP option
+			// serialize/unserialize round-trip.
 			$stored = get_site_option( $this->option_name );
-			return is_array( $stored ) && $stored === $data;
+			return is_array( $stored ) && $stored == $data;
 		}
 
 		return $result;

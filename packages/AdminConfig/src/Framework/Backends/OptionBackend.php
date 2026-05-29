@@ -37,8 +37,11 @@ final class OptionBackend implements StorageBackend {
 		if ( false === $result ) {
 			// update_option returns false both on DB error AND when the value
 			// hasn't changed. Distinguish the two by re-reading.
+			// Use == (not ===) — strict comparison would fail on int/string
+			// type coercion or key-reordering introduced by the WP option
+			// serialize/unserialize round-trip.
 			$stored = get_option( $this->option_name );
-			return is_array( $stored ) && $stored === $data;
+			return is_array( $stored ) && $stored == $data;
 		}
 
 		return $result;
