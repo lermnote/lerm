@@ -78,7 +78,9 @@ final class OptionsPage {
 		$menu                 = is_array( $this->definition['menu'] ?? null ) ? $this->definition['menu'] : array();
 		$this->network_admin  = ! empty( $menu['network_admin'] );
 		// JS global can be overridden per-instance via the definition.
-		$this->js_global = 'lermAdminConfig';
+		$this->js_global = isset( $this->definition['js_global'] ) && is_string( $this->definition['js_global'] )
+			? $this->definition['js_global']
+			: 'lermAdminConfig';
 
 		if ( $register_hooks ) {
 			add_action( $this->menu_action(), array( $this, 'register_menu' ) );
