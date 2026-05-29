@@ -10,6 +10,7 @@ declare( strict_types=1 );
 $root          = dirname( __DIR__ );
 $version_file  = $root . '/VERSION';
 $plugin_file   = $root . '/lerm-admin-config.php';
+$readme_file   = $root . '/readme.txt';
 $version_class = $root . '/src/Version.php';
 $check_only    = in_array( '--check', $argv, true );
 
@@ -35,6 +36,9 @@ $plugin_updated  = preg_replace(
 	$constant_count
 );
 
+$readme_contents = (string) file_get_contents( $readme_file );
+$readme_updated  = preg_replace( '/(Stable tag:\s*)[^\r\n]+/', '${1}' . $version, $readme_contents, 1, $stable_tag_count );
+
 $class_contents = (string) file_get_contents( $version_class );
 $class_updated  = preg_replace(
 	"/(public const PACKAGE = ')[^']+(';\s*)/",
@@ -49,13 +53,18 @@ if ( 1 !== $header_count || 1 !== $constant_count ) {
 	exit( 1 );
 }
 
+if ( 1 !== $stable_tag_count ) {
+	fwrite( STDERR, "Unable to locate readme stable tag.\n" );
+	exit( 1 );
+}
+
 if ( 1 !== $class_count ) {
 	fwrite( STDERR, "Unable to locate Version::PACKAGE.\n" );
 	exit( 1 );
 }
 
 if ( $check_only ) {
-	if ( $plugin_updated !== $plugin_contents || $class_updated !== $class_contents ) {
+	if ( $plugin_updated !== $plugin_contents || $readme_updated !== $readme_contents || $class_updated !== $class_contents ) {
 		fwrite( STDERR, "AdminConfig version literals are not synchronized with VERSION {$version}.\n" );
 		exit( 1 );
 	}
@@ -66,6 +75,11 @@ if ( $check_only ) {
 
 if ( false === file_put_contents( $plugin_file, $plugin_updated ) ) {
 	fwrite( STDERR, "Unable to write {$plugin_file}.\n" );
+	exit( 1 );
+}
+
+if ( false === file_put_contents( $readme_file, (string) $readme_updated ) ) {
+	fwrite( STDERR, "Unable to write {$readme_file}.\n" );
 	exit( 1 );
 }
 

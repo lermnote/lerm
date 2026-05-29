@@ -32,3 +32,4 @@ packages/AdminConfig/.wp-env-multisite/
 packages/AdminConfig/assets/build/
 packages/AdminConfig/playwright-report/
 packages/AdminConfig/test-results/
+CLAUDE.md

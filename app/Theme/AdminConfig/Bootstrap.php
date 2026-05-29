@@ -17,9 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Bootstrap {
 
-	public static function register( ?Runtime $runtime = null ): void {
-		$runtime = $runtime ?? Runtime::instance();
-
+	public static function register( Runtime $runtime ): void {
 		ThemeOptionsSchema::register( $runtime );
 		LayoutMetaboxSchema::register( $runtime );
 		CategoryTaxonomySchema::register( $runtime );

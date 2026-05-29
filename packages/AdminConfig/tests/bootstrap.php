@@ -317,6 +317,26 @@ if ( ! function_exists( 'get_option' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_bloginfo' ) ) {
+	function get_bloginfo( string $show = '', string $filter = 'raw' ): string {
+		unset( $filter );
+
+		$values = array(
+			'name'        => 'Example Site',
+			'description' => 'Example tagline',
+			'url'         => 'https://example.test',
+		);
+
+		return $values[ $show ] ?? '';
+	}
+}
+
+if ( ! function_exists( 'home_url' ) ) {
+	function home_url( string $path = '' ): string {
+		return 'https://example.test/' . ltrim( $path, '/' );
+	}
+}
+
 if ( ! function_exists( 'update_option' ) ) {
 	function update_option( string $option, $value ): bool {
 		$previous = $GLOBALS['lerm_admin_config_options'][ $option ] ?? null;
@@ -425,6 +445,110 @@ if ( ! function_exists( 'wp_get_attachment_url' ) ) {
 		}
 
 		return 'https://example.test/uploads/full/' . (string) $attachment_id . '.jpg';
+	}
+}
+
+if ( ! function_exists( 'wp_get_nav_menus' ) ) {
+	function wp_get_nav_menus(): array {
+		return array(
+			(object) array(
+				'term_id' => 7,
+				'name'    => 'Primary Menu',
+			),
+		);
+	}
+}
+
+if ( ! function_exists( 'get_pages' ) ) {
+	function get_pages( array $args = array() ): array {
+		unset( $args );
+
+		return array(
+			(object) array(
+				'ID'         => 11,
+				'post_title' => 'About',
+			),
+			(object) array(
+				'ID'         => 12,
+				'post_title' => 'Account',
+			),
+		);
+	}
+}
+
+if ( ! function_exists( 'get_posts' ) ) {
+	function get_posts( array $args = array() ): array {
+		unset( $args );
+
+		return array(
+			(object) array(
+				'ID'         => 21,
+				'post_title' => 'Hello World',
+			),
+		);
+	}
+}
+
+if ( ! function_exists( 'get_categories' ) ) {
+	function get_categories( array $args = array() ): array {
+		unset( $args );
+
+		return array(
+			(object) array(
+				'term_id' => 31,
+				'name'    => 'News',
+			),
+		);
+	}
+}
+
+if ( ! function_exists( 'get_tags' ) ) {
+	function get_tags( array $args = array() ): array {
+		unset( $args );
+
+		return array(
+			(object) array(
+				'term_id' => 41,
+				'name'    => 'Featured',
+			),
+		);
+	}
+}
+
+if ( ! function_exists( 'wp_roles' ) ) {
+	function wp_roles(): object {
+		return new class() {
+			public function get_names(): array {
+				return array(
+					'subscriber' => 'Subscriber',
+					'editor'     => 'Editor',
+				);
+			}
+		};
+	}
+}
+
+if ( ! function_exists( 'get_user_meta' ) ) {
+	function get_user_meta( int $user_id, string $key, bool $single = false ) {
+		$value = $GLOBALS['lerm_admin_config_user_meta'][ $user_id ][ $key ] ?? '';
+
+		return $single ? $value : array( $value );
+	}
+}
+
+if ( ! function_exists( 'update_user_meta' ) ) {
+	function update_user_meta( int $user_id, string $key, $value ): bool {
+		$GLOBALS['lerm_admin_config_user_meta'][ $user_id ][ $key ] = $value;
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'delete_user_meta' ) ) {
+	function delete_user_meta( int $user_id, string $key ): bool {
+		unset( $GLOBALS['lerm_admin_config_user_meta'][ $user_id ][ $key ] );
+
+		return true;
 	}
 }
 
@@ -616,6 +740,12 @@ if ( ! function_exists( 'get_template_directory_uri' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_template_directory' ) ) {
+	function get_template_directory(): string {
+		return dirname( __DIR__, 3 );
+	}
+}
+
 if ( ! function_exists( 'get_current_screen' ) ) {
 	function get_current_screen() {
 		return $GLOBALS['lerm_admin_config_current_screen'] ?? null;
@@ -760,6 +890,7 @@ spl_autoload_register(
 		$prefixes = array(
 			'Lerm\\AdminConfig\\Tests\\' => __DIR__ . '/',
 			'Lerm\\AdminConfig\\'        => dirname( __DIR__ ) . '/src/',
+			'Lerm\\Theme\\'              => dirname( __DIR__, 3 ) . '/app/Theme/',
 		);
 
 		foreach ( $prefixes as $prefix => $base_dir ) {

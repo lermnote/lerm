@@ -13,7 +13,7 @@ use Lerm\AdminConfig\Compiler\CompiledSchema;
 use Lerm\AdminConfig\WordPress\Runtime;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Contracts\StorageBackend;
-use Lerm\AdminConfig\Framework\Stores\OptionStore;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -94,9 +94,7 @@ final class ProfileSettingsSchema {
 		return self::$definition;
 	}
 
-	public static function register( ?Runtime $runtime = null ): void {
-		$runtime = $runtime ?? Runtime::instance();
-
+	public static function register( Runtime $runtime ): void {
 		self::register_store_factory( $runtime );
 		self::register_field_types( $runtime );
 
