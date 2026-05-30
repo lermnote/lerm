@@ -245,7 +245,7 @@ jobs:
           path: packages/AdminConfig/assets/build
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Start wp-env
         run: npm run wp-env:start
@@ -328,7 +328,7 @@ jobs:
           path: packages/AdminConfig/assets/build
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Start multisite wp-env
         run: npm run wp-env:start:multisite
@@ -407,7 +407,7 @@ jobs:
           path: packages/AdminConfig/assets/build
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Run REST-only browser suite
         run: npm run test:wp:rest-only
