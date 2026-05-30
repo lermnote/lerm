@@ -13,6 +13,7 @@ module.exports = defineConfig( {
 	},
 	use: {
 		baseURL,
+		channel: process.env.PLAYWRIGHT_CHANNEL || undefined,
 		trace: 'retain-on-failure',
 		screenshot: 'only-on-failure',
 		video: 'retain-on-failure',

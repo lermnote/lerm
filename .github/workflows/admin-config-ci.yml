@@ -208,7 +208,7 @@ jobs:
     needs: build-assets
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
-      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+      PLAYWRIGHT_CHANNEL: 'chrome'
 
     steps:
       - name: Check out repository
@@ -291,7 +291,7 @@ jobs:
     needs: build-assets
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
-      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+      PLAYWRIGHT_CHANNEL: 'chrome'
 
     steps:
       - name: Check out repository
@@ -370,7 +370,7 @@ jobs:
     needs: build-assets
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
-      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+      PLAYWRIGHT_CHANNEL: 'chrome'
 
     steps:
       - name: Check out repository
