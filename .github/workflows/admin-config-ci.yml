@@ -244,7 +244,16 @@ jobs:
           name: admin-config-build-assets
           path: packages/AdminConfig/assets/build
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('packages/AdminConfig/package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Install Playwright browser
+        timeout-minutes: 5
         run: npx playwright install chromium
 
       - name: Start wp-env
@@ -327,7 +336,16 @@ jobs:
           name: admin-config-build-assets
           path: packages/AdminConfig/assets/build
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('packages/AdminConfig/package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Install Playwright browser
+        timeout-minutes: 5
         run: npx playwright install chromium
 
       - name: Start multisite wp-env
@@ -406,7 +424,16 @@ jobs:
           name: admin-config-build-assets
           path: packages/AdminConfig/assets/build
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('packages/AdminConfig/package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Install Playwright browser
+        timeout-minutes: 5
         run: npx playwright install chromium
 
       - name: Run REST-only browser suite
