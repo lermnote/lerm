@@ -89,9 +89,7 @@ final class LayoutMetaboxSchema {
 		return self::$definition;
 	}
 
-	public static function register( ?Runtime $runtime = null ): void {
-		$runtime = $runtime ?? Runtime::instance();
-
+	public static function register( Runtime $runtime ): void {
 		if ( $runtime->has( self::schema_id() ) ) {
 			return;
 		}

@@ -32,7 +32,6 @@ final class ThemeOptionsDefinition {
 		'appearance',
 		'content',
 		'system',
-		'search',
 		'comments',
 		'account',
 		'seo',
