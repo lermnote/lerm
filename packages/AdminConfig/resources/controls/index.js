@@ -1359,14 +1359,8 @@ const ImageSelectControl = (props) => {
 				alt: option.label,
 				key: 'image',
 				src: option.url,
-				style: {
-					height: '32px',
-					objectFit: 'cover',
-					width: '48px',
-				},
 			})
-			: null,
-		createElement('span', { key: 'label' }, option.label),
+			: createElement('span', { key: 'label' }, option.label),
 	].filter(Boolean));
 };
 
@@ -2002,13 +1996,6 @@ const VisualChoiceControl = (normalized, modifier, options, renderPreview) => {
 			'data-value': option.value,
 			key: option.value,
 			onClick: () => onChange(option.value),
-			style: {
-				alignItems: 'center',
-				display: 'inline-flex',
-				gap: '6px',
-				height: 'auto',
-				margin: '0 4px 4px 0',
-			},
 			type: 'button',
 		};
 		const content = renderPreview(option);

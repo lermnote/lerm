@@ -182,6 +182,14 @@
 	border-radius: 2px;
 }
 
+.lerm-admin-config-block-panel__readonly-field strong,
+.lerm-admin-config-block-panel__unsupported-field strong {
+	display: block;
+	font-size: 12px;
+	line-height: 1.35;
+	color: var(--lac-panel-text);
+}
+
 .lerm-admin-config-block-panel__unsupported-field {
 	border-style: dashed;
 }
@@ -439,24 +447,57 @@
 	gap: 8px;
 }
 
+.lerm-admin-config-block-panel__radio label,
+.lerm-admin-config-block-panel__checkbox-list label {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.lerm-admin-config-block-panel__radio input,
+.lerm-admin-config-block-panel__checkbox-list input {
+	flex: 0 0 auto;
+	margin-top: 1px;
+}
+
 /* ---- Button Set ---- */
 
 .lerm-admin-config-block-panel__button-set {
+	display: grid;
+	width: 100%;
+	gap: 6px;
+	border: 0;
+}
+
+.lerm-admin-config-block-panel__button-set > span {
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--lac-panel-text);
+}
+
+.lerm-admin-config-block-panel__button-set .components-button-group,
+.lerm-admin-config-block-panel__button-set > div {
 	display: flex;
 	width: 100%;
-	gap: 0;
 	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
 	overflow: hidden;
 }
 
-.lerm-admin-config-block-panel__button-set .components-button {
+.lerm-admin-config-block-panel__button-set .components-button,
+.lerm-admin-config-block-panel__button-set button {
 	flex: 1 1 0;
+	min-width: 0;
+	justify-content: center;
 	border-radius: 0 !important;
 	border-right: 1px solid var(--lac-panel-border);
 }
 
-.lerm-admin-config-block-panel__button-set .components-button:last-child {
+.lerm-admin-config-block-panel__button-set .components-button:last-child,
+.lerm-admin-config-block-panel__button-set button:last-child {
 	border-right: 0;
 }
 
@@ -545,9 +586,25 @@
 
 .lerm-admin-config-block-panel__visual-choice-options .components-button,
 .lerm-admin-config-block-panel__visual-choice-options button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 	justify-content: center;
+	height: auto;
+	margin: 0;
 	min-height: 36px;
+	padding: 6px 8px;
+	text-align: center;
 	white-space: normal;
+}
+
+.lerm-admin-config-block-panel__visual-choice-options .components-button[aria-pressed="true"],
+.lerm-admin-config-block-panel__visual-choice-options button[aria-pressed="true"] {
+	box-shadow: inset 0 0 0 1px var(--lac-panel-accent);
+}
+
+.lerm-admin-config-block-panel__visual-choice--image-select .lerm-admin-config-block-panel__visual-choice-options {
+	grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
 }
 
 .lerm-admin-config-block-panel__visual-choice--image-select .components-button,
@@ -555,15 +612,23 @@
 	display: grid !important;
 	gap: 6px !important;
 	padding: 6px !important;
+	min-height: 66px;
 	text-align: center;
 }
 
 .lerm-admin-config-block-panel__visual-choice--image-select img {
 	display: block;
 	width: 100%;
+	height: 54px;
 	aspect-ratio: 4 / 3;
 	object-fit: cover;
+	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
+}
+
+.lerm-admin-config-block-panel__visual-choice--image-select .components-button[aria-pressed="true"] img,
+.lerm-admin-config-block-panel__visual-choice--image-select button[aria-pressed="true"] img {
+	border-color: #fff;
 }
 
 .lerm-admin-config-block-panel__visual-choice--icon .components-button,
