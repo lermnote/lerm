@@ -1360,7 +1360,8 @@ const ImageSelectControl = (props) => {
 				key: 'image',
 				src: option.url,
 			})
-			: createElement('span', { key: 'label' }, option.label),
+			: null,
+		createElement('span', { key: 'label' }, option.label),
 	].filter(Boolean));
 };
 
