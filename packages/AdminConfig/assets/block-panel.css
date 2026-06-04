@@ -3,6 +3,46 @@
  * Matches native WordPress editor panel visual conventions.
  */
 
+.lerm-admin-config-block-panel {
+	--lac-panel-border: #dcdcde;
+	--lac-panel-muted-border: #f0f0f1;
+	--lac-panel-surface: #fff;
+	--lac-panel-subtle-surface: #f6f7f7;
+	--lac-panel-text: #1e1e1e;
+	--lac-panel-muted-text: #646970;
+	--lac-panel-accent: #007cba;
+	--lac-panel-warning: #dba617;
+	--lac-panel-warning-bg: #fcf9e8;
+	--lac-panel-error: #cc1818;
+	--lac-panel-error-bg: #fcf0f1;
+	display: grid;
+	gap: 14px;
+	color: var(--lac-panel-text);
+}
+
+.lerm-admin-config-block-panel fieldset {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.lerm-admin-config-block-panel legend {
+	display: block;
+	margin: 0 0 8px;
+	padding: 0;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--lac-panel-text);
+}
+
+.lerm-admin-config-block-panel input,
+.lerm-admin-config-block-panel select,
+.lerm-admin-config-block-panel textarea {
+	max-width: 100%;
+}
+
 /* ---- Status / Message / Meta ---- */
 
 .lerm-admin-config-block-panel__status {
@@ -10,38 +50,37 @@
 }
 
 .lerm-admin-config-block-panel__message {
-	margin: 0 0 12px;
-	padding: 8px 12px;
+	margin: 0;
+	padding: 9px 10px;
 	font-size: 12px;
 	line-height: 1.4;
-	background: #f0f0f1;
-	border-left: 4px solid #007cba;
+	background: var(--lac-panel-subtle-surface);
+	border-left: 3px solid var(--lac-panel-accent);
 	border-radius: 2px;
 }
 
 .lerm-admin-config-block-panel__message[data-error-count]:not([data-error-count="0"]),
 .lerm-admin-config-block-panel__message[role="alert"] {
-	background: #fcf0f1;
-	border-left-color: #cc1818;
+	background: var(--lac-panel-error-bg);
+	border-left-color: var(--lac-panel-error);
 }
 
 .lerm-admin-config-block-panel__meta {
-	margin: 0 0 16px;
+	margin: -6px 0 0;
 	font-size: 11px;
-	color: #757575;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
+	line-height: 1.35;
+	color: var(--lac-panel-muted-text);
 }
 
 /* ---- Save Notice ---- */
 
 .lerm-admin-config-block-panel__save-notice {
-	margin: 0 0 12px;
-	padding: 8px 12px;
+	margin: 0;
+	padding: 9px 10px;
 	font-size: 12px;
 	line-height: 1.4;
-	background: #fcf9e8;
-	border-left: 4px solid #dba617;
+	background: var(--lac-panel-warning-bg);
+	border-left: 3px solid var(--lac-panel-warning);
 	border-radius: 2px;
 	color: #755100;
 }
@@ -49,34 +88,35 @@
 /* ---- Sections ---- */
 
 .lerm-admin-config-block-panel__section {
-	margin: 0 0 24px;
-	padding: 0;
+	margin: 0;
+	padding: 0 0 4px;
 	border: 0;
 }
 
 .lerm-admin-config-block-panel__section + .lerm-admin-config-block-panel__section {
-	padding-top: 20px;
-	border-top: 1px solid #e0e0e0;
+	padding-top: 16px;
+	border-top: 1px solid var(--lac-panel-border);
 }
 
 .lerm-admin-config-block-panel__section h3 {
-	margin: 0 0 12px;
+	margin: 0 0 10px;
 	font-size: 13px;
 	font-weight: 600;
-	color: #1e1e1e;
+	line-height: 1.35;
+	color: var(--lac-panel-text);
 }
 
 .lerm-admin-config-block-panel__section-description {
-	margin: 0 0 16px;
+	margin: 0 0 12px;
 	font-size: 12px;
-	color: #757575;
 	line-height: 1.4;
+	color: var(--lac-panel-muted-text);
 }
 
 /* ---- Fields ---- */
 
 .lerm-admin-config-block-panel__field {
-	margin: 0 0 20px;
+	margin: 0 0 16px;
 }
 
 .lerm-admin-config-block-panel__field:last-child {
@@ -84,8 +124,33 @@
 }
 
 .lerm-admin-config-block-panel__field.is-error {
-	padding: 0 0 0 8px;
-	border-left: 3px solid #cc1818;
+	padding: 10px;
+	background: var(--lac-panel-error-bg);
+	border-left: 3px solid var(--lac-panel-error);
+	border-radius: 2px;
+}
+
+.lerm-admin-config-block-panel .components-base-control {
+	margin-bottom: 0;
+}
+
+.lerm-admin-config-block-panel .components-base-control__label {
+	margin-bottom: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--lac-panel-text);
+}
+
+.lerm-admin-config-block-panel .components-base-control__help {
+	margin-top: 6px;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--lac-panel-muted-text);
+}
+
+.lerm-admin-config-block-panel__field.is-error .components-base-control__help {
+	color: var(--lac-panel-error);
 }
 
 /* Field description text (rendered inside controls) is handled by controls */
@@ -93,8 +158,8 @@
 .lerm-admin-config-block-panel__field-description {
 	margin: 4px 0 0;
 	font-size: 12px;
-	color: #757575;
 	line-height: 1.4;
+	color: var(--lac-panel-muted-text);
 }
 
 /* Field errors */
@@ -102,68 +167,88 @@
 .lerm-admin-config-block-panel__field-error {
 	margin: 6px 0 0;
 	font-size: 12px;
-	color: #cc1818;
 	line-height: 1.4;
+	color: var(--lac-panel-error);
 }
 
 /* ---- Read-only / Unsupported Fields ---- */
 
 .lerm-admin-config-block-panel__readonly-field,
 .lerm-admin-config-block-panel__unsupported-field {
-	margin-bottom: 16px;
-	padding: 12px;
-	background: #f9f9f9;
-	border: 1px solid #e0e0e0;
+	margin-bottom: 14px;
+	padding: 10px;
+	background: var(--lac-panel-subtle-surface);
+	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
 }
 
+.lerm-admin-config-block-panel__readonly-field strong,
+.lerm-admin-config-block-panel__unsupported-field strong {
+	display: block;
+	font-size: 12px;
+	line-height: 1.35;
+	color: var(--lac-panel-text);
+}
+
 .lerm-admin-config-block-panel__unsupported-field {
-	opacity: 0.65;
+	border-style: dashed;
 }
 
 .lerm-admin-config-block-panel__unsupported-message {
 	margin: 6px 0 0;
 	font-size: 11px;
-	color: #757575;
-	font-style: italic;
+	line-height: 1.4;
+	color: var(--lac-panel-muted-text);
 }
 
 /* ---- Actions Bar ---- */
 
 .lerm-admin-config-block-panel__actions {
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: 8px;
-	margin-top: 16px;
-	padding-top: 16px;
-	border-top: 1px solid #e0e0e0;
+	margin: 0 -16px -16px;
+	padding: 12px 16px;
+	background: rgba(255, 255, 255, 0.96);
+	border-top: 1px solid var(--lac-panel-border);
+	box-shadow: 0 -8px 12px rgba(0, 0, 0, 0.03);
+}
+
+.lerm-admin-config-block-panel__actions .components-button {
+	min-height: 32px;
+	justify-content: center;
 }
 
 .lerm-admin-config-block-panel__dirty-state {
 	margin-left: auto;
-	font-size: 11px;
 	padding: 2px 8px;
-	border-radius: 10px;
+	font-size: 11px;
 	line-height: 18px;
+	border-radius: 999px;
+	white-space: nowrap;
 }
 
 .lerm-admin-config-block-panel__dirty-state[data-dirty="true"] {
 	color: #755100;
-	background: #fcf9e8;
+	background: var(--lac-panel-warning-bg);
 }
 
 .lerm-admin-config-block-panel__dirty-state[data-dirty="false"] {
 	color: #50575e;
-	background: #f0f0f1;
+	background: var(--lac-panel-muted-border);
 }
 
 /* ---- Nested / Composite Fields ---- */
 
 .lerm-admin-config-block-panel__nested-field {
-	margin-bottom: 16px;
-	padding: 12px;
-	background: #f9f9f9;
-	border: 1px solid #e0e0e0;
+	margin-bottom: 12px;
+	padding: 10px;
+	background: var(--lac-panel-surface);
+	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
 }
 
@@ -173,36 +258,72 @@
 }
 
 .lerm-admin-config-block-panel__composite-field {
+	display: grid;
+	gap: 8px;
 	margin-bottom: 16px;
 }
 
 .lerm-admin-config-block-panel__composite-item {
+	display: grid;
+	grid-template-columns: minmax(70px, 0.8fr) minmax(0, 1.2fr);
+	gap: 6px 8px;
+	align-items: center;
 	padding: 8px 0;
-	border-bottom: 1px solid #f0f0f1;
+	border-top: 1px solid var(--lac-panel-muted-border);
+	font-size: 12px;
 }
 
 .lerm-admin-config-block-panel__composite-item:last-child {
-	border-bottom: 0;
+	border-bottom: 1px solid var(--lac-panel-muted-border);
+}
+
+.lerm-admin-config-block-panel__composite-item.is-error {
+	padding-left: 8px;
+	border-left: 3px solid var(--lac-panel-error);
+	background: var(--lac-panel-error-bg);
+}
+
+.lerm-admin-config-block-panel__composite-item > span:first-child {
+	font-weight: 500;
+	color: var(--lac-panel-text);
+}
+
+.lerm-admin-config-block-panel__composite-item input,
+.lerm-admin-config-block-panel__composite-item select {
+	width: 100%;
+	margin: 0;
+}
+
+.lerm-admin-config-block-panel__composite-item code {
+	overflow: hidden;
+	max-width: 100%;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .lerm-admin-config-block-panel__group {
+	display: grid;
+	gap: 12px;
 	margin-bottom: 20px;
 }
 
 .lerm-admin-config-block-panel__group-item {
-	margin-bottom: 12px;
-	padding: 12px;
-	border: 1px solid #e0e0e0;
+	margin-bottom: 0;
+	padding: 10px;
+	background: var(--lac-panel-subtle-surface);
+	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
 }
 
 /* ---- Fieldset / Typography / Background ---- */
 
 .lerm-admin-config-block-panel__fieldset {
-	margin-bottom: 20px;
-	padding: 12px;
-	background: #f9f9f9;
-	border: 1px solid #e0e0e0;
+	display: grid;
+	gap: 12px;
+	margin-bottom: 18px;
+	padding: 10px;
+	background: var(--lac-panel-subtle-surface);
+	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
 }
 
@@ -214,26 +335,47 @@
 /* ---- Media Controls ---- */
 
 .lerm-admin-config-block-panel__media-preview {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
 	gap: 8px;
 	margin-top: 8px;
+	padding: 0;
+	list-style: none;
 }
 
 .lerm-admin-config-block-panel__media-preview-item {
-	width: 80px;
-	height: 80px;
-	object-fit: cover;
-	border: 1px solid #ddd;
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	aspect-ratio: 1;
+	min-height: 56px;
+	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
-	background: #f0f0f1;
+	background: var(--lac-panel-muted-border);
+}
+
+.lerm-admin-config-block-panel__media-preview-item img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.lerm-admin-config-block-panel__media-preview-item span {
+	display: grid;
+	height: 100%;
+	padding: 6px;
+	place-items: center;
+	font-size: 11px;
+	line-height: 1.25;
+	text-align: center;
+	color: var(--lac-panel-muted-text);
 }
 
 .lerm-admin-config-block-panel__media-empty {
 	margin-top: 8px;
 	font-size: 12px;
-	color: #757575;
-	font-style: italic;
+	color: var(--lac-panel-muted-text);
 }
 
 .lerm-admin-config-block-panel__media-control {
@@ -242,6 +384,7 @@
 
 .lerm-admin-config-block-panel__media-actions {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 8px;
 	margin-top: 8px;
 }
@@ -253,8 +396,17 @@
 .lerm-admin-config-block-panel__media-url-preview {
 	margin-top: 6px;
 	font-size: 12px;
-	color: #757575;
 	word-break: break-all;
+	color: var(--lac-panel-muted-text);
+}
+
+.lerm-admin-config-block-panel__media-url-preview img {
+	display: block;
+	width: 100%;
+	max-height: 148px;
+	object-fit: cover;
+	border: 1px solid var(--lac-panel-border);
+	border-radius: 2px;
 }
 
 /* ---- Range ---- */
@@ -295,22 +447,57 @@
 	gap: 8px;
 }
 
+.lerm-admin-config-block-panel__radio label,
+.lerm-admin-config-block-panel__checkbox-list label {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.lerm-admin-config-block-panel__radio input,
+.lerm-admin-config-block-panel__checkbox-list input {
+	flex: 0 0 auto;
+	margin-top: 1px;
+}
+
 /* ---- Button Set ---- */
 
 .lerm-admin-config-block-panel__button-set {
-	display: inline-flex;
-	gap: 0;
-	border: 1px solid #757575;
+	display: grid;
+	width: 100%;
+	gap: 6px;
+	border: 0;
+}
+
+.lerm-admin-config-block-panel__button-set > span {
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--lac-panel-text);
+}
+
+.lerm-admin-config-block-panel__button-set .components-button-group,
+.lerm-admin-config-block-panel__button-set > div {
+	display: flex;
+	width: 100%;
+	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
 	overflow: hidden;
 }
 
-.lerm-admin-config-block-panel__button-set .components-button {
+.lerm-admin-config-block-panel__button-set .components-button,
+.lerm-admin-config-block-panel__button-set button {
+	flex: 1 1 0;
+	min-width: 0;
+	justify-content: center;
 	border-radius: 0 !important;
-	border-right: 1px solid #757575;
+	border-right: 1px solid var(--lac-panel-border);
 }
 
-.lerm-admin-config-block-panel__button-set .components-button:last-child {
+.lerm-admin-config-block-panel__button-set .components-button:last-child,
+.lerm-admin-config-block-panel__button-set button:last-child {
 	border-right: 0;
 }
 
@@ -338,24 +525,51 @@
 	flex-wrap: wrap;
 	gap: 6px;
 	margin-bottom: 8px;
+	font-size: 12px;
+	color: var(--lac-panel-muted-text);
 }
 
 .lerm-admin-config-block-panel__ajax-select-search {
+	display: grid;
+	gap: 4px;
 	margin-bottom: 8px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--lac-panel-text);
+}
+
+.lerm-admin-config-block-panel__ajax-select-search input {
+	width: 100%;
 }
 
 .lerm-admin-config-block-panel__ajax-select-status {
 	margin-bottom: 4px;
 	font-size: 11px;
-	color: #757575;
+	color: var(--lac-panel-muted-text);
 }
 
 .lerm-admin-config-block-panel__ajax-select-results {
 	max-height: 200px;
 	overflow-y: auto;
-	border: 1px solid #ddd;
+	border: 1px solid var(--lac-panel-border);
 	border-radius: 2px;
-	background: #fff;
+	background: var(--lac-panel-surface);
+}
+
+.lerm-admin-config-block-panel__ajax-select-results .components-button,
+.lerm-admin-config-block-panel__ajax-select-results button {
+	display: flex;
+	width: 100%;
+	height: auto;
+	justify-content: flex-start;
+	padding: 8px;
+	text-align: left;
+	border-radius: 0;
+}
+
+.lerm-admin-config-block-panel__ajax-select-results .components-button + .components-button,
+.lerm-admin-config-block-panel__ajax-select-results button + button {
+	border-top: 1px solid var(--lac-panel-muted-border);
 }
 
 /* ---- Visual Choice ---- */
@@ -365,13 +579,81 @@
 }
 
 .lerm-admin-config-block-panel__visual-choice-options {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
 	gap: 8px;
+}
+
+.lerm-admin-config-block-panel__visual-choice-options .components-button,
+.lerm-admin-config-block-panel__visual-choice-options button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	justify-content: center;
+	height: auto;
+	margin: 0;
+	min-height: 36px;
+	padding: 6px 8px;
+	text-align: center;
+	white-space: normal;
+}
+
+.lerm-admin-config-block-panel__visual-choice-options .components-button[aria-pressed="true"],
+.lerm-admin-config-block-panel__visual-choice-options button[aria-pressed="true"] {
+	box-shadow: inset 0 0 0 1px var(--lac-panel-accent);
+}
+
+.lerm-admin-config-block-panel__visual-choice--image-select .lerm-admin-config-block-panel__visual-choice-options {
+	grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+}
+
+.lerm-admin-config-block-panel__visual-choice--image-select .components-button,
+.lerm-admin-config-block-panel__visual-choice--image-select button {
+	display: grid !important;
+	gap: 6px !important;
+	padding: 6px !important;
+	min-height: 66px;
+	text-align: center;
+}
+
+.lerm-admin-config-block-panel__visual-choice--image-select img {
+	display: block;
+	width: 100%;
+	height: 54px;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+	border: 1px solid var(--lac-panel-border);
+	border-radius: 2px;
+}
+
+.lerm-admin-config-block-panel__visual-choice--image-select .components-button[aria-pressed="true"] img,
+.lerm-admin-config-block-panel__visual-choice--image-select button[aria-pressed="true"] img {
+	border-color: #fff;
+}
+
+.lerm-admin-config-block-panel__visual-choice--icon .components-button,
+.lerm-admin-config-block-panel__visual-choice--icon button {
+	min-width: 44px;
 }
 
 /* ---- Spinner ---- */
 
 .lerm-admin-config-block-panel .components-spinner {
 	margin: 12px auto;
+}
+
+@media (max-width: 782px) {
+	.lerm-admin-config-block-panel__actions {
+		bottom: 0;
+	}
+
+	.lerm-admin-config-block-panel__actions .components-button {
+		flex: 1 1 auto;
+	}
+
+	.lerm-admin-config-block-panel__dirty-state {
+		flex-basis: 100%;
+		margin-left: 0;
+		text-align: center;
+	}
 }
