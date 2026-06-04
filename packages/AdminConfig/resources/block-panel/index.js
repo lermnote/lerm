@@ -15,7 +15,7 @@ const {
 	withValues,
 } = require('../core/schema-state');
 const { createDefaultControlRegistry } = require('../controls');
-const { STORE_NAME } = require('../store');
+const { register: registerStore, STORE_NAME } = require('../store');
 
 const BLOCK_PANEL_CONFIG_GLOBAL = 'lermAdminConfigBlockPanelConfigs';
 const panelInstances = new Map();
@@ -848,6 +848,8 @@ const createPanelComponent = (config, Panel, element) => {
  */
 const registerBlockEditorPanels = (configs = blockPanelConfigsFromWindow()) => {
 	if (typeof window === 'undefined') return false;
+
+	registerStore();
 
 	const wp = window.wp || {};
 	const registerPlugin = wp.plugins && wp.plugins.registerPlugin;
