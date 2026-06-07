@@ -217,7 +217,7 @@ final class ContainerFieldRendererTest extends TestCase {
 		ob_start();
 
 		try {
-			$page->render_field( $field, $values, 'general', 'table', $field_errors );
+			$page->render_field( $field, $values, 'table', $field_errors );
 
 			return (string) ob_get_clean();
 		} catch ( \Throwable $throwable ) {

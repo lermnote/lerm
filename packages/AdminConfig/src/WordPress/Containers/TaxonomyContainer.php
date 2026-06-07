@@ -144,7 +144,7 @@ final class TaxonomyContainer implements Container {
 
 				foreach ( PageSchema::section_fields( $section ) as $field ) {
 					echo '<div class="form-field term-admin-config-field">';
-					$renderer->render_field( $field, $values, (string) $section_id, 'stack', $errors );
+					$renderer->render_field( $field, $values, 'stack', $errors );
 					echo '</div>';
 				}
 			}

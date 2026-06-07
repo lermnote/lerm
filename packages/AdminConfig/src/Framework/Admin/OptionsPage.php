@@ -677,7 +677,7 @@ final class OptionsPage {
 				}
 			}
 
-			$this->render_field( $field, $values, $section_id, $layout, $field_errors );
+			$this->render_field( $field, $values, $layout, $field_errors );
 		}
 	}
 
@@ -686,11 +686,9 @@ final class OptionsPage {
 	 *
 	 * @param array<string, mixed> $field      Field definition.
 	 * @param array<string, mixed> $values     Saved values.
-	 * @param string               $section_id Current section ID.
 	 * @param string               $layout Layout mode.
 	 */
-	public function render_field( array $field, array $values, string $section_id = '', string $layout = 'table', array $field_errors = array() ): void {
-		unset( $section_id );
+	public function render_field( array $field, array $values, string $layout = 'table', array $field_errors = array() ): void {
 
 		if ( 'stack' === $layout ) {
 			$this->render_stack_field_row( $field, $values, $field_errors );
