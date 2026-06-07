@@ -144,12 +144,12 @@ final class TaxonomyContainer implements Container {
 
 				foreach ( PageSchema::section_fields( $section ) as $field ) {
 					echo '<div class="form-field term-admin-config-field">';
-					$renderer->render_field( $field, $values, (string) $section_id, 'stack', $errors );
+					$renderer->render_field( $field, $values, 'stack', $errors );
 					echo '</div>';
 				}
 			}
 
-			wp_nonce_field( $this->nonce_action( $schema ), $this->nonce_name( $schema ) );
+			wp_nonce_field( ContainerSaveSupport::nonce_action( 'taxonomy', $schema ), ContainerSaveSupport::nonce_name( 'taxonomy', $schema ) );
 		}
 	}
 
@@ -192,16 +192,16 @@ final class TaxonomyContainer implements Container {
 
 			printf(
 				'<tr class="form-field term-admin-config-nonce"><td colspan="2">%s</td></tr>',
-				wp_nonce_field( $this->nonce_action( $schema ), $this->nonce_name( $schema ), true, false )
+				wp_nonce_field( ContainerSaveSupport::nonce_action( 'taxonomy', $schema ), ContainerSaveSupport::nonce_name( 'taxonomy', $schema ), true, false )
 			);
 		}
 	}
 
 	public function save_term( int $term_id, string $taxonomy ): void {
 		foreach ( $this->schemas_for_taxonomy( $taxonomy ) as $schema ) {
-			$nonce = ContainerSaveSupport::posted_nonce( $this->nonce_name( $schema ) );
+			$nonce = ContainerSaveSupport::posted_nonce( ContainerSaveSupport::nonce_name( 'taxonomy', $schema ) );
 
-			if ( '' === $nonce || ! wp_verify_nonce( $nonce, $this->nonce_action( $schema ) ) ) {
+			if ( '' === $nonce || ! wp_verify_nonce( $nonce, ContainerSaveSupport::nonce_action( 'taxonomy', $schema ) ) ) {
 				continue;
 			}
 
@@ -219,7 +219,7 @@ final class TaxonomyContainer implements Container {
 				$resource,
 				$store,
 				$submitted,
-				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
+				null,
 				__( 'Please review the highlighted term fields before saving again.', 'lerm-admin-config' ),
 				__( 'Unable to save these term settings right now.', 'lerm-admin-config' )
 			);
@@ -280,14 +280,6 @@ final class TaxonomyContainer implements Container {
 		}
 
 		return array_values( array_unique( $normalized ) );
-	}
-
-	private function nonce_name( CompiledSchema $schema ): string {
-		return 'lerm_admin_config_taxonomy_nonce_' . $schema->id();
-	}
-
-	private function nonce_action( CompiledSchema $schema ): string {
-		return 'lerm_admin_config_taxonomy_' . $schema->id();
 	}
 
 	private function capability_for_schema( CompiledSchema $schema, string $taxonomy ): string {

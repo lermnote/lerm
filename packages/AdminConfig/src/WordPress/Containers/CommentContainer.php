@@ -138,7 +138,7 @@ final class CommentContainer implements Container {
 			);
 		}
 
-		wp_nonce_field( $this->nonce_action( $schema ), $this->nonce_name( $schema ) );
+		wp_nonce_field( ContainerSaveSupport::nonce_action( 'comment', $schema ), ContainerSaveSupport::nonce_name( 'comment', $schema ) );
 		echo '</div>';
 	}
 
@@ -150,9 +150,9 @@ final class CommentContainer implements Container {
 		}
 
 		foreach ( $this->schemas as $schema ) {
-			$nonce = ContainerSaveSupport::posted_nonce( $this->nonce_name( $schema ) );
+			$nonce = ContainerSaveSupport::posted_nonce( ContainerSaveSupport::nonce_name( 'comment', $schema ) );
 
-			if ( '' === $nonce || ! wp_verify_nonce( $nonce, $this->nonce_action( $schema ) ) ) {
+			if ( '' === $nonce || ! wp_verify_nonce( $nonce, ContainerSaveSupport::nonce_action( 'comment', $schema ) ) ) {
 				continue;
 			}
 
@@ -169,7 +169,7 @@ final class CommentContainer implements Container {
 				(string) $comment_id,
 				$store,
 				$submitted,
-				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
+				null,
 				__( 'Please review the highlighted comment fields before saving again.', 'lerm-admin-config' ),
 				__( 'Unable to save these comment settings right now.', 'lerm-admin-config' )
 			);
@@ -204,13 +204,5 @@ final class CommentContainer implements Container {
 
 	private function meta_box_id( CompiledSchema $schema ): string {
 		return 'lerm-admin-config-comment-' . $schema->id();
-	}
-
-	private function nonce_name( CompiledSchema $schema ): string {
-		return 'lerm_admin_config_comment_nonce_' . $schema->id();
-	}
-
-	private function nonce_action( CompiledSchema $schema ): string {
-		return 'lerm_admin_config_comment_' . $schema->id();
 	}
 }

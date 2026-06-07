@@ -365,7 +365,7 @@ jobs:
         run: npm run wp-env:stop:multisite
 
   wordpress-rest-only:
-    name: WordPress REST-only
+    name: WordPress REST
     runs-on: ubuntu-latest
     needs: build-assets
     env:
@@ -409,10 +409,10 @@ jobs:
           name: admin-config-build-assets
           path: packages/AdminConfig/assets/build
 
-      - name: Run REST-only browser suite
+      - name: Run REST browser suite
         run: npm run test:wp:rest-only
 
-      - name: Capture REST-only wp-env logs
+      - name: Capture REST wp-env logs
         if: always()
         run: |
           mkdir -p artifacts/wp-env
@@ -421,7 +421,7 @@ jobs:
           npm run wp-env:logs:multisite > artifacts/wp-env/rest-only-multisite-development.log 2>&1 || true
           npm run wp-env:logs:tests:multisite > artifacts/wp-env/rest-only-multisite-tests.log 2>&1 || true
 
-      - name: Upload REST-only artifacts
+      - name: Upload REST artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
