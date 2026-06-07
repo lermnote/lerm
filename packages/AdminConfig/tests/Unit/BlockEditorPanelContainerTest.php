@@ -63,7 +63,10 @@ final class BlockEditorPanelContainerTest extends TestCase {
 		$container->mount( $this->createSchema( 'test', 'Test Panel' ) );
 
 		$GLOBALS['lerm_admin_config_current_screen'] = (object) array( 'post_type' => 'page' );
-		$GLOBALS['post']                              = (object) array( 'ID' => 1, 'post_type' => 'page' );
+		$GLOBALS['post']                             = (object) array(
+			'ID'        => 1,
+			'post_type' => 'page',
+		);
 		unset( $GLOBALS['lerm_admin_config_enqueued_scripts'] );
 
 		$container->enqueue_block_editor_assets();
@@ -80,12 +83,15 @@ final class BlockEditorPanelContainerTest extends TestCase {
 		$container->mount( $this->createSchema( 'test', 'Test Panel' ) );
 
 		$GLOBALS['lerm_admin_config_current_screen'] = (object) array( 'post_type' => 'post' );
-		$GLOBALS['post']                              = (object) array( 'ID' => 42, 'post_type' => 'post' );
+		$GLOBALS['post']                             = (object) array(
+			'ID'        => 42,
+			'post_type' => 'post',
+		);
 		unset( $GLOBALS['lerm_admin_config_enqueued_scripts'] );
 
 		$container->enqueue_block_editor_assets();
 
-		$script = ($GLOBALS['lerm_admin_config_enqueued_scripts'] ?? array())['lerm-admin-config-block-panel'] ?? null;
+		$script = ( $GLOBALS['lerm_admin_config_enqueued_scripts'] ?? array() )['lerm-admin-config-block-panel'] ?? null;
 		$this->assertIsArray( $script, 'Should enqueue block panel script for matching post type.' );
 	}
 
@@ -93,13 +99,16 @@ final class BlockEditorPanelContainerTest extends TestCase {
 		$container = $this->createContainer();
 		$container->mount( $this->createSchema( 'test', 'Test Panel' ) );
 
-		$GLOBALS['lerm_admin_config_current_screen']  = (object) array( 'post_type' => 'post' );
-		$GLOBALS['post']                               = (object) array( 'ID' => 1, 'post_type' => 'post' );
+		$GLOBALS['lerm_admin_config_current_screen'] = (object) array( 'post_type' => 'post' );
+		$GLOBALS['post']                             = (object) array(
+			'ID'        => 1,
+			'post_type' => 'post',
+		);
 		unset( $GLOBALS['lerm_admin_config_script_translations'] );
 
 		$container->enqueue_block_editor_assets();
 
-		$translations = ($GLOBALS['lerm_admin_config_script_translations'] ?? array())['lerm-admin-config-block-panel'] ?? null;
+		$translations = ( $GLOBALS['lerm_admin_config_script_translations'] ?? array() )['lerm-admin-config-block-panel'] ?? null;
 		$this->assertIsArray( $translations, 'Should register script translations.' );
 		$this->assertSame( 'lerm-admin-config', $translations['domain'] );
 	}

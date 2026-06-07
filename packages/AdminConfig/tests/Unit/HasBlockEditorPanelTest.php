@@ -81,14 +81,34 @@ final class HasBlockEditorPanelTest extends TestCase {
 			'sections'  => array(
 				'main' => array(
 					'fields' => array(
-						array( 'id' => 'f1', 'type' => 'text', 'default' => '' ),
+						array(
+							'id'      => 'f1',
+							'type'    => 'text',
+							'default' => '',
+						),
 					),
 				),
 			),
 		);
 
-		$runtime->register( array_merge( $schema, array( 'id' => 'panel_one', 'title' => 'Panel One' ) ) );
-		$runtime->register( array_merge( $schema, array( 'id' => 'panel_two', 'title' => 'Panel Two' ) ) );
+		$runtime->register(
+			array_merge(
+				$schema,
+				array(
+					'id'    => 'panel_one',
+					'title' => 'Panel One',
+				)
+			)
+		);
+		$runtime->register(
+			array_merge(
+				$schema,
+				array(
+					'id'    => 'panel_two',
+					'title' => 'Panel Two',
+				)
+			)
+		);
 		$runtime->boot();
 
 		$hook_count = 0;
@@ -119,7 +139,11 @@ final class HasBlockEditorPanelTest extends TestCase {
 				'sections'  => array(
 					'main' => array(
 						'fields' => array(
-							array( 'id' => 'f1', 'type' => 'text', 'default' => '' ),
+							array(
+								'id'      => 'f1',
+								'type'    => 'text',
+								'default' => '',
+							),
 						),
 					),
 				),
@@ -129,7 +153,10 @@ final class HasBlockEditorPanelTest extends TestCase {
 		$runtime->boot();
 
 		$GLOBALS['lerm_admin_config_current_screen'] = (object) array( 'post_type' => 'post' );
-		$GLOBALS['post']                              = (object) array( 'ID' => 1, 'post_type' => 'post' );
+		$GLOBALS['post']                             = (object) array(
+			'ID'        => 1,
+			'post_type' => 'post',
+		);
 
 		$container = $runtime->containers()['block_editor_panel'];
 		$this->assertInstanceOf( BlockEditorPanelContainer::class, $container );

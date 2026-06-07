@@ -434,7 +434,11 @@ final class SchemaCompilerTest extends TestCase {
 				'sections'  => array(
 					'main' => array(
 						'fields' => array(
-							array( 'id' => 'f1', 'type' => 'text', 'default' => '' ),
+							array(
+								'id'      => 'f1',
+								'type'    => 'text',
+								'default' => '',
+							),
 						),
 					),
 				),
