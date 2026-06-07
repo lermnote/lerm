@@ -16,6 +16,7 @@ const {
 } = require('../core/schema-state');
 const { createDefaultControlRegistry } = require('../controls');
 const { register: registerStore, STORE_NAME } = require('../store');
+const { __, _n, sprintf } = require('../i18n');
 
 const BLOCK_PANEL_CONFIG_GLOBAL = 'lermAdminConfigBlockPanelConfigs';
 const panelInstances = new Map();
@@ -488,7 +489,7 @@ const createPanelComponent = (config, Panel, element) => {
 					className: 'lerm-admin-config-block-panel__status',
 					key: 'status',
 				},
-				status === 'ready' ? 'Ready' : status.charAt(0).toUpperCase() + status.slice(1)
+				status === 'ready' ? __('Ready', 'lerm-admin-config') : status.charAt(0).toUpperCase() + status.slice(1)
 			),
 		];
 
@@ -512,7 +513,7 @@ const createPanelComponent = (config, Panel, element) => {
 					className: 'lerm-admin-config-block-panel__meta',
 					key: 'meta',
 				},
-				`${ fieldCount(state.schema) } fields loaded`
+				sprintf(_n('%d field loaded', '%d fields loaded', fieldCount(state.schema), 'lerm-admin-config'), fieldCount(state.schema))
 			));
 		}
 
@@ -723,7 +724,7 @@ const createPanelComponent = (config, Panel, element) => {
 								onClick: saveChanges,
 								variant: 'primary',
 							},
-							status === 'saving' ? 'Saving' : 'Save'
+							status === 'saving' ? __('Saving', 'lerm-admin-config') : __('Save', 'lerm-admin-config')
 						)
 						: createElement(
 							'button',
@@ -733,7 +734,7 @@ const createPanelComponent = (config, Panel, element) => {
 								onClick: saveChanges,
 								type: 'button',
 							},
-							status === 'saving' ? 'Saving' : 'Save'
+							status === 'saving' ? __('Saving', 'lerm-admin-config') : __('Save', 'lerm-admin-config')
 						),
 					typeof Button === 'function'
 						? createElement(
@@ -744,7 +745,7 @@ const createPanelComponent = (config, Panel, element) => {
 								onClick: discardChanges,
 								variant: 'secondary',
 							},
-							'Discard'
+							__('Discard', 'lerm-admin-config')
 						)
 						: createElement(
 							'button',
@@ -754,7 +755,7 @@ const createPanelComponent = (config, Panel, element) => {
 								onClick: discardChanges,
 								type: 'button',
 							},
-							'Discard'
+							__('Discard', 'lerm-admin-config')
 						),
 					createElement(
 						'span',
@@ -763,7 +764,7 @@ const createPanelComponent = (config, Panel, element) => {
 							'data-dirty': dirty ? 'true' : 'false',
 							key: 'dirty',
 						},
-						dirty ? 'Unsaved changes' : 'Saved'
+						dirty ? __('Unsaved changes', 'lerm-admin-config') : __('Saved', 'lerm-admin-config')
 					),
 				]
 			));
@@ -823,7 +824,7 @@ const createPanelComponent = (config, Panel, element) => {
 									onClick: () => setShowDiscardDialog(false),
 									variant: 'secondary',
 								},
-								'Cancel'
+								__('Cancel', 'lerm-admin-config')
 							)
 							: null,
 						typeof Button === 'function'
@@ -835,7 +836,7 @@ const createPanelComponent = (config, Panel, element) => {
 									onClick: handleConfirmDiscard,
 									variant: 'primary',
 								},
-								'Discard'
+								__('Discard', 'lerm-admin-config')
 							)
 							: null
 					)

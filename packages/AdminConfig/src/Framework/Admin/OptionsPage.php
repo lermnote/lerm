@@ -221,6 +221,12 @@ final class OptionsPage {
 			true
 		);
 
+		wp_set_script_translations(
+			$js_handle,
+			'lerm-admin-config',
+			dirname( __DIR__, 3 ) . '/languages/'
+		);
+
 		wp_localize_script(
 			$js_handle,
 			$this->js_global,

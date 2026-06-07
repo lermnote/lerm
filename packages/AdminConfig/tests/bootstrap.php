@@ -663,6 +663,17 @@ if ( ! function_exists( 'wp_localize_script' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_set_script_translations' ) ) {
+	function wp_set_script_translations( string $handle, string $domain = 'default', string $path = '' ): bool {
+		$GLOBALS['lerm_admin_config_script_translations'][ $handle ] = array(
+			'domain' => $domain,
+			'path'   => $path,
+		);
+
+		return true;
+	}
+}
+
 if ( ! function_exists( 'wp_parse_args' ) ) {
 	function wp_parse_args( $args, array $defaults = array() ): array {
 		$parsed = is_array( $args ) ? $args : array();
