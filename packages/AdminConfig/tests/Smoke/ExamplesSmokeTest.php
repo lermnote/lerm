@@ -32,8 +32,9 @@ final class ExamplesSmokeTest extends TestCase {
 		$this->assertTrue( $runtime->has( 'acme-demo-profile' ) );
 		$this->assertTrue( $runtime->has( 'acme-demo-taxonomy' ) );
 		$this->assertTrue( $runtime->has( 'acme-theme-style-kit' ) );
+		$this->assertTrue( $runtime->has( 'acme-demo-block-editor-panel' ) );
 		$this->assertTrue( $runtime->has( 'acme-theme-hero-metabox' ) );
 		$this->assertTrue( $runtime->has_data_source( 'tone_presets' ) );
-		$this->assertCount( 7, $runtime->schemas() );
+		$this->assertCount( 8, $runtime->schemas() );
 	}
 }
