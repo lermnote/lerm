@@ -153,6 +153,54 @@ final class RuntimeTest extends TestCase {
 		);
 	}
 
+	public function testBlockEditorPanelContainerIsRegisteredByDefault(): void {
+		$runtime = $this->runtime();
+		$runtime->boot();
+
+		$containers = $runtime->containers();
+		$this->assertArrayHasKey( 'block_editor_panel', $containers );
+		$this->assertInstanceOf(
+			\Lerm\AdminConfig\WordPress\Containers\BlockEditorPanelContainer::class,
+			$containers['block_editor_panel']
+		);
+	}
+
+	public function testBlockEditorPanelSchemaMountsWithoutError(): void {
+		$runtime = $this->runtime();
+		$runtime->register(
+			array(
+				'id'        => 'test_block_panel',
+				'title'     => 'Test Block Panel',
+				'container' => array(
+					'type'       => 'block_editor_panel',
+					'title'      => 'Test Block Panel',
+					'post_types' => array( 'post' ),
+					'capability' => 'edit_post',
+				),
+				'store'     => array(
+					'type' => 'post_meta',
+					'key'  => '_test_block_panel',
+				),
+				'sections'  => array(
+					'main' => array(
+						'fields' => array(
+							array(
+								'id'      => 'headline',
+								'type'    => 'text',
+								'default' => '',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$runtime->boot();
+
+		$this->assertArrayHasKey( 'enqueue_block_editor_assets', $GLOBALS['lerm_admin_config_actions'] );
+		$this->assertEmpty( $GLOBALS['lerm_admin_config_doing_it_wrong'] ?? array() );
+	}
+
 	public function testBootReportsInvalidStoreConfigurationWithoutThrowing(): void {
 		$runtime = $this->runtime();
 		$runtime->register(
