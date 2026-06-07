@@ -516,7 +516,12 @@ const createPanelComponent = (config, Panel, element) => {
 			));
 		}
 
-		const components = asRecord((typeof window !== 'undefined' && window.wp && window.wp.components) || {});
+		let components = {};
+		try {
+			components = asRecord(require('@wordpress/components'));
+		} catch (_e) {
+			// Fallback for environments without @wordpress/components (e.g. Node.js tests).
+		}
 		const sections = orderedSections(state.schema);
 		const fieldsById = asRecord(state.schema.fields);
 		const dependencies = asRecord(state.schema.dependencies);
@@ -536,8 +541,8 @@ const createPanelComponent = (config, Panel, element) => {
 		}, []);
 
 		useEffect(() => {
-			const wpData = window.wp && window.wp.data;
-			const editorDispatch = wpData && wpData.dispatch && wpData.dispatch('core/editor');
+			const { dispatch } = require('@wordpress/data');
+			const editorDispatch = dispatch('core/editor');
 			if (dirty && editorDispatch && typeof editorDispatch.lockPostSaving === 'function') {
 				editorDispatch.lockPostSaving('lerm-admin-config-unsaved');
 			} else if (!dirty && editorDispatch && typeof editorDispatch.unlockPostSaving === 'function') {
@@ -851,11 +856,19 @@ const registerBlockEditorPanels = (configs = blockPanelConfigsFromWindow()) => {
 
 	registerStore();
 
-	const wp = window.wp || {};
-	const registerPlugin = wp.plugins && wp.plugins.registerPlugin;
-	const editorPackage = wp.editPost || wp.editor || {};
-	const Panel = editorPackage.PluginDocumentSettingPanel;
-	const element = wp.element || {};
+	let plugins, editor, element;
+	try {
+		plugins = require('@wordpress/plugins');
+	} catch (_e) { plugins = {}; }
+	try {
+		editor = require('@wordpress/editor');
+	} catch (_e) { editor = {}; }
+	try {
+		element = require('@wordpress/element');
+	} catch (_e) { element = {}; }
+
+	const { registerPlugin } = plugins;
+	const Panel = editor.PluginDocumentSettingPanel;
 
 	if (
 		typeof registerPlugin !== 'function' ||
