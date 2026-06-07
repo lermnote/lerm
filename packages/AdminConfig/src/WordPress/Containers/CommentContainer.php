@@ -204,5 +204,4 @@ final class CommentContainer implements Container {
 	private function meta_box_id( CompiledSchema $schema ): string {
 		return 'lerm-admin-config-comment-' . $schema->id();
 	}
-
 }

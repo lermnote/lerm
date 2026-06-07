@@ -175,5 +175,4 @@ final class ProfileContainer implements Container {
 
 		return 'edit_user';
 	}
-
 }
