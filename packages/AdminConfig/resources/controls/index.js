@@ -1,6 +1,7 @@
 // @ts-check
 
 const { asRecord, asRecordArray } = require('../core/records');
+const { __, sprintf } = require('../i18n');
 
 /**
  * @typedef {(props: Record<string, unknown>) => unknown} FieldControl
@@ -303,7 +304,7 @@ const renderNestedField = (normalized, field, path, value) => {
 			},
 			[
 				createElement('strong', { key: 'label' }, label),
-				createElement('p', { key: 'message' }, `Field type "${ controlType }" is not available in this composite field yet.`),
+				createElement('p', { key: 'message' }, sprintf(__('Field type "%s" is not available in this composite field yet.', 'lerm-admin-config'), controlType)),
 				error
 					? createElement('p', {
 						className: 'lerm-admin-config-block-panel__field-error',
@@ -1879,12 +1880,12 @@ const backgroundFields = (field) => {
 
 	if (fieldFlag(field, 'background_image', true)) {
 		fields.push({
-			button_text: stringValue(field.background_image_button_text || 'Choose image'),
+			button_text: stringValue(field.background_image_button_text || __('Choose image', 'lerm-admin-config')),
 			default: backgroundDefault(field, 'background-image', {}),
 			id: 'background-image',
 			label: 'Image',
 			library: 'image',
-			remove_text: 'Remove image',
+			remove_text: __('Remove image', 'lerm-admin-config'),
 			type: 'media',
 		});
 	}
@@ -2484,7 +2485,7 @@ const GroupControl = (props) => {
 							onClick: () => removeItem(index),
 							variant: 'secondary',
 						},
-						'Remove item'
+						__('Remove item', 'lerm-admin-config')
 					),
 				].filter(Boolean)
 			)),
@@ -2494,7 +2495,7 @@ const GroupControl = (props) => {
 					onClick: addItem,
 					variant: 'secondary',
 				},
-				'Add item'
+				__('Add item', 'lerm-admin-config')
 			),
 		].filter(Boolean)
 	);
@@ -2511,8 +2512,8 @@ const UploadControlComponent = (normalized) => {
 	const url = stringValue(value);
 	const label = stringValue(field.label || field.id);
 	const description = stringValue(field.description);
-	const chooseText = stringValue(field.button_text || 'Choose file');
-	const removeText = stringValue(field.remove_text || 'Remove');
+	const chooseText = stringValue(field.button_text || __('Choose file', 'lerm-admin-config'));
+	const removeText = stringValue(field.remove_text || __('Remove', 'lerm-admin-config'));
 	const fallbackInput = createElement('input', {
 		'aria-label': label,
 		className: 'lerm-admin-config-block-panel__media-url',
@@ -2598,8 +2599,8 @@ const MediaControlComponent = (normalized) => {
 	const records = useAttachmentRecords(id > 0 ? [ id ] : [], inlineRecords);
 	const label = stringValue(field.label || field.id);
 	const description = stringValue(field.description);
-	const chooseText = stringValue(field.button_text || 'Choose image');
-	const removeText = stringValue(field.remove_text || 'Remove');
+	const chooseText = stringValue(field.button_text || __('Choose image', 'lerm-admin-config'));
+	const removeText = stringValue(field.remove_text || __('Remove', 'lerm-admin-config'));
 	const body = (open) => createElement(
 		'div',
 		{
@@ -2673,8 +2674,8 @@ const GalleryControlComponent = (normalized) => {
 	const records = useAttachmentRecords(ids, inlineRecords);
 	const label = stringValue(field.label || field.id);
 	const description = stringValue(field.description);
-	const chooseText = stringValue(field.button_text || 'Choose images');
-	const removeText = stringValue(field.remove_text || 'Clear gallery');
+	const chooseText = stringValue(field.button_text || __('Choose images', 'lerm-admin-config'));
+	const removeText = stringValue(field.remove_text || __('Clear gallery', 'lerm-admin-config'));
 	const body = (open) => createElement(
 		'div',
 		{

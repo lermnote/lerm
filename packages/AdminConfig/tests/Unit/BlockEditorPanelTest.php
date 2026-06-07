@@ -12,10 +12,76 @@ namespace Lerm\AdminConfig\Tests\Unit;
 use Lerm\AdminConfig\Framework\Contracts\AssetResolver;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Tests\Support\TestCase;
+use Lerm\AdminConfig\WordPress\Containers\BlockEditorPanelContainer;
 use Lerm\AdminConfig\WordPress\Containers\MetaboxContainer;
 use Lerm\AdminConfig\WordPress\Runtime;
 
 final class BlockEditorPanelTest extends TestCase {
+
+	public function testBlockEditorPanelContainerIsRegisteredInRuntime(): void {
+		$runtime = $this->runtime_with_metabox_schema();
+		$runtime->boot();
+
+		$this->assertArrayHasKey( 'block_editor_panel', $runtime->containers() );
+		$this->assertInstanceOf( BlockEditorPanelContainer::class, $runtime->containers()['block_editor_panel'] );
+	}
+
+	public function testBlockEditorPanelTypeSchemaMountsCorrectly(): void {
+		$runtime = $this->runtime_with_block_editor_panel_schema();
+		$runtime->boot();
+
+		$this->assertArrayHasKey( 'enqueue_block_editor_assets', $GLOBALS['lerm_admin_config_actions'] );
+	}
+
+	public function testBlockEditorPanelEnqueuesForMatchingPostType(): void {
+		$runtime = $this->runtime_with_block_editor_panel_schema();
+		$runtime->boot();
+
+		$GLOBALS['lerm_admin_config_current_screen'] = (object) array(
+			'post_type' => 'post',
+		);
+		$GLOBALS['post']                             = (object) array(
+			'ID'        => 123,
+			'post_type' => 'post',
+		);
+
+		$container = $runtime->containers()['block_editor_panel'];
+		$this->assertInstanceOf( BlockEditorPanelContainer::class, $container );
+		$container->enqueue_block_editor_assets();
+
+		$script = $GLOBALS['lerm_admin_config_enqueued_scripts']['lerm-admin-config-block-panel'] ?? null;
+		$this->assertIsArray( $script );
+		$this->assertTrue( $GLOBALS['lerm_admin_config_media_enqueued'] ?? false );
+
+		$inline = $GLOBALS['lerm_admin_config_inline_scripts']['lerm-admin-config-block-panel'][0] ?? null;
+		$this->assertIsArray( $inline );
+		$this->assertSame( 'before', $inline['position'] );
+
+		$payload = $this->extract_inline_payload( (string) $inline['data'] );
+		$this->assertSame( 'unit-block-editor-panel', $payload['schemas'][0]['schemaId'] );
+		$this->assertSame( 'block_editor_panel', $payload['schemas'][0]['containerType'] );
+		$this->assertSame( 'post', $payload['schemas'][0]['postType'] );
+		$this->assertSame( 123, $payload['schemas'][0]['context']['post_id'] );
+	}
+
+	public function testBlockEditorPanelSkipsUnmatchedPostType(): void {
+		$runtime = $this->runtime_with_block_editor_panel_schema();
+		$runtime->boot();
+
+		$GLOBALS['lerm_admin_config_current_screen'] = (object) array(
+			'post_type' => 'page',
+		);
+		$GLOBALS['post']                             = (object) array(
+			'ID'        => 123,
+			'post_type' => 'page',
+		);
+
+		$container = $runtime->containers()['block_editor_panel'];
+		$this->assertInstanceOf( BlockEditorPanelContainer::class, $container );
+		$container->enqueue_block_editor_assets();
+
+		$this->assertArrayNotHasKey( 'lerm-admin-config-block-panel', $GLOBALS['lerm_admin_config_enqueued_scripts'] );
+	}
 
 	public function testMetaboxRuntimeRegistersBlockEditorAssetHook(): void {
 		$runtime = $this->runtime_with_metabox_schema();
@@ -137,6 +203,52 @@ final class BlockEditorPanelTest extends TestCase {
 		$container->enqueue_block_editor_assets();
 
 		$this->assertArrayNotHasKey( 'lerm-admin-config-block-panel', $GLOBALS['lerm_admin_config_enqueued_scripts'] );
+	}
+
+	private function runtime_with_block_editor_panel_schema(): Runtime {
+		$runtime = new Runtime(
+			new Framework(
+				new class() implements AssetResolver {
+					public function url( string $filename ): string {
+						return 'https://example.test/assets/' . ltrim( $filename, '/' );
+					}
+
+					public function version(): string {
+						return 'unit-version';
+					}
+				}
+			)
+		);
+
+		$runtime->register(
+			array(
+				'id'        => 'unit-block-editor-panel',
+				'title'     => 'Unit Block Editor Panel',
+				'container' => array(
+					'type'       => 'block_editor_panel',
+					'title'      => 'Unit Block Editor Panel',
+					'post_types' => array( 'post' ),
+					'capability' => 'edit_post',
+				),
+				'store'     => array(
+					'type' => 'post_meta',
+					'key'  => '_unit_block_editor_panel',
+				),
+				'sections'  => array(
+					'display' => array(
+						'fields' => array(
+							array(
+								'id'      => 'headline',
+								'type'    => 'text',
+								'default' => '',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		return $runtime;
 	}
 
 	private function runtime_with_metabox_schema(): Runtime {

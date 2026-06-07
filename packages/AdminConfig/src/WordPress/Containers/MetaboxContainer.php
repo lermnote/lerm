@@ -16,9 +16,8 @@ use Lerm\AdminConfig\Framework\Contracts\AssetPathResolver;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
-use Lerm\AdminConfig\Framework\Support\PackageAssets;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
-use Lerm\AdminConfig\Framework\Support\ScriptAssetMetadata;
+use Lerm\AdminConfig\WordPress\Support\HasBlockEditorPanel;
 use Lerm\AdminConfig\WordPress\Support\ContainerSaveSupport;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
@@ -27,6 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class MetaboxContainer implements Container {
+
+	use HasBlockEditorPanel;
 
 	/**
 	 * @var array<string, CompiledSchema>
@@ -39,6 +40,10 @@ final class MetaboxContainer implements Container {
 		private Framework $framework,
 		private StoreResolver $stores
 	) {
+	}
+
+	private function container_type_for_block_panel(): string {
+		return 'metabox';
 	}
 
 	public function type(): string {
@@ -56,58 +61,6 @@ final class MetaboxContainer implements Container {
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		$this->hooks_registered = true;
-	}
-
-	public function enqueue_block_editor_assets(): void {
-		$editor_context = $this->current_editor_context();
-
-		if ( empty( $editor_context['post_id'] ) || '' === $editor_context['post_type'] ) {
-			return;
-		}
-
-		$schemas = $this->block_editor_schemas( $editor_context['post_type'], $editor_context['post_id'] );
-
-		if ( empty( $schemas ) ) {
-			return;
-		}
-
-		wp_enqueue_media();
-
-		$script = $this->block_panel_script_asset();
-		$handle = 'lerm-admin-config-block-panel';
-
-		wp_enqueue_script(
-			$handle,
-			$this->asset_url( $script['file'] ),
-			$script['dependencies'],
-			$script['version'],
-			true
-		);
-
-		wp_enqueue_style(
-			$handle,
-			$this->asset_url( 'block-panel.css' ),
-			array( 'wp-components' ),
-			$this->asset_version()
-		);
-
-		$payload = wp_json_encode(
-			array(
-				'restUrl'   => rest_url( 'lerm-admin-config/v1/' ),
-				'restNonce' => wp_create_nonce( 'wp_rest' ),
-				'schemas'   => $schemas,
-			)
-		);
-
-		if ( false === $payload ) {
-			return;
-		}
-
-		wp_add_inline_script(
-			$handle,
-			'window.lermAdminConfigBlockPanelConfigs = window.lermAdminConfigBlockPanelConfigs || []; window.lermAdminConfigBlockPanelConfigs.push(' . $payload . ');',
-			'before'
-		);
 	}
 
 	public function register_meta_boxes( string $post_type, $post = null ): void {
@@ -242,125 +195,6 @@ final class MetaboxContainer implements Container {
 
 	private function nonce_action( CompiledSchema $schema ): string {
 		return 'lerm_admin_config_metabox_' . $schema->id();
-	}
-
-	/**
-	 * @return array{post_id: int, post_type: string}
-	 */
-	private function current_editor_context(): array {
-		$post_id   = 0;
-		$post_type = '';
-
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-
-		if ( is_object( $screen ) ) {
-			$screen_vars      = get_object_vars( $screen );
-			$screen_post_type = $screen_vars['post_type'] ?? '';
-
-			if ( is_scalar( $screen_post_type ) ) {
-				$post_type = sanitize_key( (string) $screen_post_type );
-			}
-		}
-
-		if ( isset( $_GET['post'] ) ) {
-			$post_id = absint( wp_unslash( $_GET['post'] ) );
-		}
-
-		global $post;
-
-		if ( 0 === $post_id && is_object( $post ) && isset( $post->ID ) ) {
-			$post_id = absint( $post->ID );
-		}
-
-		if ( '' === $post_type && is_object( $post ) && isset( $post->post_type ) && is_scalar( $post->post_type ) ) {
-			$post_type = sanitize_key( (string) $post->post_type );
-		}
-
-		if ( '' === $post_type && $post_id > 0 && function_exists( 'get_post_type' ) ) {
-			$resolved_post_type = get_post_type( $post_id );
-
-			if ( is_scalar( $resolved_post_type ) ) {
-				$post_type = sanitize_key( (string) $resolved_post_type );
-			}
-		}
-
-		return array(
-			'post_id'   => $post_id,
-			'post_type' => $post_type,
-		);
-	}
-
-	/**
-	 * @return array<int, array<string, mixed>>
-	 */
-	private function block_editor_schemas( string $post_type, int $post_id ): array {
-		$schemas = array();
-
-		foreach ( $this->schemas as $schema ) {
-			$container = $schema->container();
-
-			if ( ! in_array( $post_type, $this->normalize_post_types( $container['post_types'] ?? array() ), true ) ) {
-				continue;
-			}
-
-			$capability = (string) ( $container['capability'] ?? 'edit_post' );
-
-			if ( ! current_user_can( $capability, $post_id ) ) {
-				continue;
-			}
-
-			$schemas[] = array(
-				'schemaId'      => $schema->id(),
-				'title'         => (string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Settings', 'lerm-admin-config' ) ),
-				'containerType' => 'metabox',
-				'postType'      => $post_type,
-				'context'       => array(
-					'post_id' => $post_id,
-				),
-			);
-		}
-
-		return $schemas;
-	}
-
-	/**
-	 * @return array{file: string, dependencies: array<int, string>, version: string}
-	 */
-	private function block_panel_script_asset(): array {
-		return ScriptAssetMetadata::resolve(
-			'block-panel',
-			'build/block-panel.js',
-			array(
-				'wp-api-fetch',
-				'wp-block-editor',
-				'wp-components',
-				'wp-edit-post',
-				'wp-element',
-				'wp-plugins',
-			),
-			$this->asset_version(),
-			function ( string $asset ): string {
-				return $this->asset_path( $asset );
-			}
-		);
-	}
-
-	private function asset_url( string $asset ): string {
-		return $this->framework->asset_resolver()->url( $asset );
-	}
-
-	private function asset_path( string $asset ): string {
-		$resolver = $this->framework->asset_resolver();
-
-		if ( $resolver instanceof AssetPathResolver ) {
-			return $resolver->path( $asset );
-		}
-
-		return PackageAssets::path( $asset );
-	}
-
-	private function asset_version(): string {
-		return $this->framework->asset_resolver()->version();
 	}
 
 	/**

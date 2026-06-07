@@ -20,6 +20,7 @@ use Lerm\AdminConfig\Registry\SchemaRegistry;
 use Lerm\AdminConfig\Rest\RestEndpoints;
 use Lerm\AdminConfig\Stores\MissingStoreContextException;
 use Lerm\AdminConfig\Stores\StoreResolver;
+use Lerm\AdminConfig\WordPress\Containers\BlockEditorPanelContainer;
 use Lerm\AdminConfig\WordPress\Containers\CommentContainer;
 use Lerm\AdminConfig\WordPress\Containers\MetaboxContainer;
 use Lerm\AdminConfig\WordPress\Containers\NetworkOptionsPageContainer;
@@ -70,6 +71,7 @@ final class Runtime {
 		$this->containers->register( new OptionsPageContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new NetworkOptionsPageContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new MetaboxContainer( $this->framework, $this->stores ) );
+		$this->containers->register( new BlockEditorPanelContainer( $this->framework ) );
 		$this->containers->register( new CommentContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new ProfileContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new TaxonomyContainer( $this->framework, $this->stores ) );
@@ -415,6 +417,7 @@ final class Runtime {
 				return current_user_can( (string) ( $menu['capability'] ?? $container['capability'] ?? 'manage_network_options' ) );
 
 			case 'metabox':
+			case 'block_editor_panel':
 				if ( ! empty( $context['post_id'] ) && ! empty( $container['capability'] ) ) {
 					return current_user_can( (string) $container['capability'], $context['post_id'] );
 				}

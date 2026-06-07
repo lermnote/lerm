@@ -8,6 +8,94 @@
 const { resolveAdminConfig } = require('../core/config');
 const { createFormStateHelpers } = require('./form-state');
 const { createAdminConfigTransport } = require('./transport');
+const { __ } = require('../i18n');
+
+// ─── Confirm Dialog (wp.components.Modal bridge for vanilla JS) ──────
+let confirmDialog;
+(function buildConfirmDialog() {
+	let element, components;
+	try {
+		element = require('@wordpress/element');
+		components = require('@wordpress/components');
+	} catch (_e) {
+		confirmDialog = (message) => Promise.resolve(window.confirm(message));
+		return;
+	}
+
+	const { createElement, render } = element;
+	const { Button, Modal } = components;
+
+	/**
+	 * Show a confirmation dialog using wp.components.Modal.
+	 * @param {string} message
+	 * @returns {Promise<boolean>}
+	 */
+	let dialogActive = false;
+
+	confirmDialog = (message) => {
+		if (dialogActive) {
+			return Promise.resolve(false);
+		}
+
+		dialogActive = true;
+
+		return new Promise((resolve) => {
+			const container = document.createElement('div');
+			document.body.appendChild(container);
+
+			const cleanup = (/** @type {boolean} */ result) => {
+				try {
+					render(null, container);
+				} catch (_err) {
+					// If unmount fails, just remove the container.
+				}
+				container.remove();
+				dialogActive = false;
+				resolve(result);
+			};
+
+			try {
+				render(
+					createElement(
+						Modal,
+						{
+							title: __('Confirm', 'lerm-admin-config'),
+							onRequestClose: () => cleanup(false),
+					},
+					createElement('p', null, message),
+					createElement(
+						'div',
+						{ style: { display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' } },
+						createElement(
+							Button,
+							{
+								variant: 'secondary',
+								onClick: () => cleanup(false),
+							},
+							__('Cancel', 'lerm-admin-config')
+						),
+						createElement(
+							Button,
+							{
+								variant: 'primary',
+								isDestructive: true,
+								onClick: () => cleanup(true),
+							},
+							__('Confirm', 'lerm-admin-config')
+						)
+					)
+				),
+				container
+			);
+		} catch (_renderErr) {
+			// If the initial render fails (e.g., incompatible React version),
+			// clean up the container and resolve so the caller doesn't hang.
+			cleanup(false);
+			return;
+		}
+	});
+	};
+})();
 
 /** @type {any} */ const wp = /** @type {any} */ (window['wp']);
 
@@ -20,20 +108,6 @@ const { createAdminConfigTransport } = require('./transport');
 	 * @typedef {{
 	 *   restUrl?: string, restNonce?: string,
 	 *   codeEditor: object|null,
-	 *   selectMedia: string, useMedia: string, noMedia: string,
-	 *   selectImages: string, useImages: string, noGallery: string,
-	 *   searchPrompt: string, searchMinPrompt: string, loadingResults: string,
-	 *   noResults: string, loadMoreResults: string,
-	 *   clearSelection: string, removeSelection: string,
-	 *   saving: string, resetting: string,
-	 *   saveSuccess: string, saveError: string,
-	 *   resetError: string, resetAllSuccess: string, resetSectionSuccess: string,
-	 *   importSuccess: string, importError: string, exportSuccess: string,
-	 *   statusReady: string, statusDirty: string, statusSaving: string,
-	 *   statusResetting: string, statusSaved: string, statusError: string,
-	 *   confirmResetAll: string, confirmResetSection: string,
-	 *   confirmRemoveItem: string, confirmImport: string,
-	 *   debugCopy: string, debugCopied: string
 	 * }} LermConfig
 	 */
 
@@ -1058,7 +1132,7 @@ const { createAdminConfigTransport } = require('./transport');
 			return requestRest(`schemas/${params.schemaId}/data-source`, { method: 'POST', body });
 		}
 
-		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
+		return Promise.resolve({ success: false, data: { message: __('Unable to save the settings right now.', 'lerm-admin-config') } });
 	};
 
 	/**
@@ -1196,8 +1270,8 @@ const { createAdminConfigTransport } = require('./transport');
 				pill.appendChild(dom.create('button', {
 					type: 'button',
 					class: 'lerm-ajax-select__pill-remove',
-					'aria-label': cfg.removeSelection,
-					title: cfg.removeSelection,
+					'aria-label': __('Remove selection', 'lerm-admin-config'),
+					title: __('Remove selection', 'lerm-admin-config'),
 					onclick: (event) => {
 						event.preventDefault();
 						instance.selections = instance.selections.filter((current) => current.value !== selection.value);
@@ -1223,7 +1297,7 @@ const { createAdminConfigTransport } = require('./transport');
 
 		if (!options.length) {
 			closeAjaxSelectDropdown(instance);
-			setAjaxSelectStatus(instance, cfg.noResults);
+			setAjaxSelectStatus(instance, __('No matching results found.', 'lerm-admin-config'));
 			return;
 		}
 
@@ -1248,7 +1322,7 @@ const { createAdminConfigTransport } = require('./transport');
 							renderAjaxSelectSelections(instance, true);
 							instance.search.value = '';
 							instance.currentQuery = '';
-							setAjaxSelectStatus(instance, cfg.searchPrompt);
+							setAjaxSelectStatus(instance, __('Start typing to search.', 'lerm-admin-config'));
 							closeAjaxSelectDropdown(instance);
 							return;
 						}
@@ -1257,7 +1331,7 @@ const { createAdminConfigTransport } = require('./transport');
 						renderAjaxSelectSelections(instance, true);
 						instance.search.value = '';
 						instance.currentQuery = '';
-						setAjaxSelectStatus(instance, cfg.searchPrompt);
+						setAjaxSelectStatus(instance, __('Start typing to search.', 'lerm-admin-config'));
 						closeAjaxSelectDropdown(instance);
 					},
 				}, [option.label]),
@@ -1273,7 +1347,7 @@ const { createAdminConfigTransport } = require('./transport');
 						event.preventDefault();
 						loadAjaxSelectOptions(instance, instance.currentQuery, Math.max(2, Math.ceil(instance.options.length / Math.max(instance.perPage, 1)) + 1), true);
 					},
-				}, [cfg.loadMoreResults]),
+				}, [__('Load more', 'lerm-admin-config')]),
 			]));
 		}
 
@@ -1291,7 +1365,7 @@ const { createAdminConfigTransport } = require('./transport');
 		if (!hasRestTransport() || !instance.schemaId || !instance.source) return Promise.resolve();
 
 		instance.currentQuery = query;
-		setAjaxSelectStatus(instance, cfg.loadingResults);
+		setAjaxSelectStatus(instance, __('Loading results...', 'lerm-admin-config'));
 
 		return requestDataSource(instance.form, {
 			schemaId: instance.schemaId,
@@ -1302,7 +1376,7 @@ const { createAdminConfigTransport } = require('./transport');
 			selected: !query && 1 === page ? instance.selections.map((selection) => selection.value) : [],
 		}).then((response) => {
 			if (!response?.success) {
-				setAjaxSelectStatus(instance, response?.data?.message || cfg.saveError);
+				setAjaxSelectStatus(instance, response?.data?.message || __('Unable to save the settings right now.', 'lerm-admin-config'));
 				return;
 			}
 
@@ -1312,9 +1386,9 @@ const { createAdminConfigTransport } = require('./transport');
 
 			instance.more = !!response?.data?.more;
 			renderAjaxSelectOptions(instance, append ? instance.options.concat(/** @type {AjaxSelectOption[]} */ (nextOptions)) : /** @type {AjaxSelectOption[]} */ (nextOptions));
-			setAjaxSelectStatus(instance, nextOptions.length ? cfg.searchPrompt : cfg.noResults);
+			setAjaxSelectStatus(instance, nextOptions.length ? __('Start typing to search.', 'lerm-admin-config') : __('No matching results found.', 'lerm-admin-config'));
 		}).catch(() => {
-			setAjaxSelectStatus(instance, cfg.saveError);
+			setAjaxSelectStatus(instance, __('Unable to save the settings right now.', 'lerm-admin-config'));
 		});
 	};
 
@@ -1421,7 +1495,7 @@ const { createAdminConfigTransport } = require('./transport');
 				closeAjaxSelectDropdown(instance);
 				setAjaxSelectStatus(
 					instance,
-					instance.minSearchLength > 0 ? cfg.searchMinPrompt : cfg.searchPrompt
+					instance.minSearchLength > 0 ? __('Type more characters to search.', 'lerm-admin-config') : __('Start typing to search.', 'lerm-admin-config')
 				);
 				return;
 			}
@@ -1603,8 +1677,8 @@ const { createAdminConfigTransport } = require('./transport');
 
 				/** @type {any} */
 				const config = {
-					title: cfg.selectFile || cfg.selectMedia,
-					button: { text: cfg.useFile || cfg.useMedia },
+					title: __('Choose file', 'lerm-admin-config'),
+					button: { text: __('Use this file', 'lerm-admin-config') },
 					multiple: false,
 				};
 
@@ -1700,7 +1774,7 @@ const { createAdminConfigTransport } = require('./transport');
 			/** @type {HTMLElement} */ (dom.find('.lerm-media-select', container)).addEventListener('click', (e) => {
 				e.preventDefault();
 				if (frame) { frame.open(); return; }
-				frame = wp.media({ title: cfg.selectMedia, button: { text: cfg.useMedia }, library: { type: 'image' }, multiple: false });
+				frame = wp.media({ title: __('Choose image', 'lerm-admin-config'), button: { text: __('Use this image', 'lerm-admin-config') }, library: { type: 'image' }, multiple: false });
 				frame.on('select', () => {
 					/** @type {WPAttachment} */
 					const attachment = frame.state().get('selection').first().toJSON();
@@ -1775,7 +1849,7 @@ const { createAdminConfigTransport } = require('./transport');
 			/** @type {HTMLElement} */ (dom.find('.lerm-gallery-select', container)).addEventListener('click', (e) => {
 				e.preventDefault();
 				if (frame) { frame.open(); return; }
-				frame = wp.media({ title: cfg.selectImages, button: { text: cfg.useImages }, library: { type: 'image' }, multiple: true });
+				frame = wp.media({ title: __('Choose images', 'lerm-admin-config'), button: { text: __('Use these images', 'lerm-admin-config') }, library: { type: 'image' }, multiple: true });
 				frame.on('select', () => {
 					/** @type {WPAttachment[]} */
 					const attachments = frame.state().get('selection').toJSON();
@@ -1977,11 +2051,11 @@ const { createAdminConfigTransport } = require('./transport');
 				syncDirtyState(/** @type {HTMLFormElement} */(groupEl.closest('form')));
 			});
 
-			list.addEventListener('click', (e) => {
+			list.addEventListener('click', async (e) => {
 				const btn = /** @type {HTMLElement} */ (e.target)?.closest('[data-lerm-group-remove]');
 				if (!btn || !list.contains(btn)) return;
 				e.preventDefault();
-				if (!window.confirm(cfg.confirmRemoveItem)) return;
+				if (!await confirmDialog(__('Remove this item?', 'lerm-admin-config'))) return;
     			/** @type {HTMLElement} */ (btn.closest('[data-lerm-group-item]')).remove();
 				renumberGroupItems(groupEl);
 				syncDirtyState(/** @type {HTMLFormElement} */(groupEl.closest('form')));
@@ -2276,19 +2350,19 @@ const { createAdminConfigTransport } = require('./transport');
 			if (!button || !json) return;
 
 			button.addEventListener('click', () => {
-				const defaultLabel = button.textContent || cfg.debugCopy || 'Copy JSON';
+				const defaultLabel = button.textContent || __('Copy JSON', 'lerm-admin-config');
 
 				copyText(json.textContent || '')
 					.then(() => {
-						button.textContent = cfg.debugCopied || 'Copied';
+						button.textContent = __('Copied', 'lerm-admin-config');
 						window.setTimeout(() => {
-							button.textContent = cfg.debugCopy || defaultLabel;
+							button.textContent = __('Copy JSON', 'lerm-admin-config') ;
 						}, 1400);
 					})
 					.catch(() => {
-						button.textContent = cfg.saveError || defaultLabel;
+						button.textContent = __('Unable to save the settings right now.', 'lerm-admin-config') ;
 						window.setTimeout(() => {
-							button.textContent = cfg.debugCopy || defaultLabel;
+							button.textContent = __('Copy JSON', 'lerm-admin-config') ;
 						}, 1400);
 					});
 			});
@@ -2433,7 +2507,7 @@ const { createAdminConfigTransport } = require('./transport');
 		if (statusTimer) clearTimeout(statusTimer);
 		statusTimer = setTimeout(() => {
 			const dirty = pageIsDirty(form);
-			setStatus(form, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
+			setStatus(form, dirty ? 'dirty' : 'idle', dirty ? __('Unsaved changes', 'lerm-admin-config') : __('Synced', 'lerm-admin-config'));
 		}, 1800);
 	};
 
@@ -2445,7 +2519,7 @@ const { createAdminConfigTransport } = require('./transport');
 		if (statusTimer) clearTimeout(statusTimer);
 		setData(form, 'lerm-dirty', dirty ? '1' : '0');
 		const pageDirty = pageIsDirty(form);
-		setStatus(form, pageDirty ? 'dirty' : 'idle', pageDirty ? cfg.statusDirty : cfg.statusReady);
+		setStatus(form, pageDirty ? 'dirty' : 'idle', pageDirty ? __('Unsaved changes', 'lerm-admin-config') : __('Synced', 'lerm-admin-config'));
 	};
 
 	/** @param {HTMLFormElement} form */
@@ -2476,7 +2550,7 @@ const { createAdminConfigTransport } = require('./transport');
 			return requestRest(path, { method: 'POST', body });
 		}
 
-		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
+		return Promise.resolve({ success: false, data: { message: __('Unable to save the settings right now.', 'lerm-admin-config') } });
 	};
 
 	/**
@@ -2514,7 +2588,7 @@ const { createAdminConfigTransport } = require('./transport');
 			return requestRest(path, { method: 'POST', body });
 		}
 
-		return Promise.resolve({ success: false, data: { message: cfg.saveError } });
+		return Promise.resolve({ success: false, data: { message: __('Unable to save the settings right now.', 'lerm-admin-config') } });
 	};
 
 	// ─── Value Application ────────────────────────────────────────────────────
@@ -3002,7 +3076,7 @@ const { createAdminConfigTransport } = require('./transport');
 
 		const focusForm = activePageForm(form) || form;
 		applyFieldErrors(focusForm, fieldErrors, true);
-		setStatus(focusForm, 'error', response?.data?.message || cfg.saveError);
+		setStatus(focusForm, 'error', response?.data?.message || __('Unable to save the settings right now.', 'lerm-admin-config'));
 	};
 
 	// ─── Backup Tools ─────────────────────────────────────────────────────────
@@ -3015,29 +3089,29 @@ const { createAdminConfigTransport } = require('./transport');
 				e.preventDefault();
 				request(form, 'export').then(response => {
 					if (!response?.success) {
-						setStatus(form, 'error', response?.data?.message || cfg.saveError);
+						setStatus(form, 'error', response?.data?.message || __('Unable to save the settings right now.', 'lerm-admin-config'));
 						return;
 					}
 					/** @type {HTMLInputElement} */ (dom.find('[data-lerm-backup-export-output]', form)).value = response.data.json || '';
-					setStatus(form, 'success', response.data.message || cfg.exportSuccess);
+					setStatus(form, 'success', response.data.message || __('Current settings snapshot generated.', 'lerm-admin-config'));
 					queueReadyStatus(form);
-				}).catch(() => setStatus(form, 'error', cfg.saveError));
+				}).catch(() => setStatus(form, 'error', __('Unable to save the settings right now.', 'lerm-admin-config')));
 			});
 		}
 
 		const importBtn = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-backup-import]', form));
 		if (importBtn) {
-			importBtn.addEventListener('click', (e) => {
+			importBtn.addEventListener('click', async (e) => {
 				e.preventDefault();
-				if (!window.confirm(cfg.confirmImport)) return;
+				if (!await confirmDialog(__('Importing will overwrite the current saved settings. Continue?', 'lerm-admin-config'))) return;
 				const json = String(/** @type {HTMLInputElement|null} */(dom.find('[data-lerm-backup-import-input]', form))?.value ?? '');
 				pageForms(form).forEach((pageForm) => clearFieldErrors(pageForm));
-				setBusyAcrossPage(form, true, cfg.resetting);
-				setStatus(form, 'saving', cfg.statusSaving);
+				setBusyAcrossPage(form, true, __('Resetting...', 'lerm-admin-config'));
+				setStatus(form, 'saving', __('Saving...', 'lerm-admin-config'));
 				request(form, 'import', { backup_json: json })
-					.then(response => handlePageSaveResponse(form, response, cfg.importSuccess))
-					.catch(() => setStatus(form, 'error', cfg.importError))
-					.finally(() => setBusyAcrossPage(form, false, cfg.resetting));
+					.then(response => handlePageSaveResponse(form, response, __('Settings imported successfully.', 'lerm-admin-config')))
+					.catch(() => setStatus(form, 'error', __('Unable to import the provided settings JSON.', 'lerm-admin-config')))
+					.finally(() => setBusyAcrossPage(form, false, __('Resetting...', 'lerm-admin-config')));
 			});
 		}
 	};
@@ -3052,7 +3126,7 @@ const { createAdminConfigTransport } = require('./transport');
 	const handleSaveResponse = (form, response, successMsg, partialFieldIds = null) => {
 		if (!response?.success) {
 			applyFieldErrors(form, /** @type {Record<string, string|string[]>} */ (response?.data?.errors ?? response?.data?.fieldErrors ?? {}));
-			setStatus(form, 'error', response?.data?.message || cfg.saveError);
+			setStatus(form, 'error', response?.data?.message || __('Unable to save the settings right now.', 'lerm-admin-config'));
 			return;
 		}
 		clearFieldErrors(form);
@@ -3093,29 +3167,29 @@ const { createAdminConfigTransport } = require('./transport');
 			e.preventDefault();
 			triggerEditorSaveAcrossPage(form);
 			pageForms(form).forEach((pageForm) => clearFieldErrors(pageForm));
-			setBusyAcrossPage(form, true, cfg.saving);
-			setStatus(form, 'saving', cfg.statusSaving);
+			setBusyAcrossPage(form, true, __('Saving...', 'lerm-admin-config'));
+			setStatus(form, 'saving', __('Saving...', 'lerm-admin-config'));
 			requestPage(form, 'save')
-				.then(r => handlePageSaveResponse(form, r, cfg.saveSuccess))
-				.catch(() => setStatus(form, 'error', cfg.saveError))
-				.finally(() => setBusyAcrossPage(form, false, cfg.saving));
+				.then(r => handlePageSaveResponse(form, r, __('Settings saved.', 'lerm-admin-config')))
+				.catch(() => setStatus(form, 'error', __('Unable to save the settings right now.', 'lerm-admin-config')))
+				.finally(() => setBusyAcrossPage(form, false, __('Saving...', 'lerm-admin-config')));
 		});
 
 		dom.findAll('[data-lerm-reset]', form).forEach(btn => {
-			btn.addEventListener('click', (e) => {
+			btn.addEventListener('click', async (e) => {
 				e.preventDefault();
 				const scope = getData(btn, 'lerm-reset') === 'all' ? 'all' : 'section';
-				if (!window.confirm(scope === 'all' ? cfg.confirmResetAll : cfg.confirmResetSection)) return;
+				if (!await confirmDialog(scope === 'all' ? __('Reset every section on this page back to default values?', 'lerm-admin-config') : __('Reset the current page back to its default values?', 'lerm-admin-config'))) return;
 				triggerEditorSave(form);
 				clearFieldErrors(form);
-				setBusy(form, true, cfg.resetting);
-				setStatus(form, 'resetting', cfg.statusResetting);
+				setBusy(form, true, __('Resetting...', 'lerm-admin-config'));
+				setStatus(form, 'resetting', __('Resetting...', 'lerm-admin-config'));
 				request(form, 'reset', { reset_scope: scope })
 					.then(r => {
 						const partialFieldIds = r?.data?.scope === 'subsection'
 							? Object.keys(/** @type {Record<string, unknown>} */ (r.data.values ?? {}))
 							: null;
-						handleSaveResponse(form, r, scope === 'all' ? cfg.resetAllSuccess : cfg.resetSectionSuccess, partialFieldIds);
+						handleSaveResponse(form, r, scope === 'all' ? __('All sections have been reset to defaults.', 'lerm-admin-config') : __('The current page has been reset to defaults.', 'lerm-admin-config'), partialFieldIds);
 						// After a full reset, reload values for every other tab form too.
 						if (scope === 'all' && r?.success) {
 							dom.findAll('.lerm-settings-form').forEach(otherEl => {
@@ -3133,8 +3207,8 @@ const { createAdminConfigTransport } = require('./transport');
 							});
 						}
 					})
-					.catch(() => setStatus(form, 'error', cfg.resetError))
-					.finally(() => setBusy(form, false, cfg.saving));
+					.catch(() => setStatus(form, 'error', __('Unable to reset the settings right now.', 'lerm-admin-config')))
+					.finally(() => setBusy(form, false, __('Saving...', 'lerm-admin-config')));
 			});
 		});
 
@@ -3435,7 +3509,7 @@ const { createAdminConfigTransport } = require('./transport');
 					if (nonceInput) nonceInput.value = activePanel.getAttribute('data-tab-nonce') ?? '';
 
 					const dirty = pageIsDirty(activeForm);
-					setStatus(activeForm, dirty ? 'dirty' : 'idle', dirty ? cfg.statusDirty : cfg.statusReady);
+					setStatus(activeForm, dirty ? 'dirty' : 'idle', dirty ? __('Unsaved changes', 'lerm-admin-config') : __('Synced', 'lerm-admin-config'));
 				}
 			}
 

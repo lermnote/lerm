@@ -40,6 +40,10 @@ final class SchemaDemoPlugin {
 			$runtime->register( self::taxonomy_schema( $runtime ) );
 		}
 
+		if ( ! $runtime->has( 'acme-demo-block-editor-panel' ) ) {
+			$runtime->register( self::block_editor_panel_schema() );
+		}
+
 		if ( is_multisite() && ! $runtime->has( 'acme-demo-network-settings' ) ) {
 			$runtime->register( self::network_schema() );
 		}
@@ -683,6 +687,60 @@ final class SchemaDemoPlugin {
 								'label' => __( 'Featured', 'lerm-admin-config-demo' ),
 								'slug'  => 'featured-entry',
 							),
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private static function block_editor_panel_schema(): array {
+		return array(
+			'id'        => 'acme-demo-block-editor-panel',
+			'title'     => __( 'Demo Block Editor Panel', 'lerm-admin-config-demo' ),
+			'container' => array(
+				'type'       => 'block_editor_panel',
+				'title'      => __( 'Demo Panel', 'lerm-admin-config-demo' ),
+				'post_types' => array( 'post', 'page' ),
+				'capability' => 'edit_post',
+			),
+			'store'     => array(
+				'type' => 'post_meta',
+				'key'  => '_acme_demo_block_panel_settings',
+			),
+			'sections'  => array(
+				'settings' => array(
+					'title'       => __( 'Panel Settings', 'lerm-admin-config-demo' ),
+					'description' => __( 'A standalone block editor panel driven by the block_editor_panel container type. No classic metabox is registered — this schema only appears in the Gutenberg sidebar.', 'lerm-admin-config-demo' ),
+					'fields'      => array(
+						array(
+							'id'          => 'panel_featured',
+							'type'        => 'switcher',
+							'label'       => __( 'Featured entry', 'lerm-admin-config-demo' ),
+							'description' => __( 'Toggles the featured flag through the block editor panel.', 'lerm-admin-config-demo' ),
+							'default'     => 0,
+						),
+						array(
+							'id'          => 'panel_accent',
+							'type'        => 'color',
+							'label'       => __( 'Accent color', 'lerm-admin-config-demo' ),
+							'description' => __( 'A color picker rendered inside the block editor panel.', 'lerm-admin-config-demo' ),
+							'default'     => '#2271b1',
+						),
+						array(
+							'id'          => 'panel_layout',
+							'type'        => 'select',
+							'label'       => __( 'Layout', 'lerm-admin-config-demo' ),
+							'description' => __( 'A select control rendered inside the block editor panel.', 'lerm-admin-config-demo' ),
+							'choices'     => array(
+								'default' => __( 'Default', 'lerm-admin-config-demo' ),
+								'wide'    => __( 'Wide', 'lerm-admin-config-demo' ),
+								'full'    => __( 'Full width', 'lerm-admin-config-demo' ),
+							),
+							'default'     => 'default',
 						),
 					),
 				),

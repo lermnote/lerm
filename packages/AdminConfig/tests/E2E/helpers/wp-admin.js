@@ -186,9 +186,15 @@ async function resetOptionsPage( page, scope = 'section', options = {} ) {
 	const resetButton = page.locator( `[data-lerm-reset="${ scope }"]` ).first();
 
 	await expect( resetButton ).toBeVisible();
-	acceptNextDialog( page );
+	const request = waitForAdminConfigTransport( page, 'reset', options );
+	await resetButton.click();
 
-	return clickAndWaitForAdminConfigTransport( page, resetButton, 'reset', options );
+	// Click the Confirm button in the wp.components.Modal (replaced window.confirm).
+	const confirmButton = page.locator( '.components-modal__content button.is-destructive, .components-modal__content button.is-primary' ).first();
+	await expect( confirmButton ).toBeVisible( { timeout: 5_000 } );
+	await confirmButton.click();
+
+	return request;
 }
 
 async function exportBackupSnapshot( page, options = {} ) {
@@ -212,9 +218,15 @@ async function importBackupSnapshot( page, json, options = {} ) {
 	const button = page.locator( '[data-lerm-backup-import]' ).first();
 
 	await input.fill( json );
-	acceptNextDialog( page );
+	const request = waitForAdminConfigTransport( page, 'import', options );
+	await button.click();
 
-	return clickAndWaitForAdminConfigTransport( page, button, 'import', options );
+	// Click the Confirm button in the wp.components.Modal (replaced window.confirm).
+	const confirmButton = page.locator( '.components-modal__content button.is-destructive, .components-modal__content button.is-primary' ).first();
+	await expect( confirmButton ).toBeVisible( { timeout: 5_000 } );
+	await confirmButton.click();
+
+	return request;
 }
 
 async function submitClassicForm( page, submitSelector = '#submit' ) {
