@@ -71,7 +71,7 @@ final class Runtime {
 		$this->containers->register( new OptionsPageContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new NetworkOptionsPageContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new MetaboxContainer( $this->framework, $this->stores ) );
-		$this->containers->register( new BlockEditorPanelContainer( $this->framework, $this->stores ) );
+		$this->containers->register( new BlockEditorPanelContainer( $this->framework ) );
 		$this->containers->register( new CommentContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new ProfileContainer( $this->framework, $this->stores ) );
 		$this->containers->register( new TaxonomyContainer( $this->framework, $this->stores ) );

@@ -16,7 +16,6 @@ namespace Lerm\AdminConfig\WordPress\Containers;
 
 use Lerm\AdminConfig\Compiler\CompiledSchema;
 use Lerm\AdminConfig\Contracts\Container;
-use Lerm\AdminConfig\Stores\StoreResolver;
 use Lerm\AdminConfig\Framework\Contracts\AssetPathResolver;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Support\PackageAssets;
@@ -36,8 +35,7 @@ final class BlockEditorPanelContainer implements Container {
 	private bool $hooks_registered = false;
 
 	public function __construct(
-		private Framework $framework,
-		private StoreResolver $stores
+		private Framework $framework
 	) {
 	}
 
