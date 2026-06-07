@@ -118,7 +118,23 @@ final class FieldModuleRegistry {
 	 * @return array<int, string>
 	 */
 	public function field_types_for_definition( array $definition ): array {
-		return $this->definition_field_types( $definition );
+		$types = array();
+
+		foreach ( PageSchema::sections( $definition ) as $section ) {
+			if ( isset( $section['fields'] ) && is_array( $section['fields'] ) ) {
+				$this->collect_field_types( $section['fields'], $types );
+			}
+
+			foreach ( PageSchema::section_groups( $section ) as $group ) {
+				$group_fields = $group['fields'] ?? array();
+
+				if ( is_array( $group_fields ) ) {
+					$this->collect_field_types( $group_fields, $types );
+				}
+			}
+		}
+
+		return array_keys( $types );
 	}
 
 	/**
@@ -191,30 +207,6 @@ final class FieldModuleRegistry {
 	 */
 	public function all(): array {
 		return $this->modules;
-	}
-
-	/**
-	 * @param array<string, mixed> $definition
-	 * @return array<int, string>
-	 */
-	private function definition_field_types( array $definition ): array {
-		$types = array();
-
-		foreach ( PageSchema::sections( $definition ) as $section ) {
-			if ( isset( $section['fields'] ) && is_array( $section['fields'] ) ) {
-				$this->collect_field_types( $section['fields'], $types );
-			}
-
-			foreach ( PageSchema::section_groups( $section ) as $group ) {
-				$group_fields = $group['fields'] ?? array();
-
-				if ( is_array( $group_fields ) ) {
-					$this->collect_field_types( $group_fields, $types );
-				}
-			}
-		}
-
-		return array_keys( $types );
 	}
 
 	/**
