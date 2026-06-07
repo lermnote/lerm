@@ -10,6 +10,77 @@ const { createFormStateHelpers } = require('./form-state');
 const { createAdminConfigTransport } = require('./transport');
 const { __ } = require('../i18n');
 
+// ─── Confirm Dialog (wp.components.Modal bridge for vanilla JS) ──────
+let confirmDialog;
+(function buildConfirmDialog() {
+	let element, components;
+	try {
+		element = require('@wordpress/element');
+		components = require('@wordpress/components');
+	} catch (_e) {
+		confirmDialog = (message) => Promise.resolve(window.confirm(message));
+		return;
+	}
+
+	const { createElement, render } = element;
+	const { Button, Modal } = components;
+
+	/**
+	 * Show a confirmation dialog using wp.components.Modal.
+	 * @param {string} message
+	 * @returns {Promise<boolean>}
+	 */
+	confirmDialog = (message) => {
+		return new Promise((resolve) => {
+			const container = document.createElement('div');
+			document.body.appendChild(container);
+
+			const cleanup = (/** @type {boolean} */ result) => {
+				try {
+					render(null, container);
+				} catch (_err) {
+					// If unmount fails, just remove the container.
+				}
+				container.remove();
+				resolve(result);
+			};
+
+			render(
+				createElement(
+					Modal,
+					{
+						title: __('Confirm', 'lerm-admin-config'),
+						onRequestClose: () => cleanup(false),
+					},
+					createElement('p', null, message),
+					createElement(
+						'div',
+						{ style: { display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' } },
+						createElement(
+							Button,
+							{
+								variant: 'secondary',
+								onClick: () => cleanup(false),
+							},
+							__('Cancel', 'lerm-admin-config')
+						),
+						createElement(
+							Button,
+							{
+								variant: 'primary',
+								isDestructive: true,
+								onClick: () => cleanup(true),
+							},
+							__('Confirm', 'lerm-admin-config')
+						)
+					)
+				),
+				container
+			);
+		});
+	};
+})();
+
 /** @type {any} */ const wp = /** @type {any} */ (window['wp']);
 
 (function () {
@@ -1964,11 +2035,11 @@ const { __ } = require('../i18n');
 				syncDirtyState(/** @type {HTMLFormElement} */(groupEl.closest('form')));
 			});
 
-			list.addEventListener('click', (e) => {
+			list.addEventListener('click', async (e) => {
 				const btn = /** @type {HTMLElement} */ (e.target)?.closest('[data-lerm-group-remove]');
 				if (!btn || !list.contains(btn)) return;
 				e.preventDefault();
-				if (!window.confirm(__('Remove this item?', 'lerm-admin-config'))) return;
+				if (!await confirmDialog(__('Remove this item?', 'lerm-admin-config'))) return;
     			/** @type {HTMLElement} */ (btn.closest('[data-lerm-group-item]')).remove();
 				renumberGroupItems(groupEl);
 				syncDirtyState(/** @type {HTMLFormElement} */(groupEl.closest('form')));
@@ -3014,9 +3085,9 @@ const { __ } = require('../i18n');
 
 		const importBtn = /** @type {HTMLElement|null} */ (dom.find('[data-lerm-backup-import]', form));
 		if (importBtn) {
-			importBtn.addEventListener('click', (e) => {
+			importBtn.addEventListener('click', async (e) => {
 				e.preventDefault();
-				if (!window.confirm(__('Importing will overwrite the current saved settings. Continue?', 'lerm-admin-config'))) return;
+				if (!await confirmDialog(__('Importing will overwrite the current saved settings. Continue?', 'lerm-admin-config'))) return;
 				const json = String(/** @type {HTMLInputElement|null} */(dom.find('[data-lerm-backup-import-input]', form))?.value ?? '');
 				pageForms(form).forEach((pageForm) => clearFieldErrors(pageForm));
 				setBusyAcrossPage(form, true, __('Resetting...', 'lerm-admin-config'));
@@ -3089,10 +3160,10 @@ const { __ } = require('../i18n');
 		});
 
 		dom.findAll('[data-lerm-reset]', form).forEach(btn => {
-			btn.addEventListener('click', (e) => {
+			btn.addEventListener('click', async (e) => {
 				e.preventDefault();
 				const scope = getData(btn, 'lerm-reset') === 'all' ? 'all' : 'section';
-				if (!window.confirm(scope === 'all' ? __('Reset every section on this page back to default values?', 'lerm-admin-config') : __('Reset the current page back to its default values?', 'lerm-admin-config'))) return;
+				if (!await confirmDialog(scope === 'all' ? __('Reset every section on this page back to default values?', 'lerm-admin-config') : __('Reset the current page back to its default values?', 'lerm-admin-config'))) return;
 				triggerEditorSave(form);
 				clearFieldErrors(form);
 				setBusy(form, true, __('Resetting...', 'lerm-admin-config'));
