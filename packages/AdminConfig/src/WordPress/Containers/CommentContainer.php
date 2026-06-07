@@ -169,6 +169,7 @@ final class CommentContainer implements Container {
 				(string) $comment_id,
 				$store,
 				$submitted,
+				null,
 				__( 'Please review the highlighted comment fields before saving again.', 'lerm-admin-config' ),
 				__( 'Unable to save these comment settings right now.', 'lerm-admin-config' )
 			);

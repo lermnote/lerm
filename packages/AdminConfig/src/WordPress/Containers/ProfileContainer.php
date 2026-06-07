@@ -149,6 +149,7 @@ final class ProfileContainer implements Container {
 				(string) $user_id,
 				$store,
 				$submitted,
+				null,
 				__( 'Please review the highlighted profile fields before saving again.', 'lerm-admin-config' ),
 				__( 'Unable to save these profile settings right now.', 'lerm-admin-config' )
 			);
