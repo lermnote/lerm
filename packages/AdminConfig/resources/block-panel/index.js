@@ -419,8 +419,8 @@ const renderUnavailableField = (createElement, field, controlType, status, error
 					key: 'unsupported',
 				},
 				isReadOnly
-					? `Field type "${ controlType }" is read-only in the block editor panel.`
-					: `Field type "${ controlType }" is not available in the block editor panel yet.`
+					? sprintf(__('Field type "%s" is read-only in the block editor panel.', 'lerm-admin-config'), controlType)
+					: sprintf(__('Field type "%s" is not available in the block editor panel yet.', 'lerm-admin-config'), controlType)
 			),
 			error
 				? createElement(
@@ -704,7 +704,7 @@ const createPanelComponent = (config, Panel, element) => {
 						className: 'lerm-admin-config-block-panel__save-notice',
 						key: 'save-notice',
 					},
-					'Save AdminConfig changes before updating the post — they are stored separately.'
+					__('Save AdminConfig changes before updating the post — they are stored separately.', 'lerm-admin-config')
 				))
 			}
 			body.push(createElement(

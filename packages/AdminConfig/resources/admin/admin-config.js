@@ -2347,13 +2347,13 @@ let confirmDialog;
 					.then(() => {
 						button.textContent = __('Copied', 'lerm-admin-config');
 						window.setTimeout(() => {
-							button.textContent = __('Copy JSON', 'lerm-admin-config') || defaultLabel;
+							button.textContent = __('Copy JSON', 'lerm-admin-config') ;
 						}, 1400);
 					})
 					.catch(() => {
-						button.textContent = __('Unable to save the settings right now.', 'lerm-admin-config') || defaultLabel;
+						button.textContent = __('Unable to save the settings right now.', 'lerm-admin-config') ;
 						window.setTimeout(() => {
-							button.textContent = __('Copy JSON', 'lerm-admin-config') || defaultLabel;
+							button.textContent = __('Copy JSON', 'lerm-admin-config') ;
 						}, 1400);
 					});
 			});
