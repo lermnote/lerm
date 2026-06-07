@@ -42,7 +42,7 @@ final class MetaboxContainer implements Container {
 	) {
 	}
 
-	private function containerTypeForBlockPanel(): string {
+	private function container_type_for_block_panel(): string {
 		return 'metabox';
 	}
 

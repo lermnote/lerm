@@ -7,7 +7,7 @@
  *   private Framework $framework — for asset resolution
  *
  * And MUST implement:
- *   private function containerTypeForBlockPanel(): string
+ *   private function container_type_for_block_panel(): string
  *
  * @package Lerm\AdminConfig
  */
@@ -32,13 +32,13 @@ trait HasBlockEditorPanel {
 	 * Hook this as: add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 	 */
 	public function enqueue_block_editor_assets(): void {
-		$ctx = $this->resolveEditorContext();
+		$ctx = $this->resolve_editor_context();
 
 		if ( empty( $ctx['post_id'] ) || '' === $ctx['post_type'] ) {
 			return;
 		}
 
-		$panel_schemas = $this->collectPanelSchemas( $ctx['post_type'], $ctx['post_id'] );
+		$panel_schemas = $this->collect_panel_schemas( $ctx['post_type'], $ctx['post_id'] );
 
 		if ( empty( $panel_schemas ) ) {
 			return;
@@ -46,12 +46,12 @@ trait HasBlockEditorPanel {
 
 		wp_enqueue_media();
 
-		$script = $this->resolvePanelScriptAsset();
+		$script = $this->resolve_panel_script_asset();
 		$handle = 'lerm-admin-config-block-panel';
 
 		wp_enqueue_script(
 			$handle,
-			$this->panelAssetUrl( $script['file'] ),
+			$this->panel_asset_url( $script['file'] ),
 			$script['dependencies'],
 			$script['version'],
 			true
@@ -59,9 +59,9 @@ trait HasBlockEditorPanel {
 
 		wp_enqueue_style(
 			$handle,
-			$this->panelAssetUrl( 'block-panel.css' ),
+			$this->panel_asset_url( 'block-panel.css' ),
 			array( 'wp-components' ),
-			$this->panelAssetVersion()
+			$this->panel_asset_version()
 		);
 
 		wp_set_script_translations(
@@ -92,7 +92,7 @@ trait HasBlockEditorPanel {
 	/**
 	 * @return array{post_id: int, post_type: string}
 	 */
-	private function resolveEditorContext(): array {
+	private function resolve_editor_context(): array {
 		$post_id   = 0;
 		$post_type = '';
 
@@ -138,13 +138,13 @@ trait HasBlockEditorPanel {
 	/**
 	 * @return array<int, array<string, mixed>>
 	 */
-	private function collectPanelSchemas( string $post_type, int $post_id ): array {
+	private function collect_panel_schemas( string $post_type, int $post_id ): array {
 		$schemas = array();
 
 		foreach ( $this->schemas as $schema ) {
 			$container = $schema->container();
 
-			if ( ! in_array( $post_type, $this->normalizePostTypes( $container['post_types'] ?? array() ), true ) ) {
+			if ( ! in_array( $post_type, $this->normalize_post_types( $container['post_types'] ?? array() ), true ) ) {
 				continue;
 			}
 
@@ -157,7 +157,7 @@ trait HasBlockEditorPanel {
 			$schemas[] = array(
 				'schemaId'      => $schema->id(),
 				'title'         => (string) ( $container['title'] ?? $schema->definition()['title'] ?? __( 'Settings', 'lerm-admin-config' ) ),
-				'containerType' => $this->containerTypeForBlockPanel(),
+				'containerType' => $this->container_type_for_block_panel(),
 				'postType'      => $post_type,
 				'context'       => array(
 					'post_id' => $post_id,
@@ -171,7 +171,7 @@ trait HasBlockEditorPanel {
 	/**
 	 * @return array{file: string, dependencies: array<int, string>, version: string}
 	 */
-	private function resolvePanelScriptAsset(): array {
+	private function resolve_panel_script_asset(): array {
 		return ScriptAssetMetadata::resolve(
 			'block-panel',
 			'build/block-panel.js',
@@ -183,19 +183,19 @@ trait HasBlockEditorPanel {
 				'wp-element',
 				'wp-plugins',
 			),
-			$this->panelAssetVersion(),
+			$this->panel_asset_version(),
 			function ( string $asset ): string {
-				return $this->panelAssetPath( $asset );
+				return $this->panel_asset_path( $asset );
 			}
 		);
 	}
 
-	private function panelAssetUrl( string $asset ): string {
+	private function panel_asset_url( string $asset ): string {
 		/** @psalm-suppress UndefinedThisPropertyFetch */
 		return $this->framework->asset_resolver()->url( $asset );
 	}
 
-	private function panelAssetPath( string $asset ): string {
+	private function panel_asset_path( string $asset ): string {
 		/** @psalm-suppress UndefinedThisPropertyFetch */
 		$resolver = $this->framework->asset_resolver();
 
@@ -206,7 +206,7 @@ trait HasBlockEditorPanel {
 		return PackageAssets::path( $asset );
 	}
 
-	private function panelAssetVersion(): string {
+	private function panel_asset_version(): string {
 		/** @psalm-suppress UndefinedThisPropertyFetch */
 		return $this->framework->asset_resolver()->version();
 	}
@@ -215,7 +215,7 @@ trait HasBlockEditorPanel {
 	 * @param mixed $post_types
 	 * @return array<int, string>
 	 */
-	private function normalizePostTypes( $post_types ): array {
+	private function normalize_post_types( $post_types ): array {
 		$normalized = array();
 
 		foreach ( is_array( $post_types ) ? $post_types : array( $post_types ) as $post_type ) {

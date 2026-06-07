@@ -54,7 +54,7 @@ final class BlockEditorPanelContainer implements Container {
 		$this->hooks_registered = true;
 	}
 
-	private function containerTypeForBlockPanel(): string {
+	private function container_type_for_block_panel(): string {
 		return 'block_editor_panel';
 	}
 }
