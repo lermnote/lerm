@@ -45,12 +45,13 @@ let confirmDialog;
 				resolve(result);
 			};
 
-			render(
-				createElement(
-					Modal,
-					{
-						title: __('Confirm', 'lerm-admin-config'),
-						onRequestClose: () => cleanup(false),
+			try {
+				render(
+					createElement(
+						Modal,
+						{
+							title: __('Confirm', 'lerm-admin-config'),
+							onRequestClose: () => cleanup(false),
 					},
 					createElement('p', null, message),
 					createElement(
@@ -77,7 +78,13 @@ let confirmDialog;
 				),
 				container
 			);
-		});
+		} catch (_renderErr) {
+			// If the initial render fails (e.g., incompatible React version),
+			// clean up the container and resolve so the caller doesn't hang.
+			cleanup(false);
+			return;
+		}
+	});
 	};
 })();
 
