@@ -296,7 +296,16 @@ const register = () => {
 		registerWpDataStore(store);
 		isRegistered = true;
 	} catch (_error) {
-		// Silently skip registration in environments without wp.data (e.g. Node.js tests).
+		// Silently skip registration in environments without wp.data (e.g., Node.js tests).
+		// In browser environments where wp.data exists, a failure indicates a real issue.
+		if (typeof window !== 'undefined' && window.wp && window.wp.data) {
+			console.warn(
+				'[lerm/admin-config] Failed to register wp.data store. ' +
+				'Another plugin may have registered a conflicting store name, ' +
+				'or the store configuration is invalid.',
+				_error
+			);
+		}
 	}
 };
 

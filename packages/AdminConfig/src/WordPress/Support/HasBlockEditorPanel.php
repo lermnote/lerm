@@ -67,7 +67,7 @@ trait HasBlockEditorPanel {
 		wp_set_script_translations(
 			$handle,
 			'lerm-admin-config',
-			dirname( __DIR__, 3 ) . '/languages/'
+			dirname( PackageAssets::directory() ) . '/languages/'
 		);
 
 		$payload = wp_json_encode(

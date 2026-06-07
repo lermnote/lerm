@@ -30,7 +30,15 @@ let confirmDialog;
 	 * @param {string} message
 	 * @returns {Promise<boolean>}
 	 */
+	let dialogActive = false;
+
 	confirmDialog = (message) => {
+		if (dialogActive) {
+			return Promise.resolve(false);
+		}
+
+		dialogActive = true;
+
 		return new Promise((resolve) => {
 			const container = document.createElement('div');
 			document.body.appendChild(container);
@@ -42,6 +50,7 @@ let confirmDialog;
 					// If unmount fails, just remove the container.
 				}
 				container.remove();
+				dialogActive = false;
 				resolve(result);
 			};
 
