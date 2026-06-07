@@ -169,7 +169,6 @@ final class CommentContainer implements Container {
 				(string) $comment_id,
 				$store,
 				$submitted,
-				static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
 				__( 'Please review the highlighted comment fields before saving again.', 'lerm-admin-config' ),
 				__( 'Unable to save these comment settings right now.', 'lerm-admin-config' )
 			);

@@ -53,11 +53,12 @@ final class ContainerSaveSupport {
 		string $resource_key,
 		OptionStore $store,
 		array $submitted,
-		callable $persist,
-		string $validation_message,
-		string $failure_message
+		?callable $persist = null,
+		string $validation_message = '',
+		string $failure_message = ''
 	): void {
-		$success = (bool) $persist( $store, $submitted );
+		$persist ??= static fn ( OptionStore $s, array $p ): bool => $s->import_all( $p );
+		$success   = (bool) $persist( $store, $submitted );
 
 		if ( $store->has_validation_errors() ) {
 			ValidationFlash::store(
