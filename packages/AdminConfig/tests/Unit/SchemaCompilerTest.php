@@ -415,4 +415,35 @@ final class SchemaCompilerTest extends TestCase {
 			$compiled->store()
 		);
 	}
+
+	public function testCompileContainerPreservesBlockEditorPanelType(): void {
+		$compiler = new SchemaCompiler();
+		$compiled = $compiler->compile(
+			array(
+				'id'        => 'panel_schema',
+				'container' => array(
+					'type'       => 'block_editor_panel',
+					'title'      => 'Panel Settings',
+					'post_types' => array( 'post', 'page' ),
+					'capability' => 'edit_post',
+				),
+				'store'     => array(
+					'type' => 'post_meta',
+					'key'  => '_panel_settings',
+				),
+				'sections'  => array(
+					'main' => array(
+						'fields' => array(
+							array( 'id' => 'f1', 'type' => 'text', 'default' => '' ),
+						),
+					),
+				),
+			)
+		);
+
+		$container = $compiled->container();
+		$this->assertSame( 'block_editor_panel', $container['type'] );
+		$this->assertSame( array( 'post', 'page' ), $container['post_types'] );
+		$this->assertSame( 'edit_post', $container['capability'] );
+	}
 }
