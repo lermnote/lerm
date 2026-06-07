@@ -1,6 +1,6 @@
 // @ts-check
 
-const { createReduxStore, registerStore } = require('@wordpress/data');
+const { createReduxStore, register: registerWpDataStore } = require('@wordpress/data');
 
 const STORE_NAME = 'lerm/admin-config';
 
@@ -293,7 +293,7 @@ const register = () => {
 	}
 
 	try {
-		registerStore(store);
+		registerWpDataStore(store);
 		isRegistered = true;
 	} catch (_error) {
 		// Silently skip registration in environments without wp.data (e.g. Node.js tests).

@@ -87,6 +87,12 @@ final class BlockEditorPanelContainer implements Container {
 			$this->asset_version()
 		);
 
+		wp_set_script_translations(
+			$handle,
+			'lerm-admin-config',
+			dirname( __DIR__, 3 ) . '/languages/'
+		);
+
 		$payload = wp_json_encode(
 			array(
 				'restUrl'   => rest_url( 'lerm-admin-config/v1/' ),
