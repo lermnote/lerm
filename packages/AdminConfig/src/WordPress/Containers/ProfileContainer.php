@@ -116,7 +116,7 @@ final class ProfileContainer implements Container {
 
 			printf(
 				'<tr class="user-admin-config-nonce"><td colspan="2">%s</td></tr>',
-				wp_nonce_field( $this->nonce_action( $schema ), $this->nonce_name( $schema ), true, false )
+				wp_nonce_field( ContainerSaveSupport::nonce_action( 'profile', $schema ), ContainerSaveSupport::nonce_name( 'profile', $schema ), true, false )
 			);
 			echo '</table>';
 		}
@@ -130,9 +130,9 @@ final class ProfileContainer implements Container {
 		}
 
 		foreach ( $this->schemas as $schema ) {
-			$nonce = ContainerSaveSupport::posted_nonce( $this->nonce_name( $schema ) );
+			$nonce = ContainerSaveSupport::posted_nonce( ContainerSaveSupport::nonce_name( 'profile', $schema ) );
 
-			if ( '' === $nonce || ! wp_verify_nonce( $nonce, $this->nonce_action( $schema ) ) ) {
+			if ( '' === $nonce || ! wp_verify_nonce( $nonce, ContainerSaveSupport::nonce_action( 'profile', $schema ) ) ) {
 				continue;
 			}
 
@@ -177,11 +177,4 @@ final class ProfileContainer implements Container {
 		return 'edit_user';
 	}
 
-	private function nonce_name( CompiledSchema $schema ): string {
-		return 'lerm_admin_config_profile_nonce_' . $schema->id();
-	}
-
-	private function nonce_action( CompiledSchema $schema ): string {
-		return 'lerm_admin_config_profile_' . $schema->id();
-	}
 }

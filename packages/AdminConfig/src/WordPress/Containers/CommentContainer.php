@@ -138,7 +138,7 @@ final class CommentContainer implements Container {
 			);
 		}
 
-		wp_nonce_field( $this->nonce_action( $schema ), $this->nonce_name( $schema ) );
+		wp_nonce_field( ContainerSaveSupport::nonce_action( 'comment', $schema ), ContainerSaveSupport::nonce_name( 'comment', $schema ) );
 		echo '</div>';
 	}
 
@@ -150,9 +150,9 @@ final class CommentContainer implements Container {
 		}
 
 		foreach ( $this->schemas as $schema ) {
-			$nonce = ContainerSaveSupport::posted_nonce( $this->nonce_name( $schema ) );
+			$nonce = ContainerSaveSupport::posted_nonce( ContainerSaveSupport::nonce_name( 'comment', $schema ) );
 
-			if ( '' === $nonce || ! wp_verify_nonce( $nonce, $this->nonce_action( $schema ) ) ) {
+			if ( '' === $nonce || ! wp_verify_nonce( $nonce, ContainerSaveSupport::nonce_action( 'comment', $schema ) ) ) {
 				continue;
 			}
 
@@ -206,11 +206,4 @@ final class CommentContainer implements Container {
 		return 'lerm-admin-config-comment-' . $schema->id();
 	}
 
-	private function nonce_name( CompiledSchema $schema ): string {
-		return 'lerm_admin_config_comment_nonce_' . $schema->id();
-	}
-
-	private function nonce_action( CompiledSchema $schema ): string {
-		return 'lerm_admin_config_comment_' . $schema->id();
-	}
 }
