@@ -9,28 +9,15 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Modules;
 
-use Lerm\AdminConfig\Contracts\FieldModule;
 use Lerm\AdminConfig\Framework\FieldTypes\StructuredFieldTypes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class StructuredFieldsModule implements FieldModule {
+final class StructuredFieldsModule extends DelegatingFieldModule {
 
-	public function id(): string {
-		return 'structured';
-	}
-
-	public function field_types(): array {
-		return array_keys( $this->definitions() );
-	}
-
-	public function definitions(): array {
-		return StructuredFieldTypes::definitions();
-	}
-
-	public function enabled_by_default(): bool {
-		return false;
+	public function __construct() {
+		parent::__construct( 'structured', StructuredFieldTypes::class );
 	}
 }

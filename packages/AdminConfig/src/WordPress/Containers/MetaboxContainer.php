@@ -70,7 +70,7 @@ final class MetaboxContainer implements Container {
 
 		foreach ( $this->schemas as $schema ) {
 			$container  = $schema->container();
-			$post_types = $this->normalize_post_types( $container['post_types'] ?? array() );
+			$post_types = ContainerSaveSupport::normalize_string_list( $container['post_types'] ?? array() );
 
 			if ( ! in_array( $post_type, $post_types, true ) ) {
 				continue;
@@ -151,7 +151,7 @@ final class MetaboxContainer implements Container {
 
 		foreach ( $this->schemas as $schema ) {
 			$container  = $schema->container();
-			$post_types = $this->normalize_post_types( $container['post_types'] ?? array() );
+			$post_types = ContainerSaveSupport::normalize_string_list( $container['post_types'] ?? array() );
 
 			if ( ! in_array( $post->post_type, $post_types, true ) ) {
 				continue;
@@ -187,30 +187,6 @@ final class MetaboxContainer implements Container {
 
 	private function meta_box_id( CompiledSchema $schema ): string {
 		return 'lerm-admin-config-metabox-' . $schema->id();
-	}
-
-	/**
-	 * @param mixed $post_types
-	 * @return array<int, string>
-	 */
-	private function normalize_post_types( $post_types ): array {
-		$normalized = array();
-
-		foreach ( is_array( $post_types ) ? $post_types : array( $post_types ) as $post_type ) {
-			if ( ! is_scalar( $post_type ) ) {
-				continue;
-			}
-
-			$value = sanitize_key( (string) $post_type );
-
-			if ( '' === $value ) {
-				continue;
-			}
-
-			$normalized[] = $value;
-		}
-
-		return array_values( array_unique( $normalized ) );
 	}
 
 	private function post_context_uses_block_editor( string $post_type, ?\WP_Post $post = null ): bool {

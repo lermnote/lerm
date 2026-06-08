@@ -18,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class ContainerFieldRenderer {
 
+	use FieldErrorMatcher;
+
 	private FieldTypeRegistry $field_types;
 	private OptionsPage $page;
 
@@ -48,7 +50,7 @@ final class ContainerFieldRenderer {
 		$values   = is_array( $value ) ? $value : array();
 		$fields   = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
 		$path     = $this->resolve_render_path( $field_id );
-		$invalid  = $this->field_has_errors( $path, true );
+		$invalid  = $this->field_has_errors( $this->field_errors, $path, true );
 		$classes  = array_filter(
 			array_map(
 				'trim',
@@ -78,7 +80,7 @@ final class ContainerFieldRenderer {
 		$items          = $this->panel_items( $field );
 		$allow_multiple = ! empty( $field['allow_multiple'] );
 		$open_first     = ! array_key_exists( 'open_first', $field ) || ! empty( $field['open_first'] );
-		$invalid        = $this->field_has_errors( $field_path, true );
+		$invalid        = $this->field_has_errors( $this->field_errors, $field_path, true );
 
 		echo '<div class="lerm-fieldset lerm-accordion-field' . ( $invalid ? ' is-invalid' : '' ) . '" data-target="' . esc_attr( $field_id ) . '" data-field-path="' . esc_attr( $field_path ) . '" data-lerm-accordion data-allow-multiple="' . esc_attr( $allow_multiple ? '1' : '0' ) . '">';
 
@@ -89,7 +91,7 @@ final class ContainerFieldRenderer {
 			$item_desc    = (string) ( $item['description'] ?? '' );
 			$item_fields  = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
 			$item_values  = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
-			$item_invalid = $this->field_has_errors( $item_path, true );
+			$item_invalid = $this->field_has_errors( $this->field_errors, $item_path, true );
 			$is_open      = $item_invalid || ! empty( $item['open'] ) || ( $open_first && 0 === $index );
 			$panel_id     = $field_id . '__' . $item_id;
 			$button_id    = $panel_id . '__button';
@@ -139,19 +141,19 @@ final class ContainerFieldRenderer {
 			$item_id   = (string) ( $item['id'] ?? '' );
 			$item_path = $this->compose_render_path( $field_path, $item_id );
 
-			if ( '' !== $item_id && $this->field_has_errors( $item_path, true ) ) {
+			if ( '' !== $item_id && $this->field_has_errors( $this->field_errors, $item_path, true ) ) {
 				$active_tab = $item_id;
 				break;
 			}
 		}
 
-		echo '<div class="lerm-fieldset lerm-tabbed-field' . ( $this->field_has_errors( $field_path, true ) ? ' is-invalid' : '' ) . '" data-target="' . esc_attr( $field_id ) . '" data-field-path="' . esc_attr( $field_path ) . '" data-lerm-tabbed data-default-tab="' . esc_attr( $active_tab ) . '">';
+		echo '<div class="lerm-fieldset lerm-tabbed-field' . ( $this->field_has_errors( $this->field_errors, $field_path, true ) ? ' is-invalid' : '' ) . '" data-target="' . esc_attr( $field_id ) . '" data-field-path="' . esc_attr( $field_path ) . '" data-lerm-tabbed data-default-tab="' . esc_attr( $active_tab ) . '">';
 		echo '<div class="lerm-tabbed__nav" role="tablist">';
 
 		foreach ( $items as $index => $item ) {
 			$item_id      = (string) $item['id'];
 			$item_path    = $this->compose_render_path( $field_path, $item_id );
-			$item_invalid = $this->field_has_errors( $item_path, true );
+			$item_invalid = $this->field_has_errors( $this->field_errors, $item_path, true );
 			$is_active    = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
 			$panel_id     = $field_id . '__' . $item_id;
 			$trigger_id   = $panel_id . '__tab';
@@ -169,7 +171,7 @@ final class ContainerFieldRenderer {
 			$item_desc    = (string) ( $item['description'] ?? '' );
 			$item_fields  = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
 			$item_values  = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
-			$item_invalid = $this->field_has_errors( $item_path, true );
+			$item_invalid = $this->field_has_errors( $this->field_errors, $item_path, true );
 			$is_active    = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
 			$panel_id     = $field_id . '__' . $item_id;
 			$trigger_id   = $panel_id . '__tab';
@@ -205,7 +207,7 @@ final class ContainerFieldRenderer {
 		$items       = is_array( $value ) ? array_values( $value ) : array();
 		$button_text = (string) ( $field['button_text'] ?? __( 'Add item', 'lerm-admin-config' ) );
 
-		echo '<div class="lerm-group' . ( $this->field_has_errors( $field_path, true ) ? ' is-invalid' : '' ) . '" data-target="' . esc_attr( $field_id ) . '" data-field-path="' . esc_attr( $field_path ) . '">';
+		echo '<div class="lerm-group' . ( $this->field_has_errors( $this->field_errors, $field_path, true ) ? ' is-invalid' : '' ) . '" data-target="' . esc_attr( $field_id ) . '" data-field-path="' . esc_attr( $field_path ) . '">';
 		echo '<div class="lerm-group__toolbar">';
 		echo '<button type="button" class="button button-secondary" data-lerm-group-add>' . esc_html( $button_text ) . '</button>';
 		echo '</div>';
@@ -230,7 +232,7 @@ final class ContainerFieldRenderer {
 	private function group_item_markup( array $field, string $field_name, array $item, string $index, string $field_path = '', string $path_template = '' ): string {
 		$fields          = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
 		$item_path       = $this->compose_render_path( $field_path, $index );
-		$item_has_errors = $this->field_has_errors( $item_path, true );
+		$item_has_errors = $this->field_has_errors( $this->field_errors, $item_path, true );
 
 		ob_start();
 		?>
@@ -312,8 +314,8 @@ final class ContainerFieldRenderer {
 			$child_name  = $field_name . '[' . $child_id . ']';
 			$child_value = $values[ $child_id ] ?? ( $child['default'] ?? '' );
 			$child_path  = $this->compose_render_path( $base_path, $child_id );
-			$error       = $this->field_error_message( $child_path );
-			$has_errors  = $this->field_has_errors( $child_path, true );
+			$error       = $this->field_error_message( $this->field_errors, $child_path );
+			$has_errors  = $this->field_has_errors( $this->field_errors, $child_path, true );
 			$classes     = trim( $item_class . ( $has_errors ? ' is-invalid' : '' ) );
 
 			echo '<div class="' . esc_attr( $classes ) . '" data-subfield-id="' . esc_attr( $child_id ) . '" data-field-type="' . esc_attr( sanitize_key( (string) ( $child['type'] ?? 'text' ) ) ) . '" data-field-path="' . esc_attr( $child_path ) . '"';
@@ -336,42 +338,6 @@ final class ContainerFieldRenderer {
 
 			echo '</div>';
 		}
-	}
-
-	private function field_error_message( string $field_id ): string {
-		return implode( ' ', $this->field_error_messages( $field_id ) );
-	}
-
-	/**
-	 * @return array<int, string>
-	 */
-	private function field_error_messages( string $field_path, bool $include_descendants = false ): array {
-		$messages = array();
-
-		foreach ( $this->field_errors as $error_path => $error_messages ) {
-			$error_path = (string) $error_path;
-			$is_match   = $error_path === $field_path;
-
-			if ( ! $is_match && $include_descendants && '' !== $field_path ) {
-				$is_match = str_starts_with( $error_path, $field_path . '.' );
-			}
-
-			if ( ! $is_match ) {
-				continue;
-			}
-
-			foreach ( (array) $error_messages as $message ) {
-				if ( is_scalar( $message ) && '' !== (string) $message ) {
-					$messages[] = (string) $message;
-				}
-			}
-		}
-
-		return array_values( array_unique( $messages ) );
-	}
-
-	private function field_has_errors( string $field_path, bool $include_descendants = false ): bool {
-		return ! empty( $this->field_error_messages( $field_path, $include_descendants ) );
 	}
 
 	private function resolve_render_path( string $field_id ): string {

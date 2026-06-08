@@ -8,6 +8,7 @@
 const { resolveAdminConfig } = require('../core/config');
 const { createFormStateHelpers } = require('./form-state');
 const { createAdminConfigTransport } = require('./transport');
+const { dependencyMatches: coreDependencyMatches, dependencyScalar, dependencyScalarList } = require('../core/dependencies');
 const { __ } = require('../i18n');
 
 // ─── Confirm Dialog (wp.components.Modal bridge for vanilla JS) ──────
@@ -314,18 +315,6 @@ let confirmDialog;
 	// ─── Dependencies ─────────────────────────────────────────────────────────
 
 	/** @param {unknown} value */
-	const dependencyScalar = (value) => {
-		if (typeof value === 'boolean') return value ? '1' : '0';
-		if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'string') return String(value);
-		return '';
-	};
-
-	/** @param {unknown} value */
-	const dependencyScalarList = (value) => Array.isArray(value)
-		? value.map(dependencyScalar)
-		: [ dependencyScalar(value) ];
-
-	/** @param {unknown} value */
 	const dependencyExpectedValue = (value) => {
 		const raw = String(value ?? '');
 
@@ -339,46 +328,6 @@ let confirmDialog;
 		} catch (error) {
 			return raw;
 		}
-	};
-
-	/**
-	 * @param {unknown} actual
-	 * @param {unknown} operator
-	 * @param {unknown} expected
-	 */
-	const dependencyMatches = (actual, operator = '==', expected = '1') => {
-		const op = String(operator || '==').trim() || '==';
-		const actualValues = dependencyScalarList(actual);
-		const expectedValues = dependencyScalarList(expected);
-		const expectedValue = expectedValues[0] || '';
-
-		if (op === '!=' || op === '!==') {
-			return !actualValues.includes(expectedValue);
-		}
-
-		if (op === 'in') {
-			return actualValues.some(value => expectedValues.includes(value));
-		}
-
-		if (op === 'not_in' || op === 'not in') {
-			return !actualValues.some(value => expectedValues.includes(value));
-		}
-
-		if ([ '>', '>=', '<', '<=' ].includes(op)) {
-			const actualNumber = Number(actualValues[0] || '');
-			const expectedNumber = Number(expectedValue);
-
-			if (!Number.isFinite(actualNumber) || !Number.isFinite(expectedNumber)) {
-				return false;
-			}
-
-			if (op === '>') return actualNumber > expectedNumber;
-			if (op === '>=') return actualNumber >= expectedNumber;
-			if (op === '<') return actualNumber < expectedNumber;
-			return actualNumber <= expectedNumber;
-		}
-
-		return actualValues.includes(expectedValue);
 	};
 
 	/** @param {HTMLFormElement} form */

@@ -90,4 +90,33 @@ final class ContainerSaveSupport {
 
 		ValidationFlash::clear( $scope, $schema_id, $resource_key );
 	}
+
+	/**
+	 * Normalize a mixed list of identifiers into a unique array of sanitized keys.
+	 *
+	 * Accepts a string, an array of strings, or a mixed array — mirrors the
+	 * same pattern used for post_types, taxonomies, and other container targets.
+	 *
+	 * @param mixed $items Raw identifier(s) from the schema definition.
+	 * @return array<int, string>
+	 */
+	public static function normalize_string_list( $items ): array {
+		$normalized = array();
+
+		foreach ( is_array( $items ) ? $items : array( $items ) as $item ) {
+			if ( ! is_scalar( $item ) ) {
+				continue;
+			}
+
+			$value = sanitize_key( (string) $item );
+
+			if ( '' === $value ) {
+				continue;
+			}
+
+			$normalized[] = $value;
+		}
+
+		return array_values( array_unique( $normalized ) );
+	}
 }
