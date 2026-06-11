@@ -20,6 +20,7 @@ use Lerm\AdminConfig\Framework\Backends\OptionBackend;
 use Lerm\AdminConfig\Framework\Contracts\FrameworkContract;
 use Lerm\AdminConfig\Framework\Contracts\StorageBackend;
 use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\Support\FieldPath;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -170,6 +171,53 @@ final class OptionStore {
 	}
 
 	/**
+	 * @param iterable<int, array<string, mixed>> $fields
+	 * @param array<string, mixed>                $submitted
+	 */
+	private function save_fields_internal( iterable $fields, array $submitted ): bool {
+		$this->begin_validation_capture();
+		$options = $this->raw();
+
+		try {
+			foreach ( $fields as $field ) {
+				if ( ! $this->field_is_saved( $field ) ) {
+					continue;
+				}
+
+				$field_id             = (string) $field['id'];
+				$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true, $field_id );
+			}
+
+			if ( $this->has_validation_errors() ) {
+				return false;
+			}
+
+			return $this->persist_options( $options );
+		} finally {
+			$this->end_validation_capture();
+		}
+	}
+
+	/**
+	 * @param iterable<int, array<string, mixed>> $fields
+	 */
+	private function reset_fields_internal( iterable $fields ): bool {
+		$this->clear_validation_errors();
+		$options = $this->raw();
+
+		foreach ( $fields as $field ) {
+			if ( ! $this->field_is_saved( $field ) ) {
+				continue;
+			}
+
+			$field_id             = (string) $field['id'];
+			$options[ $field_id ] = $this->sanitize_field_internal( $field, $field['default'] ?? '', false );
+		}
+
+		return $this->persist_options( $options );
+	}
+
+	/**
 	 * Save a single section.
 	 *
 	 * @param string               $section_id Section ID.
@@ -178,40 +226,9 @@ final class OptionStore {
 	public function save_section( string $section_id, array $submitted ): bool {
 		$section = PageSchema::section( $this->definition, $section_id );
 
-		if ( null === $section ) {
-			return false;
-		}
-
-		$this->begin_validation_capture();
-		$options = $this->raw();
-
-		try {
-			foreach ( PageSchema::section_fields( $section ) as $field ) {
-				if ( ! $this->field_is_saved( $field ) ) {
-					continue;
-				}
-
-				$field_id             = (string) $field['id'];
-				$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true, $field_id );
-			}
-
-			if ( $this->has_validation_errors() ) {
-				return false;
-			}
-
-			return $this->persist_options( $options );
-		} finally {
-			$this->end_validation_capture();
-		}
-	}
-
-	/**
-	 * Save the full settings payload across every section.
-	 *
-	 * @param array<string, mixed> $submitted Submitted values.
-	 */
-	public function save_all( array $submitted ): bool {
-		return $this->import_all( $submitted );
+		return null !== $section
+			? $this->save_fields_internal( PageSchema::section_fields( $section ), $submitted )
+			: false;
 	}
 
 	/**
@@ -220,27 +237,7 @@ final class OptionStore {
 	 * @param array<string, mixed> $submitted Submitted values.
 	 */
 	public function import_all( array $submitted ): bool {
-		$this->begin_validation_capture();
-		$options = $this->raw();
-
-		try {
-			foreach ( PageSchema::fields( $this->definition ) as $field ) {
-				if ( ! $this->field_is_saved( $field ) ) {
-					continue;
-				}
-
-				$field_id             = (string) $field['id'];
-				$options[ $field_id ] = $this->sanitize_field_internal( $field, $submitted[ $field_id ] ?? null, true, $field_id );
-			}
-
-			if ( $this->has_validation_errors() ) {
-				return false;
-			}
-
-			return $this->persist_options( $options );
-		} finally {
-			$this->end_validation_capture();
-		}
+		return $this->save_fields_internal( PageSchema::fields( $this->definition ), $submitted );
 	}
 
 	/**
@@ -298,23 +295,9 @@ final class OptionStore {
 	public function reset_section( string $section_id ): bool {
 		$section = PageSchema::section( $this->definition, $section_id );
 
-		if ( null === $section ) {
-			return false;
-		}
-
-		$this->clear_validation_errors();
-		$options = $this->raw();
-
-		foreach ( PageSchema::section_fields( $section ) as $field ) {
-			if ( ! $this->field_is_saved( $field ) ) {
-				continue;
-			}
-
-			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field_internal( $field, $field['default'] ?? '', false );
-		}
-
-		return $this->persist_options( $options );
+		return null !== $section
+			? $this->reset_fields_internal( PageSchema::section_fields( $section ) )
+			: false;
 	}
 
 	/**
@@ -326,23 +309,7 @@ final class OptionStore {
 	public function reset_section_group( string $section_id, string $group_id ): bool {
 		$fields = $this->section_group_fields( $section_id, $group_id );
 
-		if ( empty( $fields ) ) {
-			return false;
-		}
-
-		$this->clear_validation_errors();
-		$options = $this->raw();
-
-		foreach ( $fields as $field ) {
-			if ( ! $this->field_is_saved( $field ) ) {
-				continue;
-			}
-
-			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field_internal( $field, $field['default'] ?? '', false );
-		}
-
-		return $this->persist_options( $options );
+		return ! empty( $fields ) ? $this->reset_fields_internal( $fields ) : false;
 	}
 
 	/**
@@ -371,19 +338,7 @@ final class OptionStore {
 	 * Reset every field in the page to defaults.
 	 */
 	public function reset_all_sections(): bool {
-		$this->clear_validation_errors();
-		$options = $this->raw();
-
-		foreach ( PageSchema::fields( $this->definition ) as $field ) {
-			if ( ! $this->field_is_saved( $field ) ) {
-				continue;
-			}
-
-			$field_id             = (string) $field['id'];
-			$options[ $field_id ] = $this->sanitize_field_internal( $field, $field['default'] ?? '', false );
-		}
-
-		return $this->persist_options( $options );
+		return $this->reset_fields_internal( PageSchema::fields( $this->definition ) );
 	}
 
 	/**
@@ -554,7 +509,7 @@ final class OptionStore {
 	}
 
 	private function resolve_field_path( string $field_id ): string {
-		return $this->compose_path( $this->current_field_path(), $field_id );
+		return FieldPath::join( $this->current_field_path(), $field_id );
 	}
 
 	private function current_field_path(): string {
@@ -580,19 +535,7 @@ final class OptionStore {
 			return $container_path;
 		}
 
-		return $this->compose_path( $container_path, $field_id );
-	}
-
-	private function compose_path( string $base_path, string $segment ): string {
-		if ( '' === $segment ) {
-			return $base_path;
-		}
-
-		if ( '' === $base_path ) {
-			return $segment;
-		}
-
-		return $base_path . '.' . $segment;
+		return FieldPath::join( $container_path, $field_id );
 	}
 
 	/**

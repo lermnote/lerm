@@ -125,7 +125,7 @@ final class OptionsPage {
 			? wp_unslash( $_POST[ $this->option_name() ] )
 			: array();
 
-		$success             = $this->store->save_all( $submitted );
+		$success             = $this->store->import_all( $submitted );
 		$status              = 'success';
 		$redirect_tab        = $tab;
 		$redirect_subsection = $subsection;
