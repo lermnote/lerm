@@ -211,5 +211,4 @@ trait HasBlockEditorPanel {
 		/** @psalm-suppress UndefinedThisPropertyFetch */
 		return $this->framework->asset_resolver()->version();
 	}
-
 }
