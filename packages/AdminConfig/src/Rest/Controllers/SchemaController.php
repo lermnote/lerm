@@ -124,7 +124,7 @@ final class SchemaController {
 
 		$submitted = RequestPayload::values( $request, $store->storage_key() );
 
-		if ( ! $store->save_all( $submitted ) ) {
+		if ( ! $store->import_all( $submitted ) ) {
 			if ( $store->has_validation_errors() ) {
 				$target = $this->first_validation_target( $schema, $store->validation_errors() );
 

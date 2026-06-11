@@ -83,7 +83,7 @@ final class ContainerSaveSupportTest extends TestCase {
 			'42',
 			$store,
 			$submitted,
-			static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->save_all( $payload ),
+			static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
 			'Validation failed.',
 			'Save failed.'
 		);
@@ -137,7 +137,7 @@ final class ContainerSaveSupportTest extends TestCase {
 			array(
 				'headline' => 'Updated',
 			),
-			static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->save_all( $payload ),
+			static fn ( OptionStore $resolved_store, array $payload ): bool => $resolved_store->import_all( $payload ),
 			'Validation failed.',
 			'Save failed.'
 		);

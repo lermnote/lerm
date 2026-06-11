@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Framework\FieldTypes\Support;
 
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
+use Lerm\AdminConfig\Framework\Support\FieldPath;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -46,7 +47,7 @@ final class NestedFieldSanitizer {
 				continue;
 			}
 
-			$sanitized = self::sanitize_child_fields( $fields, $item, $strict, $store, self::compose_path( $path, (string) $index ) );
+			$sanitized = self::sanitize_child_fields( $fields, $item, $strict, $store, FieldPath::join( $path, (string) $index ) );
 
 			if ( self::nested_values_empty( $sanitized ) ) {
 				continue;
@@ -76,23 +77,11 @@ final class NestedFieldSanitizer {
 				$child,
 				$submitted[ $child_id ] ?? null,
 				$strict,
-				self::compose_path( $base_path, $child_id )
+				FieldPath::join( $base_path, $child_id )
 			);
 		}
 
 		return $clean;
-	}
-
-	private static function compose_path( string $base_path, string $segment ): string {
-		if ( '' === $segment ) {
-			return $base_path;
-		}
-
-		if ( '' === $base_path ) {
-			return $segment;
-		}
-
-		return $base_path . '.' . $segment;
 	}
 
 	/**

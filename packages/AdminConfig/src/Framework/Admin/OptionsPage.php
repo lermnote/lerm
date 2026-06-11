@@ -65,6 +65,13 @@ final class OptionsPage {
 	private array $render_path_stack = array();
 
 	/**
+	 * Lazily-built field-id → {tab, subsection} map.
+	 *
+	 * @var array<string, array{tab: string, subsection: string}>|null
+	 */
+	private ?array $field_section_map_cache = null;
+
+	/**
 	 * @var array<string, bool>|null
 	 */
 	private ?array $dependency_controller_fields = null;
@@ -125,7 +132,7 @@ final class OptionsPage {
 			? wp_unslash( $_POST[ $this->option_name() ] )
 			: array();
 
-		$success             = $this->store->save_all( $submitted );
+		$success             = $this->store->import_all( $submitted );
 		$status              = 'success';
 		$redirect_tab        = $tab;
 		$redirect_subsection = $subsection;
@@ -970,34 +977,40 @@ final class OptionsPage {
 	}
 
 	/**
+	 * @return string The sanitized redirect status from the URL, or '' if absent.
+	 */
+	private function redirect_status(): string {
+		return isset( $_GET['lerm_admin_config_status'] )
+			? sanitize_key( wp_unslash( $_GET['lerm_admin_config_status'] ) )
+			: '';
+	}
+
+	/**
 	 * @param array<string, mixed>|null $flash
 	 * @return array{class: string, message: string}|null
 	 */
 	private function section_flash_notice( ?array $flash, string $section_id ): ?array {
-		if ( ! is_array( $flash ) || (string) ( $flash['tab'] ?? '' ) !== $section_id ) {
-			$status = isset( $_GET['lerm_admin_config_status'] ) ? sanitize_key( wp_unslash( $_GET['lerm_admin_config_status'] ) ) : '';
+		if ( is_array( $flash ) && (string) ( $flash['tab'] ?? '' ) === $section_id ) {
+			$message = isset( $flash['message'] ) && is_scalar( $flash['message'] ) ? (string) $flash['message'] : '';
 
-			if ( 'success' !== $status ) {
+			if ( '' === $message ) {
 				return null;
 			}
 
+			return array(
+				'class'   => 'validation_error' === $this->redirect_status() ? 'notice-error' : 'notice-warning',
+				'message' => $message,
+			);
+		}
+
+		if ( 'success' === $this->redirect_status() ) {
 			return array(
 				'class'   => 'notice-success',
 				'message' => __( 'Settings saved.', 'lerm-admin-config' ),
 			);
 		}
 
-		$message = isset( $flash['message'] ) && is_scalar( $flash['message'] ) ? (string) $flash['message'] : '';
-		$status  = isset( $_GET['lerm_admin_config_status'] ) ? sanitize_key( wp_unslash( $_GET['lerm_admin_config_status'] ) ) : 'error';
-
-		if ( '' === $message ) {
-			return null;
-		}
-
-		return array(
-			'class'   => 'validation_error' === $status ? 'notice-error' : 'notice-warning',
-			'message' => $message,
-		);
+		return null;
 	}
 
 	/**
@@ -1049,6 +1062,54 @@ final class OptionsPage {
 	}
 
 	/**
+	 * Lazily-built field-id → {tab, subsection} map.
+	 *
+	 * @return array<string, array{tab: string, subsection: string}>
+	 */
+	private function field_section_map(): array {
+		if ( null !== $this->field_section_map_cache ) {
+			return $this->field_section_map_cache;
+		}
+
+		$map = array();
+
+		foreach ( PageSchema::sections( $this->definition ) as $section_id => $section ) {
+			$groups       = PageSchema::section_groups( $section );
+			$use_subsects = $this->section_uses_subsections( $section, $groups );
+
+			foreach ( PageSchema::section_fields( $section ) as $field ) {
+				$field_id = (string) ( $field['id'] ?? '' );
+
+				if ( '' === $field_id ) {
+					continue;
+				}
+
+				$subsection = '';
+
+				if ( $use_subsects ) {
+					foreach ( $groups as $group ) {
+						foreach ( (array) ( $group['fields'] ?? array() ) as $gf ) {
+							if ( (string) ( $gf['id'] ?? '' ) === $field_id ) {
+								$subsection = sanitize_key( (string) ( $group['id'] ?? '' ) );
+								break 2;
+							}
+						}
+					}
+				}
+
+				$map[ $field_id ] = array(
+					'tab'        => (string) $section_id,
+					'subsection' => $subsection,
+				);
+			}
+		}
+
+		$this->field_section_map_cache = $map;
+
+		return $this->field_section_map_cache;
+	}
+
+	/**
 	 * Resolve the owning tab/subsection for a dotted field path.
 	 *
 	 * @return array{tab: string, subsection: string}
@@ -1056,51 +1117,7 @@ final class OptionsPage {
 	private function field_target( string $field_path ): array {
 		$field_id = sanitize_key( (string) strtok( $field_path, '.' ) );
 
-		if ( '' === $field_id ) {
-			return array(
-				'tab'        => '',
-				'subsection' => '',
-			);
-		}
-
-		foreach ( PageSchema::sections( $this->definition ) as $section_id => $section ) {
-			$section_fields  = PageSchema::section_fields( $section );
-			$section_groups  = PageSchema::section_groups( $section );
-			$use_subsections = $this->section_uses_subsections( $section, $section_groups );
-
-			foreach ( $section_fields as $field ) {
-				if ( ! is_array( $field ) || (string) ( $field['id'] ?? '' ) !== $field_id ) {
-					continue;
-				}
-
-				if ( ! $use_subsections ) {
-					return array(
-						'tab'        => (string) $section_id,
-						'subsection' => '',
-					);
-				}
-
-				foreach ( $section_groups as $group ) {
-					foreach ( (array) ( $group['fields'] ?? array() ) as $group_field ) {
-						if ( ! is_array( $group_field ) || (string) ( $group_field['id'] ?? '' ) !== $field_id ) {
-							continue;
-						}
-
-						return array(
-							'tab'        => (string) $section_id,
-							'subsection' => sanitize_key( (string) ( $group['id'] ?? '' ) ),
-						);
-					}
-				}
-
-				return array(
-					'tab'        => (string) $section_id,
-					'subsection' => '',
-				);
-			}
-		}
-
-		return array(
+		return $this->field_section_map()[ $field_id ] ?? array(
 			'tab'        => '',
 			'subsection' => '',
 		);

@@ -57,7 +57,7 @@ final class NestedFieldSanitizersTest extends TestCase {
 		);
 
 		$this->assertFalse(
-			$store->save_all(
+			$store->import_all(
 				array(
 					'layout' => array(
 						'headline' => '',
@@ -159,7 +159,7 @@ final class NestedFieldSanitizersTest extends TestCase {
 		);
 
 		$this->assertFalse(
-			$store->save_all(
+			$store->import_all(
 				array(
 					'launch_accordion' => array(
 						'cta' => array(

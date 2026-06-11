@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Lerm\AdminConfig\Framework\Admin;
 
 use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\Support\FieldPath;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -86,7 +87,7 @@ final class ContainerFieldRenderer {
 
 		foreach ( $items as $index => $item ) {
 			$item_id      = (string) $item['id'];
-			$item_path    = $this->compose_render_path( $field_path, $item_id );
+			$item_path    = FieldPath::join( $field_path, $item_id );
 			$item_title   = (string) $item['title'];
 			$item_desc    = (string) ( $item['description'] ?? '' );
 			$item_fields  = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
@@ -139,7 +140,7 @@ final class ContainerFieldRenderer {
 
 		foreach ( $items as $item ) {
 			$item_id   = (string) ( $item['id'] ?? '' );
-			$item_path = $this->compose_render_path( $field_path, $item_id );
+			$item_path = FieldPath::join( $field_path, $item_id );
 
 			if ( '' !== $item_id && $this->field_has_errors( $this->field_errors, $item_path, true ) ) {
 				$active_tab = $item_id;
@@ -152,7 +153,7 @@ final class ContainerFieldRenderer {
 
 		foreach ( $items as $index => $item ) {
 			$item_id      = (string) $item['id'];
-			$item_path    = $this->compose_render_path( $field_path, $item_id );
+			$item_path    = FieldPath::join( $field_path, $item_id );
 			$item_invalid = $this->field_has_errors( $this->field_errors, $item_path, true );
 			$is_active    = $item_id === $active_tab || ( '' === $active_tab && 0 === $index );
 			$panel_id     = $field_id . '__' . $item_id;
@@ -167,7 +168,7 @@ final class ContainerFieldRenderer {
 
 		foreach ( $items as $index => $item ) {
 			$item_id      = (string) $item['id'];
-			$item_path    = $this->compose_render_path( $field_path, $item_id );
+			$item_path    = FieldPath::join( $field_path, $item_id );
 			$item_desc    = (string) ( $item['description'] ?? '' );
 			$item_fields  = is_array( $item['fields'] ?? null ) ? $item['fields'] : array();
 			$item_values  = is_array( $values[ $item_id ] ?? null ) ? $values[ $item_id ] : array();
@@ -215,11 +216,11 @@ final class ContainerFieldRenderer {
 		echo '<div class="lerm-group-list" data-lerm-group-list>';
 
 		foreach ( $items as $index => $item ) {
-			echo $this->group_item_markup( $field, $field_name, is_array( $item ) ? $item : array(), (string) $index, $field_path, $this->compose_render_path( $field_path, '__INDEX__' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo $this->group_item_markup( $field, $field_name, is_array( $item ) ? $item : array(), (string) $index, $field_path, FieldPath::join( $field_path, '__INDEX__' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
 		echo '</div>';
-		echo '<script type="text/html" class="lerm-group-template">' . $this->group_item_markup( $field, $field_name, array(), '__INDEX__', $field_path, $this->compose_render_path( $field_path, '__INDEX__' ) ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<script type="text/html" class="lerm-group-template">' . $this->group_item_markup( $field, $field_name, array(), '__INDEX__', $field_path, FieldPath::join( $field_path, '__INDEX__' ) ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</div>';
 	}
 
@@ -231,7 +232,7 @@ final class ContainerFieldRenderer {
 	 */
 	private function group_item_markup( array $field, string $field_name, array $item, string $index, string $field_path = '', string $path_template = '' ): string {
 		$fields          = is_array( $field['fields'] ?? null ) ? $field['fields'] : array();
-		$item_path       = $this->compose_render_path( $field_path, $index );
+		$item_path       = FieldPath::join( $field_path, $index );
 		$item_has_errors = $this->field_has_errors( $this->field_errors, $item_path, true );
 
 		ob_start();
@@ -255,7 +256,7 @@ final class ContainerFieldRenderer {
 					$field_name . '[' . $index . ']',
 					(string) $field['id'] . '__' . $index,
 					$item_path,
-					$this->compose_render_path( $path_template, '' ),
+					FieldPath::join( $path_template, '' ),
 					'lerm-group-item__field'
 				);
 				?>
@@ -313,7 +314,7 @@ final class ContainerFieldRenderer {
 			$child_id    = (string) $child['id'];
 			$child_name  = $field_name . '[' . $child_id . ']';
 			$child_value = $values[ $child_id ] ?? ( $child['default'] ?? '' );
-			$child_path  = $this->compose_render_path( $base_path, $child_id );
+			$child_path  = FieldPath::join( $base_path, $child_id );
 			$error       = $this->field_error_message( $this->field_errors, $child_path );
 			$has_errors  = $this->field_has_errors( $this->field_errors, $child_path, true );
 			$classes     = trim( $item_class . ( $has_errors ? ' is-invalid' : '' ) );
@@ -321,7 +322,7 @@ final class ContainerFieldRenderer {
 			echo '<div class="' . esc_attr( $classes ) . '" data-subfield-id="' . esc_attr( $child_id ) . '" data-field-type="' . esc_attr( sanitize_key( (string) ( $child['type'] ?? 'text' ) ) ) . '" data-field-path="' . esc_attr( $child_path ) . '"';
 
 			if ( '' !== $base_path_template ) {
-				echo ' data-field-path-template="' . esc_attr( $this->compose_render_path( $base_path_template, $child_id ) ) . '"';
+				echo ' data-field-path-template="' . esc_attr( FieldPath::join( $base_path_template, $child_id ) ) . '"';
 			}
 
 			echo '>';
@@ -349,20 +350,9 @@ final class ContainerFieldRenderer {
 			return $field_id;
 		}
 
-		return $this->compose_render_path( $this->current_path, $field_id );
+		return FieldPath::join( $this->current_path, $field_id );
 	}
 
-	private function compose_render_path( string $base_path, string $segment ): string {
-		if ( '' === $segment ) {
-			return $base_path;
-		}
-
-		if ( '' === $base_path ) {
-			return $segment;
-		}
-
-		return $base_path . '.' . $segment;
-	}
 
 	/**
 	 * @param array<string, mixed> $field
