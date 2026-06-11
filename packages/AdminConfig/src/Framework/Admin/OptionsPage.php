@@ -1104,7 +1104,9 @@ final class OptionsPage {
 			}
 		}
 
-		return $this->field_section_map_cache = $map;
+		$this->field_section_map_cache = $map;
+
+		return $this->field_section_map_cache;
 	}
 
 	/**
