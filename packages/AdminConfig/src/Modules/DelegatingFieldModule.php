@@ -30,8 +30,8 @@ class DelegatingFieldModule implements FieldModule {
 	 * @param bool   $enabled_by_default Whether the module is active without explicit opt-in.
 	 */
 	public function __construct( string $id, string $definitions_class, bool $enabled_by_default = false ) {
-		$this->id                = $id;
-		$this->definitions_class = $definitions_class;
+		$this->id                 = $id;
+		$this->definitions_class  = $definitions_class;
 		$this->enabled_by_default = $enabled_by_default;
 	}
 
