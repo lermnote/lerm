@@ -9,28 +9,15 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Modules;
 
-use Lerm\AdminConfig\Contracts\FieldModule;
 use Lerm\AdminConfig\Framework\FieldTypes\BuiltinFieldTypes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class CoreFieldsModule implements FieldModule {
+final class CoreFieldsModule extends DelegatingFieldModule {
 
-	public function id(): string {
-		return 'core';
-	}
-
-	public function field_types(): array {
-		return array_keys( $this->definitions() );
-	}
-
-	public function definitions(): array {
-		return BuiltinFieldTypes::definitions();
-	}
-
-	public function enabled_by_default(): bool {
-		return true;
+	public function __construct() {
+		parent::__construct( 'core', BuiltinFieldTypes::class, true );
 	}
 }

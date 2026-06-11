@@ -211,7 +211,7 @@ final class OptionsPageDependencyTest extends TestCase {
 		ob_start();
 
 		try {
-			$page->render_field( $field, $values, 'general' );
+			$page->render_field( $field, $values );
 
 			return (string) ob_get_clean();
 		} catch ( \Throwable $throwable ) {

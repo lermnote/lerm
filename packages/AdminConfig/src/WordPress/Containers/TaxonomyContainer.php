@@ -263,23 +263,7 @@ final class TaxonomyContainer implements Container {
 	private function taxonomies_for_schema( CompiledSchema $schema ): array {
 		$container  = $schema->container();
 		$taxonomies = $container['taxonomy'] ?? $container['taxonomies'] ?? array();
-		$normalized = array();
-
-		foreach ( is_array( $taxonomies ) ? $taxonomies : array( $taxonomies ) as $taxonomy ) {
-			if ( ! is_scalar( $taxonomy ) ) {
-				continue;
-			}
-
-			$value = sanitize_key( (string) $taxonomy );
-
-			if ( '' === $value ) {
-				continue;
-			}
-
-			$normalized[] = $value;
-		}
-
-		return array_values( array_unique( $normalized ) );
+		return ContainerSaveSupport::normalize_string_list( $taxonomies );
 	}
 
 	private function capability_for_schema( CompiledSchema $schema, string $taxonomy ): string {

@@ -9,28 +9,15 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Modules;
 
-use Lerm\AdminConfig\Contracts\FieldModule;
 use Lerm\AdminConfig\Framework\FieldTypes\ToolFieldTypes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class ToolsFieldsModule implements FieldModule {
+final class ToolsFieldsModule extends DelegatingFieldModule {
 
-	public function id(): string {
-		return 'tools';
-	}
-
-	public function field_types(): array {
-		return array_keys( $this->definitions() );
-	}
-
-	public function definitions(): array {
-		return ToolFieldTypes::definitions();
-	}
-
-	public function enabled_by_default(): bool {
-		return false;
+	public function __construct() {
+		parent::__construct( 'tools', ToolFieldTypes::class );
 	}
 }

@@ -18,12 +18,15 @@ use Lerm\AdminConfig\Framework\Support\PackageAssets;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Framework\Support\ScriptAssetMetadata;
 use Lerm\AdminConfig\Registry\FieldModuleRegistry;
+use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 final class OptionsPage {
+
+	use FieldErrorMatcher;
 
 	/**
 	 * Page definition.
@@ -133,7 +136,10 @@ final class OptionsPage {
 			$status              = 'validation_error';
 			$redirect_tab        = $error_target['tab'];
 			$redirect_subsection = $error_target['subsection'];
-			$this->store_flash(
+			ValidationFlash::store(
+				'options_page',
+				$this->schema_id(),
+				$this->flash_resource_key(),
 				array(
 					'tab'        => $redirect_tab,
 					'subsection' => $redirect_subsection,
@@ -145,7 +151,10 @@ final class OptionsPage {
 			);
 		} elseif ( ! $success ) {
 			$status = 'error';
-			$this->store_flash(
+			ValidationFlash::store(
+				'options_page',
+				$this->schema_id(),
+				$this->flash_resource_key(),
 				array(
 					'tab'        => $redirect_tab,
 					'subsection' => $redirect_subsection,
@@ -156,7 +165,7 @@ final class OptionsPage {
 				)
 			);
 		} else {
-			$this->clear_flash();
+			ValidationFlash::clear( 'options_page', $this->schema_id(), $this->flash_resource_key() );
 		}
 
 		$redirect_url = add_query_arg(
@@ -246,7 +255,7 @@ final class OptionsPage {
 		$sections    = PageSchema::sections( $this->definition );
 		$current_tab = $this->current_tab();
 		$values      = $this->store->all();
-		$flash       = $this->consume_flash();
+		$flash       = ValidationFlash::consume( 'options_page', $this->schema_id(), $this->flash_resource_key() );
 		?>
 		<div class="wrap lerm-settings-wrap">
 			<div class="lerm-settings-shell">
@@ -835,16 +844,6 @@ final class OptionsPage {
 		}
 	}
 
-	private function render_field_notes( string $description, string $field_error ): void {
-		if ( $description ) {
-			printf( '<p class="description">%s</p>', esc_html( $description ) );
-		}
-
-		if ( '' !== $field_error ) {
-			printf( '<p class="lerm-field-error" data-lerm-field-error-message>%s</p>', esc_html( $field_error ) );
-		}
-	}
-
 	public function container_field_renderer(): ContainerFieldRenderer {
 		return new ContainerFieldRenderer(
 			$this->field_types,
@@ -1027,52 +1026,6 @@ final class OptionsPage {
 	}
 
 	/**
-	 * @param array<string, mixed> $field_errors
-	 */
-	private function field_error_message( array $field_errors, string $field_id ): string {
-		return implode( ' ', $this->field_error_messages( $field_errors, $field_id ) );
-	}
-
-	/**
-	 * @param array<string, mixed> $field_errors
-	 * @return array<int, string>
-	 */
-	private function field_error_messages( array $field_errors, string $field_path, bool $include_descendants = false ): array {
-		$messages = array();
-
-		foreach ( $field_errors as $path => $raw_messages ) {
-			$is_match = (string) $path === $field_path;
-
-			if ( ! $is_match && $include_descendants ) {
-				$is_match = '' !== $field_path && str_starts_with( (string) $path, $field_path . '.' );
-			}
-
-			if ( ! $is_match ) {
-				continue;
-			}
-
-			foreach ( is_array( $raw_messages ) ? $raw_messages : array( $raw_messages ) as $message ) {
-				$message = is_scalar( $message ) ? trim( (string) $message ) : '';
-
-				if ( '' === $message || in_array( $message, $messages, true ) ) {
-					continue;
-				}
-
-				$messages[] = $message;
-			}
-		}
-
-		return $messages;
-	}
-
-	/**
-	 * @param array<string, mixed> $field_errors
-	 */
-	private function field_has_errors( array $field_errors, string $field_path, bool $include_descendants = false ): bool {
-		return ! empty( $this->field_error_messages( $field_errors, $field_path, $include_descendants ) );
-	}
-
-	/**
 	 * Resolve the first tab/subsection that contains a validation error.
 	 *
 	 * @param array<string, array<int, string>> $errors
@@ -1153,34 +1106,8 @@ final class OptionsPage {
 		);
 	}
 
-	/**
-	 * @param array<string, mixed> $payload
-	 */
-	private function store_flash( array $payload ): void {
-		set_transient( $this->flash_key(), $payload, MINUTE_IN_SECONDS );
-	}
-
-	/**
-	 * @return array<string, mixed>|null
-	 */
-	private function consume_flash(): ?array {
-		$flash = get_transient( $this->flash_key() );
-
-		if ( ! is_array( $flash ) ) {
-			return null;
-		}
-
-		delete_transient( $this->flash_key() );
-
-		return $flash;
-	}
-
-	private function clear_flash(): void {
-		delete_transient( $this->flash_key() );
-	}
-
-	private function flash_key(): string {
-		return 'lerm_admin_config_flash_' . md5( $this->page_slug() . ':' . (string) get_current_user_id() );
+	private function flash_resource_key(): string {
+		return $this->page_slug();
 	}
 
 	private function current_render_path(): string {

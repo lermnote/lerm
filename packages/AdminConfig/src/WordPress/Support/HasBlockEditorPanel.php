@@ -19,6 +19,7 @@ namespace Lerm\AdminConfig\WordPress\Support;
 use Lerm\AdminConfig\Framework\Contracts\AssetPathResolver;
 use Lerm\AdminConfig\Framework\Support\PackageAssets;
 use Lerm\AdminConfig\Framework\Support\ScriptAssetMetadata;
+use Lerm\AdminConfig\WordPress\Support\ContainerSaveSupport;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -144,7 +145,7 @@ trait HasBlockEditorPanel {
 		foreach ( $this->schemas as $schema ) {
 			$container = $schema->container();
 
-			if ( ! in_array( $post_type, $this->normalize_post_types( $container['post_types'] ?? array() ), true ) ) {
+			if ( ! in_array( $post_type, ContainerSaveSupport::normalize_string_list( $container['post_types'] ?? array() ), true ) ) {
 				continue;
 			}
 
@@ -209,29 +210,5 @@ trait HasBlockEditorPanel {
 	private function panel_asset_version(): string {
 		/** @psalm-suppress UndefinedThisPropertyFetch */
 		return $this->framework->asset_resolver()->version();
-	}
-
-	/**
-	 * @param mixed $post_types
-	 * @return array<int, string>
-	 */
-	private function normalize_post_types( $post_types ): array {
-		$normalized = array();
-
-		foreach ( is_array( $post_types ) ? $post_types : array( $post_types ) as $post_type ) {
-			if ( ! is_scalar( $post_type ) ) {
-				continue;
-			}
-
-			$value = sanitize_key( (string) $post_type );
-
-			if ( '' === $value ) {
-				continue;
-			}
-
-			$normalized[] = $value;
-		}
-
-		return array_values( array_unique( $normalized ) );
 	}
 }

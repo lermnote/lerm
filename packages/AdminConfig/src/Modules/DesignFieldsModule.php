@@ -9,28 +9,15 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Modules;
 
-use Lerm\AdminConfig\Contracts\FieldModule;
 use Lerm\AdminConfig\Framework\FieldTypes\DesignFieldTypes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class DesignFieldsModule implements FieldModule {
+final class DesignFieldsModule extends DelegatingFieldModule {
 
-	public function id(): string {
-		return 'design';
-	}
-
-	public function field_types(): array {
-		return array_keys( $this->definitions() );
-	}
-
-	public function definitions(): array {
-		return DesignFieldTypes::definitions();
-	}
-
-	public function enabled_by_default(): bool {
-		return false;
+	public function __construct() {
+		parent::__construct( 'design', DesignFieldTypes::class );
 	}
 }
