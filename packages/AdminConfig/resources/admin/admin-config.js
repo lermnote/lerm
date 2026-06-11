@@ -8,7 +8,7 @@
 const { resolveAdminConfig } = require('../core/config');
 const { createFormStateHelpers } = require('./form-state');
 const { createAdminConfigTransport } = require('./transport');
-const { dependencyMatches: coreDependencyMatches, dependencyScalar, dependencyScalarList } = require('../core/dependencies');
+const { dependencyMatches: coreDependencyMatches } = require('../core/dependencies');
 const { __ } = require('../i18n');
 
 // ─── Confirm Dialog (wp.components.Modal bridge for vanilla JS) ──────
@@ -353,7 +353,7 @@ let confirmDialog;
 				const shouldHide = (
 					!controllerRow
 					|| controllerRow.hidden
-					|| !dependencyMatches(getControllerValue(form, dependencyField), dependencyOperator, dependencyValue)
+					|| !coreDependencyMatches(getControllerValue(form, dependencyField), dependencyOperator, dependencyValue)
 				);
 
 				if (row.hidden !== shouldHide) {

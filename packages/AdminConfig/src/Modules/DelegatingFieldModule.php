@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class DelegatingFieldModule implements FieldModule {
+class DelegatingFieldModule implements FieldModule {
 
 	private string $id;
 	private string $definitions_class;

@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class MetaBackend implements StorageBackend {
+class MetaBackend implements StorageBackend {
 
 	/**
 	 * Map of meta type prefixes to their WordPress function triples.
