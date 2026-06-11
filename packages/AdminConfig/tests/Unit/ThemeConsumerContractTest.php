@@ -67,7 +67,7 @@ final class ThemeConsumerContractTest extends TestCase {
 		);
 
 		self::assertTrue(
-			$store->save_all(
+			$store->import_all(
 				array(
 					'avatar_id' => '15',
 					'gender'    => 'female',

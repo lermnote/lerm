@@ -34,7 +34,7 @@ final class MultisiteSchemaIntegrationTest extends WpIntegrationTestCase {
 		$store = $runtime->store( 'acme-demo-network-settings' );
 
 		self::assertTrue(
-			$store->save_all(
+			$store->import_all(
 				array(
 					'shared_presets'    => 1,
 					'template_endpoint' => 'https://example.com/network-library.json',

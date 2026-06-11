@@ -24,8 +24,8 @@ final class StoreBackendsIntegrationTest extends WpIntegrationTestCase {
 		$option_store = $runtime->store( 'integration-option' );
 		$site_store   = $runtime->store( 'integration-site-option' );
 
-		self::assertTrue( $option_store->save_all( array( 'note' => 'Site option test' ) ) );
-		self::assertTrue( $site_store->save_all( array( 'note' => 'Network option test' ) ) );
+		self::assertTrue( $option_store->import_all( array( 'note' => 'Site option test' ) ) );
+		self::assertTrue( $site_store->import_all( array( 'note' => 'Network option test' ) ) );
 		self::assertSame( 'Site option test', (string) get_option( 'lerm_integration_option', array() )['note'] );
 		self::assertSame( 'Network option test', (string) get_site_option( 'lerm_integration_site_option', array() )['note'] );
 	}
@@ -75,10 +75,10 @@ final class StoreBackendsIntegrationTest extends WpIntegrationTestCase {
 		$runtime->register( self::make_store_schema( 'integration-user-meta', 'user_meta', 'lerm_integration_user_meta' ) );
 		$runtime->register( self::make_store_schema( 'integration-comment-meta', 'comment_meta', 'lerm_integration_comment_meta' ) );
 
-		self::assertTrue( $runtime->store( 'integration-post-meta', array( 'post_id' => $post_id ) )->save_all( array( 'note' => 'Post meta test' ) ) );
-		self::assertTrue( $runtime->store( 'integration-term-meta', array( 'term_id' => $term_id ) )->save_all( array( 'note' => 'Term meta test' ) ) );
-		self::assertTrue( $runtime->store( 'integration-user-meta', array( 'user_id' => $user_id ) )->save_all( array( 'note' => 'User meta test' ) ) );
-		self::assertTrue( $runtime->store( 'integration-comment-meta', array( 'comment_id' => $comment_id ) )->save_all( array( 'note' => 'Comment meta test' ) ) );
+		self::assertTrue( $runtime->store( 'integration-post-meta', array( 'post_id' => $post_id ) )->import_all( array( 'note' => 'Post meta test' ) ) );
+		self::assertTrue( $runtime->store( 'integration-term-meta', array( 'term_id' => $term_id ) )->import_all( array( 'note' => 'Term meta test' ) ) );
+		self::assertTrue( $runtime->store( 'integration-user-meta', array( 'user_id' => $user_id ) )->import_all( array( 'note' => 'User meta test' ) ) );
+		self::assertTrue( $runtime->store( 'integration-comment-meta', array( 'comment_id' => $comment_id ) )->import_all( array( 'note' => 'Comment meta test' ) ) );
 
 		self::assertSame( 'Post meta test', (string) get_post_meta( $post_id, 'lerm_integration_post_meta', true )['note'] );
 		self::assertSame( 'Term meta test', (string) get_term_meta( $term_id, 'lerm_integration_term_meta', true )['note'] );
