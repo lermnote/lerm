@@ -9,9 +9,7 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Framework\Admin;
 
-use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
 use Lerm\AdminConfig\Framework\Support\FieldPath;
-use Lerm\AdminConfig\Framework\Support\PageSchema;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -21,8 +19,10 @@ final class ContainerFieldRenderer {
 
 	use FieldErrorMatcher;
 
-	private FieldTypeRegistry $field_types;
-	private OptionsPage $page;
+	/**
+	 * @var callable
+	 */
+	private $nested_render;
 
 	/**
 	 * @var array<string, mixed>
@@ -31,13 +31,13 @@ final class ContainerFieldRenderer {
 	private string $current_path;
 
 	/**
-	 * @param array<string, mixed> $field_errors
+	 * @param callable              $nested_render Callback to render a nested sub-field.
+	 * @param array<string, mixed>  $field_errors
 	 */
-	public function __construct( FieldTypeRegistry $field_types, OptionsPage $page, array $field_errors = array(), string $current_path = '' ) {
-		$this->field_types  = $field_types;
-		$this->page         = $page;
-		$this->field_errors = $field_errors;
-		$this->current_path = $current_path;
+	public function __construct( callable $nested_render, array $field_errors = array(), string $current_path = '' ) {
+		$this->nested_render = $nested_render;
+		$this->field_errors  = $field_errors;
+		$this->current_path  = $current_path;
 	}
 
 	/**
@@ -274,26 +274,7 @@ final class ContainerFieldRenderer {
 	 * @param mixed                $value Field value.
 	 */
 	private function render_nested_field( array $field, $value, string $field_name, string $input_id, string $name_template = '', string $id_template = '' ): void {
-		$field_type    = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
-		$name_attr     = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
-		$id_attr       = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
-		$custom_render = $this->field_types->nested_render_callback( $field_type );
-
-		if ( is_callable( $custom_render ) ) {
-			call_user_func( $custom_render, $field, $value, $field_name, $input_id, $this->page, $name_template, $id_template );
-			return;
-		}
-
-		printf(
-			'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" placeholder="%5$s"%6$s%7$s>',
-			esc_attr( (string) ( $field['input_type'] ?? 'text' ) ),
-			esc_attr( $input_id ),
-			esc_attr( $field_name ),
-			esc_attr( PageSchema::scalar_value( $value ) ),
-			esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
-			$name_attr,
-			$id_attr
-		);
+		( $this->nested_render )( $field, $value, $field_name, $input_id, $name_template, $id_template );
 	}
 
 	/**
