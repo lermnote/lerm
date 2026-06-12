@@ -518,7 +518,7 @@ final class OptionStore {
 	 */
 	public function field_container_path( array $field, string $base_path = '' ): string {
 		$resolved_path = '' !== $base_path ? $base_path : $this->current_field_path();
-		$field_id       = isset( $field['id'] ) && is_scalar( $field['id'] ) ? (string) $field['id'] : '';
+		$field_id      = isset( $field['id'] ) && is_scalar( $field['id'] ) ? (string) $field['id'] : '';
 
 		if ( '' === $resolved_path ) {
 			return $field_id;
