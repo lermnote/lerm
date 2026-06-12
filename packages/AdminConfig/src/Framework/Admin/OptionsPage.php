@@ -853,10 +853,48 @@ final class OptionsPage {
 
 	public function container_field_renderer(): ContainerFieldRenderer {
 		return new ContainerFieldRenderer(
-			$this->field_types,
-			$this,
+			function ( array $field, $value, string $field_name, string $input_id, string $name_template = '', string $id_template = '' ): void {
+				$this->nested_render_proxy( $field, $value, $field_name, $input_id, $name_template, $id_template );
+			},
 			$this->render_field_errors,
 			$this->current_render_path()
+		);
+	}
+
+	/**
+	 * Proxy for rendering a nested sub-field inside a structured container.
+	 *
+	 * Contains the FieldTypeRegistry lookup and fallback rendering logic that
+	 * was previously in ContainerFieldRenderer::render_nested_field().
+	 *
+	 * @param array<string, mixed> $field        Field definition.
+	 * @param mixed                $value        Field value.
+	 * @param string               $field_name   Form field name attribute.
+	 * @param string               $input_id     DOM id attribute.
+	 * @param string               $name_template Template for the name attribute in repeaters.
+	 * @param string               $id_template   Template for the id attribute in repeaters.
+	 */
+	public function nested_render_proxy( array $field, $value, string $field_name, string $input_id, string $name_template = '', string $id_template = '' ): void {
+		$field_type    = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+		$custom_render = $this->field_types->nested_render_callback( $field_type );
+
+		if ( is_callable( $custom_render ) ) {
+			call_user_func( $custom_render, $field, $value, $field_name, $input_id, $this, $name_template, $id_template );
+			return;
+		}
+
+		$name_attr = '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
+		$id_attr   = '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
+
+		printf(
+			'<input type="%1$s" id="%2$s" name="%3$s" value="%4$s" class="regular-text" placeholder="%5$s"%6$s%7$s>',
+			esc_attr( (string) ( $field['input_type'] ?? 'text' ) ),
+			esc_attr( $input_id ),
+			esc_attr( $field_name ),
+			esc_attr( PageSchema::scalar_value( $value ) ),
+			esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
+			$name_attr,
+			$id_attr
 		);
 	}
 
