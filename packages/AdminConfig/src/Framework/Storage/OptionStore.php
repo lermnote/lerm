@@ -400,13 +400,6 @@ final class OptionStore {
 	}
 
 	/**
-	 * @param array<string, mixed> $field
-	 */
-	public function field_container_path( array $field, string $base_path = '' ): string {
-		return $this->container_path( $field, $base_path );
-	}
-
-	/**
 	 * Run an optional field-level validator after sanitization.
 	 *
 	 * Validators should return the validated value. Returning WP_Error records
@@ -523,19 +516,19 @@ final class OptionStore {
 	/**
 	 * @param array<string, mixed> $field
 	 */
-	private function container_path( array $field, string $base_path = '' ): string {
-		$container_path = '' !== $base_path ? $base_path : $this->current_field_path();
+	public function field_container_path( array $field, string $base_path = '' ): string {
+		$resolved_path = '' !== $base_path ? $base_path : $this->current_field_path();
 		$field_id       = isset( $field['id'] ) && is_scalar( $field['id'] ) ? (string) $field['id'] : '';
 
-		if ( '' === $container_path ) {
+		if ( '' === $resolved_path ) {
 			return $field_id;
 		}
 
-		if ( '' === $field_id || $container_path === $field_id || str_ends_with( $container_path, '.' . $field_id ) ) {
-			return $container_path;
+		if ( '' === $field_id || $resolved_path === $field_id || str_ends_with( $resolved_path, '.' . $field_id ) ) {
+			return $resolved_path;
 		}
 
-		return FieldPath::join( $container_path, $field_id );
+		return FieldPath::join( $resolved_path, $field_id );
 	}
 
 	/**
