@@ -2,12 +2,17 @@
 /**
  * Shared field error matching logic for admin page and container renderers.
  *
+ * Delegates core lookup to {@see FieldErrorLookup} while keeping the
+ * convenience wrappers that keep call sites clean.
+ *
  * @package Lerm\AdminConfig
  */
 
 declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\Framework\Admin;
+
+use Lerm\AdminConfig\Framework\Support\FieldErrorLookup;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -22,7 +27,7 @@ trait FieldErrorMatcher {
 	 * @param string               $field_path   Dotted field path.
 	 */
 	private function field_error_message( array $field_errors, string $field_path ): string {
-		return implode( ' ', $this->field_error_messages( $field_errors, $field_path ) );
+		return implode( ' ', FieldErrorLookup::messages( $field_errors, $field_path ) );
 	}
 
 	/**
@@ -34,31 +39,7 @@ trait FieldErrorMatcher {
 	 * @return array<int, string>
 	 */
 	private function field_error_messages( array $field_errors, string $field_path, bool $include_descendants = false ): array {
-		$messages = array();
-
-		foreach ( $field_errors as $path => $raw_messages ) {
-			$is_match = (string) $path === $field_path;
-
-			if ( ! $is_match && $include_descendants ) {
-				$is_match = '' !== $field_path && str_starts_with( (string) $path, $field_path . '.' );
-			}
-
-			if ( ! $is_match ) {
-				continue;
-			}
-
-			foreach ( is_array( $raw_messages ) ? $raw_messages : array( $raw_messages ) as $message ) {
-				$message = is_scalar( $message ) ? trim( (string) $message ) : '';
-
-				if ( '' === $message || in_array( $message, $messages, true ) ) {
-					continue;
-				}
-
-				$messages[] = $message;
-			}
-		}
-
-		return $messages;
+		return FieldErrorLookup::messages( $field_errors, $field_path, $include_descendants );
 	}
 
 	/**
@@ -69,7 +50,7 @@ trait FieldErrorMatcher {
 	 * @param bool                 $include_descendants Whether to include child-path errors.
 	 */
 	private function field_has_errors( array $field_errors, string $field_path, bool $include_descendants = false ): bool {
-		return ! empty( $this->field_error_messages( $field_errors, $field_path, $include_descendants ) );
+		return FieldErrorLookup::has_errors( $field_errors, $field_path, $include_descendants );
 	}
 
 	/**
