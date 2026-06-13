@@ -14,17 +14,16 @@ const { __ } = require('../i18n');
 // ─── Confirm Dialog (wp.components.Modal bridge for vanilla JS) ──────
 let confirmDialog;
 (function buildConfirmDialog() {
-	let element, components;
+	let createElement, render, Button, Modal;
 	try {
-		element = require('@wordpress/element');
-		components = require('@wordpress/components');
+		const element = require('@wordpress/element');
+		const components = require('@wordpress/components');
+		({ createElement, render } = element);
+		({ Button, Modal } = components);
 	} catch (_e) {
 		confirmDialog = (message) => Promise.resolve(window.confirm(message));
 		return;
 	}
-
-	const { createElement, render } = element;
-	const { Button, Modal } = components;
 
 	/**
 	 * Show a confirmation dialog using wp.components.Modal.

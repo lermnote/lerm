@@ -243,7 +243,7 @@ async function submitClassicForm( page, submitSelector = '#submit' ) {
 		.then( () => true )
 		.catch( () => false );
 
-	await submitButton.click();
+	await submitButton.click( { force: true } );
 
 	const didNavigate = await navigation;
 
