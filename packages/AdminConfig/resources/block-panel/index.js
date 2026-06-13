@@ -166,7 +166,7 @@ const createBlockPanelRuntime = (config = {}, options = {}) => {
 
 		discardChanges() {
 			state = withValues(state, state.savedValues);
-			state = withStatus(state, 'ready', 'Unsaved changes discarded.');
+			state = withStatus(state, 'ready', __('Unsaved changes discarded.', 'lerm-admin-config'));
 
 			return state;
 		},
@@ -476,6 +476,13 @@ const createPanelComponent = (config, Panel, element) => {
 			};
 		}, [ runtime ]);
 
+		const statusLabels = {
+			error: __('Error', 'lerm-admin-config'),
+			idle: __('Idle', 'lerm-admin-config'),
+			loading: __('Loading…', 'lerm-admin-config'),
+			ready: __('Ready', 'lerm-admin-config'),
+			saving: __('Saving…', 'lerm-admin-config'),
+		};
 		const status = String(state.status || 'idle');
 		const message = String(state.message || '');
 		const errorCount = Object.keys(state.errors || {}).length;
@@ -489,7 +496,7 @@ const createPanelComponent = (config, Panel, element) => {
 					className: 'lerm-admin-config-block-panel__status',
 					key: 'status',
 				},
-				status === 'ready' ? __('Ready', 'lerm-admin-config') : status.charAt(0).toUpperCase() + status.slice(1)
+				statusLabels[status] || status.charAt(0).toUpperCase() + status.slice(1)
 			),
 		];
 
@@ -507,13 +514,14 @@ const createPanelComponent = (config, Panel, element) => {
 		}
 
 		if (status === 'ready') {
+			const fieldCountValue = fieldCount(state.schema);
 			body.push(createElement(
 				'p',
 				{
 					className: 'lerm-admin-config-block-panel__meta',
 					key: 'meta',
 				},
-				sprintf(_n('%d field loaded', '%d fields loaded', fieldCount(state.schema), 'lerm-admin-config'), fieldCount(state.schema))
+				sprintf(_n('%d field loaded', '%d fields loaded', fieldCountValue, 'lerm-admin-config'), fieldCountValue)
 			));
 		}
 
@@ -542,8 +550,13 @@ const createPanelComponent = (config, Panel, element) => {
 		}, []);
 
 		useEffect(() => {
-			const { dispatch } = require('@wordpress/data');
-			const editorDispatch = dispatch('core/editor');
+			let dispatch;
+			try {
+				dispatch = require('@wordpress/data').dispatch;
+			} catch (_e) {
+				dispatch = null;
+			}
+			const editorDispatch = dispatch ? dispatch('core/editor') : null;
 			if (dirty && editorDispatch && typeof editorDispatch.lockPostSaving === 'function') {
 				editorDispatch.lockPostSaving('lerm-admin-config-unsaved');
 			} else if (!dirty && editorDispatch && typeof editorDispatch.unlockPostSaving === 'function') {
@@ -799,13 +812,13 @@ const createPanelComponent = (config, Panel, element) => {
 					Modal,
 					{
 						key: 'discard-dialog',
-						title: 'Discard changes?',
+						title: __('Discard changes?', 'lerm-admin-config'),
 						onRequestClose: () => setShowDiscardDialog(false),
 					},
 					createElement(
 						'div',
 						{ style: { padding: '0 0 16px' } },
-						createElement('p', null, 'Discard unsaved AdminConfig changes?')
+						createElement('p', null, __('Discard unsaved AdminConfig changes?', 'lerm-admin-config'))
 					),
 					createElement(
 						'div',
@@ -877,6 +890,7 @@ const registerBlockEditorPanels = (configs = blockPanelConfigsFromWindow()) => {
 		typeof element.createElement !== 'function' ||
 		typeof element.useEffect !== 'function' ||
 		typeof element.useMemo !== 'function' ||
+		typeof element.useRef !== 'function' ||
 		typeof element.useState !== 'function'
 	) {
 		return false;
