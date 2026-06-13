@@ -528,13 +528,12 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await newsletterChannel.setChecked( ! initialNewsletter );
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
-	const discardDialogPromise = page.waitForEvent( 'dialog' );
 	const discardClickPromise = panel.getByRole( 'button', { name: /^Discard$/ } ).click();
-	const discardDialog = await discardDialogPromise;
+	const discardModal = page.locator( '.components-modal__frame' ).filter( { hasText: /Discard unsaved AdminConfig changes?/ } ).first();
 
-	expect( discardDialog.type() ).toBe( 'confirm' );
-	expect( discardDialog.message() ).toContain( 'Discard unsaved AdminConfig changes?' );
-	await discardDialog.accept();
+	await expect( discardModal ).toBeVisible( { timeout: 5_000 } );
+	await expect( discardModal.getByRole( 'button', { name: /^Discard$/ } ).first() ).toBeVisible();
+	await discardModal.getByRole( 'button', { name: /^Discard$/ } ).first().click();
 	await discardClickPromise;
 	await expect( panel ).toHaveAttribute( 'data-dirty', 'false' );
 	await expect( entrySlug ).toHaveValue( initialSlug );

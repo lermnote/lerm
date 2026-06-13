@@ -1,7 +1,5 @@
 // @ts-check
 
-const { createReduxStore, register: registerWpDataStore } = require('@wordpress/data');
-
 const STORE_NAME = 'lerm/admin-config';
 
 /**
@@ -274,7 +272,8 @@ const storeConfig = {
 	},
 };
 
-const store = createReduxStore(STORE_NAME, storeConfig);
+/** @type {import('@wordpress/data').WPDataStore|null} */
+let store = null;
 
 /** @type {boolean} */
 let isRegistered = false;
@@ -293,6 +292,10 @@ const register = () => {
 	}
 
 	try {
+		const { createReduxStore, register: registerWpDataStore } = require('@wordpress/data');
+		if (!store) {
+			store = createReduxStore(STORE_NAME, storeConfig);
+		}
 		registerWpDataStore(store);
 		isRegistered = true;
 	} catch (_error) {

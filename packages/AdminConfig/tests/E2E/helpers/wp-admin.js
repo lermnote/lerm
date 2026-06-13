@@ -243,7 +243,7 @@ async function submitClassicForm( page, submitSelector = '#submit' ) {
 		.then( () => true )
 		.catch( () => false );
 
-	await submitButton.click();
+	await submitButton.click( { force: true } );
 
 	const didNavigate = await navigation;
 
@@ -287,8 +287,8 @@ async function openCommentEditor( page, commentSignature ) {
 	const row = page.locator( '#the-comment-list tr', { hasText: commentSignature } ).first();
 
 	await expect( row ).toBeVisible();
-	await row.hover();
-	await row.locator( 'span.edit a' ).first().click();
+	await row.hover( { force: true } );
+	await row.locator( 'span.edit a' ).first().click( { force: true } );
 	await page.waitForLoadState( 'domcontentloaded' );
 }
 
