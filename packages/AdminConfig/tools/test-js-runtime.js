@@ -410,8 +410,9 @@ function testDefaultControlRegistry() {
 		onChange: (value) => changes.push(value),
 		value: 'compact',
 	});
+	const MockColorPicker = (props) => null;
 	const renderedColor = registry.get('color')({
-		components: {},
+		components: { ColorPicker: MockColorPicker },
 		createElement: (type, props, ...children) => ({ type, props, children }),
 		field: {
 			id: 'accent',
@@ -527,7 +528,7 @@ function testDefaultControlRegistry() {
 	});
 
 	renderedSelect.props.onChange({ target: { value: 'feature' } });
-	renderedColor.children[0][1].props.onInput({ target: { value: '#13579b' } });
+	renderedColor.children[0][1].props.onChange('#13579b');
 	renderedDate.children[0][1].props.onInput({ target: { value: '2026-05-03' } });
 	renderedRange.children[0][1].props.onInput({ target: { value: '4' } });
 	renderedCheckboxChoices.children[0][1].children[0][0].props.onChange({ target: { checked: true } });
@@ -544,7 +545,7 @@ function testDefaultControlRegistry() {
 		'split',
 		'dashicons-megaphone',
 	]);
-	assert.equal(renderedColor.children[0][1].props.onChange, undefined);
+	assert.equal(typeof renderedColor.children[0][1].props.onChange, 'function');
 	assert.equal(renderedDate.children[0][1].props.onChange, undefined);
 	assert.equal(renderedRange.children[0][1].props.onChange, undefined);
 	assert.equal(typeof renderedAjaxSelect.type, 'function');
