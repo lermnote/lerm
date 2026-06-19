@@ -504,7 +504,48 @@
 /* ---- Color ---- */
 
 .lerm-admin-config-block-panel__color {
+	display: grid;
+	gap: 8px;
 	margin-bottom: 16px;
+}
+
+.lerm-admin-config-block-panel__color-label {
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--lac-panel-text);
+}
+
+.lerm-admin-config-block-panel__color-picker {
+	width: 100%;
+	max-width: 100%;
+}
+
+.lerm-admin-config-block-panel__color-picker .components-input-control,
+.lerm-admin-config-block-panel__color-picker .components-input-control__container {
+	max-width: 100%;
+}
+
+.lerm-admin-config-block-panel__color-value {
+	display: inline-flex;
+	width: max-content;
+	max-width: 100%;
+	padding: 2px 6px;
+	border: 1px solid var(--lac-panel-muted-border);
+	border-radius: 2px;
+	background: var(--lac-panel-muted-surface);
+	font-size: 11px;
+	line-height: 1.4;
+	color: var(--lac-panel-muted-text);
+}
+
+.lerm-admin-config-block-panel__composite-item--color {
+	grid-template-columns: minmax(0, 1fr);
+	align-items: stretch;
+}
+
+.lerm-admin-config-block-panel__composite-item--color .lerm-admin-config-block-panel__color-label {
+	font-weight: 500;
 }
 
 .lerm-admin-config-block-panel__palette-swatches {
