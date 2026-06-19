@@ -1042,27 +1042,17 @@ const ButtonSetControl = (props) => {
  */
 const ColorControl = (props) => {
 	const normalized = normalizeProps(props);
-	const { createElement, field, onChange, value } = normalized;
-	const current = stringValue(value || field.default || '#000000');
+	const { field, inputId, onChange, path, value } = normalized;
 	const label = stringValue(field.label || field.id);
 
-	return createElement(
-		'label',
-		{
-			className: 'lerm-admin-config-block-panel__color',
-		},
-		[
-			createElement('span', { key: 'label' }, label),
-			createElement('input', {
-				'aria-label': label,
-				key: 'input',
-				onInput: (event) => onChange(stringValue(changeValue(event))),
-				type: 'color',
-				value: current,
-			}),
-			createElement('code', { key: 'value' }, current),
-		]
-	);
+	return renderColorPickerControl(normalized, {
+		defaultValue: field.default,
+		id: inputId,
+		label,
+		onChange,
+		path,
+		value: fieldValue(field, value),
+	});
 };
 
 /**
@@ -1621,6 +1611,70 @@ const nativeColorValue = (value, fallback = '#000000') => {
 	}
 
 	return /^#[0-9a-f]{6}$/i.test(color) ? color : fallback;
+};
+
+/**
+ * @param {ReturnType<typeof normalizeProps>} normalized
+ * @param {{
+ *   ariaLabel?: string,
+ *   className?: string,
+ *   defaultValue?: unknown,
+ *   error?: string,
+ *   id?: string,
+ *   key?: string,
+ *   label: string,
+ *   onChange: Function,
+ *   path?: string[],
+ *   value: unknown
+ * }} options
+ * @returns {unknown}
+ */
+const renderColorPickerControl = (normalized, options) => {
+	const { components, createElement } = normalized;
+	const ColorPicker = components.ColorPicker;
+	const fallback = nativeColorValue(options.defaultValue || '#000000');
+	const current = nativeColorValue(options.value, fallback);
+	const label = stringValue(options.label);
+	const ariaLabel = stringValue(options.ariaLabel || label);
+	const path = pathTokens(options.path || options.id || label);
+	const error = errorMessage(options.error);
+	const controlProps = {
+		'aria-label': ariaLabel,
+		className: options.className || 'lerm-admin-config-block-panel__color',
+		'data-color-field': pathKey(path),
+		'data-color-value': current,
+		key: options.key,
+	};
+	const picker = createElement(ColorPicker, {
+		'aria-label': ariaLabel,
+		className: 'lerm-admin-config-block-panel__color-picker',
+		color: current,
+		copyFormat: 'hex',
+		defaultValue: fallback,
+		enableAlpha: false,
+		key: 'picker',
+		onChange: (nextColor) => options.onChange(nativeColorValue(nextColor, fallback)),
+	});
+
+	return createElement(
+		'div',
+		controlProps,
+		[
+			createElement('span', { className: 'lerm-admin-config-block-panel__color-label', key: 'label' }, label),
+			picker,
+			createElement('code', {
+				className: 'lerm-admin-config-block-panel__color-value',
+				key: 'value',
+			}, current),
+			error
+				? createElement('span', {
+					className: 'lerm-admin-config-block-panel__field-error',
+					'data-field-error': pathKey(path),
+					key: 'error',
+				}, error)
+				: null,
+		].filter(Boolean)
+	);
 };
 
 /**
@@ -2238,25 +2292,17 @@ const BorderControl = (props) => {
 			)
 			: null,
 		fieldFlag(field, 'color', true)
-			? createElement(
-				'label',
-				{
-					className: 'lerm-admin-config-block-panel__composite-item',
-					key: 'color',
-				},
-				[
-					createElement('span', { key: 'label' }, 'Color'),
-					createElement('input', {
-						'aria-label': `${ label } Color`,
-						id: `${ inputId }-color`,
-						key: 'input',
-						onInput: (event) => onPathChange([ ...basePath, 'color' ], stringValue(changeValue(event))),
-						type: 'color',
-						value: nativeColorValue(compositeValue(field, current, 'color')),
-					}),
-					createElement('code', { key: 'value' }, stringValue(compositeValue(field, current, 'color'))),
-				]
-			)
+			? renderColorPickerControl(normalized, {
+				ariaLabel: `${ label } Color`,
+				className: 'lerm-admin-config-block-panel__composite-item lerm-admin-config-block-panel__composite-item--color',
+				defaultValue: compositeValue(field, {}, 'color'),
+				id: `${ inputId }-color`,
+				key: 'color',
+				label: 'Color',
+				onChange: (nextColor) => onPathChange([ ...basePath, 'color' ], nextColor),
+				path: [ ...basePath, 'color' ],
+				value: compositeValue(field, current, 'color'),
+			})
 			: null,
 	];
 
@@ -2293,33 +2339,18 @@ const LinkColorControl = (props) => {
 				const error = errorForPath(normalized.errors, path);
 				const currentValue = compositeValue(field, current, item.key);
 
-				return createElement(
-					'label',
-					{
-						className: `lerm-admin-config-block-panel__composite-item${ error ? ' is-error' : '' }`,
-						key: item.key,
-					},
-					[
-						createElement('span', { key: 'label' }, item.label),
-						createElement('input', {
-							'aria-invalid': error ? 'true' : undefined,
-							'aria-label': `${ label } ${ item.label }`,
-							id: `${ inputId }-${ item.key }`,
-							key: 'input',
-							onInput: (event) => onPathChange(path, stringValue(changeValue(event))),
-							type: 'color',
-							value: nativeColorValue(currentValue),
-						}),
-						createElement('code', { key: 'value' }, stringValue(currentValue)),
-						error
-							? createElement('span', {
-								className: 'lerm-admin-config-block-panel__field-error',
-								'data-field-error': pathKey(path),
-								key: 'error',
-							}, error)
-							: null,
-					].filter(Boolean)
-				);
+				return renderColorPickerControl(normalized, {
+					ariaLabel: `${ label } ${ item.label }`,
+					className: `lerm-admin-config-block-panel__composite-item lerm-admin-config-block-panel__composite-item--color${ error ? ' is-error' : '' }`,
+					defaultValue: compositeValue(field, {}, item.key),
+					error,
+					id: `${ inputId }-${ item.key }`,
+					key: item.key,
+					label: item.label,
+					onChange: (nextColor) => onPathChange(path, nextColor),
+					path,
+					value: currentValue,
+				});
 			}),
 	];
 

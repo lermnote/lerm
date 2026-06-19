@@ -82,6 +82,11 @@ const setInputValue = async ( locator, value ) => {
 	}, value );
 };
 
+const setColorValue = async ( locator, value ) => {
+	const input = locator.locator( 'input' ).first();
+	await input.fill( value );
+};
+
 const currentBlockPanelMediaValues = async ( page ) => page.evaluate( () => {
 	const instances = window.lermAdminConfigBlockPanel?.getInstances?.() || [];
 	const instance = instances.find( ( candidate ) => candidate.schemaId === 'acme-demo-post-metabox' ) || {};
@@ -208,7 +213,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryLayout = panel.getByRole( 'combobox', { name: /Entry layout/i } );
 	const entryFormat = panel.locator( '[data-field-id="entry_format"]' );
 	const entryEmphasis = panel.locator( '[data-field-id="entry_emphasis"]' );
-	const entryAccent = panel.locator( '[data-field-id="entry_accent"] input[type="color"]' );
+	const entryAccent = panel.locator( '[data-field-id="entry_accent"] [data-color-field="entry_accent"]' );
 	const entryReviewDate = panel.locator( '[data-field-id="entry_review_date"] input[type="date"]' );
 	const entryPriority = panel.locator( '[data-field-id="entry_priority"] input[type="range"]' );
 	const entryScore = panel.locator( '[data-field-id="entry_score"] input[type="number"]' );
@@ -238,9 +243,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryBorderTop = entryBorder.getByRole( 'spinbutton', { name: /Entry card border Top/i } );
 	const entryBorderRight = entryBorder.getByRole( 'spinbutton', { name: /Entry card border Right/i } );
 	const entryBorderStyle = entryBorder.getByRole( 'combobox', { name: /Entry card border Style/i } );
-	const entryBorderColor = entryBorder.locator( 'input[aria-label="Entry card border Color"]' );
-	const entryLinkNormal = entryLinkColors.locator( 'input[aria-label="Entry link colors Normal"]' );
-	const entryLinkHover = entryLinkColors.locator( 'input[aria-label="Entry link colors Hover"]' );
+	const entryBorderColor = entryBorder.locator( '[data-color-field="entry_border.color"]' );
+	const entryLinkNormal = entryLinkColors.locator( '[data-color-field="entry_link_colors.color"]' );
+	const entryLinkHover = entryLinkColors.locator( '[data-color-field="entry_link_colors.hover"]' );
 	const entryTypographyFamily = entryTypography.getByRole( 'textbox', { name: /^Family$/i } );
 	const entryTypographyWeight = entryTypography.getByRole( 'combobox', { name: /^Weight$/i } );
 	const entryTypographyStyleNormal = entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[data-value="normal"]' );
@@ -251,9 +256,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const entryTypographyLetterSpacing = entryTypography.getByRole( 'textbox', { name: /^Letter spacing$/i } );
 	const entryTypographyAlignLeft = entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="left"]' );
 	const entryTypographyAlignCenter = entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="center"]' );
-	const entryTypographyColor = entryTypography.locator( '[data-field-path="entry_typography.color"] input[type="color"]' );
-	const entryBackgroundColor = entryBackground.locator( '[data-field-path="entry_background.background-color"] input[type="color"]' );
-	const entryBackgroundGradientColor = entryBackground.locator( '[data-field-path="entry_background.background-gradient-color"] input[type="color"]' );
+	const entryTypographyColor = entryTypography.locator( '[data-field-path="entry_typography.color"] [data-color-field="entry_typography.color"]' );
+	const entryBackgroundColor = entryBackground.locator( '[data-field-path="entry_background.background-color"] [data-color-field="entry_background.background-color"]' );
+	const entryBackgroundGradientColor = entryBackground.locator( '[data-field-path="entry_background.background-gradient-color"] [data-color-field="entry_background.background-gradient-color"]' );
 	const entryBackgroundGradientDirection = entryBackground.locator( '[data-field-path="entry_background.background-gradient-direction"] select' );
 	const entryBackgroundImage = entryBackground.locator( '[data-field-path="entry_background.background-image"]' );
 	const entryBackgroundPosition = entryBackground.locator( '[data-field-path="entry_background.background-position"] select' );
@@ -335,7 +340,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const initialLayout = await entryLayout.inputValue();
 	const initialFormat = await entryFormat.locator( 'input[type="radio"]:checked' ).inputValue();
 	const initialEmphasis = await entryEmphasis.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
-	const initialAccent = ( await entryAccent.inputValue() ).toLowerCase();
+	const initialAccent = ( await entryAccent.getAttribute( 'data-color-value' ) ).toLowerCase();
 	const initialReviewDate = await entryReviewDate.inputValue();
 	const initialPriority = await entryPriority.inputValue();
 	const initialScore = await entryScore.inputValue();
@@ -350,9 +355,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const initialBorderTop = await entryBorderTop.inputValue();
 	const initialBorderRight = await entryBorderRight.inputValue();
 	const initialBorderStyle = await entryBorderStyle.inputValue();
-	const initialBorderColor = ( await entryBorderColor.inputValue() ).toLowerCase();
-	const initialLinkNormal = ( await entryLinkNormal.inputValue() ).toLowerCase();
-	const initialLinkHover = ( await entryLinkHover.inputValue() ).toLowerCase();
+	const initialBorderColor = ( await entryBorderColor.getAttribute( 'data-color-value' ) ).toLowerCase();
+	const initialLinkNormal = ( await entryLinkNormal.getAttribute( 'data-color-value' ) ).toLowerCase();
+	const initialLinkHover = ( await entryLinkHover.getAttribute( 'data-color-value' ) ).toLowerCase();
 	const initialTypographyFamily = await entryTypographyFamily.inputValue();
 	const initialTypographyWeight = await entryTypographyWeight.inputValue();
 	const initialTypographyStyle = await entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ).getAttribute( 'data-value' );
@@ -361,9 +366,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	const initialTypographyLineHeight = await entryTypographyLineHeight.inputValue();
 	const initialTypographyLetterSpacing = await entryTypographyLetterSpacing.inputValue();
 	const initialTypographyAlign = await entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ).getAttribute( 'data-value' );
-	const initialTypographyColor = ( await entryTypographyColor.inputValue() ).toLowerCase();
-	const initialBackgroundColor = ( await entryBackgroundColor.inputValue() ).toLowerCase();
-	const initialBackgroundGradientColor = ( await entryBackgroundGradientColor.inputValue() ).toLowerCase();
+	const initialTypographyColor = ( await entryTypographyColor.getAttribute( 'data-color-value' ) ).toLowerCase();
+	const initialBackgroundColor = ( await entryBackgroundColor.getAttribute( 'data-color-value' ) ).toLowerCase();
+	const initialBackgroundGradientColor = ( await entryBackgroundGradientColor.getAttribute( 'data-color-value' ) ).toLowerCase();
 	const initialBackgroundGradientDirection = await entryBackgroundGradientDirection.inputValue();
 	const initialBackgroundPosition = await entryBackgroundPosition.inputValue();
 	const initialBackgroundRepeat = await entryBackgroundRepeat.inputValue();
@@ -482,7 +487,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryLayout.selectOption( discardLayout );
 	await entryFormat.getByRole( 'radio', { name: new RegExp( `^${ discardFormat }$`, 'i' ) } ).check();
 	await entryEmphasis.locator( `button[data-value="${ discardEmphasis }"]` ).click();
-	await setInputValue( entryAccent, discardAccent );
+	await setColorValue( entryAccent, discardAccent );
 	await setInputValue( entryReviewDate, discardReviewDate );
 	await setInputValue( entryPriority, discardPriority );
 	await entryScore.fill( discardScore );
@@ -497,9 +502,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryBorderTop.fill( discardBorderTop );
 	await entryBorderRight.fill( discardBorderRight );
 	await entryBorderStyle.selectOption( discardBorderStyle );
-	await setInputValue( entryBorderColor, discardBorderColor );
-	await setInputValue( entryLinkNormal, discardLinkNormal );
-	await setInputValue( entryLinkHover, discardLinkHover );
+	await setColorValue( entryBorderColor, discardBorderColor );
+	await setColorValue( entryLinkNormal, discardLinkNormal );
+	await setColorValue( entryLinkHover, discardLinkHover );
 	await entryTypographyFamily.fill( discardTypographyFamily );
 	await entryTypographyWeight.selectOption( discardTypographyWeight );
 	await ( discardTypographyStyle === 'italic' ? entryTypographyStyleItalic : entryTypographyStyleNormal ).click();
@@ -508,9 +513,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryTypographyLineHeight.fill( discardTypographyLineHeight );
 	await entryTypographyLetterSpacing.fill( discardTypographyLetterSpacing );
 	await ( discardTypographyAlign === 'center' ? entryTypographyAlignCenter : entryTypographyAlignLeft ).click();
-	await setInputValue( entryTypographyColor, discardTypographyColor );
-	await setInputValue( entryBackgroundColor, discardBackgroundColor );
-	await setInputValue( entryBackgroundGradientColor, discardBackgroundGradientColor );
+	await setColorValue( entryTypographyColor, discardTypographyColor );
+	await setColorValue( entryBackgroundColor, discardBackgroundColor );
+	await setColorValue( entryBackgroundGradientColor, discardBackgroundGradientColor );
 	await entryBackgroundGradientDirection.selectOption( discardBackgroundGradientDirection );
 	await entryBackgroundPosition.selectOption( discardBackgroundPosition );
 	await entryBackgroundRepeat.selectOption( discardBackgroundRepeat );
@@ -540,7 +545,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryLayout ).toHaveValue( initialLayout );
 	await expect( entryFormat.locator( 'input[type="radio"]:checked' ) ).toHaveValue( initialFormat );
 	await expect( entryEmphasis.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialEmphasis || '' );
-	await expect( entryAccent ).toHaveValue( initialAccent );
+	await expect( entryAccent ).toHaveAttribute( 'data-color-value', initialAccent );
 	await expect( entryReviewDate ).toHaveValue( initialReviewDate );
 	await expect( entryPriority ).toHaveValue( initialPriority );
 	await expect( entryScore ).toHaveValue( initialScore );
@@ -555,9 +560,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryBorderTop ).toHaveValue( initialBorderTop );
 	await expect( entryBorderRight ).toHaveValue( initialBorderRight );
 	await expect( entryBorderStyle ).toHaveValue( initialBorderStyle );
-	await expect( entryBorderColor ).toHaveValue( initialBorderColor );
-	await expect( entryLinkNormal ).toHaveValue( initialLinkNormal );
-	await expect( entryLinkHover ).toHaveValue( initialLinkHover );
+	await expect( entryBorderColor ).toHaveAttribute( 'data-color-value', initialBorderColor );
+	await expect( entryLinkNormal ).toHaveAttribute( 'data-color-value', initialLinkNormal );
+	await expect( entryLinkHover ).toHaveAttribute( 'data-color-value', initialLinkHover );
 	await expect( entryTypographyFamily ).toHaveValue( initialTypographyFamily );
 	await expect( entryTypographyWeight ).toHaveValue( initialTypographyWeight );
 	await expect( entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialTypographyStyle || '' );
@@ -566,9 +571,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryTypographyLineHeight ).toHaveValue( initialTypographyLineHeight );
 	await expect( entryTypographyLetterSpacing ).toHaveValue( initialTypographyLetterSpacing );
 	await expect( entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialTypographyAlign || '' );
-	await expect( entryTypographyColor ).toHaveValue( initialTypographyColor );
-	await expect( entryBackgroundColor ).toHaveValue( initialBackgroundColor );
-	await expect( entryBackgroundGradientColor ).toHaveValue( initialBackgroundGradientColor );
+	await expect( entryTypographyColor ).toHaveAttribute( 'data-color-value', initialTypographyColor );
+	await expect( entryBackgroundColor ).toHaveAttribute( 'data-color-value', initialBackgroundColor );
+	await expect( entryBackgroundGradientColor ).toHaveAttribute( 'data-color-value', initialBackgroundGradientColor );
 	await expect( entryBackgroundGradientDirection ).toHaveValue( initialBackgroundGradientDirection );
 	await expect( entryBackgroundPosition ).toHaveValue( initialBackgroundPosition );
 	await expect( entryBackgroundRepeat ).toHaveValue( initialBackgroundRepeat );
@@ -624,7 +629,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryLayout.selectOption( savedLayout );
 	await entryFormat.locator( `input[type="radio"][value="${ savedFormat }"]` ).check();
 	await entryEmphasis.locator( `button[data-value="${ savedEmphasis }"]` ).click();
-	await setInputValue( entryAccent, savedAccent );
+	await setColorValue( entryAccent, savedAccent );
 	await setInputValue( entryReviewDate, savedReviewDate );
 	await setInputValue( entryPriority, savedPriority );
 	await entryScore.fill( savedScore );
@@ -638,9 +643,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryBorderTop.fill( savedBorderTop );
 	await entryBorderRight.fill( savedBorderRight );
 	await entryBorderStyle.selectOption( savedBorderStyle );
-	await setInputValue( entryBorderColor, savedBorderColor );
-	await setInputValue( entryLinkNormal, savedLinkNormal );
-	await setInputValue( entryLinkHover, savedLinkHover );
+	await setColorValue( entryBorderColor, savedBorderColor );
+	await setColorValue( entryLinkNormal, savedLinkNormal );
+	await setColorValue( entryLinkHover, savedLinkHover );
 	await entryTypographyFamily.fill( savedTypographyFamily );
 	await entryTypographyWeight.selectOption( savedTypographyWeight );
 	await ( savedTypographyStyle === 'italic' ? entryTypographyStyleItalic : entryTypographyStyleNormal ).click();
@@ -649,9 +654,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await entryTypographyLineHeight.fill( savedTypographyLineHeight );
 	await entryTypographyLetterSpacing.fill( savedTypographyLetterSpacing );
 	await ( savedTypographyAlign === 'center' ? entryTypographyAlignCenter : entryTypographyAlignLeft ).click();
-	await setInputValue( entryTypographyColor, savedTypographyColor );
-	await setInputValue( entryBackgroundColor, savedBackgroundColor );
-	await setInputValue( entryBackgroundGradientColor, savedBackgroundGradientColor );
+	await setColorValue( entryTypographyColor, savedTypographyColor );
+	await setColorValue( entryBackgroundColor, savedBackgroundColor );
+	await setColorValue( entryBackgroundGradientColor, savedBackgroundGradientColor );
 	await entryBackgroundGradientDirection.selectOption( savedBackgroundGradientDirection );
 	await entryBackgroundPosition.selectOption( savedBackgroundPosition );
 	await entryBackgroundRepeat.selectOption( savedBackgroundRepeat );
@@ -696,7 +701,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryLayout ).toHaveValue( savedLayout );
 	await expect( entryFormat.locator( 'input[type="radio"]:checked' ) ).toHaveValue( savedFormat );
 	await expect( entryEmphasis.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedEmphasis );
-	await expect( entryAccent ).toHaveValue( savedAccent );
+	await expect( entryAccent ).toHaveAttribute( 'data-color-value', savedAccent );
 	await expect( entryReviewDate ).toHaveValue( savedReviewDate );
 	await expect( entryPriority ).toHaveValue( savedPriority );
 	await expect( entryScore ).toHaveValue( savedScore );
@@ -711,9 +716,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryBorderTop ).toHaveValue( savedBorderTop );
 	await expect( entryBorderRight ).toHaveValue( savedBorderRight );
 	await expect( entryBorderStyle ).toHaveValue( savedBorderStyle );
-	await expect( entryBorderColor ).toHaveValue( savedBorderColor );
-	await expect( entryLinkNormal ).toHaveValue( savedLinkNormal );
-	await expect( entryLinkHover ).toHaveValue( savedLinkHover );
+	await expect( entryBorderColor ).toHaveAttribute( 'data-color-value', savedBorderColor );
+	await expect( entryLinkNormal ).toHaveAttribute( 'data-color-value', savedLinkNormal );
+	await expect( entryLinkHover ).toHaveAttribute( 'data-color-value', savedLinkHover );
 	await expect( entryTypographyFamily ).toHaveValue( savedTypographyFamily );
 	await expect( entryTypographyWeight ).toHaveValue( savedTypographyWeight );
 	await expect( entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyStyle );
@@ -722,9 +727,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( entryTypographyLineHeight ).toHaveValue( savedTypographyLineHeight );
 	await expect( entryTypographyLetterSpacing ).toHaveValue( savedTypographyLetterSpacing );
 	await expect( entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyAlign );
-	await expect( entryTypographyColor ).toHaveValue( savedTypographyColor );
-	await expect( entryBackgroundColor ).toHaveValue( savedBackgroundColor );
-	await expect( entryBackgroundGradientColor ).toHaveValue( savedBackgroundGradientColor );
+	await expect( entryTypographyColor ).toHaveAttribute( 'data-color-value', savedTypographyColor );
+	await expect( entryBackgroundColor ).toHaveAttribute( 'data-color-value', savedBackgroundColor );
+	await expect( entryBackgroundGradientColor ).toHaveAttribute( 'data-color-value', savedBackgroundGradientColor );
 	await expect( entryBackgroundGradientDirection ).toHaveValue( savedBackgroundGradientDirection );
 	await expect( entryBackgroundPosition ).toHaveValue( savedBackgroundPosition );
 	await expect( entryBackgroundRepeat ).toHaveValue( savedBackgroundRepeat );
@@ -759,7 +764,7 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.getByRole( 'combobox', { name: /Entry layout/i } ) ).toHaveValue( savedLayout );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_format"] input[type="radio"]:checked' ) ).toHaveValue( savedFormat );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_emphasis"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedEmphasis );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_accent"] input[type="color"]' ) ).toHaveValue( savedAccent );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_accent"] [data-color-field="entry_accent"]' ) ).toHaveAttribute( 'data-color-value', savedAccent );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_review_date"] input[type="date"]' ) ).toHaveValue( savedReviewDate );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_priority"] input[type="range"]' ) ).toHaveValue( savedPriority );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_score"] input[type="number"]' ) ).toHaveValue( savedScore );
@@ -774,9 +779,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.locator( '[data-field-id="entry_border"]' ).getByRole( 'spinbutton', { name: /Entry card border Top/i } ) ).toHaveValue( savedBorderTop );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_border"]' ).getByRole( 'spinbutton', { name: /Entry card border Right/i } ) ).toHaveValue( savedBorderRight );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_border"]' ).getByRole( 'combobox', { name: /Entry card border Style/i } ) ).toHaveValue( savedBorderStyle );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_border"] input[aria-label="Entry card border Color"]' ) ).toHaveValue( savedBorderColor );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_link_colors"] input[aria-label="Entry link colors Normal"]' ) ).toHaveValue( savedLinkNormal );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_link_colors"] input[aria-label="Entry link colors Hover"]' ) ).toHaveValue( savedLinkHover );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_border"] [data-color-field="entry_border.color"]' ) ).toHaveAttribute( 'data-color-value', savedBorderColor );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_link_colors"] [data-color-field="entry_link_colors.color"]' ) ).toHaveAttribute( 'data-color-value', savedLinkNormal );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_link_colors"] [data-color-field="entry_link_colors.hover"]' ) ).toHaveAttribute( 'data-color-value', savedLinkHover );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'textbox', { name: /^Family$/i } ) ).toHaveValue( savedTypographyFamily );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'combobox', { name: /^Weight$/i } ) ).toHaveValue( savedTypographyWeight );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyStyle );
@@ -785,9 +790,9 @@ test( 'block editor edits and saves AdminConfig panel values through REST', asyn
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'textbox', { name: /^Line height$/i } ) ).toHaveValue( savedTypographyLineHeight );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'textbox', { name: /^Letter spacing$/i } ) ).toHaveValue( savedTypographyLetterSpacing );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyAlign );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.color"] input[type="color"]' ) ).toHaveValue( savedTypographyColor );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-color"] input[type="color"]' ) ).toHaveValue( savedBackgroundColor );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-gradient-color"] input[type="color"]' ) ).toHaveValue( savedBackgroundGradientColor );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.color"] [data-color-field="entry_typography.color"]' ) ).toHaveAttribute( 'data-color-value', savedTypographyColor );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-color"] [data-color-field="entry_background.background-color"]' ) ).toHaveAttribute( 'data-color-value', savedBackgroundColor );
+	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-gradient-color"] [data-color-field="entry_background.background-gradient-color"]' ) ).toHaveAttribute( 'data-color-value', savedBackgroundGradientColor );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-gradient-direction"] select' ) ).toHaveValue( savedBackgroundGradientDirection );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-position"] select' ) ).toHaveValue( savedBackgroundPosition );
 	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-repeat"] select' ) ).toHaveValue( savedBackgroundRepeat );
