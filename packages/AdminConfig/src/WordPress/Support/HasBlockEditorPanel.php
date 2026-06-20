@@ -2,12 +2,10 @@
 /**
  * Shared block editor panel enqueue logic for admin-config containers.
  *
- * Consuming classes MUST declare:
- *   private array $schemas     — compiled schemas keyed by schema ID
- *   private Framework $framework — for asset resolution
- *
- * And MUST implement:
- *   private function container_type_for_block_panel(): string
+ * The consuming class MUST implement BlockEditorPanelContext, providing:
+ *   - schemas(): array<string, CompiledSchema>
+ *   - framework(): Framework
+ *   - container_type_for_block_panel(): string
  *
  * @package Lerm\AdminConfig
  */
@@ -142,7 +140,8 @@ trait HasBlockEditorPanel {
 	private function collect_panel_schemas( string $post_type, int $post_id ): array {
 		$schemas = array();
 
-		foreach ( $this->schemas as $schema ) {
+		/** @var BlockEditorPanelContext $this */
+		foreach ( $this->schemas() as $schema ) {
 			$container = $schema->container();
 
 			if ( ! in_array( $post_type, ContainerSaveSupport::normalize_string_list( $container['post_types'] ?? array() ), true ) ) {
@@ -192,13 +191,13 @@ trait HasBlockEditorPanel {
 	}
 
 	private function panel_asset_url( string $asset ): string {
-		/** @psalm-suppress UndefinedThisPropertyFetch */
-		return $this->framework->asset_resolver()->url( $asset );
+		/** @var BlockEditorPanelContext $this */
+		return $this->framework()->asset_resolver()->url( $asset );
 	}
 
 	private function panel_asset_path( string $asset ): string {
-		/** @psalm-suppress UndefinedThisPropertyFetch */
-		$resolver = $this->framework->asset_resolver();
+		/** @var BlockEditorPanelContext $this */
+		$resolver = $this->framework()->asset_resolver();
 
 		if ( $resolver instanceof AssetPathResolver ) {
 			return $resolver->path( $asset );
@@ -208,7 +207,7 @@ trait HasBlockEditorPanel {
 	}
 
 	private function panel_asset_version(): string {
-		/** @psalm-suppress UndefinedThisPropertyFetch */
-		return $this->framework->asset_resolver()->version();
+		/** @var BlockEditorPanelContext $this */
+		return $this->framework()->asset_resolver()->version();
 	}
 }

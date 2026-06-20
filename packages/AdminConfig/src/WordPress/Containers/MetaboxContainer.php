@@ -18,6 +18,7 @@ use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\WordPress\Support\HasBlockEditorPanel;
+use Lerm\AdminConfig\WordPress\Support\BlockEditorPanelContext;
 use Lerm\AdminConfig\WordPress\Support\ContainerSaveSupport;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
@@ -25,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class MetaboxContainer implements Container {
+final class MetaboxContainer implements Container, BlockEditorPanelContext {
 
 	use HasBlockEditorPanel;
 
@@ -42,7 +43,18 @@ final class MetaboxContainer implements Container {
 	) {
 	}
 
-	private function container_type_for_block_panel(): string {
+	/**
+	 * @return array<string, CompiledSchema>
+	 */
+	public function schemas(): array {
+		return $this->schemas;
+	}
+
+	public function framework(): Framework {
+		return $this->framework;
+	}
+
+	public function container_type_for_block_panel(): string {
 		return 'metabox';
 	}
 
