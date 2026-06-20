@@ -101,7 +101,7 @@ final class CommentContainer implements Container {
 		$renderer    = $this->renderer( $schema, $store );
 		$sections    = PageSchema::sections( $schema->definition() );
 		$flash       = ValidationFlash::consume( 'comment', $schema->id(), (string) $comment->comment_ID );
-		$values      = ValidationFlash::render_values( $store->all(), $flash );
+		$values      = ValidationFlash::render_values( $store->all(), $flash, $schema->definition(), $this->framework->field_types() );
 		$errors      = ValidationFlash::field_errors( $flash );
 		$notice      = ValidationFlash::notice( $flash );
 		$show_titles = count( $sections ) > 1;

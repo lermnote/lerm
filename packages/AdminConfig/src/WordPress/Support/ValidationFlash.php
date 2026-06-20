@@ -9,6 +9,9 @@ declare( strict_types=1 );
 
 namespace Lerm\AdminConfig\WordPress\Support;
 
+use Lerm\AdminConfig\Framework\FieldTypes\FieldTypeRegistry;
+use Lerm\AdminConfig\Framework\Support\PageSchema;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -69,14 +72,104 @@ final class ValidationFlash {
 	}
 
 	/**
+	 * Merge flashed submission data back into saved values for re-rendering.
+	 *
+	 * Some controls intentionally submit no key when emptied (for example
+	 * multi-selects, checkbox lists, or an emptied group). A plain
+	 * `wp_parse_args()` merge would resurrect the last saved value after a
+	 * validation failure, so we replay those omissions as their empty state
+	 * instead when a FieldTypeRegistry and schema definition are available.
+	 *
 	 * @param array<string, mixed>      $values
 	 * @param array<string, mixed>|null $flash
+	 * @param array<string, mixed>|null $definition   Schema definition for field lookup.
+	 * @param FieldTypeRegistry|null    $field_types   Registry for missing_submission callbacks.
 	 * @return array<string, mixed>
 	 */
-	public static function render_values( array $values, ?array $flash ): array {
+	public static function render_values( array $values, ?array $flash, ?array $definition = null, ?FieldTypeRegistry $field_types = null ): array {
 		$submitted = is_array( $flash['submitted'] ?? null ) ? $flash['submitted'] : array();
 
-		return wp_parse_args( $submitted, $values );
+		if ( null === $definition || null === $field_types ) {
+			return wp_parse_args( $submitted, $values );
+		}
+
+		$fields = self::collect_definition_fields( $definition );
+		$merged = $values;
+
+		foreach ( $fields as $field_id => $field ) {
+			if ( array_key_exists( $field_id, $submitted ) ) {
+				$merged[ $field_id ] = $submitted[ $field_id ];
+				continue;
+			}
+
+			$missing = self::missing_submission_render_value( $field, $field_types );
+
+			if ( $missing['apply'] ) {
+				$merged[ $field_id ] = $missing['value'];
+			}
+		}
+
+		// Any submitted keys that are not known fields (e.g. dynamic groups) still win.
+		return wp_parse_args( $submitted, $merged );
+	}
+
+	/**
+	 * Collect all top-level field definitions from a schema, including
+	 * fields nested inside section groups.
+	 *
+	 * @param array<string, mixed> $definition
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function collect_definition_fields( array $definition ): array {
+		$fields = array();
+
+		foreach ( PageSchema::sections( $definition ) as $section ) {
+			foreach ( PageSchema::section_fields( $section ) as $field ) {
+				if ( is_array( $field ) && isset( $field['id'] ) ) {
+					$fields[ (string) $field['id'] ] = $field;
+				}
+			}
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * Resolve the empty-state value for a field that was absent from the submission.
+	 *
+	 * Mirrors the logic in OptionsPage::missing_submission_render_value so
+	 * containers (metabox, taxonomy, profile, comment) get the same behavior.
+	 *
+	 * @param array<string, mixed> $field
+	 * @param FieldTypeRegistry    $field_types
+	 * @return array{apply: bool, value: mixed}
+	 */
+	private static function missing_submission_render_value( array $field, FieldTypeRegistry $field_types ): array {
+		if ( array_key_exists( 'missing_submission_value', $field ) ) {
+			return array(
+				'apply' => true,
+				'value' => $field['missing_submission_value'],
+			);
+		}
+
+		$type     = sanitize_key( (string) ( $field['type'] ?? 'text' ) );
+		$callback = $field_types->missing_submission_callback( $type );
+
+		if ( is_callable( $callback ) ) {
+			$missing = call_user_func( $callback, $field );
+
+			if ( is_array( $missing ) ) {
+				return array(
+					'apply' => ! empty( $missing['apply'] ),
+					'value' => $missing['value'] ?? null,
+				);
+			}
+		}
+
+		return array(
+			'apply' => false,
+			'value' => null,
+		);
 	}
 
 	/**

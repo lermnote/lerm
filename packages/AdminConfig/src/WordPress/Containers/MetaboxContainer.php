@@ -111,7 +111,7 @@ final class MetaboxContainer implements Container {
 		$section_id = (string) array_key_first( $sections );
 		$section    = '' !== $section_id ? ( $sections[ $section_id ] ?? null ) : null;
 		$flash      = ValidationFlash::consume( 'metabox', $schema->id(), (string) $post->ID );
-		$values     = ValidationFlash::render_values( $store->all(), $flash );
+		$values     = ValidationFlash::render_values( $store->all(), $flash, $schema->definition(), $this->framework->field_types() );
 		$errors     = ValidationFlash::field_errors( $flash );
 		$notice     = ValidationFlash::notice( $flash );
 

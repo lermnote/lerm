@@ -230,6 +230,16 @@ final class FieldModuleRegistry {
 			if ( is_array( $children ) && ! empty( $children ) ) {
 				$this->collect_field_types( $children, $types );
 			}
+
+			$items = is_array( $field['items'] ?? null ) ? $field['items'] : array();
+
+			foreach ( $items as $item ) {
+				if ( ! is_array( $item ) || ! is_array( $item['fields'] ?? null ) ) {
+					continue;
+				}
+
+				$this->collect_field_types( $item['fields'], $types );
+			}
 		}
 	}
 }

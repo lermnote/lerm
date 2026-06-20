@@ -79,7 +79,7 @@ final class ProfileContainer implements Container {
 			$store     = $this->stores->store( $schema, array( 'user_id' => $user->ID ) );
 			$renderer  = $this->renderer( $schema, $user->ID );
 			$flash     = ValidationFlash::consume( 'profile', $schema->id(), (string) $user->ID );
-			$values    = ValidationFlash::render_values( $store->all(), $flash );
+			$values    = ValidationFlash::render_values( $store->all(), $flash, $schema->definition(), $this->framework->field_types() );
 			$errors    = ValidationFlash::field_errors( $flash );
 			$notice    = ValidationFlash::notice( $flash );
 
