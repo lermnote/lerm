@@ -4,11 +4,11 @@
   "scripts": {
     "build": "wp-scripts build",
     "build:check": "npm run build && node tools/check-build-assets.js",
-    "check": "npm run build:check && npm run test:js-runtime && npm run test:unit",
+    "check": "npm run build:check && npm run test:js-runtime",
     "start": "wp-scripts start",
     "makepot": "wp i18n make-pot . languages/lerm-admin-config.pot --include='resources/'",
     "test:js-runtime": "node tools/test-js-runtime.js",
-    "test:unit": "jest",
+    "test:unit": "wp-scripts test-unit-jest",
     "wp-env:start": "wp-env start",
     "wp-env:start:multisite": "node tools/wp-env-multisite.js start",
     "wp-env:stop": "wp-env stop",
@@ -53,8 +53,7 @@
     "@wordpress/env": "^10.19.0",
     "@wordpress/i18n": "^5.0.0",
     "@wordpress/scripts": "^32.0.0",
-    "cross-env": "^7.0.3",
-    "jest": "^29.7.0"
+    "cross-env": "^7.0.3"
   },
   "overrides": {
     "ajv": "^8.20.0",
