@@ -175,9 +175,7 @@ final class MetaboxContainer implements Container, BlockEditorPanelContext {
 				continue;
 			}
 
-			$capability = (string) ( $container['capability'] ?? 'edit_post' );
-
-			if ( ! current_user_can( $capability, $post_id ) ) {
+			if ( ! current_user_can( ContainerSaveSupport::capability_for_schema( $schema, 'edit_post' ), $post_id ) ) {
 				continue;
 			}
 

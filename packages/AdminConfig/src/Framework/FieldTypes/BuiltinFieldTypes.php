@@ -12,6 +12,7 @@ namespace Lerm\AdminConfig\Framework\FieldTypes;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldRenderHelpers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -62,8 +63,8 @@ final class BuiltinFieldTypes {
 					$input_id,
 					'text',
 					'',
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -99,8 +100,8 @@ final class BuiltinFieldTypes {
 					$input_id,
 					'url',
 					'',
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -134,8 +135,8 @@ final class BuiltinFieldTypes {
 					$field_name,
 					$input_id,
 					'',
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -168,7 +169,7 @@ final class BuiltinFieldTypes {
 					$value,
 					$field_name,
 					$input_id,
-					self::name_attr( $name_template ) . self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ) . FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -201,8 +202,8 @@ final class BuiltinFieldTypes {
 					esc_attr( $input_id ),
 					esc_attr( $field_name ),
 					esc_attr( PageSchema::scalar_value( $value ) ),
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -239,8 +240,8 @@ final class BuiltinFieldTypes {
 					$field_name,
 					$input_id,
 					'',
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -262,7 +263,7 @@ final class BuiltinFieldTypes {
 				self::render_choice_group( $field, $value, $field_name, true, '', '', $type );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ) use ( $type ): void {
-				self::render_choice_group( $field, $value, $field_name, false, self::name_attr( $name_template ), self::id_attr( $id_template ), $type );
+				self::render_choice_group( $field, $value, $field_name, false, FieldRenderHelpers::name_attr( $name_template ), FieldRenderHelpers::id_attr( $id_template ), $type );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				return self::sanitize_select_like( $field, $value, $strict );
@@ -449,7 +450,7 @@ final class BuiltinFieldTypes {
 		$current_value    = $multiple ? '' : PageSchema::scalar_value( $value );
 		$select_name_attr = $multiple && '' !== $name_template
 			? ' data-name-template="' . esc_attr( $name_template . '[]' ) . '"'
-			: self::name_attr( $name_template );
+			: FieldRenderHelpers::name_attr( $name_template );
 
 		printf(
 			'<select id="%1$s" name="%2$s" class="regular-text"%3$s%4$s%5$s%6$s>',
@@ -458,7 +459,7 @@ final class BuiltinFieldTypes {
 			$multiple ? ' multiple="multiple"' : '',
 			$multiple ? ' size="' . esc_attr( (string) min( max( count( $choices ), 4 ), 10 ) ) . '"' : '',
 			$select_name_attr,
-			$is_root ? ' data-lerm-controller="1"' : self::id_attr( $id_template )
+			$is_root ? ' data-lerm-controller="1"' : FieldRenderHelpers::id_attr( $id_template )
 		);
 
 		foreach ( $choices as $choice_value => $choice_label ) {
@@ -615,13 +616,5 @@ final class BuiltinFieldTypes {
 		}
 
 		return $fallback;
-	}
-
-	private static function name_attr( string $name_template ): string {
-		return '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
-	}
-
-	private static function id_attr( string $id_template ): string {
-		return '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
 	}
 }

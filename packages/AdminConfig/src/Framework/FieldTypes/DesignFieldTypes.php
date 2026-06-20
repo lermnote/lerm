@@ -12,6 +12,7 @@ namespace Lerm\AdminConfig\Framework\FieldTypes;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldRenderHelpers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -274,10 +275,10 @@ final class DesignFieldTypes {
 					'button_text' => (string) ( $field['background_image_button_text'] ?? __( 'Choose image', 'lerm-admin-config' ) ),
 				),
 				$values['background-image'] ?? array(),
-				self::sub_name( $field_name, 'background-image' ),
-				self::sub_id( $input_id, 'background-image' ),
-				self::name_attr( self::sub_template( $name_template, 'background-image' ) ),
-				self::id_attr( self::sub_id_template( $id_template, 'background-image' ) )
+				FieldRenderHelpers::sub_name( $field_name, 'background-image' ),
+				FieldRenderHelpers::sub_id( $input_id, 'background-image' ),
+				FieldRenderHelpers::name_attr( FieldRenderHelpers::sub_template( $name_template, 'background-image' ) ),
+				FieldRenderHelpers::id_attr( FieldRenderHelpers::sub_id_template( $id_template, 'background-image' ) )
 			);
 			echo '</div>';
 		}
@@ -434,11 +435,11 @@ final class DesignFieldTypes {
 		echo '<label class="lerm-composite__item"><span class="lerm-composite__label">' . esc_html( $label ) . '</span><span class="lerm-composite__input">';
 		printf(
 			'<input type="number" id="%1$s" name="%2$s" value="%3$s" class="small-text"%4$s%5$s step="any">%6$s',
-			esc_attr( self::sub_id( $input_id, $key ) ),
-			esc_attr( self::sub_name( $field_name, $key ) ),
+			esc_attr( FieldRenderHelpers::sub_id( $input_id, $key ) ),
+			esc_attr( FieldRenderHelpers::sub_name( $field_name, $key ) ),
 			esc_attr( self::numeric_fragment( $values[ $key ] ?? '' ) ),
-			self::name_attr( self::sub_template( $name_template, $key ) ),
-			self::id_attr( self::sub_id_template( $id_template, $key ) ),
+			FieldRenderHelpers::name_attr( FieldRenderHelpers::sub_template( $name_template, $key ) ),
+			FieldRenderHelpers::id_attr( FieldRenderHelpers::sub_id_template( $id_template, $key ) ),
 			'' !== $unit ? '<span class="lerm-composite__unit">' . esc_html( $unit ) . '</span>' : ''
 		);
 		echo '</span></label>';
@@ -448,11 +449,11 @@ final class DesignFieldTypes {
 		echo '<label class="lerm-composite__item"><span class="lerm-composite__label">' . esc_html( $label ) . '</span>';
 		printf(
 			'<input type="text" id="%1$s" name="%2$s" value="%3$s" class="regular-text lerm-color-field"%4$s%5$s>',
-			esc_attr( self::sub_id( $input_id, $key ) ),
-			esc_attr( self::sub_name( $field_name, $key ) ),
+			esc_attr( FieldRenderHelpers::sub_id( $input_id, $key ) ),
+			esc_attr( FieldRenderHelpers::sub_name( $field_name, $key ) ),
 			esc_attr( $value ),
-			self::name_attr( self::sub_template( $name_template, $key ) ),
-			self::id_attr( self::sub_id_template( $id_template, $key ) )
+			FieldRenderHelpers::name_attr( FieldRenderHelpers::sub_template( $name_template, $key ) ),
+			FieldRenderHelpers::id_attr( FieldRenderHelpers::sub_id_template( $id_template, $key ) )
 		);
 		echo '</label>';
 	}
@@ -461,10 +462,10 @@ final class DesignFieldTypes {
 		echo '<label class="lerm-composite__item"><span class="lerm-composite__label">' . esc_html( $label ) . '</span>';
 		printf(
 			'<select id="%1$s" name="%2$s" class="regular-text"%3$s%4$s>',
-			esc_attr( self::sub_id( $input_id, $key ) ),
-			esc_attr( self::sub_name( $field_name, $key ) ),
-			self::name_attr( self::sub_template( $name_template, $key ) ),
-			self::id_attr( self::sub_id_template( $id_template, $key ) )
+			esc_attr( FieldRenderHelpers::sub_id( $input_id, $key ) ),
+			esc_attr( FieldRenderHelpers::sub_name( $field_name, $key ) ),
+			FieldRenderHelpers::name_attr( FieldRenderHelpers::sub_template( $name_template, $key ) ),
+			FieldRenderHelpers::id_attr( FieldRenderHelpers::sub_id_template( $id_template, $key ) )
 		);
 		foreach ( $choices as $choice_value => $choice_label ) {
 			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $choice_value ), selected( $value, (string) $choice_value, false ), esc_html( $choice_label ) );
@@ -618,30 +619,6 @@ final class DesignFieldTypes {
 		}
 		$number = (float) $string;
 		return floor( $number ) === $number ? (string) (int) $number : rtrim( rtrim( sprintf( '%.4F', $number ), '0' ), '.' );
-	}
-
-	private static function sub_name( string $field_name, string $key ): string {
-		return $field_name . '[' . $key . ']';
-	}
-
-	private static function sub_template( string $template, string $key ): string {
-		return '' !== $template ? $template . '[' . $key . ']' : '';
-	}
-
-	private static function sub_id( string $input_id, string $key ): string {
-		return $input_id . '__' . sanitize_html_class( str_replace( '_', '-', $key ) );
-	}
-
-	private static function sub_id_template( string $template, string $key ): string {
-		return '' !== $template ? $template . '__' . sanitize_html_class( str_replace( '_', '-', $key ) ) : '';
-	}
-
-	private static function name_attr( string $template ): string {
-		return '' !== $template ? ' data-name-template="' . esc_attr( $template ) . '"' : '';
-	}
-
-	private static function id_attr( string $template ): string {
-		return '' !== $template ? ' data-id-template="' . esc_attr( $template ) . '"' : '';
 	}
 
 	private static function border_styles(): array {

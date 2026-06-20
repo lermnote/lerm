@@ -13,6 +13,7 @@ use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\FieldTypes\Support\NestedFieldSanitizer;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldRenderHelpers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -114,8 +115,8 @@ final class StructuredFieldTypes {
 					$value,
 					$field_name,
 					$input_id,
-					self::name_attr( '' !== $name_template ? $name_template . '[id]' : '' ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( '' !== $name_template ? $name_template . '[id]' : '' ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
@@ -148,8 +149,8 @@ final class StructuredFieldTypes {
 					$value,
 					$field_name,
 					$input_id,
-					self::name_attr( '' !== $name_template ? $name_template . '[ids]' : '' ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( '' !== $name_template ? $name_template . '[ids]' : '' ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): array {
@@ -374,8 +375,8 @@ final class StructuredFieldTypes {
 			esc_attr( $field_name ),
 			esc_attr( (string) ( $field['rows'] ?? 10 ) ),
 			esc_attr( (string) ( $field['placeholder'] ?? '' ) ),
-			self::name_attr( $name_template ),
-			self::id_attr( $id_template ),
+			FieldRenderHelpers::name_attr( $name_template ),
+			FieldRenderHelpers::id_attr( $id_template ),
 			esc_textarea( PageSchema::scalar_value( $value ) )
 		);
 	}
@@ -391,8 +392,8 @@ final class StructuredFieldTypes {
 				esc_attr( $input_id ),
 				esc_attr( $field_name ),
 				esc_attr( (string) ( $field['rows'] ?? 6 ) ),
-				self::name_attr( $name_template ),
-				self::id_attr( $id_template ),
+				FieldRenderHelpers::name_attr( $name_template ),
+				FieldRenderHelpers::id_attr( $id_template ),
 				esc_textarea( PageSchema::scalar_value( $value ) )
 			);
 			return;
@@ -649,13 +650,5 @@ final class StructuredFieldTypes {
 			'<p class="description" style="color:#b91c1c;font-style:italic">%s</p>',
 			esc_html( $message )
 		);
-	}
-
-	private static function name_attr( string $name_template ): string {
-		return '' !== $name_template ? ' data-name-template="' . esc_attr( $name_template ) . '"' : '';
-	}
-
-	private static function id_attr( string $id_template ): string {
-		return '' !== $id_template ? ' data-id-template="' . esc_attr( $id_template ) . '"' : '';
 	}
 }

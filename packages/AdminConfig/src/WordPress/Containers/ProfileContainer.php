@@ -136,7 +136,7 @@ final class ProfileContainer implements Container {
 				continue;
 			}
 
-			if ( ! current_user_can( $this->capability_for_schema( $schema ), $user_id ) ) {
+			if ( ! current_user_can( ContainerSaveSupport::capability_for_schema( $schema, 'edit_user' ), $user_id ) ) {
 				continue;
 			}
 
@@ -167,13 +167,4 @@ final class ProfileContainer implements Container {
 		);
 	}
 
-	private function capability_for_schema( CompiledSchema $schema ): string {
-		$container = $schema->container();
-
-		if ( ! empty( $container['capability'] ) && is_scalar( $container['capability'] ) ) {
-			return (string) $container['capability'];
-		}
-
-		return 'edit_user';
-	}
 }
