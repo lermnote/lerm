@@ -18,6 +18,7 @@ use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\WordPress\Support\HasBlockEditorPanel;
+use Lerm\AdminConfig\WordPress\Support\BlockEditorPanelContext;
 use Lerm\AdminConfig\WordPress\Support\ContainerSaveSupport;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
@@ -25,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class MetaboxContainer implements Container {
+final class MetaboxContainer implements Container, BlockEditorPanelContext {
 
 	use HasBlockEditorPanel;
 
@@ -42,7 +43,18 @@ final class MetaboxContainer implements Container {
 	) {
 	}
 
-	private function container_type_for_block_panel(): string {
+	/**
+	 * @return array<string, CompiledSchema>
+	 */
+	public function schemas(): array {
+		return $this->schemas;
+	}
+
+	public function framework(): Framework {
+		return $this->framework;
+	}
+
+	public function container_type_for_block_panel(): string {
 		return 'metabox';
 	}
 
@@ -111,7 +123,7 @@ final class MetaboxContainer implements Container {
 		$section_id = (string) array_key_first( $sections );
 		$section    = '' !== $section_id ? ( $sections[ $section_id ] ?? null ) : null;
 		$flash      = ValidationFlash::consume( 'metabox', $schema->id(), (string) $post->ID );
-		$values     = ValidationFlash::render_values( $store->all(), $flash );
+		$values     = ValidationFlash::render_values( $store->all(), $flash, $schema->definition(), $this->framework->field_types() );
 		$errors     = ValidationFlash::field_errors( $flash );
 		$notice     = ValidationFlash::notice( $flash );
 

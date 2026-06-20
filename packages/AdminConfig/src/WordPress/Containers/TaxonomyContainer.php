@@ -124,7 +124,7 @@ final class TaxonomyContainer implements Container {
 			$renderer = $this->renderer( $schema, $store );
 			$sections = PageSchema::sections( $schema->definition() );
 			$flash    = ValidationFlash::consume( 'taxonomy', $schema->id(), $this->add_flash_resource( $taxonomy ) );
-			$values   = ValidationFlash::render_values( $store->all(), $flash );
+			$values   = ValidationFlash::render_values( $store->all(), $flash, $schema->definition(), $this->framework->field_types() );
 			$errors   = ValidationFlash::field_errors( $flash );
 			$notice   = ValidationFlash::notice( $flash );
 
@@ -159,7 +159,7 @@ final class TaxonomyContainer implements Container {
 			$renderer = $this->renderer( $schema, $store );
 			$sections = PageSchema::sections( $schema->definition() );
 			$flash    = ValidationFlash::consume( 'taxonomy', $schema->id(), $this->edit_flash_resource( $term->term_id ) );
-			$values   = ValidationFlash::render_values( $store->all(), $flash );
+			$values   = ValidationFlash::render_values( $store->all(), $flash, $schema->definition(), $this->framework->field_types() );
 			$errors   = ValidationFlash::field_errors( $flash );
 			$notice   = ValidationFlash::notice( $flash );
 

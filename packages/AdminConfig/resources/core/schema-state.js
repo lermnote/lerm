@@ -2,6 +2,7 @@
 
 const { fieldErrorsFromResponse, messageFromResponse } = require('./errors');
 const { asRecord, asRecordArray } = require('./records');
+const { attachmentId: mediaAttachmentId, fieldControlType, galleryIds: galleryAttachmentIds, pathTokens, positiveInteger } = require('./utils');
 
 /**
  * @typedef {{
@@ -33,14 +34,6 @@ const cloneContainer = (value) => {
 
 	return cloneRecord(value);
 };
-
-/**
- * @param {string|string[]} path
- * @returns {string[]}
- */
-const pathTokens = (path) => (Array.isArray(path) ? path : String(path).split('.'))
-	.map((token) => String(token).trim())
-	.filter(Boolean);
 
 /**
  * @param {Record<string, unknown>} values
@@ -96,76 +89,6 @@ const withoutErrorAtPath = (errors, path) => {
 	delete nextErrors[exactPath];
 
 	return nextErrors;
-};
-
-/**
- * @param {unknown} value
- * @returns {number}
- */
-const positiveInteger = (value) => {
-	const parsed = Number.parseInt(String(value || ''), 10);
-
-	return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-};
-
-/**
- * @param {unknown} value
- * @returns {number}
- */
-const mediaAttachmentId = (value) => {
-	if (Array.isArray(value)) {
-		return mediaAttachmentId(value[0]);
-	}
-
-	const record = asRecord(value);
-
-	return positiveInteger(record.id || record.ID || value);
-};
-
-/**
- * @param {unknown} value
- * @returns {Array<number>}
- */
-const galleryAttachmentIds = (value) => {
-	let candidates = value;
-
-	if (typeof value === 'string') {
-		candidates = value.split(',');
-	}
-
-	const record = asRecord(value);
-
-	if (typeof record.ids === 'string') {
-		candidates = record.ids.split(',');
-	} else if (Array.isArray(record.ids)) {
-		candidates = record.ids;
-	}
-
-	if (!Array.isArray(candidates)) {
-		candidates = [];
-	}
-
-	const ids = [];
-
-	for (const candidate of candidates) {
-		const id = mediaAttachmentId(candidate);
-
-		if (id > 0 && !ids.includes(id)) {
-			ids.push(id);
-		}
-	}
-
-	return ids;
-};
-
-/**
- * @param {Record<string, unknown>} field
- * @returns {string}
- */
-const fieldControlType = (field) => {
-	const client = asRecord(field.client);
-
-	return String(field.control || client.control || field.type || '');
 };
 
 /**

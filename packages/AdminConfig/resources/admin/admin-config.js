@@ -184,6 +184,24 @@ let confirmDialog;
 	};
 
 	/**
+	 * Check whether a URL uses a safe protocol (http or https).
+	 * Prevents javascript: / data: / vbscript: URLs in src / href attributes.
+	 *
+	 * @param {string} url
+	 * @returns {string} The original URL if safe, or an empty string.
+	 */
+	const safeUrl = (url) => {
+		try {
+			const { protocol } = new URL(url, location.href);
+			if (protocol !== 'http:' && protocol !== 'https:') return '';
+		} catch (_) {
+			// Unparseable URL — allow only if it starts with / or #
+			if (!url.startsWith('/') && !url.startsWith('#')) return '';
+		}
+		return url;
+	};
+
+	/**
 	 * Normalize a dataset-style key to the actual attribute suffix used in HTML.
 	 * Accepts both `fieldType` and `field-type`.
 	 *
@@ -347,7 +365,9 @@ let confirmDialog;
 
 		const dependentRows = dom.findAll('[data-dependency-field]', form).map((row) => /** @type {HTMLElement} */ (row));
 
-		for (let pass = 0; pass < dependentRows.length; pass += 1) {
+		const maxPasses = Math.min(dependentRows.length, 20);
+
+		for (let pass = 0; pass < maxPasses; pass += 1) {
 			let changed = false;
 
 			dependentRows.forEach((row) => {
@@ -850,7 +870,6 @@ let confirmDialog;
 		wrapper.appendChild(trigger);
 		wrapper.appendChild(input);
 		wrapper.appendChild(clearButton);
-		clearButton.textContent = 'x';
 
 		/** @type {ColorControlInstance} */
 		const control = {
@@ -939,8 +958,8 @@ let confirmDialog;
 		setValue(input, value) {
 			if (!(input instanceof HTMLInputElement)) return;
 
-			this.init(input);
 			input.value = normalizeHexColor(value) || String(value ?? '').trim();
+			this.init(input);
 			createColorControl(input).syncUi();
 		},
 	};
@@ -1587,20 +1606,21 @@ let confirmDialog;
 	 */
 	const renderUploadPreview = (preview, removeButton, url) => {
 		dom.empty(preview);
-		const hasValue = Boolean(url);
+		const safe = safeUrl(url);
+		const hasValue = Boolean(safe);
 		preview.hidden = !hasValue;
 		removeButton.hidden = !hasValue;
 
 		if (!hasValue) return;
 
-		if (/\.(avif|gif|jpe?g|png|svg|webp)(\?.*)?$/i.test(url)) {
-			preview.appendChild(dom.create('img', { src: url, alt: '' }));
+		if (/\.(avif|gif|jpe?g|png|svg|webp)(\?.*)?$/i.test(safe)) {
+			preview.appendChild(dom.create('img', { src: safe, alt: '' }));
 			return;
 		}
 
-		const label = url.split('/').pop() || url;
+		const label = safe.split('/').pop() || safe;
 		preview.appendChild(dom.create('a', {
-			href: url,
+			href: safe,
 			target: '_blank',
 			rel: 'noopener noreferrer',
 		}, [label]));
@@ -1701,9 +1721,10 @@ let confirmDialog;
 	 */
 	const renderMediaPreview = (preview, removeButton, imageUrl) => {
 		dom.empty(preview);
-		if (imageUrl) {
+		const safe = safeUrl(imageUrl);
+		if (safe) {
 			preview.hidden = false;
-			preview.appendChild(dom.create('img', { src: imageUrl, alt: '' }));
+			preview.appendChild(dom.create('img', { src: safe, alt: '' }));
 			removeButton.hidden = false;
 		} else {
 			preview.hidden = true;
@@ -1770,7 +1791,8 @@ let confirmDialog;
 		preview.hidden = attachments.length === 0;
 		if (!attachments.length) return;
 		attachments.forEach(a => {
-			preview.appendChild(dom.create('img', { src: a.sizes?.thumbnail?.url ?? a.url, alt: '' }));
+			const src = safeUrl(a.sizes?.thumbnail?.url ?? a.url ?? '');
+			if (src) preview.appendChild(dom.create('img', { src, alt: '' }));
 		});
 	};
 
@@ -1999,7 +2021,13 @@ let confirmDialog;
 
 			/** @type {HTMLElement} */ (dom.find('[data-lerm-group-add]', groupEl)).addEventListener('click', (e) => {
 				e.preventDefault();
-				list.insertAdjacentHTML('beforeend', template?.innerHTML ?? '');
+				if (!template?.content) return;
+				try {
+					list.appendChild(template.content.cloneNode(true));
+				} catch (_) {
+					// Fallback: if cloneNode fails, skip this addition
+					return;
+				}
 				renumberGroupItems(groupEl);
 				initGroupChildren(groupEl);
 				syncDirtyState(/** @type {HTMLFormElement} */(groupEl.closest('form')));
@@ -2010,7 +2038,8 @@ let confirmDialog;
 				if (!btn || !list.contains(btn)) return;
 				e.preventDefault();
 				if (!await confirmDialog(__('Remove this item?', 'lerm-admin-config'))) return;
-    			/** @type {HTMLElement} */ (btn.closest('[data-lerm-group-item]')).remove();
+				const item = btn.closest('[data-lerm-group-item]');
+				if (item) item.remove();
 				renumberGroupItems(groupEl);
 				syncDirtyState(/** @type {HTMLFormElement} */(groupEl.closest('form')));
 			});
@@ -2476,11 +2505,20 @@ let confirmDialog;
 		setStatus(form, pageDirty ? 'dirty' : 'idle', pageDirty ? __('Unsaved changes', 'lerm-admin-config') : __('Synced', 'lerm-admin-config'));
 	};
 
+	/** @type {Map<HTMLFormElement, number>} */
+	const dirtyDebounceMap = new Map();
+
 	/** @param {HTMLFormElement} form */
 	const syncDirtyState = (form) => {
-		const savedState = formSnapshotMap.get(form) ?? {};
-		const dirty = stableStateString(readFormState(form)) !== stableStateString(savedState);
-		setDirty(form, dirty);
+		const existing = dirtyDebounceMap.get(form);
+		if (existing) clearTimeout(existing);
+
+		dirtyDebounceMap.set(form, setTimeout(() => {
+			dirtyDebounceMap.delete(form);
+			const savedState = formSnapshotMap.get(form) ?? {};
+			const dirty = stableStateString(readFormState(form)) !== stableStateString(savedState);
+			setDirty(form, dirty);
+		}, 150));
 	};
 
 	// ─── REST Actions ──────────────────────────────────────────────────────────

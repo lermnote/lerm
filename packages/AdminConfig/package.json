@@ -8,6 +8,7 @@
     "start": "wp-scripts start",
     "makepot": "wp i18n make-pot . languages/lerm-admin-config.pot --include='resources/'",
     "test:js-runtime": "node tools/test-js-runtime.js",
+    "test:unit": "wp-scripts test-unit-jest",
     "wp-env:start": "wp-env start",
     "wp-env:start:multisite": "node tools/wp-env-multisite.js start",
     "wp-env:stop": "wp-env stop",
@@ -49,8 +50,8 @@
     "@wordpress/api-fetch": "^7.44.0",
     "@wordpress/components": "^28.0.0",
     "@wordpress/data": "^10.0.0",
-    "@wordpress/i18n": "^5.0.0",
     "@wordpress/env": "^10.19.0",
+    "@wordpress/i18n": "^5.0.0",
     "@wordpress/scripts": "^32.0.0",
     "cross-env": "^7.0.3"
   },

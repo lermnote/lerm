@@ -17,13 +17,14 @@ namespace Lerm\AdminConfig\WordPress\Containers;
 use Lerm\AdminConfig\Compiler\CompiledSchema;
 use Lerm\AdminConfig\Contracts\Container;
 use Lerm\AdminConfig\Framework\Framework;
+use Lerm\AdminConfig\WordPress\Support\BlockEditorPanelContext;
 use Lerm\AdminConfig\WordPress\Support\HasBlockEditorPanel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class BlockEditorPanelContainer implements Container {
+final class BlockEditorPanelContainer implements Container, BlockEditorPanelContext {
 
 	use HasBlockEditorPanel;
 
@@ -54,7 +55,18 @@ final class BlockEditorPanelContainer implements Container {
 		$this->hooks_registered = true;
 	}
 
-	private function container_type_for_block_panel(): string {
+	/**
+	 * @return array<string, CompiledSchema>
+	 */
+	public function schemas(): array {
+		return $this->schemas;
+	}
+
+	public function framework(): Framework {
+		return $this->framework;
+	}
+
+	public function container_type_for_block_panel(): string {
 		return 'block_editor_panel';
 	}
 }

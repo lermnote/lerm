@@ -30,6 +30,12 @@ final class RestEndpoints {
 	 */
 	private static array $runtimes = array();
 
+	/**
+	 * Tracks whether routes have been registered to prevent duplicate
+	 * registration when multiple RestEndpoints instances exist.
+	 */
+	private static bool $routes_registered = false;
+
 	public function __construct(
 		private Runtime $runtime
 	) {
@@ -38,7 +44,10 @@ final class RestEndpoints {
 	public function register(): void {
 		self::$runtimes[ spl_object_id( $this->runtime ) ] = \WeakReference::create( $this->runtime );
 
-		add_action( 'rest_api_init', array( self::class, 'register_routes' ) );
+		if ( ! self::$routes_registered ) {
+			add_action( 'rest_api_init', array( self::class, 'register_routes' ) );
+			self::$routes_registered = true;
+		}
 	}
 
 	public static function register_routes(): void {

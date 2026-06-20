@@ -1,6 +1,7 @@
 // @ts-check
 
 const { asRecord, asRecordArray } = require('../core/records');
+const { attachmentId, fieldControlType, galleryIds, pathTokens, positiveInteger, stringValue } = require('../core/utils');
 const { __, sprintf } = require('../i18n');
 
 /**
@@ -12,12 +13,6 @@ const { __, sprintf } = require('../i18n');
  * @returns {Array<unknown>}
  */
 const asArray = (value) => Array.isArray(value) ? value : [];
-
-/**
- * @param {unknown} value
- * @returns {string}
- */
-const stringValue = (value) => value === null || typeof value === 'undefined' ? '' : String(value);
 
 /**
  * @param {unknown} value
@@ -198,27 +193,9 @@ const numericValue = (value, field) => {
 
 /**
  * @param {Record<string, unknown>} field
- * @returns {string}
- */
-const fieldControlType = (field) => {
-	const client = asRecord(field.client);
-
-	return stringValue(field.control || client.control || field.type || 'text') || 'text';
-};
-
-/**
- * @param {Record<string, unknown>} field
  * @returns {Array<Record<string, unknown>>}
  */
 const childFields = (field) => asRecordArray(field.fields);
-
-/**
- * @param {string|string[]} path
- * @returns {string[]}
- */
-const pathTokens = (path) => (Array.isArray(path) ? path : stringValue(path).split('.'))
-	.map((token) => stringValue(token).trim())
-	.filter(Boolean);
 
 /**
  * @param {string[]} path
@@ -353,30 +330,6 @@ const renderNestedField = (normalized, field, path, value) => {
 
 /**
  * @param {unknown} value
- * @returns {number}
- */
-const positiveInteger = (value) => {
-	const parsed = Number.parseInt(stringValue(value), 10);
-
-	return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-};
-
-/**
- * @param {unknown} value
- * @returns {number}
- */
-const attachmentId = (value) => {
-	if (Array.isArray(value)) {
-		return attachmentId(value[0]);
-	}
-
-	const record = asRecord(value);
-
-	return positiveInteger(record.id || record.ID || value);
-};
-
-/**
- * @param {unknown} value
  * @returns {Array<unknown>}
  */
 const selectionItems = (value) => {
@@ -404,39 +357,8 @@ const selectionItems = (value) => {
 };
 
 /**
- * @param {unknown} value
- * @returns {Array<number>}
- */
-const galleryIds = (value) => {
-	let candidates = value;
-	const record = asRecord(value);
 
-	if (typeof value === 'string') {
-		candidates = value.split(',');
-	} else if (typeof record.ids === 'string') {
-		candidates = record.ids.split(',');
-	} else if (Array.isArray(record.ids)) {
-		candidates = record.ids;
-	}
 
-	if (!Array.isArray(candidates)) {
-		return [];
-	}
-
-	const ids = [];
-
-	for (const candidate of candidates) {
-		const id = attachmentId(candidate);
-
-		if (id > 0 && !ids.includes(id)) {
-			ids.push(id);
-		}
-	}
-
-	return ids;
-};
-
-/**
  * @param {Record<string, unknown>} record
  * @returns {string}
  */

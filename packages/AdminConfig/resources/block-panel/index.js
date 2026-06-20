@@ -4,6 +4,7 @@ const { createAdminConfigRestClient, normalizeRestError } = require('../core/res
 const { contextFromConfig, contextQueryString } = require('../core/context');
 const { isFieldDependencySatisfied } = require('../core/dependencies');
 const { asRecord, asRecordArray } = require('../core/records');
+const { fieldControlType } = require('../core/utils');
 const {
 	createSchemaState,
 	hydrateSchemaResponse,
@@ -283,16 +284,6 @@ const fieldCount = (schema) => {
 
 		return count + (Array.isArray(sectionFields) ? sectionFields.length : 0);
 	}, 0);
-};
-
-/**
- * @param {Record<string, unknown>} field
- * @returns {string}
- */
-const fieldControlType = (field) => {
-	const client = asRecord(field.client);
-
-	return String(field.control || client.control || field.type || 'text');
 };
 
 /**

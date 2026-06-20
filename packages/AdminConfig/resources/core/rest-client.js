@@ -1,8 +1,17 @@
 // @ts-check
 
-const apiFetchModule = require('@wordpress/api-fetch');
-const apiFetch = apiFetchModule.default || apiFetchModule;
 const { asRecord } = require('./records');
+
+let apiFetch = null;
+
+try {
+	const apiFetchModule = require('@wordpress/api-fetch');
+	apiFetch = apiFetchModule.default || apiFetchModule;
+} catch (_) {
+	// @wordpress/api-fetch is unavailable outside the webpack/browser bundle
+	// (e.g. in Node.js test environments). The client's hasTransport() guard
+	// prevents calls when REST config is missing, so apiFetch stays unused.
+}
 
 /**
  * @typedef {{
@@ -127,6 +136,10 @@ const createAdminConfigRestClient = ({ getConfig }) => {
 	 * @returns {Promise<AdminConfigResponse>}
 	 */
 	const request = async (path, options = {}) => {
+		if (!apiFetch) {
+			return normalizeRestError(new Error('REST transport unavailable'), 'REST transport unavailable');
+		}
+
 		const currentConfig = cfg();
 		const headers = plainHeaders(options.headers);
 		headers['X-WP-Nonce'] = String(currentConfig.restNonce || '');
