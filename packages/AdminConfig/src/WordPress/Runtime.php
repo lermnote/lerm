@@ -193,7 +193,7 @@ final class Runtime {
 	 * @param array<string, mixed> $args
 	 * @return mixed
 	 */
-	public function resolve_data_source( string $source_id, array $args = array() ) {
+	public function resolve_data_source( string $source_id, array $args = array() ): mixed {
 		return $this->data_sources->resolve( $source_id, $args );
 	}
 
@@ -252,9 +252,10 @@ final class Runtime {
 	}
 
 	/**
+	 * @param mixed $fallback
 	 * @return mixed
 	 */
-	public function get( string $schema_id, string $field_id, string $tag = '', $fallback = '', array $context = array() ) {
+	public function get( string $schema_id, string $field_id, string $tag = '', $fallback = '', array $context = array() ): mixed {
 		try {
 			return $this->store( $schema_id, $context )->get( $field_id, $tag, $fallback );
 		} catch ( MissingStoreContextException $exception ) {
@@ -350,7 +351,7 @@ final class Runtime {
 	 * @param mixed $resolved
 	 * @return array{items: array<int, array{value: string, label: string}>, more: bool}
 	 */
-	public function normalize_data_source_response( $resolved ): array {
+	public function normalize_data_source_response( mixed $resolved ): array {
 		$items = array();
 		$more  = false;
 
