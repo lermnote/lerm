@@ -23,6 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * @phpstan-require-implements BlockEditorPanelContext
+ */
 trait HasBlockEditorPanel {
 
 	/**
@@ -140,7 +143,6 @@ trait HasBlockEditorPanel {
 	private function collect_panel_schemas( string $post_type, int $post_id ): array {
 		$schemas = array();
 
-		/** @var BlockEditorPanelContext $this */
 		foreach ( $this->schemas() as $schema ) {
 			$container = $schema->container();
 
@@ -191,12 +193,10 @@ trait HasBlockEditorPanel {
 	}
 
 	private function panel_asset_url( string $asset ): string {
-		/** @var BlockEditorPanelContext $this */
 		return $this->framework()->asset_resolver()->url( $asset );
 	}
 
 	private function panel_asset_path( string $asset ): string {
-		/** @var BlockEditorPanelContext $this */
 		$resolver = $this->framework()->asset_resolver();
 
 		if ( $resolver instanceof AssetPathResolver ) {
@@ -207,7 +207,6 @@ trait HasBlockEditorPanel {
 	}
 
 	private function panel_asset_version(): string {
-		/** @var BlockEditorPanelContext $this */
 		return $this->framework()->asset_resolver()->version();
 	}
 }
