@@ -166,5 +166,4 @@ final class ProfileContainer implements Container {
 			$this->framework->field_modules()
 		);
 	}
-
 }
