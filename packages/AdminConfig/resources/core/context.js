@@ -13,10 +13,11 @@ const CONTEXT_KEYS = [
  * @returns {Record<string, number>}
  */
 const contextFromRecord = (source = {}) => {
+	const record = source && typeof source === 'object' ? source : {};
 	const context = {};
 
 	for (const key of CONTEXT_KEYS) {
-		const value = Number.parseInt(String(source[key] ?? ''), 10);
+		const value = Number.parseInt(String(record[key] ?? ''), 10);
 
 		if (Number.isInteger(value) && value > 0) {
 			context[key] = value;
@@ -38,20 +39,24 @@ const recordFromUnknown = (value) => value && typeof value === 'object'
  * @param {Record<string, unknown>} source
  * @returns {Record<string, number>}
  */
-const contextFromConfig = (source = {}) => ({
-	...contextFromRecord(source),
-	...contextFromRecord(recordFromUnknown(source.context)),
-});
+const contextFromConfig = (source = {}) => {
+	const record = source && typeof source === 'object' ? source : {};
+	return {
+		...contextFromRecord(record),
+		...contextFromRecord(recordFromUnknown(record.context)),
+	};
+};
 
 /**
  * @param {Record<string, number>} context
  * @returns {string}
  */
 const contextQueryString = (context = {}) => {
+	const record = context && typeof context === 'object' ? context : {};
 	const params = new URLSearchParams();
 
 	for (const key of CONTEXT_KEYS) {
-		const value = context[key];
+		const value = record[key];
 
 		if (Number.isInteger(value) && value > 0) {
 			params.set(key, String(value));

@@ -154,668 +154,586 @@ const selectAjaxOption = async ( page, field, search, value, label ) => {
 	await field.locator( `button[data-value="${ value }"]` ).click();
 };
 
+/**
+ * Gather all field locators from the expanded panel.
+ *
+ * @param {import('@playwright/test').Locator} panel
+ * @returns {Record<string, import('@playwright/test').Locator>}
+ */
+const gatherLocators = ( panel ) => ( {
+	featuredToggle: panel.getByRole( 'checkbox', { name: /Feature this entry/i } ),
+	entrySlug: panel.getByRole( 'textbox', { name: /Entry slug/i } ),
+	entryLayout: panel.getByRole( 'combobox', { name: /Entry layout/i } ),
+	entryFormat: panel.locator( '[data-field-id="entry_format"]' ),
+	entryEmphasis: panel.locator( '[data-field-id="entry_emphasis"]' ),
+	entryAccent: panel.locator( '[data-field-id="entry_accent"] [data-color-field="entry_accent"]' ),
+	entryReviewDate: panel.locator( '[data-field-id="entry_review_date"] input[type="date"]' ),
+	entryPriority: panel.locator( '[data-field-id="entry_priority"] input[type="range"]' ),
+	entryScore: panel.locator( '[data-field-id="entry_score"] input[type="number"]' ),
+	entryUpload: panel.locator( '[data-field-id="entry_upload"]' ),
+	entryMedia: panel.locator( '[data-field-id="entry_media"]' ),
+	entryGallery: panel.locator( '[data-field-id="entry_gallery"]' ),
+	entryDimensions: panel.locator( '[data-field-id="entry_dimensions"]' ),
+	entrySpacing: panel.locator( '[data-field-id="entry_spacing"]' ),
+	entryBorder: panel.locator( '[data-field-id="entry_border"]' ),
+	entryLinkColors: panel.locator( '[data-field-id="entry_link_colors"]' ),
+	entryTypography: panel.locator( '[data-field-id="entry_typography"]' ),
+	entryBackground: panel.locator( '[data-field-id="entry_background"]' ),
+	entryPalette: panel.locator( '[data-field-id="entry_palette"]' ),
+	entryImageStyle: panel.locator( '[data-field-id="entry_image_style"]' ),
+	entryCampaign: panel.locator( '[data-field-id="entry_campaign"]' ),
+	entryLinks: panel.locator( '[data-field-id="entry_links"]' ),
+	entryIcon: panel.locator( '[data-field-id="entry_icon"]' ),
+	entryBadge: panel.locator( '[data-field-id="entry_badge"]' ),
+} );
+
+/**
+ * Read all initial field values from the panel.
+ *
+ * @param {Record<string, import('@playwright/test').Locator>} l
+ * @returns {Promise<Record<string, string>>}
+ */
+const readInitialValues = async ( l ) => ( {
+	checked: await l.featuredToggle.isChecked(),
+	slug: await l.entrySlug.inputValue(),
+	layout: await l.entryLayout.inputValue(),
+	format: await l.entryFormat.locator( 'input[type="radio"]:checked' ).inputValue(),
+	emphasis: await l.entryEmphasis.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' ),
+	accent: ( await l.entryAccent.getAttribute( 'data-color-value' ) ).toLowerCase(),
+	reviewDate: await l.entryReviewDate.inputValue(),
+	priority: await l.entryPriority.inputValue(),
+	score: await l.entryScore.inputValue(),
+	badgeLabel: await l.entryBadge.getByRole( 'textbox', { name: /^Label$/i } ).inputValue(),
+	badgeSlug: await l.entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } ).inputValue(),
+	dimensionsWidth: await l.entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Width/i } ).inputValue(),
+	dimensionsHeight: await l.entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Height/i } ).inputValue(),
+	dimensionsUnit: await l.entryDimensions.getByRole( 'combobox', { name: /Entry card size unit/i } ).inputValue(),
+	spacingTop: await l.entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Top/i } ).inputValue(),
+	spacingRight: await l.entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Right/i } ).inputValue(),
+	spacingUnit: await l.entrySpacing.getByRole( 'combobox', { name: /Entry card spacing unit/i } ).inputValue(),
+	borderTop: await l.entryBorder.getByRole( 'spinbutton', { name: /Entry card border Top/i } ).inputValue(),
+	borderRight: await l.entryBorder.getByRole( 'spinbutton', { name: /Entry card border Right/i } ).inputValue(),
+	borderStyle: await l.entryBorder.getByRole( 'combobox', { name: /Entry card border Style/i } ).inputValue(),
+	borderColor: ( await l.entryBorder.locator( '[data-color-field="entry_border.color"]' ).getAttribute( 'data-color-value' ) ).toLowerCase(),
+	linkNormal: ( await l.entryLinkColors.locator( '[data-color-field="entry_link_colors.color"]' ).getAttribute( 'data-color-value' ) ).toLowerCase(),
+	linkHover: ( await l.entryLinkColors.locator( '[data-color-field="entry_link_colors.hover"]' ).getAttribute( 'data-color-value' ) ).toLowerCase(),
+	typographyFamily: await l.entryTypography.getByRole( 'textbox', { name: /^Family$/i } ).inputValue(),
+	typographyWeight: await l.entryTypography.getByRole( 'combobox', { name: /^Weight$/i } ).inputValue(),
+	typographyStyle: await l.entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ).getAttribute( 'data-value' ),
+	typographySize: await l.entryTypography.getByRole( 'textbox', { name: /^Size$/i } ).inputValue(),
+	typographyUnit: await l.entryTypography.getByRole( 'combobox', { name: /^Unit$/i } ).inputValue(),
+	typographyLineHeight: await l.entryTypography.getByRole( 'textbox', { name: /^Line height$/i } ).inputValue(),
+	typographyLetterSpacing: await l.entryTypography.getByRole( 'textbox', { name: /^Letter spacing$/i } ).inputValue(),
+	typographyAlign: await l.entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ).getAttribute( 'data-value' ),
+	typographyColor: ( await l.entryTypography.locator( '[data-field-path="entry_typography.color"] [data-color-field="entry_typography.color"]' ).getAttribute( 'data-color-value' ) ).toLowerCase(),
+	backgroundColor: ( await l.entryBackground.locator( '[data-field-path="entry_background.background-color"] [data-color-field="entry_background.background-color"]' ).getAttribute( 'data-color-value' ) ).toLowerCase(),
+	backgroundGradientColor: ( await l.entryBackground.locator( '[data-field-path="entry_background.background-gradient-color"] [data-color-field="entry_background.background-gradient-color"]' ).getAttribute( 'data-color-value' ) ).toLowerCase(),
+	backgroundGradientDirection: await l.entryBackground.locator( '[data-field-path="entry_background.background-gradient-direction"] select' ).inputValue(),
+	backgroundPosition: await l.entryBackground.locator( '[data-field-path="entry_background.background-position"] select' ).inputValue(),
+	backgroundRepeat: await l.entryBackground.locator( '[data-field-path="entry_background.background-repeat"] select' ).inputValue(),
+	backgroundAttachment: await l.entryBackground.locator( '[data-field-path="entry_background.background-attachment"] select' ).inputValue(),
+	backgroundSize: await l.entryBackground.locator( '[data-field-path="entry_background.background-size"] select' ).inputValue(),
+	backgroundOrigin: await l.entryBackground.locator( '[data-field-path="entry_background.background-origin"] select' ).inputValue(),
+	backgroundClip: await l.entryBackground.locator( '[data-field-path="entry_background.background-clip"] select' ).inputValue(),
+	backgroundBlendMode: await l.entryBackground.locator( '[data-field-path="entry_background.background-blend-mode"] select' ).inputValue(),
+	palette: await l.entryPalette.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' ),
+	imageStyle: await l.entryImageStyle.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' ),
+	campaign: await l.entryCampaign.locator( '[data-selected-value]' ).first().getAttribute( 'data-selected-value' ),
+	icon: await l.entryIcon.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' ),
+	linkLabel: await l.entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first().inputValue(),
+	linkUrl: await l.entryLinks.getByRole( 'textbox', { name: /^Link URL$/i } ).first().inputValue(),
+	newsletter: await panel.getByRole( 'checkbox', { name: /^Newsletter$/i } ).isChecked(),
+} );
+
+/**
+ * Fill all fields with a computed set of values.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} panel
+ * @param {Record<string, import('@playwright/test').Locator>} l
+ * @param {Record<string, string>} v
+ * @param {boolean} initialNewsletter
+ */
+const fillAllFields = async ( page, panel, l, v, initialNewsletter ) => {
+	const typographyStyleItalic = l.entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[data-value="italic"]' );
+	const typographyStyleNormal = l.entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[data-value="normal"]' );
+	const typographyAlignCenter = l.entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="center"]' );
+	const typographyAlignLeft = l.entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="left"]' );
+
+	await l.featuredToggle.setChecked( ! v.checked );
+	await l.entrySlug.fill( v.slug );
+	await l.entryLayout.selectOption( v.layout );
+	await l.entryFormat.getByRole( 'radio', { name: new RegExp( `^${ v.format }$`, 'i' ) } ).check();
+	await l.entryEmphasis.locator( `button[data-value="${ v.emphasis }"]` ).click();
+	await setColorValue( l.entryAccent, v.accent );
+	await setInputValue( l.entryReviewDate, v.reviewDate );
+	await setInputValue( l.entryPriority, v.priority );
+	await l.entryScore.fill( v.score );
+	await l.entryBadge.getByRole( 'textbox', { name: /^Label$/i } ).fill( v.badgeLabel );
+	await l.entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } ).fill( v.badgeSlug );
+	await l.entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Width/i } ).fill( v.dimensionsWidth );
+	await l.entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Height/i } ).fill( v.dimensionsHeight );
+	await l.entryDimensions.getByRole( 'combobox', { name: /Entry card size unit/i } ).selectOption( v.dimensionsUnit );
+	await l.entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Top/i } ).fill( v.spacingTop );
+	await l.entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Right/i } ).fill( v.spacingRight );
+	await l.entrySpacing.getByRole( 'combobox', { name: /Entry card spacing unit/i } ).selectOption( v.spacingUnit );
+	await l.entryBorder.getByRole( 'spinbutton', { name: /Entry card border Top/i } ).fill( v.borderTop );
+	await l.entryBorder.getByRole( 'spinbutton', { name: /Entry card border Right/i } ).fill( v.borderRight );
+	await l.entryBorder.getByRole( 'combobox', { name: /Entry card border Style/i } ).selectOption( v.borderStyle );
+	await setColorValue( l.entryBorder.locator( '[data-color-field="entry_border.color"]' ), v.borderColor );
+	await setColorValue( l.entryLinkColors.locator( '[data-color-field="entry_link_colors.color"]' ), v.linkNormal );
+	await setColorValue( l.entryLinkColors.locator( '[data-color-field="entry_link_colors.hover"]' ), v.linkHover );
+	await l.entryTypography.getByRole( 'textbox', { name: /^Family$/i } ).fill( v.typographyFamily );
+	await l.entryTypography.getByRole( 'combobox', { name: /^Weight$/i } ).selectOption( v.typographyWeight );
+	await ( v.typographyStyle === 'italic' ? typographyStyleItalic : typographyStyleNormal ).click();
+	await l.entryTypography.getByRole( 'textbox', { name: /^Size$/i } ).fill( v.typographySize );
+	await l.entryTypography.getByRole( 'combobox', { name: /^Unit$/i } ).selectOption( v.typographyUnit );
+	await l.entryTypography.getByRole( 'textbox', { name: /^Line height$/i } ).fill( v.typographyLineHeight );
+	await l.entryTypography.getByRole( 'textbox', { name: /^Letter spacing$/i } ).fill( v.typographyLetterSpacing );
+	await ( v.typographyAlign === 'center' ? typographyAlignCenter : typographyAlignLeft ).click();
+	await setColorValue( l.entryTypography.locator( '[data-field-path="entry_typography.color"] [data-color-field="entry_typography.color"]' ), v.typographyColor );
+	await setColorValue( l.entryBackground.locator( '[data-field-path="entry_background.background-color"] [data-color-field="entry_background.background-color"]' ), v.backgroundColor );
+	await setColorValue( l.entryBackground.locator( '[data-field-path="entry_background.background-gradient-color"] [data-color-field="entry_background.background-gradient-color"]' ), v.backgroundGradientColor );
+	await l.entryBackground.locator( '[data-field-path="entry_background.background-gradient-direction"] select' ).selectOption( v.backgroundGradientDirection );
+	await l.entryBackground.locator( '[data-field-path="entry_background.background-position"] select' ).selectOption( v.backgroundPosition );
+	await l.entryBackground.locator( '[data-field-path="entry_background.background-repeat"] select' ).selectOption( v.backgroundRepeat );
+	await l.entryBackground.locator( '[data-field-path="entry_background.background-attachment"] select' ).selectOption( v.backgroundAttachment );
+	await l.entryBackground.locator( '[data-field-path="entry_background.background-size"] select' ).selectOption( v.backgroundSize );
+	await l.entryBackground.locator( '[data-field-path="entry_background.background-origin"] select' ).selectOption( v.backgroundOrigin );
+	await l.entryBackground.locator( '[data-field-path="entry_background.background-clip"] select' ).selectOption( v.backgroundClip );
+	await l.entryBackground.locator( '[data-field-path="entry_background.background-blend-mode"] select' ).selectOption( v.backgroundBlendMode );
+	await l.entryPalette.locator( `button[data-value="${ v.palette }"]` ).click();
+	await l.entryImageStyle.locator( `button[data-value="${ v.imageStyle }"]` ).click();
+	await selectAjaxOption( page, l.entryCampaign, v.campaignSearch, v.campaign, v.campaignLabel );
+	await l.entryIcon.locator( `button[data-value="${ v.icon }"]` ).click();
+	await l.entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first().fill( v.linkLabel );
+	await l.entryLinks.getByRole( 'textbox', { name: /^Link URL$/i } ).first().fill( v.linkUrl );
+	await panel.getByRole( 'checkbox', { name: /^Newsletter$/i } ).setChecked( ! initialNewsletter );
+};
+
+/**
+ * Compute a set of "discard" values that differ from the initial values.
+ *
+ * @param {Record<string, string>} init
+ * @returns {Record<string, string>}
+ */
+const computeDiscardValues = ( init ) => ( {
+	slug: init.slug === 'discard-check' ? 'discard-check-next' : 'discard-check',
+	layout: init.layout === 'wide' ? 'compact' : 'wide',
+	format: init.format === 'editorial' ? 'alert' : 'editorial',
+	emphasis: init.emphasis === 'spotlight' ? 'quiet' : 'spotlight',
+	accent: init.accent === '#445566' ? '#665544' : '#445566',
+	reviewDate: init.reviewDate === '2026-05-01' ? '2026-05-02' : '2026-05-01',
+	priority: init.priority === '5' ? '4' : '5',
+	score: init.score === '10' ? '9' : '10',
+	badgeLabel: init.badgeLabel === 'Draft Badge' ? 'Draft Badge Next' : 'Draft Badge',
+	badgeSlug: init.badgeSlug === 'draft-badge' ? 'draft-badge-next' : 'draft-badge',
+	dimensionsWidth: init.dimensionsWidth === '480' ? '420' : '480',
+	dimensionsHeight: init.dimensionsHeight === '260' ? '240' : '260',
+	dimensionsUnit: init.dimensionsUnit === '%' ? 'px' : '%',
+	spacingTop: init.spacingTop === '20' ? '18' : '20',
+	spacingRight: init.spacingRight === '24' ? '22' : '24',
+	spacingUnit: init.spacingUnit === 'rem' ? 'px' : 'rem',
+	borderTop: init.borderTop === '4' ? '3' : '4',
+	borderRight: init.borderRight === '5' ? '4' : '5',
+	borderStyle: init.borderStyle === 'dashed' ? 'solid' : 'dashed',
+	borderColor: init.borderColor === '#aa5500' ? '#0055aa' : '#aa5500',
+	linkNormal: init.linkNormal === '#aa0000' ? '#0044aa' : '#aa0000',
+	linkHover: init.linkHover === '#00aa44' ? '#aa4400' : '#00aa44',
+	typographyFamily: init.typographyFamily === 'Georgia, serif' ? 'Inter, system-ui, sans-serif' : 'Georgia, serif',
+	typographyWeight: init.typographyWeight === '600' ? '500' : '600',
+	typographyStyle: init.typographyStyle === 'italic' ? 'normal' : 'italic',
+	typographySize: init.typographySize === '2.4' ? '2.2' : '2.4',
+	typographyUnit: init.typographyUnit === 'px' ? 'rem' : 'px',
+	typographyLineHeight: init.typographyLineHeight === '1.4' ? '1.3' : '1.4',
+	typographyLetterSpacing: init.typographyLetterSpacing === '0.02' ? '0.01' : '0.02',
+	typographyAlign: init.typographyAlign === 'center' ? 'left' : 'center',
+	typographyColor: init.typographyColor === '#665544' ? '#445566' : '#665544',
+	backgroundColor: init.backgroundColor === '#eeffee' ? '#ffeeee' : '#eeffee',
+	backgroundGradientColor: init.backgroundGradientColor === '#ddeeff' ? '#ffeedd' : '#ddeeff',
+	backgroundGradientDirection: init.backgroundGradientDirection === '135deg' ? 'to bottom' : '135deg',
+	backgroundPosition: init.backgroundPosition === 'right bottom' ? 'left top' : 'right bottom',
+	backgroundRepeat: init.backgroundRepeat === 'repeat-x' ? 'repeat-y' : 'repeat-x',
+	backgroundAttachment: init.backgroundAttachment === 'fixed' ? 'scroll' : 'fixed',
+	backgroundSize: init.backgroundSize === 'contain' ? 'auto' : 'contain',
+	backgroundOrigin: init.backgroundOrigin === 'border-box' ? 'content-box' : 'border-box',
+	backgroundClip: init.backgroundClip === 'padding-box' ? 'content-box' : 'padding-box',
+	backgroundBlendMode: init.backgroundBlendMode === 'screen' ? 'overlay' : 'screen',
+	palette: init.palette === 'warm' ? 'cool' : 'warm',
+	imageStyle: init.imageStyle === 'split' ? 'cover' : 'split',
+	campaign: init.campaign === 'studio-preview' ? 'design-sprint' : 'studio-preview',
+	campaignSearch: init.campaign === 'studio-preview' ? 'design' : 'studio',
+	campaignLabel: init.campaign === 'studio-preview' ? 'Design Sprint' : 'Studio Preview',
+	icon: init.icon === 'dashicons-star-filled' ? 'dashicons-format-aside' : 'dashicons-star-filled',
+	linkLabel: init.linkLabel === 'Discard Link' ? 'Discard Link Next' : 'Discard Link',
+	linkUrl: init.linkUrl === 'https://example.test/discard' ? 'https://example.test/discard-next' : 'https://example.test/discard',
+} );
+
+/**
+ * Compute a set of "saved" values that differ from both initial and discard.
+ *
+ * @param {Record<string, string>} init
+ * @returns {Record<string, string>}
+ */
+const computeSavedValues = ( init ) => ( {
+	slug: init.slug === 'block-panel-valid' ? 'block-panel-valid-next' : 'block-panel-valid',
+	layout: init.layout === 'feature' ? 'compact' : 'feature',
+	format: init.format === 'alert' ? 'editorial' : 'alert',
+	emphasis: init.emphasis === 'quiet' ? 'spotlight' : 'quiet',
+	accent: init.accent === '#13579b' ? '#2468ac' : '#13579b',
+	reviewDate: init.reviewDate === '2026-05-03' ? '2026-05-04' : '2026-05-03',
+	priority: init.priority === '4' ? '3' : '4',
+	score: init.score === '7' ? '6' : '7',
+	badgeLabel: init.badgeLabel === 'Published Badge' ? 'Published Badge Next' : 'Published Badge',
+	badgeSlug: init.badgeSlug === 'published-badge' ? 'published-badge-next' : 'published-badge',
+	dimensionsWidth: init.dimensionsWidth === '640' ? '560' : '640',
+	dimensionsHeight: init.dimensionsHeight === '360' ? '320' : '360',
+	dimensionsUnit: init.dimensionsUnit === 'rem' ? 'px' : 'rem',
+	spacingTop: init.spacingTop === '16' ? '14' : '16',
+	spacingRight: init.spacingRight === '18' ? '14' : '18',
+	spacingUnit: init.spacingUnit === 'rem' ? 'px' : 'rem',
+	borderTop: init.borderTop === '2' ? '3' : '2',
+	borderRight: init.borderRight === '6' ? '5' : '6',
+	borderStyle: init.borderStyle === 'double' ? 'dotted' : 'double',
+	borderColor: init.borderColor === '#2468ac' ? '#13579b' : '#2468ac',
+	linkNormal: init.linkNormal === '#123abc' ? '#345abc' : '#123abc',
+	linkHover: init.linkHover === '#bc123a' ? '#ac2468' : '#bc123a',
+	typographyFamily: init.typographyFamily === 'Aptos, sans-serif' ? 'Inter, system-ui, sans-serif' : 'Aptos, sans-serif',
+	typographyWeight: init.typographyWeight === '800' ? '700' : '800',
+	typographyStyle: init.typographyStyle === 'italic' ? 'normal' : 'italic',
+	typographySize: init.typographySize === '2.75' ? '2.5' : '2.75',
+	typographyUnit: init.typographyUnit === 'px' ? 'rem' : 'px',
+	typographyLineHeight: init.typographyLineHeight === '1.05' ? '1.1' : '1.05',
+	typographyLetterSpacing: init.typographyLetterSpacing === '0.03' ? '0.02' : '0.03',
+	typographyAlign: init.typographyAlign === 'center' ? 'left' : 'center',
+	typographyColor: init.typographyColor === '#8844aa' ? '#aa4488' : '#8844aa',
+	backgroundColor: init.backgroundColor === '#fafafa' ? '#f0f9ff' : '#fafafa',
+	backgroundGradientColor: init.backgroundGradientColor === '#dbeafe' ? '#fef3c7' : '#dbeafe',
+	backgroundGradientDirection: init.backgroundGradientDirection === '-135deg' ? 'to right' : '-135deg',
+	backgroundPosition: init.backgroundPosition === 'center top' ? 'center bottom' : 'center top',
+	backgroundRepeat: init.backgroundRepeat === 'no-repeat' ? 'repeat' : 'no-repeat',
+	backgroundAttachment: init.backgroundAttachment === 'fixed' ? 'scroll' : 'fixed',
+	backgroundSize: init.backgroundSize === 'cover' ? 'contain' : 'cover',
+	backgroundOrigin: init.backgroundOrigin === 'padding-box' ? 'border-box' : 'padding-box',
+	backgroundClip: init.backgroundClip === 'border-box' ? 'padding-box' : 'border-box',
+	backgroundBlendMode: init.backgroundBlendMode === 'multiply' ? 'normal' : 'multiply',
+	palette: init.palette === 'mono' ? 'cool' : 'mono',
+	imageStyle: init.imageStyle === 'poster' ? 'cover' : 'poster',
+	campaign: init.campaign === 'pro-tools' ? 'community-notes' : 'pro-tools',
+	campaignSearch: init.campaign === 'pro-tools' ? 'community' : 'pro',
+	campaignLabel: init.campaign === 'pro-tools' ? 'Community Notes' : 'Pro Tools',
+	icon: init.icon === 'dashicons-megaphone' ? 'dashicons-format-aside' : 'dashicons-megaphone',
+	linkLabel: init.linkLabel === 'Continue reading' ? 'Read the update' : 'Continue reading',
+	linkUrl: init.linkUrl === 'https://example.test/update' ? 'https://example.test/story' : 'https://example.test/update',
+} );
+
 test.skip(
 	process.env.LERM_ADMIN_CONFIG_BLOCK_EDITOR !== '1',
 	'Block editor smoke runs through npm run test:e2e:block-editor so the fixture can temporarily enable the editor.'
 );
 
-test( 'block editor edits and saves AdminConfig panel values through REST', async ( { page } ) => {
-	await login( page );
+// Shared state across serial tests.
+const shared = /** @type {any} */ ( {} );
 
-	const ajaxRequests = collectAdminConfigAjaxRequests( page );
-	const schemaRequest = page.waitForResponse( ( response ) => isMetaboxSchemaResponse( response ), { timeout: 30_000 } );
+test.describe.serial( 'block editor AdminConfig panel', () => {
 
-	await openPostEditor( page, 'Admin Config Smoke Post', 'post' );
+	test( 'schema loads and panel renders all fields', async ( { page } ) => {
+		await login( page );
 
-	const response = await schemaRequest;
-	const url = decodedUrl( response );
+		shared.ajaxRequests = collectAdminConfigAjaxRequests( page );
+		const schemaRequest = page.waitForResponse( ( response ) => isMetaboxSchemaResponse( response ), { timeout: 30_000 } );
 
-	expect( response.ok() ).toBe( true );
-	expect( url ).toContain( 'post_id=' );
+		await openPostEditor( page, 'Admin Config Smoke Post', 'post' );
 
-	await expect
-		.poll(
-			() => page.evaluate( () => {
-				const instances = window.lermAdminConfigBlockPanel?.getInstances?.() || [];
+		const response = await schemaRequest;
+		const url = decodedUrl( response );
 
-				return instances.map( ( instance ) => ( {
-					postId: instance.context?.post_id || 0,
-					schemaId: instance.schemaId || '',
-					status: instance.state?.status || '',
-				} ) );
-			} ),
-			{ timeout: 30_000 }
-		)
-		.toContainEqual(
-			expect.objectContaining( {
-				postId: expect.any( Number ),
-				schemaId: 'acme-demo-post-metabox',
-				status: 'ready',
-			} )
-		);
+		expect( response.ok() ).toBe( true );
+		expect( url ).toContain( 'post_id=' );
 
-	const readyInstance = await page.evaluate( () => {
-		const instances = window.lermAdminConfigBlockPanel?.getInstances?.() || [];
+		await expect
+			.poll(
+				() => page.evaluate( () => {
+					const instances = window.lermAdminConfigBlockPanel?.getInstances?.() || [];
 
-		return instances.find( ( instance ) => instance.schemaId === 'acme-demo-post-metabox' ) || null;
+					return instances.map( ( instance ) => ( {
+						postId: instance.context?.post_id || 0,
+						schemaId: instance.schemaId || '',
+						status: instance.state?.status || '',
+					} ) );
+				} ),
+				{ timeout: 30_000 }
+			)
+			.toContainEqual(
+				expect.objectContaining( {
+					postId: expect.any( Number ),
+					schemaId: 'acme-demo-post-metabox',
+					status: 'ready',
+				} )
+			);
+
+		const readyInstance = await page.evaluate( () => {
+			const instances = window.lermAdminConfigBlockPanel?.getInstances?.() || [];
+
+			return instances.find( ( instance ) => instance.schemaId === 'acme-demo-post-metabox' ) || null;
+		} );
+
+		expect( readyInstance.context.post_id ).toBeGreaterThan( 0 );
+
+		await page.getByRole( 'dialog', { name: /Welcome to the editor/i } )
+			.getByRole( 'button', { name: /Close/i } )
+			.click( { timeout: 3_000 } )
+			.catch( () => {} );
+
+		shared.panel = await expandBlockPanel( page, 'acme-demo-post-metabox', 'Entry Display Overrides' );
+		shared.page = page;
+
+		const l = gatherLocators( shared.panel );
+
+		await expect( page.locator( '#lerm-admin-config-metabox-acme-demo-post-metabox' ) ).toHaveCount( 0 );
+		await expect( l.featuredToggle ).toBeVisible();
+		await expect( l.entrySlug ).toBeVisible();
+		await expect( l.entryLayout ).toBeVisible();
+		await expect( l.entryFormat.getByRole( 'radio', { name: /^Standard$/i } ) ).toBeVisible();
+		await expect( l.entryEmphasis.getByRole( 'button', { name: /^Normal$/i } ) ).toBeVisible();
+		await expect( l.entryAccent ).toBeVisible();
+		await expect( l.entryReviewDate ).toBeVisible();
+		await expect( l.entryPriority ).toBeVisible();
+		await expect( l.entryScore ).toBeVisible();
+		await expect( l.entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ) ).toBeVisible();
+		await expect( l.entryMedia.getByRole( 'button', { name: /^Choose image$/i } ) ).toBeVisible();
+		await expect( l.entryGallery.getByRole( 'button', { name: /^Choose gallery images$/i } ) ).toBeVisible();
+		await expect( l.entryBadge.getByRole( 'textbox', { name: /^Label$/i } ) ).toBeVisible();
+		await expect( l.entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } ) ).toBeVisible();
+		await expect( l.entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Width/i } ) ).toBeVisible();
+		await expect( l.entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Height/i } ) ).toBeVisible();
+		await expect( l.entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Top/i } ) ).toBeVisible();
+		await expect( l.entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Right/i } ) ).toBeVisible();
+		await expect( l.entryBorder.getByRole( 'spinbutton', { name: /Entry card border Top/i } ) ).toBeVisible();
+		await expect( l.entryBorder.getByRole( 'spinbutton', { name: /Entry card border Right/i } ) ).toBeVisible();
+		await expect( l.entryBorder.getByRole( 'combobox', { name: /Entry card border Style/i } ) ).toBeVisible();
+		await expect( l.entryBorder.locator( '[data-color-field="entry_border.color"]' ) ).toBeVisible();
+		await expect( l.entryLinkColors.locator( '[data-color-field="entry_link_colors.color"]' ) ).toBeVisible();
+		await expect( l.entryLinkColors.locator( '[data-color-field="entry_link_colors.hover"]' ) ).toBeVisible();
+		await expect( l.entryTypography.getByRole( 'textbox', { name: /^Family$/i } ) ).toBeVisible();
+		await expect( l.entryTypography.getByRole( 'combobox', { name: /^Weight$/i } ) ).toBeVisible();
+		await expect( l.entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[data-value="normal"]' ) ).toBeVisible();
+		await expect( l.entryTypography.getByRole( 'textbox', { name: /^Size$/i } ) ).toBeVisible();
+		await expect( l.entryTypography.getByRole( 'combobox', { name: /^Unit$/i } ) ).toBeVisible();
+		await expect( l.entryTypography.getByRole( 'textbox', { name: /^Line height$/i } ) ).toBeVisible();
+		await expect( l.entryTypography.getByRole( 'textbox', { name: /^Letter spacing$/i } ) ).toBeVisible();
+		await expect( l.entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="left"]' ) ).toBeVisible();
+		await expect( l.entryTypography.locator( '[data-field-path="entry_typography.color"] [data-color-field="entry_typography.color"]' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-color"] [data-color-field="entry_background.background-color"]' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-gradient-color"] [data-color-field="entry_background.background-gradient-color"]' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-gradient-direction"] select' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-image"]' ).getByRole( 'button', { name: /^Choose background image$/i } ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-position"] select' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-repeat"] select' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-attachment"] select' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-size"] select' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-origin"] select' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-clip"] select' ) ).toBeVisible();
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-blend-mode"] select' ) ).toBeVisible();
+		await expect( l.entryPalette.locator( 'button[data-value="cool"]' ) ).toBeVisible();
+		await expect( l.entryPalette.locator( 'button[data-value="warm"]' ) ).toBeVisible();
+		await expect( l.entryImageStyle.locator( 'button[data-value="cover"]' ) ).toBeVisible();
+		await expect( l.entryImageStyle.locator( 'button[data-value="split"]' ) ).toBeVisible();
+		await expect( l.entryCampaign.getByRole( 'searchbox', { name: /Search entry campaign/i } ) ).toBeVisible();
+		await expect( l.entryCampaign.locator( '[data-selected-value="spring-launch"]' ) ).toContainText( /Spring Launch|spring-launch/i );
+		await expect( l.entryIcon.locator( 'button[data-value="dashicons-format-aside"]' ) ).toBeVisible();
+		await expect( l.entryIcon.locator( 'button[data-value="dashicons-megaphone"]' ) ).toBeVisible();
+		await expect( l.entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first() ).toBeVisible();
+		await expect( l.entryLinks.getByRole( 'textbox', { name: /^Link URL$/i } ).first() ).toBeVisible();
+		await expect( shared.panel.getByRole( 'checkbox', { name: /^Newsletter$/i } ) ).toBeVisible();
+
+		shared.initial = await readInitialValues( l );
 	} );
 
-	expect( readyInstance.context.post_id ).toBeGreaterThan( 0 );
+	test( 'discard reverts all unsaved changes', async () => {
+		const page = shared.page;
+		const panel = shared.panel;
+		const init = shared.initial;
+		const l = gatherLocators( panel );
 
-	await page.getByRole( 'dialog', { name: /Welcome to the editor/i } )
-		.getByRole( 'button', { name: /Close/i } )
-		.click( { timeout: 3_000 } )
-		.catch( () => {} );
+		const discard = computeDiscardValues( init );
 
-	const panel = await expandBlockPanel( page, 'acme-demo-post-metabox', 'Entry Display Overrides' );
-	const featuredToggle = panel.getByRole( 'checkbox', { name: /Feature this entry/i } );
-	const entrySlug = panel.getByRole( 'textbox', { name: /Entry slug/i } );
-	const entryLayout = panel.getByRole( 'combobox', { name: /Entry layout/i } );
-	const entryFormat = panel.locator( '[data-field-id="entry_format"]' );
-	const entryEmphasis = panel.locator( '[data-field-id="entry_emphasis"]' );
-	const entryAccent = panel.locator( '[data-field-id="entry_accent"] [data-color-field="entry_accent"]' );
-	const entryReviewDate = panel.locator( '[data-field-id="entry_review_date"] input[type="date"]' );
-	const entryPriority = panel.locator( '[data-field-id="entry_priority"] input[type="range"]' );
-	const entryScore = panel.locator( '[data-field-id="entry_score"] input[type="number"]' );
-	const entryUpload = panel.locator( '[data-field-id="entry_upload"]' );
-	const entryMedia = panel.locator( '[data-field-id="entry_media"]' );
-	const entryGallery = panel.locator( '[data-field-id="entry_gallery"]' );
-	const entryDimensions = panel.locator( '[data-field-id="entry_dimensions"]' );
-	const entrySpacing = panel.locator( '[data-field-id="entry_spacing"]' );
-	const entryBorder = panel.locator( '[data-field-id="entry_border"]' );
-	const entryLinkColors = panel.locator( '[data-field-id="entry_link_colors"]' );
-	const entryTypography = panel.locator( '[data-field-id="entry_typography"]' );
-	const entryBackground = panel.locator( '[data-field-id="entry_background"]' );
-	const entryPalette = panel.locator( '[data-field-id="entry_palette"]' );
-	const entryImageStyle = panel.locator( '[data-field-id="entry_image_style"]' );
-	const entryCampaign = panel.locator( '[data-field-id="entry_campaign"]' );
-	const entryLinks = panel.locator( '[data-field-id="entry_links"]' );
-	const entryIcon = panel.locator( '[data-field-id="entry_icon"]' );
-	const entryBadge = panel.locator( '[data-field-id="entry_badge"]' );
-	const entryBadgeLabel = entryBadge.getByRole( 'textbox', { name: /^Label$/i } );
-	const entryBadgeSlug = entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } );
-	const entryDimensionsWidth = entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Width/i } );
-	const entryDimensionsHeight = entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Height/i } );
-	const entryDimensionsUnit = entryDimensions.getByRole( 'combobox', { name: /Entry card size unit/i } );
-	const entrySpacingTop = entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Top/i } );
-	const entrySpacingRight = entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Right/i } );
-	const entrySpacingUnit = entrySpacing.getByRole( 'combobox', { name: /Entry card spacing unit/i } );
-	const entryBorderTop = entryBorder.getByRole( 'spinbutton', { name: /Entry card border Top/i } );
-	const entryBorderRight = entryBorder.getByRole( 'spinbutton', { name: /Entry card border Right/i } );
-	const entryBorderStyle = entryBorder.getByRole( 'combobox', { name: /Entry card border Style/i } );
-	const entryBorderColor = entryBorder.locator( '[data-color-field="entry_border.color"]' );
-	const entryLinkNormal = entryLinkColors.locator( '[data-color-field="entry_link_colors.color"]' );
-	const entryLinkHover = entryLinkColors.locator( '[data-color-field="entry_link_colors.hover"]' );
-	const entryTypographyFamily = entryTypography.getByRole( 'textbox', { name: /^Family$/i } );
-	const entryTypographyWeight = entryTypography.getByRole( 'combobox', { name: /^Weight$/i } );
-	const entryTypographyStyleNormal = entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[data-value="normal"]' );
-	const entryTypographyStyleItalic = entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[data-value="italic"]' );
-	const entryTypographySize = entryTypography.getByRole( 'textbox', { name: /^Size$/i } );
-	const entryTypographyUnit = entryTypography.getByRole( 'combobox', { name: /^Unit$/i } );
-	const entryTypographyLineHeight = entryTypography.getByRole( 'textbox', { name: /^Line height$/i } );
-	const entryTypographyLetterSpacing = entryTypography.getByRole( 'textbox', { name: /^Letter spacing$/i } );
-	const entryTypographyAlignLeft = entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="left"]' );
-	const entryTypographyAlignCenter = entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[data-value="center"]' );
-	const entryTypographyColor = entryTypography.locator( '[data-field-path="entry_typography.color"] [data-color-field="entry_typography.color"]' );
-	const entryBackgroundColor = entryBackground.locator( '[data-field-path="entry_background.background-color"] [data-color-field="entry_background.background-color"]' );
-	const entryBackgroundGradientColor = entryBackground.locator( '[data-field-path="entry_background.background-gradient-color"] [data-color-field="entry_background.background-gradient-color"]' );
-	const entryBackgroundGradientDirection = entryBackground.locator( '[data-field-path="entry_background.background-gradient-direction"] select' );
-	const entryBackgroundImage = entryBackground.locator( '[data-field-path="entry_background.background-image"]' );
-	const entryBackgroundPosition = entryBackground.locator( '[data-field-path="entry_background.background-position"] select' );
-	const entryBackgroundRepeat = entryBackground.locator( '[data-field-path="entry_background.background-repeat"] select' );
-	const entryBackgroundAttachment = entryBackground.locator( '[data-field-path="entry_background.background-attachment"] select' );
-	const entryBackgroundSize = entryBackground.locator( '[data-field-path="entry_background.background-size"] select' );
-	const entryBackgroundOrigin = entryBackground.locator( '[data-field-path="entry_background.background-origin"] select' );
-	const entryBackgroundClip = entryBackground.locator( '[data-field-path="entry_background.background-clip"] select' );
-	const entryBackgroundBlendMode = entryBackground.locator( '[data-field-path="entry_background.background-blend-mode"] select' );
-	const entryPaletteCool = entryPalette.locator( 'button[data-value="cool"]' );
-	const entryPaletteWarm = entryPalette.locator( 'button[data-value="warm"]' );
-	const entryImageCover = entryImageStyle.locator( 'button[data-value="cover"]' );
-	const entryImageSplit = entryImageStyle.locator( 'button[data-value="split"]' );
-	const entryCampaignSearch = entryCampaign.getByRole( 'searchbox', { name: /Search entry campaign/i } );
-	const entryIconAside = entryIcon.locator( 'button[data-value="dashicons-format-aside"]' );
-	const entryIconAnnouncement = entryIcon.locator( 'button[data-value="dashicons-megaphone"]' );
-	const entryLinkLabel = entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first();
-	const entryLinkUrl = entryLinks.getByRole( 'textbox', { name: /^Link URL$/i } ).first();
-	const newsletterChannel = panel.getByRole( 'checkbox', { name: /^Newsletter$/i } );
+		await fillAllFields( page, panel, l, discard, init.newsletter );
+		await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
-	await expect( page.locator( '#lerm-admin-config-metabox-acme-demo-post-metabox' ) ).toHaveCount( 0 );
-	await expect( featuredToggle ).toBeVisible();
-	await expect( entrySlug ).toBeVisible();
-	await expect( entryLayout ).toBeVisible();
-	await expect( entryFormat.getByRole( 'radio', { name: /^Standard$/i } ) ).toBeVisible();
-	await expect( entryEmphasis.getByRole( 'button', { name: /^Normal$/i } ) ).toBeVisible();
-	await expect( entryAccent ).toBeVisible();
-	await expect( entryReviewDate ).toBeVisible();
-	await expect( entryPriority ).toBeVisible();
-	await expect( entryScore ).toBeVisible();
-	await expect( entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ) ).toBeVisible();
-	await expect( entryMedia.getByRole( 'button', { name: /^Choose image$/i } ) ).toBeVisible();
-	await expect( entryGallery.getByRole( 'button', { name: /^Choose gallery images$/i } ) ).toBeVisible();
-	await expect( entryBadgeLabel ).toBeVisible();
-	await expect( entryBadgeSlug ).toBeVisible();
-	await expect( entryDimensionsWidth ).toBeVisible();
-	await expect( entryDimensionsHeight ).toBeVisible();
-	await expect( entrySpacingTop ).toBeVisible();
-	await expect( entrySpacingRight ).toBeVisible();
-	await expect( entryBorderTop ).toBeVisible();
-	await expect( entryBorderRight ).toBeVisible();
-	await expect( entryBorderStyle ).toBeVisible();
-	await expect( entryBorderColor ).toBeVisible();
-	await expect( entryLinkNormal ).toBeVisible();
-	await expect( entryLinkHover ).toBeVisible();
-	await expect( entryTypographyFamily ).toBeVisible();
-	await expect( entryTypographyWeight ).toBeVisible();
-	await expect( entryTypographyStyleNormal ).toBeVisible();
-	await expect( entryTypographySize ).toBeVisible();
-	await expect( entryTypographyUnit ).toBeVisible();
-	await expect( entryTypographyLineHeight ).toBeVisible();
-	await expect( entryTypographyLetterSpacing ).toBeVisible();
-	await expect( entryTypographyAlignLeft ).toBeVisible();
-	await expect( entryTypographyColor ).toBeVisible();
-	await expect( entryBackgroundColor ).toBeVisible();
-	await expect( entryBackgroundGradientColor ).toBeVisible();
-	await expect( entryBackgroundGradientDirection ).toBeVisible();
-	await expect( entryBackgroundImage.getByRole( 'button', { name: /^Choose background image$/i } ) ).toBeVisible();
-	await expect( entryBackgroundPosition ).toBeVisible();
-	await expect( entryBackgroundRepeat ).toBeVisible();
-	await expect( entryBackgroundAttachment ).toBeVisible();
-	await expect( entryBackgroundSize ).toBeVisible();
-	await expect( entryBackgroundOrigin ).toBeVisible();
-	await expect( entryBackgroundClip ).toBeVisible();
-	await expect( entryBackgroundBlendMode ).toBeVisible();
-	await expect( entryPaletteCool ).toBeVisible();
-	await expect( entryPaletteWarm ).toBeVisible();
-	await expect( entryImageCover ).toBeVisible();
-	await expect( entryImageSplit ).toBeVisible();
-	await expect( entryCampaignSearch ).toBeVisible();
-	await expect( entryCampaign.locator( '[data-selected-value="spring-launch"]' ) ).toContainText( /Spring Launch|spring-launch/i );
-	await expect( entryIconAside ).toBeVisible();
-	await expect( entryIconAnnouncement ).toBeVisible();
-	await expect( entryLinkLabel ).toBeVisible();
-	await expect( entryLinkUrl ).toBeVisible();
-	await expect( newsletterChannel ).toBeVisible();
-	const initialChecked = await featuredToggle.isChecked();
-	const initialSlug = await entrySlug.inputValue();
-	const initialLayout = await entryLayout.inputValue();
-	const initialFormat = await entryFormat.locator( 'input[type="radio"]:checked' ).inputValue();
-	const initialEmphasis = await entryEmphasis.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
-	const initialAccent = ( await entryAccent.getAttribute( 'data-color-value' ) ).toLowerCase();
-	const initialReviewDate = await entryReviewDate.inputValue();
-	const initialPriority = await entryPriority.inputValue();
-	const initialScore = await entryScore.inputValue();
-	const initialBadgeLabel = await entryBadgeLabel.inputValue();
-	const initialBadgeSlug = await entryBadgeSlug.inputValue();
-	const initialDimensionsWidth = await entryDimensionsWidth.inputValue();
-	const initialDimensionsHeight = await entryDimensionsHeight.inputValue();
-	const initialDimensionsUnit = await entryDimensionsUnit.inputValue();
-	const initialSpacingTop = await entrySpacingTop.inputValue();
-	const initialSpacingRight = await entrySpacingRight.inputValue();
-	const initialSpacingUnit = await entrySpacingUnit.inputValue();
-	const initialBorderTop = await entryBorderTop.inputValue();
-	const initialBorderRight = await entryBorderRight.inputValue();
-	const initialBorderStyle = await entryBorderStyle.inputValue();
-	const initialBorderColor = ( await entryBorderColor.getAttribute( 'data-color-value' ) ).toLowerCase();
-	const initialLinkNormal = ( await entryLinkNormal.getAttribute( 'data-color-value' ) ).toLowerCase();
-	const initialLinkHover = ( await entryLinkHover.getAttribute( 'data-color-value' ) ).toLowerCase();
-	const initialTypographyFamily = await entryTypographyFamily.inputValue();
-	const initialTypographyWeight = await entryTypographyWeight.inputValue();
-	const initialTypographyStyle = await entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ).getAttribute( 'data-value' );
-	const initialTypographySize = await entryTypographySize.inputValue();
-	const initialTypographyUnit = await entryTypographyUnit.inputValue();
-	const initialTypographyLineHeight = await entryTypographyLineHeight.inputValue();
-	const initialTypographyLetterSpacing = await entryTypographyLetterSpacing.inputValue();
-	const initialTypographyAlign = await entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ).getAttribute( 'data-value' );
-	const initialTypographyColor = ( await entryTypographyColor.getAttribute( 'data-color-value' ) ).toLowerCase();
-	const initialBackgroundColor = ( await entryBackgroundColor.getAttribute( 'data-color-value' ) ).toLowerCase();
-	const initialBackgroundGradientColor = ( await entryBackgroundGradientColor.getAttribute( 'data-color-value' ) ).toLowerCase();
-	const initialBackgroundGradientDirection = await entryBackgroundGradientDirection.inputValue();
-	const initialBackgroundPosition = await entryBackgroundPosition.inputValue();
-	const initialBackgroundRepeat = await entryBackgroundRepeat.inputValue();
-	const initialBackgroundAttachment = await entryBackgroundAttachment.inputValue();
-	const initialBackgroundSize = await entryBackgroundSize.inputValue();
-	const initialBackgroundOrigin = await entryBackgroundOrigin.inputValue();
-	const initialBackgroundClip = await entryBackgroundClip.inputValue();
-	const initialBackgroundBlendMode = await entryBackgroundBlendMode.inputValue();
-	const initialPalette = await entryPalette.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
-	const initialImageStyle = await entryImageStyle.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
-	const initialCampaign = await entryCampaign.locator( '[data-selected-value]' ).first().getAttribute( 'data-selected-value' );
-	const initialIcon = await entryIcon.locator( 'button[aria-pressed="true"]' ).getAttribute( 'data-value' );
-	const initialLinkLabel = await entryLinkLabel.inputValue();
-	const initialLinkUrl = await entryLinkUrl.inputValue();
-	const initialNewsletter = await newsletterChannel.isChecked();
-	const discardSlug = initialSlug === 'discard-check' ? 'discard-check-next' : 'discard-check';
-	const discardLayout = initialLayout === 'wide' ? 'compact' : 'wide';
-	const discardFormat = initialFormat === 'editorial' ? 'alert' : 'editorial';
-	const discardEmphasis = initialEmphasis === 'spotlight' ? 'quiet' : 'spotlight';
-	const discardAccent = initialAccent === '#445566' ? '#665544' : '#445566';
-	const discardReviewDate = initialReviewDate === '2026-05-01' ? '2026-05-02' : '2026-05-01';
-	const discardPriority = initialPriority === '5' ? '4' : '5';
-	const discardScore = initialScore === '10' ? '9' : '10';
-	const discardBadgeLabel = initialBadgeLabel === 'Draft Badge' ? 'Draft Badge Next' : 'Draft Badge';
-	const discardBadgeSlug = initialBadgeSlug === 'draft-badge' ? 'draft-badge-next' : 'draft-badge';
-	const discardDimensionsWidth = initialDimensionsWidth === '480' ? '420' : '480';
-	const discardDimensionsHeight = initialDimensionsHeight === '260' ? '240' : '260';
-	const discardDimensionsUnit = initialDimensionsUnit === '%' ? 'px' : '%';
-	const discardSpacingTop = initialSpacingTop === '20' ? '18' : '20';
-	const discardSpacingRight = initialSpacingRight === '24' ? '22' : '24';
-	const discardSpacingUnit = initialSpacingUnit === 'rem' ? 'px' : 'rem';
-	const discardBorderTop = initialBorderTop === '4' ? '3' : '4';
-	const discardBorderRight = initialBorderRight === '5' ? '4' : '5';
-	const discardBorderStyle = initialBorderStyle === 'dashed' ? 'solid' : 'dashed';
-	const discardBorderColor = initialBorderColor === '#aa5500' ? '#0055aa' : '#aa5500';
-	const discardLinkNormal = initialLinkNormal === '#aa0000' ? '#0044aa' : '#aa0000';
-	const discardLinkHover = initialLinkHover === '#00aa44' ? '#aa4400' : '#00aa44';
-	const discardTypographyFamily = initialTypographyFamily === 'Georgia, serif' ? 'Inter, system-ui, sans-serif' : 'Georgia, serif';
-	const discardTypographyWeight = initialTypographyWeight === '600' ? '500' : '600';
-	const discardTypographyStyle = initialTypographyStyle === 'italic' ? 'normal' : 'italic';
-	const discardTypographySize = initialTypographySize === '2.4' ? '2.2' : '2.4';
-	const discardTypographyUnit = initialTypographyUnit === 'px' ? 'rem' : 'px';
-	const discardTypographyLineHeight = initialTypographyLineHeight === '1.4' ? '1.3' : '1.4';
-	const discardTypographyLetterSpacing = initialTypographyLetterSpacing === '0.02' ? '0.01' : '0.02';
-	const discardTypographyAlign = initialTypographyAlign === 'center' ? 'left' : 'center';
-	const discardTypographyColor = initialTypographyColor === '#665544' ? '#445566' : '#665544';
-	const discardBackgroundColor = initialBackgroundColor === '#eeffee' ? '#ffeeee' : '#eeffee';
-	const discardBackgroundGradientColor = initialBackgroundGradientColor === '#ddeeff' ? '#ffeedd' : '#ddeeff';
-	const discardBackgroundGradientDirection = initialBackgroundGradientDirection === '135deg' ? 'to bottom' : '135deg';
-	const discardBackgroundPosition = initialBackgroundPosition === 'right bottom' ? 'left top' : 'right bottom';
-	const discardBackgroundRepeat = initialBackgroundRepeat === 'repeat-x' ? 'repeat-y' : 'repeat-x';
-	const discardBackgroundAttachment = initialBackgroundAttachment === 'fixed' ? 'scroll' : 'fixed';
-	const discardBackgroundSize = initialBackgroundSize === 'contain' ? 'auto' : 'contain';
-	const discardBackgroundOrigin = initialBackgroundOrigin === 'border-box' ? 'content-box' : 'border-box';
-	const discardBackgroundClip = initialBackgroundClip === 'padding-box' ? 'content-box' : 'padding-box';
-	const discardBackgroundBlendMode = initialBackgroundBlendMode === 'screen' ? 'overlay' : 'screen';
-	const discardPalette = initialPalette === 'warm' ? 'cool' : 'warm';
-	const discardImageStyle = initialImageStyle === 'split' ? 'cover' : 'split';
-	const discardCampaign = initialCampaign === 'studio-preview' ? 'design-sprint' : 'studio-preview';
-	const discardCampaignSearch = discardCampaign === 'studio-preview' ? 'studio' : 'design';
-	const discardCampaignLabel = discardCampaign === 'studio-preview' ? 'Studio Preview' : 'Design Sprint';
-	const discardIcon = initialIcon === 'dashicons-star-filled' ? 'dashicons-format-aside' : 'dashicons-star-filled';
-	const discardLinkLabel = initialLinkLabel === 'Discard Link' ? 'Discard Link Next' : 'Discard Link';
-	const discardLinkUrl = initialLinkUrl === 'https://example.test/discard' ? 'https://example.test/discard-next' : 'https://example.test/discard';
-	const savedSlug = initialSlug === 'block-panel-valid' ? 'block-panel-valid-next' : 'block-panel-valid';
-	const savedLayout = initialLayout === 'feature' ? 'compact' : 'feature';
-	const savedFormat = initialFormat === 'alert' ? 'editorial' : 'alert';
-	const savedEmphasis = initialEmphasis === 'quiet' ? 'spotlight' : 'quiet';
-	const savedAccent = initialAccent === '#13579b' ? '#2468ac' : '#13579b';
-	const savedReviewDate = initialReviewDate === '2026-05-03' ? '2026-05-04' : '2026-05-03';
-	const savedPriority = initialPriority === '4' ? '3' : '4';
-	const savedScore = initialScore === '7' ? '6' : '7';
-	const savedBadgeLabel = initialBadgeLabel === 'Published Badge' ? 'Published Badge Next' : 'Published Badge';
-	const savedBadgeSlug = initialBadgeSlug === 'published-badge' ? 'published-badge-next' : 'published-badge';
-	const savedDimensionsWidth = initialDimensionsWidth === '640' ? '560' : '640';
-	const savedDimensionsHeight = initialDimensionsHeight === '360' ? '320' : '360';
-	const savedDimensionsUnit = initialDimensionsUnit === 'rem' ? 'px' : 'rem';
-	const savedSpacingTop = initialSpacingTop === '16' ? '14' : '16';
-	const savedSpacingRight = initialSpacingRight === '18' ? '14' : '18';
-	const savedSpacingUnit = initialSpacingUnit === 'rem' ? 'px' : 'rem';
-	const savedBorderTop = initialBorderTop === '2' ? '3' : '2';
-	const savedBorderRight = initialBorderRight === '6' ? '5' : '6';
-	const savedBorderStyle = initialBorderStyle === 'double' ? 'dotted' : 'double';
-	const savedBorderColor = initialBorderColor === '#2468ac' ? '#13579b' : '#2468ac';
-	const savedLinkNormal = initialLinkNormal === '#123abc' ? '#345abc' : '#123abc';
-	const savedLinkHover = initialLinkHover === '#bc123a' ? '#ac2468' : '#bc123a';
-	const savedTypographyFamily = initialTypographyFamily === 'Aptos, sans-serif' ? 'Inter, system-ui, sans-serif' : 'Aptos, sans-serif';
-	const savedTypographyWeight = initialTypographyWeight === '800' ? '700' : '800';
-	const savedTypographyStyle = initialTypographyStyle === 'italic' ? 'normal' : 'italic';
-	const savedTypographySize = initialTypographySize === '2.75' ? '2.5' : '2.75';
-	const savedTypographyUnit = initialTypographyUnit === 'px' ? 'rem' : 'px';
-	const savedTypographyLineHeight = initialTypographyLineHeight === '1.05' ? '1.1' : '1.05';
-	const savedTypographyLetterSpacing = initialTypographyLetterSpacing === '0.03' ? '0.02' : '0.03';
-	const savedTypographyAlign = initialTypographyAlign === 'center' ? 'left' : 'center';
-	const savedTypographyColor = initialTypographyColor === '#8844aa' ? '#aa4488' : '#8844aa';
-	const savedBackgroundColor = initialBackgroundColor === '#fafafa' ? '#f0f9ff' : '#fafafa';
-	const savedBackgroundGradientColor = initialBackgroundGradientColor === '#dbeafe' ? '#fef3c7' : '#dbeafe';
-	const savedBackgroundGradientDirection = initialBackgroundGradientDirection === '-135deg' ? 'to right' : '-135deg';
-	const savedBackgroundPosition = initialBackgroundPosition === 'center top' ? 'center bottom' : 'center top';
-	const savedBackgroundRepeat = initialBackgroundRepeat === 'no-repeat' ? 'repeat' : 'no-repeat';
-	const savedBackgroundAttachment = initialBackgroundAttachment === 'fixed' ? 'scroll' : 'fixed';
-	const savedBackgroundSize = initialBackgroundSize === 'cover' ? 'contain' : 'cover';
-	const savedBackgroundOrigin = initialBackgroundOrigin === 'padding-box' ? 'border-box' : 'padding-box';
-	const savedBackgroundClip = initialBackgroundClip === 'border-box' ? 'padding-box' : 'border-box';
-	const savedBackgroundBlendMode = initialBackgroundBlendMode === 'multiply' ? 'normal' : 'multiply';
-	const savedPalette = initialPalette === 'mono' ? 'cool' : 'mono';
-	const savedImageStyle = initialImageStyle === 'poster' ? 'cover' : 'poster';
-	const savedCampaign = initialCampaign === 'pro-tools' ? 'community-notes' : 'pro-tools';
-	const savedCampaignSearch = savedCampaign === 'pro-tools' ? 'pro' : 'community';
-	const savedCampaignLabel = savedCampaign === 'pro-tools' ? 'Pro Tools' : 'Community Notes';
-	const savedIcon = initialIcon === 'dashicons-megaphone' ? 'dashicons-format-aside' : 'dashicons-megaphone';
-	const savedLinkLabel = initialLinkLabel === 'Continue reading' ? 'Read the update' : 'Continue reading';
-	const savedLinkUrl = initialLinkUrl === 'https://example.test/update' ? 'https://example.test/story' : 'https://example.test/update';
+		const discardClickPromise = panel.getByRole( 'button', { name: /^Discard$/ } ).click();
+		const discardModal = page.locator( '.components-modal__frame' ).filter( { hasText: /Discard unsaved AdminConfig changes?/ } ).first();
 
-	await entrySlug.fill( discardSlug );
-	await entryLayout.selectOption( discardLayout );
-	await entryFormat.getByRole( 'radio', { name: new RegExp( `^${ discardFormat }$`, 'i' ) } ).check();
-	await entryEmphasis.locator( `button[data-value="${ discardEmphasis }"]` ).click();
-	await setColorValue( entryAccent, discardAccent );
-	await setInputValue( entryReviewDate, discardReviewDate );
-	await setInputValue( entryPriority, discardPriority );
-	await entryScore.fill( discardScore );
-	await entryBadgeLabel.fill( discardBadgeLabel );
-	await entryBadgeSlug.fill( discardBadgeSlug );
-	await entryDimensionsWidth.fill( discardDimensionsWidth );
-	await entryDimensionsHeight.fill( discardDimensionsHeight );
-	await entryDimensionsUnit.selectOption( discardDimensionsUnit );
-	await entrySpacingTop.fill( discardSpacingTop );
-	await entrySpacingRight.fill( discardSpacingRight );
-	await entrySpacingUnit.selectOption( discardSpacingUnit );
-	await entryBorderTop.fill( discardBorderTop );
-	await entryBorderRight.fill( discardBorderRight );
-	await entryBorderStyle.selectOption( discardBorderStyle );
-	await setColorValue( entryBorderColor, discardBorderColor );
-	await setColorValue( entryLinkNormal, discardLinkNormal );
-	await setColorValue( entryLinkHover, discardLinkHover );
-	await entryTypographyFamily.fill( discardTypographyFamily );
-	await entryTypographyWeight.selectOption( discardTypographyWeight );
-	await ( discardTypographyStyle === 'italic' ? entryTypographyStyleItalic : entryTypographyStyleNormal ).click();
-	await entryTypographySize.fill( discardTypographySize );
-	await entryTypographyUnit.selectOption( discardTypographyUnit );
-	await entryTypographyLineHeight.fill( discardTypographyLineHeight );
-	await entryTypographyLetterSpacing.fill( discardTypographyLetterSpacing );
-	await ( discardTypographyAlign === 'center' ? entryTypographyAlignCenter : entryTypographyAlignLeft ).click();
-	await setColorValue( entryTypographyColor, discardTypographyColor );
-	await setColorValue( entryBackgroundColor, discardBackgroundColor );
-	await setColorValue( entryBackgroundGradientColor, discardBackgroundGradientColor );
-	await entryBackgroundGradientDirection.selectOption( discardBackgroundGradientDirection );
-	await entryBackgroundPosition.selectOption( discardBackgroundPosition );
-	await entryBackgroundRepeat.selectOption( discardBackgroundRepeat );
-	await entryBackgroundAttachment.selectOption( discardBackgroundAttachment );
-	await entryBackgroundSize.selectOption( discardBackgroundSize );
-	await entryBackgroundOrigin.selectOption( discardBackgroundOrigin );
-	await entryBackgroundClip.selectOption( discardBackgroundClip );
-	await entryBackgroundBlendMode.selectOption( discardBackgroundBlendMode );
-	await entryPalette.locator( `button[data-value="${ discardPalette }"]` ).click();
-	await entryImageStyle.locator( `button[data-value="${ discardImageStyle }"]` ).click();
-	await selectAjaxOption( page, entryCampaign, discardCampaignSearch, discardCampaign, discardCampaignLabel );
-	await entryIcon.locator( `button[data-value="${ discardIcon }"]` ).click();
-	await entryLinkLabel.fill( discardLinkLabel );
-	await entryLinkUrl.fill( discardLinkUrl );
-	await newsletterChannel.setChecked( ! initialNewsletter );
-	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
+		await expect( discardModal ).toBeVisible( { timeout: 5_000 } );
+		await expect( discardModal.getByRole( 'button', { name: /^Discard$/ } ).first() ).toBeVisible();
+		await discardModal.getByRole( 'button', { name: /^Discard$/ } ).first().click();
+		await discardClickPromise;
 
-	const discardClickPromise = panel.getByRole( 'button', { name: /^Discard$/ } ).click();
-	const discardModal = page.locator( '.components-modal__frame' ).filter( { hasText: /Discard unsaved AdminConfig changes?/ } ).first();
+		await expect( panel ).toHaveAttribute( 'data-dirty', 'false' );
+		await expect( l.entrySlug ).toHaveValue( init.slug );
+		await expect( l.entryLayout ).toHaveValue( init.layout );
+		await expect( l.entryFormat.locator( 'input[type="radio"]:checked' ) ).toHaveValue( init.format );
+		await expect( l.entryEmphasis.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', init.emphasis || '' );
+		await expect( l.entryAccent ).toHaveAttribute( 'data-color-value', init.accent );
+		await expect( l.entryReviewDate ).toHaveValue( init.reviewDate );
+		await expect( l.entryPriority ).toHaveValue( init.priority );
+		await expect( l.entryScore ).toHaveValue( init.score );
+		await expect( l.entryBadge.getByRole( 'textbox', { name: /^Label$/i } ) ).toHaveValue( init.badgeLabel );
+		await expect( l.entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } ) ).toHaveValue( init.badgeSlug );
+		await expect( l.entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Width/i } ) ).toHaveValue( init.dimensionsWidth );
+		await expect( l.entryDimensions.getByRole( 'spinbutton', { name: /Entry card size Height/i } ) ).toHaveValue( init.dimensionsHeight );
+		await expect( l.entryDimensions.getByRole( 'combobox', { name: /Entry card size unit/i } ) ).toHaveValue( init.dimensionsUnit );
+		await expect( l.entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Top/i } ) ).toHaveValue( init.spacingTop );
+		await expect( l.entrySpacing.getByRole( 'spinbutton', { name: /Entry card spacing Right/i } ) ).toHaveValue( init.spacingRight );
+		await expect( l.entrySpacing.getByRole( 'combobox', { name: /Entry card spacing unit/i } ) ).toHaveValue( init.spacingUnit );
+		await expect( l.entryBorder.getByRole( 'spinbutton', { name: /Entry card border Top/i } ) ).toHaveValue( init.borderTop );
+		await expect( l.entryBorder.getByRole( 'spinbutton', { name: /Entry card border Right/i } ) ).toHaveValue( init.borderRight );
+		await expect( l.entryBorder.getByRole( 'combobox', { name: /Entry card border Style/i } ) ).toHaveValue( init.borderStyle );
+		await expect( l.entryBorder.locator( '[data-color-field="entry_border.color"]' ) ).toHaveAttribute( 'data-color-value', init.borderColor );
+		await expect( l.entryLinkColors.locator( '[data-color-field="entry_link_colors.color"]' ) ).toHaveAttribute( 'data-color-value', init.linkNormal );
+		await expect( l.entryLinkColors.locator( '[data-color-field="entry_link_colors.hover"]' ) ).toHaveAttribute( 'data-color-value', init.linkHover );
+		await expect( l.entryTypography.getByRole( 'textbox', { name: /^Family$/i } ) ).toHaveValue( init.typographyFamily );
+		await expect( l.entryTypography.getByRole( 'combobox', { name: /^Weight$/i } ) ).toHaveValue( init.typographyWeight );
+		await expect( l.entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', init.typographyStyle || '' );
+		await expect( l.entryTypography.getByRole( 'textbox', { name: /^Size$/i } ) ).toHaveValue( init.typographySize );
+		await expect( l.entryTypography.getByRole( 'combobox', { name: /^Unit$/i } ) ).toHaveValue( init.typographyUnit );
+		await expect( l.entryTypography.getByRole( 'textbox', { name: /^Line height$/i } ) ).toHaveValue( init.typographyLineHeight );
+		await expect( l.entryTypography.getByRole( 'textbox', { name: /^Letter spacing$/i } ) ).toHaveValue( init.typographyLetterSpacing );
+		await expect( l.entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', init.typographyAlign || '' );
+		await expect( l.entryTypography.locator( '[data-field-path="entry_typography.color"] [data-color-field="entry_typography.color"]' ) ).toHaveAttribute( 'data-color-value', init.typographyColor );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-color"] [data-color-field="entry_background.background-color"]' ) ).toHaveAttribute( 'data-color-value', init.backgroundColor );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-gradient-color"] [data-color-field="entry_background.background-gradient-color"]' ) ).toHaveAttribute( 'data-color-value', init.backgroundGradientColor );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-gradient-direction"] select' ) ).toHaveValue( init.backgroundGradientDirection );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-position"] select' ) ).toHaveValue( init.backgroundPosition );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-repeat"] select' ) ).toHaveValue( init.backgroundRepeat );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-attachment"] select' ) ).toHaveValue( init.backgroundAttachment );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-size"] select' ) ).toHaveValue( init.backgroundSize );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-origin"] select' ) ).toHaveValue( init.backgroundOrigin );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-clip"] select' ) ).toHaveValue( init.backgroundClip );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-blend-mode"] select' ) ).toHaveValue( init.backgroundBlendMode );
+		await expect( l.entryPalette.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', init.palette || '' );
+		await expect( l.entryImageStyle.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', init.imageStyle || '' );
+		await expect( l.entryCampaign.locator( '[data-selected-value]' ).first() ).toHaveAttribute( 'data-selected-value', init.campaign || '' );
+		await expect( l.entryIcon.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', init.icon || '' );
+		await expect( l.entryLinks.getByRole( 'textbox', { name: /^Link label$/i } ).first() ).toHaveValue( init.linkLabel );
+		await expect( l.entryLinks.getByRole( 'textbox', { name: /^Link URL$/i } ).first() ).toHaveValue( init.linkUrl );
+		await expect( shared.panel.getByRole( 'checkbox', { name: /^Newsletter$/i } ) ).toBeChecked( { checked: init.newsletter } );
+	} );
 
-	await expect( discardModal ).toBeVisible( { timeout: 5_000 } );
-	await expect( discardModal.getByRole( 'button', { name: /^Discard$/ } ).first() ).toBeVisible();
-	await discardModal.getByRole( 'button', { name: /^Discard$/ } ).first().click();
-	await discardClickPromise;
-	await expect( panel ).toHaveAttribute( 'data-dirty', 'false' );
-	await expect( entrySlug ).toHaveValue( initialSlug );
-	await expect( entryLayout ).toHaveValue( initialLayout );
-	await expect( entryFormat.locator( 'input[type="radio"]:checked' ) ).toHaveValue( initialFormat );
-	await expect( entryEmphasis.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialEmphasis || '' );
-	await expect( entryAccent ).toHaveAttribute( 'data-color-value', initialAccent );
-	await expect( entryReviewDate ).toHaveValue( initialReviewDate );
-	await expect( entryPriority ).toHaveValue( initialPriority );
-	await expect( entryScore ).toHaveValue( initialScore );
-	await expect( entryBadgeLabel ).toHaveValue( initialBadgeLabel );
-	await expect( entryBadgeSlug ).toHaveValue( initialBadgeSlug );
-	await expect( entryDimensionsWidth ).toHaveValue( initialDimensionsWidth );
-	await expect( entryDimensionsHeight ).toHaveValue( initialDimensionsHeight );
-	await expect( entryDimensionsUnit ).toHaveValue( initialDimensionsUnit );
-	await expect( entrySpacingTop ).toHaveValue( initialSpacingTop );
-	await expect( entrySpacingRight ).toHaveValue( initialSpacingRight );
-	await expect( entrySpacingUnit ).toHaveValue( initialSpacingUnit );
-	await expect( entryBorderTop ).toHaveValue( initialBorderTop );
-	await expect( entryBorderRight ).toHaveValue( initialBorderRight );
-	await expect( entryBorderStyle ).toHaveValue( initialBorderStyle );
-	await expect( entryBorderColor ).toHaveAttribute( 'data-color-value', initialBorderColor );
-	await expect( entryLinkNormal ).toHaveAttribute( 'data-color-value', initialLinkNormal );
-	await expect( entryLinkHover ).toHaveAttribute( 'data-color-value', initialLinkHover );
-	await expect( entryTypographyFamily ).toHaveValue( initialTypographyFamily );
-	await expect( entryTypographyWeight ).toHaveValue( initialTypographyWeight );
-	await expect( entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialTypographyStyle || '' );
-	await expect( entryTypographySize ).toHaveValue( initialTypographySize );
-	await expect( entryTypographyUnit ).toHaveValue( initialTypographyUnit );
-	await expect( entryTypographyLineHeight ).toHaveValue( initialTypographyLineHeight );
-	await expect( entryTypographyLetterSpacing ).toHaveValue( initialTypographyLetterSpacing );
-	await expect( entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialTypographyAlign || '' );
-	await expect( entryTypographyColor ).toHaveAttribute( 'data-color-value', initialTypographyColor );
-	await expect( entryBackgroundColor ).toHaveAttribute( 'data-color-value', initialBackgroundColor );
-	await expect( entryBackgroundGradientColor ).toHaveAttribute( 'data-color-value', initialBackgroundGradientColor );
-	await expect( entryBackgroundGradientDirection ).toHaveValue( initialBackgroundGradientDirection );
-	await expect( entryBackgroundPosition ).toHaveValue( initialBackgroundPosition );
-	await expect( entryBackgroundRepeat ).toHaveValue( initialBackgroundRepeat );
-	await expect( entryBackgroundAttachment ).toHaveValue( initialBackgroundAttachment );
-	await expect( entryBackgroundSize ).toHaveValue( initialBackgroundSize );
-	await expect( entryBackgroundOrigin ).toHaveValue( initialBackgroundOrigin );
-	await expect( entryBackgroundClip ).toHaveValue( initialBackgroundClip );
-	await expect( entryBackgroundBlendMode ).toHaveValue( initialBackgroundBlendMode );
-	await expect( entryPalette.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialPalette || '' );
-	await expect( entryImageStyle.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialImageStyle || '' );
-	await expect( entryCampaign.locator( '[data-selected-value]' ).first() ).toHaveAttribute( 'data-selected-value', initialCampaign || '' );
-	await expect( entryIcon.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', initialIcon || '' );
-	await expect( entryLinkLabel ).toHaveValue( initialLinkLabel );
-	await expect( entryLinkUrl ).toHaveValue( initialLinkUrl );
-	await expect( newsletterChannel ).toBeChecked( { checked: initialNewsletter } );
+	test( 'validation errors prevent save', async () => {
+		const page = shared.page;
+		const panel = shared.panel;
+		const l = gatherLocators( panel );
 
-	await entrySlug.fill( 'x' );
-	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
+		// Top-level validation error: slug too short.
+		await l.entrySlug.fill( 'x' );
+		await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
-	const invalidSaveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
+		const invalidSaveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
 
-	await panel.getByRole( 'button', { name: /^Save$/ } ).click();
+		await panel.getByRole( 'button', { name: /^Save$/ } ).click();
 
-	const invalidSaveResponse = await invalidSaveRequest;
+		const invalidSaveResponse = await invalidSaveRequest;
 
-	expect( invalidSaveResponse.status() ).toBe( 422 );
-	await expect( panel ).toHaveAttribute( 'data-status', 'error' );
-	await expect( panel ).toHaveAttribute( 'data-error-count', '1' );
-	await expect( panel.locator( '[data-field-error="entry_slug"]' ) ).toContainText( /between 3 and 32/i );
+		expect( invalidSaveResponse.status() ).toBe( 422 );
+		await expect( panel ).toHaveAttribute( 'data-status', 'error' );
+		await expect( panel ).toHaveAttribute( 'data-error-count', '1' );
+		await expect( panel.locator( '[data-field-error="entry_slug"]' ) ).toContainText( /between 3 and 32/i );
 
-	await entrySlug.fill( savedSlug );
-	await expect( panel ).toHaveAttribute( 'data-status', 'ready' );
-	await expect( panel ).toHaveAttribute( 'data-error-count', '0' );
+		// Fix slug, then trigger a nested field validation error.
+		await l.entrySlug.fill( 'block-panel-valid' );
+		await expect( panel ).toHaveAttribute( 'data-status', 'ready' );
+		await expect( panel ).toHaveAttribute( 'data-error-count', '0' );
 
-	await entryBadgeSlug.fill( 'x' );
+		await l.entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } ).fill( 'x' );
 
-	const invalidNestedSaveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
+		const invalidNestedSaveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
 
-	await panel.getByRole( 'button', { name: /^Save$/ } ).click();
+		await panel.getByRole( 'button', { name: /^Save$/ } ).click();
 
-	const invalidNestedSaveResponse = await invalidNestedSaveRequest;
+		const invalidNestedSaveResponse = await invalidNestedSaveRequest;
 
-	expect( invalidNestedSaveResponse.status() ).toBe( 422 );
-	await expect( panel ).toHaveAttribute( 'data-status', 'error' );
-	await expect( panel ).toHaveAttribute( 'data-error-count', '1' );
-	await expect( panel.locator( '[data-field-error="entry_badge.slug"]' ) ).toContainText( /between 3 and 32/i );
+		expect( invalidNestedSaveResponse.status() ).toBe( 422 );
+		await expect( panel ).toHaveAttribute( 'data-status', 'error' );
+		await expect( panel ).toHaveAttribute( 'data-error-count', '1' );
+		await expect( panel.locator( '[data-field-error="entry_badge.slug"]' ) ).toContainText( /between 3 and 32/i );
 
-	await entryBadgeSlug.fill( savedBadgeSlug );
-	await expect( panel ).toHaveAttribute( 'data-status', 'ready' );
-	await expect( panel ).toHaveAttribute( 'data-error-count', '0' );
+		// Fix the nested error so the panel is clean for the next test.
+		await l.entryBadge.getByRole( 'textbox', { name: /^Badge slug$/i } ).fill( shared.initial.badgeSlug );
+		await expect( panel ).toHaveAttribute( 'data-status', 'ready' );
+		await expect( panel ).toHaveAttribute( 'data-error-count', '0' );
+	} );
 
-	await featuredToggle.setChecked( ! initialChecked );
-	await entryLayout.selectOption( savedLayout );
-	await entryFormat.locator( `input[type="radio"][value="${ savedFormat }"]` ).check();
-	await entryEmphasis.locator( `button[data-value="${ savedEmphasis }"]` ).click();
-	await setColorValue( entryAccent, savedAccent );
-	await setInputValue( entryReviewDate, savedReviewDate );
-	await setInputValue( entryPriority, savedPriority );
-	await entryScore.fill( savedScore );
-	await entryBadgeLabel.fill( savedBadgeLabel );
-	await entryDimensionsWidth.fill( savedDimensionsWidth );
-	await entryDimensionsHeight.fill( savedDimensionsHeight );
-	await entryDimensionsUnit.selectOption( savedDimensionsUnit );
-	await entrySpacingTop.fill( savedSpacingTop );
-	await entrySpacingRight.fill( savedSpacingRight );
-	await entrySpacingUnit.selectOption( savedSpacingUnit );
-	await entryBorderTop.fill( savedBorderTop );
-	await entryBorderRight.fill( savedBorderRight );
-	await entryBorderStyle.selectOption( savedBorderStyle );
-	await setColorValue( entryBorderColor, savedBorderColor );
-	await setColorValue( entryLinkNormal, savedLinkNormal );
-	await setColorValue( entryLinkHover, savedLinkHover );
-	await entryTypographyFamily.fill( savedTypographyFamily );
-	await entryTypographyWeight.selectOption( savedTypographyWeight );
-	await ( savedTypographyStyle === 'italic' ? entryTypographyStyleItalic : entryTypographyStyleNormal ).click();
-	await entryTypographySize.fill( savedTypographySize );
-	await entryTypographyUnit.selectOption( savedTypographyUnit );
-	await entryTypographyLineHeight.fill( savedTypographyLineHeight );
-	await entryTypographyLetterSpacing.fill( savedTypographyLetterSpacing );
-	await ( savedTypographyAlign === 'center' ? entryTypographyAlignCenter : entryTypographyAlignLeft ).click();
-	await setColorValue( entryTypographyColor, savedTypographyColor );
-	await setColorValue( entryBackgroundColor, savedBackgroundColor );
-	await setColorValue( entryBackgroundGradientColor, savedBackgroundGradientColor );
-	await entryBackgroundGradientDirection.selectOption( savedBackgroundGradientDirection );
-	await entryBackgroundPosition.selectOption( savedBackgroundPosition );
-	await entryBackgroundRepeat.selectOption( savedBackgroundRepeat );
-	await entryBackgroundAttachment.selectOption( savedBackgroundAttachment );
-	await entryBackgroundSize.selectOption( savedBackgroundSize );
-	await entryBackgroundOrigin.selectOption( savedBackgroundOrigin );
-	await entryBackgroundClip.selectOption( savedBackgroundClip );
-	await entryBackgroundBlendMode.selectOption( savedBackgroundBlendMode );
-	await entryPalette.locator( `button[data-value="${ savedPalette }"]` ).click();
-	await entryImageStyle.locator( `button[data-value="${ savedImageStyle }"]` ).click();
-	await selectAjaxOption( page, entryCampaign, savedCampaignSearch, savedCampaign, savedCampaignLabel );
-	await entryIcon.locator( `button[data-value="${ savedIcon }"]` ).click();
-	await entryLinkLabel.fill( savedLinkLabel );
-	await entryLinkUrl.fill( savedLinkUrl );
-	await newsletterChannel.setChecked( ! initialNewsletter );
-	await selectMediaAttachments( page, entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ), [ 'Admin Config Media One' ] );
-	await selectMediaAttachments( page, entryMedia.getByRole( 'button', { name: /^Choose image$/i } ), [ 'Admin Config Media Two' ] );
-	await selectMediaAttachments( page, entryBackgroundImage.getByRole( 'button', { name: /^Choose background image$/i } ), [ 'Admin Config Media Three' ] );
-	await selectMediaAttachments( page, entryGallery.getByRole( 'button', { name: /^Choose gallery images$/i } ), [
-		'Admin Config Media One',
-		'Admin Config Media Three',
-	] );
+	test( 'saves values through REST and persists on reload', async () => {
+		const page = shared.page;
+		const panel = shared.panel;
+		const init = shared.initial;
+		const l = gatherLocators( panel );
 
-	const selectedMedia = await currentBlockPanelMediaValues( page );
+		const saved = computeSavedValues( init );
 
-	expect( selectedMedia.upload ).toContain( 'admin-config-media-one' );
-	expect( selectedMedia.mediaId ).toBeGreaterThan( 0 );
-	expect( selectedMedia.backgroundMediaId ).toBeGreaterThan( 0 );
-	expect( selectedMedia.galleryIds ).toHaveLength( 2 );
-	await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
+		await fillAllFields( page, panel, l, saved, init.newsletter );
 
-	const saveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
+		await selectMediaAttachments( page, l.entryUpload.getByRole( 'button', { name: /^Choose uploaded file$/i } ), [ 'Admin Config Media One' ] );
+		await selectMediaAttachments( page, l.entryMedia.getByRole( 'button', { name: /^Choose image$/i } ), [ 'Admin Config Media Two' ] );
+		await selectMediaAttachments( page, l.entryBackground.locator( '[data-field-path="entry_background.background-image"]' ).getByRole( 'button', { name: /^Choose background image$/i } ), [ 'Admin Config Media Three' ] );
+		await selectMediaAttachments( page, l.entryGallery.getByRole( 'button', { name: /^Choose gallery images$/i } ), [
+			'Admin Config Media One',
+			'Admin Config Media Three',
+		] );
 
-	await panel.getByRole( 'button', { name: /^Save$/ } ).click();
+		const selectedMedia = await currentBlockPanelMediaValues( page );
 
-	const saveResponse = await saveRequest;
+		expect( selectedMedia.upload ).toContain( 'admin-config-media-one' );
+		expect( selectedMedia.mediaId ).toBeGreaterThan( 0 );
+		expect( selectedMedia.backgroundMediaId ).toBeGreaterThan( 0 );
+		expect( selectedMedia.galleryIds ).toHaveLength( 2 );
+		await expect( panel ).toHaveAttribute( 'data-dirty', 'true' );
 
-	expect( saveResponse.ok() ).toBe( true );
-	await expect( panel ).toHaveAttribute( 'data-dirty', 'false' );
-	await expect( featuredToggle ).toBeChecked( { checked: ! initialChecked } );
-	await expect( entrySlug ).toHaveValue( savedSlug );
-	await expect( entryLayout ).toHaveValue( savedLayout );
-	await expect( entryFormat.locator( 'input[type="radio"]:checked' ) ).toHaveValue( savedFormat );
-	await expect( entryEmphasis.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedEmphasis );
-	await expect( entryAccent ).toHaveAttribute( 'data-color-value', savedAccent );
-	await expect( entryReviewDate ).toHaveValue( savedReviewDate );
-	await expect( entryPriority ).toHaveValue( savedPriority );
-	await expect( entryScore ).toHaveValue( savedScore );
-	await expect( entryBadgeLabel ).toHaveValue( savedBadgeLabel );
-	await expect( entryBadgeSlug ).toHaveValue( savedBadgeSlug );
-	await expect( entryDimensionsWidth ).toHaveValue( savedDimensionsWidth );
-	await expect( entryDimensionsHeight ).toHaveValue( savedDimensionsHeight );
-	await expect( entryDimensionsUnit ).toHaveValue( savedDimensionsUnit );
-	await expect( entrySpacingTop ).toHaveValue( savedSpacingTop );
-	await expect( entrySpacingRight ).toHaveValue( savedSpacingRight );
-	await expect( entrySpacingUnit ).toHaveValue( savedSpacingUnit );
-	await expect( entryBorderTop ).toHaveValue( savedBorderTop );
-	await expect( entryBorderRight ).toHaveValue( savedBorderRight );
-	await expect( entryBorderStyle ).toHaveValue( savedBorderStyle );
-	await expect( entryBorderColor ).toHaveAttribute( 'data-color-value', savedBorderColor );
-	await expect( entryLinkNormal ).toHaveAttribute( 'data-color-value', savedLinkNormal );
-	await expect( entryLinkHover ).toHaveAttribute( 'data-color-value', savedLinkHover );
-	await expect( entryTypographyFamily ).toHaveValue( savedTypographyFamily );
-	await expect( entryTypographyWeight ).toHaveValue( savedTypographyWeight );
-	await expect( entryTypography.locator( '[data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyStyle );
-	await expect( entryTypographySize ).toHaveValue( savedTypographySize );
-	await expect( entryTypographyUnit ).toHaveValue( savedTypographyUnit );
-	await expect( entryTypographyLineHeight ).toHaveValue( savedTypographyLineHeight );
-	await expect( entryTypographyLetterSpacing ).toHaveValue( savedTypographyLetterSpacing );
-	await expect( entryTypography.locator( '[data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyAlign );
-	await expect( entryTypographyColor ).toHaveAttribute( 'data-color-value', savedTypographyColor );
-	await expect( entryBackgroundColor ).toHaveAttribute( 'data-color-value', savedBackgroundColor );
-	await expect( entryBackgroundGradientColor ).toHaveAttribute( 'data-color-value', savedBackgroundGradientColor );
-	await expect( entryBackgroundGradientDirection ).toHaveValue( savedBackgroundGradientDirection );
-	await expect( entryBackgroundPosition ).toHaveValue( savedBackgroundPosition );
-	await expect( entryBackgroundRepeat ).toHaveValue( savedBackgroundRepeat );
-	await expect( entryBackgroundAttachment ).toHaveValue( savedBackgroundAttachment );
-	await expect( entryBackgroundSize ).toHaveValue( savedBackgroundSize );
-	await expect( entryBackgroundOrigin ).toHaveValue( savedBackgroundOrigin );
-	await expect( entryBackgroundClip ).toHaveValue( savedBackgroundClip );
-	await expect( entryBackgroundBlendMode ).toHaveValue( savedBackgroundBlendMode );
-	await expect( entryPalette.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedPalette );
-	await expect( entryImageStyle.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedImageStyle );
-	await expect( entryCampaign.locator( '[data-selected-value]' ).first() ).toHaveAttribute( 'data-selected-value', savedCampaign );
-	await expect( entryIcon.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedIcon );
-	await expect( entryLinkLabel ).toHaveValue( savedLinkLabel );
-	await expect( entryLinkUrl ).toHaveValue( savedLinkUrl );
-	await expect( newsletterChannel ).toBeChecked( { checked: ! initialNewsletter } );
-	await expect( entryUpload.locator( '.lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
-	await expect( entryMedia.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
-	await expect( entryBackgroundImage.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
-	await expect( entryGallery.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );
+		const saveRequest = page.waitForResponse( ( saveResponse ) => isMetaboxSaveResponse( saveResponse, 'acme-demo-post-metabox' ), { timeout: 20_000 } );
 
-	const reloadSchemaRequest = page.waitForResponse( ( reloadResponse ) => isMetaboxSchemaResponse( reloadResponse ), { timeout: 30_000 } );
+		await panel.getByRole( 'button', { name: /^Save$/ } ).click();
 
-	await page.reload( { waitUntil: 'domcontentloaded' } );
-	await reloadSchemaRequest;
+		const saveResponse = await saveRequest;
 
-	const reloadedPanel = await expandBlockPanel( page, 'acme-demo-post-metabox', 'Entry Display Overrides' );
+		expect( saveResponse.ok() ).toBe( true );
+		await expect( panel ).toHaveAttribute( 'data-dirty', 'false' );
 
-	await expect( reloadedPanel.getByRole( 'checkbox', { name: /Feature this entry/i } ) ).toBeChecked(
-		{ checked: ! initialChecked, timeout: 30_000 }
-	);
-	await expect( reloadedPanel.getByRole( 'textbox', { name: /Entry slug/i } ) ).toHaveValue( savedSlug );
-	await expect( reloadedPanel.getByRole( 'combobox', { name: /Entry layout/i } ) ).toHaveValue( savedLayout );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_format"] input[type="radio"]:checked' ) ).toHaveValue( savedFormat );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_emphasis"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedEmphasis );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_accent"] [data-color-field="entry_accent"]' ) ).toHaveAttribute( 'data-color-value', savedAccent );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_review_date"] input[type="date"]' ) ).toHaveValue( savedReviewDate );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_priority"] input[type="range"]' ) ).toHaveValue( savedPriority );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_score"] input[type="number"]' ) ).toHaveValue( savedScore );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_badge"]' ).getByRole( 'textbox', { name: /^Label$/i } ) ).toHaveValue( savedBadgeLabel );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_badge"]' ).getByRole( 'textbox', { name: /^Badge slug$/i } ) ).toHaveValue( savedBadgeSlug );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_dimensions"]' ).getByRole( 'spinbutton', { name: /Entry card size Width/i } ) ).toHaveValue( savedDimensionsWidth );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_dimensions"]' ).getByRole( 'spinbutton', { name: /Entry card size Height/i } ) ).toHaveValue( savedDimensionsHeight );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_dimensions"]' ).getByRole( 'combobox', { name: /Entry card size unit/i } ) ).toHaveValue( savedDimensionsUnit );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_spacing"]' ).getByRole( 'spinbutton', { name: /Entry card spacing Top/i } ) ).toHaveValue( savedSpacingTop );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_spacing"]' ).getByRole( 'spinbutton', { name: /Entry card spacing Right/i } ) ).toHaveValue( savedSpacingRight );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_spacing"]' ).getByRole( 'combobox', { name: /Entry card spacing unit/i } ) ).toHaveValue( savedSpacingUnit );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_border"]' ).getByRole( 'spinbutton', { name: /Entry card border Top/i } ) ).toHaveValue( savedBorderTop );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_border"]' ).getByRole( 'spinbutton', { name: /Entry card border Right/i } ) ).toHaveValue( savedBorderRight );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_border"]' ).getByRole( 'combobox', { name: /Entry card border Style/i } ) ).toHaveValue( savedBorderStyle );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_border"] [data-color-field="entry_border.color"]' ) ).toHaveAttribute( 'data-color-value', savedBorderColor );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_link_colors"] [data-color-field="entry_link_colors.color"]' ) ).toHaveAttribute( 'data-color-value', savedLinkNormal );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_link_colors"] [data-color-field="entry_link_colors.hover"]' ) ).toHaveAttribute( 'data-color-value', savedLinkHover );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'textbox', { name: /^Family$/i } ) ).toHaveValue( savedTypographyFamily );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'combobox', { name: /^Weight$/i } ) ).toHaveValue( savedTypographyWeight );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.font-style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyStyle );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'textbox', { name: /^Size$/i } ) ).toHaveValue( savedTypographySize );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'combobox', { name: /^Unit$/i } ) ).toHaveValue( savedTypographyUnit );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'textbox', { name: /^Line height$/i } ) ).toHaveValue( savedTypographyLineHeight );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"]' ).getByRole( 'textbox', { name: /^Letter spacing$/i } ) ).toHaveValue( savedTypographyLetterSpacing );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.text-align"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedTypographyAlign );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_typography"] [data-field-path="entry_typography.color"] [data-color-field="entry_typography.color"]' ) ).toHaveAttribute( 'data-color-value', savedTypographyColor );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-color"] [data-color-field="entry_background.background-color"]' ) ).toHaveAttribute( 'data-color-value', savedBackgroundColor );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-gradient-color"] [data-color-field="entry_background.background-gradient-color"]' ) ).toHaveAttribute( 'data-color-value', savedBackgroundGradientColor );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-gradient-direction"] select' ) ).toHaveValue( savedBackgroundGradientDirection );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-position"] select' ) ).toHaveValue( savedBackgroundPosition );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-repeat"] select' ) ).toHaveValue( savedBackgroundRepeat );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-attachment"] select' ) ).toHaveValue( savedBackgroundAttachment );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-size"] select' ) ).toHaveValue( savedBackgroundSize );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-origin"] select' ) ).toHaveValue( savedBackgroundOrigin );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-clip"] select' ) ).toHaveValue( savedBackgroundClip );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-blend-mode"] select' ) ).toHaveValue( savedBackgroundBlendMode );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_palette"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedPalette );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_image_style"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedImageStyle );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_campaign"] [data-selected-value]' ).first() ).toHaveAttribute( 'data-selected-value', savedCampaign );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_icon"] button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', savedIcon );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link label$/i } ).first() ).toHaveValue( savedLinkLabel );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_links"]' ).getByRole( 'textbox', { name: /^Link URL$/i } ).first() ).toHaveValue( savedLinkUrl );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_upload"] .lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_media"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-image"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
-	await expect( reloadedPanel.locator( '[data-field-id="entry_gallery"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );
-	await expect
-		.poll( () => currentBlockPanelMediaValues( page ), { timeout: 30_000 } )
-		.toMatchObject( selectedMedia );
-	await expect( reloadedPanel.getByRole( 'checkbox', { name: /^Newsletter$/i } ) ).toBeChecked(
-		{ checked: ! initialNewsletter }
-	);
-	expect( ajaxRequests ).toEqual( [] );
+		// Verify saved values are reflected in the UI.
+		await expect( l.featuredToggle ).toBeChecked( { checked: ! init.newsletter } );
+		await expect( l.entrySlug ).toHaveValue( saved.slug );
+		await expect( l.entryLayout ).toHaveValue( saved.layout );
+		await expect( l.entryFormat.locator( 'input[type="radio"]:checked' ) ).toHaveValue( saved.format );
+		await expect( l.entryEmphasis.locator( 'button[aria-pressed="true"]' ) ).toHaveAttribute( 'data-value', saved.emphasis );
+		await expect( l.entryAccent ).toHaveAttribute( 'data-color-value', saved.accent );
+		await expect( l.entryUpload.locator( '.lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
+		await expect( l.entryMedia.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
+		await expect( l.entryBackground.locator( '[data-field-path="entry_background.background-image"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
+		await expect( l.entryGallery.locator( '.lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );
+
+		// Reload and verify persistence.
+		const reloadSchemaRequest = page.waitForResponse( ( reloadResponse ) => isMetaboxSchemaResponse( reloadResponse ), { timeout: 30_000 } );
+
+		await page.reload( { waitUntil: 'domcontentloaded' } );
+		await reloadSchemaRequest;
+
+		const reloadedPanel = await expandBlockPanel( page, 'acme-demo-post-metabox', 'Entry Display Overrides' );
+
+		await expect( reloadedPanel.getByRole( 'checkbox', { name: /Feature this entry/i } ) ).toBeChecked(
+			{ checked: ! init.newsletter, timeout: 30_000 }
+		);
+		await expect( reloadedPanel.getByRole( 'textbox', { name: /Entry slug/i } ) ).toHaveValue( saved.slug );
+		await expect( reloadedPanel.getByRole( 'combobox', { name: /Entry layout/i } ) ).toHaveValue( saved.layout );
+		await expect( reloadedPanel.locator( '[data-field-id="entry_format"] input[type="radio"]:checked' ) ).toHaveValue( saved.format );
+		await expect( reloadedPanel.locator( '[data-field-id="entry_upload"] .lerm-admin-config-block-panel__media-url-preview img' ) ).toHaveAttribute( 'src', /admin-config-media-one/i );
+		await expect( reloadedPanel.locator( '[data-field-id="entry_media"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
+		await expect( reloadedPanel.locator( '[data-field-id="entry_background"] [data-field-path="entry_background.background-image"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 1 );
+		await expect( reloadedPanel.locator( '[data-field-id="entry_gallery"] .lerm-admin-config-block-panel__media-preview-item' ) ).toHaveCount( 2 );
+
+		await expect
+			.poll( () => currentBlockPanelMediaValues( page ), { timeout: 30_000 } )
+			.toMatchObject( selectedMedia );
+
+		expect( shared.ajaxRequests ).toEqual( [] );
+	} );
 } );
