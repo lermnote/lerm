@@ -17,6 +17,7 @@ use Lerm\AdminConfig\Rest\Support\RequestPayload;
 use Lerm\AdminConfig\Rest\Support\ResponseFactory;
 use Lerm\AdminConfig\Stores\MissingStoreContextException;
 use Lerm\AdminConfig\WordPress\Runtime;
+use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -133,7 +134,7 @@ final class SchemaController {
 					esc_html__( 'Please review the highlighted fields and try again.', 'lerm-admin-config' ),
 					422,
 					array(
-						'fieldErrors' => $this->collapse_field_errors( $store->validation_errors() ),
+						'fieldErrors' => ValidationFlash::collapse_errors( $store->validation_errors() ),
 						'errors'      => $store->validation_errors(),
 						'tab'         => $target['tab'],
 						'subsection'  => $target['subsection'],
@@ -291,7 +292,7 @@ final class SchemaController {
 					esc_html__( 'Please review the highlighted fields before importing again.', 'lerm-admin-config' ),
 					422,
 					array(
-						'fieldErrors' => $this->collapse_field_errors( $store->validation_errors() ),
+						'fieldErrors' => ValidationFlash::collapse_errors( $store->validation_errors() ),
 						'errors'      => $store->validation_errors(),
 						'tab'         => $target['tab'],
 						'subsection'  => $target['subsection'],
@@ -493,29 +494,6 @@ final class SchemaController {
 		}
 
 		return $targets;
-	}
-
-	/**
-	 * @param array<string, array<int, string>> $errors
-	 * @return array<string, string>
-	 */
-	private function collapse_field_errors( array $errors ): array {
-		$collapsed = array();
-
-		foreach ( $errors as $path => $messages ) {
-			if ( ! is_array( $messages ) || empty( $messages ) ) {
-				continue;
-			}
-
-			$field_id = sanitize_key( (string) strtok( (string) $path, '.' ) );
-			$message  = trim( implode( ' ', array_filter( array_map( 'strval', $messages ) ) ) );
-
-			if ( '' !== $field_id && '' !== $message && ! isset( $collapsed[ $field_id ] ) ) {
-				$collapsed[ $field_id ] = $message;
-			}
-		}
-
-		return $collapsed;
 	}
 
 	/**
