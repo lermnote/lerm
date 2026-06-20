@@ -10,6 +10,7 @@
   <exclude-pattern>*/vendor/*</exclude-pattern>
   <exclude-pattern>*/assets/*</exclude-pattern>
   <exclude-pattern>*/tests/E2E/*</exclude-pattern>
+  <exclude-pattern>*/tests/JS/*</exclude-pattern>
 
   <rule ref="WordPress-Core">
     <exclude name="WordPress.Files.FileName"/>
