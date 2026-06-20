@@ -39,7 +39,7 @@ final class SchemaController {
 		}
 
 		[ $schema, $store ] = $resolved;
-		$values            = $store->all();
+		$values             = $store->all();
 
 		return rest_ensure_response(
 			array(
@@ -98,7 +98,7 @@ final class SchemaController {
 		}
 
 		[ $schema, $store ] = $resolved;
-		$values            = $store->all();
+		$values             = $store->all();
 
 		return ResponseFactory::success(
 			SchemaSerializer::values( $schema, $values, $this->schema_actions( $schema, $request ) )
@@ -214,7 +214,7 @@ final class SchemaController {
 		}
 
 		[ $schema, $store ] = $resolved;
-		$values            = $store->all();
+		$values             = $store->all();
 
 		$json = wp_json_encode( $values, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 
