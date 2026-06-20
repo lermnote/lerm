@@ -365,7 +365,9 @@ let confirmDialog;
 
 		const dependentRows = dom.findAll('[data-dependency-field]', form).map((row) => /** @type {HTMLElement} */ (row));
 
-		for (let pass = 0; pass < dependentRows.length; pass += 1) {
+		const maxPasses = Math.min(dependentRows.length, 20);
+
+		for (let pass = 0; pass < maxPasses; pass += 1) {
 			let changed = false;
 
 			dependentRows.forEach((row) => {
@@ -956,8 +958,8 @@ let confirmDialog;
 		setValue(input, value) {
 			if (!(input instanceof HTMLInputElement)) return;
 
-			this.init(input);
 			input.value = normalizeHexColor(value) || String(value ?? '').trim();
+			this.init(input);
 			createColorControl(input).syncUi();
 		},
 	};
@@ -2503,11 +2505,20 @@ let confirmDialog;
 		setStatus(form, pageDirty ? 'dirty' : 'idle', pageDirty ? __('Unsaved changes', 'lerm-admin-config') : __('Synced', 'lerm-admin-config'));
 	};
 
+	/** @type {Map<HTMLFormElement, number>} */
+	const dirtyDebounceMap = new Map();
+
 	/** @param {HTMLFormElement} form */
 	const syncDirtyState = (form) => {
-		const savedState = formSnapshotMap.get(form) ?? {};
-		const dirty = stableStateString(readFormState(form)) !== stableStateString(savedState);
-		setDirty(form, dirty);
+		const existing = dirtyDebounceMap.get(form);
+		if (existing) clearTimeout(existing);
+
+		dirtyDebounceMap.set(form, setTimeout(() => {
+			dirtyDebounceMap.delete(form);
+			const savedState = formSnapshotMap.get(form) ?? {};
+			const dirty = stableStateString(readFormState(form)) !== stableStateString(savedState);
+			setDirty(form, dirty);
+		}, 150));
 	};
 
 	// ─── REST Actions ──────────────────────────────────────────────────────────
