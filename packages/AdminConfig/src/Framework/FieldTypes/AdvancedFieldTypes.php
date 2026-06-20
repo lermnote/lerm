@@ -13,6 +13,7 @@ use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\FieldTypes\Support\NestedFieldSanitizer;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldRenderHelpers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -70,8 +71,8 @@ final class AdvancedFieldTypes {
 					$field_name,
 					$input_id,
 					'',
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ): string {
@@ -515,13 +516,5 @@ final class AdvancedFieldTypes {
 			'<p class="description" style="color:#b91c1c;font-style:italic">%s</p>',
 			esc_html( $message )
 		);
-	}
-
-	private static function name_attr( string $template ): string {
-		return '' !== $template ? ' data-name-template="' . esc_attr( $template ) . '"' : '';
-	}
-
-	private static function id_attr( string $template ): string {
-		return '' !== $template ? ' data-id-template="' . esc_attr( $template ) . '"' : '';
 	}
 }

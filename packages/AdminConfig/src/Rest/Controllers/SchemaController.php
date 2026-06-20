@@ -15,6 +15,7 @@ use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Rest\Support\ContextResolver;
 use Lerm\AdminConfig\Rest\Support\RequestPayload;
 use Lerm\AdminConfig\Rest\Support\ResponseFactory;
+use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Stores\MissingStoreContextException;
 use Lerm\AdminConfig\WordPress\Runtime;
 use Lerm\AdminConfig\WordPress\Support\ValidationFlash;
@@ -31,17 +32,14 @@ final class SchemaController {
 	}
 
 	public function schema( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		$schema = $this->schema_from_request( $request );
+		$resolved = $this->resolve_store( $request );
 
-		if ( is_wp_error( $schema ) ) {
-			return $schema;
+		if ( is_wp_error( $resolved ) ) {
+			return $resolved;
 		}
 
-		try {
-			$values = $this->runtime->store( $schema->id(), ContextResolver::from_request( $request ) )->all();
-		} catch ( MissingStoreContextException $exception ) {
-			return $this->missing_context_error( $exception );
-		}
+		[ $schema, $store ] = $resolved;
+		$values             = $store->all();
 
 		return rest_ensure_response(
 			array(
@@ -93,17 +91,14 @@ final class SchemaController {
 	}
 
 	public function values( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		$schema = $this->schema_from_request( $request );
+		$resolved = $this->resolve_store( $request );
 
-		if ( is_wp_error( $schema ) ) {
-			return $schema;
+		if ( is_wp_error( $resolved ) ) {
+			return $resolved;
 		}
 
-		try {
-			$values = $this->runtime->store( $schema->id(), ContextResolver::from_request( $request ) )->all();
-		} catch ( MissingStoreContextException $exception ) {
-			return $this->missing_context_error( $exception );
-		}
+		[ $schema, $store ] = $resolved;
+		$values             = $store->all();
 
 		return ResponseFactory::success(
 			SchemaSerializer::values( $schema, $values, $this->schema_actions( $schema, $request ) )
@@ -111,17 +106,13 @@ final class SchemaController {
 	}
 
 	public function save( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		$schema = $this->schema_from_request( $request );
+		$resolved = $this->resolve_store( $request );
 
-		if ( is_wp_error( $schema ) ) {
-			return $schema;
+		if ( is_wp_error( $resolved ) ) {
+			return $resolved;
 		}
 
-		try {
-			$store = $this->runtime->store( $schema->id(), ContextResolver::from_request( $request ) );
-		} catch ( MissingStoreContextException $exception ) {
-			return $this->missing_context_error( $exception );
-		}
+		[ $schema, $store ] = $resolved;
 
 		$submitted = RequestPayload::values( $request, $store->storage_key() );
 
@@ -161,17 +152,13 @@ final class SchemaController {
 	}
 
 	public function reset( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		$schema = $this->schema_from_request( $request );
+		$resolved = $this->resolve_store( $request );
 
-		if ( is_wp_error( $schema ) ) {
-			return $schema;
+		if ( is_wp_error( $resolved ) ) {
+			return $resolved;
 		}
 
-		try {
-			$store = $this->runtime->store( $schema->id(), ContextResolver::from_request( $request ) );
-		} catch ( MissingStoreContextException $exception ) {
-			return $this->missing_context_error( $exception );
-		}
+		[ $schema, $store ] = $resolved;
 
 		$section    = $this->posted_section( $request, $schema );
 		$subsection = RequestPayload::string( $request, 'subsection', RequestPayload::string( $request, 'lerm_settings_subsection' ) );
@@ -220,17 +207,14 @@ final class SchemaController {
 	}
 
 	public function export( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		$schema = $this->schema_from_request( $request );
+		$resolved = $this->resolve_store( $request );
 
-		if ( is_wp_error( $schema ) ) {
-			return $schema;
+		if ( is_wp_error( $resolved ) ) {
+			return $resolved;
 		}
 
-		try {
-			$values = $this->runtime->store( $schema->id(), ContextResolver::from_request( $request ) )->all();
-		} catch ( MissingStoreContextException $exception ) {
-			return $this->missing_context_error( $exception );
-		}
+		[ $schema, $store ] = $resolved;
+		$values             = $store->all();
 
 		$json = wp_json_encode( $values, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 
@@ -251,17 +235,13 @@ final class SchemaController {
 	}
 
 	public function import( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		$schema = $this->schema_from_request( $request );
+		$resolved = $this->resolve_store( $request );
 
-		if ( is_wp_error( $schema ) ) {
-			return $schema;
+		if ( is_wp_error( $resolved ) ) {
+			return $resolved;
 		}
 
-		try {
-			$store = $this->runtime->store( $schema->id(), ContextResolver::from_request( $request ) );
-		} catch ( MissingStoreContextException $exception ) {
-			return $this->missing_context_error( $exception );
-		}
+		[ $schema, $store ] = $resolved;
 
 		$json = RequestPayload::string( $request, 'backup_json', RequestPayload::string( $request, 'json' ) );
 
@@ -517,6 +497,25 @@ final class SchemaController {
 		}
 
 		return $selected;
+	}
+
+	/**
+	 * @return array{0: CompiledSchema, 1: OptionStore}|\WP_Error
+	 */
+	private function resolve_store( \WP_REST_Request $request ): array|\WP_Error {
+		$schema = $this->schema_from_request( $request );
+		if ( is_wp_error( $schema ) ) {
+			return $schema;
+		}
+		try {
+			$store = $this->runtime->store(
+				$schema->id(),
+				ContextResolver::from_request( $request )
+			);
+		} catch ( MissingStoreContextException $e ) {
+			return $this->missing_context_error( $e );
+		}
+		return array( $schema, $store );
 	}
 
 	private function missing_context_error( MissingStoreContextException $exception ): \WP_Error {

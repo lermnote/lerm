@@ -156,7 +156,7 @@ final class CommentContainer implements Container {
 				continue;
 			}
 
-			if ( ! current_user_can( $this->capability_for_schema( $schema ), $comment_id ) ) {
+			if ( ! current_user_can( ContainerSaveSupport::capability_for_schema( $schema, 'edit_comment' ), $comment_id ) ) {
 				continue;
 			}
 
@@ -190,16 +190,6 @@ final class CommentContainer implements Container {
 			false,
 			$this->framework->field_modules()
 		);
-	}
-
-	private function capability_for_schema( CompiledSchema $schema ): string {
-		$container = $schema->container();
-
-		if ( ! empty( $container['capability'] ) && is_scalar( $container['capability'] ) ) {
-			return (string) $container['capability'];
-		}
-
-		return 'edit_comment';
 	}
 
 	private function meta_box_id( CompiledSchema $schema ): string {

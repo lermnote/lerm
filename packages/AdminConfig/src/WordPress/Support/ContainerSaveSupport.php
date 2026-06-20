@@ -119,4 +119,18 @@ final class ContainerSaveSupport {
 
 		return array_values( array_unique( $normalized ) );
 	}
+
+	/**
+	 * Read the capability declared in the schema container, falling back
+	 * to the caller-supplied default when no explicit capability is set.
+	 */
+	public static function capability_for_schema( CompiledSchema $schema, string $fallback ): string {
+		$container = $schema->container();
+
+		if ( ! empty( $container['capability'] ) && is_scalar( $container['capability'] ) ) {
+			return (string) $container['capability'];
+		}
+
+		return $fallback;
+	}
 }

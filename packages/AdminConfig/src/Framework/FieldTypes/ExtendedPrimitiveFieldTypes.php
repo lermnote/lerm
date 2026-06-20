@@ -12,6 +12,7 @@ namespace Lerm\AdminConfig\Framework\FieldTypes;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldRenderHelpers;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -58,7 +59,7 @@ final class ExtendedPrimitiveFieldTypes {
 			},
 			'render_nested'      => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
 				if ( self::checkbox_uses_choices( $field ) ) {
-					self::render_checkbox_group( $field, $value, $field_name, false, self::name_attr( self::multiple_name_template( $name_template ) ) );
+					self::render_checkbox_group( $field, $value, $field_name, false, FieldRenderHelpers::name_attr( self::multiple_name_template( $name_template ) ) );
 					return;
 				}
 
@@ -68,8 +69,8 @@ final class ExtendedPrimitiveFieldTypes {
 					$field_name,
 					$input_id,
 					'',
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'           => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -120,8 +121,8 @@ final class ExtendedPrimitiveFieldTypes {
 					$field_name,
 					$input_id,
 					'',
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -191,8 +192,8 @@ final class ExtendedPrimitiveFieldTypes {
 					$field_name,
 					$input_id,
 					'',
-					self::name_attr( $name_template ),
-					self::id_attr( $id_template )
+					FieldRenderHelpers::name_attr( $name_template ),
+					FieldRenderHelpers::id_attr( $id_template )
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
@@ -220,7 +221,7 @@ final class ExtendedPrimitiveFieldTypes {
 				);
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-				self::render_spinner_field( $field, $value, $field_name, $input_id, self::name_attr( $name_template ) . self::id_attr( $id_template ) );
+				self::render_spinner_field( $field, $value, $field_name, $input_id, FieldRenderHelpers::name_attr( $name_template ) . FieldRenderHelpers::id_attr( $id_template ) );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				return self::sanitize_numeric_scalar( $field, $value );
@@ -241,7 +242,7 @@ final class ExtendedPrimitiveFieldTypes {
 				self::render_image_select_field( $field, $value, $field_name, true );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-				self::render_image_select_field( $field, $value, $field_name, false, self::name_attr( $name_template ) );
+				self::render_image_select_field( $field, $value, $field_name, false, FieldRenderHelpers::name_attr( $name_template ) );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				return self::sanitize_select_value( $field, $value, $strict );
@@ -262,7 +263,7 @@ final class ExtendedPrimitiveFieldTypes {
 				self::render_palette_field( $field, $value, $field_name, true );
 			},
 			'render_nested' => static function ( array $field, $value, string $field_name, string $input_id, OptionsPage $page, string $name_template = '', string $id_template = '' ): void {
-				self::render_palette_field( $field, $value, $field_name, false, self::name_attr( $name_template ) );
+				self::render_palette_field( $field, $value, $field_name, false, FieldRenderHelpers::name_attr( $name_template ) );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				$options = self::palette_options( $field );
@@ -395,13 +396,13 @@ final class ExtendedPrimitiveFieldTypes {
 			$data = is_array( $value ) ? $value : array();
 
 			echo '<div class="lerm-date-range">';
-			self::render_date_input( self::sub_name( $field_name, 'from' ), self::sub_id( $input_id, 'from' ), PageSchema::scalar_value( $data['from'] ?? '' ), (string) ( $field['text_from'] ?? __( 'From', 'lerm-admin-config' ) ), self::name_attr( self::sub_template( $name_template, 'from' ) ), self::id_attr( self::sub_id_template( $id_template, 'from' ) ), $extra_attrs );
-			self::render_date_input( self::sub_name( $field_name, 'to' ), self::sub_id( $input_id, 'to' ), PageSchema::scalar_value( $data['to'] ?? '' ), (string) ( $field['text_to'] ?? __( 'To', 'lerm-admin-config' ) ), self::name_attr( self::sub_template( $name_template, 'to' ) ), self::id_attr( self::sub_id_template( $id_template, 'to' ) ) );
+			self::render_date_input( FieldRenderHelpers::sub_name( $field_name, 'from' ), FieldRenderHelpers::sub_id( $input_id, 'from' ), PageSchema::scalar_value( $data['from'] ?? '' ), (string) ( $field['text_from'] ?? __( 'From', 'lerm-admin-config' ) ), FieldRenderHelpers::name_attr( FieldRenderHelpers::sub_template( $name_template, 'from' ) ), FieldRenderHelpers::id_attr( FieldRenderHelpers::sub_id_template( $id_template, 'from' ) ), $extra_attrs );
+			self::render_date_input( FieldRenderHelpers::sub_name( $field_name, 'to' ), FieldRenderHelpers::sub_id( $input_id, 'to' ), PageSchema::scalar_value( $data['to'] ?? '' ), (string) ( $field['text_to'] ?? __( 'To', 'lerm-admin-config' ) ), FieldRenderHelpers::name_attr( FieldRenderHelpers::sub_template( $name_template, 'to' ) ), FieldRenderHelpers::id_attr( FieldRenderHelpers::sub_id_template( $id_template, 'to' ) ) );
 			echo '</div>';
 			return;
 		}
 
-		self::render_date_input( $field_name, $input_id, PageSchema::scalar_value( $value ), '', self::name_attr( $name_template ), self::id_attr( $id_template ), $extra_attrs );
+		self::render_date_input( $field_name, $input_id, PageSchema::scalar_value( $value ), '', FieldRenderHelpers::name_attr( $name_template ), FieldRenderHelpers::id_attr( $id_template ), $extra_attrs );
 	}
 
 	private static function render_date_input( string $field_name, string $input_id, string $value, string $label = '', string $name_attr = '', string $id_attr = '', string $extra_attrs = '' ): void {
@@ -647,31 +648,7 @@ final class ExtendedPrimitiveFieldTypes {
 		return is_scalar( $field['default'] ?? null ) ? (string) $field['default'] : '0';
 	}
 
-	private static function sub_name( string $field_name, string $key ): string {
-		return $field_name . '[' . $key . ']';
-	}
-
-	private static function sub_template( string $template, string $key ): string {
-		return '' !== $template ? $template . '[' . $key . ']' : '';
-	}
-
-	private static function sub_id( string $input_id, string $key ): string {
-		return $input_id . '__' . sanitize_html_class( str_replace( '_', '-', $key ) );
-	}
-
-	private static function sub_id_template( string $template, string $key ): string {
-		return '' !== $template ? $template . '__' . sanitize_html_class( str_replace( '_', '-', $key ) ) : '';
-	}
-
 	private static function multiple_name_template( string $template ): string {
 		return '' !== $template ? $template . '[]' : '';
-	}
-
-	private static function name_attr( string $template ): string {
-		return '' !== $template ? ' data-name-template="' . esc_attr( $template ) . '"' : '';
-	}
-
-	private static function id_attr( string $template ): string {
-		return '' !== $template ? ' data-id-template="' . esc_attr( $template ) . '"' : '';
 	}
 }
