@@ -524,7 +524,7 @@ final class OptionStore {
 			return $field_id;
 		}
 
-		if ( '' === $field_id || $resolved_path === $field_id || str_ends_with( $resolved_path, '.' . $field_id ) ) {
+		if ( '' === $field_id || $resolved_path === $field_id || FieldPath::ends_with_segment( $resolved_path, $field_id ) ) {
 			return $resolved_path;
 		}
 

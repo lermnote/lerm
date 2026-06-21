@@ -171,7 +171,6 @@ final class RestEndpoints {
 	}
 
 	public static function can_list_schemas( \WP_REST_Request $request ): bool {
-		unset( $request );
 
 		return current_user_can( 'manage_options' );
 	}
