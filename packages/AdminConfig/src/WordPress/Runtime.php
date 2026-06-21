@@ -419,11 +419,13 @@ final class Runtime {
 
 			case 'metabox':
 			case 'block_editor_panel':
-				if ( ! empty( $context['post_id'] ) && ! empty( $container['capability'] ) ) {
-					return current_user_can( (string) $container['capability'], $context['post_id'] );
+			case 'metabox':
+			case 'block_editor_panel':
+				if ( empty( $context['post_id'] ) ) {
+					return false;
 				}
-
-				return current_user_can( 'edit_posts' );
+				$cap = ! empty( $container['capability'] ) ? (string) $container['capability'] : 'edit_post';
+				return current_user_can( $cap, $context['post_id'] );
 
 			case 'taxonomy':
 				if ( ! empty( $context['term_id'] ) && ! empty( $container['capability'] ) ) {
