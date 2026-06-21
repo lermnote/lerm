@@ -419,8 +419,6 @@ final class Runtime {
 
 			case 'metabox':
 			case 'block_editor_panel':
-			case 'metabox':
-			case 'block_editor_panel':
 				if ( empty( $context['post_id'] ) ) {
 					return false;
 				}
