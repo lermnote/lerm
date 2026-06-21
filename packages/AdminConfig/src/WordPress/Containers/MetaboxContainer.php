@@ -200,7 +200,7 @@ final class MetaboxContainer implements Container, BlockEditorPanelContext {
 	}
 
 	private function post_context_uses_block_editor( string $post_type, ?\WP_Post $post = null ): bool {
-		if ( null !== $post && function_exists( 'use_block_editor_for_post' ) ) {
+		if ( null !== $post ) {
 			return use_block_editor_for_post( $post );
 		}
 

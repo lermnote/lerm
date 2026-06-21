@@ -419,32 +419,32 @@ final class Runtime {
 
 			case 'metabox':
 			case 'block_editor_panel':
-				if ( ! empty( $context['post_id'] ) && ! empty( $container['capability'] ) ) {
-					return current_user_can( (string) $container['capability'], $context['post_id'] );
+				if ( empty( $context['post_id'] ) ) {
+					return false;
 				}
-
-				return current_user_can( 'edit_posts' );
+				$cap = ! empty( $container['capability'] ) ? (string) $container['capability'] : 'edit_post';
+				return current_user_can( $cap, $context['post_id'] );
 
 			case 'taxonomy':
-				if ( ! empty( $context['term_id'] ) && ! empty( $container['capability'] ) ) {
-					return current_user_can( (string) $container['capability'], $context['term_id'] );
+				if ( empty( $context['term_id'] ) ) {
+					return false;
 				}
-
-				return current_user_can( 'manage_categories' );
+				$cap = ! empty( $container['capability'] ) ? (string) $container['capability'] : 'manage_categories';
+				return current_user_can( $cap, $context['term_id'] );
 
 			case 'profile':
-				if ( ! empty( $context['user_id'] ) && ! empty( $container['capability'] ) ) {
-					return current_user_can( (string) $container['capability'], $context['user_id'] );
+				if ( empty( $context['user_id'] ) ) {
+					return false;
 				}
-
-				return current_user_can( 'edit_users' );
+				$cap = ! empty( $container['capability'] ) ? (string) $container['capability'] : 'edit_user';
+				return current_user_can( $cap, $context['user_id'] );
 
 			case 'comment':
-				if ( ! empty( $context['comment_id'] ) && ! empty( $container['capability'] ) ) {
-					return current_user_can( (string) $container['capability'], $context['comment_id'] );
+				if ( empty( $context['comment_id'] ) ) {
+					return false;
 				}
-
-				return current_user_can( 'moderate_comments' );
+				$cap = ! empty( $container['capability'] ) ? (string) $container['capability'] : 'moderate_comments';
+				return current_user_can( $cap, $context['comment_id'] );
 
 			case 'options_page':
 			default:

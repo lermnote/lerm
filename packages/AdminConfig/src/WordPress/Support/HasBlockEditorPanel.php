@@ -181,7 +181,6 @@ trait HasBlockEditorPanel {
 				'wp-api-fetch',
 				'wp-block-editor',
 				'wp-components',
-				'wp-edit-post',
 				'wp-element',
 				'wp-plugins',
 			),

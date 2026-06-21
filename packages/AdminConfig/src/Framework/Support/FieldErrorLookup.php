@@ -30,7 +30,7 @@ final class FieldErrorLookup {
 			$is_match = (string) $path === $field_path;
 
 			if ( ! $is_match && $include_descendants ) {
-				$is_match = '' !== $field_path && str_starts_with( (string) $path, $field_path . '.' );
+				$is_match = '' !== $field_path && FieldPath::starts_with( (string) $path, $field_path );
 			}
 
 			if ( ! $is_match ) {
@@ -66,7 +66,7 @@ final class FieldErrorLookup {
 			$is_match = (string) $path === $field_path;
 
 			if ( ! $is_match && $include_descendants ) {
-				$is_match = '' !== $field_path && str_starts_with( (string) $path, $field_path . '.' );
+				$is_match = '' !== $field_path && FieldPath::starts_with( (string) $path, $field_path );
 			}
 
 			if ( ! $is_match ) {
