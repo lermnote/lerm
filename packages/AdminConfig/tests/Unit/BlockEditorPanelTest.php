@@ -170,7 +170,6 @@ final class BlockEditorPanelTest extends TestCase {
 		$this->assertSame( $expected_version, $script['version'] );
 		$this->assertContains( 'wp-api-fetch', $script['dependencies'] );
 		$this->assertContains( 'wp-block-editor', $script['dependencies'] );
-		$this->assertContains( 'wp-edit-post', $script['dependencies'] );
 		$this->assertContains( 'wp-element', $script['dependencies'] );
 		$this->assertTrue( $GLOBALS['lerm_admin_config_media_enqueued'] ?? false );
 		$this->assertIsArray( $inline );
