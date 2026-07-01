@@ -434,6 +434,10 @@ final class OptionsPage {
 	}
 
 	private function debug_panel_enabled(): bool {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
 		$view = is_array( $this->definition['view'] ?? null ) ? $this->definition['view'] : array();
 
 		if ( array_key_exists( 'debug', $view ) ) {

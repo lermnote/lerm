@@ -12,6 +12,7 @@ namespace Lerm\AdminConfig\Framework\FieldTypes;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldValueHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -174,7 +175,7 @@ final class AsyncFieldTypes {
 					continue;
 				}
 
-				$clean[] = self::cast_scalar_value( $item, $cast );
+				$clean[] = FieldValueHelper::cast_scalar_value( $item, $cast );
 			}
 
 			return array_values( array_unique( $clean, SORT_REGULAR ) );
@@ -182,7 +183,7 @@ final class AsyncFieldTypes {
 
 		$item = PageSchema::scalar_value( $value, '', true );
 
-		return '' === $item ? array() : array( self::cast_scalar_value( $item, $cast ) );
+		return '' === $item ? array() : array( FieldValueHelper::cast_scalar_value( $item, $cast ) );
 	}
 
 	/**
@@ -204,27 +205,13 @@ final class AsyncFieldTypes {
 					continue;
 				}
 
-				$clean[] = self::cast_scalar_value( $item, $cast );
+				$clean[] = FieldValueHelper::cast_scalar_value( $item, $cast );
 			}
 
 			return array_values( array_unique( $clean, SORT_REGULAR ) );
 		}
 
-		return self::cast_scalar_value( PageSchema::scalar_value( $value, '', true ), $cast );
+		return FieldValueHelper::cast_scalar_value( PageSchema::scalar_value( $value, '', true ), $cast );
 	}
 
-	/**
-	 * @return string|int|float
-	 */
-	private static function cast_scalar_value( string $value, string $cast ) {
-		if ( 'int' === $cast ) {
-			return (int) $value;
-		}
-
-		if ( 'float' === $cast ) {
-			return (float) $value;
-		}
-
-		return $value;
-	}
 }

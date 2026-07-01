@@ -243,6 +243,16 @@ final class SchemaController {
 
 		[ $schema, $store ] = $resolved;
 
+		$raw_body = $request->get_body();
+
+		if ( strlen( $raw_body ) > MB_IN_BYTES ) {
+			return ResponseFactory::error(
+				'import_payload_too_large',
+				esc_html__( 'The import payload exceeds the 1 MB limit.', 'lerm-admin-config' ),
+				413
+			);
+		}
+
 		$json = RequestPayload::string( $request, 'backup_json', RequestPayload::string( $request, 'json' ) );
 
 		if ( '' === $json ) {
@@ -337,11 +347,19 @@ final class SchemaController {
 			'schema_id' => $schema->id(),
 		);
 
-		return ResponseFactory::success(
-			$this->runtime->normalize_data_source_response(
-				$this->runtime->resolve_data_source( $source_id, $args )
-			)
-		);
+		try {
+			return ResponseFactory::success(
+				$this->runtime->normalize_data_source_response(
+					$this->runtime->resolve_data_source( $source_id, $args )
+				)
+			);
+		} catch ( \Throwable $e ) {
+			return ResponseFactory::error(
+				'data_source_error',
+				esc_html__( 'An error occurred while fetching data from the source.', 'lerm-admin-config' ),
+				500
+			);
+		}
 	}
 
 	public function can_access_schema( \WP_REST_Request $request ): bool|\WP_Error {

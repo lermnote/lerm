@@ -19,9 +19,7 @@ PHP schema, permissions, storage, and validation path as the source of truth.
 
 ## Canonical Routes
 
-`/schemas/*` is the canonical route family because the namespace exposes a
-schema collection. The singular `/schema/*` routes remain compatibility aliases
-for older 0.2.x clients, but new code should not depend on them.
+`/schemas/*` is the canonical route family.
 
 | Method | Route | Purpose |
 | --- | --- | --- |
@@ -33,14 +31,6 @@ for older 0.2.x clients, but new code should not depend on them.
 | `GET` | `/schemas/{schema_id}/export` | Export current values as formatted JSON. |
 | `POST` | `/schemas/{schema_id}/import` | Import values from a JSON snapshot. |
 | `GET`/`POST` | `/schemas/{schema_id}/data-source` | Resolve async field options. |
-
-Compatibility aliases:
-
-- `GET /schema/{schema_id}` returns the 0.2.x shape `{ schema, values }`.
-- `GET /schema/{schema_id}/values` maps to the canonical values read.
-- `POST /schema/{schema_id}/save` maps to `POST /schemas/{schema_id}/values`.
-- `POST /schema/{schema_id}/reset`, `/import`, `GET /export`, and
-  `GET|POST /data-source` map to the same canonical handlers.
 
 ## Payloads
 
@@ -267,7 +257,9 @@ REST errors use stable error codes and include `status`, `success: false`, and
 - `forbidden`: current user cannot access the schema, `403`
 - `missing_store_context`: object-backed store context is missing, `400`
 - `invalid_import_json`: import payload is not valid JSON, `400`
+- `import_payload_too_large`: import payload exceeds the 1 MB limit, `413`
 - `validation_error`: save/import failed field validation, `422`
+- `data_source_error`: data-source callback raised an exception, `500`
 
 Validation errors include:
 

@@ -171,8 +171,19 @@ final class RestEndpoints {
 	}
 
 	public static function can_list_schemas( \WP_REST_Request $request ): bool {
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
 
-		return current_user_can( 'manage_options' );
+		foreach ( self::live_runtimes() as $runtime ) {
+			foreach ( $runtime->schemas() as $schema ) {
+				if ( $runtime->current_user_can_schema( $schema, \Lerm\AdminConfig\Rest\Support\ContextResolver::from_request( $request ) ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**

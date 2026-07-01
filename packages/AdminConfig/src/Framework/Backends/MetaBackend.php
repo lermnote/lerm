@@ -71,6 +71,15 @@ class MetaBackend implements StorageBackend {
 		$this->type      = sanitize_key( $type );
 
 		if ( ! isset( self::TYPE_MAP[ $this->type ] ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: invalid meta type */
+					esc_html__( 'Invalid meta type "%s" provided. Falling back to "post".', 'lerm-admin-config' ),
+					esc_html( $this->type )
+				),
+				'0.4.0'
+			);
 			$this->type = 'post';
 		}
 
