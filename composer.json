@@ -15,9 +15,18 @@
 			"role": "Developer"
 		}
 	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/lermnote/admin-config"
+		}
+	],
+	"require": {
+		"php": ">=8.0",
+		"lerm/admin-config": "^0.4"
+	},
 	"autoload": {
 		"psr-4": {
-			"Lerm\\AdminConfig\\": "packages/AdminConfig/src/",
 			"Lerm\\": "app/"
 		},
 		"files": [

@@ -34,8 +34,8 @@ Author:         Lerm
 Theme URI:      http://github.com/lermnote
 Author URI:     https://www.hanost.com
 Requires WP:    4.7+
-Tested up to:   6.4
-Requires PHP:   7.4+
+Tested up to:   6.8
+Requires PHP:   8.0+
 Version:        5.0.0
 Text Domain:    lerm
 License:        GPL-2.0-or-later

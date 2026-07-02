@@ -23,13 +23,4 @@ Thumbs.db
 *.swp
 *.swo
 *.dist
-!packages/AdminConfig/phpcs.xml.dist
-!packages/AdminConfig/phpstan.neon.dist
-!packages/AdminConfig/phpunit.integration.xml.dist
-!packages/AdminConfig/phpunit.xml.dist
-packages/AdminConfig/.wp-env.override.json
-packages/AdminConfig/.wp-env-multisite/
-packages/AdminConfig/assets/build/
-packages/AdminConfig/playwright-report/
-packages/AdminConfig/test-results/
 CLAUDE.md

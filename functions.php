@@ -91,7 +91,7 @@ if ( ! function_exists( 'lerm_admin_config_runtime' ) ) {
 
 		if ( null === $runtime ) {
 			$runtime = \Lerm\AdminConfig\WordPress\EmbeddedBootstrap::boot(
-				trailingslashit( get_template_directory_uri() ) . 'packages/AdminConfig/assets',
+				trailingslashit( get_template_directory_uri() ) . 'vendor/lerm/admin-config/assets',
 				'LERM_VERSION'
 			);
 
