@@ -13,6 +13,7 @@ use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldRenderHelpers;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldValueHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -75,7 +76,7 @@ final class ExtendedPrimitiveFieldTypes {
 			},
 			'sanitize'           => static function ( array $field, $value, bool $strict, OptionStore $store ) {
 				if ( self::checkbox_uses_choices( $field ) ) {
-					return self::sanitize_checkbox_choices( $field, $value, $strict );
+					return FieldValueHelper::sanitize_checkbox_list_values( $field, $value, $strict );
 				}
 
 				return ! empty( $value );
@@ -197,7 +198,7 @@ final class ExtendedPrimitiveFieldTypes {
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
-				return self::sanitize_numeric_scalar( $field, $value );
+				return FieldValueHelper::sanitize_numeric_value( $field, $value );
 			},
 			'client'        => array(
 				'control' => 'slider',
@@ -224,7 +225,7 @@ final class ExtendedPrimitiveFieldTypes {
 				self::render_spinner_field( $field, $value, $field_name, $input_id, FieldRenderHelpers::name_attr( $name_template ) . FieldRenderHelpers::id_attr( $id_template ) );
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
-				return self::sanitize_numeric_scalar( $field, $value );
+				return FieldValueHelper::sanitize_numeric_value( $field, $value );
 			},
 			'client'        => array(
 				'control' => 'spinner',
@@ -527,51 +528,6 @@ final class ExtendedPrimitiveFieldTypes {
 			echo '</span></label>';
 		}
 		echo '</fieldset>';
-	}
-
-	/**
-	 * @param mixed $value
-	 * @return array<int, string>
-	 */
-	private static function sanitize_checkbox_choices( array $field, $value, bool $strict ): array {
-		$choices = $strict ? PageSchema::choices( $field ) : array();
-		$values  = is_array( $value ) ? $value : array();
-		$clean   = array();
-
-		foreach ( $values as $item ) {
-			$item = is_scalar( $item ) ? (string) $item : '';
-			if ( '' === $item ) {
-				continue;
-			}
-
-			if ( ! $strict || array_key_exists( $item, $choices ) ) {
-				$clean[] = $item;
-			}
-		}
-
-		return array_values( array_unique( $clean ) );
-	}
-
-	/**
-	 * @param mixed $value
-	 * @return int|float
-	 */
-	private static function sanitize_numeric_scalar( array $field, $value ) {
-		$default = $field['default'] ?? 0;
-		$cast    = (string) ( $field['cast'] ?? 'int' );
-		$number  = is_numeric( $value ) ? (float) $value : ( is_numeric( $default ) ? (float) $default : 0.0 );
-		$min     = isset( $field['min'] ) && is_numeric( $field['min'] ) ? (float) $field['min'] : null;
-		$max     = isset( $field['max'] ) && is_numeric( $field['max'] ) ? (float) $field['max'] : null;
-
-		if ( null !== $min && $number < $min ) {
-			$number = $min;
-		}
-
-		if ( null !== $max && $number > $max ) {
-			$number = $max;
-		}
-
-		return 'float' === $cast ? $number : (int) round( $number );
 	}
 
 	/**

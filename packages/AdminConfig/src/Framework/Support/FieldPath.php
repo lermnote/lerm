@@ -39,19 +39,13 @@ final class FieldPath {
 	 *
 	 * Matches "foo.bar" for prefix "foo", but not "foobar".
 	 * Returns false when either argument is empty.
-	 *
-	 * Replaces str_starts_with( $path, $prefix . '.' ) (PHP 8.0+) so that
-	 * the call-sites remain compatible with PHP 7.x if the minimum
-	 * requirement is ever lowered.
 	 */
 	public static function starts_with( string $path, string $prefix ): bool {
 		if ( '' === $path || '' === $prefix ) {
 			return false;
 		}
 
-		$needle = $prefix . '.';
-
-		return substr( $path, 0, strlen( $needle ) ) === $needle;
+		return str_starts_with( $path, $prefix . '.' );
 	}
 
 	/**
@@ -59,19 +53,12 @@ final class FieldPath {
 	 *
 	 * Matches "foo.bar" for segment "bar", but not "foobar".
 	 * Returns false when either argument is empty.
-	 *
-	 * Replaces str_ends_with( $path, '.' . $segment ) (PHP 8.0+) so that
-	 * the call-sites remain compatible with PHP 7.x if the minimum
-	 * requirement is ever lowered.
 	 */
 	public static function ends_with_segment( string $path, string $segment ): bool {
 		if ( '' === $path || '' === $segment ) {
 			return false;
 		}
 
-		$needle = '.' . $segment;
-		$offset = strlen( $path ) - strlen( $needle );
-
-		return $offset > 0 && substr( $path, $offset ) === $needle;
+		return str_ends_with( $path, '.' . $segment );
 	}
 }

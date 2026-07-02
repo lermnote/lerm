@@ -166,7 +166,7 @@ final class SchemaSerializer {
 	}
 
 	/**
-	 * Return the pre-v1 client config shape used by the deprecated /schema alias.
+	 * Return the pre-v1 client config shape (server-only keys stripped).
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -426,63 +426,31 @@ final class SchemaSerializer {
 	}
 
 	private static function surface_for_container( string $type ): string {
-		switch ( $type ) {
-			case 'network_options_page':
-				return 'network-admin';
-
-			case 'metabox':
-				return 'block-editor';
-
-			case 'taxonomy':
-			case 'profile':
-			case 'comment':
-			case 'options_page':
-			default:
-				return 'admin';
-		}
+		return match ( $type ) {
+			'network_options_page' => 'network-admin',
+			'metabox'              => 'block-editor',
+			default                => 'admin',
+		};
 	}
 
 	private static function context_kind_for_container( string $type ): string {
-		switch ( $type ) {
-			case 'metabox':
-				return 'post';
-
-			case 'taxonomy':
-				return 'term';
-
-			case 'profile':
-				return 'user';
-
-			case 'comment':
-				return 'comment';
-
-			case 'network_options_page':
-				return 'network';
-
-			case 'options_page':
-			default:
-				return 'site';
-		}
+		return match ( $type ) {
+			'metabox'              => 'post',
+			'taxonomy'             => 'term',
+			'profile'              => 'user',
+			'comment'              => 'comment',
+			'network_options_page' => 'network',
+			default                => 'site',
+		};
 	}
 
 	private static function scope_for_store( string $type ): string {
-		switch ( $type ) {
-			case 'site_option':
-				return 'network';
-
-			case 'post_meta':
-			case 'term_meta':
-			case 'user_meta':
-			case 'comment_meta':
-				return 'object';
-
-			case 'array':
-				return 'memory';
-
-			case 'option':
-			default:
-				return 'site';
-		}
+		return match ( $type ) {
+			'site_option'                          => 'network',
+			'post_meta', 'term_meta', 'user_meta', 'comment_meta' => 'object',
+			'array'                                => 'memory',
+			default                                => 'site',
+		};
 	}
 
 	/**

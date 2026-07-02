@@ -26,6 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class SchemaController {
 
+	private const MAX_IMPORT_SIZE = 1048576; // 1 MB
+
 	public function __construct(
 		private Runtime $runtime
 	) {
@@ -245,6 +247,14 @@ final class SchemaController {
 
 		$json = RequestPayload::string( $request, 'backup_json', RequestPayload::string( $request, 'json' ) );
 
+		if ( strlen( $json ) > self::MAX_IMPORT_SIZE ) {
+			return ResponseFactory::error(
+				'import_payload_too_large',
+				esc_html__( 'The import payload exceeds the 1 MB limit.', 'lerm-admin-config' ),
+				413
+			);
+		}
+
 		if ( '' === $json ) {
 			return ResponseFactory::error(
 				'missing_import_payload',
@@ -337,10 +347,18 @@ final class SchemaController {
 			'schema_id' => $schema->id(),
 		);
 
+		try {
+			$response = $this->runtime->resolve_data_source( $source_id, $args );
+		} catch ( \Throwable $e ) {
+			return ResponseFactory::error(
+				'data_source_error',
+				esc_html__( 'An error occurred while fetching data from the source.', 'lerm-admin-config' ),
+				500
+			);
+		}
+
 		return ResponseFactory::success(
-			$this->runtime->normalize_data_source_response(
-				$this->runtime->resolve_data_source( $source_id, $args )
-			)
+			$this->runtime->normalize_data_source_response( $response )
 		);
 	}
 

@@ -267,10 +267,10 @@ final class TaxonomyContainer implements Container {
 	}
 
 	private function capability_for_schema( CompiledSchema $schema, string $taxonomy ): string {
-		$container = $schema->container();
+		$shared = ContainerSaveSupport::capability_for_schema( $schema, '' );
 
-		if ( ! empty( $container['capability'] ) && is_scalar( $container['capability'] ) ) {
-			return (string) $container['capability'];
+		if ( '' !== $shared ) {
+			return $shared;
 		}
 
 		$taxonomy_object = get_taxonomy( $taxonomy );

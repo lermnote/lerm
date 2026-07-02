@@ -91,19 +91,6 @@ final class Framework implements FrameworkContract {
 	}
 
 	/**
-	 * Get or create an option store for a page definition.
-	 *
-	 * Pass a StorageBackend to use term_meta, user_meta, or post_meta instead
-	 * of the default get_option / update_option backend:
-	 *
-	 *   $framework->store( $def, new TermMetaBackend( $term_id, 'my_key' ) );
-	 *   $framework->store( $def, new UserMetaBackend( $user_id, 'my_key' ) );
-	 *   $framework->store( $def, new PostMetaBackend( $post_id, 'my_key' ) );
-	 *
-	 * @param array<string, mixed>  $definition Page definition.
-	 * @param StorageBackend|null   $backend    Optional custom backend.
-	 */
-	/**
 	 * Fire a framework lifecycle hook.
 	 *
 	 * Used internally by the OptionStore after a successful write.
@@ -118,6 +105,19 @@ final class Framework implements FrameworkContract {
 		do_action( 'lerm_admin_config_' . $hook, $page_id, $data, $this );
 	}
 
+	/**
+	 * Get or create an option store for a page definition.
+	 *
+	 * Pass a StorageBackend to use term_meta, user_meta, or post_meta instead
+	 * of the default get_option / update_option backend:
+	 *
+	 *   $framework->store( $def, new TermMetaBackend( $term_id, 'my_key' ) );
+	 *   $framework->store( $def, new UserMetaBackend( $user_id, 'my_key' ) );
+	 *   $framework->store( $def, new PostMetaBackend( $post_id, 'my_key' ) );
+	 *
+	 * @param array<string, mixed>  $definition Page definition.
+	 * @param StorageBackend|null   $backend    Optional custom backend.
+	 */
 	public function store( array $definition, ?StorageBackend $backend = null ): OptionStore {
 		$this->prepare_definition( $definition );
 		$cache_key = $this->cache_key( $definition, $backend );

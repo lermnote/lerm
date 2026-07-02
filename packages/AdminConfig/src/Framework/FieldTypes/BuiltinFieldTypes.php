@@ -13,6 +13,7 @@ use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
 use Lerm\AdminConfig\Framework\Support\PageSchema;
 use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldRenderHelpers;
+use Lerm\AdminConfig\Framework\FieldTypes\Support\FieldValueHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -173,7 +174,7 @@ final class BuiltinFieldTypes {
 				);
 			},
 			'sanitize'      => static function ( array $field, $value, bool $strict, OptionStore $store ) {
-				return self::sanitize_number( $field, $value );
+				return FieldValueHelper::sanitize_numeric_value( $field, $value );
 			},
 			'client'        => array(
 				'control' => 'number',
@@ -321,7 +322,7 @@ final class BuiltinFieldTypes {
 				self::render_checkbox_list( $field, $value, $field_name, false, $name_template );
 			},
 			'sanitize'           => static function ( array $field, $value, bool $strict, OptionStore $store ) {
-				return self::sanitize_checkbox_list( $field, $value, $strict );
+				return FieldValueHelper::sanitize_checkbox_list_values( $field, $value, $strict );
 			},
 			'missing_submission' => static function (): array {
 				return array(
@@ -530,7 +531,7 @@ final class BuiltinFieldTypes {
 					continue;
 				}
 
-				$clean[] = self::cast_scalar_value( $item, $cast );
+				$clean[] = FieldValueHelper::cast_scalar_value( $item, $cast );
 			}
 
 			return array_values( array_unique( $clean, SORT_REGULAR ) );
@@ -546,68 +547,7 @@ final class BuiltinFieldTypes {
 			}
 		}
 
-		return self::cast_scalar_value( $choice, $cast );
-	}
-
-	/**
-	 * @param mixed $value
-	 * @return array<int, string>
-	 */
-	private static function sanitize_checkbox_list( array $field, $value, bool $strict ): array {
-		$choices = $strict ? PageSchema::choices( $field ) : array();
-		$values  = is_array( $value ) ? $value : array();
-		$clean   = array();
-
-		foreach ( $values as $item ) {
-			$item = is_scalar( $item ) ? (string) $item : '';
-
-			if ( '' === $item ) {
-				continue;
-			}
-
-			if ( ! $strict || array_key_exists( $item, $choices ) ) {
-				$clean[] = $item;
-			}
-		}
-
-		return array_values( array_unique( $clean ) );
-	}
-
-	/**
-	 * @param mixed $value
-	 * @return int|float
-	 */
-	private static function sanitize_number( array $field, $value ) {
-		$default = $field['default'] ?? 0;
-		$cast    = (string) ( $field['cast'] ?? 'int' );
-		$number  = is_numeric( $value ) ? (float) $value : (float) $default;
-		$min     = isset( $field['min'] ) && is_numeric( $field['min'] ) ? (float) $field['min'] : null;
-		$max     = isset( $field['max'] ) && is_numeric( $field['max'] ) ? (float) $field['max'] : null;
-
-		if ( null !== $min && $number < $min ) {
-			$number = $min;
-		}
-
-		if ( null !== $max && $number > $max ) {
-			$number = $max;
-		}
-
-		return 'float' === $cast ? $number : (int) round( $number );
-	}
-
-	/**
-	 * @return string|int|float
-	 */
-	private static function cast_scalar_value( string $value, string $cast ) {
-		if ( 'int' === $cast ) {
-			return (int) $value;
-		}
-
-		if ( 'float' === $cast ) {
-			return (float) $value;
-		}
-
-		return $value;
+		return FieldValueHelper::cast_scalar_value( $choice, $cast );
 	}
 
 	private static function input_type( array $field, string $fallback ): string {

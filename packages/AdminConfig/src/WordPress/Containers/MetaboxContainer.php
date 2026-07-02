@@ -12,7 +12,6 @@ namespace Lerm\AdminConfig\WordPress\Containers;
 use Lerm\AdminConfig\Compiler\CompiledSchema;
 use Lerm\AdminConfig\Contracts\Container;
 use Lerm\AdminConfig\Stores\StoreResolver;
-use Lerm\AdminConfig\Framework\Contracts\AssetPathResolver;
 use Lerm\AdminConfig\Framework\Admin\OptionsPage;
 use Lerm\AdminConfig\Framework\Framework;
 use Lerm\AdminConfig\Framework\Storage\OptionStore;
@@ -205,7 +204,6 @@ final class MetaboxContainer implements Container, BlockEditorPanelContext {
 		}
 
 		return '' !== $post_type
-			&& function_exists( 'use_block_editor_for_post_type' )
 			&& use_block_editor_for_post_type( $post_type );
 	}
 }
