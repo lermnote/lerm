@@ -434,7 +434,7 @@ final class OptionsPage {
 	}
 
 	private function debug_panel_enabled(): bool {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( $this->capability() ) ) {
 			return false;
 		}
 

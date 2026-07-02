@@ -204,7 +204,6 @@ final class MetaboxContainer implements Container, BlockEditorPanelContext {
 		}
 
 		return '' !== $post_type
-			&& function_exists( 'use_block_editor_for_post_type' )
 			&& use_block_editor_for_post_type( $post_type );
 	}
 }

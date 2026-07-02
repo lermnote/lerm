@@ -26,6 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class SchemaController {
 
+	private const MAX_IMPORT_SIZE = 1048576; // 1 MB
+
 	public function __construct(
 		private Runtime $runtime
 	) {
@@ -245,7 +247,7 @@ final class SchemaController {
 
 		$json = RequestPayload::string( $request, 'backup_json', RequestPayload::string( $request, 'json' ) );
 
-		if ( strlen( $json ) > 1048576 ) {
+		if ( strlen( $json ) > self::MAX_IMPORT_SIZE ) {
 			return ResponseFactory::error(
 				'import_payload_too_large',
 				esc_html__( 'The import payload exceeds the 1 MB limit.', 'lerm-admin-config' ),
@@ -346,11 +348,7 @@ final class SchemaController {
 		);
 
 		try {
-			return ResponseFactory::success(
-				$this->runtime->normalize_data_source_response(
-					$this->runtime->resolve_data_source( $source_id, $args )
-				)
-			);
+			$response = $this->runtime->resolve_data_source( $source_id, $args );
 		} catch ( \Throwable $e ) {
 			return ResponseFactory::error(
 				'data_source_error',
@@ -358,6 +356,10 @@ final class SchemaController {
 				500
 			);
 		}
+
+		return ResponseFactory::success(
+			$this->runtime->normalize_data_source_response( $response )
+		);
 	}
 
 	public function can_access_schema( \WP_REST_Request $request ): bool|\WP_Error {

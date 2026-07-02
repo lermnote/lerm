@@ -175,9 +175,11 @@ final class RestEndpoints {
 			return true;
 		}
 
+		$context = \Lerm\AdminConfig\Rest\Support\ContextResolver::from_request( $request );
+
 		foreach ( self::live_runtimes() as $runtime ) {
 			foreach ( $runtime->schemas() as $schema ) {
-				if ( $runtime->current_user_can_schema( $schema, \Lerm\AdminConfig\Rest\Support\ContextResolver::from_request( $request ) ) ) {
+				if ( $runtime->current_user_can_schema( $schema, $context ) ) {
 					return true;
 				}
 			}
