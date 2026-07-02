@@ -245,7 +245,7 @@ final class SchemaController {
 
 		$raw_body = $request->get_body();
 
-		if ( strlen( $raw_body ) > MB_IN_BYTES ) {
+		if ( strlen( $raw_body ) > 1048576 ) {
 			return ResponseFactory::error(
 				'import_payload_too_large',
 				esc_html__( 'The import payload exceeds the 1 MB limit.', 'lerm-admin-config' ),
