@@ -17,11 +17,8 @@
 	],
 	"repositories": [
 		{
-			"type": "path",
-			"url": "packages/AdminConfig",
-			"options": {
-				"symlink": true
-			}
+			"type": "vcs",
+			"url": "https://github.com/lermnote/admin-config"
 		}
 	],
 	"require": {
