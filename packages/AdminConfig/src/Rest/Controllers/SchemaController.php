@@ -243,7 +243,7 @@ final class SchemaController {
 
 		[ $schema, $store ] = $resolved;
 
-		$raw_body = $request->get_body();
+		$raw_body = $request->get_content();
 
 		if ( strlen( $raw_body ) > 1048576 ) {
 			return ResponseFactory::error(
