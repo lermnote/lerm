@@ -213,5 +213,4 @@ final class AsyncFieldTypes {
 
 		return FieldValueHelper::cast_scalar_value( PageSchema::scalar_value( $value, '', true ), $cast );
 	}
-
 }
