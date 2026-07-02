@@ -15,9 +15,21 @@
 			"role": "Developer"
 		}
 	],
+	"repositories": [
+		{
+			"type": "path",
+			"url": "packages/AdminConfig",
+			"options": {
+				"symlink": true
+			}
+		}
+	],
+	"require": {
+		"php": ">=8.0",
+		"lerm/admin-config": "^0.4"
+	},
 	"autoload": {
 		"psr-4": {
-			"Lerm\\AdminConfig\\": "packages/AdminConfig/src/",
 			"Lerm\\": "app/"
 		},
 		"files": [

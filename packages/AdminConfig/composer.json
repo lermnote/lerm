@@ -1,5 +1,6 @@
 {
 	"name": "lerm/admin-config",
+	"version": "0.4.0",
 	"description": "Schema-driven WordPress admin configuration infrastructure.",
 	"type": "library",
 	"license": "GPL-2.0-or-later",

@@ -4,3 +4,7 @@
 /.wp-env.override.json
 /playwright-report/
 /test-results/
+!phpcs.xml.dist
+!phpstan.neon.dist
+!phpunit.xml.dist
+!phpunit.integration.xml.dist

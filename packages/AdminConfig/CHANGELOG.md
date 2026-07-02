@@ -6,6 +6,8 @@ The format follows Keep a Changelog and the package uses Semantic Versioning onc
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-02
+
 ### Added
 - REST contract browser smoke coverage that exercises save, reset, import,
   export, and async data-source requests without toggling legacy Ajax.
