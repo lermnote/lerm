@@ -243,17 +243,15 @@ final class SchemaController {
 
 		[ $schema, $store ] = $resolved;
 
-		$raw_body = $request->get_content();
+		$json = RequestPayload::string( $request, 'backup_json', RequestPayload::string( $request, 'json' ) );
 
-		if ( strlen( $raw_body ) > 1048576 ) {
+		if ( strlen( $json ) > 1048576 ) {
 			return ResponseFactory::error(
 				'import_payload_too_large',
 				esc_html__( 'The import payload exceeds the 1 MB limit.', 'lerm-admin-config' ),
 				413
 			);
 		}
-
-		$json = RequestPayload::string( $request, 'backup_json', RequestPayload::string( $request, 'json' ) );
 
 		if ( '' === $json ) {
 			return ResponseFactory::error(
